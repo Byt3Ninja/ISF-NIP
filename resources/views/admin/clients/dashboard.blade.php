@@ -235,7 +235,6 @@
     $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
     $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
     $available_surveys = collect([]);
-    dd($notrated_men);
     // load survey for startup
     if( $_user->company && $circle_id != 0 )
     {

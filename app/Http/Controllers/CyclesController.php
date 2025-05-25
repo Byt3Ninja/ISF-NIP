@@ -202,23 +202,43 @@ class CyclesController extends Controller
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
-                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
+                $file = $request->file('program-guideline-pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
+                $programGuidelineFile = $file->storeAs('', $fileName, 'programs');
+
+            }else{
+                $programGuidelineFile = $cycle->program_guideline_file;
             }
 
             $financialGuidelineFile = null;
             if ($request->hasFile('financial_policy_pdf')) {
-                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
+                $file = $request->file('financial_policy_pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension();
+                $financialGuidelineFile = $file->storeAs('', $fileName, 'financials');
+            }else{
+                $financialGuidelineFile = $cycle->financial_guideline_file;
             }
 
             $legalPolicyPath = null;
             if ($request->hasFile('legal_policy_pdf')) {
-                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
+                $file = $request->file('legal_policy_pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
+                $legalPolicyPath = $file->storeAs('', $fileName, 'legal_policies');
+            }else{
+                $legalPolicyPath = $cycle->legal_guideline_file;
             }
-
 
             $delegationPdfPath = null;
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
+                $file = $request->file('delegation_pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
+                $delegationPdfPath = $file->storeAs('', $fileName, 'delegations');
+            }else{
+                $delegationPdfPath = $cycle->delegation_file;
             }
 
 
@@ -461,7 +481,10 @@ class CyclesController extends Controller
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
-                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
+                $file = $request->file('program-guideline-pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
+                $programGuidelineFile = $file->storeAs('', $fileName, 'programs');
             }
 
             $cycle->program_guideline = $request->program_guideline;
@@ -470,7 +493,10 @@ class CyclesController extends Controller
             // Check if file is uploaded
             $financialGuidelineFile = null;
             if ($request->hasFile('financial_policy_pdf')) {
-                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
+                $file = $request->file('financial_policy_pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension();
+                $financialGuidelineFile = $file->storeAs('', $fileName, 'financials');
             }
 
             $cycle->budget_allocation = $request->budget_allocation;
@@ -481,12 +507,18 @@ class CyclesController extends Controller
             // Handle file uploads
             $legalPolicyPath = null;
             if ($request->hasFile('legal_policy_pdf')) {
-                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
+                $file = $request->file('legal_policy_pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
+                $legalPolicyPath = $file->storeAs('', $fileName, 'legal_policies');
             }
 
             $delegationPdfPath = null;
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
+                $file = $request->file('delegation_pdf');
+                $originalName = $file->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
+                $delegationPdfPath = $file->storeAs('', $fileName, 'delegations');
             }
 
             $cycle->legal_guideline = $request->legal_policy;
@@ -561,7 +593,7 @@ class CyclesController extends Controller
       $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
         if (!$user->HaveCompany) {
-            return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+            return redirect()->route('user.profile_Edit')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!$user->company) {
             return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);

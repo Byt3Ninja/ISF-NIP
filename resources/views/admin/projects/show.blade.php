@@ -166,7 +166,7 @@
               <div class="form-check mb-2 border-bottom pb-3">
                 <input type="checkbox" class="form-check-input" name="programs[]" value="{{ $program->id }}" id="program-{{ $program->id }}">
                 <label class="form-check-label ms-2" for="program-{{ $program->id }}">
-                  {{ $program->title }} - {{ $program->organization->{'name_' . app()->getLocale()} }}
+                  {{ $program->title }} - {{ $program->organization?->{'name_' . app()->getLocale()} }}
                 </label>
               </div>
               @endforeach
@@ -224,7 +224,7 @@
                   <div class="form-check-select">
                     <select name="roles[{{ $member->id }}]" class="form-select form-select-sm">
                       @foreach($distinctRoles as $role)
-                      <option value="{{ $role }}">{{ $role }}</option>
+                      <option value="{{ $role }}">{{ __('admin.'.$role) }}</option>
                       @endforeach
                     </select>
                   </div>
@@ -257,14 +257,44 @@
 <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 <script>
   $(document).ready(function() {
-    $('#organizations-list-datatable').DataTable({
-      responsive: true,
-      autoWidth: false
-    });
-    $('#team-members-table').DataTable({  
-      responsive: true,
-      autoWidth: false
-    });
+    const lang = "{{ $l }}";
+
+  const datatableLanguage = lang === 'ar' ? {
+    "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+    "sLoadingRecords": "جارٍ التحميل...",
+    "sProcessing": "جارٍ التحميل...",
+    "sLengthMenu": "أظهر _MENU_ مدخلات",
+    "sZeroRecords": "لم يعثر على أية سجلات",
+    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+    "sInfoPostFix": "",
+    "sSearch": "ابحث:",
+    "sUrl": "",
+    "oPaginate": {
+      "sFirst": "الأول",
+      "sPrevious": "السابق",
+      "sNext": "التالي",
+      "sLast": "الأخير"
+    },
+    "oAria": {
+      "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+      "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+    }
+  } : {}; // If not Arabic, fallback to default (English)
+
+     $('#organizations-list-datatable').DataTable({
+    responsive: true,
+    autoWidth: false,
+    language: datatableLanguage
+  });
+
+  $('#team-members-table').DataTable({
+    responsive: true,
+    autoWidth: false,
+    language: datatableLanguage
+  });
+  
   });
 </script>
 @stop
@@ -278,12 +308,18 @@
 
       let confirmationMessage = "{{ __('admin.delete_program') }}"; 
       Swal.fire({
-        title: confirmationMessage,
-        icon: 'warning',
+        title: "{{ __('admin.delete_project') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning", // استخدم icon بدلاً من type
         showCancelButton: true,
-        confirmButtonText: '{{ __('admin.Yes') }}',
-        cancelButtonText: '{{ __('admin.No') }}'
-      }).then((result) => {
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        customClass: {
+            confirmButton: 'btn btn-danger',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
         if (result.isConfirmed) {
           $.ajax({
             url: deleteUrl,
@@ -292,11 +328,11 @@
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-              Swal.fire(
-                '{{ __('admin.Deleted') }}',
-                response.message,
-                'success'
-              );
+              // Swal.fire(
+              //   '{{ __('admin.Deleted') }}',
+              //   response.message,
+              //   'success'
+              // );
 
               button.closest('tr').fadeOut(300, function() {
                 $(this).remove();
@@ -333,12 +369,18 @@
       let deleteUrl = button.data('url');
       let confirmationMessage = "{{ __('admin.delete_team_member') }}"; 
       Swal.fire({
-        title: confirmationMessage,
-        icon: 'warning',
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning", // استخدم icon بدلاً من type
         showCancelButton: true,
-        confirmButtonText: '{{ __('admin.Yes') }}',
-        cancelButtonText: '{{ __('admin.No') }}'
-      }).then((result) => {
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        customClass: {
+            confirmButton: 'btn btn-danger',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
         if (result.isConfirmed) {
           $.ajax({
             url: deleteUrl,
@@ -347,11 +389,11 @@
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-              Swal.fire(
-                '{{ __('admin.Deleted') }}',
-                response.message,
-                'success'
-              );
+              // Swal.fire(
+              //   '{{ __('admin.Deleted') }}',
+              //   response.message,
+              //   'success'
+              // );
 
               button.closest('tr').fadeOut(300, function() {
                 $(this).remove();

@@ -1,30 +1,37 @@
 <?php
 namespace App\Factories;
 
-use App\Services\OnlineMeetingServiceInterface;
+use App\Settings;
 use App\Services\ZoomService;
 use App\Services\TeamsService;
+use Illuminate\Support\Facades\Auth;
+use App\Services\OnlineMeetingServiceInterface;
 
 class OnlineMeetingFactory
 {
     public static function create(): OnlineMeetingServiceInterface
     {
-        $Setting = \App\Settings::where('id', 1)->first();
-        if($Setting->Meeting == null){
-            $service = 'Zoom';
-        }else{
-            $service = $Setting->Meeting;
+       $platform = null;
+
+        $user = Auth::user();
+        if ($user && $user->organization) {
+            $platform = $user->organization->meeting_platform ?? 'zoom';
         }
 
-        $service = strtolower( $service );
+        if (!$platform) {
+            $setting = Settings::find(1);
+            $platform = $setting?->Meeting ?? 'zoom';
+        }
 
-        switch ($service) {
+        $platform = strtolower($platform);
+
+        switch ($platform) {
             case 'zoom':
                 return new ZoomService();
             case 'teams':
                 return new TeamsService();
             default:
-              throw new \Exception("Unsupported online meeting service: $service");
+                throw new \Exception("Unsupported online meeting service: $platform");
         }
     }
 }

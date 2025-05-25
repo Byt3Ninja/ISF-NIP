@@ -30,6 +30,19 @@ class ScreeningEvaluation extends Model
 
 	public static function getEvaluationData( $id )
 	{
+		$inputs = [];
+		if( is_array( $id ) )
+		{
+			$placeholders = implode(',', array_fill(0, count($id), '?'));
+			$conditions = "se.step_id IN ($placeholders)";
+			foreach( $id as $value ) { $inputs[] = $value; }
+		}
+		else
+		{
+			$inputs[] = $id;
+			$conditions = "se.step_id = ?";
+		}
+
 		$evaluationForm_q = "SELECT
 				se.id AS evaluation_id,
 				se.step_id,
@@ -48,10 +61,9 @@ class ScreeningEvaluation extends Model
 			LEFT JOIN
 				screening_evaluation_criteria sec_child ON sec.id = sec_child.parent_id AND sec_child.evaluation_id IS NULL
 			WHERE
-				se.step_id = ?
+				$conditions
 		";
-		$evaluationForm = collect(DB::select($evaluationForm_q, [$id]));
-
+		$evaluationForm = collect(DB::select($evaluationForm_q, $inputs));
 		$evaluationForm = $evaluationForm->groupBy('evaluation_id')->map(function ( $e ) {
 			$_e = $e->first();
 			$evaluation = new stdClass;
@@ -75,8 +87,31 @@ class ScreeningEvaluation extends Model
 			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
 			$evaluation->categories = $categories;
 			return $evaluation;
-		})->values()->first();
+		})->values();
+		if( !is_array( $id ) ) { $evaluationForm = $evaluationForm->first(); }
 
 		return $evaluationForm;
+	}
+
+	public static function getMyFinalComment( $evaluation_id, $user_id )
+	{
+		$finalCommentField = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation_id)->first();
+		if( empty( $finalCommentField ) )
+		{
+			$finalCommentField = new ScreeningEvaluationCustomFields;
+			$finalCommentField->name = 'final_comment';
+			$finalCommentField->evaluation_id = $evaluation_id;
+			$finalCommentField->save();
+		}
+		$myComment = ScreeningEvaluationFieldsValues::where('custom_field_id', $finalCommentField->id)->where('user_id', $user_id)->first();
+		if( empty( $myComment ) )
+		{
+			$myComment = new ScreeningEvaluationFieldsValues;
+			$myComment->custom_field_id = $finalCommentField->id;
+			$myComment->user_id = $user_id;
+			$myComment->save();
+		}
+
+		return $myComment;
 	}
 }

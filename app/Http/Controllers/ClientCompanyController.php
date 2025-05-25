@@ -7,6 +7,7 @@ use App\Events\WebMessage;
 use App\FundingRound;
 use App\Organization;
 use App\ScreeningEvaluation;
+use App\ScreeningEvaluationResults;
 use App\Sector;
 use App\Team_member;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ use App\Settings;
 use App\Stage;
 use App\SustainableIcon;
 use \Illuminate\Validation\ValidationException;
-use URL, File, DB, Exception, Session, Storage;
+use URL, File, DB, Exception, Session, Storage, stdClass;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -43,6 +44,8 @@ class ClientCompanyController extends Controller
     public function show($id)
     {
         try {
+            $user = auth()->user();
+            $user_id = $user->id;
             $company = Company::with('state')
                 ->with('city')
                 ->with('user')
@@ -78,6 +81,27 @@ class ClientCompanyController extends Controller
             $fileExists = file_exists($pathToFile);
             $company_current_step = $company->step;
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
+            $isResponsesPublished = false;
+            $final_comment = null;
+            if( !empty( $evaluationForm ) )
+            {
+                $myResponses = ScreeningEvaluationResults::where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
+                $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
+                $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id );
+                $final_comment = $myComment->value;
+                $evaluationForm->final_comment = $final_comment;
+                $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {
+                    $category->subCriteria->map(function ( $subCategory ) use ( $myResponses ) {
+                        $checkResponse = $myResponses->where('criteria_id', $subCategory->id)->first();
+                        $subCategory->result = new stdClass;
+                        $subCategory->result->score = $checkResponse?->score;
+                        $subCategory->result->comment = $checkResponse?->comment;
+                        return $subCategory;
+                    });
+                    return $category;
+                });
+                $evaluationForm->isPublished = $isResponsesPublished;
+            }
             return view('admin/clients/startup/company_profile', compact('company', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
         } catch (Exception $e) {
             //log what happend

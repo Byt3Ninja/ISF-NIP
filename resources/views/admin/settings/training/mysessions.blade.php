@@ -122,7 +122,7 @@
                   <i class="fas fa-video me-1"></i>
                   <span id="session-type"></span> 
                 </span>
-                <span class="badge bg-label-info me-2">
+                <span class="badge bg-label-info me-2" id="session-duration-badge">
                   <i class="far fa-clock me-1"></i> 
                   <span id="session-duration"></span>
                 </span>
@@ -133,17 +133,26 @@
             </div>
 
             <div class="session-details">
-              <div class="d-flex align-items-center py-3 border-bottom border-top">
-                <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border">
-                  <i class="ti ti-school ti-lg text-dark"></i>
-                </div>
-                <div class="trainer-details">
-                  <h6 class="mb-1" id="session-trainer-name"></h6>
-                  <small><i class="fas fa-envelope me-1"></i> <a href="#" class="cursor-pointer" id="session-trainer-email"></a></small>
-                </div>
-              </div>
+              <div id="trainer-info-wrapper"> <!-- Add this wrapper -->
+  <div class="d-flex align-items-center py-3 border-bottom border-top">
+    <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
+      <i class="ti ti-school ti-lg text-dark"></i>
+    </div>
+    <div class="trainer-details mb-3" id="session-trainer-info">
+      <h6 class="mb-1">
+        {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
+      </h6>
+      <small>
+        <i class="fas fa-envelope me-1"></i>
+        <strong>{{ __('admin.Trainer Email') }}:</strong>
+        <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
+      </small>
+    </div>
+  </div>
+</div>
 
-              <div class="row border-bottom">
+
+              <div class="row border-bottom" id="date-info">
                 <div class="col-md-6">
                   <div class="py-3">
                     <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.StartDate') }}</div>
@@ -158,14 +167,14 @@
                 </div>
               </div>
 
-              <div class="py-3 border-bottom">
-                <div class="info-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
+              <div class="py-3 border-bottom" id="location-info">
+                <div class="info-label" id="text-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
                 <div id="session-location"></div>
                 <div id="session-address" class="text-muted"></div>
               </div>
 
-              <div class="py-3 border-bottom">
-                <div class="info-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
+              <div class="py-3 border-bottom" id="join-info">
+                <div class="info-label" id="join-link-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
                 <div class="d-flex align-items-center">
                   <a id="join-link" href="#" class="text-primary text-decoration-none"
                     target="_blank">
@@ -179,8 +188,8 @@
                 </div>
               </div>
 
-              <div class="py-3 border-bottom">
-                <div class="info-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.zoom_id') }}</div>
+              <div class="py-3 border-bottom" id="zoom-info">
+                <div class="info-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.meeting_id') }}</div>
                 <div id="zoom-id" class="text-truncate"></div>
               </div>
             </div>
@@ -455,37 +464,42 @@
             }
 
             // 4. Location
-            if (response.training_location || response.training_Address) {
+            if (response.type == 'offline') {
               $location.text(response.training_location || '');
               $address.text(response.training_Address || '');
+            }else{
+               $('#text-label').hide();
+               $('#location-info').hide();
             }
 
             // 5. Trainer Details
-            if (response.trainer_name) {
-              $trainerName.text(response.trainer_name);
+                if (response.type === 'sessions' || response.type === 'offline') {
+                  $('#trainer-info-wrapper').show();
+                  $('#session-duration-badge').show();
+                  $trainerName.text(response.trainer_name);
+                  $trainerEmailLink.text(response.trainer_email);
+                  $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
+            } else {
+             $('#trainer-info-wrapper').hide();
+              $('#session-duration-badge').hide();
+           }
+
+
+            // 6. Date
+            if (response.datetime) {
+              $sessionStartDate.text(response.datetime);
+            }
+            if (response.enddatetime) {
+              $sessionEndDate.text(response.enddatetime);
             }
 
-            // 6. Trainer Email
-            if (response.trainer_email) {
-              $trainerEmailLink.text(response.trainer_email);
-              $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
-            }
-
-            // 7. Date
-            if (response.start_date) {
-              $sessionStartDate.text(response.start_date);
-            }
-            if (response.end_date) {
-              $sessionEndDate.text(response.end_date);
-            }
-
-            // 8. Duration
+            // 7. Duration
             if (response.duration) {
               $sessionDuration.text(response.duration + ' ' + '{{ __('admin.minutes') }}');
             }
 
-            // 9. Join Link
-            if (response.join_url) {
+            // 8. Join Link
+            if (response.type == 'sessions') {
               $('#join-link').attr('href', response.join_url);
               $('#join-link').text(response.join_url);
               $('#join-button').show();
@@ -493,11 +507,15 @@
             } else {
               $('#join-button').hide();
               $('#copy-link').hide();
+              $('#join-link').hide();
+              $('#join-info').hide();
             }
 
-            // 10. Zoom ID
-            if (response.zoom_id) {
+            // 9. Zoom ID
+            if (response.type == 'sessions') {
               $zoomId.text(response.zoom_id);
+            }else{
+              $('#zoom-info').hide();
             }
 
             $modal.modal('show');

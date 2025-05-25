@@ -253,14 +253,18 @@
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
         Swal.fire({
-            title: "{{ __('admin.SureDelete') }}",
-            text: "{{ __('admin.Recover') }}",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonClass: "btn-label-danger",
-            confirmButtonText: "{{ __('admin.DYes') }}",
-            cancelButtonText: "{{ __('admin.No') }}!",
-          })
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning", // استخدم icon بدلاً من type
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        customClass: {
+            confirmButton: 'btn btn-danger',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    })
           .then((result) => {
             if (result.value) {
               $.post(url, {
@@ -268,11 +272,11 @@
                   '_token': token
                 },
                 function(response) {
-                  Swal.fire({
-                    type: 'success',
-                    title: "{{ __('admin.Deleted') }}!",
-                    html: "{{ __('admin.FileDeleted') }}.",
-                  });
+                  // Swal.fire({
+                  //   type: 'success',
+                  //   title: "{{ __('admin.Deleted') }}!",
+                  //   html: "{{ __('admin.FileDeleted') }}.",
+                  // });
                   location.reload();
                 }
               ).fail(function(error) {
