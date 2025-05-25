@@ -137,10 +137,17 @@
                 <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border">
                   <i class="ti ti-school ti-lg text-dark"></i>
                 </div>
-                <div class="trainer-details">
-                  <h6 class="mb-1" id="session-trainer-name"></h6>
-                  <small><i class="fas fa-envelope me-1"></i> <a href="#" class="cursor-pointer" id="session-trainer-email"></a></small>
-                </div>
+                  <div class="trainer-details mb-3">
+                    <h6 class="mb-1">
+                          {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
+                    </h6>
+                  <small>
+                      <i class="fas fa-envelope me-1"></i>
+                      <strong>{{ __('admin.Trainer Email') }}:</strong>
+                      <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
+                  </small>
+                  </div>
+                
               </div>
 
               <div class="row border-bottom">
@@ -158,13 +165,13 @@
                 </div>
               </div>
 
-              <div class="py-3 border-bottom">
+              <div class="py-3 border-bottom" id="location-info">
                 <div class="info-label" id="text-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
                 <div id="session-location"></div>
                 <div id="session-address" class="text-muted"></div>
               </div>
 
-              <div class="py-3 border-bottom">
+              <div class="py-3 border-bottom" id="join-info">
                 <div class="info-label" id="join-link-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
                 <div class="d-flex align-items-center">
                   <a id="join-link" href="#" class="text-primary text-decoration-none"
@@ -179,8 +186,8 @@
                 </div>
               </div>
 
-              <div class="py-3 border-bottom">
-                <div class="info-label" id="zoom-id-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.zoom_id') }}</div>
+              <div class="py-3 border-bottom" id="zoom-info">
+                <div class="info-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.meeting_id') }}</div>
                 <div id="zoom-id" class="text-truncate"></div>
               </div>
             </div>
@@ -460,6 +467,7 @@
               $address.text(response.training_Address || '');
             }else{
                $('#text-label').hide();
+               $('#location-info').hide();
             }
 
             // 5. Trainer Details
@@ -493,14 +501,17 @@
               $('#join-button').show();
               $('#copy-link').show();
             } else {
-              $('#join-link-label').hide();
+              $('#join-button').hide();
+              $('#copy-link').hide();
+              $('#join-link').hide();
+              $('#join-info').hide();
             }
 
             // 10. Zoom ID
             if (response.type == 'sessions') {
               $zoomId.text(response.zoom_id);
             }else{
-              $('#zoom-id-label').hide();
+              $('#zoom-info').hide();
             }
 
             $modal.modal('show');
