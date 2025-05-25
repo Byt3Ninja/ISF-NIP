@@ -122,7 +122,7 @@
                   <i class="fas fa-video me-1"></i>
                   <span id="session-type"></span> 
                 </span>
-                <span class="badge bg-label-info me-2">
+                <span class="badge bg-label-info me-2" id="session-duration-badge">
                   <i class="far fa-clock me-1"></i> 
                   <span id="session-duration"></span>
                 </span>
@@ -133,24 +133,26 @@
             </div>
 
             <div class="session-details">
-              <div class="d-flex align-items-center py-3 border-bottom border-top">
-                <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border">
-                  <i class="ti ti-school ti-lg text-dark"></i>
-                </div>
-                  <div class="trainer-details mb-3">
-                    <h6 class="mb-1">
-                          {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
-                    </h6>
-                  <small>
-                      <i class="fas fa-envelope me-1"></i>
-                      <strong>{{ __('admin.Trainer Email') }}:</strong>
-                      <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
-                  </small>
-                  </div>
-                
-              </div>
+              <div id="trainer-info-wrapper"> <!-- Add this wrapper -->
+  <div class="d-flex align-items-center py-3 border-bottom border-top">
+    <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
+      <i class="ti ti-school ti-lg text-dark"></i>
+    </div>
+    <div class="trainer-details mb-3" id="session-trainer-info">
+      <h6 class="mb-1">
+        {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
+      </h6>
+      <small>
+        <i class="fas fa-envelope me-1"></i>
+        <strong>{{ __('admin.Trainer Email') }}:</strong>
+        <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
+      </small>
+    </div>
+  </div>
+</div>
 
-              <div class="row border-bottom">
+
+              <div class="row border-bottom" id="date-info">
                 <div class="col-md-6">
                   <div class="py-3">
                     <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.StartDate') }}</div>
@@ -471,17 +473,19 @@
             }
 
             // 5. Trainer Details
-            if (response.trainer_name) {
-              $trainerName.text(response.trainer_name);
-            }
+                if (response.type === 'sessions' || response.type === 'offline') {
+                  $('#trainer-info-wrapper').show();
+                  $('#session-duration-badge').show();
+                  $trainerName.text(response.trainer_name);
+                  $trainerEmailLink.text(response.trainer_email);
+                  $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
+            } else {
+             $('#trainer-info-wrapper').hide();
+              $('#session-duration-badge').hide();
+           }
 
-            // 6. Trainer Email
-            if (response.trainer_email) {
-              $trainerEmailLink.text(response.trainer_email);
-              $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
-            }
 
-            // 7. Date
+            // 6. Date
             if (response.datetime) {
               $sessionStartDate.text(response.datetime);
             }
@@ -489,12 +493,12 @@
               $sessionEndDate.text(response.enddatetime);
             }
 
-            // 8. Duration
+            // 7. Duration
             if (response.duration) {
               $sessionDuration.text(response.duration + ' ' + '{{ __('admin.minutes') }}');
             }
 
-            // 9. Join Link
+            // 8. Join Link
             if (response.type == 'sessions') {
               $('#join-link').attr('href', response.join_url);
               $('#join-link').text(response.join_url);
@@ -507,7 +511,7 @@
               $('#join-info').hide();
             }
 
-            // 10. Zoom ID
+            // 9. Zoom ID
             if (response.type == 'sessions') {
               $zoomId.text(response.zoom_id);
             }else{
