@@ -98,7 +98,7 @@
 																	@if( $response->triggered_by == 'session' )
 																	{{ __('dashboard.with') }} 
 																	@php $mentor = $middleware?->mentor; @endphp
-																	{{ $mentor->name }}
+																	{{ $mentor?->name }}
 																	@elseif( $response->triggered_by == 'due' )
 																	- {{ $middleware?->title }}
 																	@else
