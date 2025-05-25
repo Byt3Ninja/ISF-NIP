@@ -1749,4 +1749,7 @@ return [
 	'SurveyUpdatedSuccessfully' => 'Survey Updated Successfully',
 	'SurveyStoredSuccessfully' => 'Survey Created Successfully',
 	'meeting_id' => 'Meeting ID',
+	'All_Organizations' => 'All Organizations',
+	'All_statuses' => 'All Statuses',
+	'All_Programs' => 'All Programs',
 ];

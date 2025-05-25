@@ -1770,4 +1770,7 @@ return [
 	'SurveyUpdatedSuccessfully' => 'تم تحديث الاستبيان بنجاح',
 	'SurveyStoredSuccessfully' => 'تم انشاء الاستبيان بنجاح',
 	'meeting_id' => 'معرف الجلسة',
+	'All_Organizations' => 'جميع المنظمات',
+	'All_statuses' => 'جميع الحالات',
+	'All_Programs' => 'جميع البرامج',
 ];
