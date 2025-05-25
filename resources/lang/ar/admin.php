@@ -1769,5 +1769,5 @@ return [
 	'InvalidQuestionSelected' => 'تم اختيار سؤال غير صالح',
 	'SurveyUpdatedSuccessfully' => 'تم تحديث الاستبيان بنجاح',
 	'SurveyStoredSuccessfully' => 'تم انشاء الاستبيان بنجاح',
-
+	'meeting_id' => 'معرف الجلسة',
 ];
