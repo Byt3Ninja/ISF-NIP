@@ -631,10 +631,10 @@
             <input type="hidden" name="sid" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
-              <select id="select-type" name="type" class="select2 form-control" required>
-                    <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{ __('cycles.online') }}</option>
-                    <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{ __('cycles.sessions') }}</option>
-                    <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{ __('cycles.offline') }}</option>
+              <select id="select-type" name="type" class="select2 form-control" required disabled>
+                <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{ __('cycles.online') }}</option>
+                <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{ __('cycles.sessions') }}</option>
+                <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{ __('cycles.offline') }}</option>
              </select>
              
             </div>
