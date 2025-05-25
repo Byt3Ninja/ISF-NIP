@@ -17,7 +17,8 @@
           <div class="card px-4 py-3 shadow-sm border" style="height: 76px;">
             <div class="d-flex justify-content-between align-items-center">
               <div class="badge bg-label-secondary me-1 me-md-0">
-                @php($icon = $st->status == 'in-progress' ? 'ti ti-file-text' : ($st->status == 'completed' ? 'ti ti-circle-check' : 'ti ti-gavel'))
+                @php($icon = $st->status == 'in-progress' ? 'ti ti-file-text' : ($st->status == 'completed' ? 'ti
+                ti-circle-check' : 'ti ti-gavel'))
                 @if ($i == 0)
                 <img src="/icons/primary-rocket.svg" height="38" width="40" />
                 @else

@@ -713,7 +713,7 @@ return [
 	'all Tags' => 'all Tags',
 	'Add new Tags' => 'Add New Tags',
 	'Reset' => 'Reset',
-	'Course Deleted' => 'Session Deleted Successfully',
+	'Course Deleted' => 'Course Deleted',
 	'CountProgram' => 'Program Count',
 	'Enroll' => 'Enroll',
 	'Mentorship Avr Rating' => ' Mentorship Avrage Rating ',
@@ -1744,12 +1744,5 @@ return [
 	'Investor' => 'Investor',
 	'Current_Step' => 'Current Step',
 	'Mentor_Session_Appointment' => 'Mentor Session Appointment',
-	'SelectedQuestionsMustBeArray' => 'Selected Questions Must Be An Array',
-	'InvalidQuestionSelected' => 'Invalid Question Selected',
-	'SurveyUpdatedSuccessfully' => 'Survey Updated Successfully',
-	'SurveyStoredSuccessfully' => 'Survey Created Successfully',
-	'meeting_id' => 'Meeting ID',
-	'All_Organizations' => 'All Organizations',
-	'All_statuses' => 'All Statuses',
-	'All_Programs' => 'All Programs',
+	
 ];

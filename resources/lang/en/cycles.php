@@ -320,6 +320,5 @@ return [
     'Create' => 'Create',
     'View Report' => 'View Report',
     'Display course contents' => 'Display course contents',
-    'Select judges' => 'Select Judges',
 ];
 

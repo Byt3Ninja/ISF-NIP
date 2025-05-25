@@ -234,11 +234,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
               dt_basic.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
             });
-            // Populate organization filter dynamically
-            const organizations = [...new Set(data.map(item => item.organization_name))];
-            organizations.forEach(org => {
-              orgFilter.append('<option value="' + org + '">' + org + '</option>');
-            });
             @endif
 
           // Program filter
@@ -256,6 +251,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
               dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
             });
+
+          // Populate organization filter dynamically
+          const organizations = [...new Set(data.map(item => item.organization_name))];
+          organizations.forEach(org => {
+            orgFilter.append('<option value="' + org + '">' + org + '</option>');
+          });
 
           // Populate program filter dynamically
           const programs = [...new Set(data.map(item => item.program_name))];

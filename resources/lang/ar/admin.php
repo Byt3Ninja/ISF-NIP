@@ -1765,12 +1765,6 @@ return [
 	'Investor' => 'مستثمر',
 	'Current_Step' => 'المرحلة الحالية',
 	'Mentor_Session_Appointment' => 'موعد جلسة الارشاد',
-	'SelectedQuestionsMustBeArray' => 'يجب أن تكون الأسئلة المختارة مصفوفة',
-	'InvalidQuestionSelected' => 'تم اختيار سؤال غير صالح',
-	'SurveyUpdatedSuccessfully' => 'تم تحديث الاستبيان بنجاح',
-	'SurveyStoredSuccessfully' => 'تم انشاء الاستبيان بنجاح',
-	'meeting_id' => 'معرف الجلسة',
-	'All_Organizations' => 'جميع المنظمات',
-	'All_statuses' => 'جميع الحالات',
-	'All_Programs' => 'جميع البرامج',
+	
+
 ];

@@ -705,14 +705,12 @@
 							<div class="col-md-12">
 								<div class="card">
 									<div class="card-header border-bottom mb-4">
-										<div class="d-flex justify-content-between align-items-center">
-											<div class="d-flex align-items-center">
-												<i class="ti ti-calendar-plus ti-24px"></i>
-												<span class="mx-2">{{ __("dashboard.My current schedule") }}</span>
-											</div>
+										<h5 class="card-title align-items-center">
+											<i class="ti ti-calendar-plus ti-24px"></i>
+											<span class="mx-2">{{ __("dashboard.My current schedule") }}</span>
 											@if( $_user->ableTo('mentors.settings_modify', $permissions) )
 											<button id="addSchedule"
-												onclick="this.querySelector('.spinner-border').classList.remove('d-none'); mentorSchedule(1, undefined, 0)"
+												onclick="this.querySelector('.spinner-border').classList.remove('d-none'); modify(1, undefined, 0)"
 												type="button" class="btn btn-sm btn-label-primary">
 												{{ __('dashboard.Schedule') }}
 												<i class="ti ti-calendar ms-2"></i>
@@ -720,7 +718,7 @@
 													aria-hidden="true"></span>
 											</button>
 											@endif
-										</div>
+										</h5>
 									</div>
 									<div class="card-body">
 										<div class="table-responsive">
@@ -745,14 +743,14 @@
 																<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
 																	data-bs-toggle="dropdown"> <i class="ti ti-dots-vertical"></i> </button>
 																<div class="dropdown-menu">
-																	<button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
+																	<button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button"> <i
 																			class="ti ti-pencil me-2"></i> Edit </button>
 																	<button class="dropdown-item"
-																		onclick="mentorSchedule(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
+																		onclick="modify(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
 																		<i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
 																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
 																	</button>
-																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
+																	<button onclick="modify(3,{{ $schedule->id }},0)" type="button"
 																		class="dropdown-item"><i class="ti ti-trash me-2"></i> Delete</button>
 																</div>
 															</div>
@@ -975,9 +973,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 @stop
 @section('pagescripts')
-@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
-	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
-@endif
 <script>
 	// Initialize DataTable with pagination configuration
 	$(document).ready(function() {
@@ -1153,7 +1148,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 				@endif
 			});
 		});
-
 		function modify(type, id, stat) {
 		  $.ajaxSetup({
 			headers: {

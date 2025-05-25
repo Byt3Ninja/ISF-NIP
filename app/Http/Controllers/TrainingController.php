@@ -852,50 +852,42 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 		}
 	}
 
-	public function editsession(Request $request,$id)
+	public function editsession(Request $request)
 	{
+	
 		$this->meetingService =  OnlineMeetingFactory::create();
 		$addOrEdit = 'edit';
+		$dateRange = $request->date_range; 
 		$type = $request->type;
-		$start_datetime = null;
-    	$end_datetime = null;
 		$l = app()->getLocale();
+
+if ($type == 'sessions' || $type == 'offline') {
+		$startDate = $request->datetime;
+		$startTime = date('H:i', strtotime($request->starttime));   // وقت البداية
+		$endTime = date('H:i', strtotime($request->endtime));   // وقت النهاية
+		$start_datetime = $startDate.' '. $startTime;
+		$end_datetime = $startDate.' '.$endTime;
+} else if ($type == 'online') {
+    [$startDate, $endDate] = explode(' - ', $dateRange);
+    $start_datetime = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y-m-d');
+    $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
+}
+if($start_datetime == null || $end_datetime == null){
+	return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
+}
+
 		
-		if ($type == 'sessions' || $type == 'offline') {
-        $startDate = $request->datetime;
-        $startTime = date('H:i', strtotime($request->starttime));
-        $endTime = date('H:i', strtotime($request->endtime));
-        $start_datetime = $startDate . ' ' . $startTime;
-        $end_datetime = $startDate . ' ' . $endTime;
-    } elseif ($type == 'online') {
-        if (empty($request->date_range)) {
-            return back()->with(['message' => 'Date range is required for online sessions', 'class' => 'danger']);
-        }
-        [$startDate, $endDate] = explode(' - ', $request->date_range);
-        try {
-            $start_datetime = Carbon::createFromFormat('m/d/Y', trim($startDate))->format('Y-m-d');
-            $end_datetime = Carbon::createFromFormat('m/d/Y', trim($endDate))->format('Y-m-d');
-        } catch (\Exception $e) {
-            return back()->with(['message' => 'Invalid date format in date range', 'class' => 'danger']);
-        }
-    }
-
-    if (is_null($start_datetime) || is_null($end_datetime)) {
-        return back()->with(['message' => 'Please fill all required date and time fields', 'class' => 'danger']);
-    }
-
-	
-		$step = $request->step_id;
-		$title = $request->title;
-		$dsc = $request->dsc;
-		$datetime = $start_datetime;
-		$start = Carbon::parse($datetime);
-		$end = Carbon::parse($end_datetime);
-		$duration = $start->diffInMinutes($end);
+$step = $request->step_id;
+$title = $request->title;
+$dsc = $request->dsc;
+$datetime = $start_datetime;
+$start = Carbon::parse($datetime);
+$end = Carbon::parse($end_datetime);
+$duration = $start->diffInMinutes($end);
 		// $step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-
+		$id = $request->sid;
 		if ($type == 'sessions') {
 			// Add Zoom
 		
@@ -927,7 +919,7 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 			// ==========> End Notify <================
 
 			// ==========> End Notify <================
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 		} elseif ($type == 'online') {
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
@@ -936,7 +928,7 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 
 			SendTrainingNotificationJob::dispatch($step, $Session, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);
 
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
 			$session = TrainingSession::where('id', $id)->update([
 				'type' => $type,
@@ -972,7 +964,7 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 			$session->update(['QrCode' => $qrFilePath]);
 
 			// ==========> End Notify <================
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} else {
 			return back()->with(['message' => 'Can\'t edit session', 'class' => 'danger']);
 		}

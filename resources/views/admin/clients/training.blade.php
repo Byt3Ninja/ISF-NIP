@@ -44,35 +44,6 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="row">
         <div class="col-lg-8">
-          <div class="card shadow-sm mb-4" style="border-radius: 1rem;">
-            <div class="card-header">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="card-title mb-0">Course Title</h5>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="badge bg-label-danger">Course Type</span>
-                  <span class="badge bg-label-primary"><i class="ti ti-calendar ti-16px"></i> 20-12-2024</span>
-                </div>
-              </div>
-              <p class="card-text text-muted mb-0">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque impedit exercitationem, quasi rem, maxime dolores commodi quis perferendis minima minus ea atque inventore in adipisci facere maiores? Explicabo, labore rem!
-              </p>
-            </div>
-
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="mb-2">{{ __('admin.Progress') }}</h6>
-                <div class="d-flex align-items-center">
-                  <span class="badge bg-label-primary me-2">{{ $progressPercentage }} %</span>
-                </div>
-              </div>
-              <div style="width: 100%; height: 7px;" class="progress rounded-pill">
-                <div class="progress-bar bg-primary" role="progressbar"
-                  style="width: {{ number_format($progressPercentage, 2) }}%;"
-                  aria-valuenow="{{ number_format($progressPercentage, 2) }}" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-          </div>
-
           <div class="card" style="border-radius: 1rem;">
             <div class="card-body">
               <div class="d-flex flex-column">
@@ -81,7 +52,7 @@
                     <h5 class="mb-0">{{ $ccontent->title }}</h5>
                   </div>
                   <div class="d-flex align-items-center">
-                    {{-- <span class="badge bg-label-danger">Course type</span> --}}
+                    <span class="badge bg-label-danger">Course type</span>
                     <button 
                       id="shareButton"
                       class="btn btn-transparent btn-icon btn-sm shadow-none ms-2"
@@ -118,16 +89,16 @@
                   @endif
                   <div id="instructorsContainer">
                     <hr class="my-6" />
-                    <h5>{{ $l == 'en' ? 'Trainer' : 'المدرب' }}</h5>
+                    <h5>{{ $l == 'en' ? 'Instructor' : 'المدرب' }}</h5>
                     <div class="d-flex justify-content-start align-items-center user-name">
                       <div class="avatar-wrapper">
                         <div class="avatar me-4">
                           <img src="/icons/account.svg" alt="Avatar" class="rounded-circle" />
                         </div>
                       </div>
-                      <div class="d-flex flex-column">
+                      <div class="d-flex flex-column mb-6">
                         <h6 class="mb-1">Devonne Wallbridge</h6>
-                        <small>Devonne@gmail.com</small>
+                        <small>Web Developer, Designer, and Teacher</small>
                       </div>
                     </div>
                   </div>
@@ -157,14 +128,8 @@
                           <i class='ti ti-check ti-28px;'></i>
                         </span>
                       @else
-                        <span 
-                          class="w-px-30 h-px-30 bg-light rounded-circle text-white"
-                          style="display: grid; place-items: center;"
-                        >
-                          <i class='ti ti-check ti-28px;'></i>
-                        </span>
                         <!-- Circular Progress -->
-                        {{-- <div
+                        <div
                           class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center"
                           style="width: 40px; height: 40px;">
                           <span
@@ -187,7 +152,7 @@
                               stroke-width="2.5"
                               stroke-dasharray="{{ $progressPercentage }}, 100" />
                           </svg>
-                        </div> --}}
+                        </div>
                         <!-- Circular Progress -->
                       @endif
                     </div>
@@ -231,7 +196,7 @@
 @stop
 
 @section('pagescripts')
- <script>
+  <script>
     console.log(@json($ccontent))
   </script>
   <script>

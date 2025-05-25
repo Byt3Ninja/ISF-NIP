@@ -30,19 +30,6 @@ class ScreeningEvaluation extends Model
 
 	public static function getEvaluationData( $id )
 	{
-		$inputs = [];
-		if( is_array( $id ) )
-		{
-			$placeholders = implode(',', array_fill(0, count($id), '?'));
-			$conditions = "se.step_id IN ($placeholders)";
-			foreach( $id as $value ) { $inputs[] = $value; }
-		}
-		else
-		{
-			$inputs[] = $id;
-			$conditions = "se.step_id = ?";
-		}
-
 		$evaluationForm_q = "SELECT
 				se.id AS evaluation_id,
 				se.step_id,
@@ -61,9 +48,10 @@ class ScreeningEvaluation extends Model
 			LEFT JOIN
 				screening_evaluation_criteria sec_child ON sec.id = sec_child.parent_id AND sec_child.evaluation_id IS NULL
 			WHERE
-				$conditions
+				se.step_id = ?
 		";
-		$evaluationForm = collect(DB::select($evaluationForm_q, $inputs));
+		$evaluationForm = collect(DB::select($evaluationForm_q, [$id]));
+
 		$evaluationForm = $evaluationForm->groupBy('evaluation_id')->map(function ( $e ) {
 			$_e = $e->first();
 			$evaluation = new stdClass;
@@ -87,8 +75,7 @@ class ScreeningEvaluation extends Model
 			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
 			$evaluation->categories = $categories;
 			return $evaluation;
-		})->values();
-		if( !is_array( $id ) ) { $evaluationForm = $evaluationForm->first(); }
+		})->values()->first();
 
 		return $evaluationForm;
 	}

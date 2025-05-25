@@ -312,6 +312,9 @@
               <div class="card card-body border h-100 d-flex flex-column">
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i
                     class="fas fa-tasks text-primary me-2"></i> {{ __('admin.Program Status') }}</h4>
+                <p class="mt-6">This summary provides a comprehensive overview of the participating startups
+                  performance and
+                  aggregates key metrics from various evaluation reports.</p>
                 <div>
                   <div class="py-8">
                     <h6 class="mt-3 fw-bold">{{ __('admin.Key Program Stages') }}:</h6>

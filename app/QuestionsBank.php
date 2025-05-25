@@ -71,9 +71,4 @@ class QuestionsBank extends Model
 	{
 		return $this->belongsToMany(Organization::class, 'organization_question_bank', 'question_id', 'organization_id');
 	}
-
-	public function getTagsArrayAttribute()
-    {
-        return $this->tags ? explode(',', $this->tags) : [];
-    }
 }

@@ -202,41 +202,29 @@ class CyclesController extends Controller
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
-                $file = $request->file('program-guideline-pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $programGuidelineFile = $file->storeAs('', $fileName, 'programs');
-
+                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'program');
             }else{
                 $programGuidelineFile = $cycle->program_guideline_file;
             }
 
             $financialGuidelineFile = null;
             if ($request->hasFile('financial_policy_pdf')) {
-                $file = $request->file('financial_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension();
-                $financialGuidelineFile = $file->storeAs('', $fileName, 'financials');
+                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'program');
             }else{
                 $financialGuidelineFile = $cycle->financial_guideline_file;
             }
 
             $legalPolicyPath = null;
             if ($request->hasFile('legal_policy_pdf')) {
-                $file = $request->file('legal_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $legalPolicyPath = $file->storeAs('', $fileName, 'legal_policies');
+                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'program');
             }else{
                 $legalPolicyPath = $cycle->legal_guideline_file;
             }
 
+
             $delegationPdfPath = null;
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $file = $request->file('delegation_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $delegationPdfPath = $file->storeAs('', $fileName, 'delegations');
+                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'program');
             }else{
                 $delegationPdfPath = $cycle->delegation_file;
             }
@@ -481,10 +469,7 @@ class CyclesController extends Controller
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
-                $file = $request->file('program-guideline-pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $programGuidelineFile = $file->storeAs('', $fileName, 'programs');
+                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
             }
 
             $cycle->program_guideline = $request->program_guideline;
@@ -493,10 +478,7 @@ class CyclesController extends Controller
             // Check if file is uploaded
             $financialGuidelineFile = null;
             if ($request->hasFile('financial_policy_pdf')) {
-                $file = $request->file('financial_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension();
-                $financialGuidelineFile = $file->storeAs('', $fileName, 'financials');
+                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
             }
 
             $cycle->budget_allocation = $request->budget_allocation;
@@ -507,18 +489,12 @@ class CyclesController extends Controller
             // Handle file uploads
             $legalPolicyPath = null;
             if ($request->hasFile('legal_policy_pdf')) {
-                $file = $request->file('legal_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $legalPolicyPath = $file->storeAs('', $fileName, 'legal_policies');
+                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
             }
 
             $delegationPdfPath = null;
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $file = $request->file('delegation_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $delegationPdfPath = $file->storeAs('', $fileName, 'delegations');
+                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
             }
 
             $cycle->legal_guideline = $request->legal_policy;
