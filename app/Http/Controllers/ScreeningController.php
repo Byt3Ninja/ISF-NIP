@@ -139,16 +139,94 @@ class ScreeningController extends Controller
 							$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 							Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 
-						}
-					}
-				}
-				/// End of mail send
-			}
-			return Redirect::back()->with('message', 'Saved');
-		} else {
-			return Redirect::back()->with('message2', 'error');
-		}
-	}
+    // Convert all judge IDs to integers for processing
+    if ($request->step && Step::where('id', $request->step)->pluck('data')->first() === 'grouptogroup') {
+        $judgesInput = array_map(fn($panel) => is_array($panel) ? array_map('intval', $panel) : [], $judgesInput);
+    } else {
+        $judgesInput = array_map('intval', Arr::flatten($judgesInput));
+    }
+
+    $judges = array_unique(Arr::flatten($judgesInput));
+
+    if (empty($judges)) {
+        return Redirect::back()->with('message2', __('admin.Please_Choose_Judges'));
+    }
+
+    if ($request->step) {
+        $type = Step::where('id', $request->step)->pluck('data')->first();
+        $list = ($type === 'grouptogroup') ? $judgesInput : $judges;
+
+        // Log input for debugging
+        Log::info('Update judges input:', ['judgesInput' => $judgesInput, 'list' => $list]);
+
+        Step::where('id', $request->step)->update(['list' => json_encode($list)]);
+        Screening::where('step_id', $request->step)->delete();
+        Formdata::where('form_id', $request->fid)->update(['step_id' => $request->step, 'screening' => '{}', 'comments' => '{}']);
+
+        if ($list) {
+            if ($type === 'grouptogroup') {
+                foreach ($list as $key => $panel) {
+                    $cpanel = $key;
+                    $panelUsers = array_map('strval', (array)$panel);
+                    foreach ((array)$panel as $user) {
+                        Screening::create([
+                            'step_id' => $request->step,
+                            'user_id' => $user,
+                            'panel' => $cpanel,
+                            'users' => json_encode($panelUsers)
+                        ]);
+                    }
+                }
+            } else {
+                foreach ((array)$judges as $user) {
+                    Screening::updateOrCreate([
+                        'step_id' => $request->step,
+                        'user_id' => $user,
+                        'panel' => 0,
+                        'users' => json_encode([strval($user)]) 
+                    ]);
+                }
+            }
+
+            // Notify users via Mail if notify is enabled
+            if ($request->notify) {
+                $cstep = Step::findOrFail($request->step);
+                $notifylist = User::whereIn('id', $judges)->get();
+                foreach ($notifylist as $rname) {
+                    $user = new User();
+                    $user->email = $rname->email;
+                    $user->id = $rname->id;
+                    $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+                    $MSG = new TemplateEmail;
+                    $MSG->Message = [
+                        "New judging - VI portal",
+                        "Dear " . $rfullname . ",",
+                        "Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
+                        " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
+                        "/dashboard"
+                    ];
+                    if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                        try {
+                            $user->notify($MSG);
+                        } catch (\Throwable $th) {
+                            Log::error('Notification error for user ' . $rname->id . ': ' . $th->getMessage());
+                        }
+
+                        $phoneNumber = $rname->country_code_w_a . $rname->whatsapp;
+                        $Massage = "Dear " . $rfullname . ",\n";
+                        $Massage .= "we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') . "\n";
+                        $Massage .= " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details, \n";
+                        $Massage .= "Thanks from " . env('APP_NAME');
+                        $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+                    }
+                }
+            }
+        }
+        return Redirect::back()->with('message', 'Saved');
+    } else {
+        return Redirect::back()->with('message2', 'error');
+    }
+}
 
 	public function view($fid, $cid)
 	{
@@ -492,4 +570,40 @@ class ScreeningController extends Controller
 
 		}
 	}
+
+	public function get($formId, $stepId, $panel)
+{
+    try {
+        $judges = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Judger');
+        })->get();
+
+        $options = '';
+        foreach ($judges as $judge) {
+            $options .= "<option value=\"{$judge->id}\">{$judge->first_name_en} {$judge->last_name_en}</option>";
+        }
+
+        $screening = Screening::where('step_id', $stepId)
+            ->where('panel', $panel)
+            ->first();
+
+        $selected = $screening && $screening->users ? json_decode($screening->users, true) : [];
+
+        $selected = array_map('strval', (array)$selected);
+
+        return response()->json([
+            'options' => $options,
+            'selected' => $selected
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error in screening get:', [
+            'form_id' => $formId,
+            'step_id' => $stepId,
+            'panel' => $panel,
+            'error' => $e->getMessage()
+        ]);
+        return response()->json(['error' => 'Failed to fetch users'], 500);
+    }
+}
+
 }

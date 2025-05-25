@@ -567,6 +567,7 @@
   {"name": "importer.upload", "description": "Upload Importer File", "permission_group_id": "Importer Tool", "guard_name": "web"},
   {"name": "importer.import", "description": "Importer Parsing", "permission_group_id": "Importer Tool", "guard_name": "web"},
   {"name": "importer.organizations", "description": "Fetch Organizations", "permission_group_id": "Importer Tool", "guard_name": "web"},
-  {"name": "mentorship.sessions_Rate", "description": "Rate mentorship session", "permission_group_id": "Dashboard (Startup)", "guard_name": "web"}
+  {"name": "mentorship.sessions_Rate", "description": "Rate mentorship session", "permission_group_id": "Dashboard (Startup)", "guard_name": "web"},
+  {"name": "screening.get", "description": "Get Judger Users", "permission_group_id": "Screening", "guard_name": "web"}
 
 ]

@@ -154,7 +154,6 @@
                   $status = request('status');
 
                   @endphp
-{{ $csession->id }}
                   @foreach ($companies as $company)
                   @php
                   $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
