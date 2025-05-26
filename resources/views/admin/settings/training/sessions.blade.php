@@ -629,11 +629,12 @@
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content rounded p-0 p-md-6" id="modal-content">
-      <form id="editSessionForm" method="post" action="/dashboard/training/editsession" enctype="multipart/form-data"
+      <form id="editSessionForm" method="post" action="{{ route('trainings.sessions_edit',$session->id) }}" enctype="multipart/form-data"
         autocomplete="off">
         @include('partials.modal.modal-header', ['title' => __('cycles.Edit training session')])
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
+          @method('PUT')
           <div  style="height: 400px;">
             <input type="hidden" name="sid" value="{{ $id }}" id="id">
             <input type="hidden" name="step_id" value="{{ $id }}" id="step_id">

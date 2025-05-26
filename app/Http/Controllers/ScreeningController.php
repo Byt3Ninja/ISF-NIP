@@ -4,29 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Step;
 use App\User;
+use stdClass;
 use App\Company;
 use App\Formdata;
 use App\Formfield;
 use App\Screening;
-use App\ScreeningEvaluation;
-use App\ScreeningEvaluationCriteria;
-use App\ScreeningEvaluationResults;
-use App\ScreeningEvaluationCustomFields;
-use App\ScreeningEvaluationFieldsValues;
 use App\Events\ChangeStep;
+use Illuminate\Support\Arr;
+use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use App\Jobs\ExportScreeneData;
 use App\Jobs\ExportResScreenData;
 use App\Services\WhatsAppService;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
+use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
+use App\ScreeningEvaluationCriteria;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
+use App\ScreeningEvaluationCustomFields;
+use App\ScreeningEvaluationFieldsValues;
 use Illuminate\Support\Facades\Redirect;
-use stdClass;
 
 class ScreeningController extends Controller
 {
