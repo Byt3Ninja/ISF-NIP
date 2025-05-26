@@ -30,6 +30,10 @@ class BroadcastConfigService
                     'LINKEDIN_CLIENT_SECRET' => '',
                     'LINKEDIN_REDIRECT_URI' => '',
 
+                    'GOOGLE_CALENDAR_CLIENT_ID' => '',
+                    'GOOGLE_CALENDAR_CLIENT_SECRET' => '',
+                    'GOOGLE_CALENDAR_REDIRECT' => '',
+
                     'locale' => 'en',
 
                 ];
@@ -57,6 +61,10 @@ class BroadcastConfigService
             'MICROSOFT_CLIENT_SECRET_ID' => $settings->MICROSOFT_CLIENT_SECRET_ID ?? '',
             'MICROSOFT_APP_EMAIL' => $settings->MICROSOFT_APP_EMAIL ?? '',
             'MICROSOFT_REDIRECT_URI' => $settings->MICROSOFT_REDIRECT_URI ?? '',
+
+            'GOOGLE_CALENDAR_CLIENT_ID' => $settings->GOOGLE_CALENDAR_CLIENT_ID ?? '',
+            'GOOGLE_CALENDAR_CLIENT_SECRET' => $settings->GOOGLE_CALENDAR_CLIENT_SECRET ?? '',
+            'GOOGLE_CALENDAR_REDIRECT' => $settings->GOOGLE_CALENDAR_REDIRECT ?? '',
 
             'locale' => $settings->Default_Language ?? 'en',
 
