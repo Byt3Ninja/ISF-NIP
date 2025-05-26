@@ -22,6 +22,25 @@
     </div>
 
 
+
+     <div class="form-group mb-3">
+      <label class="form-label mb-1" for="GOOGLE_CALENDAR_CLIENT_ID">{{ __('settings.GOOGLE_CALENDAR_CLIENT_ID') }}</label>
+      <input id="GOOGLE_CALENDAR_CLIENT_ID" type="text" class="form-control" value="{{ $Title->GOOGLE_CALENDAR_CLIENT_ID }}"
+        name="GOOGLE_CALENDAR_CLIENT_ID">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="GOOGLE_CALENDAR_CLIENT_SECRET">{{ __('settings.GOOGLE_CALENDAR_CLIENT_SECRET') }}</label>
+      <input type="text" class="form-control" value="{{ $Title->GOOGLE_CALENDAR_CLIENT_SECRET }}" name="GOOGLE_CALENDAR_CLIENT_SECRET"
+        id="GOOGLE_CALENDAR_CLIENT_SECRET">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="GOOGLE_CALENDAR_REDIRECT">{{ __('settings.GOOGLE_CALENDAR_REDIRECT') }}</label>
+      <input type="text" class="form-control" value="{{ $Title->GOOGLE_CALENDAR_REDIRECT }}" name="GOOGLE_CALENDAR_REDIRECT"
+        id="GOOGLE_CALENDAR_REDIRECT">
+    </div>
+
+
+
     <div class="form-group mb-3">
       <label class="form-label mb-1" for="LINKEDIN_CLIENT_ID">{{ __('admin.LINKEDIN_CLIENT_ID') }}</label>
       <input id="LINKEDIN_CLIENT_ID" type="text" class="form-control" value="{{ $Title->LINKEDIN_CLIENT_ID }}"
