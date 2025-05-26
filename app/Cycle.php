@@ -67,4 +67,30 @@ class Cycle extends Model
     {
         return $this->hasMany(SurveyResponses::class);
     }
+
+    public function getProgramGuidelineFileAttribute($value)
+    {
+        return $value ? 'programs/' . basename($value) : null;
+    }
+
+    
+    public function getFinancialGuidelineFileAttribute($value)
+    {
+        return $value ? 'financials/' . basename($value) : null;
+    }
+
+   
+    public function getLegalGuidelineFileAttribute($value)
+    {
+        return $value ? 'legal_policies/' . basename($value) : null;
+    }
+
+    public function getDelegationFileAttribute($value)
+    {
+        return $value ? 'delegations/' . basename($value) : null;
+    }
+
+    
+
+
 }

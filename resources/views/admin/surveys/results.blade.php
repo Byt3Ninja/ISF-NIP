@@ -100,17 +100,17 @@
 																	@php $mentor = $middleware?->mentor; @endphp
 																	{{ $mentor?->name }}
 																	@elseif( $response->triggered_by == 'due' )
-																	- {{ $middleware?->title }}
+																	- {{ $middleware->title }}
 																	@else
 																	-
 																	@endif
 																@elseif( $response->triggered_on == 'training' )
 																	@if( $response->triggered_by == 'session' )
-																	{{ '(' . __('cycles.' . $middleware?->type ) . ')' }} {{ $middleware?->title }}
+																	{{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
 																	@elseif( $response->triggered_by == 'due' )
-																	- {{ $middleware?->title }}
+																	- {{ $middleware->title }}
 																	@elseif( $response->triggered_by == 'quiz' )
-																	- {{ $middleware?->title }}
+																	- {{ $middleware->title }}
 																	@else
 																	-
 																	@endif

@@ -82,22 +82,16 @@ class ScreeningController extends Controller
 		return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
-	public function update(Request $request)
+public function update(Request $request)
 {
     $judgesInput = $request->input('judges', []);
 
+    // Decode judges input if it's a JSON string
     if (is_string($judgesInput)) {
         $judgesInput = json_decode($judgesInput, true) ?? [];
     }
 
-    // Convert all judge IDs to integers
-    if ($request->step && Step::where('id', $request->step)->pluck('data')->first() === 'grouptogroup') {
-        $judgesInput = array_map(fn($panel) => is_array($panel) ? array_map('intval', $panel) : [], $judgesInput);
-    } else {
-        $judgesInput = array_map('intval', Arr::flatten($judgesInput));
-    }
-
-    $judges = array_unique(Arr::flatten($judgesInput));
+    $judges = Arr::flatten($judgesInput);
 
     if (empty($judges)) {
         return Redirect::back()->with('message2', __('admin.Please_Choose_Judges'));
@@ -105,9 +99,15 @@ class ScreeningController extends Controller
 
     if ($request->step) {
         $type = Step::where('id', $request->step)->pluck('data')->first();
-        $list = ($type === 'grouptogroup') ? $judgesInput : $judges;
+        $list = ($type === 'grouptogroup') ? ($request->input('judges', []) ?: []) : $judges;
 
-        // Ensure list is JSON-encoded with integer IDs
+        if (is_string($list)) {
+            $list = json_decode($list, true) ?? [];
+        }
+
+        // Ensure judges are valid integers
+        $judges = array_map('intval', array_unique($judges));
+        $notifylist = User::whereIn('id', $judges)->get();
         Step::where('id', $request->step)->update(['list' => json_encode($list)]);
         Screening::where('step_id', $request->step)->delete();
         Formdata::where('form_id', $request->fid)->update(['step_id' => $request->step, 'screening' => '{}', 'comments' => '{}']);
@@ -131,9 +131,9 @@ class ScreeningController extends Controller
                 }
             }
 
+            // Notify users via Mail if notify is enabled
             if ($request->notify) {
                 $cstep = Step::findOrFail($request->step);
-                $notifylist = User::whereIn('id', $judges)->get();
                 foreach ($notifylist as $rname) {
                     $user = new User();
                     $user->email = $rname->email;
@@ -151,7 +151,7 @@ class ScreeningController extends Controller
                         try {
                             $user->notify($MSG);
                         } catch (\Throwable $th) {
-                            Log::error('Notification error for user ' . $rname->id . ': ' . $th->getMessage());
+                            // Log error
                         }
 
                         $phoneNumber = $rname->country_code_w_a . $rname->whatsapp;
@@ -160,7 +160,7 @@ class ScreeningController extends Controller
                         $Massage .= " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details, \n";
                         $Massage .= "Thanks from " . env('APP_NAME');
                         $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-                        Log::info('WhatsApp message sent to ' . $phoneNumber . ': ' . json_encode($result));
+                        Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
                     }
                 }
             }
@@ -170,7 +170,6 @@ class ScreeningController extends Controller
         return Redirect::back()->with('message2', 'error');
     }
 }
-
 
 	public function view($fid, $cid)
 	{

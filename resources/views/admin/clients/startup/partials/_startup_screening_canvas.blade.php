@@ -3,6 +3,117 @@
   $showCanvas = request()->query('screening') === 'true';
 @endphp
 
+<style>
+  .subcriteria-container .nav-tabs .nav-link {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem 0.375rem 0 0;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .subcriteria-container .nav-tabs .nav-link:not(.active):hover {
+    background-color: rgba(67, 89, 113, 0.04);
+  }
+  
+  .subcriteria-container .tab-content .card {
+    border-top-left-radius: 0;
+    box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.15);
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Styles for responsive sub-criteria display */
+  .subcriteria-container .nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(67, 89, 113, 0.2) transparent;
+  }
+  
+  .subcriteria-container .nav-tabs::-webkit-scrollbar {
+    height: 5px;
+  }
+  
+  .subcriteria-container .nav-tabs::-webkit-scrollbar-thumb {
+    background: rgba(67, 89, 113, 0.2);
+    border-radius: 10px;
+  }
+  
+  .subcriteria-container .nav-tabs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .subcriteria-container .nav-tabs .nav-item {
+    min-width: 150px;
+    flex-shrink: 0;
+  }
+  
+  .subcriteria-container .nav-tabs .nav-link {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Dropdown for mobile and many criteria */
+  .subcriteria-dropdown {
+    display: none;
+    margin-bottom: 1rem;
+  }
+  
+  /* For many sub-criteria, style the tabs better */
+  .subcriteria-container.many-criteria .nav-tabs .nav-item {
+    min-width: 120px;
+  }
+  
+  /* Horizontal scrolling indicators */
+  .subcriteria-container .nav-tabs.has-more-right::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 30px;
+    background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.9));
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .subcriteria-container .nav-tabs.has-more-left::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 30px;
+    background: linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,0.9));
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 992px) {
+    .subcriteria-dropdown {
+      display: block;
+    }
+    .subcriteria-container .subcriteria-tabs {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .subcriteria-container .tab-content .card .card-body {
+      padding: 1rem;
+    }
+  }
+  
+  /* When there are 5 or more sub-criteria */
+  @media (min-width: 993px) {
+    .subcriteria-container.many-criteria .nav-tabs {
+      position: relative;
+      padding: 0 15px;
+    }
+  }
+
+</style>
+
 @if( !empty( $evaluationForm ) && $evaluationForm->status == 'Published' )
 <div class="screening-gavel" data-bs-target="#rightModalCanvas" data-bs-toggle="offcanvas" aria-controls="rightModalCanvas"
   onclick="document.querySelector('.template-customizer-open-btn').style.display = 'none';">
@@ -19,7 +130,7 @@
         <input type="hidden" id="evaluation_program_id" name="evaluation_program_id" value="{{ $company->id }}" />
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         <div class="d-flex align-items-center gap-3">
-          @if( $evaluationForm->isPublished == true )
+          @if( !is_null( $evaluationForm ) && !empty( $evaluationForm ) && $evaluationForm->isPublished == true )
           <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
             <i class="ti ti-check me-2"></i> Published
           </button>
@@ -103,33 +214,158 @@
                               <h6 class="mb-0">{{ $criteria->name }}</h6>
                               <small>{{ __('admin.Provide your evaluation for') }} {{ $criteria->name }}.</small>
                             </div>
-                            <div class="accordion" id="criteria_{{ $key }}">
-                              @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
-                              <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                  <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $key . '_' . $sub_key }}" aria-expanded="true" aria-controls="collapse{{ $key . '_' . $sub_key }}">
-                                    {{ $subCriteria->name }}
-                                  </button>
-                                </h2>
-                                <div id="collapse{{ $key . '_' . $sub_key }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#criteria_{{ $key }}">
-                                  <div class="accordion-body">
-                                    <div class="form-group mb-4">
-                                      <label for="score_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Score') }}</label>
-                                      <select class="form-select" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}">
-                                        <option value="">{{ __('admin.Select score') }}</option>
-                                        @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}" {{ $subCriteria?->result?->score == $i ? 'selected' : '' }}>{{ $i }}</option> @endfor
-                                      </select>
-                                    </div>
-                                    <div class="form-group">
-                                      <label for="comment_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Comment') }}</label>
-                                      <textarea class="form-control" id="comment_{{ $subCriteria->id }}" name="comment_{{ $subCriteria->id }}" rows="3"
-                                        placeholder="{{ __('admin.Enter your comment here...') }}">{{ $subCriteria?->result?->comment ?? '' }}</textarea>
+                            <div class="subcriteria-container">
+                              <div class="nav-align-top">
+                                <!-- Mobile/Responsive Dropdown for Sub-Criteria -->
+                                <div class="subcriteria-dropdown">
+                                  <label class="form-label">{{ __('admin.Select Sub-Criteria') }}</label>
+                                  <select class="form-select subcriteria-select" id="subcriteria-select-{{ $key }}" data-criteria-key="{{ $key }}">
+                                    @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
+                                      <option value="#tab{{ $key . '_' . $sub_key }}" {{ $loop->first ? 'selected' : '' }}>
+                                        {{ $subCriteria->name }}
+                                      </option>
+                                    @endforeach
+                                  </select>
+                                </div>
+                                
+                                <!-- Desktop Tabs for Sub-Criteria -->
+                                <ul class="nav nav-tabs nav-fill subcriteria-tabs" role="tablist">
+                                  @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
+                                  <li class="nav-item">
+                                    <button type="button" class="nav-link {{ $loop->first ? 'active' : '' }}" 
+                                      role="tab" data-bs-toggle="tab" 
+                                      data-bs-target="#tab{{ $key . '_' . $sub_key }}" 
+                                      aria-controls="tab{{ $key . '_' . $sub_key }}" 
+                                      aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                                      <i class="ti ti-checkbox-circle me-1"></i>
+                                      {{ $subCriteria->name }}
+                                    </button>
+                                  </li>
+                                  @endforeach
+                                </ul>
+                                
+                                <div class="tab-content p-0 shadow-none">
+                                  @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
+                                  <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" 
+                                    id="tab{{ $key . '_' . $sub_key }}" role="tabpanel">
+                                    <div class="card">
+                                      <div class="card-body">
+                                        <div class="row">
+                                          <div class="col-12 col-md-6">
+                                            <div class="form-group mb-4">
+                                              <label for="score_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Score') }}</label>
+                                              <select class="form-select score-select" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}">
+                                                <option value="">{{ __('admin.Select score') }}</option>
+                                                <option value="1" {{ $subCriteria?->result?->score == 1 ? 'selected' : '' }}>1</option>
+                                                <option value="2" {{ $subCriteria?->result?->score == 2 ? 'selected' : '' }}>2</option>
+                                                <option value="3" {{ $subCriteria?->result?->score == 3 ? 'selected' : '' }}>3</option>
+                                                <option value="4" {{ $subCriteria?->result?->score == 4 ? 'selected' : '' }}>4</option>
+                                                <option value="5" {{ $subCriteria?->result?->score == 5 ? 'selected' : '' }}>5</option>
+                                              </select>
+                                            </div>
+                                          </div>
+                                          <div class="col-12">
+                                            <div class="form-group">
+                                              <label for="comment_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Comment') }}</label>
+                                              <textarea class="form-control" id="comment_{{ $subCriteria->id }}" name="comment_{{ $subCriteria->id }}" rows="3"
+                                                placeholder="{{ __('admin.Enter your comment here...') }}">{{ $subCriteria?->result?->comment ?? '' }}</textarea>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
+                                  @endforeach
                                 </div>
                               </div>
-                              @endforeach
                             </div>
+
+                            <script>
+                              document.addEventListener('DOMContentLoaded', function() {
+                                // Handle dropdown selection for sub-criteria
+                                const subcriteriaSelects = document.querySelectorAll('.subcriteria-select');
+                                subcriteriaSelects.forEach(select => {
+                                  select.addEventListener('change', function() {
+                                    const target = this.value;
+                                    const tabElement = document.querySelector(target);
+                                    const tabLink = document.querySelector(`[data-bs-target="${target}"]`);
+                                    
+                                    if (tabElement && tabLink) {
+                                      // Deactivate all tabs
+                                      const allTabs = document.querySelectorAll(`.subcriteria-tabs .nav-link[data-bs-target^="#tab${select.dataset.criteriaKey}_"]`);
+                                      allTabs.forEach(tab => {
+                                        tab.classList.remove('active');
+                                        tab.setAttribute('aria-selected', 'false');
+                                      });
+                                      
+                                      // Deactivate all panes
+                                      const allPanes = document.querySelectorAll(`.tab-pane[id^="tab${select.dataset.criteriaKey}_"]`);
+                                      allPanes.forEach(pane => {
+                                        pane.classList.remove('show', 'active');
+                                      });
+                                      
+                                      // Activate the selected tab
+                                      tabLink.classList.add('active');
+                                      tabLink.setAttribute('aria-selected', 'true');
+                                      
+                                      // Activate the selected pane
+                                      tabElement.classList.add('show', 'active');
+                                    }
+                                  });
+                                });
+                                
+                                // Auto-switch to dropdown mode when there are more than 4 sub-criteria
+                                document.querySelectorAll('.subcriteria-container').forEach(container => {
+                                  const tabs = container.querySelectorAll('.nav-item');
+                                  if (tabs.length > 4) {
+                                    // Add class for many criteria to apply specific styles
+                                    container.classList.add('many-criteria');
+                                    
+                                    const dropdownContainer = container.querySelector('.subcriteria-dropdown');
+                                    const tabsContainer = container.querySelector('.subcriteria-tabs');
+                                    
+                                    // On mobile, show the dropdown (handled by CSS)
+                                    
+                                    // On desktop, make tabs scrollable
+                                    if (window.innerWidth > 992) {
+                                      // Add visual indicator if there are more tabs to scroll
+                                      const tabsNav = container.querySelector('.nav-tabs');
+                                      if (tabsNav) {
+                                        tabsNav.addEventListener('scroll', function() {
+                                          checkScrollIndicators(tabsNav);
+                                        });
+                                        
+                                        // Initial check
+                                        setTimeout(() => checkScrollIndicators(tabsNav), 100);
+                                      }
+                                    }
+                                  }
+                                });
+                                
+                                // Helper function to check if scroll indicators are needed
+                                function checkScrollIndicators(element) {
+                                  const isScrollable = element.scrollWidth > element.clientWidth;
+                                  const isScrolledToEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
+                                  const isScrolledToStart = element.scrollLeft <= 10;
+                                  
+                                  element.classList.toggle('has-more-right', isScrollable && !isScrolledToEnd);
+                                  element.classList.toggle('has-more-left', isScrollable && !isScrolledToStart);
+                                }
+                                
+                                // Sync tab changes with dropdown
+                                document.querySelectorAll('.subcriteria-tabs .nav-link').forEach(tab => {
+                                  tab.addEventListener('shown.bs.tab', function(event) {
+                                    const targetId = event.target.dataset.bsTarget;
+                                    const criteriaKey = targetId.split('_')[0].replace('#tab', '');
+                                    const dropdown = document.getElementById('subcriteria-select-' + criteriaKey);
+                                    
+                                    if (dropdown) {
+                                      dropdown.value = targetId;
+                                    }
+                                  });
+                                });
+                              });
+                            </script>
 
 
                             <div class="col-12 d-flex justify-content-between mt-12">
@@ -166,100 +402,40 @@
             </div>
             <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
               <div class="row mb-6">
-                <div class="col-3">
+                @foreach( $evaluationForm->categories as $key => $criteria )
+                <div class="col-3 pb-3">
                   <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
+                    <h6 class="mb-0 text-secondary fw-semibold">{{ $criteria->name }}</h6>
                     <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
+                      <span class="fs-5 fw-bold mb-0 text-dark">
+                        {{ $criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) }} / {{ $criteria->subCriteria->count() * 5 }}
+                      </span>
                       <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
                     </div>
                   </div>
                 </div>
-                <div class="col-3">
-                  <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
-                    </div>
-                  </div>
-                </div>
+                @endforeach
               </div>
               
               <div class="row">
+                @foreach( $evaluationForm->categories as $key => $criteria )
                 <div class="col-12 mb-5 border-bottom pb-4">
-                  <h5 class="text-primary fw-semibold">{{ __('admin.All Comments')}}</h5>
+                  <h5 class="text-primary fw-semibold">{{ $criteria->name . ' ' . __('admin.Comments')}}</h5>
+                  @foreach( $criteria->subCriteria as $index => $subCriteria )
                   <div class="d-flex flex-column mb-4">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-primary rounded-pill">1</span>
-                      <span class="fs-5 mb-0 text-dark">Market Fit</span>
+                      <span class="badge bg-primary rounded-pill">{{ $index + 1 }}</span>
+                      <span class="fs-5 mb-0 text-dark">{{ $subCriteria->name }}</span>
                     </div>
-                    <small class="text-light line-clamp-3 mt-2 w-75">
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                      At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                    </small>
+                    <small class="text-light line-clamp-3 mt-2 w-75">{{ $subCriteria->result->comment }}</small>
                   </div>
-                  <div class="d-flex flex-column">
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-primary rounded-pill">2</span>
-                      <span class="fs-5 mb-0 text-dark">Financial Viability</span>
-                    </div>
-                    <small class="text-light line-clamp-3 mt-2 w-75">
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                      At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                    </small>
-                  </div>
+                  @endforeach
                 </div>
-              </div>
-              <div class="col-12 mb-5">
-                <h5 class="text-primary fw-semibold">{{ __('admin.All Notes')}}</h5>
-                <div class="d-flex flex-column mb-4">
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-pill">1</span>
-                    <span class="fs-5 mb-0 text-dark">Market Fit</span>
-                  </div>
-                  <small class="text-light line-clamp-3 mt-2 w-75">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                  </small>
-                </div>
-                <div class="d-flex flex-column">
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-pill">2</span>
-                    <span class="fs-5 mb-0 text-dark">Financial Viability</span>
-                  </div>
-                  <small class="text-light line-clamp-3 mt-2 w-75">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                  </small>
-                </div>
+                @endforeach
               </div>
               <div class="col-12">
                 <h5 class="text-primary fw-semibold mb-2">{{ __('admin.Final Comments')}}</h5>
-                <small class="text-light line-clamp-3 mt-2 w-75">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Ad minus, optio repellat odit pariatur accusantium, quas,
-                  natus tenetur delectus voluptas tempora sint corporis. Autem omnis
-                  maxime cumque blanditiis labore perferendis.
-                </small>
+                <small class="text-light line-clamp-3 mt-2 w-75">{{ $evaluationForm->final_comment }}</small>
               </div>
             </div>
           </div>

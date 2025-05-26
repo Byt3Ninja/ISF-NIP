@@ -39,7 +39,7 @@
 								<div class="card-body">
 									@if($_user->ableToAny(['quizzes.create', 'quizzes.store'], $permissions))
 									<div class="row pb-1">
-										<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
+										<div class="col-12 d-flex justify-content-end">
 											<a href="{{ route('quizzes.create') }}" class="btn btn-block btn-primary"> 
 												<i class="ti ti-plus me-1"></i> {{ __('admin.Add New')}}
 											</a>
@@ -53,7 +53,7 @@
 										  <div class="d-flex align-items-center mx-2">
 											<div style="display: flex; align-items: center;">
 											<button
-											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center me-3" 
 											  style="border-radius: 17px; width: 40px; height: 40px;"
 											   type="submit"
 											>
@@ -65,7 +65,7 @@
 							
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="org_id" class="form-control">
-											  <option value="0">{{ __('admin.All') }}</option>
+											  <option value="0">{{ __('admin.All_Organizations') }}</option>
 											  @php
 											  $organizations = App\Organization::all();
 											  
@@ -91,7 +91,7 @@
 							
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="status" class="form-control">
-											  <option value="0">{{ __('admin.All') }}</option>
+											  <option value="0">{{ __('admin.All_statuses') }}</option>
 											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>{{ __('admin.Draft') }}</option>
 											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>{{ __('admin.Published') }}</option>
 											</select>
@@ -99,7 +99,7 @@
 
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="Program_id" class="form-control">
-											  <option value="0">{{ __('admin.All') }}</option>
+											  <option value="0">{{ __('admin.All_Programs') }}</option>
 											  @php
 											  if(!empty(request('org_id'))){
 											  	$cycles = App\Cycle::where('organization_id',request('org_id'))->get();
@@ -153,14 +153,14 @@
 														<td class="text-center"><a href="{{ URL::to('dashboard/training/all/' . $quiz->training->id) }}"> {{ $quiz->training->title }}</a></td>
 														<td class="text-center">
 															@if( $quiz->status == 'draft' )
-																<span class="badge text-bg-secondary">{{__('admin.Draft')}}</span>
+																<span class="badge bg-label-secondary">{{__('admin.Draft')}}</span>
 															@elseif( $quiz->status == 'published' )
-																<span class="badge text-bg-success">{{__('admin.Published')}}</span>
+																<span class="badge bg-label-success">{{__('admin.Published')}}</span>
 															@endif
 														</td>
 														<td class="text-center">
-															<span title="{{ $quiz->start }}" class="badge text-bg-primary"> {{ __('admin.From') }} {{ $quiz->start->format('Y-m-d') }} </span> <br />
-															<span title="{{ $quiz->end }}" class="badge text-bg-dark"> {{ __('admin.To') }} {{ $quiz->end->format('Y-m-d') }} </span>
+															<span title="{{ $quiz->start }}" class="badge bg-label-primary"> {{ __('admin.From') }} {{ $quiz->start->format('Y-m-d') }} </span> <br />
+															<span title="{{ $quiz->end }}" class="badge bg-label-secondary mt-1"> {{ __('admin.To') }} {{ $quiz->end->format('Y-m-d') }} </span>
 														</td>
 														<td class="text-center"> {{ $participates->count() }} </td>
 														<td class="text-center">
@@ -173,7 +173,7 @@
 														@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))
 														<td class="text-center">
 															<div class="btn-group w-100">
-																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
+																<button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
 																	@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update'], $permissions))
 																	<a href="{{ route('quizzes.questions_manage', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
