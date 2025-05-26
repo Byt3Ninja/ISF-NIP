@@ -427,7 +427,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
     Route::post('training/delsession/{id}', 'TrainingController@delsession')->name('trainings.sessions_delete');
     Route::post('training/session', 'TrainingController@session')->name('trainings.sessions_view');
-    Route::post('training/editsession', 'TrainingController@editsession')->name('trainings.sessions_edit');
+    Route::put('training/editsession/{id}', 'TrainingController@editsession')->name('trainings.sessions_edit');
     Route::post('trainings/getdsc/{id}', 'TrainingController@getdsc')->name('trainings.descriptions_view');
     Route::get('/export-Tresult', 'TrainingController@exportTresult')->name('trainings.results_export');
     Route::post('trainings/change/Tresult', 'TrainingController@changAllTL')->name('trainings.tl_update_all');

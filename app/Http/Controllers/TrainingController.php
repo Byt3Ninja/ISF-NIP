@@ -852,9 +852,9 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 		}
 	}
 
-	public function editsession(Request $request)
+	public function editsession(Request $request , $id)
 	{
-	
+		// dd($request->all());
 		$this->meetingService =  OnlineMeetingFactory::create();
 		$addOrEdit = 'edit';
 		$dateRange = $request->date_range; 
@@ -887,7 +887,7 @@ $duration = $start->diffInMinutes($end);
 		// $step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$id = $request->sid;
+		// $id = $request->sid;
 		if ($type == 'sessions') {
 			// Add Zoom
 		
@@ -906,6 +906,7 @@ $duration = $start->diffInMinutes($end);
 				'dsc' => $dsc,
 				'zoom_id' => $zoomid,
 				'datetime' => $datetime,
+				'enddatetime' => $end_datetime,
 				'duration' => $request->duration,
 				'user_id' => Auth::id(),
 				'start_url' => $start,
@@ -919,7 +920,7 @@ $duration = $start->diffInMinutes($end);
 			// ==========> End Notify <================
 
 			// ==========> End Notify <================
-			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
+			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
 		} elseif ($type == 'online') {
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
