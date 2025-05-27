@@ -170,8 +170,8 @@
                         <td>{{ $key + 1 }}</td>
                         <td>{{ __('cycles.' . $session->type) }}</td>
                         <td>{{ $session->title }}</td>
-                        <td>{{ $session->datetime }}</td>
-                        <td>{{ $session->enddatetime ?? '-' }}</td>
+                        <td>{{ FormatDate($session->datetime, 'Y-m-d H:i') }}</td>
+                        <td>{{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}</td>
                         <td>
                           @if ($session->type == 'sessions')
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
@@ -629,9 +629,11 @@
           @method('PUT')
           <div>
             <input type="hidden" name="sid" value="{{ $id }}" id="id">
+            <input type="hidden" name="step_id" value="{{ $id }}" id="step_id">
             <div class="form-group mb-4" id="ctype">
+              <input type="hidden" name="type" id="select-type">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
-              <select id="select-type" name="type" class="select2 form-control" required disabled>
+              <select id="select-type" class="select2 form-control" required disabled>
                 <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{ __('cycles.online') }}</option>
                 <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{ __('cycles.sessions') }}</option>
                 <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{ __('cycles.offline') }}</option>
@@ -961,6 +963,7 @@
       
       const formId = '#editSessionForm';
       const typeValue = $(`${formId} #select-type`).val();
+      const id = $(`${formId} #id`).val();
       const dateRangePicker = $(`${formId} #date-range-picker`);
       const dateRangeValue = dateRangePicker.val();
       const dateValue = $(`${formId} .flatpickr-date`).val();
@@ -1236,6 +1239,8 @@
 
 
           $('#editSessionForm #title').show();
+          $('#editSessionForm #id').val(response.id);
+          $('#editSessionForm #step_id').val(response.step_id);
           $('#editSessionForm #title').val(response.title);
           $('#editSessionForm #dsc').val(response.dsc);
           $('#editSessionForm #select-type').val(response.type).trigger('change');

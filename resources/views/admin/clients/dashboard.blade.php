@@ -128,7 +128,7 @@
         if( empty( $trainingSession->datetime ) ) { continue; }
         else
         {
-          $endAt = Carbon\carbon::parse($trainingSession->datetime)->format('Y-m-d H:i:s');
+          $endAt = FormatDate($trainingSession->datetime, 'Y-m-d H:i:s');
           if( now() > $endAt )
           {
             $surveyEligible[] = [
@@ -879,8 +879,8 @@
                       
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span></td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') ?? '-' }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') ?? '-' }}</td>
+                    <td>{{ FormatDate($step->from, 'Y-m-d') ?? '-' }}</td>
+                    <td>{{ FormatDate($step->to, 'Y-m-d') ?? '-' }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}

@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 if (! function_exists('in_array_2d')) {
@@ -44,5 +45,12 @@ if (!function_exists('getPusherConfig')) {
     function getPusherConfig()
     {
         return DB::table('settings')->select('PUSHER_APP_KEY', 'PUSHER_APP_CLUSTER')->first();
+    }
+}
+if (!function_exists('FormatDate')) {
+    function FormatDate($date, $format)
+    {
+        return Carbon::parse($date)->format($format);
+        
     }
 }
