@@ -15,7 +15,7 @@ class MentorProgramController extends Controller
   {
       $mentor = auth()->user();
 
-      $cycles = $mentor->mentorCycles;
+      $cycles = $mentor->mentorCycles()->with(['mentorshipRequests.tasks'])->get();
 
       $upcomingSessions = MentorshipRequest::where('mentor_id', $mentor->id)
           ->where('zoom_date', '>', now())
@@ -31,15 +31,17 @@ class MentorProgramController extends Controller
               return $now >= $step->from && $now <= $step->to; 
           })->count();
 
+          $sessionsWithoutTasks = $cycle->mentorshipRequests->filter(function ($request) {
+            return $request->tasks->where('status', 'pending')->isEmpty();
+        })->count();
+
           $progressPercentage = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
 
           $cycle->progressPercentage = $progressPercentage;
           $cycle->totalSteps = $totalSteps;
           $cycle->totalStepsFinish = $totalStepsFinish;
+          $cycle->sessionsWithoutTasks = $sessionsWithoutTasks;
 
-          $cycle->sessionsWithoutTasks = MentorshipRequest::where('cycle_id', $cycle->id)
-             ->whereDoesntHave('tasks') 
-             ->count();
       }
 
       return view('mentor.programs.show', compact('cycles', 'upcomingSessions'));

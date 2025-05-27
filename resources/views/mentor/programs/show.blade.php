@@ -92,10 +92,10 @@
               </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="guideline-tab" data-bs-toggle="tab" href="#program-guideline">Program Guideline</a>
+            <a class="nav-link" id="guideline-tab" data-bs-toggle="tab" href="#program-guideline">{{ __('admin.Program Guideline') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="policy-tab" data-bs-toggle="tab" href="#financial-policy">Financial Policy</a>
+            <a class="nav-link" id="policy-tab" data-bs-toggle="tab" href="#financial-policy">{{ __('admin.Financial Policy') }}</a>
           </li>
         </ul>
       </div>
@@ -177,7 +177,7 @@
                   <ul class="list-group">
                     <li class="list-group-item d-flex align-items-center gap-3">
                       <i class="ti ti-file-text text-primary"></i>
-                      <a href="{{ asset('storage/' . $cycle->program_guideline_file) }}" class="text-dark" target="_blank" download>
+                      <a href="{{ asset($cycle->program_guideline_file) }}" class="text-dark" target="_blank" download>
                         {{ __('admin.Download') }}
                       </a>
                     </li>
@@ -193,9 +193,9 @@
             <div class="mb-6 pb-4 border-bottom">
               <h5 class="fw-bold mb-3">
                 {{ __('admin.Financial Policy') }}
-                @foreach($cycles as $cycle)
-                 <span class="badge bg-label-primary text-white ms-2">${{ $cycle->budget_allocation }}</span>
-                @endforeach
+               <span class="badge bg-label-primary text-white ms-2">
+                    ${{ collect($cycles)->pluck('budget_allocation')->filter()->join(', ') ?: 'N/A' }}
+                </span>
               </h5>
               @foreach($cycles as $cycle)
               <p class="text-muted mb-0">{{ $cycle->financial_guideline }}</p>
@@ -205,7 +205,7 @@
                   <ul class="list-group">
                     <li class="list-group-item d-flex align-items-center gap-3">
                       <i class="ti ti-file-text text-primary"></i>
-                      <a href="{{ asset('storage/' . $cycle->financial_guideline_file) }}" class="text-dark" target="_blank" download>
+                      <a href="{{ asset($cycle->financial_guideline_file) }}" class="text-dark" target="_blank" download>
                       {{ __('admin.Download') }}
                       </a>
                     </li>

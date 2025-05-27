@@ -10,6 +10,68 @@
 @section('content')
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
+			<!-- Breadcrumb -->
+          <nav aria-label="breadcrumb"> 
+    		<ol class="breadcrumb">
+        		<li class="breadcrumb-item"><a href="{{ route('mentorships.requests_view',['id' => $cycle->id]) }}">{{ __('admin.Mentorships') }}</a></li>
+        		<li class="breadcrumb-item active">{{ __('admin.mentorshipSurveys') }}</li>
+   			 </ol>
+		 </nav>
+
+            <!-- Mentorship Stage Info -->
+            <div class="card mb-3">
+				  <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('admin.Step Title') }}</th>
+                                    <th>{{ __('admin.StartDate') }}</th>
+                                    <th>{{ __('admin.EndDate') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($cycle->steps as $step)
+                                    <tr>
+                                        <td>{{ $step->title ?? 'N/A' }}</td>
+                                        <td>{{ $step->from ? $step->from->format('Y-m-d') : 'N/A' }}</td>
+                                        <td>{{ $step->to ? $step->to->format('Y-m-d') : 'N/A' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+            </div>
+
+            <!-- Program Info -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>{{ __('admin.Program Details') }}</h5>
+                    <p><strong>{{ __('admin.Program Name') }}:</strong> {{ $cycle->title }}</p>
+                    <p><strong>{{ __('admin.StartDate') }}:</strong> {{ $cycle->start ? $cycle->start->format('Y-m-d') : 'N/A' }}</p>
+                    <p><strong>{{ __('admin.EndDate') }}:</strong> {{ $cycle->end ? $cycle->end->format('Y-m-d') : 'N/A' }}</p>
+                    <p><strong>{{ __('admin.Organization') }}:</strong> {{ $cycle->organization->{'name_' . app()->getLocale()} }}</p>
+                        @if (!is_null($cycle->organization))
+                    @php
+                    $imageUrl = $cycle->organization->image_url;
+
+                    $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+
+                    $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+
+                    @endphp
+
+                    <img src="{{ $imageUrl }}" alt="Logo" class="img-fluid"
+                      style="max-width: 20%; max-height: 20%; object-fit: contain;" />
+                    @else
+                    @php $setting = \App\Settings::where('id', 1)->first(); @endphp
+                    @if (!empty($setting->Logo))
+                    <img src="/images/logo/{{ $setting->Logo }}" alt="Logo" class="img-fluid"
+                      style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    @else
+                    <img src="/images/background/logo.png" alt="Logo" class="img-fluid"
+                      style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    @endif
+                    @endif
+                </div>
+            </div>
 			<div class="content-overlay"></div>
 			<div class="content-header">
 				<h4 class="content-title">{{__('admin.mentorshipSurveys')}}</h4>
@@ -63,7 +125,9 @@
 									@endif
 									<div class="row pb-1">
 										<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
-											<a href="{{ route('mentorships.surveys_create', ['id' => $cycle->id]) }}" class="btn btn-block btn-primary"> <i class="ti ti-plus me-1"></i> {{ __('admin.AddNewSurvey')}} </a>
+											<button class="btn btn-block btn-primary" data-bs-toggle="modal" data-bs-target="#createSurveyModal">
+                                                <i class="ti ti-plus me-1"></i> {{ __('admin.AddNewSurvey') }}
+                                            </button>
 										</div>
 									</div>
 									<div class="table-responsive surveys-list">
@@ -76,6 +140,7 @@
 												<th class="text-center">{{ __('admin.surveyTriggerAfterSession') }}</th>
 												<th class="text-center">{{ __('admin.surveyTriggerAfterCycle') }}</th>
 												<th class="text-center">{{ __('admin.engagementRate') }}</th>
+												<th class="text-center">{{ __('admin.type') }}</th>
 												<th style="width: 100px;" class="text-center">{{__('admin.Actions')}}</th>
 											</tr>
 											</thead>
@@ -106,6 +171,9 @@
 															</span>
 														</td>
 														<td class="text-center">
+																{{ $survey_scope->type }}
+														</td>
+														<td class="text-center">
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
@@ -126,6 +194,56 @@
 						</div>
 					</div>
 				</section>
+				<!-- Create Survey Modal -->
+                <div class="modal fade" id="createSurveyModal" tabindex="-1" aria-labelledby="createSurveyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createSurveyModalLabel">{{ __('admin.AddNewSurvey') }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="createSurveyForm" action="{{ route('mentorships.surveys_store', ['id' => $cycle->id]) }}" method="POST">
+                                    @csrf
+                                   <div class="row">
+									<div class="col-md-12 col-sm-9">
+												<fieldset class="form-group">
+													<label for="survey_id">{{ __('admin.Survey') }}</label>
+													<select class="form-control form-select" name="survey_id" id="survey_id" required>
+														<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
+														@foreach($available_surveys as $survey )
+															<option value="{{ $survey->id }}">{{ $survey->title }}</option>
+														@endforeach
+													</select>
+												</fieldset>
+									</div>
+									</div>
+                                    <div class="mt-3 col-12">
+                                        <label for="targetUserType" class="form-label">{{ __('admin.Type_Survey') }}</label>
+                                        <select class="form-control" id="type" name="type">
+											<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
+											<option value="mentor">{{ $l == 'ar' ? 'مرشد' : 'Mentor' }}</option>
+											<option value="startup">{{ $l == 'ar' ? 'مؤسس' : 'StartUp' }}</option>
+											<option value="both">{{ $l == 'ar' ? 'الاثنين' : 'Both' }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label">{{ __('admin.SurveyTriggers') }}</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="triggerBySession" name="trigger_by_session">
+                                            <label class="form-check-label" for="triggerBySession">{{ __('admin.surveyTriggerAfterSession') }}</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="triggerByDue" name="trigger_by_due">
+                                            <label class="form-check-label" for="triggerByDue">{{ __('admin.surveyTriggerAfterCycle') }}</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">{{ __('admin.Submit') }}</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 			</div>
 		</div>
 	</div>
