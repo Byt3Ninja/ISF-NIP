@@ -358,11 +358,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-secondary">
                           <i class="ti ti-calendar ti-20px text-info"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($cycle->start, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-secondary">
                           <i class="ti ti-calendar ti-20px text-danger"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($cycle->end, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -552,11 +552,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -757,11 +757,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1029,11 +1029,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1191,11 +1191,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1402,11 +1402,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>

@@ -21,7 +21,20 @@
         id="whatsApp_ACCESS_TOKEN">
     </div>
 
-    <h1>WhatsApp Session Manager</h1>
+    
+
+    </div>
+
+
+
+
+
+
+  <div class="form-group d-flex justify-content-end mt-auto">
+    <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+  </div>
+</form>
+<h1>WhatsApp Session Manager</h1>
 
         <div class="action-group">
             <h2>Manage Specific Session</h2>
@@ -52,15 +65,3 @@
              <strong>Monitoring Status:</strong>
              <span id="pollingStatusContent">Waiting to start...</span>
          </div>
-
-    </div>
-
-
-
-
-
-
-  <div class="form-group d-flex justify-content-end mt-auto">
-    <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-  </div>
-</form>

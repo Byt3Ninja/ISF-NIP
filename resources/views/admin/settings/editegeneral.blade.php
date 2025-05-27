@@ -350,13 +350,16 @@
             if (statusData.state === 'CONNECTED') {
                 showFeedback(`Session '${sessionId}' is now CONNECTED!`, 'success');
                 updatePollingStatus(`CONNECTED! (Attempt ${pollingAttempts})`);
-                qrCodeImageArea.style.display = 'none'; // Hide QR once connected
+                // qrCodeImageArea.style.display = 'none'; // Hide QR once connected
+                setTimeout(function() {
+                    qrCodeImageArea.style.display = 'none';
+                }, 30000);     // Hide after 30 seconds QR once connected
                 stopPolling();
 
                 // --- !!! NEXT STEP HERE !!! ---
                 console.log("Session connected successfully.");
                 // You could redirect, enable other parts of the UI, etc.
-                alert(`Session ${sessionId} successfully connected!`);
+                // alert(`Session ${sessionId} successfully connected!`);
 
             } else if (statusData.state === 'SCAN_QR_CODE') {
                 // Continue polling

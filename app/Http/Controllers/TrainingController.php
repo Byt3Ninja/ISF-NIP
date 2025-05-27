@@ -729,7 +729,6 @@ class TrainingController extends Controller
 
 	public function addsession(Request $request)
 	{
-		
 		$addOrEdit = 'add';
 		$this->meetingService =  OnlineMeetingFactory::create();
 		
@@ -737,18 +736,18 @@ class TrainingController extends Controller
 		$type = $request->type;
 		$l = app()->getLocale();
 if ($type == 'sessions' || $type == 'offline') {
-		$startDate = $request->datetime;
+		$startDate = FormatDate($request->datetime, 'Y-m-d');
 		$startTime = $request->starttime;   // وقت البداية
 		$endTime = $request->endtime;   // وقت النهاية
 		$start_datetime = $startDate.' '. $startTime;
 		$end_datetime = $startDate.' '.$endTime;
 } else if ($type == 'online') {
     [$startDate, $endDate] = explode(' - ', $dateRange);
-    $start_datetime = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y-m-d');
-    $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
+    $start_datetime = FormatDate($startDate, 'Y-m-d') ;
+    $end_datetime = FormatDate($endDate, 'Y-m-d');
 }
 		
-
+			
 		if($start_datetime == null || $end_datetime == null){
 			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 		}
@@ -757,93 +756,33 @@ if ($type == 'sessions' || $type == 'offline') {
 		$title = $request->title;
 		$dsc = $request->dsc;
 		$datetime = $start_datetime;
+		$datetimeStamp = Carbon::parse($datetime)->timestamp;
+		$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
 		$start = Carbon::parse($datetime);
 		$end = Carbon::parse($end_datetime);
 		$duration = $start->diffInMinutes($end);
 
 		if ($type == 'sessions') {
-			// Add Zoom
-			$topic = "Training (" . $title . ')';
-			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $request->duration, 'host_video' => 1, 'participant_video' => 1];
-			$onlineMeeting = $this->meetingService->createMeeting($data);
-			if (!$onlineMeeting['success']) {
-				return back()->with([
-					'message' => $onlineMeeting['data'],
-					'class' => 'danger'
-				]);
-			}
-			$zoomid =  $onlineMeeting['data']['id'];
-			$start = $onlineMeeting['data']['start_url'];
-			$join = $onlineMeeting['data']['join_url'];
-			$trainingSession = TrainingSession::insert([
-				'type' => $type,
-				'step_id' => $step,
-				'title' => $title,
-				'dsc' => $dsc,
-				'zoom_id' => $zoomid,
-				'datetime' => $datetime,
-				'enddatetime' => $end_datetime,
-				'duration' => $duration,
-				'user_id' => Auth::id(),
-				'start_url' => $start,
-				'join_url' => $join,
-				'trainer_name' => $request->trainer_name,
-				'trainer_email' => $request->trainer_email
-			]);
-			
+			$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 
-
 		} elseif ($type == 'online') {
-			if (!$request->online) {
-				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
-			}
-			$trainingSession = TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
-
+				$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online);
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
-
-SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);
-			
-		}
+				SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);	
+			}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
+
 		} elseif ($type == 'offline') {
-		
-			$trainingSession = TrainingSession::create([
-				'type' => $type,
-				'step_id' => $step,
-				'title' => $title,
-				'dsc' => $dsc,
-				'datetime' => $start_datetime,
-				'user_id' => Auth::id(),
-				'training_Address' => $request->training_Address,
-				'training_location' => $request->training_location,
-				'enddatetime' => $end_datetime,
-				'trainer_name' => $request->trainer_name,
-				'trainer_email' => $request->trainer_email
-			]);
+			$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email);
 			// ======> notify Trainer <=================
-							$join_url = $request->training_location ?? 'No Location';
-							$address  = $request->training_Address ?? 'No Address';
-				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
-			// }
-			// رابط المسح الضوئي للحضور
-			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$trainingSession->id}");
-			// اسم ملف QR Code
-			$qrFileName = 'training_' . $trainingSession->id . '.png';
-			// توليد QR Code كـ string
-			$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
-			// المسار الكامل داخل `public/`
-			$qrFilePath = '/qrcodes/' . $qrFileName;
-			// حفظ QR Code في `public/qrcodes/`
-			$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
-
-			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
-			$trainingSession->update(['QrCode' => $qrFilePath]);
-
+			$join_url = $request->training_location ?? 'No Location';
+			$address  = $request->training_Address ?? 'No Address';
+			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 			
@@ -868,6 +807,7 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
         $endTime = date('H:i', strtotime($request->endtime));
         $start_datetime = $startDate . ' ' . $startTime;
         $end_datetime = $startDate . ' ' . $endTime;
+		
     } elseif ($type == 'online') {
         if (empty($request->date_range)) {
             return back()->with(['message' => 'Date range is required for online sessions', 'class' => 'danger']);
@@ -890,6 +830,8 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 		$title = $request->title;
 		$dsc = $request->dsc;
 		$datetime = $start_datetime;
+		$datetimeStamp = Carbon::parse($datetime)->timestamp;
+		$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
 		$start = Carbon::parse($datetime);
 		$end = Carbon::parse($end_datetime);
 		$duration = $start->diffInMinutes($end);
@@ -897,72 +839,127 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 		$title = $request->title;
 		$dsc = $request->dsc;
 		// $id = $request->sid;
+		
 		if ($type == 'sessions') {
 			// Add Zoom
+		$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
+			// $session = TrainingSession::find($trainingSession->sid);
+			// ======> notify Trainer <=================
+			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			// ==========> End Notify <================
+			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+
+		} elseif ($type == 'online') {
+			$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online, $request->sid);
+			SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);
+			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+
+		} elseif ($type == 'offline') {
+			$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email, $request->sid);
+			// ======> notify Trainer <=================
+			$join_url = $request->training_location ?? 'No Location';
+			$address = $request->training_Address ?? 'No Address';
+			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			// ==========> End Notify <================
+			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+		} else {
+			return back()->with(['message' => 'Can\'t edit session', 'class' => 'danger']);
+		}
 		
+	}
+
+	private function addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $trainer_name, $trainer_email, $sid = null) {
+
+		$this->meetingService =  OnlineMeetingFactory::create();
+		if ($type == 'sessions') {
+			// Add Zoom
 			$topic = "Training (" . $title . ')';
 			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 			if (!$onlineMeeting['success']) {
-				return back()->with(['message' => 'Can\'t create zoom meeting, API error', 'class' => 'danger']);
+				return back()->with([
+					'message' => $onlineMeeting['data'],
+					'class' => 'danger'
+				]);
 			}
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
 			$join = $onlineMeeting['data']['join_url'];
-			$session = TrainingSession::where('id', $id)->update([
-				'type' => $type,
-				'title' => $title,
-				'dsc' => $dsc,
-				'zoom_id' => $zoomid,
-				'datetime' => $datetime,
-				'enddatetime' => $end_datetime,
-				'duration' => $request->duration,
-				'user_id' => Auth::id(),
-				'start_url' => $start,
-				'join_url' => $join,
-				'trainer_name' => $request->trainer_name,
-				'trainer_email' => $request->trainer_email
-			]);
-			$session = TrainingSession::find($id);
-			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $session, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
-			// ==========> End Notify <================
+			
+			$data = [
+						'type' => $type,
+						'step_id' => $step,
+						'title' => $title,
+						'dsc' => $dsc,
+						'zoom_id' => $zoomid,
+						'datetime' => $datetimeStamp,
+						'enddatetime' => $end_datetimeStamp,
+						'duration' => $duration,
+						'user_id' => Auth::id(),
+						'start_url' => $start,
+						'join_url' => $join,
+						'trainer_name' => $trainer_name,
+						'trainer_email' => $trainer_email
+					];
+					if ($addOrEdit == 'add') {
+						$trainingSession = TrainingSession::create($data);
+					} else {
+						$trainingSession_update = TrainingSession::where('id', $sid)->update($data);
+						$trainingSession = TrainingSession::find($sid);
+					}
+	
+			return $trainingSession;
+		}
+	}
+	private function addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $online, $sid = null) {
 
-			// ==========> End Notify <================
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
-		} elseif ($type == 'online') {
-			if (!$request->online) {
+			if (!$online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			$Session = TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $start_datetime,  'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
-
-			SendTrainingNotificationJob::dispatch($step, $Session, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);
-
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
-		} elseif ($type == 'offline') {
-			$session = TrainingSession::where('id', $id)->update([
+			$data = [
 				'type' => $type,
+				'step_id' => $step, 
+				'title' => $title, 
+				'dsc' => $dsc, 
+				'datetime' => $datetimeStamp, 
+				'enddatetime' => $end_datetimeStamp, 
+				'user_id' => Auth::id(), 
+				'training_Address' => $online
+					];
+					if ($addOrEdit == 'add') {
+						$trainingOnlineSession = TrainingSession::create($data);
+					} else {
+						$trainingSession_update = TrainingSession::where('id', $sid)->update($data);
+						$trainingOnlineSession = TrainingSession::find($sid);
+					}
+	
+			return $trainingOnlineSession;
+		}
+	private function addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $training_Address, $training_location, $trainer_name, $trainer_email, $sid = null) {
+	
+		$data = [
+				'type' => $type,
+				'step_id' => $step,
 				'title' => $title,
 				'dsc' => $dsc,
-				'datetime' => $datetime,
+				'datetime' => $datetimeStamp,
 				'user_id' => Auth::id(),
-				'training_Address' => $request->training_Address,
-				'training_location' => $request->training_location,
-				'enddatetime' => $end_datetime,
-				'trainer_name' => $request->trainer_name,
-				'trainer_email' => $request->trainer_email
-			]);
-			$session = TrainingSession::find($id);
-			// ======> notify Trainer <=================
-			$join_url = $request->training_location ?? 'No Location';
-			$address = $request->training_Address ?? 'No Address';
-
-			SendTrainingNotificationJob::dispatch($step, $session, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
-
-			// رابط المسح الضوئي للحضور
-			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$session->id}");
+				'training_Address' => $training_Address,
+				'training_location' => $training_location,
+				'enddatetime' => $end_datetimeStamp,
+				'trainer_name' => $trainer_name,
+				'trainer_email' => $trainer_email
+				];
+				if ($addOrEdit == 'add') {
+					$trainingSession = TrainingSession::create($data);
+				} else {
+					$trainingSession_update = TrainingSession::where('id', $sid)->update($data);
+					$trainingSession = TrainingSession::find($sid);
+				}
+				// رابط المسح الضوئي للحضور
+			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$trainingSession->id}");
 			// اسم ملف QR Code
-			$qrFileName = 'training_' . $session->id . '.png';
+			$qrFileName = 'training_' . $trainingSession->id . '.png';
 			// توليد QR Code كـ string
 			$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
 			// المسار الكامل داخل `public/`
@@ -971,15 +968,11 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 			$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
 
 			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
-			$session->update(['QrCode' => $qrFilePath]);
+			$trainingSession->update(['QrCode' => $qrFilePath]);
 
-			// ==========> End Notify <================
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
-		} else {
-			return back()->with(['message' => 'Can\'t edit session', 'class' => 'danger']);
-		}
-		
+		return $trainingSession;
 	}
+	
 
 	public function session(Request $request)
 	{
@@ -992,11 +985,11 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 			$session['dsc'] = $sessionData->dsc;
 			$session['type'] = $sessionData->type;
 			if($sessionData->type == 'online'){
-				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime)) . ' - ' . date('Y-m-d', strtotime($sessionData->enddatetime));
+				$session['daterange'] = FormatDate($sessionData->datetime, 'Y-m-d').' - '.FormatDate($sessionData->enddatetime, 'Y-m-d');
 			}else{
-				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime));
-				$session['fromtime'] = date('h:i A', strtotime($sessionData->datetime));
-				$session['endtime'] = date('h:i A', strtotime($sessionData->enddatetime));
+				$session['daterange'] = FormatDate($sessionData->datetime, 'Y-m-d');
+				$session['fromtime'] = FormatDate($sessionData->datetime, 'h:i A');
+				$session['endtime'] = FormatDate($sessionData->enddatetime, 'h:i A');
 			}
 			if($sessionData->type == 'sessions'){
 				$session['training_Address'] = $sessionData->training_Address;
@@ -1013,6 +1006,7 @@ SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime
 			$session['start_url'] = $sessionData->start_url;
 			$session['join_url'] = $sessionData->join_url;
 			$session['created_at'] = $sessionData->created_at;
+			$session['step_id'] = $sessionData->step_id;
 
 			return response()->json($session);
 		} else {
