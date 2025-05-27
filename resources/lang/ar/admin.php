@@ -1773,4 +1773,7 @@ return [
 	'All_Organizations' => 'جميع المنظمات',
 	'All_statuses' => 'جميع الحالات',
 	'All_Programs' => 'جميع البرامج',
+	'Mentorships' => 'ارشادات',
+	'submitDate' => 'تاريخ الارسال',
+	'Step Title' => 'اسم المرحلة',
 ];

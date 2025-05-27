@@ -59,16 +59,33 @@
 													<tr>
 														<th class="text-center" style="width: 5%;">#</th>
 														<th>{{__('admin.user')}}</th>
+														<th>{{__('admin.Startup')}}</th>
 														<th>{{__('admin.Cycle informations')}}</th>
 														<th>{{__('admin.surveyAbout')}}</th>
 														<th class="text-center" style="width: 10%;">{{__('admin.Status')}}</th>
+														<th>{{__('admin.submitDate')}}</th>
 													</tr>
 												</thead>
 												<tbody>
 													@foreach( $responses as $index => $response )
 														<tr>
 															<td class="text-center">{{ $index + 1 }}</td>
-															<td><a target="_blank" href="/dashboard/users/{{ $response->user->id }}/edit"> {{ $response->user->name }}</a></td>
+															<td>
+																<a target="_blank" class="text-dark d-flex align-items-center gap-2">
+                        										<img src="{{ $response->user->image_url }}" alt="avatar" class="rounded-circle"
+                        											height="35" width="35" style="border: 2px solid #ddd;">
+                        										<div class="media-body">
+                          										<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $response?->user?->name }}</h6>
+                       											 </div>
+                      											</a>
+															</td>
+															<td>
+																<a class="text-dark" href="/dashboard/companyProfile/{{ $response?->user?->company?->id }}">
+                        										<img src="{{ $response?->user->company?->logo_url }}" alt="avatar" class="rounded-circle"
+                          											height="40" width="40">
+                        											<span class="fw-medium"> {{ $response?->user?->company?->{'name_'.$l} }}</span>
+                      											</a>
+															</td>
 															<td>
 																<a target="_blank" href="/dashboard/programlist/show/{{ $response->cycle->id }}/"> {{ $response->cycle->title }} </a>
 															</td>
@@ -78,7 +95,10 @@
 																@elseif( $response->triggered_on == 'training' )
 																<i class="ti ti-presentation mx-1"></i> 
 																@endif
-																{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . $target . ucFirst($response->triggered_by) ) }} 
+																{{ __('dashboard.surveyAbout')  }}
+																<span class="badge {{ $response->triggered_by == 'session' ? 'bg-primary' : 'bg-warning' }} text-dark">
+        															{{ __('dashboard.surveyTriggerBy' . $target . ucfirst($response->triggered_by)) }}
+   																 </span>
 																@php
 																	$middleware = collect([]);
 																	if( $response->triggered_on == 'mentorship' )
@@ -122,6 +142,9 @@
 																@else
 																	<button data-id="{{ $response->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
 																@endif
+															</td>
+															<td class="text-center">
+																{{ $response->created_at}}
 															</td>
 														</tr>
 													@endforeach

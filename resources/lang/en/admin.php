@@ -1752,4 +1752,8 @@ return [
 	'All_Organizations' => 'All Organizations',
 	'All_statuses' => 'All Statuses',
 	'All_Programs' => 'All Programs',
+	'Mentorship Stage' => 'Mentorship Stage',
+	'Mentorships' => 'Mentorships',
+	'Step Title' => 'Step Title',
+	'submitDate' => 'Submit Date',
 ];
