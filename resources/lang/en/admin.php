@@ -1756,4 +1756,6 @@ return [
 	'Mentorships' => 'Mentorships',
 	'Step Title' => 'Step Title',
 	'submitDate' => 'Submit Date',
+	'Started' => 'Started',
+	'Not started' => 'Not started',
 ];

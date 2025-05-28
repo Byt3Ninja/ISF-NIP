@@ -1776,4 +1776,11 @@ return [
 	'Mentorships' => 'ارشادات',
 	'submitDate' => 'تاريخ الارسال',
 	'Step Title' => 'اسم المرحلة',
+	'Training sessions' => 'جلسات التدريب',
+	'Services Requests' => 'طلبات الخدمات',
+	'Training sessions Duration' => 'مدة جلسات التدريب (ساعات)',
+	'Services' => 'الخدمات',
+	'My Requests' => 'طلباتي',
+	'Started' => 'بدأت',
+	'Not started' => 'لم تبدأ',
 ];

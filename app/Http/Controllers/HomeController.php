@@ -1366,7 +1366,7 @@ class HomeController extends Controller
                 'color' => 'info',
                 'href' => '/dashboard/training/sessions',
                 'icon' => 'ti-alarm',
-                'text' => __('admin.Training sessions Duration'),
+                'text' => 'Training sessions Duration',
                 'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
                 'count' => $training_sessions->sum('duration') / 60,
                 'isRating' => false,

@@ -84,7 +84,7 @@
 							</div>
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
-						<p class="mb-1 text-center">{{ $card['text'] }}</p>
+						<p class="mb-1 text-center">{{ __('admin.'.$card['text']) }}</p>
 					</div>
 				</div>
 			</a>
@@ -312,7 +312,7 @@
 													{{ $step->title }}
 													@endif
 												</td>
-												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ $step->status
+												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ __('admin.'.$step->status)
 														}}</span></td>
 												<td>{{ $step->from }}</td>
 												<td>{{ $step->to }}</td>
