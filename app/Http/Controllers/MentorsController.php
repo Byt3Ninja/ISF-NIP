@@ -701,6 +701,7 @@ Thanks from " . env('APP_NAME');
 			
 			$type = $request->rtype;
 			if ($type == 6) {
+				
 				$start = $join = null;
 				if ($request->stat == 'Yes') {
 					
@@ -716,7 +717,9 @@ Thanks from " . env('APP_NAME');
 					$join = $onlineMeeting['data']['join_url'];
 				}
 				
+					
 				MentorshipRequest::find($request->id)->update(['approved' => $request->stat, 'start_url' => $start, 'join_url' => $join]);
+				
 				/// Notify Mentor
 				$session = MentorshipRequest::findOrFail($request->id);
 				$rName = User::findOrFail($session->mentor_id);

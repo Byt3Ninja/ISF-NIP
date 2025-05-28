@@ -431,7 +431,7 @@
                     @foreach ($expertises as $expertise_group)
                     <optgroup label="{{ $expertise_group->title }}">
                       @foreach ($expertise_group->children as $expertise)
-                      <option value="{{ $expertise->id }}">{{ $expertise->title }}</option>
+                      <option value="{{ $expertise->id }}">{{ __('admin.'.$expertise->title) }}</option>
                       @endforeach
                     </optgroup>
                     @endforeach
