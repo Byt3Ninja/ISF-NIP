@@ -156,9 +156,22 @@
                             <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
                           </td>
                           <td>
-                            <span class="badge bg-label-{{ $session->approved ? 'success' : 'warning' }}">
-                              {{ $session->approved ? __('Yes') : __('Waiting') }}
-                            </span>
+                              @if( $session->approved )
+                              @if( $session->approved == 'Yes' )
+                              <span class="badge bg-label-success" >
+                              {{ __('admin.Yes') }}
+                              </span>
+                              @else
+                              <span class="badge bg-label-danger" >
+                              {{ __('admin.No') }}
+                              </span>
+                              @endif
+                              @else
+                              <span class="badge bg-label-warning" >
+                              {{ __('admin.Waiting') }}
+                              </span>
+                              @endif
+                            
                           </td>
                           <td>
                             <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
@@ -472,7 +485,11 @@
     }
 
     function approve(id, stat) {
-      alert('{{ __('admin.sending_request') }}')
+      if(stat == 'Yes'){
+      alert('{{ __('admin.Accepting_request') }}')
+      }else{
+        alert('{{ __('admin.Rejecting_request') }}')
+      }
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
