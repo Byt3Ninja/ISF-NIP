@@ -193,14 +193,6 @@
                                         class="form-control"
                                         accept="application/pdf"
                                     />
-                                    @if($ccycle->financial_guideline_file)
-                                        <small class="text-muted mt-2 d-block">
-                                            Current file: 
-                                            <a href="{{ asset($ccycle->financial_guideline_file) }}" download>
-                                                {{ preg_replace('/_\d+\.pdf$/', '.pdf', basename($ccycle->financial_guideline_file)) }}
-                                            </a>
-                                        </small>
-                                    @endif
                                 </div>
                             </div>
                             <div id="financial-file-container" class="mb-6"></div>
