@@ -292,7 +292,9 @@ class ProgramController extends Controller
 
     public function programReport(string $id , Request $request)
     {
-        $cycle = Cycle::withCount(['companies', 'mentors'])->with(['steps'])->findOrFail($id);
+        $cycle = Cycle::withCount(['companies', 'mentors'])->with(['steps' => function ($query) {
+          $query->orderBy('arr');
+          }])->findOrFail($id);
 
         $totalWorkshops = $cycle->trainingSessions()->count();
         
