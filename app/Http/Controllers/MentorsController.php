@@ -150,7 +150,9 @@ class MentorsController extends Controller
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
-		})->find($id);
+		}) ->with(['steps' => function ($q) {
+        	$q->orderBy('arr');
+    	}])->find($id);
 
 		if (!empty($cycle)) {
 			$organization_id = $cycle->organization_id;
