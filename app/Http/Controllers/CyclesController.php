@@ -201,10 +201,12 @@ class CyclesController extends Controller
             }
 
             // Check if file is uploaded
-             $programsPath = public_path('programs');
-            if (!File::exists($programsPath)) {
-                File::makeDirectory($programsPath, 0755, true);
-             }
+           $destinationPath = 'programs'; 
+
+           $fullPath = public_path($destinationPath);
+            if (!File::exists($fullPath)) {
+                File::makeDirectory($fullPath, 0755, true);
+            }
 
 
             $cycle->organization_id = $request->organization_id2;
@@ -217,20 +219,20 @@ class CyclesController extends Controller
 
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
-             $cycle->program_guideline_file = $this->storeUploadedFile($request, 'program-guideline-pdf', $programsPath);
+             $cycle->program_guideline_file = $this->storeUploadedFile($request, 'program-guideline-pdf', $destinationPath);
             }
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
             if ($request->hasFile('financial_policy_pdf')) {
-             $cycle->financial_guideline_file = $this->storeUploadedFile($request, 'financial_policy_pdf', $programsPath);
+             $cycle->financial_guideline_file = $this->storeUploadedFile($request, 'financial_policy_pdf', $destinationPath);
             }
             $cycle->legal_guideline = $request->legal_policy;
             if ($request->hasFile('legal_policy_pdf')) {
-                $cycle->legal_guideline_file = $this->storeUploadedFile($request, 'legal_policy_pdf', $programsPath);
+                $cycle->legal_guideline_file = $this->storeUploadedFile($request, 'legal_policy_pdf', $destinationPath);
             }
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $cycle->delegation_file = $this->storeUploadedFile($request, 'delegation_pdf', $programsPath);
+                $cycle->delegation_file = $this->storeUploadedFile($request, 'delegation_pdf', $destinationPath);
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
@@ -450,26 +452,27 @@ class CyclesController extends Controller
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
             // Check if file is uploaded
-            $programsPath = public_path('programs');
-            if (!File::exists($programsPath)) {
-                File::makeDirectory($programsPath, 0755, true);
-             }
+            $destinationPath = 'programs';
+            $fullPath = public_path($destinationPath);
+            if (!File::exists($fullPath)) {
+                File::makeDirectory($fullPath, 0755, true);
+            }
 
             $cycle->program_guideline = $request->program_guideline;
-            $cycle->program_guideline_file = $this->storeUploadedFile($request, 'program-guideline-pdf', $programsPath);
+            $cycle->program_guideline_file = $this->storeUploadedFile($request, 'program-guideline-pdf', $destinationPath);
 
 
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
-            $cycle->financial_guideline_file = $this->storeUploadedFile($request, 'financial_policy_pdf', $programsPath);
+            $cycle->financial_guideline_file = $this->storeUploadedFile($request, 'financial_policy_pdf', $destinationPath);
 
 
             $cycle->legal_guideline = $request->legal_policy;
-            $cycle->legal_guideline_file = $this->storeUploadedFile($request, 'legal_policy_pdf', $programsPath);
+            $cycle->legal_guideline_file = $this->storeUploadedFile($request, 'legal_policy_pdf', $destinationPath);
 
             if ($request->delegation_option === 'yes') {
-                 $cycle->delegation_file = $this->storeUploadedFile($request, 'delegation_pdf', $programsPath);
+                 $cycle->delegation_file = $this->storeUploadedFile($request, 'delegation_pdf', $destinationPath);
             }
         
             $cycle->save();
@@ -758,8 +761,16 @@ private function storeUploadedFile(Request $request, string $inputName, string $
     if ($request->hasFile($inputName)) {
         $file = $request->file($inputName);
         $originalName = $file->getClientOriginalName();
-        $file->move($destinationPath, $originalName);
-        return 'programs/' . $originalName;
+        $fullPath = public_path($destinationPath);
+
+        if (!File::exists($fullPath)) {
+            File::makeDirectory($fullPath, 0755, true);
+        }
+
+        $contents = file_get_contents($file->getRealPath());
+        File::put($fullPath . '/' . $originalName, $contents);
+
+        return $destinationPath . '/' . $originalName;
     }
     return null;
 }
