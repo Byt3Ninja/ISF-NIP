@@ -32,6 +32,7 @@ use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
+use Illuminate\Support\Facades\File;
 
 class CyclesController extends Controller
 {
@@ -200,46 +201,10 @@ class CyclesController extends Controller
             }
 
             // Check if file is uploaded
-            $programGuidelineFile = null;
-            if ($request->hasFile('program-guideline-pdf')) {
-                $file = $request->file('program-guideline-pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $programGuidelineFile = $file->storeAs('', $fileName, 'programs');
-
-            }else{
-                $programGuidelineFile = $cycle->program_guideline_file;
-            }
-
-            $financialGuidelineFile = null;
-            if ($request->hasFile('financial_policy_pdf')) {
-                $file = $request->file('financial_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension();
-                $financialGuidelineFile = $file->storeAs('', $fileName, 'financials');
-            }else{
-                $financialGuidelineFile = $cycle->financial_guideline_file;
-            }
-
-            $legalPolicyPath = null;
-            if ($request->hasFile('legal_policy_pdf')) {
-                $file = $request->file('legal_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $legalPolicyPath = $file->storeAs('', $fileName, 'legal_policies');
-            }else{
-                $legalPolicyPath = $cycle->legal_guideline_file;
-            }
-
-            $delegationPdfPath = null;
-            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $file = $request->file('delegation_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $delegationPdfPath = $file->storeAs('', $fileName, 'delegations');
-            }else{
-                $delegationPdfPath = $cycle->delegation_file;
-            }
+             $programsPath = public_path('programs');
+            if (!File::exists($programsPath)) {
+                File::makeDirectory($programsPath, 0755, true);
+             }
 
 
             $cycle->organization_id = $request->organization_id2;
@@ -251,16 +216,22 @@ class CyclesController extends Controller
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
 
             $cycle->program_guideline = $request->program_guideline;
-            $cycle->program_guideline_file = $programGuidelineFile;
-
+            if ($request->hasFile('program-guideline-pdf')) {
+             $cycle->program_guideline_file = $this->storeUploadedFile($request, 'program-guideline-pdf', $programsPath);
+            }
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
-            $cycle->financial_guideline_file = $financialGuidelineFile;
-
+            if ($request->hasFile('financial_policy_pdf')) {
+             $cycle->financial_guideline_file = $this->storeUploadedFile($request, 'financial_policy_pdf', $programsPath);
+            }
             $cycle->legal_guideline = $request->legal_policy;
-            $cycle->legal_guideline_file = $legalPolicyPath;
-            $cycle->delegation_file = $delegationPdfPath;
+            if ($request->hasFile('legal_policy_pdf')) {
+                $cycle->legal_guideline_file = $this->storeUploadedFile($request, 'legal_policy_pdf', $programsPath);
+            }
+            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
+                $cycle->delegation_file = $this->storeUploadedFile($request, 'delegation_pdf', $programsPath);
+            }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
 
@@ -479,51 +450,28 @@ class CyclesController extends Controller
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
             // Check if file is uploaded
-            $programGuidelineFile = null;
-            if ($request->hasFile('program-guideline-pdf')) {
-                $file = $request->file('program-guideline-pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $programGuidelineFile = $file->storeAs('', $fileName, 'programs');
-            }
+            $programsPath = public_path('programs');
+            if (!File::exists($programsPath)) {
+                File::makeDirectory($programsPath, 0755, true);
+             }
 
             $cycle->program_guideline = $request->program_guideline;
-            $cycle->program_guideline_file = $programGuidelineFile;
+            $cycle->program_guideline_file = $this->storeUploadedFile($request, 'program-guideline-pdf', $programsPath);
 
-            // Check if file is uploaded
-            $financialGuidelineFile = null;
-            if ($request->hasFile('financial_policy_pdf')) {
-                $file = $request->file('financial_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension();
-                $financialGuidelineFile = $file->storeAs('', $fileName, 'financials');
-            }
 
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
-            $cycle->financial_guideline_file = $financialGuidelineFile;
+            $cycle->financial_guideline_file = $this->storeUploadedFile($request, 'financial_policy_pdf', $programsPath);
 
-            // Handle file uploads
-            $legalPolicyPath = null;
-            if ($request->hasFile('legal_policy_pdf')) {
-                $file = $request->file('legal_policy_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $legalPolicyPath = $file->storeAs('', $fileName, 'legal_policies');
-            }
-
-            $delegationPdfPath = null;
-            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $file = $request->file('delegation_pdf');
-                $originalName = $file->getClientOriginalName();
-                $fileName = pathinfo($originalName, PATHINFO_FILENAME) .  '.' . $file->getClientOriginalExtension();
-                $delegationPdfPath = $file->storeAs('', $fileName, 'delegations');
-            }
 
             $cycle->legal_guideline = $request->legal_policy;
-            $cycle->legal_guideline_file = $legalPolicyPath;
-            $cycle->delegation_file = $delegationPdfPath;
+            $cycle->legal_guideline_file = $this->storeUploadedFile($request, 'legal_policy_pdf', $programsPath);
+
+            if ($request->delegation_option === 'yes') {
+                 $cycle->delegation_file = $this->storeUploadedFile($request, 'delegation_pdf', $programsPath);
+            }
+        
             $cycle->save();
 
             if (auth()->user()->hasRole('OrganizationManager')) {
@@ -803,6 +751,17 @@ public function sendMessage($phoneNumber, $message)
         Log::error('Failed to send message via GrowthLabs WhatsApp API: ' . $e->getMessage());
         return false;
     }
+}
+
+private function storeUploadedFile(Request $request, string $inputName, string $destinationPath): ?string
+{
+    if ($request->hasFile($inputName)) {
+        $file = $request->file($inputName);
+        $originalName = $file->getClientOriginalName();
+        $file->move($destinationPath, $originalName);
+        return 'programs/' . $originalName;
+    }
+    return null;
 }
 
 }

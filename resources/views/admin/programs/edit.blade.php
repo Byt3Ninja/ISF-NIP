@@ -335,12 +335,9 @@
         handleEditorChange(editLegalEditor, '#legal_policy');
 
         // Handle Append File
-        const appendFile = (mode, file, containerId, disk) => {
-            console.log('file', file, 'disk', disk);
+        const appendFile = (mode, file, containerId) => {
+            // console.log('file', file, 'disk', disk);
             if (!file) return;
-            // Validate disk
-            const validDisks = ['programs', 'financials', 'legal_policies', 'delegations'];
-            const selectedDisk = validDisks.includes(disk) ? disk : 'programs'; // Fallback to 'programs'
             const fileName = file.split('/').pop();
             const displayName = fileName.replace(/_\d+\.pdf$/, '.pdf');
             const content = `
@@ -349,7 +346,7 @@
                         <i class="ti ti-file fs-4 text-warning"></i>
                         <span class="text-truncate" style="max-width: 200px;">${displayName}</span>
                     </div> 
-                    <a class="btn btn-label-primary btn-icon btn-sm" href="${'{{ asset('') }}'}${selectedDisk}/${fileName}" download="${displayName}">
+                    <a class="btn btn-label-primary btn-icon btn-sm" href="${'{{ asset('programs/') }}/'}${fileName}" download="${displayName}">
                         <i class="ti ti-download fs-5"></i>
                     </a>
                 </div>`;
@@ -358,16 +355,16 @@
 
         $(document).ready(function() {
             @if($ccycle->program_guideline_file)
-                appendFile('edit', @json(basename($ccycle->program_guideline_file)), '#guideline-file-container', 'programs');
+                appendFile('edit', @json(basename($ccycle->program_guideline_file)), '#guideline-file-container');
             @endif
             @if($ccycle->financial_guideline_file)
-                appendFile('edit', @json(basename($ccycle->financial_guideline_file)), '#financial-file-container', 'financials');
+                appendFile('edit', @json(basename($ccycle->financial_guideline_file)), '#financial-file-container');
             @endif
             @if($ccycle->legal_guideline_file)
-                appendFile('edit', @json(basename($ccycle->legal_guideline_file)), '#legal-file-container', 'legal_policies');
+                appendFile('edit', @json(basename($ccycle->legal_guideline_file)), '#legal-file-container');
             @endif
             @if($ccycle->delegation_file)
-                appendFile('edit', @json(basename($ccycle->delegation_file)), '#delegation-file-container', 'delegations');
+                appendFile('edit', @json(basename($ccycle->delegation_file)), '#delegation-file-container');
             @endif
 
             // Handle Edit Program AJAX

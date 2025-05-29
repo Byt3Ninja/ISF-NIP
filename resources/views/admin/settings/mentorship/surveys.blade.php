@@ -31,9 +31,9 @@
                             <tbody>
                                 @foreach($cycle->steps as $step)
                                     <tr>
-                                        <td>{{ $step->title ?? 'N/A' }}</td>
-                                        <td>{{ $step->from ? $step->from->format('Y-m-d') : 'N/A' }}</td>
-                                        <td>{{ $step->to ? $step->to->format('Y-m-d') : 'N/A' }}</td>
+                                        <td>{{ $step?->title ?? 'N/A' }}</td>
+                                        <td>{{ $step?->from ? $step->from->format('Y-m-d') : 'N/A' }}</td>
+                                        <td>{{ $step?->to ? $step->to->format('Y-m-d') : 'N/A' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
