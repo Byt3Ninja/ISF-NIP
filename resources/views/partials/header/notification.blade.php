@@ -18,7 +18,7 @@ if( $user )
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
       @if ($all > 0)
-      <div id="notification-count-container"> {{ $all }} </div>
+      <span class="badge badge-notifications bg-danger w-px-20 h-px-20 rounded-circle d-flex justify-content-center align-items-center">{{ $all }}</span>
       @endif
     </span>
   </a>

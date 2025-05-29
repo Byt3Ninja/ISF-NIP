@@ -156,8 +156,8 @@
             if (data && data.message) {
               // console.log("data.message", data.message);
               const notifContainer = document.querySelector(
-                "#notification-count-container"
-              );
+                ".position-relative .ti-bell"
+              )?.parentElement;
 
               if (notifContainer) {
                 let count = 1; // Default count
@@ -168,24 +168,14 @@
                 );
                 if (existingBadge) {
                   // Extract the current count
-                  const countSpan = existingBadge.querySelector("span");
-                  if (countSpan) {
-                    count = parseInt(countSpan.textContent, 10) + 1;
-                  }
+                  count = parseInt(existingBadge.textContent, 10) + 1;
                   existingBadge.remove(); // Remove old badge
                 }
 
                 // Insert new badge with updated count
                 notifContainer.insertAdjacentHTML(
                   "beforeend",
-                  `
-                  <span
-                    class="badge rounded-pill bg-danger badge-notifications border"
-                    style="width: 20px; height: 20px; left: 15px;"
-                  >
-                    <span>${count}</span>
-                  </span>
-                `
+                  `<span class="badge badge-notifications bg-danger w-px-20 h-px-20 rounded-circle d-flex justify-content-center align-items-center">${count}</span>`
                 );
 
                 let lang = document.documentElement.lang;
