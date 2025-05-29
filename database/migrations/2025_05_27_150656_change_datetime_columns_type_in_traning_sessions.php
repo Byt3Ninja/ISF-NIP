@@ -15,8 +15,8 @@ return new class extends Migration
     {
         $rows = DB::table('training_sessions')->select('id', 'datetime', 'enddatetime')->get();
         Schema::table('training_sessions', function (Blueprint $table) {
-            $table->string('datetime', 15)->nullable()->change();
-            $table->string('enddatetime', 15)->nullable()->change();
+            $table->string('datetime', 20)->nullable()->change();
+            $table->string('enddatetime', 20)->nullable()->change();
         });
 
          foreach ($rows as $row) {
