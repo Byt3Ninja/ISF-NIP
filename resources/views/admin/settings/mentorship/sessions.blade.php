@@ -321,20 +321,20 @@
     });
   </script>
   <script>
-    $('#sdate').flatpickr({
-      enableTime: true,
-      dateFormat: "Y-m-d h:i K",
-      minDate: "today",
-      time_24hr: false,
-      allowInput: true,
-      onClose: function(selectedDates, dateStr, instance) {
-        // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
-        if (selectedDates.length > 0) {
-          const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
-          instance.setDate(formattedDate, true, "Y-m-d h:i K");
-        }
-      }
-    });
+    // $('#sdate').flatpickr({
+    //   enableTime: true,
+    //   dateFormat: "Y-m-d h:i K",
+    //   minDate: "today",
+    //   time_24hr: false,
+    //   allowInput: true,
+    //   onClose: function(selectedDates, dateStr, instance) {
+    //     // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+    //     if (selectedDates.length > 0) {
+    //       const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+    //       instance.setDate(formattedDate, true, "Y-m-d h:i K");
+    //     }
+    //   }
+    // });
 
     $('.datewithouttime').flatpickr({
       enableTime: false,
@@ -357,7 +357,22 @@
           $('#sid').val(id);
           $('#mentorid').val(response.mentor_id);
           $('#userid').val(response.user_id);
-          $('#sdate').val(response.zoom_date);
+          // $('#sdate').val(response.zoom_date);
+          $('#sdate').flatpickr({
+            enableTime: true,
+            dateFormat: "Y-m-d h:i K",
+            minDate: "today",
+            time_24hr: false,
+            allowInput: true,
+            defaultDate: response.zoom_date ? response.zoom_date : '',
+            onClose: function(selectedDates, dateStr, instance) {
+              // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+              if (selectedDates.length > 0) {
+                const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+                instance.setDate(formattedDate, true, "Y-m-d h:i K");
+              }
+            }
+          });
           $('#period').val(response.period);
           $('#notes').val(response.notes);
           $('#ModifyRequest').modal('show');
