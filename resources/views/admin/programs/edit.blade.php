@@ -54,7 +54,7 @@
                         @foreach ($tabs as $tab)
                             <li class="nav-item" role="presentation">
                                 <button
-                                    class="nav-link {{ $tab['active'] ? 'active' : '' }}"
+                                    class="nav-link {{ $tab['active'] ? 'active' : '' }} {{ $tab['id'] != 'program_info' ? 'tab-disabled' : '' }}"
                                     id="pills-{{ $tab['id'] }}-tab-edit"
                                     data-bs-toggle="pill"
                                     data-bs-target="#pills-{{ $tab['id'] }}-edit"
@@ -62,6 +62,7 @@
                                     role="tab"
                                     aria-controls="pills-{{ $tab['id'] }}-edit"
                                     aria-selected="{{ $tab['active'] ? 'true' : 'false' }}"
+                                    {{ $tab['id'] != 'program_info' ? 'disabled' : '' }}
                                 >
                                     <span class="fw-semibold">{{ $tab['label'] }}</span>
                                 </button>
@@ -75,7 +76,7 @@
                     @foreach ($tabs as $tab)
                         <li class="nav-item" role="presentation">
                             <button
-                                class="nav-link {{ $tab['active'] ? 'active' : '' }}"
+                                class="nav-link {{ $tab['active'] ? 'active' : '' }} {{ $tab['id'] != 'program_info' ? 'tab-disabled' : '' }}"
                                 id="pills-{{ $tab['id'] }}-tab-edit"
                                 data-bs-toggle="pill"
                                 data-bs-target="#pills-{{ $tab['id'] }}-edit"
@@ -83,6 +84,7 @@
                                 role="tab"
                                 aria-controls="pills-{{ $tab['id'] }}-edit"
                                 aria-selected="{{ $tab['active'] ? 'true' : 'false' }}"
+                                {{ $tab['id'] != 'program_info' ? 'disabled' : '' }}
                             >
                                 <span class="fw-semibold">{{ $tab['label'] }}</span>
                             </button>
@@ -426,6 +428,9 @@
                             editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
                         }
                         $('#legal_policy').val(response.legal_guideline ?? '');
+                        
+                        // Validate fields after loading data
+                        setTimeout(validateRequiredFields, 100);
                     },
                     error: function(error) {
                         console.log(error);
@@ -472,5 +477,77 @@
                 formGroup.style.display = radio.checked ? 'block' : 'none';
             }
         }
+
+        // Function to validate title and description fields
+        function validateRequiredFields() {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const isValid = title !== '' && description !== '';
+            
+            // Get all tab buttons except program_info
+            const tabButtons = document.querySelectorAll('[id^="pills-"][id$="-tab-edit"]:not([id="pills-program_info-tab-edit"])');
+            
+            tabButtons.forEach(button => {
+                if (isValid) {
+                    // Enable tabs
+                    button.classList.remove('tab-disabled');
+                    button.removeAttribute('disabled');
+                    button.style.pointerEvents = '';
+                } else {
+                    // Disable tabs
+                    button.classList.add('tab-disabled');
+                    button.setAttribute('disabled', 'disabled');
+                    button.style.pointerEvents = 'none';
+                    
+                    // If current tab is disabled, switch back to program_info
+                    if (button.classList.contains('active')) {
+                        button.classList.remove('active');
+                        button.setAttribute('aria-selected', 'false');
+                        
+                        // Hide current tab content
+                        const targetId = button.getAttribute('data-bs-target');
+                        const targetContent = document.querySelector(targetId);
+                        if (targetContent) {
+                            targetContent.classList.remove('show', 'active');
+                        }
+                        
+                        // Show program_info tab
+                        const programInfoTab = document.querySelector('#pills-program_info-tab-edit');
+                        const programInfoContent = document.querySelector('#pills-program_info-edit');
+                        if (programInfoTab && programInfoContent) {
+                            programInfoTab.classList.add('active');
+                            programInfoTab.setAttribute('aria-selected', 'true');
+                            programInfoContent.classList.add('show', 'active');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add event listeners to title and description fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const titleField = document.getElementById('title');
+            const descriptionField = document.getElementById('description');
+            
+            if (titleField && descriptionField) {
+                titleField.addEventListener('input', validateRequiredFields);
+                descriptionField.addEventListener('input', validateRequiredFields);
+                
+                // Initial validation
+                validateRequiredFields();
+            }
+        });
+
+        // Prevent tab switching if fields are not filled
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('.tab-disabled') || e.target.closest('.tab-disabled')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Show alert or notification
+                alert('Please fill in the Program Title and Description before accessing other tabs.');
+                return false;
+            }
+        });
     </script>
 @stop
