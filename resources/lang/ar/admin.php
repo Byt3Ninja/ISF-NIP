@@ -1831,4 +1831,31 @@ return [
 	'PleaseFillRequiredFields' => 'يرجى ملء جميع الحقول المطلوبة.',
 	'NoTriggersSelected' => 'لم يتم تحديد محفزات',
 	'SelectAtLeastOneTrigger' => 'يرجى تحديد محفز واحد على الأقل للاستطلاع.',
+
+	// DataTable Survey Results Translations
+	'surveyResults' => 'نتائج الاستطلاع',
+	'exportCSV' => 'تصدير CSV',
+	'exportExcel' => 'تصدير Excel',
+	'allStatus' => 'جميع الحالات',
+	'allMentors' => 'جميع المرشدين',
+	'allPrograms' => 'جميع البرامج',
+	'searchSurveysPlaceholder' => 'البحث في نتائج الاستطلاع...',
+	'submitDate' => 'تاريخ التقديم',
+	'user' => 'المستخدم',
+	'Startup' => 'الشركة الناشئة',
+	'program' => 'البرنامج',
+	'loading' => 'جاري التحميل',
+	'loadingResponses' => 'جاري تحميل الردود',
+	'errorLoadingResponses' => 'خطأ في تحميل الردود',
+	
+	// DataTable Language Keys
+	'show' => 'عرض',
+	'entries' => 'عنصر',
+	'showing' => 'عرض',
+	'filteredFrom' => 'مفلتر من',
+	'totalEntries' => 'إجمالي العناصر',
+	
+	// DataTable Data State Keys
+	'noDataAvailable' => 'لا توجد بيانات متاحة في الجدول',
+	'noMatchingRecords' => 'لم يتم العثور على سجلات مطابقة',
 ];

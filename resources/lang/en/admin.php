@@ -633,7 +633,7 @@ return [
 	'retryAfterPlaceholder' => 'Retry after in format of HH:MM ex 13:00 means after 13 hours',
 	'manageQuestions' => 'Manage questions',
 	'noQuiz' => 'No quiz',
-	'surveyResults' => 'Survey results',
+	'surveyResults' => 'Survey Results',
 	'quizzesAndSurveys' => 'Quizzes and Surveys',
 	'engagementRate' => 'Engagement Rate',
 	'total' => 'Total',
@@ -1806,4 +1806,30 @@ return [
 	'PleaseFillRequiredFields' => 'Please fill all required fields.',
 	'NoTriggersSelected' => 'No Triggers Selected',
 	'SelectAtLeastOneTrigger' => 'Please select at least one trigger for the survey.',
+
+	// DataTable Survey Results Translations
+	'exportCSV' => 'Export CSV',
+	'exportExcel' => 'Export Excel',
+	'allStatus' => 'All Status',
+	'allMentors' => 'All Mentors',
+	'allPrograms' => 'All Programs',
+	'searchSurveysPlaceholder' => 'Search survey results...',
+	'submitDate' => 'Submit Date',
+	'user' => 'User',
+	'Startup' => 'Startup',
+	'mentor' => 'Mentor',
+	'program' => 'Program',
+	'loading' => 'Loading',
+	'loadingResponses' => 'Loading responses',
+	'errorLoadingResponses' => 'Error loading responses',
+	
+	// DataTable Language Keys
+	'show' => 'Show',
+	'showing' => 'Showing',
+	'filteredFrom' => 'filtered from',
+	'totalEntries' => 'total entries',
+
+	// DataTable Data State Keys
+	'noDataAvailable' => 'No data available in table',
+	'noMatchingRecords' => 'No matching records found',
 ];
