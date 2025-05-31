@@ -361,7 +361,7 @@
           $('#sdate').flatpickr({
             enableTime: true,
             dateFormat: "Y-m-d h:i K",
-            minDate: "today",
+            // minDate: "today",
             time_24hr: false,
             allowInput: true,
             defaultDate: response.zoom_date ? response.zoom_date : '',
