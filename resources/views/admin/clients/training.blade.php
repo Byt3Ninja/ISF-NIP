@@ -33,6 +33,36 @@
       /* Progress color */
       transition: stroke-dasharray 0.3s ease;
     }
+    .content-container img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+    .content-container figure {
+      margin: 0;
+      max-width: 100%;
+    }
+    .content-container iframe,
+    .content-container video {
+      max-width: 100%;
+      width: 100%;
+      aspect-ratio: 16/9;
+    }
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .video-wrapper iframe,
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
   </style>
 @stop
 
@@ -105,8 +135,12 @@
               </div>
               <div class="card academy-content shadow-none border">
                 <div class="p-2">
-                  <div class="cursor-pointer" style="max-width: 100%;">
-                    {!! $ccontent->content !!}
+                  <div class="cursor-pointer content-container" style="max-width: 100%;">
+                    @php
+                      // Convert any standalone video tags to responsive containers
+                      $content = preg_replace('/<video(.*?)>(.*?)<\/video>/is', '<div class="video-wrapper"><video$1>$2</video></div>', $ccontent->content);
+                    @endphp
+                    {!! $content ?? $ccontent->content !!}
                   </div>
                 </div>
                 <div class="card-body pt-4">
@@ -231,9 +265,9 @@
 @stop
 
 @section('pagescripts')
- <script>
+ {{-- <script>
     console.log(@json($ccontent))
-  </script>
+  </script> --}}
   <script>
     const url = window.location.href;
     const urlArr = url.split('/');
