@@ -43,7 +43,9 @@ use App\Notifications\NewTrainingNotification;
 use App\Jobs\SendWhatsAppMessageJob;
 use App\Jobs\SendTrainingNotificationJob;
 use Intervention\Image\ImageManagerStatic as Image;
-
+use stdClass;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TrainingResultExport;
 
 class TrainingController extends Controller
 {
@@ -56,16 +58,88 @@ class TrainingController extends Controller
 
 	public function exportTresult(Request $request)
 	{
+		$course_id = $request->input('location', null);
+		$step_id = $request->input('step', null);
+		$user = auth()->user();
 		// تحقق من أن البريد الإلكتروني موجود
-		$data2 = [
-			'step' => $request->input('step'),
-			'location' => $request->input('location'),
-			'userEmail' => auth()->user()->email
-		];
+	
 
-		// إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
-		ExportTresultData::dispatch($data2);
-		return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+		$courses = collect(DB::select("SELECT id FROM training_contents WHERE training_id = ?", [$course_id]));
+		$course_contents = $courses->count();
+		// 'cycle',
+        // 'step',
+		$inputs = [];
+		$query = "SELECT
+				com.id,
+				com.name_en,
+				com.name_ar,
+				com.created_at,
+				u.id AS user_id,
+				u.first_name_en AS user_first_name_en,
+				u.last_name_en AS user_last_name_en,
+				u.first_name_ar AS user_first_name_ar,
+				u.last_name_ar AS user_last_name_ar,
+				c.id AS cycle_id,
+				c.title AS cycle_title,
+				s.id AS step_id,
+				s.title AS step_title,
+				CONCAT(TRIM(COALESCE(tc.training_id, '')), '_', TRIM(COALESCE(tc.user_id, '')), '_', TRIM(COALESCE(tc.course_id, ''))) AS training_completed_id
+			FROM
+				companies com
+			LEFT JOIN
+				users u ON u.company_id = com.id
+			LEFT JOIN
+				cycles c ON c.id = com.cycle
+			LEFT JOIN
+				steps s ON s.id = com.step
+			LEFT JOIN
+				training_completed tc ON tc.user_id = u.id AND tc.course_id = ?
+			WHERE
+				com.deleted_at IS NULL
+				AND u.deleted_at IS NULL
+				AND u.HaveCompany = 1
+				AND c.deleted_at IS NULL
+				AND s.deleted_at IS NULL
+		";
+
+		$inputs[] = $course_id;
+		if( !$user->hasRole('Admin') )
+		{
+			$query.= " AND com.step = ?";
+			$inputs[] = $step_id;
+		}
+
+		$l = app()->getLocale();
+		$compaines = collect(DB::select($query, $inputs))->filter(function($company){
+			return !is_null($company->cycle_id) && !is_null($company->step_id);
+		})->map(function($c) {
+			$c->training_completed_id = trim( $c->training_completed_id ) == '__' ? null : $c->training_completed_id;
+			return $c;
+		})->groupBy('id')->map(function($combinedComanies) use ($l, $course_contents) {
+			$c = $combinedComanies->first();
+			$company = new stdClass;
+			$company->id = $c->id;
+			$company->name = $c->{'name_' . $l};
+			$company->created_at = $c->created_at;
+			$company->users = $combinedComanies->map(function($u) use ($l) {
+				$user = new stdClass;
+				$user->id = $u->user_id;
+				$user->name = trim( $u->{'user_first_name_' . $l} . ' ' . $u->{'user_last_name_' . $l} );
+				return $user;
+			})->unique('id')->values();
+			$completed = $combinedComanies->whereNotNull('training_completed_id')->count();
+			$company->program = new stdClass;
+			$company->program->id = $c->cycle_id;
+			$company->program->name = $c->cycle_title;
+			$company->step = new stdClass;
+			$company->step->id = $c->step_id;
+			$company->step->name = $c->step_title;
+			$company->completed = $course_contents > 0 ? ( round( ( $completed / $course_contents ) * 100, 2 ) ) : 0;
+			return $company;
+		})->values();
+
+		return Excel::download(new TrainingResultExport($compaines), 'training_results_report.xlsx');
+		
 	}
 
 	public function changAllTL(Request $request)

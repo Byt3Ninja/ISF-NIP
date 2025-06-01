@@ -209,7 +209,10 @@ $(document).ready(function () {
             alert('Please make sure all required fields are filled.');
             return;
         }
-        alert(messages.exportSuccess);
+        // alert(messages.exportSuccess);
+		let url = window.location.origin + '/dashboard/export-Tresult?step=' + step + '&location=' + location;
+		window.open(url, '_blank');
+        return;
         $.ajax({
             url: `/dashboard/export-Tresult`,
             type: 'GET',

@@ -60,6 +60,18 @@ Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
  // test middleware
+ Route::get('/testting', function () {
+    $stamp = '1746024780';
+    $format = 'Y-m-d';
+    try {
+        $parser = 'carbon';
+        $date = Carbon\Carbon::parse($stamp)->format($format);
+    } catch (\Exception $e) {
+        $parser = 'date';
+        $date = date($format, $stamp);
+    }
+    dd( $date, $parser );
+ });
  Route::get('/2otp', function () {
     return redirect('/dashboard');
 })->middleware(['auth', '2fa']);
