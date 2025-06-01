@@ -1832,7 +1832,6 @@ return [
 	// DataTable Data State Keys
 	'noDataAvailable' => 'No data available in table',
 	'noMatchingRecords' => 'No matching records found',
-<<<<<<< Updated upstream
 	'BulkDelete' => 'Bulk Delete',
 	'SelectForDelete' => 'Select for delete',
 	'noQuestionsSelected' => 'No Questions Selected',
@@ -1842,7 +1841,5 @@ return [
 	'Add Answer' => 'Add Answer',
 	'typeAnswer' => 'Type the text of the answer',
 ]; 
-=======
 	'Finished' => 'Finished',
 ];
->>>>>>> Stashed changes
