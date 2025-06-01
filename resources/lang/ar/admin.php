@@ -1858,7 +1858,6 @@ return [
 	// DataTable Data State Keys
 	'noDataAvailable' => 'لا توجد بيانات متاحة في الجدول',
 	'noMatchingRecords' => 'لم يتم العثور على سجلات مطابقة',
-<<<<<<< Updated upstream
 	'BulkDelete' => 'حذف مجموعة',
 	'SelectForDelete' => 'حدد العناصر التي تريد حذفها',
 	'noQuestionsSelected' => 'لم يتم اختيار أسئلة للحذف',
@@ -1867,7 +1866,5 @@ return [
     'surveyNotFound' => 'الاستبيان غير موجود',
 	'Add Answer' => 'اضافة جواب',
 	'typeAnswer' => 'اكتب نص الإجابة',
-=======
 	'Finished' => 'منتهية',
->>>>>>> Stashed changes
 ];
