@@ -5,12 +5,14 @@ use App\Step;
 use App\Cycle;
 use App\Quizzes;
 use App\Training;
-use App\TrainingSession;
 use App\Organization;
 use App\QuestionsBank;
 use App\QuizQuestions;
+use App\TrainingSession;
 use App\QuestionCategories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class quizzesController extends Controller
 {
@@ -25,27 +27,109 @@ class quizzesController extends Controller
 	{
 		$user = auth()->user();
 		$organization_id = $user->organization_id;
-		$quizzes = Quizzes::with(['organization', 'training', 'results']);
-		if( !empty( $organization_id ) )
+
+		$quizzes_q = "SELECT 
+		q.*,
+		o.id AS org_id,
+		o.name_ar AS org_name_ar,
+		o.name_en AS org_name_en, 
+		t.title AS training_title,
+		t.id AS training_id,
+		t.dsc AS training_description,
+		c.id AS cycle_id,
+		c.title AS cycle_title,
+		qr.id AS result_id,
+		qr.user_id AS result_user_id
+
+		FROM quizzes q
+		LEFT JOIN organizations o ON q.organization_id = o.id
+		LEFT JOIN trainings t ON q.training_id = t.id
+		LEFT JOIN cycles c ON c.organization_id = o.id
+		LEFT JOIN quiz_results qr ON qr.quiz_id = q.id
+		WHERE t.deleted_at IS NULL ";
+		if( $request->org_id != 0 )
 		{
-			if( is_array( $organization_id ) ) { $quizzes = $quizzes->whereIn('organization_id', $organization_id); }
-			else { $quizzes = $quizzes->where('organization_id', $organization_id); }
-		}
-		if($request->org_id != 0){
-			$quizzes = $quizzes->where('organization_id', $request->org_id);
+			$quizzes_q .= "AND q.organization_id = $request->org_id ";
 		}
 		if($request->status != 0){
-			$quizzes = $quizzes->where('status', $request->status);
+			$quizzes_q .= "AND q.status = $request->status ";
 		}
 		if($request->Program_id != 0){
-			// $cycle = Cycle::where('id',$request->Program_id)->first();
-			$get_step = Step::where('stype', 4)->where('cycle_id', $request->Program_id)->get();
-			$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function($training) {
-				return $training->training_Address != null && is_numeric($training->training_Address);
-			})->pluck('training_Address')->unique()->values()->toArray();
-			$quizzes = $quizzes->whereIn('training_id', $training_ids);
+			$quizzes_q .= "AND c.id = $request->Program_id ";
 		}
-		$quizzes = $quizzes->get();
+
+		$quizzes_q = DB::select($quizzes_q);
+		$quizzes = collect($quizzes_q);
+
+		$quizzes = $quizzes->map(function ($quiz) {
+			$quiz_obj = new stdClass();
+			$quiz_obj->id = $quiz->id;
+			$quiz_obj->title = $quiz->title;
+			$quiz_obj->organization_id = $quiz->org_id;
+			$quiz_obj->training_id = $quiz->training_id;
+			$quiz_obj->description = $quiz->description;
+			$quiz_obj->start = $quiz->start;
+			$quiz_obj->end = $quiz->end;
+			$quiz_obj->time_limit = $quiz->time_limit;
+			$quiz_obj->attempts = $quiz->attempts;
+			$quiz_obj->retry_after = $quiz->retry_after;
+			$quiz_obj->passing_criteria = $quiz->passing_criteria;
+			$quiz_obj->shuffle = $quiz->shuffle;
+			$quiz_obj->status = $quiz->status;
+			$quiz_obj->created_at = $quiz->created_at;
+			$quiz_obj->updated_at = $quiz->updated_at;
+
+			 $quiz_obj->organization = new stdClass();
+			 $quiz_obj->organization->id = $quiz->org_id;
+			$quiz_obj->organization->org_name_ar = $quiz->org_name_ar;
+			$quiz_obj->organization->org_name_en = $quiz->org_name_en;
+
+			$quiz_obj->training = new stdClass();
+			$quiz_obj->training->id = $quiz->training_id;
+			$quiz_obj->training->title = $quiz->training_title;
+			$quiz_obj->training->dsc = $quiz->training_description;
+
+			$quiz_obj->results = new stdClass();
+			$quiz_obj->results->id = $quiz->result_id;
+			$quiz_obj->results->user_id = $quiz->result_user_id;
+
+
+			$quiz_obj->cycle = new stdClass();
+			$quiz_obj->cycle->cycle_id = $quiz->cycle_id;
+			$quiz_obj->cycle->cycle_title = $quiz->cycle_title;
+			return $quiz_obj;
+			
+		});
+
+		
+		
+		
+
+		// $quizzes2 = Quizzes::with(['organization', 'training', 'results'])->get();
+
+		// dd($quizzes, $quizzes2);
+		// if( !empty( $organization_id ) )
+		// {
+		// 	if( is_array( $organization_id ) ) { $quizzes = $quizzes->whereIn('organization_id', $organization_id); }
+		// 	else { $quizzes = $quizzes->where('organization_id', $organization_id); }
+		// }
+		// if($request->org_id != 0){
+		// 	$quizzes = $quizzes->where('organization_id', $request->org_id);
+		// }
+		// if($request->status != 0){
+		// 	$quizzes = $quizzes->where('status', $request->status);
+		// }
+		// if($request->Program_id != 0){
+		// 	// $cycle = Cycle::where('id',$request->Program_id)->first();
+		// 	$get_step = Step::where('stype', 4)->where('cycle_id', $request->Program_id)->get();
+			
+		// 	$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function($training) {
+		// 		return $training->training_Address != null && is_numeric($training->training_Address);
+		// 	})->pluck('training_Address')->unique()->values()->toArray();
+			
+		// 	$quizzes = $quizzes->whereIn('training_id', $training_ids);
+		// }
+		// $quizzes = $quizzes->get();
 
 		return view('admin.quizzes.index', compact('quizzes'));
 	}
