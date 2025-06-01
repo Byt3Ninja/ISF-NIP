@@ -153,14 +153,7 @@ $survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id
         </div>
         @endforeach
 
-        <div class="card-footer">
-          <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">
-              {{__('admin.Save')}}
-              <i class="ti ti-circle-check ms-2"></i>
-            </button>
-          </div>
-        </div>
+        
       </form>
     </div>
   </div>
