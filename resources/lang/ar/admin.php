@@ -1858,4 +1858,12 @@ return [
 	// DataTable Data State Keys
 	'noDataAvailable' => 'لا توجد بيانات متاحة في الجدول',
 	'noMatchingRecords' => 'لم يتم العثور على سجلات مطابقة',
+	'BulkDelete' => 'حذف مجموعة',
+	'SelectForDelete' => 'حدد العناصر التي تريد حذفها',
+	'noQuestionsSelected' => 'لم يتم اختيار أسئلة للحذف',
+    'DeletedSuccessfully' => 'تم حذف الأسئلة بنجاح',
+    'StoredSuccessfully' => 'تم حفظ الأسئلة بنجاح',
+    'surveyNotFound' => 'الاستبيان غير موجود',
+	'Add Answer' => 'اضافة جواب',
+	'typeAnswer' => 'اكتب نص الإجابة',
 ];

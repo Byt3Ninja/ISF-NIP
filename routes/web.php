@@ -461,6 +461,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('surveys/{survey}/questions', 'surveysController@save_questions')->name('surveys.questions_update');
     Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.take');
     Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
+    Route::post('surveys/{survey}/questions/delete', 'surveysController@delete_questions')->name('surveys.questions_delete');
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
