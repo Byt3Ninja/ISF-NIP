@@ -51,7 +51,7 @@ if (!function_exists('FormatDate')) {
     function FormatDate($stamp, $format)
     {
         try {
-            $date = Carbon::parse($stamp)->format($format);
+            $date = Carbon::createFromTimestamp($stamp)->format($format);
         } catch (\Exception $e) {
             $date = date($format, $stamp);
         }
