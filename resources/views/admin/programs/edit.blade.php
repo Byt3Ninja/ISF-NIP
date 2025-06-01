@@ -348,7 +348,7 @@
                         <i class="ti ti-file fs-4 text-warning"></i>
                         <span class="text-truncate" style="max-width: 200px;">${displayName}</span>
                     </div> 
-                    <a class="btn btn-label-primary btn-icon btn-sm" href="${'{{ asset('programs/') }}/'}${fileName}" download="${displayName}">
+                    <a class="btn btn-label-primary btn-icon btn-sm" href="{{ asset('191014/programs') }}/${fileName}" download="${displayName}">
                         <i class="ti ti-download fs-5"></i>
                     </a>
                 </div>`;
