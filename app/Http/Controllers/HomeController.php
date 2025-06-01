@@ -1067,7 +1067,7 @@ class HomeController extends Controller
             })->values()->map(function($item) {
                 $item->end_at = null;
                 if( $item->type == 'sessions' ) { $item->end_at = Carbon::parse($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s'); }
-                elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = Carbon::parse($item->datetime)->format('Y-m-d H:i:s'); }
+                elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s'); }
                 return $item;
             })->filter(function($item) {
                 return now() > $item->end_at;
@@ -1093,7 +1093,7 @@ class HomeController extends Controller
                 $quiz = new stdClass;
                 $quiz->id = $item->id;
                 $quiz->criteria = $item->criteria;
-                $quiz->end = Carbon::parse( $item->end )->format('Y-m-d H:i:s');
+                $quiz->end = FormatDate($item->datetime, 'Y-m-d H:i:s');
                 $quiz->trials = $item->attempts;
                 $quiz->attempts = $items->map(function($result) {
                     $attempt = new stdClass;
