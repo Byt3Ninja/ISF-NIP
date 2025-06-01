@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Step;
 use App\User;
+use DateTime;
+use stdClass;
 use App\Cycle;
 use App\Sector;
 use App\Company;
@@ -16,14 +18,15 @@ use App\Settings;
 use App\Messenger;
 use App\Screening;
 use App\TimeSheet;
+use Carbon\Carbon;
 use App\BuilderForm;
 use App\Organization;
-use App\Documentation;
-use App\SurveyScopes;
-use App\SurveyResponses;
 
+use App\SurveyScopes;
+use App\Documentation;
 use App\Finalscreening;
 use App\MentorshipTask;
+use App\SurveyResponses;
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
@@ -35,8 +38,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ServiceRequestNotification;
-use stdClass;
-use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -1066,7 +1067,10 @@ class HomeController extends Controller
                 else { return true; }
             })->values()->map(function($item) {
                 $item->end_at = null;
-                if( $item->type == 'sessions' ) { $item->end_at = Carbon::parse($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s'); }
+                $datetime = new DateTime($item->datetime);
+                $datetime->modify("+{$item->duration} minutes");
+                $formatted = $datetime->format('Y-m-d H:i:s');
+                if( $item->type == 'sessions' ) { $item->end_at = $formatted; }
                 elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s'); }
                 return $item;
             })->filter(function($item) {
