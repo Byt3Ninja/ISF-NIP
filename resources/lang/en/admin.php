@@ -1840,6 +1840,5 @@ return [
     'surveyNotFound' => 'Survey not found',
 	'Add Answer' => 'Add Answer',
 	'typeAnswer' => 'Type the text of the answer',
-]; 
 	'Finished' => 'Finished',
 ];
