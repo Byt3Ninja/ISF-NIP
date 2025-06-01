@@ -53,15 +53,19 @@
                             $session->title .
                             '</a>'
                           : $session->title !!}</td>
-                        <td>{{ $session->datetime }}</td>
-                        <td>{{ $session->enddatetime ?? '-' }}</td>
+                        <td>{{ FormatDate($session->datetime, 'Y-m-d H:i') }}</td>
+                        <td>{{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}</td>
                         <td>
                           @if ($session->type == 'sessions')
+                          @if(FormatDate($session->enddatetime, 'Y-m-d H:i') > now()->format('Y-m-d H:i'))
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
                           <a title="Click to join" href="{{ $session->join_url }}" target="_blank">
                             <button title="Join only" type="button"
                               class="btn btn-icon rounded-circle btn-label-primary">
                               <i class="ti ti-brand-zoom"></i></button></a>
+                              @else
+                              {{ __('admin.Finished') }}
+                              @endif
                           @elseif ($session->type == 'offline')
                           <b>{{ __('cycles.trainer name') }}:</b>
                           {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
