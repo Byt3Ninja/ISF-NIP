@@ -48,9 +48,13 @@ if (!function_exists('getPusherConfig')) {
     }
 }
 if (!function_exists('FormatDate')) {
-    function FormatDate($date, $format)
+    function FormatDate($stamp, $format)
     {
-        return Carbon::parse($date)->format($format);
-        
+        try {
+            $date = Carbon::parse($stamp)->format($format);
+        } catch (\Exception $e) {
+            $date = date($format, $stamp);
+        }
+        return $date;
     }
 }
