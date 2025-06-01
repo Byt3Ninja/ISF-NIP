@@ -1832,4 +1832,12 @@ return [
 	// DataTable Data State Keys
 	'noDataAvailable' => 'No data available in table',
 	'noMatchingRecords' => 'No matching records found',
-];
+	'BulkDelete' => 'Bulk Delete',
+	'SelectForDelete' => 'Select for delete',
+	'noQuestionsSelected' => 'No Questions Selected',
+	'DeletedSuccessfully' => 'Questions Deleted sSccessfully',
+    'StoredSuccessfully' => 'Questions Saved Successfully',
+    'surveyNotFound' => 'Survey not found',
+	'Add Answer' => 'Add Answer',
+	'typeAnswer' => 'Type the text of the answer',
+]; 

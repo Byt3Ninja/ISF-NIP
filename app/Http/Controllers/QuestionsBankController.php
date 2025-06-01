@@ -122,7 +122,6 @@ class QuestionsBankController extends Controller
 			$category_id = null;
 			
 			$question = new QuestionsBank;
-			$question->organization_id = auth()->user()->organization_id;
 			$question->group = $request->question_group;
 			if ($request->question_group == 'quiz') {
 				$type = $request->type;
@@ -234,7 +233,7 @@ class QuestionsBankController extends Controller
 				}
 
 				$rules = [
-					'organization_id' => 'required|exists:organizations,id',
+					'organization_id' => 'nullable|exists:organizations,id',
 					'category_id' => 'required_if:question_group,quiz|exists:question_categories,id',
 					'difficulty' => 'required_if:question_group,quiz|in:easy,medium,hard',
 					'question' => 'required|string',
@@ -278,7 +277,6 @@ class QuestionsBankController extends Controller
 				} else {
 					$surveyType = $request->survey_type;
 				}
-				$question->organization_id = auth()->user()->organization_id;
 				$question->category_id = $request->category_id;
 				$question->group = $request->question_group;
 				$question->question = $request->question;

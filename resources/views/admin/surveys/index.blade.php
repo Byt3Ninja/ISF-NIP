@@ -187,15 +187,20 @@ $(document).on("click", "#deleteAction", function(e) {
   e.preventDefault();
   var url = $(this).data('url');
   var token = '{{ csrf_token() }}';
-  Swal.fire({
-      title: "{{__('admin.SureDelete')}}",
-      text: "{{__('admin.Recover')}}",
-      icon: "warning",
-      buttonsStyling: true,
-      showCancelButton: true,
-      confirmButtonClass: "btn-danger",
-      confirmButtonText: "{{__('admin.DYes')}}",
-      cancelButtonText: "{{__('admin.No')}}!",
+ 
+    Swal.fire({
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
     })
     .then((result) => {
       if (result.value) {
@@ -207,7 +212,6 @@ $(document).on("click", "#deleteAction", function(e) {
             Swal.fire({
               icon: 'success',
               title: "{{ __('admin.Deleted') }}!",
-              html: "{{ __('admin.FileDeleted') }}.",
             });
             location.reload();
           }

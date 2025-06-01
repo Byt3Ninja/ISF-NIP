@@ -63,10 +63,18 @@ $survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id
     <div class="px-0 px-md-6">
       <div class="row mb-3">
         <div class="col-6">
-          <button type="button" class="btn btn-label-primary btn-sm mb-3" id="add-questions-btn">
-            {{ __('admin.AddQuestions') }}
-            <i class="ti ti-plus ms-2"></i>
+          <button type="button" class="btn btn-label-primary btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#addQuestionsModal">
+                  {{ __('admin.AddQuestions') }}
+                  <i class="ti ti-plus ms-2"></i>
           </button>
+          <button type="button" class="btn btn-label-secondary btn-sm mb-3" id="select-delete-btn">
+            {{ __('admin.SelectForDelete') }}
+            <i class="ti ti-checkbox ms-2"></i>
+        </button>
+        <button type="button" class="btn btn-label-danger btn-sm mb-3 d-none" id="bulk-delete-btn">
+            {{ __('admin.BulkDelete') }}
+            <i class="ti ti-trash ms-2"></i>
+        </button>
         </div>
         <div class="col-6 d-none" id="select-title">
           <div class="d-flex justify-content-end">
@@ -77,7 +85,7 @@ $survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id
           </div>
         </div>
       </div>
-      <form method="post" action="{{ route('surveys.store') }}">
+      <form method="post" action="{{ route('surveys.questions_update', ['survey' => $survey->id]) }}">
         {!! csrf_field() !!}
         <input type="hidden" name="selected_questions" id="selected-questions" value="[]" />
         @foreach( $survey->questions as $key => $question )
@@ -95,7 +103,7 @@ $survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id
 								</div>
 								<div class="d-flex align-items-center gap-4">
 									<input type="checkbox" class="form-check-input ms-auto question-checkbox d-none"
-										value="{{ $question->id }}" />
+										name="question_ids[]" value="{{ $question->id }}" />
 									<div class="ms-2">
 										<button class="btn border-none" type="button" data-bs-toggle="dropdown" aria-haspopup="true"
 											aria-expanded="false">
@@ -105,9 +113,9 @@ $survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id
 											<a href="{{ route('questions-bank.edit', ['questions_bank' => $question->id]) }}"
 												data-id="{{ $question->id }}" class="edit-question dropdown-item">
 												<i class="ti ti-edit text-info"></i> {{ __('admin.Edit') }} </a>
-											<a data-id="{{ $question->id }}" id="deleteAction" class="dropdown-item"> <i
-													class="ti ti-trash text-danger"></i>
-												{{ __('admin.Delete') }} </a>
+											  <a href="#" data-id="{{ $question->id }}" class="delete-question dropdown-item">
+                          <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }}
+                        </a>
 										</div>
 									</div>
 								</div>
@@ -157,69 +165,164 @@ $survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id
     </div>
   </div>
 </div>
+</div>
+ <!-- Add Questions Modal -->
+    <div class="modal fade" id="addQuestionsModal" tabindex="-1" aria-labelledby="addQuestionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addQuestionsModalLabel">{{ __('admin.AddQuestions') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ route('surveys.questions_update', ['survey' => $survey->id]) }}" id="add-questions-form">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('admin.Question') }}</th>
+                                        <th class="text-center">{{ __('admin.Select') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($questions as $question)
+                                        <tr>
+                                            <td>{{ $question->question }}</td>
+                                            <td class="text-center">
+                                                <input type="checkbox" class="form-check-input modal-question-checkbox" name="questions_ids[]" value="{{ $question->id }}" {{ in_array($question->id, $survey_questions) ? 'checked ' : '' }} />
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('admin.Save') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @stop
 
 @section('pagescripts')
 <script>
-const questions = @json($questions);
-console.log('questions', questions);
 
-document.getElementById('add-questions-btn').addEventListener('click', function() {
-  document.querySelectorAll('.question-checkbox').forEach(function(checkbox) {
-    checkbox.classList.toggle('d-none');
+const questions = @json($questions);
+const surveyQuestions = @json($survey_questions);
+
+document.getElementById('select-delete-btn').addEventListener('click', function() {
+    document.querySelectorAll('.question-checkbox').forEach(function(checkbox) {
+        checkbox.classList.toggle('d-none');
+    });
     document.querySelector('#select-title').classList.toggle('d-none');
-  });
 });
 
 document.querySelectorAll('.question-checkbox').forEach(function(checkbox) {
-  checkbox.addEventListener('change', function() {
-    const selectedQuestions = JSON.parse(document.getElementById('selected-questions').value);
-    if (this.checked) {
-      selectedQuestions.push(this.value);
-    } else {
-      const index = selectedQuestions.indexOf(this.value);
-      if (index > -1) {
-        selectedQuestions.splice(index, 1);
-      }
-    }
-    document.getElementById('selected-questions').value = JSON.stringify(selectedQuestions);
-    console.log('values', document.getElementById('selected-questions').value);
-  });
+    checkbox.addEventListener('change', function() {
+        const anyChecked = Array.from(document.querySelectorAll('.question-checkbox')).some(cb => cb.checked);
+        document.querySelector('#bulk-delete-btn').classList.toggle('d-none', !anyChecked);
+    });
 });
 
-$(document).on("click", "#deleteAction", function(e) {
-  e.preventDefault();
-  var url = $(this).data('url');
-  var token = '{{ csrf_token() }}';
-  Swal.fire({
-      title: "{{__('admin.SureDelete')}}",
-      text: "{{__('admin.Recover')}}",
-      icon: "warning",
-      buttonsStyling: true,
-      showCancelButton: true,
-      confirmButtonClass: "btn-danger",
-      confirmButtonText: "{{__('admin.DYes')}}",
-      cancelButtonText: "{{__('admin.No')}}!",
-    })
-    .then((result) => {
-      if (result.value) {
-        $.post(url, {
-            '_method': 'DELETE',
-            '_token': token
-          },
-          function(response) {
-            Swal.fire({
-              icon: 'success',
-              title: "{{ __('admin.Deleted') }}!",
-              html: "{{ __('admin.FileDeleted') }}.",
-            });
-            location.reload();
-          }
-        ).fail(function(error) {
-          console.log(error);
-        });
-      }
-    })
+document.getElementById('add-questions-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const selectedQuestions = Array.from(document.querySelectorAll('.modal-question-checkbox:checked'))
+        .map(checkbox => parseInt(checkbox.value));
+    
+    const currentQuestions = JSON.parse(document.getElementById('selected-questions').value);
+    const updatedQuestions = [...new Set([...currentQuestions, ...selectedQuestions])];
+    document.getElementById('selected-questions').value = JSON.stringify(updatedQuestions);
+
+    this.submit();
 });
+
+document.getElementById('bulk-delete-btn').addEventListener('click', function() {
+  Swal.fire({
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('surveys.questions_delete', ['survey' => $survey->id]) }}';
+            form.style.display = 'none';
+
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = '_token';
+            token.value = '{{ csrf_token() }}';
+            form.appendChild(token);
+
+            document.querySelectorAll('.question-checkbox:checked').forEach(checkbox => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'question_ids[]';
+                input.value = checkbox.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+});
+
+$(document).on('click', '.delete-question', function(e) {
+    e.preventDefault();
+   Swal.fire({
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('surveys.questions_delete', ['survey' => $survey->id]) }}';
+            form.style.display = 'none';
+
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = '_token';
+            token.value = '{{ csrf_token() }}';
+            form.appendChild(token);
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'question_ids[]';
+            input.value = questionId;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+});
+
+
 </script>
 @stop

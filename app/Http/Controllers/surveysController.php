@@ -296,4 +296,18 @@ class surveysController extends Controller
 			}
 		}
 	}
+
+	public function delete_questions($id, Request $request)
+{
+    $survey = Surveys::find($id);
+    if (empty($survey)) {
+        return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
+    }
+    $question_ids = $request->input('question_ids', []);
+    if (empty($question_ids)) {
+        return redirect()->route('surveys.questions_manage', ['survey' => $id])->with(['error' => 'noQuestionsSelected']);
+    }
+    $survey->questions()->detach($question_ids);
+    return redirect()->route('surveys.questions_manage', ['survey' => $id])->with('success', 'DeletedSuccessfully');
+}
 }
