@@ -77,7 +77,7 @@
 												<tr>
 													<td>{{$c++}}</td>
 													@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
-													<td>{{$timeSheet->user->{'first_name_'.$l} ." ". $timeSheet->user->{'last_name_'.$l} }}</td>
+													<td>{{ $timeSheet->user ? $timeSheet->user->{'first_name_'.$l} ." ". $timeSheet->user->{'last_name_'.$l} : 'N/A' }}</td>
 													@endif
 													<td>{{$timeSheet->title}} <br> {{$timeSheet->description}} </td>
 													<td>{{$timeSheet->date}}</td>
