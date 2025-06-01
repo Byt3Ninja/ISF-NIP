@@ -1067,7 +1067,8 @@ class HomeController extends Controller
                 else { return true; }
             })->values()->map(function($item) {
                 $item->end_at = null;
-                $datetime = new DateTime($item->datetime);
+                $datetime = new DateTime();
+                $datetime->setTimestamp($item->datetime);
                 $datetime->modify("+{$item->duration} minutes");
                 $formatted = $datetime->format('Y-m-d H:i:s');
                 if( $item->type == 'sessions' ) { $item->end_at = $formatted; }
