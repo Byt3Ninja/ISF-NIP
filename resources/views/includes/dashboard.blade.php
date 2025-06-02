@@ -736,7 +736,7 @@
 													@foreach( $my_schedules as $key => $schedule )
 													<tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
 														<td> {{ $loop->iteration }} </td>
-														<td> {{ $schedule->_days }} </td>
+														<td> {{ str_replace('"', '', $schedule->days) }} </td>
 														<td> {{ __('dashboard.from') }} {{ $schedule->t_from }} {{ __('dashboard.to') }} {{
 															$schedule->t_to }} </td>
 														<td> {{ $schedule->notes }} </td>
@@ -745,13 +745,13 @@
 																<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
 																	data-bs-toggle="dropdown"> <i class="ti ti-dots-vertical"></i> </button>
 																<div class="dropdown-menu">
-																	<button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
-																			class="ti ti-pencil me-2"></i> Edit </button>
-																	<button class="dropdown-item"
+																	{{-- <button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
+																			class="ti ti-pencil me-2"></i> Edit </button> --}}
+																	{{-- <button class="dropdown-item"
 																		onclick="mentorSchedule(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
 																		<i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
 																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
-																	</button>
+																	</button> --}}
 																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
 																		class="dropdown-item"><i class="ti ti-trash me-2"></i> Delete</button>
 																</div>
