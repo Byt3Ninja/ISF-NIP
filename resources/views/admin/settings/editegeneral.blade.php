@@ -1,160 +1,161 @@
 @extends('layouts.admin')
 
 @section('style')
-  <style>
-     .custom-container {
-      width: 100%;
-    }
+<link rel="stylesheet" href="/css/whatsapp-auth.css" />
+<style>
+  .custom-container {
+    width: 100%;
+  }
 
-    @media screen and (min-width: 768px) {
-      .custom-container {
-        width: 75%;
-      }
+  @media screen and (min-width: 768px) {
+    .custom-container {
+      width: 75%;
     }
-  </style>
+  }
+</style>
 @stop
 
 @php
-  $title = $l == 'en' ? 'Settings' : 'الإعدادات';
+$title = $l == 'en' ? 'Settings' : 'الإعدادات';
 
-  $tabs = collect([
-    ['general', 'ti-settings', __('settings.General Settings')],
-    ['analysis', 'ti-graph', __('settings.Analysis Settings')],
-    ['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
-    ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
-    ['Notification', 'ti-bell', __('settings.Push Notification Settings')],
-    ['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
-    ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
-    ['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
-    ['HomePage', 'ti-home', __('admin.HomePageSetting')],
-    ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
-  ])->map(function ($tab) {
-    return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
-  })->toArray();
+$tabs = collect([
+['general', 'ti-settings', __('settings.General Settings')],
+['analysis', 'ti-graph', __('settings.Analysis Settings')],
+['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
+['app-identity', 'ti-id-badge', __('settings.Application Identity')],
+['Notification', 'ti-bell', __('settings.Push Notification Settings')],
+['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
+['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
+['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
+['HomePage', 'ti-home', __('admin.HomePageSetting')],
+['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
+])->map(function ($tab) {
+return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
+})->toArray();
 @endphp
 
 @section('content')
-  <!-- Content wrapper -->
-  <div class="content-wrapper">
-    <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <!-- Alert -->
-      @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible" role="alert">
-          {{ __('admin.' . session()->get('message')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      @endif
-      @if (session()->has('message2'))
-        <div class="alert alert-danger alert-dismissible" role="alert">
-          {{ __('admin.' . session()->get('message2')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      @endif
-
-      @if ($errors->any())
+<!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Alert -->
+    @if (session()->has('message'))
+    <div class="alert alert-success alert-dismissible" role="alert">
+      {{ __('admin.' . session()->get('message')) }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    @if (session()->has('message2'))
     <div class="alert alert-danger alert-dismissible" role="alert">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      {{ __('admin.' . session()->get('message2')) }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-@endif
-      <!-- / Alert -->
-      <!-- Tabs (mobile) -->
-      <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
-        <ul class="nav nav-pills flex-nowrap" role="tablist">
+    @endif
+
+    @if ($errors->any())
+    <div class="alert alert-danger alert-dismissible" role="alert">
+      <ul class="mb-0">
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    <!-- / Alert -->
+    <!-- Tabs (mobile) -->
+    <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
+      <ul class="nav nav-pills flex-nowrap" role="tablist">
+        @foreach ($tabs as $key => $tab)
+        <li class="nav-item d-flex justify-content-center align-items-center">
+          <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }}"
+            data-bs-toggle="tab" role="tab">
+            <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
+            {{ $tab['label'] }}
+          </a>
+        </li>
+        @endforeach
+      </ul>
+    </div>
+    <!-- / Tabs (mobile) -->
+    <div class="d-flex justify-content-start w-100 mb-6">
+      <nav class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block"
+        style="min-height: 500px; min-width: 18%; max-width: 18%;">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
           @foreach ($tabs as $key => $tab)
-            <li class="nav-item d-flex justify-content-center align-items-center">
-              <a href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link {{ $key == 0 ? 'active' : '' }}"
-                data-bs-toggle="tab" role="tab">
-                <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
-                {{ $tab['label'] }}
-              </a>
-            </li>
+          <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
+            <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+              data-bs-toggle="tab" role="tab">
+              <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
+              {{ $tab['label'] }}
+            </a>
+          </li>
           @endforeach
         </ul>
-      </div>
-      <!-- / Tabs (mobile) -->
-      <div class="d-flex justify-content-start w-100 mb-6">
-        <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
-          style="min-height: 500px; min-width: 18%; max-width: 18%;">
-          <!-- Tabs -->
-          <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
-            @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
-                <a href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
-                  data-bs-toggle="tab" role="tab">
-                  <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
-                  {{ $tab['label'] }}
-                </a>
-              </li>
-            @endforeach
-          </ul>
-          <!-- / Tabs -->
-        </nav>
-        <!-- Tab Content On Tab Click -->
-        <div class="tab-content p-0 overflow-y-auto custom-container mb-6" 
-          style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
-        >
-          @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6"
-              id="navs-left-{{ $tab['target'] }}">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
-                </div>
-                <div class="card-body">
-                  @switch($tab['target'])
-                    @case('general')
-                      @include('partials.forms.general-settings-form')
-                      @break
-                    @case('analysis')
-                      @include('partials.forms.analysis-settings-form')
-                      @break
-                    @case('SMTP')
-                      @include('partials.forms.SMTP-configuration-form')
-                      @break
-                    @case('app-identity')
-                      @include('partials.forms.app-identity-form')
-                      @break
-                    @case('Notification')
-                      @include('partials.forms.notification-settings-form')
-                      @break
-                    @case('MeetingTab')
-                      @include('partials.forms.meeting-settings-form')
-                      @break
-                    @case('SocialMediaLinks')
-                      @include('partials.forms.social-link-form')
-                      @break
-                    @case('SocialMediaLogin')
-                      @include('partials.forms.social-login-form')
-                      @break
-                    @case('HomePage')
-                      @include('partials.forms.home-settings-form')
-                      @break
-                      @case('WhatsApp')
-                      @include('partials.forms.whatsapp-settings-form')
-                      @break
-                  @endswitch
-                </div>
-              </div>
+        <!-- / Tabs -->
+      </nav>
+      <!-- Tab Content On Tab Click -->
+      <div class="tab-content p-0 overflow-y-auto custom-container mb-6"
+        style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}">
+        @foreach ($tabs as $index => $tab)
+        <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
+          <div class="{{$index !== 9 ? 'card' : ''}} mb-6">
+            @if($index !== 9)
+            <div class="card-header">
+              <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
             </div>
-          @endforeach
+            @endif
+            <div class="card-body">
+              @switch($tab['target'])
+              @case('general')
+              @include('partials.forms.general-settings-form')
+              @break
+              @case('analysis')
+              @include('partials.forms.analysis-settings-form')
+              @break
+              @case('SMTP')
+              @include('partials.forms.SMTP-configuration-form')
+              @break
+              @case('app-identity')
+              @include('partials.forms.app-identity-form')
+              @break
+              @case('Notification')
+              @include('partials.forms.notification-settings-form')
+              @break
+              @case('MeetingTab')
+              @include('partials.forms.meeting-settings-form')
+              @break
+              @case('SocialMediaLinks')
+              @include('partials.forms.social-link-form')
+              @break
+              @case('SocialMediaLogin')
+              @include('partials.forms.social-login-form')
+              @break
+              @case('HomePage')
+              @include('partials.forms.home-settings-form')
+              @break
+              @case('WhatsApp')
+              @include('partials.forms.whatsapp-settings-form')
+              @break
+              @endswitch
+            </div>
+          </div>
         </div>
-        <!-- / Tab Content On Tab Click -->
+        @endforeach
       </div>
+      <!-- / Tab Content On Tab Click -->
     </div>
-    <!-- / Content -->
   </div>
-  <!-- / Content wrapper -->
-  <script>
-    $(document).ready(function() {
+  <!-- / Content -->
+</div>
+<!-- / Content wrapper -->
+@stop
+
+@section('pagescripts')
+<script>
+  $(document).ready(function() {
       getStates($('#country_id').val());
       $('#country_id').change(function() {
         getStates($(this).val());
@@ -178,7 +179,7 @@
           // console.log(data);
           $state.html('<option value="" disabled >{{ __('admin.State') }}</option>');
           $.each(data, function(id, value) {
-            console.log(id, value);
+            // console.log(id, value);
             // selected = '';
             
             if (currentState == id) {
@@ -194,246 +195,798 @@
           $('#state').show(150);
         }
       });
-    }
+    }    
+</script>
 
+<script>
+class WhatsAppAuthenticator {
+  constructor() {
+    this.pollingInterval = 3000; // 3 seconds
+    this.maxPollingAttempts = 60; // 3 minutes total
+    this.pollingTimer = null;
+    this.pollingAttempts = 0;
+    this.isPolling = false;
+    this.currentSessionId = null;
+    this.qrTimer = null;
+    this.qrTimeRemaining = 180; // 3 minutes
+    this.storageKey = 'whatsapp_session_id';
     
-  </script>
-  <script>
-    // --- Configuration ---
-    const pollingInterval = 5000; // Check status every 5 seconds
-    const maxPollingAttempts = 36; // Stop after 36 * 5s = 180s (3 minutes)
+    this.initializeElements();
+    this.loadStoredSession();
+  }
 
-    // --- Global State ---
-    let pollingTimer = null;
-    let pollingAttempts = 0;
-    let isPolling = false;
+  initializeElements() {
+    this.sessionIdInput = document.getElementById('sessionIdInput');
+    this.connectButton = document.getElementById('connectButton');
+    this.statusButton = document.getElementById('statusButton');
+    this.disconnectButton = document.getElementById('disconnectButton');
+    this.qrCodeSection = document.getElementById('qrCodeSection');
+    this.qrImage = document.getElementById('qrImage');
+    this.qrLoader = document.getElementById('qrLoader');
+    this.connectionProgress = document.getElementById('connectionProgress');
+    this.progressBar = document.getElementById('progressBar');
+    this.progressText = document.getElementById('progressText');
+    this.progressAttempt = document.getElementById('progressAttempt');
+    this.successState = document.getElementById('successState');
+    this.statusIndicator = document.getElementById('statusIndicator');
+    this.connectionTitle = document.getElementById('connectionTitle');
+    this.connectionSubtitle = document.getElementById('connectionSubtitle');
+    this.connectedSessionId = document.getElementById('connectedSessionId');
+    this.connectedSince = document.getElementById('connectedSince');
+    this.statusMessages = document.getElementById('statusMessages');
+    this.qrTimerDisplay = document.getElementById('qrTimer');
+  }
 
-    // --- DOM References ---
-    const sessionIdInput = document.getElementById('sessionIdInput');
-    const monitorButton = document.getElementById('monitorButton');
-    const feedbackArea = document.getElementById('feedbackArea');
-    const qrCodeImageArea = document.getElementById('qrCodeImageArea');
-    const qrImageElement = document.getElementById('qrImageElement');
-    const pollingFeedbackArea = document.getElementById('pollingFeedbackArea');
-    const pollingStatusContent = document.getElementById('pollingStatusContent');
+  async loadStoredSession() {
+    try {
+      const storedSessionId = localStorage.getItem(this.storageKey);
+      const storedConnectionTime = localStorage.getItem(`${this.storageKey}_connected_at`);
+      
+      if (storedSessionId) {
+        // Update UI with stored session ID
+        if (this.sessionIdInput) {
+          this.sessionIdInput.value = storedSessionId;
+        }
+        
+        // Show checking status
+        this.updateConnectionStatus('checking');
+        this.showMessage('{{__('admin.Checking stored session status')}}...', 'info', 3000);
 
-     // --- Helper Functions ---
-    function showFeedback(message, type = 'info') {
-        feedbackArea.textContent = message;
-        feedbackArea.className = `feedback ${type}`;
-        feedbackArea.style.display = 'block';
+        // Check if the stored session is still connected
+        const response = await this.apiCall(`/dashboard/whatsapp/session/${storedSessionId}/status`);
+        
+        if (response.status === 'CONNECTED' || response.status === 'OPEN') {
+          // Session is still active
+          this.currentSessionId = storedSessionId;
+          this.updateConnectionStatus('connected', storedSessionId);
+          
+          // Update connected since time from storage
+          if (this.connectedSince && storedConnectionTime) {
+            this.connectedSince.textContent = new Date(parseInt(storedConnectionTime)).toLocaleString();
+          }
+          
+          // Show success state
+          if (this.successState) {
+            this.successState.style.display = 'block';
+          }
+
+          this.showMessage(`{{__('admin.Already connected to WhatsApp with session')}}: ${storedSessionId}`, 'success');
+        } else {
+          // Session is no longer active, clear storage
+          this.clearStoredSession();
+          this.updateConnectionStatus('disconnected');
+          this.showMessage('{{__('admin.Stored session is no longer active. Please reconnect')}}', 'warning');
+        }
+      } else {
+        // No stored session
+        this.updateConnectionStatus('disconnected');
+      }
+    } catch (error) {
+      // Error checking stored session, clear it
+      this.clearStoredSession();
+      this.updateConnectionStatus('disconnected');
+      this.showMessage('Error checking stored session. Please reconnect.', 'warning');
+      console.error('Error checking stored session:', error);
+    }
+  }
+
+  storeSession(sessionId) {
+    try {
+      localStorage.setItem(this.storageKey, sessionId);
+      localStorage.setItem(`${this.storageKey}_connected_at`, Date.now().toString());
+    } catch (error) {
+      console.error('Error storing session:', error);
+    }
+  }
+
+  clearStoredSession() {
+    try {
+      localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(`${this.storageKey}_connected_at`);
+    } catch (error) {
+      console.error('Error clearing stored session:', error);
+    }
+  }
+
+  updateConnectionStatus(status, sessionId = null) {
+    const statusConfig = {
+      disconnected: {
+        title: '{{ __('admin.whatsapp_not_connected_title') }}',
+        subtitle: '{{ __('admin.start_session_to_connect_subtitle') }}',
+        className: 'disconnected',
+        showConnect: true,
+        showDisconnect: false
+      },
+      checking: {
+        title: '{{ __('admin.checking_connection_title') }}',
+        subtitle: '{{ __('admin.verifying_session_subtitle') }}',
+        className: 'connecting',
+        showConnect: false,
+        showDisconnect: false
+      },
+      connecting: {
+        title: '{{ __('admin.connecting_whatsapp_title') }}',
+        subtitle: '{{ __('admin.establishing_connection_subtitle') }}',
+        className: 'connecting',
+        showConnect: false,
+        showDisconnect: false
+      },
+      connected: {
+        title: '{{ __('admin.whatsapp_connected_title') }}',
+        subtitle: '{{ __('admin.account_linked_subtitle') }}',
+        className: 'connected',
+        showConnect: false,
+        showDisconnect: true
+      }
+    };
+
+    const config = statusConfig[status] || statusConfig.disconnected;
+    
+    if (this.statusIndicator) {
+      this.statusIndicator.className = `status-indicator ${config.className}`;
+    }
+    
+    if (this.connectionTitle) {
+      this.connectionTitle.textContent = config.title;
+    }
+    
+    if (this.connectionSubtitle) {
+      this.connectionSubtitle.textContent = config.subtitle;
     }
 
-    function updatePollingStatus(message) {
-        pollingStatusContent.textContent = message;
-        pollingFeedbackArea.style.display = 'block';
+    if (this.connectButton) {
+      this.connectButton.style.display = config.showConnect ? 'inline-block' : 'none';
+      this.connectButton.disabled = !config.showConnect || status === 'checking' || status === 'connecting';
+    }
+    
+    if (this.disconnectButton) {
+      this.disconnectButton.style.display = config.showDisconnect ? 'inline-block' : 'none';
     }
 
-    function clearOutputs() {
-         feedbackArea.style.display = 'none';
-         qrCodeImageArea.style.display = 'none';
-         qrImageElement.src = ''; // Clear previous QR image
-         pollingFeedbackArea.style.display = 'none';
-         updatePollingStatus('Waiting to start...');
-         stopPolling(); // Ensure any previous polling is stopped
+    // Update session info for connected state
+    if (status === 'connected' && sessionId) {
+      this.currentSessionId = sessionId;
+      if (this.connectedSessionId) {
+        this.connectedSessionId.textContent = sessionId;
+      }
+      if (this.connectedSince) {
+        this.connectedSince.textContent = new Date().toLocaleString();
+      }
+    }
+  }
+
+  showMessage(message, type = 'info', duration = 5000) {
+    if (!this.statusMessages) return;
+    
+    const alertClass = {
+      success: 'alert-success',
+      error: 'alert-danger',
+      warning: 'alert-warning',
+      info: 'alert-info'
+    }[type] || 'alert-info';
+
+    const messageElement = document.createElement('div');
+    messageElement.className = `alert ${alertClass} alert-dismissible fade show`;
+    messageElement.innerHTML = `
+      <div class="d-flex flex-column">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+            <span>${message}</span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+    `;
+
+    this.statusMessages.appendChild(messageElement);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        if (messageElement.parentNode) {
+          messageElement.remove();
+        }
+      }, duration);
+    }
+  }
+
+  startQRTimer() {
+    this.qrTimeRemaining = 180; // 3 minutes
+    this.updateQRTimer();
+    
+    this.qrTimer = setInterval(() => {
+      this.qrTimeRemaining--;
+      this.updateQRTimer();
+      
+      if (this.qrTimeRemaining <= 0) {
+        clearInterval(this.qrTimer);
+        this.showMessage('QR Code expired. Please try again.', 'warning');
+        this.resetInterface();
+      }
+    }, 1000);
+  }
+
+  updateQRTimer() {
+    if (!this.qrTimerDisplay) return;
+    
+    const minutes = Math.floor(this.qrTimeRemaining / 60);
+    const seconds = this.qrTimeRemaining % 60;
+    this.qrTimerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  stopQRTimer() {
+    if (this.qrTimer) {
+      clearInterval(this.qrTimer);
+      this.qrTimer = null;
+    }
+  }
+
+  async startAuthentication() {
+    // Prevent multiple simultaneous connection attempts
+    if (this.isPolling || this.currentSessionId) {
+      this.showMessage('Already connecting or connected. Please wait or disconnect first.', 'warning');
+      return;
+    }
+    
+    const sessionId = this.sessionIdInput?.value?.trim();
+    if (!sessionId) {
+      this.showMessage('Please enter a session ID', 'error');
+      return;
     }
 
-    function getSessionId(actionName = 'perform action') {
-        const sessionId = sessionIdInput.value.trim();
-        if (!sessionId) {
-            showFeedback(`Please enter a Session ID to ${actionName}.`, 'error');
-            return null;
-        }
-        // Basic validation - adjust if your IDs have different rules
-        if (!/^[a-zA-Z0-9\-]+$/.test(sessionId)) {
-             showFeedback(`Invalid Session ID format. Only alphanumeric characters and hyphens are allowed.`, 'error');
-             return null;
-        }
-        return sessionId;
+    if (!/^[a-zA-Z0-9\-]+$/.test(sessionId)) {
+      this.showMessage('Invalid session ID format. Only letters, numbers, and hyphens allowed.', 'error');
+      return;
     }
 
-    function stopPolling() {
-        if (pollingTimer) {
-            clearTimeout(pollingTimer);
-            pollingTimer = null;
-        }
-        isPolling = false;
-        monitorButton.disabled = false; // Re-enable button
-        console.log("Polling stopped.");
+    this.resetInterface();
+    this.updateConnectionStatus('connecting');
+    
+    try {
+      // Start session
+      await this.apiCall(`/dashboard/whatsapp/session/${sessionId}/start`);
+      
+      // Show QR code section
+      if (this.qrCodeSection) {
+        this.qrCodeSection.style.display = 'block';
+      }
+      
+      // Load QR code
+      await this.loadQRCode(sessionId);
+      
+      // Start monitoring
+      this.startPolling(sessionId);
+      this.startQRTimer();
+      
+    } catch (error) {
+      console.log('error', error);
+      
+      // Parse error response if it's a JSON string
+      let errorData = error;
+      if (typeof error.message === 'string') {
+      try {
+        errorData = JSON.parse(error.message);
+      } catch (parseError) {
+        // If parsing fails, use the original error
+        errorData = { api_error: error.message };
+      }
+      }
+      
+      // Extract the specific error message
+      const errorMessage = errorData.api_error || errorData.error || error.message || 'Unknown error occurred';
+      
+      this.showMessage(`Failed to start session: ${errorMessage}`, 'error');
+      this.updateConnectionStatus('disconnected');
+      
+      // Display sweet alert of error with proper error message
+      alert(`Error: ${errorMessage}`);
     }
+  }
 
-    // --- Fetch Functions (Calling Laravel Backend) ---
-
-    // Fetches QR Code Image Blob from Laravel backend
-    async function fetchQrImageBlob(sessionId) {
-        // Construct the URL to the Laravel route, replacing placeholder
-        const url = `{{ route('whatsapp.session.qr.image', ['sessionId' => 'SESSION_ID_PLACEHOLDER']) }}`
-                    .replace('SESSION_ID_PLACEHOLDER', encodeURIComponent(sessionId));
-
-        console.log(`Fetching QR Image from: ${url}`);
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'image/png', // Important: Tell backend we want an image
-                'X-Requested-With': 'XMLHttpRequest' // Often helpful for Laravel
-            }
-        });
-
-        if (!response.ok) {
-            // Try to parse error JSON if backend sent one
-            let errorJson = null;
-            try {
-                errorJson = await response.json();
-            } catch (e) { /* Ignore if response is not JSON */ }
-            throw {
-                status: response.status,
-                error: errorJson?.error || `Failed to fetch QR image (HTTP ${response.status})`
-            };
-        }
-
-        // Check content type *again* to be sure backend sent an image
-        const contentType = response.headers.get('Content-Type');
-        if (!contentType || !contentType.startsWith('image/')) {
-             throw { status: 502, error: 'Backend did not return a valid image file.' };
-        }
-
-        return await response.blob(); // Return the image data as a Blob
-    }
-
-    // Fetches Status JSON from Laravel backend
-    async function fetchSessionStatus(sessionId) {
-         const url = `{{ route('whatsapp.session.status', ['sessionId' => 'SESSION_ID_PLACEHOLDER']) }}`
-                     .replace('SESSION_ID_PLACEHOLDER', encodeURIComponent(sessionId));
-
-        console.log(`Fetching Status from: ${url}`);
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        const data = await response.json(); // Assume backend always returns JSON (even for errors)
-
-        if (!response.ok) {
-             throw { status: response.status, error: data.error || `Failed to fetch status (HTTP ${response.status})` };
-        }
-        if (!data.success) {
-             throw { status: response.status, error: data.error || 'API indicated unsuccessful status check.' };
-        }
-
-        return data; // Return the parsed JSON { success: true, state: '...', message: '...' }
-    }
-
-
-    // --- Polling Logic ---
-    async function checkStatus(sessionId) {
-        if (!isPolling) return;
-
-        pollingAttempts++;
-        updatePollingStatus(`Attempt ${pollingAttempts}/${maxPollingAttempts}: Checking status...`);
-
-        if (pollingAttempts > maxPollingAttempts) {
-            showFeedback('Polling timed out. User may not have scanned the QR code.', 'warning');
-            updatePollingStatus(`Timed out after ${maxPollingAttempts} attempts.`);
-            stopPolling();
-            return;
-        }
-
-        try {
-            const statusData = await fetchSessionStatus(sessionId); // Call backend
-            console.log("Received Status:", statusData);
-            updatePollingStatus(`Attempt ${pollingAttempts}/${maxPollingAttempts}: Status is '${statusData.state}'.`);
-
-            // --- Check the 'state' field from the response ---
-            if (statusData.state === 'CONNECTED') {
-                showFeedback(`Session '${sessionId}' is now CONNECTED!`, 'success');
-                updatePollingStatus(`CONNECTED! (Attempt ${pollingAttempts})`);
-                // qrCodeImageArea.style.display = 'none'; // Hide QR once connected
-                setTimeout(function() {
-                    qrCodeImageArea.style.display = 'none';
-                }, 30000);     // Hide after 30 seconds QR once connected
-                stopPolling();
-
-                // --- !!! NEXT STEP HERE !!! ---
-                console.log("Session connected successfully.");
-                // You could redirect, enable other parts of the UI, etc.
-                // alert(`Session ${sessionId} successfully connected!`);
-
-            } else if (statusData.state === 'SCAN_QR_CODE') {
-                // Continue polling
-                pollingTimer = setTimeout(() => checkStatus(sessionId), pollingInterval);
+  async loadQRCode(sessionId) {
+    const maxRetries = 36;
+    const retryDelay = 5000; // 5 seconds
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const qrUrl = `/dashboard/whatsapp/session/${sessionId}/qr-image`;
+        
+        // Show loader
+        if (this.qrLoader) {
+          this.qrLoader.style.display = 'block';
+          // Update loader text to show retry attempt
+          const loaderText = this.qrLoader.querySelector('p');
+          if (loaderText) {
+            if (attempt === 1) {
+              loaderText.textContent = 'Generating QR Code...';
             } else {
-                // Handle other states reported by the API (e.g., TIMEOUT, OFFLINE, ERROR)
-                showFeedback(`Session '${sessionId}' status changed to '${statusData.state}'. Monitoring stopped. Message: ${statusData.message || 'N/A'}`, 'warning');
-                updatePollingStatus(`Stopped. Final status: ${statusData.state}`);
-                 qrCodeImageArea.style.display = 'none'; // Hide QR on other final states
-                stopPolling();
+              loaderText.textContent = `Waiting for QR Code... (${attempt}/${maxRetries})`;
             }
-
-        } catch (error) {
-             console.error('Polling Error:', error);
-             const errorMsg = error.error || `An unexpected error occurred (Status: ${error.status || 'N/A'})`;
-             showFeedback(`Error during status check: ${errorMsg}`, 'error');
-             updatePollingStatus(`Error on attempt ${pollingAttempts}. Stopping.`);
-             qrCodeImageArea.style.display = 'none'; // Hide QR on error
-             stopPolling();
+          }
         }
+        if (this.qrImage) {
+          this.qrImage.style.display = 'none';
+        }
+
+        // Fetch image with authentication headers
+        const headers = {
+          'Accept': 'image/png',
+          'X-Requested-With': 'XMLHttpRequest'
+        };
+
+        // Add CSRF token if available
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (token) {
+          headers['X-CSRF-TOKEN'] = token.getAttribute('content');
+        }
+
+        const response = await fetch(qrUrl, {
+          method: 'GET',
+          headers: headers,
+          credentials: 'same-origin' // Include cookies for authentication
+        });
+
+        if (response.ok) {
+          // Check if response is an image
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.startsWith('image/')) {
+            // Convert response to blob and create object URL
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+
+            // Display image
+            if (this.qrImage) {
+              this.qrImage.src = imageUrl;
+              this.qrImage.style.display = 'block';
+              
+              // Clean up object URL when image is loaded
+              this.qrImage.onload = () => {
+                URL.revokeObjectURL(imageUrl);
+              };
+            }
+            
+            if (this.qrLoader) {
+              this.qrLoader.style.display = 'none';
+            }
+            
+            return; // Success, exit the retry loop
+          }
+        }
+        
+        // If we get here, check if it's a JSON response with retry info
+        const result = await response.json().catch(() => null);
+        
+        if (result && result.retry && attempt < maxRetries) {
+          // API said to retry, wait and try again
+          console.log(`QR code not ready, retrying in ${retryDelay}ms (attempt ${attempt}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          continue;
+        }
+        
+        // Handle specific error cases
+        if (result && result.error) {
+          throw new Error(result.error);
+        }
+        
+        throw new Error(`Failed to fetch QR code: ${response.status} ${response.statusText}`);
+        
+      } catch (error) {
+        console.error(`QR Code loading attempt ${attempt} failed:`, error);
+        
+        // If this is the last attempt, show detailed troubleshooting
+        if (attempt === maxRetries) {
+          this.showQRCodeTroubleshooting(sessionId, error.message);
+          
+          // Hide loader on final error
+          if (this.qrLoader) {
+            this.qrLoader.style.display = 'none';
+          }
+          
+          throw error;
+        }
+        
+        // For non-retryable errors, throw immediately
+        if (error.message.includes('already scanned')) {
+          this.showMessage('QR code was already scanned. Please check your connection status.', 'warning');
+          
+          if (this.qrLoader) {
+            this.qrLoader.style.display = 'none';
+          }
+          
+          throw error;
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
+    }
+  }
+
+  showQRCodeTroubleshooting(sessionId, errorMessage) {
+    // Hide the QR section and show troubleshooting information
+    if (this.qrCodeSection) {
+      this.qrCodeSection.style.display = 'none';
     }
 
-     // --- Main Monitoring Workflow Trigger ---
-     async function startSessionMonitoring() {
-        clearOutputs();
-        const sessionId = getSessionId('start and monitor');
-        if (!sessionId) return;
+    // Create troubleshooting card
+    const troubleshootingHtml = `
+      <div class="card border-warning mb-4" id="troubleshootingCard">
+        <div class="card-header bg-warning text-dark">
+          <h6 class="mb-0">
+            <i class="fas fa-exclamation-triangle"></i>
+            QR Code Generation Issue
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-warning">
+            <strong>Issue:</strong> The WhatsApp API server could not generate a QR code for session "${sessionId}".
+          </div>
+          
+          <div class="mb-3">
+            <strong>Error Details:</strong>
+            <code class="d-block mt-1 p-2 bg-light rounded">${errorMessage}</code>
+          </div>
 
-        monitorButton.disabled = true;
-        showFeedback(`Requesting QR code for session '${sessionId}'...`, 'info');
-        pollingFeedbackArea.style.display = 'block'; // Show monitoring area early
-        updatePollingStatus('Fetching QR code...');
+          <div class="mb-3">
+            <strong>Possible Solutions:</strong>
+            <ol class="mb-0">
+              <li><strong>Try a different session ID:</strong> The current session might be in an invalid state.</li>
+              <li><strong>Check API server status:</strong> The WhatsApp API server might be experiencing issues.</li>
+              <li><strong>Wait and retry:</strong> Sometimes the server needs more time to initialize the session.</li>
+              <li><strong>Contact administrator:</strong> The API server configuration might need attention.</li>
+            </ol>
+          </div>
 
-        try {
-             // 1. Fetch QR Code Image from Laravel Backend
-            const imageBlob = await fetchQrImageBlob(sessionId);
-            const qrImageUrl = URL.createObjectURL(imageBlob); // Create local URL for the blob
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" onclick="this.closest('#troubleshootingCard').remove(); startAuthentication();">
+              <i class="fas fa-redo"></i> Try Again
+            </button>
+            <button class="btn btn-outline-primary" onclick="generateRandomSessionId(); this.closest('#troubleshootingCard').remove(); startAuthentication();">
+              <i class="fas fa-random"></i> Try Different Session ID
+            </button>
+            <button class="btn btn-outline-secondary" onclick="checkConnectionStatus();">
+              <i class="fas fa-signal"></i> Check Status
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
 
-            // 2. Display QR Code
-            qrImageElement.src = qrImageUrl;
-            qrImageElement.alt = `WhatsApp QR Code for ${sessionId}`;
-            qrCodeImageArea.style.display = 'block';
-            showFeedback(`QR Code for '${sessionId}' displayed. Waiting for scan...`, 'info');
-
-            // 3. Start Polling Status
-            pollingAttempts = 0;
-            isPolling = true;
-            updatePollingStatus('Waiting for scan (Attempt 0)...');
-            // Start first check slightly delayed to allow rendering
-            pollingTimer = setTimeout(() => checkStatus(sessionId), 1000);
-
-        } catch (error) {
-            console.error("Monitoring Setup Error:", error);
-            const errorMsg = error.error || `An unexpected error occurred (Status: ${error.status || 'N/A'})`;
-            showFeedback(`Failed to get QR Code or start monitoring: ${errorMsg}`, 'error');
-            updatePollingStatus('Failed to initiate monitoring.');
-            monitorButton.disabled = false; // Re-enable on failure
-        }
+    // Insert troubleshooting card after the action buttons
+    const actionButtons = document.querySelector('.action-buttons');
+    if (actionButtons) {
+      actionButtons.insertAdjacentHTML('afterend', troubleshootingHtml);
     }
 
-    // --- Event Listeners ---
-    monitorButton.addEventListener('click', startSessionMonitoring);
+    this.showMessage('QR code generation failed. See troubleshooting information below.', 'error', 0);
+  }
 
-    // Add listeners for other buttons if you have them (e.g., restart, terminate)
-    // Example:
-    // const restartButton = document.getElementById('restartButton');
-    // if(restartButton) {
-    //     restartButton.addEventListener('click', async () => {
-    //         const sessionId = getSessionId('restart');
-    //         if (!sessionId) return;
-    //         // Add fetch call to your Laravel restart endpoint here
-    //         showFeedback(`Restart request sent for ${sessionId} (Simulated)`, 'info');
-    //     });
-    // }
+  startPolling(sessionId) {
+    this.isPolling = true;
+    this.pollingAttempts = 0;
+    
+    if (this.connectionProgress) {
+      this.connectionProgress.style.display = 'block';
+    }
+    
+    this.checkStatus(sessionId);
+  }
 
+  async checkStatus(sessionId) {
+    if (!this.isPolling) return;
+
+    this.pollingAttempts++;
+    
+    // Update progress
+    const progress = (this.pollingAttempts / this.maxPollingAttempts) * 100;
+    if (this.progressBar) {
+      this.progressBar.style.width = `${Math.min(progress, 100)}%`;
+    }
+    if (this.progressText) {
+      this.progressText.textContent = 'Waiting for WhatsApp scan...';
+    }
+    if (this.progressAttempt) {
+      this.progressAttempt.textContent = `${this.pollingAttempts}/${this.maxPollingAttempts}`;
+    }
+
+    try {
+      const response = await this.apiCall(`/dashboard/whatsapp/session/${sessionId}/status`);
+      
+      if (response.status === 'CONNECTED' || response.status === 'OPEN') {
+        this.onConnectionSuccess(sessionId);
+        return;
+      }
+      
+      if (this.pollingAttempts >= this.maxPollingAttempts) {
+        this.showMessage('Connection timeout. Please try again.', 'warning');
+        this.resetInterface();
+        return;
+      }
+      
+      // Continue polling
+      setTimeout(() => this.checkStatus(sessionId), this.pollingInterval);
+      
+    } catch (error) {
+      this.showMessage(`Status check failed: ${error.message}`, 'error');
+      this.resetInterface();
+    }
+  }
+
+  onConnectionSuccess(sessionId) {
+    this.isPolling = false;
+    this.stopQRTimer();
+    
+    // Store session in localStorage
+    this.storeSession(sessionId);
+    
+    // Hide QR and progress sections
+    if (this.qrCodeSection) {
+      this.qrCodeSection.style.display = 'none';
+    }
+    if (this.connectionProgress) {
+      this.connectionProgress.style.display = 'none';
+    }
+    
+    // Show success state
+    if (this.successState) {
+      this.successState.style.display = 'block';
+    }
+    
+    this.updateConnectionStatus('connected', sessionId);
+    this.showMessage('{{ __('admin.whatsapp_connected_successfully') }}', 'success');
+  }
+
+  async disconnectSession() {
+    const sessionId = this.currentSessionId || this.sessionIdInput?.value?.trim();
+    if (!sessionId) {
+      this.showMessage('No session to disconnect', 'error');
+      return;
+    }
+
+    if (!confirm(`{{__('admin.Are you sure you want to disconnect session')}} '${sessionId}'?`)) {
+      return;
+    }
+
+    try {
+      await this.apiCall(`/dashboard/whatsapp/session/${sessionId}/terminate`, 'DELETE');
+      
+      // Clear stored session
+      this.clearStoredSession();
+
+      this.showMessage('{{__('admin.WhatsApp_disconnected_successfully')}}', 'success');
+      this.resetInterface();
+    } catch (error) {
+      this.showMessage(`Failed to disconnect: ${error.message}`, 'error');
+    }
+  }
+
+  async checkConnectionStatus() {
+    const sessionId = this.sessionIdInput?.value?.trim();
+    if (!sessionId) {
+      this.showMessage('{{__('admin.Please enter a session ID')}}', 'error');
+      return;
+    }
+
+    try {
+      const response = await this.apiCall(`/dashboard/whatsapp/session/${sessionId}/status`);
+      
+      // Show detailed status information
+      // ${response.raw_response ? `<strong>Raw Response:</strong> ${JSON.stringify(response.raw_response, null, 2)}` : ''}
+      const statusInfo = `
+        <div class="alert alert-info">
+          <div class="d-flex flex-column gap-2">
+            <strong>{{__('admin.Session Status Details')}}:</strong>
+            <strong>{{__('admin.session_id')}}:</strong> ${sessionId}
+            <strong>{{__('admin.Status')}}:</strong> ${response.status || 'Unknown'}
+            <strong>{{__('admin.message')}}:</strong> ${response.message || 'No message'}
+          </div>
+        </div>
+      `;
+      
+      this.showMessage(statusInfo, 'info', 10000);
+    } catch (error) {
+      this.showMessage(`Failed to check status: ${error.message}`, 'error');
+    }
+  }
+
+  async sendTestMessage() {
+    const phoneNumber = document.getElementById('testPhoneNumber')?.value?.trim();
+    const message = document.getElementById('testMessage')?.value?.trim();
+    
+    if (!phoneNumber || !message) {
+      this.showMessage('{{__('admin.Please enter both phone number and message')}}', 'error');
+      return;
+    }
+
+    if (!this.currentSessionId) {
+      this.showMessage('{{__('admin.No active session. Please connect first')}}', 'error');
+      return;
+    }
+
+    try {
+      await this.apiCall(`/dashboard/whatsapp/session/${this.currentSessionId}/send`, 'POST', {
+        to: phoneNumber,
+        message: message
+      });
+      this.showMessage('{{__('admin.Test message sent successfully')}}', 'success');
+
+      // Clear inputs
+      document.getElementById('testPhoneNumber').value = '';
+      document.getElementById('testMessage').value = '';
+    } catch (error) {
+      this.showMessage(`{{__('admin.Failed to send message')}}: ${error.message}`, 'error');
+    }
+  }
+
+  resetInterface() {
+    this.isPolling = false;
+    this.stopQRTimer();
+    this.currentSessionId = null;
+    
+    // Clear stored session only if explicitly resetting due to connection failure
+    // (not when just hiding UI elements)
+    
+    // Hide all sections
+    if (this.qrCodeSection) {
+      this.qrCodeSection.style.display = 'none';
+    }
+    if (this.connectionProgress) {
+      this.connectionProgress.style.display = 'none';
+    }
+    if (this.successState) {
+      this.successState.style.display = 'none';
+    }
+
+    // Remove any troubleshooting cards
+    const troubleshootingCard = document.getElementById('troubleshootingCard');
+    if (troubleshootingCard) {
+      troubleshootingCard.remove();
+    }
+    
+    this.updateConnectionStatus('disconnected');
+  }
+
+  async apiCall(endpoint, method = 'GET', data = null) {
+    const options = {
+      method: method,
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (token && method !== 'GET') {
+      options.headers['X-CSRF-TOKEN'] = token.getAttribute('content');
+    }
+
+    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      options.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(endpoint, options);
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+
+    return result;
+  }
+}
+
+// Initialize the authenticator
+let whatsappAuth;
+document.addEventListener('DOMContentLoaded', function() {
+  whatsappAuth = new WhatsAppAuthenticator();
+});
+
+// Global functions for button onclick handlers
+function startAuthentication() {
+  whatsappAuth?.startAuthentication();
+}
+
+function checkConnectionStatus() {
+  whatsappAuth?.checkConnectionStatus();
+}
+
+function disconnectSession() {
+  whatsappAuth?.disconnectSession();
+}
+
+function sendTestMessage() {
+  whatsappAuth?.sendTestMessage();
+}
+
+function clearStoredSession() {
+  if (whatsappAuth) {
+    if (confirm('Are you sure you want to clear the stored session? This will remove the locally stored connection information.')) {
+      whatsappAuth.clearStoredSession();
+      whatsappAuth.currentSessionId = null;
+      whatsappAuth.resetInterface();
+      whatsappAuth.showMessage('Stored session cleared successfully', 'success');
+      
+      // Clear the session ID input
+      const sessionInput = document.getElementById('sessionIdInput');
+      if (sessionInput) {
+        sessionInput.value = '';
+      }
+    }
+  }
+}
+
+function generateRandomSessionId() {
+  const adjectives = ['quick', 'smart', 'brave', 'calm', 'bright', 'fast', 'cool', 'wise'];
+  const nouns = ['tiger', 'eagle', 'wolf', 'lion', 'shark', 'hawk', 'bear', 'fox'];
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  const randomNumber = Math.floor(Math.random() * 1000);
+  
+  const sessionId = `${randomAdjective}-${randomNoun}-${randomNumber}`;
+  document.getElementById('sessionIdInput').value = sessionId;
+}
+
+// Legacy functions for backward compatibility
+function startSession(sessionId = null) {
+  if (sessionId) {
+    document.getElementById('sessionIdInput').value = sessionId;
+  }
+  startAuthentication();
+}
+
+function checkStatus(sessionId = null) {
+  if (sessionId) {
+    document.getElementById('sessionIdInput').value = sessionId;
+  }
+  checkConnectionStatus();
+}
+
+function getQRData(sessionId = null) {
+  if (sessionId) {
+    document.getElementById('sessionIdInput').value = sessionId;
+  }
+  startAuthentication();
+}
+
+function showQRCode(sessionId = null) {
+  if (sessionId) {
+    document.getElementById('sessionIdInput').value = sessionId;
+  }
+  startAuthentication();
+}
+
+function showMessage(message, type) {
+  whatsappAuth?.showMessage(message, type);
+}
+
+
+// Enable connectButton oninput change
+document.getElementById('sessionIdInput').addEventListener('input', function() {
+  const connectButton = document.getElementById('connectButton');
+  if (connectButton) {
+    connectButton.disabled = !this.value.trim();
+  }
+});
 </script>
 @stop

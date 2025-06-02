@@ -1,0 +1,318 @@
+/* WhatsApp Authentication UI Styles */
+
+.whatsapp-auth-container {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Authentication Card */
+.auth-card {
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.auth-card .card-header {
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  border: none;
+  padding: 1.5rem;
+}
+
+.auth-card .card-body {
+  padding: 2rem;
+}
+
+/* Connection Status */
+.connection-status {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.disconnected .status-dot {
+  background-color: #dc3545;
+}
+
+.status-indicator.connecting .status-dot {
+  background-color: #ffc107;
+}
+
+.status-indicator.connected .status-dot {
+  background-color: #28a745;
+}
+
+.status-indicator.connected .connection-status {
+  border-color: #28a745;
+  background: #f8fff9;
+}
+
+.status-indicator.connecting .connection-status {
+  border-color: #ffc107;
+  background: #fffdf8;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+.session-input-group .input-group-text {
+  background: #25d366;
+  border: 2px solid #25d366;
+  color: white;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.action-buttons .btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.action-buttons .btn-success {
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.action-buttons .btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+/* QR Code Section */
+.qr-section {
+  margin-top: 2rem;
+}
+
+.qr-section .card {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.qr-image-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.qr-image {
+  max-width: 250px;
+  max-height: 250px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.qr-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* QR Instructions */
+.qr-instructions {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.instruction-step {
+  text-align: center;
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #25d366;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin: 0 auto 0.5rem;
+}
+
+/* Timer Display */
+.timer-display {
+  background: #fff3cd;
+  color: #856404;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+/* Connection Progress */
+.connection-progress {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.connection-progress .progress {
+  height: 8px;
+  border-radius: 4px;
+  background: #e9ecef;
+}
+
+.connection-progress .progress-bar {
+  border-radius: 4px;
+}
+
+/* Success State */
+/* .success-state {
+  margin-top: 1.5rem;
+}
+
+.success-state .alert {
+  border-radius: 12px;
+  padding: 1.5rem;
+} */
+
+/* .session-info {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+} */
+
+/* .info-item label {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.info-item div {
+  font-size: 1rem;
+  color: #495057;
+} */
+
+/* Test Section */
+.test-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.test-section h6 {
+  color: #495057;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.test-section .form-control {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+}
+
+.test-section .form-control:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 0 0.2rem rgba(37, 211, 102, 0.25);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .auth-card .card-body {
+    padding: 1.5rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-buttons .btn {
+    justify-content: center;
+  }
+  
+  .qr-image {
+    max-width: 200px;
+    max-height: 200px;
+  }
+  
+  .instruction-step {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Loading Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Smooth transitions */
+.qr-section,
+.connection-progress,
+/* .success-state {
+  transition: all 0.3s ease-in-out;
+} */
+
+/* WhatsApp Green Theme */
+:root {
+  --whatsapp-green: #25d366;
+  --whatsapp-dark-green: #128c7e;
+  --whatsapp-light-green: #dcf8c6;
+}
+
+/* Enhanced form styling */
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.form-text {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

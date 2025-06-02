@@ -109,8 +109,15 @@ class WhatsAppSessionController extends Controller
             $response = $this->prepareHttpClient()->get($endpoint);
             $response->throw();
 
-            // Return the successful JSON response from the API directly
-            return response()->json($response->json());
+            $apiResponse = $response->json();
+            
+            // Normalize the response to have consistent structure
+            return response()->json([
+                'success' => $apiResponse['success'] ?? true,
+                'status' => $apiResponse['state'] ?? $apiResponse['message'] ?? 'unknown',
+                'message' => $apiResponse['message'] ?? 'Status retrieved successfully',
+                'raw_response' => $apiResponse // Include raw API response for debugging
+            ]);
 
         } catch (RequestException $e) {
             Log::error("WhatsApp API error getting status for session {$sessionId}: " . $e->getMessage());
@@ -211,7 +218,7 @@ class WhatsAppSessionController extends Controller
                              ->withHeaders(['Accept' => 'image/png']) // Be explicit
                              ->get($endpoint);
             $response->throw(); // Check for 4xx/5xx errors
-            dd($response);
+            
             // Check if the response looks like an image
             $contentType = $response->header('Content-Type');
             if (strpos($contentType, 'image/') === 0) {
@@ -219,11 +226,43 @@ class WhatsAppSessionController extends Controller
                 return response($response->body())
                        ->header('Content-Type', $contentType);
             } else {
-                // API returned 200 OK but not an image
-                 Log::warning("WhatsApp API returned non-image content for QR Image endpoint for session {$sessionId}. Content-Type: {$contentType}");
-                 return response()->json([
+                // API returned JSON instead of image - check if it's an error or QR not ready
+                $responseBody = $response->body();
+                $jsonResponse = null;
+                
+                try {
+                    $jsonResponse = json_decode($responseBody, true);
+                } catch (\Exception $e) {
+                    // Not JSON either
+                }
+                
+                if ($jsonResponse && isset($jsonResponse['message'])) {
+                    $message = $jsonResponse['message'];
+                    if (strpos($message, 'qr code not ready') !== false) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'QR code not ready yet. Please wait a moment and try again.',
+                            'retry' => true
+                        ], 202); // 202 Accepted - processing but not ready
+                    }
+                    if (strpos($message, 'already scanned') !== false) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'QR code was already scanned. Please check your connection status.',
+                            'retry' => false
+                        ], 410); // 410 Gone - resource no longer available
+                    }
+                }
+                
+                // API returned 200 OK but not an image and not a known error
+                Log::warning("WhatsApp API returned non-image content for QR Image endpoint for session {$sessionId}. Content-Type: {$contentType}. Body: {$responseBody}");
+                return response()->json([
                     'success' => false,
-                    'error' => 'API did not return a valid image for the QR code.'
+                    'error' => 'API did not return a valid image for the QR code.',
+                    'debug_info' => [
+                        'content_type' => $contentType,
+                        'response_preview' => substr($responseBody, 0, 200)
+                    ]
                 ], 502); // Bad Gateway - upstream API error
             }
 
@@ -246,6 +285,95 @@ class WhatsAppSessionController extends Controller
                 'success' => false,
                 'error' => 'An unexpected error occurred while getting session QR image.',
                 'E' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Terminate a WhatsApp session.
+     * Corresponds to: DELETE /session/logout/{sessionId}
+     *
+     * @param string $sessionId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function terminate(string $sessionId): JsonResponse
+    {
+        $endpoint = "/session/logout/{$sessionId}";
+
+        try {
+            $response = $this->prepareHttpClient()->delete($endpoint);
+            $response->throw();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Session '{$sessionId}' terminated successfully.",
+                'api_response' => $response->json()
+            ]);
+
+        } catch (RequestException $e) {
+            Log::error("WhatsApp API error terminating session {$sessionId}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to terminate session.',
+                'api_status' => $e->response?->status(),
+                'api_error' => $e->response?->json()['error'] ?? $e->getMessage()
+            ], $e->response?->status() ?? 500);
+
+        } catch (\Exception $e) {
+            Log::error("General error terminating WhatsApp session {$sessionId}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'An unexpected error occurred while terminating the session.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Send a message through WhatsApp.
+     * Corresponds to: POST /client/sendMessage/{sessionId}
+     *
+     * @param string $sessionId
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendMessage(string $sessionId, Request $request): JsonResponse
+    {
+        $request->validate([
+            'to' => 'required|string',
+            'message' => 'required|string'
+        ]);
+
+        $endpoint = "/client/sendMessage/{$sessionId}";
+
+        try {
+            $response = $this->prepareHttpClient()->post($endpoint, [
+                'chatId' => $request->input('to'),
+                'contentType' => 'string',
+                'content' => $request->input('message')
+            ]);
+
+            $response->throw();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Message sent successfully.',
+                'api_response' => $response->json()
+            ]);
+
+        } catch (RequestException $e) {
+            Log::error("WhatsApp API error sending message from session {$sessionId}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to send message.',
+                'api_status' => $e->response?->status(),
+                'api_error' => $e->response?->json()['error'] ?? $e->getMessage()
+            ], $e->response?->status() ?? 500);
+
+        } catch (\Exception $e) {
+            Log::error("General error sending WhatsApp message from session {$sessionId}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'An unexpected error occurred while sending the message.'
             ], 500);
         }
     }

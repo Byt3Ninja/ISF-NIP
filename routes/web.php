@@ -43,6 +43,7 @@ Route::get('default-permissions', function() { App\Permission::default_permissio
 
 /// Frontend routes ///
 Route::get('lang/{locale}', 'IndexController@lang');
+Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
 Route::get('home', 'IndexController@home');
 Route::get('about', 'IndexController@home');
@@ -156,10 +157,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('settings.system_social_home_image_update');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('settings.system_social_achievements_update');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('settings.system_social_whatsapp_update');
+  
     Route::get('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.start');
     Route::get('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.status');
     Route::get('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.qr.data');
     Route::get('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.qr.image');
+    Route::delete('whatsapp/session/{sessionId}/terminate', 'WhatsAppSessionController@terminate')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.terminate');
+    Route::post('whatsapp/session/{sessionId}/send', 'WhatsAppSessionController@sendMessage')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.send');
 
     
 
@@ -521,7 +525,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
         Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
         Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
-        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.show');
+        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.display');
         Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach');
         Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach');
 
