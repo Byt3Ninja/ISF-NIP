@@ -6,7 +6,7 @@
 }
 
 /* Authentication Card */
-.auth-card {
+/* .auth-card {
   border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 15px;
@@ -17,11 +17,11 @@
   background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
   border: none;
   padding: 1.5rem;
-}
+} */
 
-.auth-card .card-body {
+/* .auth-card .card-body {
   padding: 2rem;
-}
+} */
 
 /* Connection Status */
 .connection-status {

@@ -1,20 +1,20 @@
 <!-- WhatsApp Authentication Interface -->
-<div class="whatsapp-auth-container">
+<div class="">
   <!-- Main Authentication Card -->
-  <div class="card auth-card mb-4">
-    <div class="card-header bg-success text-white">
-      <div class="d-flex align-items-center">
+  <div class="mb-4">
+    <div class="">
+      {{-- <div class="d-flex align-items-center">
         <i class="fab fa-whatsapp fa-2x me-3"></i>
         <div>
-          <h5 class="mb-0 text-white">{{ __('admin.whatsapp_authentication') }}</h5>
+          <h5 class="mb-0">{{ __('admin.whatsapp_authentication') }}</h5>
           <small class="opacity-75">{{ __('admin.connect_whatsapp_account') }}</small>
         </div>
-      </div>
+      </div> --}}
     </div>
     
-    <div class="card-body">
+    <div class="">
       <!-- Connection Status -->
-      <div id="connectionStatus" class="connection-status my-4">
+      <div id="connectionStatus" class="connection-status mb-4">
         <div class="status-indicator disconnected" id="statusIndicator">
           <div class="status-dot"></div>
           <div class="status-info">
@@ -25,7 +25,7 @@
       </div>
 
       <!-- Session Input -->
-      <div class="session-input-group mb-4">
+      <div class="input-group mb-8 shadow-none">
         <label for="sessionIdInput" class="form-label">{{ __('admin.session_id') }}</label>
         <div class="input-group">
           <span class="input-group-text">
@@ -52,7 +52,7 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons mb-4">
-        <button id="connectButton" class="btn btn-success btn-lg me-2" onclick="startAuthentication()">
+        <button id="connectButton" class="btn btn-primary btn-lg me-2" onclick="startAuthentication()">
           <i class="fas fa-qrcode"></i>
           <span>{{ __('admin.connect_whatsapp') }}</span>
         </button>

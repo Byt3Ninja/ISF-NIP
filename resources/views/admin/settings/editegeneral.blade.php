@@ -101,12 +101,17 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
         style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}">
         @foreach ($tabs as $index => $tab)
         <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
-          <div class="{{$index !== 9 ? 'card' : ''}} mb-6">
-            @if($index !== 9)
+          <div class="card mb-6">
             <div class="card-header">
+              @if($index !== 9)
               <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
+              @else
+              <div class="card-title pb-3 border-bottom">
+                <h5 class="mb-0 card-title ">{{ __('admin.whatsapp_authentication') }}</h5>
+                <small class="opacity-75">{{ __('admin.connect_whatsapp_account') }}</small>
+              </div>
+              @endif
             </div>
-            @endif
             <div class="card-body">
               @switch($tab['target'])
               @case('general')
