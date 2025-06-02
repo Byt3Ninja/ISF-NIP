@@ -22,7 +22,8 @@ class MessengerController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::user()->id;
+        $user = auth()->user();
+        $userId = $user->id;
         $messages = $this->messenger_query(null, $request);
         //  dd( $messages );
         
@@ -60,14 +61,11 @@ class MessengerController extends Controller
                 $message->replies = $groupedReplies[$message->id] ?? collect();
                 return $message;
             });
-            
 
-        // Count all messages
-        $receivedMessagesCount = Messenger::where('receiver', $userId)
-            // ->where('read', 0)
-            ->count();
-
-
+            // Count all messages
+            $receivedMessagesCount = Messenger::where('receiver', $userId)
+                // ->where('read', 0)
+                ->count();
 
         // Fetch sent messages
         // $sentMessages = Messenger::where('messenger.sender', $userId)
@@ -89,24 +87,30 @@ class MessengerController extends Controller
 
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
-        if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
+        if( $user->hasAnyRole('Admin|OrganizationManager'))
+        {
             $cycles = Cycle::select('id', 'title')->get();
             $users = Company::get();
             $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
             $organizations = Organization::all();
-        } elseif (Auth::user()->hasRole('Mentor')) {
+        }
+        elseif( $user->hasRole('Mentor'))
+        {
             $cycles = CyclesMentors::where('user_id', $userId)->get(['cycle_id'])->toArray();
             $users = Company::whereIn('cycle', array_values($cycles))->get();
-        } elseif (Auth::user()->company) {
-            if (Auth::user()->company->approved) {
-                $users = Company::where('cycle', Auth::user()->company->cycle)
-                    ->where('id', '!=', Auth::user()->company->id)
-                    ->whereHas('user', function ($query) {
-                        $query->role('Registered');
+        }
+        elseif( $user->company )
+        {
+            if( $user->company->approved )
+            {
+                $users = Company::where('cycle', $user->company->cycle)
+                    ->where('id', '!=', $user->company->id)
+                    ->whereHas('user', function ( $query ) {
+                        $query->hasRole('registered');
                     })->get();
 
                 $mentors = User::join('cycles_mentors', 'users.id', 'user_id')
-                    ->where('cycle_id', Auth::user()->company->cycle)
+                    ->where('cycle_id', $user->company->cycle)
                     ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);
             }
         }
@@ -128,50 +132,50 @@ class MessengerController extends Controller
         //         'message_drafts.sender'
         //     ]);
 
-    //     $trashedMessages = DB::table('messenger')
-    // ->whereNotNull('deleted_at')
-    // ->where(function($query) {
-    //     $query->where('sender', Auth::id())
-    //           ->orWhere('receiver', Auth::id());
-    // })
-    // ->get();
+        //     $trashedMessages = DB::table('messenger')
+        // ->whereNotNull('deleted_at')
+        // ->where(function($query) {
+        //     $query->where('sender', Auth::id())
+        //           ->orWhere('receiver', Auth::id());
+        // })
+        // ->get();
 
-    $trashedMessages = DB::table('messenger')
-    ->whereNotNull('messenger.deleted_at')
-    ->where(function($query) {
-        $query->where('sender', Auth::id())
-              ->orWhere('receiver', Auth::id());
-    })
-    ->join('users', function($join) {
-        $join->on('users.id', '=', DB::raw("
-            CASE
-                WHEN messenger.sender = " . Auth::id() . " THEN messenger.receiver
-                ELSE messenger.sender
-            END
-        "));
-    })
-    ->orderBy('messenger.created_at', 'DESC')
-    ->select(
-        'messenger.*',
-        'users.first_name_en',
-        'users.last_name_en',
-        'users.first_name_ar',
-        'users.last_name_ar'
-    )
-    ->get()
-    ->map(function ($item) {
-        return (array) $item; // ← نحوله إلى مصفوفة
-    });
+        $trashedMessages = DB::table('messenger')
+        ->whereNotNull('messenger.deleted_at')
+        ->where(function($query) {
+            $query->where('sender', Auth::id())
+                ->orWhere('receiver', Auth::id());
+        })
+        ->join('users', function($join) {
+            $join->on('users.id', '=', DB::raw("
+                CASE
+                    WHEN messenger.sender = " . Auth::id() . " THEN messenger.receiver
+                    ELSE messenger.sender
+                END
+            "));
+        })
+        ->orderBy('messenger.created_at', 'DESC')
+        ->select(
+            'messenger.*',
+            'users.first_name_en',
+            'users.last_name_en',
+            'users.first_name_ar',
+            'users.last_name_ar'
+        )
+        ->get()
+        ->map(function ($item) {
+            return (array) $item; // ← نحوله إلى مصفوفة
+        });
 
-    // $starred = DB::table('messenger')
-    // ->where('starred', 1)
-    // ->where(function($query) {
-    //     $query->where('sender', Auth::id())
-    //           ->orWhere('receiver', Auth::id());
-    // })
-    // ->get();
+        // $starred = DB::table('messenger')
+        // ->where('starred', 1)
+        // ->where(function($query) {
+        //     $query->where('sender', Auth::id())
+        //           ->orWhere('receiver', Auth::id());
+        // })
+        // ->get();
 
-    $starred = Messenger::where(function($query) use ($userId) {
+        $starred = Messenger::where(function($query) use ($userId) {
                 $query->where('sender', $userId)
                     ->orWhere('receiver', $userId);
                     })->where('starred', 1)
