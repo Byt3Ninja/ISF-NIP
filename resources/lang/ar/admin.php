@@ -1617,5 +1617,7 @@ return [
 	'Already connected to WhatsApp with session' => 'متصل بالفعل بواتساب مع الجلسة: ',
 	'Stored session is no longer active. Please reconnect' => 'الجلسة المخزنة لم تعد نشطة. يرجى إعادة الاتصال',
 	'Session Status Details' => 'تفاصيل حالة الجلسة',
-	'session_connected' => 'الجلسة متصلة'
+	'session_connected' => 'الجلسة متصلة',
+	'Invalid session ID format. only numbers allowed' => 'صيغة معرف الجلسة غير صالحة. مسموح فقط بالأرقام',
+	'Already connecting or connected. Please wait or disconnect first' => 'جارٍ الاتصال أو متصل بالفعل. يرجى الانتظار أو قطع الاتصال أولاً'
 ];

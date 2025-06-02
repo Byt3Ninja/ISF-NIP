@@ -1575,5 +1575,7 @@ return [
 	'Already connected to WhatsApp with session' => 'Already connected to WhatsApp with session',
 	'Stored session is no longer active. Please reconnect' => 'Stored session is no longer active. Please reconnect',
 	'Session Status Details' => 'Session Status Details',
-	'session_connected' => 'Session Connected'
+	'session_connected' => 'Session Connected',
+	'Invalid session ID format. only numbers allowed' => 'Invalid session ID format. Only numbers allowed',
+	'Already connecting or connected. Please wait or disconnect first' => 'Already connecting or connected. Please wait or disconnect first',
 ];

@@ -142,9 +142,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Status Messages -->
-        <div id="statusMessages" class="status-messages flex flex-column"></div>
         
         <!-- Connected Session Info -->
         <div id="sessionInfo" class="session-info mt-3">
@@ -188,6 +185,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Status Messages -->
+      <div id="statusMessages" class="status-messages flex flex-column"></div>
     </div>
   </div>
 </div>

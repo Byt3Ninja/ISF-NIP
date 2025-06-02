@@ -444,18 +444,18 @@ class WhatsAppAuthenticator {
   async startAuthentication() {
     // Prevent multiple simultaneous connection attempts
     if (this.isPolling || this.currentSessionId) {
-      this.showMessage('Already connecting or connected. Please wait or disconnect first.', 'warning');
+      this.showMessage('{{__('admin.Already connecting or connected. Please wait or disconnect first')}}', 'warning');
       return;
     }
     
     const sessionId = this.sessionIdInput?.value?.trim();
     if (!sessionId) {
-      this.showMessage('Please enter a session ID', 'error');
+      this.showMessage('{{__('admin.Please enter a session ID')}}', 'error');
       return;
     }
 
-    if (!/^[a-zA-Z0-9\-]+$/.test(sessionId)) {
-      this.showMessage('Invalid session ID format. Only letters, numbers, and hyphens allowed.', 'error');
+    if (!/^[0-9]+$/.test(sessionId)) {
+      this.showMessage('{{__('admin.Invalid session ID format. only numbers allowed')}}', 'error');
       return;
     }
 
