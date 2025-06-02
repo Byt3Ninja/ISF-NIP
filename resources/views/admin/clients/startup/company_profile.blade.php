@@ -785,7 +785,7 @@
       <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
         {!! csrf_field() !!}
         <input type="hidden" name="sender" value="{{ $_user->id }}">
-        <input type="hidden" name="receiver" value="{{ $company->user->id }}">
+        <input type="hidden" name="receiver" value="{{ $company?->user?->id }}">
         <div class="modal-body">
           <div class="form-group mb-3">
             <label class="form-label fs-6 mb-1">{{ __('messages.Subject') }}:</label>
