@@ -316,9 +316,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.folders_starred');
     Route::post('/messages/toggleMarkReadStatus', 'MessengerController@toggleMarkReadStatus')->name('messages.read_status_toggle');
     //Contact US Messages
-    // Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
-    // Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
-    // Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
+    Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
+    Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
+    Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
     Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.read_status_mark_read');
     Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.read_status_mark_unread');
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.view');
