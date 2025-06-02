@@ -840,7 +840,7 @@ if ($type == 'sessions' || $type == 'offline') {
 		if ($type == 'sessions') {
 			$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 
@@ -920,7 +920,7 @@ if ($type == 'sessions' || $type == 'offline') {
 		$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
 			// $session = TrainingSession::find($trainingSession->sid);
 			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
 

@@ -8,6 +8,8 @@ use Closure;
 use App;
 use App\Settings;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Client\RequestException;
 
 class IndexController extends Controller
 {
@@ -186,6 +188,57 @@ class IndexController extends Controller
             return redirect()->back()->with('message', 'Done');
         } else {
             return redirect()->back()->with('message', 'Fail');
+        }
+    }
+
+       /**
+     * Send a message through WhatsApp.
+     * Corresponds to: POST /client/sendMessage/{sessionId}
+     *
+     * @param string $sessionId
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+     public function sendMessage(string $sessionId, Request $request): JsonResponse
+    {
+        $request->validate([
+            'to' => 'required|string',
+            'message' => 'required|string'
+        ]);
+
+        $endpoint = "/client/sendMessage/{$sessionId}";
+
+        try {
+            $response = $this->prepareHttpClient()->post($endpoint, [
+                'chatId' => $request->input('to'),
+                'contentType' => 'string',
+                'content' => $request->input('message')
+            ]);
+
+            $response->throw();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Message sent successfully.',
+                'api_response' => $response->json()
+            ]);
+
+        } catch (RequestException $e) {
+            Log::error("WhatsApp API error sending message from session {$sessionId}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to send message.',
+                'api_status' => $e->response?->status(),
+                'api_error' => $e->response?->json()['error'] ?? $e->getMessage()
+            ], $e->response?->status() ?? 500);
+
+        } catch (\Exception $e) {
+            Log::error("General error sending WhatsApp message from session {$sessionId}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'An unexpected error occurred while sending the message.'
+            ], 500);
         }
     }
 

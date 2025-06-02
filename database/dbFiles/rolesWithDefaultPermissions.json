@@ -110,6 +110,76 @@
                 "default_for": [
                     "admin"
                 ]
+            }, 
+            {
+                "name": "whatsapp.session.start",
+                "description": "WhatsApp Sessions Start",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }, 
+            {
+                "name": "whatsapp.session.status",
+                "description": "WhatsApp Sessions Status",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }, 
+            {
+                "name": "whatsapp.session.qr.data",
+                "description": "WhatsApp Sessions Qr Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }, 
+            {
+                "name": "whatsapp.session.qr.image",
+                "description": "WhatsApp Sessions Qr Image",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "whatsapp.session.terminate",
+                "description": "WhatsApp Sessions Terminate",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }, 
+            {
+                "name": "whatsapp.session.send",
+                "description": "WhatsApp Sessions Send Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }, 
+            {
+                "name": "whatsapp.session.getsessionid",
+                "description": "Get WhatsApp Sessions Id",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
