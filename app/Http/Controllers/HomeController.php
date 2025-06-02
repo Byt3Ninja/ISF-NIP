@@ -339,6 +339,7 @@ class HomeController extends Controller
                     service_categories sc ON s.service_category_id = sc.id
                 WHERE
                     s.deleted_at IS NULL
+                    AND s.organization_id IS NOT NULL
             ";
             if( $has_org ) { $services_q .= " AND s.organization_id = " . $user->organization_id; }
             $services = collect( DB::select( $services_q ) )->map(function( $service ) use ( $l ) {
@@ -355,7 +356,7 @@ class HomeController extends Controller
             });
         } else { $services = collect([]); }
 
-        if( array_intersect(['dashboard_cards.my_services_requests'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions) )
         {
             $my_requests_q = "SELECT
                     sr.id
@@ -403,7 +404,9 @@ class HomeController extends Controller
                 return $oneUser;
             })->values();
         } else { $my_mentors = collect([]); }
-
+        $cycle = $user->company->cycle ?? 0;
+        $mentorIds = DB::table('cycles_mentors')->where('cycle_id', $cycle)->pluck('user_id')->toArray();
+        $my_mentors =  $my_mentors->whereIn('id', $mentorIds);
         if( array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions) )
         {
             $today = date("Y-m-d");
@@ -1234,7 +1237,7 @@ class HomeController extends Controller
             elseif( !$middleware->count() ) { return false; }
             return true;
         })->values();
-
+        
         $data['my_schedules'] = $my_schedules;
         $data['upcoming_sessions'] = $upcoming_sessions;
         $data['cType'] = $cType;
@@ -1319,7 +1322,7 @@ class HomeController extends Controller
             ],
             [
                 'color' => 'danger',
-                'href' => '/dashboard/users#search=Mentor',
+                'href' => '/dashboard/show/Mentors',
                 'icon' => 'ti-school',
                 'text' => __('admin.Mentors'),
                 'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],

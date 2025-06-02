@@ -84,7 +84,7 @@
 							</div>
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
-						<p class="mb-1 text-center">{{ __('admin.'.$card['text']) }}</p>
+						<p class="mb-1 text-center">{{ $card['text'] }}</p>
 					</div>
 				</div>
 			</a>
