@@ -93,81 +93,83 @@
                   </div>
                 </div>
               </div>
-              <div class="col-12 col-lg-8">
-                <form method="GET" action="{{ route('users.view_companies') }}" class="row h-100 align-items-center">
-                  <div class="col-2">
-                    <div class="d-flex align-items-center justify-content-end gap-3">
-                      @if(request()->query())
-                        <button class="btn bg-label-secondary p-3 justify-content-center align-items-center"
-                          style="border-radius: 17px; width: 40px; height: 40px;" type="button"
-                          onclick="window.location.href='/dashboard/companies'"
-                        >
-                          <i class="ti ti-reload ti-sm"></i>
-                        </button>
-                      @endif
-                      <button class="btn bg-primary p-3 justify-content-center align-items-center"
-                        style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
-                        <i class="ti ti-filter text-white ti-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="col-3">
-                    <div class="SearchSector">
-                      @php
-                        $sectors = App\Sector::whereNull('parent_id')->get();
-                      @endphp
-                      <select id="selectsector" class="form-select select2 sector" name="sector" data-placeholder="{{ __('admin.Sector') }}">
-                        <option value="" selected>{{ __('admin.Sector') }}
-                        </option>
-                        @foreach ($sectors as $sector_group)
-                          <optgroup label="{{ $sector_group->name }}">
+                <div class="col-12 col-lg-8">
+                <form method="GET" action="{{ route('users.view_companies') }}" class="row h-100 align-items-center" id="search-form">
+                <div class="col-12 col-lg-2">
+                 <div class="d-flex align-items-center justify-content-end gap-3">
+                 @if(request()->query())
+                    <button class="btn bg-label-secondary p-3 justify-content-center align-items-center"
+                        style="border-radius: 17px; width: 40px; height: 40px;" type="button"
+                        onclick="window.location.href='/dashboard/companies'">
+                        <i class="ti ti-reload ti-sm"></i>
+                    </button>
+                @endif
+                <button class="btn bg-primary p-3 justify-content-center align-items-center"
+                    style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
+                    <i class="ti ti-filter text-white ti-sm"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-12 col-lg-10 d-flex flex-wrap align-items-center gap-2">
+            <div class="SearchSector flex-grow-1">
+                @php
+                    $sectors = App\Sector::whereNull('parent_id')->get();
+                @endphp
+                <select id="selectsector" class="form-select select2 sector" name="sector" data-placeholder="{{ __('admin.Sector') }}">
+                    <option value="" selected>{{ __('admin.Sector') }}</option>
+                    @foreach ($sectors as $sector_group)
+                        <optgroup label="{{ $sector_group->name }}">
                             @foreach ($sector_group->children as $sector)
-                              <option value="{{ $sector->name_en }} "
-                                {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}
-                              </option>
+                                <option value="{{ $sector->name_en }}"
+                                    {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}</option>
                             @endforeach
-                          </optgroup>
-                        @endforeach
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="SearchStage">
-                      <select class="form-select select2 stage" name="stage" data-placeholder="{{ __('admin.stage') }}">
-                        <option value="">{{ __('admin.stage') }}</option>
-                        @php
-                          $stages = App\Stage::all();
-                        @endphp
-                        @foreach ($stages as $stage)
-                          <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
+                        </optgroup>
+                    @endforeach
+                </select>
+            </div>
+            <div class="SearchStage flex-grow-1">
+                <select class="form-select select2 stage" name="stage" data-placeholder="{{ __('admin.stage') }}">
+                    <option value="">{{ __('admin.stage') }}</option>
+                    @php
+                        $stages = App\Stage::all();
+                    @endphp
+                    @foreach ($stages as $stage)
+                        <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
                             {{ $stage->{'name_' . $l} ?? '' }}
-                          </option>
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            @role('Admin')
+                <div class="SearchOrg flex-grow-1">
+                    @php
+                        $orgs = App\Organization::all();
+                    @endphp
+                    <select class="form-select select2" name="orgnization" data-placeholder="{{ __('admin.Organizations') }}">
+                        <option value="" selected>{{ __('admin.Organizations') }}</option>
+                        @foreach ($orgs as $org)
+                            <option value="{{ $org->id }}"
+                                {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}</option>
                         @endforeach
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-3">
-                    @role('Admin')
-                      <div class="SearchOrg">
-                        @php
-                          $orgs = App\Organization::all();
-                          $orgrequest = App\Organization::where('id', request('orgnization'))->get();
-                        @endphp
-
-                        <select class="form-select select2 sector" name="orgnization" data-placeholder="{{ __('admin.Organizations') }}">
-                          <option value="" selected>{{ __('admin.Organizations') }}
-                          </option>
-                          @foreach ($orgs as $org)
-                            <option value="{{ $org->id }} "
-                              {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
-                    @endrole
-                  </div>
-                </form>
-              </div>
+                    </select>
+                </div>
+            @endrole
+            <div class="position-relative flex-grow-1">
+                <div class="position-absolute top-50 translate-middle-y end-0 mx-3 search-icon">
+                    <i class="ti ti-search text-muted"></i>
+                </div>
+                <input
+                    id="search-input"
+                    class="form-control search border rounded bg-transparent"
+                    style="width: 250px;"
+                    placeholder="{{ __('admin.Search') }}"
+                    name="search"
+                    value="{{ request('search') }}"
+                />
+            </div>
+        </div>
+    </form>
+</div>
             </div>
           </div>
         </div>
@@ -178,7 +180,7 @@
             <h5 class="mb-0">
               {{ $l == 'en' ? 'Companies List' : 'قائمة الشركات' }}
             </h5>
-            <div class="position-relative">
+            {{-- <div class="position-relative">
               <div class="position-absolute top-50 translate-middle-y end-0 mx-3 search-icon">
                 <i class="ti ti-search text-muted"></i>
               </div>
@@ -191,7 +193,7 @@
                 name="search"
                 value="{{ request('search') }}" 
               />
-            </div>
+            </div> --}}
           </div>
           <div class="row">
             @if (count($companies) == 0)
@@ -530,11 +532,30 @@
   <script>
     $('#search-input').on('keyup', function() {
       var value = $(this).val().toLowerCase();
-      $('.card-container').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      $('.card-container').each(function() {
+        var companyName = $(this).find('h5').text().toLowerCase();
+        $(this).toggle(companyName.indexOf(value) > -1);
       });
     });
   </script>
+  <script>
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    $('#search-input').on('keyup', debounce(function() {
+      $('#search-form').submit();
+    }, 500));
+  </script>
+  
   <script type="text/javascript">
     $(document).ready(function() {
       $('.table').DataTable({
@@ -566,6 +587,6 @@
       });
     });
   </script>
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+  {{-- <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
+  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script> --}}
 @stop

@@ -703,8 +703,8 @@
                     ->where('stype', 1)
                     ->orderBy('arr')
                     ->first(['id']);
-                    $weight = $company->companyWeight($company->id, $form->id, 0);
-                    $judges = $company->judges($company->id, $form->id);
+                    $weight = $company->companyWeight($company->id, $form?->id, 0);
+                    $judges = $company->judges($company->id, $form?->id);
                     $judges = \App\User::whereIn('id', $judges)->get();
                     @endphp
                     <span
@@ -777,8 +777,8 @@
       <div class="modal-header">
         <h4 class="modal-title" id="myModalLabel33">
           {{ __('messages.SendMessageTo') }}
-          {{ $company->user->{'first_name_' . $l} }}
-          {{ $company->user->{'last_name_' . $l} }}
+          {{ $company?->user?->{'first_name_' . $l} }}
+          {{ $company?->user?->{'last_name_' . $l} }}
           ({{ $company->{'name_' . $l} }}).
         </h4>
       </div>
