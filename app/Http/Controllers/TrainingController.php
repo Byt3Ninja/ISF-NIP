@@ -407,7 +407,8 @@ class TrainingController extends Controller
 				}
 			}
 			TrainingContent::updateOrCreate(['id' => $id], ['title' => $request->title, 'content' => $request->tcontent, 'training_id' => $request->training_id, 'user_id' => Auth::id(), 'arr' => $arr]);
-			return redirect('/dashboard/training/all/' . $request->training_id)->with(['class' => 'success', 'message' => 'Saved']);
+			return redirect()->route('trainings.course_view', ['id' => $request->training_id])->with(['class' => 'success', 'message' => 'Saved']);
+			// return redirect('/dashboard/training/all/' . $request->training_id)->with(['class' => 'success', 'message' => 'Saved']);
 		}
 		return back()->withInput()->with(['class' => 'danger', 'message' => 'Error']);
 	}
