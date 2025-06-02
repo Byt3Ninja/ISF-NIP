@@ -177,7 +177,7 @@
                   <ul class="list-group">
                     <li class="list-group-item d-flex align-items-center gap-3">
                       <i class="ti ti-file-text text-primary"></i>
-                      <a href="{{ asset($cycle->program_guideline_file) }}" class="text-dark" target="_blank" download>
+                      <a href="{{ Storage::disk('public_uploads')->url($cycle->program_guideline_file) }}" class="text-dark" target="_blank" download>
                         {{ __('admin.Download') }}
                       </a>
                     </li>
@@ -205,7 +205,7 @@
                   <ul class="list-group">
                     <li class="list-group-item d-flex align-items-center gap-3">
                       <i class="ti ti-file-text text-primary"></i>
-                      <a href="{{ asset($cycle->financial_guideline_file) }}" class="text-dark" target="_blank" download>
+                      <a href="{{ Storage::disk('public_uploads')->url($cycle->financial_guideline_file)}}" class="text-dark" target="_blank" download>
                       {{ __('admin.Download') }}
                       </a>
                     </li>
