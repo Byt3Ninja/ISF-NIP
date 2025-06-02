@@ -95,7 +95,7 @@
                                                             @endrole
                                                         </td>
                                                         @role('Admin')
-                                                        <td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $survey_scope->organization->id . '/edit') }}"> {{ $survey_scope->organization->{'name_'.$l} }}</a></td>
+                                                        <td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $survey_scope->organization?->id . '/edit') }}"> {{ $survey_scope->organization?->{'name_'.$l} }}</a></td>
 														@endrole
                                                         <td class="text-center">
 															@if( $survey_scope->trigger_by_session )

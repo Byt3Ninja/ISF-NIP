@@ -154,7 +154,6 @@
                   $status = request('status');
 
                   @endphp
-{{ $csession->id }}
                   @foreach ($companies as $company)
                   @php
                   $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
@@ -200,7 +199,7 @@
                         <a class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
                           href="/dashboard/users/{{ $company->user->id }}/edit">
                           @if ($company->user->img_url)
-                          <img src="/191014/{{ $company->user->img_url }}" onerror="this.src='/icons/account.svg'"
+                          <img src="/191014/{{ $company->user->img_url }}"
                             alt="avatar" class="img-fluid w-100 h-100">
                           @else
                           <img src="/icons/account.svg" class="img-fluid" />
@@ -276,6 +275,7 @@
 @stop
 
 @section('pagescripts')
+<script src="/app-assets/js/1.js"></script>
 <script>
   $(document).on("change", "#status-select", function(e) {
       $("#status-form").submit();

@@ -72,11 +72,7 @@ public function sendMessage($phoneNumber, $message)
             Log::error("Failed to get chatId for number: {$phoneNumber}");
             return ['success' => false, 'message' => 'Failed to get chatId'];
         }
-        $client = new Client();
-       $response = $client->request('GET', 'https://wapi.growthlabs.app');
-        // تحقق من حالة السيرفر
-        // إذا كان السيرفر يعمل، أرسل الرسالة
-    if($response->getStatusCode() == 200) {
+       
         $sendResponse = Http::withHeaders([
             'x-api-key' => env('WAPI_KEY')
         ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
@@ -91,9 +87,8 @@ public function sendMessage($phoneNumber, $message)
             Log::error("Failed to send message to {$phoneNumber}: " . $sendResponse->body());
             return ['success' => false, 'message' => 'Failed to send message'];
         }
-        } else {
-    return  ['success' => false, 'message' => __("admin.URLNotWorking")];
-}
+      
+
     } catch (\Exception $e) {
         Log::error('Failed to send message via WhatsApp: ' . $e->getMessage());
         return ['success' => false, 'message' => $e->getMessage()];

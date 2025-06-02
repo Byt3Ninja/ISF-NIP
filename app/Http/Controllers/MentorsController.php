@@ -150,7 +150,9 @@ class MentorsController extends Controller
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
-		})->find($id);
+		}) ->with(['steps' => function ($q) {
+        	$q->orderBy('arr');
+    	}])->find($id);
 
 		if (!empty($cycle)) {
 			$organization_id = $cycle->organization_id;
@@ -166,7 +168,9 @@ class MentorsController extends Controller
 				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
 				return $survey;
 			});
-			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle'));
+
+       	  	$available_surveys = Surveys::where('organization_id', $cycle->organization_id)->get();
+			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle','available_surveys'));
 		} else {
 			abort(404);
 		}
@@ -699,6 +703,7 @@ Thanks from " . env('APP_NAME');
 			
 			$type = $request->rtype;
 			if ($type == 6) {
+				
 				$start = $join = null;
 				if ($request->stat == 'Yes') {
 					
@@ -714,7 +719,9 @@ Thanks from " . env('APP_NAME');
 					$join = $onlineMeeting['data']['join_url'];
 				}
 				
+					
 				MentorshipRequest::find($request->id)->update(['approved' => $request->stat, 'start_url' => $start, 'join_url' => $join]);
+				
 				/// Notify Mentor
 				$session = MentorshipRequest::findOrFail($request->id);
 				$rName = User::findOrFail($session->mentor_id);

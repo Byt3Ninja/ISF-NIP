@@ -220,7 +220,7 @@
 														<label class="fs-6 form-label mb-2 fw-bold w-100" for="answers">{{ __('admin.answers')}}</label>
 														<button id="addNewAnswer" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new answer" style="height: 35px;"> 
 															<i class="ti ti-plus me-2"></i>
-															<span class="text-nowrap">Add Answer</span>
+															<span class="text-nowrap">{{ __('admin.Add Answer') }}</span>
 														</button>
 													</div>
 													<div class="form-group" id="quizAnswers">
@@ -423,7 +423,7 @@
 			}
 			var answer = `
 			<div class="d-flex flex-nowrap gap-4 mb-3">
-				<input placeholder="Type the text of the answer" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
+				<input placeholder="{{ __('admin.typeAnswer') }}" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
 				<input placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترح ' }}" class="form-control ` + class_control2 + `" id="quiz_answer_` + count + `_score" name="quiz_answer_score[]">
 				<select class="select2 form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
 					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>

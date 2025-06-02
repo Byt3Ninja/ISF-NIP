@@ -133,7 +133,7 @@
 											<tbody>
 												@foreach( $quizzes as $quiz )
 													@php
-														$participates = $quiz->results->groupBy('user_id');
+														$participates = collect($quiz->results)->groupBy('user_id');
 														$passed_participates = $participates->filter(function( $item ) use ( $quiz ) {
 															$passed = $item->where('score', '>=', $quiz->passing_criteria);
 															$failed = $item->where('score', '<', $quiz->passing_criteria);
@@ -141,7 +141,7 @@
 															else
 															{
 																if( $failed->count() >= $quiz->attempts ) { return false; }
-																if( now()->format('Y-m-d H:i:s') >= $quiz->end->format('Y-m-d H:i:s') ) { return false; }
+																if( now()->format('Y-m-d H:i:s') >= \Carbon\Carbon::parse($quiz->end)->format('Y-m-d H:i:s') ) { return false; }
 																return true;
 															}
 														});
@@ -149,7 +149,7 @@
 													<tr>
 														<td><a href="{{ URL::to('dashboard/quizzes/' . $quiz->id . '/edit') }}">{{ $quiz->id }}</a></td>
 														<td>{!! $quiz->title !!}</td>
-														<td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $quiz->organization->id . '/edit') }}"> {{ $quiz->organization->{'name_'.$l} }}</a></td>
+														<td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $quiz->organization->id . '/edit') }}"> {{ $quiz->organization->{'org_name_'.$l} }}</a></td>
 														<td class="text-center"><a href="{{ URL::to('dashboard/training/all/' . $quiz->training->id) }}"> {{ $quiz->training->title }}</a></td>
 														<td class="text-center">
 															@if( $quiz->status == 'draft' )
@@ -159,8 +159,8 @@
 															@endif
 														</td>
 														<td class="text-center">
-															<span title="{{ $quiz->start }}" class="badge bg-label-primary"> {{ __('admin.From') }} {{ $quiz->start->format('Y-m-d') }} </span> <br />
-															<span title="{{ $quiz->end }}" class="badge bg-label-secondary mt-1"> {{ __('admin.To') }} {{ $quiz->end->format('Y-m-d') }} </span>
+															<span title="{{ $quiz->start }}" class="badge bg-label-primary"> {{ __('admin.From') }} {{ FormatDate($quiz->start, 'Y-m-d') }} </span> <br />
+															<span title="{{ $quiz->end }}" class="badge bg-label-secondary mt-1"> {{ __('admin.To') }} {{ FormatDate($quiz->end, 'Y-m-d') }}</span>
 														</td>
 														<td class="text-center"> {{ $participates->count() }} </td>
 														<td class="text-center">

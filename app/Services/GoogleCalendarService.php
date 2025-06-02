@@ -3,15 +3,16 @@
 
 namespace App\Services;
 
-use Google_Client;
-// use Google_Service_Calendar;
-use App\UserOauthToken;
-use Google_Service_Calendar_Event;
-use Carbon\Carbon;
 use App\Settings;
+// use Google_Service_Calendar;
+use Carbon\Carbon;
 use Google\Client;
-use Google\Service\Calendar as Google_Service_Calendar;
+use Google_Client;
+use App\UserOauthToken;
+
+use Google_Service_Calendar_Event;
 use Illuminate\Support\Facades\Schema;
+use Google\Service\Calendar as Google_Service_Calendar;
 
 class GoogleCalendarService
 {
@@ -25,9 +26,9 @@ class GoogleCalendarService
             $Setting = Settings::where('id', 1)->first();
 
             if ($Setting) {
-                $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
-                $GOOGLE_CLIENT_SECRET = $Setting->GOOGLE_CLIENT_SECRET;
-                $CALENDER_GOOGLE_REDIRECT_URI = $Setting->GOOGLE_REDIRECT;
+                $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CALENDAR_CLIENT_ID;
+                $GOOGLE_CLIENT_SECRET = $Setting->GOOGLE_CALENDAR_CLIENT_SECRET;
+                $CALENDER_GOOGLE_REDIRECT_URI = $Setting->GOOGLE_CALENDAR_REDIRECT;
             } else {
                 $GOOGLE_CLIENT_ID = '';
                 $GOOGLE_CLIENT_SECRET = '';
@@ -39,7 +40,12 @@ class GoogleCalendarService
             $this->client->setClientId($GOOGLE_CLIENT_ID);
             $this->client->setClientSecret($GOOGLE_CLIENT_SECRET);
             $this->client->setRedirectUri($CALENDER_GOOGLE_REDIRECT_URI);
-            $this->client->addScope(Google_Service_Calendar::CALENDAR);
+            $this->client->addScope(Google_Service_Calendar::CALENDAR_EVENTS);
+            $this->client->addScope('https://www.googleapis.com/auth/calendar.events');
+            $this->client->addScope('https://www.googleapis.com/auth/userinfo.email');
+            $this->client->addScope('openid');
+            $this->client->setAccessType('offline');
+            $this->client->setPrompt('consent');
         }
     }
 
@@ -68,31 +74,34 @@ class GoogleCalendarService
     public function getCalendarService($user)
     {
         // Fetch user's token
-        $oauthToken = $user->oauthToken()->where('provider', 'google')->firstOrFail();
+       $oauthToken = $user->oauthToken()->where('provider', 'google')->firstOrFail();
 
         if ($oauthToken) {
             $this->client->setAccessToken([
                 'access_token' => $oauthToken->access_token,
-                'refresh_token' => $oauthToken->access_token,
+                'refresh_token' => $oauthToken->refresh_token,
                 'expires_at' => $oauthToken->expires_at,
             ]);
 
             // Refresh access token if needed
             if ($this->client->isAccessTokenExpired()) {
-                $this->client->fetchAccessTokenWithRefreshToken($oauthToken->refresh_token);
+              $newToken = $this->client->fetchAccessTokenWithRefreshToken($oauthToken->refresh_token);
 
-
-                // Update the tokens in the database
-                $oauthToken->update([
-                    'access_token' => $this->client->getAccessToken()['access_token'],
-                    'expires_at' => $this->client->getAccessToken()['expires_at'],
-                ]);
+            if (isset($newToken['error'])) {
+                   throw new \Exception("Failed to refresh access token: " . $newToken['error_description'] ?? 'Unknown error');
             }
+
+         $oauthToken->update([
+              'access_token' => $newToken['access_token'],
+              'expires_at' => now()->addSeconds($newToken['expires_in']),
+         ]);
+        }
 
             return new Google_Service_Calendar($this->client);
         }
 
         throw new \Exception("User OAuth Token not found.");
+
     }
     public function createEvent($user, $eventData)
     {

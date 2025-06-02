@@ -1,10 +1,5 @@
 @extends('layouts.admin')
 
-@section('vendorstyle')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-@stop
-
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
@@ -156,9 +151,22 @@
                             <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
                           </td>
                           <td>
-                            <span class="badge bg-label-{{ $session->approved ? 'success' : 'warning' }}">
-                              {{ $session->approved ? __('Yes') : __('Waiting') }}
-                            </span>
+                              @if( $session->approved )
+                              @if( $session->approved == 'Yes' )
+                              <span class="badge bg-label-success" >
+                              {{ __('admin.Yes') }}
+                              </span>
+                              @else
+                              <span class="badge bg-label-danger" >
+                              {{ __('admin.No') }}
+                              </span>
+                              @endif
+                              @else
+                              <span class="badge bg-label-warning" >
+                              {{ __('admin.Waiting') }}
+                              </span>
+                              @endif
+                            
                           </td>
                           <td>
                             <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
@@ -252,25 +260,19 @@
             </div>
           </div>
           <div class="modal-footer">
-            <div class="btn btn-label-secondary ml-1">
-              <i class="ti ti-check d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
+            <div class="btn btn-label-secondary ml-1" data-bs-dismiss="modal" aria-label="Close">
+              {{-- <i class="ti ti-check"></i> --}}
+              <span class="">{{ __('cycles.Close') }}</span>
             </div>
             <button type="submit" class="btn btn-primary ml-1">
-              <i class="ti ti-check d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+              {{-- <i class="ti ti-check"></i> --}}
+              <span class="">{{ __('cycles.Submit') }}</span>
             </button>
           </div>
         </form>
       </div>
     </div>
   </div>
-@stop
-
-@section('scripts')
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
 
 @section('pagescripts')
@@ -319,9 +321,19 @@
     });
   </script>
   <script>
-    // $('.date').datetimepicker({
-    //   timepicker: true,
-    //   format: 'Y-m-d H:i'
+    // $('#sdate').flatpickr({
+    //   enableTime: true,
+    //   dateFormat: "Y-m-d h:i K",
+    //   minDate: "today",
+    //   time_24hr: false,
+    //   allowInput: true,
+    //   onClose: function(selectedDates, dateStr, instance) {
+    //     // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+    //     if (selectedDates.length > 0) {
+    //       const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+    //       instance.setDate(formattedDate, true, "Y-m-d h:i K");
+    //     }
+    //   }
     // });
 
     $('.datewithouttime').flatpickr({
@@ -345,7 +357,22 @@
           $('#sid').val(id);
           $('#mentorid').val(response.mentor_id);
           $('#userid').val(response.user_id);
-          $('#sdate').val(response.zoom_date);
+          // $('#sdate').val(response.zoom_date);
+          $('#sdate').flatpickr({
+            enableTime: true,
+            dateFormat: "Y-m-d h:i K",
+            // minDate: "today",
+            time_24hr: false,
+            allowInput: true,
+            defaultDate: response.zoom_date ? response.zoom_date : '',
+            onClose: function(selectedDates, dateStr, instance) {
+              // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+              if (selectedDates.length > 0) {
+                const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+                instance.setDate(formattedDate, true, "Y-m-d h:i K");
+              }
+            }
+          });
           $('#period').val(response.period);
           $('#notes').val(response.notes);
           $('#ModifyRequest').modal('show');
@@ -472,7 +499,11 @@
     }
 
     function approve(id, stat) {
-      alert('{{ __('admin.sending_request') }}')
+      if(stat == 'Yes'){
+      alert('{{ __('admin.Accepting_request') }}')
+      }else{
+        alert('{{ __('admin.Rejecting_request') }}')
+      }
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

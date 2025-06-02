@@ -62,38 +62,12 @@ return [
             'url' => env('APP_URL') . '/pitch_decks',
             'visibility' => 'public',
         ],
-        'programs' => [
+        'public' => [
             'driver' => 'local',
-            'root' => public_path('programs'),
-            'url' => env('APP_URL') . '/programs',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
-    'financials' => [
-        'driver' => 'local',
-        'root' => public_path('financials'),
-        'url' => env('APP_URL') . '/financials',
-        'visibility' => 'public',
-    ],
-    'legal_policies' => [
-        'driver' => 'local',
-        'root' => public_path('legal_policies'),
-        'url' => env('APP_URL') . '/legal_policies',
-        'visibility' => 'public',
-    ],
-    'delegations' => [
-        'driver' => 'local',
-        'root' => public_path('delegations'),
-        'url' => env('APP_URL') . '/delegations',
-        'visibility' => 'public',
-    ],
-      
-       
-    'public' => [
-        'driver' => 'local',
-        'root' => storage_path('app/public'),
-        'url' => env('APP_URL') . '/storage',
-        'visibility' => 'public',
-      ],
         'logo_uploads' => [
             'driver' => 'local',
             'root' => public_path('images/logo'), // المسار المطلوب

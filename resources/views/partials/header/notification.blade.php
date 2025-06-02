@@ -18,7 +18,7 @@ if( $user )
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
       @if ($all > 0)
-      <div id="notification-count-container"> {{ $all }} </div>
+      <span class="badge badge-notifications bg-danger w-px-20 h-px-20 rounded-circle d-flex justify-content-center align-items-center">{{ $all }}</span>
       @endif
     </span>
   </a>
@@ -33,7 +33,7 @@ if( $user )
             <span class="badge bg-label-primary me-2" id="new-count">0 {{ $l == 'en' ? 'New': 'جديد' }}</span>
 
             <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all"
-              data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i
+              data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.mark_all_as_read') }}"><i
                 class="ti ti-mail-opened text-heading"></i></a>
           </div>
         </div>

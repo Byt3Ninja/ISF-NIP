@@ -240,13 +240,14 @@
 @section('pagescripts')
   <script>
     // This siteUrl used in app-calendar.js
+    
     var siteUrlFromBlade = "{{ url('/') }}";
     /* customButtons: {
       google: {
           text: 'Sync With Google Calender',
           click: function () {
               /// add
-              window.open('{{ route('calendar.events_list') }}','_Self')
+              window.open('{{ route('integrations.calendar_google_login') }}','_Self')
               //// end
           }
       },
@@ -260,6 +261,9 @@
       },
 
   } */
+
+
+
   </script>
   <script src="/vuexy/assets/js/app-calendar.js"></script>
   {{-- <script src="/vuexy/assets/js/app-calendar-events.js"></script> --}}

@@ -37,12 +37,7 @@ class ExportTresultData implements ShouldQueue
         $step = $this->data2['step'];
         $location= $this->data2['location'];
         $userEmail = $this->data2['userEmail'];
-    
-        
-
-        $companies = Company::where('step', $step)->get();
-       
-        
+        $Authuser = $this->data2['Authuser'];
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -59,14 +54,14 @@ class ExportTresultData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-        if(Auth()->user()->hasRole('Admin')){
+        if($Authuser->hasRole('Admin')){
 
-            Company::chunk(1000, function($companies) use (&$sheet, &$row, $location) {
+            Company::with('user')->chunk(1000, function($companies) use (&$sheet, &$row, $location) {
                 foreach ($companies as $companie) {
                     
                     $sheet->setCellValue('A' . $row, $companie->id);
                     $sheet->setCellValue('B' . $row, $companie->name);
-                    $sheet->setCellValue('C' . $row, $companie->user->title);
+                    $sheet->setCellValue('C' . $row, $companie->cycle->title);
                     $sheet->setCellValue('D' . $row, $companie->user->name);
                     $contents1 = TrainingContent::where('training_id', $location)->count();
                     if ($contents1 != 0) {$contents = $contents1;}else{$contents = 0;}
@@ -114,7 +109,7 @@ class ExportTresultData implements ShouldQueue
     $writer->save($tempFilePath);
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
-    Mail::to(auth()->user()->email)
+    Mail::to($Authuser->email)
         ->send(new ExportMail($tempFilePath, $fileName));
 
     // حذف الملف المؤقت

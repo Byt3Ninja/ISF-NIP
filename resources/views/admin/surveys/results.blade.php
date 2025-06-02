@@ -3,255 +3,413 @@
 @section('index_url', route('surveys.index') )
 @section('sub_index_url', route('surveys.edit', ['survey' => $survey->id]) )
 @section('subTitle', __('admin.manageQuestions'))
-@section('style')
-	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-	<style type="text/css">
-		.custom-px-1 { padding-inline: 0.25rem; }
-		.custom-py-1 { padding-block: 0.25rem; }
-		.custom-px-2 { padding-inline: 0.5rem; }
-		.custom-py-2 { padding-block: 0.5rem; }
-		.btn i.fa { top: 0px !important; }
-		.btn { padding: 5px 10px !important; }
-		#previewArea, #modelPreviewArea { border: 1px solid #a8a3a3; border-radius: 5px; }
-		.custom-star-rating, .custom-star-rating-done { list-style: none; display: block ruby; }
-		.custom-star-rating i.fas { cursor: pointer; }
-		.custom-star-rating li { margin-inline: 3px; }
-		.text-gold { color: #fd7e14; font-size: 1.2rem !important; }
-	</style>
-@stop
+
 @section('content')
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		<div class="content-overlay"></div>		
-		<div class="content-header row">
-			@if( session()->has('success') )
-				<div class="col-md-12">
-					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						<div class="d-flex align-items-center"> <i class="ti ti-thumb-up me-3 ti-md"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
-					</div>
-				</div>
-			@endif
-			@if( session()->has('error') )
-				<div class="col-md-12">
-					<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-						<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
-					</div>
-				</div>
-			@endif
-		</div>
 		<div class="content-body">
-			<section id="basic-input">
-				<div class="row">
-					<div class="col-md-12">
-						<div class="card">
-							<div class="card-header row">
-								<div class="col-md-12 col-lg-12 col-sm-12"> <h4 class="card-title">{{__('admin.surveyResults')}}</h4> </div>
-							</div>
-							<div class="card-content">
-								<div class="card-body">
-									<div class="container-fluid px-0">
-										<div class="table-responsive">
-											<table class="table table-bordered table-hover">
-												<thead class="bg-label-light">
-													<tr>
-														<th class="text-center" style="width: 5%;">#</th>
-														<th>{{__('admin.user')}}</th>
-														<th>{{__('admin.Cycle informations')}}</th>
-														<th>{{__('admin.surveyAbout')}}</th>
-														<th class="text-center" style="width: 10%;">{{__('admin.Status')}}</th>
-													</tr>
-												</thead>
-												<tbody>
-													@foreach( $responses as $index => $response )
-														<tr>
-															<td class="text-center">{{ $index + 1 }}</td>
-															<td><a target="_blank" href="/dashboard/users/{{ $response->user->id }}/edit"> {{ $response->user->name }}</a></td>
-															<td>
-																<a target="_blank" href="/dashboard/programlist/show/{{ $response->cycle->id }}/"> {{ $response->cycle->title }} </a>
-															</td>
-															<td>
-																@if( $response->triggered_on == 'mentorship' )
-																<i class="ti ti-bulb mx-1"></i> 
-																@elseif( $response->triggered_on == 'training' )
-																<i class="ti ti-presentation mx-1"></i> 
-																@endif
-																{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . $target . ucFirst($response->triggered_by) ) }} 
-																@php
-																	$middleware = collect([]);
-																	if( $response->triggered_on == 'mentorship' )
-																	{
-																	if( $response->triggered_by == 'session' ) { $middleware = $response->mentorship_session; }
-																	if( $response->triggered_by == 'due' ) { $middleware = $response->mentorship_step; }
-																	}
-																	elseif( $response->triggered_on == 'training' )
-																	{
-																	if( $response->triggered_by == 'session' ) { $middleware = $response->training_session; }
-																	if( $response->triggered_by == 'due' ) { $middleware = $response->training_step; }
-																	if( $response->triggered_by == 'quiz' ) { $middleware = $response->training_quiz; }
-																	}
-																@endphp
-																@if( $response->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($response->triggered_on) ) }} @endif
-																@if( $response->triggered_on == 'mentorship' )
-																	@if( $response->triggered_by == 'session' )
-																	{{ __('dashboard.with') }} 
-																	@php $mentor = $middleware->mentor; @endphp
-																	{{ $mentor->name }}
-																	@elseif( $response->triggered_by == 'due' )
-																	- {{ $middleware->title }}
-																	@else
-																	-
-																	@endif
-																@elseif( $response->triggered_on == 'training' )
-																	@if( $response->triggered_by == 'session' )
-																	{{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
-																	@elseif( $response->triggered_by == 'due' )
-																	- {{ $middleware->title }}
-																	@elseif( $response->triggered_by == 'quiz' )
-																	- {{ $middleware->title }}
-																	@else
-																	-
-																	@endif
-																@endif
-															</td>
-															<td class="text-center">
-																@if( is_null( $response->responses ) || count( $response->responses ) == 0 )
-																	<button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button>
-																@else
-																	<button data-id="{{ $response->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
-																@endif
-															</td>
-														</tr>
-													@endforeach
-												</tbody>
-											</table>
-										</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header border-bottom mb-6">
+							<div class="row align-items-center">
+								<div class="col-md-6">
+									<div class="d-flex align-items-center gap-2">
+										<i class="ti ti-chart-bar ti-lg text-primary"></i>
+										<h4 class="card-title mb-0">{{__('admin.surveyResults')}}</h4>
+									</div>
+								</div>
+								<div class="col-md-6 text-end">
+									<!-- Export Buttons -->
+									<div class="d-flex align-items-center justify-content-end gap-2" role="group">
+										<button type="button" class="btn btn-label-primary btn-sm" id="exportCSV">
+											<i class="ti ti-file-text me-1"></i>{{__('admin.exportCSV')}}
+										</button>
+										<button type="button" class="btn btn-label-success btn-sm" id="exportExcel">
+											<i class="ti ti-file-spreadsheet me-1"></i>{{__('admin.exportExcel')}}
+										</button>
 									</div>
 								</div>
 							</div>
 						</div>
+						<div class="card-datatable">
+							<div class="row mx-2">
+								<div class="col-md-12">
+									<!-- Filters Row -->
+									<div class="row align-items-center mb-3 mt-3">
+										<div class="col-md-3">
+											<label class="form-label">{{__('admin.Status')}}</label>
+											<select class="form-select form-select-sm" id="statusFilter">
+												<option value="">{{__('admin.allStatus')}}</option>
+												<option value="answered">{{__('admin.answered')}}</option>
+												<option value="not_answered">{{__('admin.notAnswered')}}</option>
+											</select>
+										</div>
+										<div class="col-md-3">
+											<label class="form-label">{{__('admin.mentor')}}</label>
+											<select class="form-select form-select-sm" id="mentorFilter">
+												<option value="">{{__('admin.allMentors')}}</option>
+											</select>
+										</div>
+										<div class="col-md-3">
+											<label class="form-label">{{__('admin.program')}}</label>
+											<select class="form-select form-select-sm" id="programFilter">
+												<option value="">{{__('admin.allPrograms')}}</option>
+											</select>
+										</div>
+										<div class="col-md-3">
+											<label class="form-label">{{__('admin.Search')}}</label>
+											<input type="text" class="form-control form-control-sm" id="globalSearch" 
+												   placeholder="{{__('admin.searchSurveysPlaceholder')}}">
+										</div>
+									</div>
+								</div>
+							</div>
+							<table class="table table-hover" id="surveyResultsTable">
+								<thead class="bg-label-light">
+									<tr>
+										<th class="text-center" style="width: 5%;">#</th>
+										<th>{{__('admin.user')}}</th>
+										<th>{{__('admin.Startup')}}</th>
+										<th>{{__('admin.Cycle informations')}}</th>
+										<th>{{__('admin.surveyAbout')}}</th>
+										<th class="text-center" style="width: 10%;">{{__('admin.Status')}}</th>
+										<th>{{__('admin.submitDate')}}</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach( $responses as $index => $response )
+									<tr data-status="{{ is_null( $response->responses ) || count( $response->responses ) == 0 ? 'not_answered' : 'answered' }}"
+										data-mentor="{{ $response->triggered_on == 'mentorship' && $response->triggered_by == 'session' ? $response->mentorship_session?->mentor?->name : '' }}"
+										data-program="{{ $response->cycle->title }}">
+										<td class="text-center">{{ $index + 1 }}</td>
+										<td>
+											<a target="_blank" class="text-dark d-flex align-items-center gap-2">
+												<img src="{{ $response->user->image_url }}" alt="avatar" class="rounded-circle"
+													height="35" width="35" style="border: 2px solid #ddd;"
+														onerror="this.onerror=null;this.src='/icons/account.svg';"
+													>
+												<div class="media-body">
+													<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $response?->user?->name }}
+													</h6>
+												</div>
+											</a>
+										</td>
+										<td>
+											<a class="text-dark d-flex align-items-center gap-2"
+												href="/dashboard/companyProfile/{{ $response?->user?->company?->id }}">
+												<img src="{{ $response?->user->company?->logo_url }}" alt="avatar"
+													class="rounded-circle" height="35" width="35" style="border: 2px solid #ddd;"
+													onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"
+													>
+												<span class="fw-medium"> {{ $response?->user?->company?->{'name_'.$l} }}</span>
+											</a>
+										</td>
+										<td>
+											<a target="_blank" href="/dashboard/programlist/show/{{ $response->cycle->id }}/"> {{
+												$response->cycle->title }} </a>
+										</td>
+										<td>
+											<div class="d-flex flex-column">
+												<div class="mb-1 d-flex flex-column">
+													<span class="fw-semibold">
+														@if($response->triggered_on == 'mentorship')
+															<i class="ti ti-bulb text-warning me-2"></i>
+														@elseif($response->triggered_on == 'training')
+															<i class="ti ti-presentation text-info me-2"></i>
+														@endif
+														{{ __('dashboard.surveyAbout') }}
+													</span>
+													<span class="badge {{ $response->triggered_by == 'session' ? 'bg-label-primary' : 'bg-label-warning' }}">
+														{{ __('dashboard.surveyTriggerBy' . $target . ucfirst($response->triggered_by)) }}
+													</span>
+												</div>
+												
+												@php
+												$middleware = collect([]);
+												if($response->triggered_on == 'mentorship') {
+													if($response->triggered_by == 'session') { 
+														$middleware = $response->mentorship_session;
+													}
+													if($response->triggered_by == 'due') { 
+														$middleware = $response->mentorship_step; 
+													}
+												} elseif($response->triggered_on == 'training') {
+													if($response->triggered_by == 'session') { 
+														$middleware = $response->training_session; 
+													}
+													if($response->triggered_by == 'due') { 
+														$middleware = $response->training_step; 
+													}
+													if($response->triggered_by == 'quiz') { 
+														$middleware = $response->training_quiz; 
+													}
+												}
+												@endphp
+												
+												<div class="text-muted small">
+													@if($response->triggered_by == 'due')
+														<span class="fw-medium">{{ __('dashboard.surveyStepName' . ucFirst($response->triggered_on)) }}</span>
+													@endif
+													
+													@if($response->triggered_on == 'mentorship')
+														@if($response->triggered_by == 'session')
+															{{ __('dashboard.with') }}
+															@php $mentor = $middleware?->mentor; @endphp
+															<span class="fw-medium text-primary">{{ $mentor?->name }}</span>
+														@elseif($response->triggered_by == 'due')
+															- <span class="fw-medium">{{ $middleware->title }}</span>
+														@else
+															-
+														@endif
+													@elseif($response->triggered_on == 'training')
+														@if($response->triggered_by == 'session')
+															<span class="text-dark">{{ '(' . __('cycles.' . $middleware->type) . ')' }}</span>
+															<span class="fw-medium">{{ $middleware->title }}</span>
+														@elseif($response->triggered_by == 'due' || $response->triggered_by == 'quiz')
+															- <span class="fw-medium">{{ $middleware->title }}</span>
+														@else
+															-
+														@endif
+													@endif
+												</div>
+											</div>
+										</td>
+										<td class="text-center">
+											@if( is_null( $response->responses ) || count( $response->responses ) == 0 )
+											<button class="btn btn-sm btn-label-danger text-nowrap"> {{ __('admin.notAnswered') }} </button>
+											@else
+											<button data-id="{{ $response->id }}" class="btn btn-sm btn-label-success text-nowrap">
+												{{ __('admin.answered') }} </button>
+											@endif
+										</td>
+										<td class="text-center">
+											{{ $response->created_at}}
+										</td>
+									</tr>
+									@endforeach
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
-			</section>
+			</div>
 		</div>
 	</div>
 </div>
-<div class="modal fade" id="questionsModal" tabindex="-1" role="dialog" aria-labelledby="modalScrollableTitle" aria-hidden="true">
-	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+
+<!-- Response Details Modal -->
+<div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-scrollable">
 		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modalScrollableTitle"> {{ __('admin.surveyAnswersDetails') }} </h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title" id="responseModalLabel">
+					<i class="ti ti-chart-pie me-2"></i>{{__('admin.surveyResponses')}}
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<div class="container-fluid">
-					<div class="row">
-						<div class="col-md-8 col-lg-8 col-sm-8">
-							<div class="table-responsive">
-								<table class="table table-bordered table-hover">
-									<thead>
-										<tr>
-											<th> {{__('admin.question')}} </th>
-											<th class="w-25 text-center px-0"> {{__('admin.question_Type')}} </th>
-										</tr>
-									</thead>
-									<tbody id="question-picker-tbody"></tbody>
-								</table>
-							</div>
-						</div>
-						<div class="col-md-4 col-lg-4 col-sm-4">
-							<div class="py-1 px-2" id="modelPreviewArea">
-								<div class="text-center"> {{ __('admin.previewAreaPlaceholder') }} </div>
-							</div>
-						</div>
-					</div>
+				<div id="responseContent">
+					<!-- Response content will be loaded here -->
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-md btn-dark" data-bs-dismiss="modal">
-					<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
-				</button>
 			</div>
 		</div>
 	</div>
 </div>
 @stop
+
 @section('pagescripts')
-	<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
-	<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js" integrity="sha256-Fb0zP4jE3JHqu+IBB9YktLcSjI1Zc6J2b6gTjB0LpoM=" crossorigin="anonymous"></script>
-	<script type="text/javascript">
-		var responses = @json($responses)
+<script>
+	console.log('responses', @json($responses));
+$(document).ready(function() {
+    // Initialize DataTable
+    const table = $('#surveyResultsTable').DataTable({
+        responsive: true,
+        pageLength: 25,
+        lengthMenu: [10, 25, 50, 100],
+        order: [[6, 'desc']], // Sort by submit date (descending)
+        language: {
+            @if($l == 'ar')
+            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/ar.json'
+            @else
+            search: "{{ __('admin.Search') }}:",
+            lengthMenu: "{{ __('admin.show') }} _MENU_ {{ __('admin.Entries') }}",
+            info: "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.of') }} _TOTAL_ {{ __('admin.Entries') }}",
+            infoEmpty: "{{ __('admin.showing') }} 0 {{ __('admin.To') }} 0 {{ __('admin.of') }} 0 {{ __('admin.Entries') }}",
+            infoFiltered: "({{ __('admin.filteredFrom') }} _MAX_ {{ __('admin.totalEntries') }})",
+            paginate: {
+                first: "{{ __('admin.First') }}",
+                last: "{{ __('admin.Last') }}",
+                next: "{{ __('admin.Next') }}",
+                previous: "{{ __('admin.Previous') }}"
+            },
+            emptyTable: "{{ __('admin.noDataAvailable') }}",
+            zeroRecords: "{{ __('admin.noMatchingRecords') }}"
+            @endif
+        },
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        drawCallback: function() {
+            // Re-initialize tooltips and other UI elements after table redraw
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        }
+    });
 
-		$(document).on('click', '.open-responses', function() {
-			var id = $(this).data('id');
-			
-			var responses = @json($responses);
-			
-			var response = responses.filter(function(oneResponse) {
-				return oneResponse.id == id;
-			});
-			var responses = response[0].responses;
-			var html = '';
-			responses.forEach(function(oneResponse) {
-				html += '<tr data-id="' + id + '" data-qid="' + oneResponse.id + '" class="cursor-pointer open-question-details">';
-				html += '<td>' + oneResponse.question + '</td>';
-				html += '<td class="text-center">' + ( oneResponse.type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : ( oneResponse.type == 'answers' ? "{{ __('admin.surveyQuestionAndAnswer') }}" : "{{ __('admin.surveyTypeStarRating') }}" ) ) + '</td>';
-				html += '</tr>';
-			});
-			$("#modelPreviewArea").html('<div class="text-center"> {{ __("admin.previewAreaPlaceholder") }} </div>');
-			$('#question-picker-tbody').html(html);
-			$('#questionsModal').modal('show');
+    // Populate filter dropdowns with unique values
+    populateFilters();
+
+		// Status Filter
+		$('#statusFilter').on('change', function() {
+			const value = $(this).val();
+			table.draw();
 		});
 
-		$(document).on('click', '.open-question-details', function() {
-			var id = $(this).data('id');
-			var question_id = $(this).data('qid');
-			var responses = @json($responses);
-			var response = responses.filter(function(oneResponse) {
-				return oneResponse.id == id;
-			});
-			var responses = response[0].responses;
-			var question = responses.filter(function(oneResponse) {
-				return oneResponse.id == question_id;
-			});
-			var question = question[0];
-			var html = '';
-			if( question.type == 'radio' )
-			{
-				question.answers.forEach( function(item, key) {
-					var count = key + 1;
-					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
-					html += '<div class="custom-py-1"> <button class="w-100 text-left btn ' + checked + '">' + count + '. ' + item.text + '</button> </div>';
-				});
+		// Custom search function for status filter
+		$.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+			const statusFilter = $('#statusFilter').val();
+			if (statusFilter === '') {
+				return true; // Show all rows when no filter is selected
 			}
-			else if( question.type == 'answers' )
-			{
-				question.answers.forEach( function(item, key) {
-					var count = key + 1;
-					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
-					html += '<div class="custom-py-1"> '+ question.answer +' </div>';
-				});
-			}
-			else if( question.type == 'stars' )
-			{
-				var answer = parseInt( question.answer );
-				html += '<ul class="custom-star-rating text-center p-0 my-1">';
-					for( var i = 0; i < question.answers.length; i++ )
-					{
-						if( i < answer )
-						{
-							html += '<li><i class="fas fa-star text-gold"></i> </li>';
-						}
-						else
-						{
-							html += '<li><i class="far fa-star text-gold"></i> </li>';
-						}
-					}
-				html += '</ul>';
-			}
-			$("#modelPreviewArea").html(html);
+			
+			const row = table.row(dataIndex).node();
+			const status = $(row).data('status');
+			
+			return status === statusFilter;
 		});
-	</script>
+
+    // Mentor Filter
+    $('#mentorFilter').on('change', function() {
+        const value = $(this).val();
+        table.column(4).search(value, true, false).draw();
+    });
+
+    // Program Filter  
+    $('#programFilter').on('change', function() {
+        const value = $(this).val();
+        table.column(3).search(value, true, false).draw();
+    });
+
+    // Global Search
+    $('#globalSearch').on('keyup', function() {
+        table.search($(this).val()).draw();
+    });
+
+    // Export CSV
+    $('#exportCSV').on('click', function() {
+        exportTableToCSV('survey_results.csv');
+    });
+
+    // Export Excel
+    $('#exportExcel').on('click', function() {
+        exportTableToExcel('survey_results.xlsx');
+    });
+
+    // Open response modal
+    $(document).on('click', '.open-responses', function() {
+        const responseId = $(this).data('id');
+        loadResponseDetails(responseId);
+    });
+
+    function populateFilters() {
+        const mentors = new Set();
+        const programs = new Set();
+
+        // Extract unique mentors and programs from table data
+        table.rows().every(function() {
+            const rowData = this.node();
+            const mentor = $(rowData).data('mentor');
+            const program = $(rowData).data('program');
+            
+            if (mentor && mentor.trim() !== '') {
+                mentors.add(mentor);
+            }
+            if (program && program.trim() !== '') {
+                programs.add(program);
+            }
+        });
+
+        // Populate mentor filter
+        const mentorSelect = $('#mentorFilter');
+        mentors.forEach(mentor => {
+            mentorSelect.append(`<option value="${mentor}">${mentor}</option>`);
+        });
+
+        // Populate program filter
+        const programSelect = $('#programFilter');
+        programs.forEach(program => {
+            programSelect.append(`<option value="${program}">${program}</option>`);
+        });
+    }
+
+    function exportTableToCSV(filename) {
+        const csv = [];
+        const rows = document.querySelectorAll("#surveyResultsTable tr:not(.child)");
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = [], cols = rows[i].querySelectorAll("td, th");
+            
+            for (let j = 0; j < cols.length; j++) {
+                let cellText = cols[j].innerText;
+                // Clean up the cell text
+                cellText = cellText.replace(/"/g, '""'); // Escape quotes
+                cellText = cellText.replace(/\s+/g, ' ').trim(); // Clean whitespace
+                row.push('"' + cellText + '"');
+            }
+            csv.push(row.join(","));
+        }
+
+        // Download CSV file
+        const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+        const downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    function exportTableToExcel(filename) {
+        // Simple Excel export using table HTML
+        const table = document.getElementById('surveyResultsTable');
+        const tableHTML = table.outerHTML.replace(/ /g, '%20');
+        
+        const downloadLink = document.createElement("a");
+        downloadLink.href = 'data:application/vnd.ms-excel,' + tableHTML;
+        downloadLink.download = filename;
+        downloadLink.click();
+    }
+
+    function loadResponseDetails(responseId) {
+        // Show loading state
+        $('#responseContent').html(`
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">{{ __('admin.loading') }}...</span>
+                </div>
+                <p class="mt-2">{{ __('admin.loadingResponses') }}...</p>
+            </div>
+        `);
+        
+        // Show modal
+        $('#responseModal').modal('show');
+
+        // Load response details via AJAX
+        $.ajax({
+            url: `/admin/survey-responses/${responseId}/details`,
+            method: 'GET',
+            success: function(response) {
+                $('#responseContent').html(response);
+            },
+            error: function(xhr, status, error) {
+                $('#responseContent').html(`
+                    <div class="alert alert-danger">
+                        <i class="ti ti-alert-circle me-2"></i>
+                        {{ __('admin.errorLoadingResponses') }}
+                    </div>
+                `);
+            }
+        });
+    }
+});
+</script>
 @stop

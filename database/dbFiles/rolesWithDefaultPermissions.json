@@ -1,0 +1,6066 @@
+[
+    {
+        "name": "System Settings (Advanced)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "settings.system_general_view",
+                "description": "View General Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_general_update",
+                "description": "Save General Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_section_one_update",
+                "description": "Update Setting Section One",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_logo_update",
+                "description": "Update Logo",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_section_two_update",
+                "description": "Update Setting Section Two",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_mail_update",
+                "description": "Update Mail Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_push_notifications_update",
+                "description": "Update Push Notification Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_meeting_integration_update",
+                "description": "Update Meeting Integration Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_social_login_update",
+                "description": "Update Social Media Login Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_social_home_image_update",
+                "description": "Update Social Media Home Image Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_social_achievements_update",
+                "description": "Update Social Media Achievements Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_social_whatsapp_update",
+                "description": "Update Social Media WhatsApp Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Service Categories",
+        "description": null,
+        "permissions": [
+            {
+                "name": "add_service_category",
+                "description": "Add Service Category (Specific Action)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.index",
+                "description": "List Service Categories",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.create",
+                "description": "Create Service Category Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.store",
+                "description": "Save New Service Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.show",
+                "description": "View Service Category Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.edit",
+                "description": "Edit Service Category Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.update",
+                "description": "Save Service Category Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "serviceCategories.destroy",
+                "description": "Delete Service Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Documentation",
+        "description": null,
+        "permissions": [
+            {
+                "name": "documentation.index",
+                "description": "List Documentation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "documentation.create",
+                "description": "Create Documentation Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "documentation.store",
+                "description": "Save New Documentation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "documentation.show",
+                "description": "View Documentation Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "documentation.edit",
+                "description": "Edit Documentation Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "documentation.update",
+                "description": "Save Documentation Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "documentation.destroy",
+                "description": "Delete Documentation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Menus",
+        "description": null,
+        "permissions": [
+            {
+                "name": "menus.list",
+                "description": "List Menus",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "menus.create",
+                "description": "Create Menu Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "menus.store",
+                "description": "Save New Menu",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "menus.show",
+                "description": "View Menu Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "menus.edit",
+                "description": "Edit Menu Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "menus.update",
+                "description": "Save Menu Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "menus.delete",
+                "description": "Delete Menu",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Slides",
+        "description": null,
+        "permissions": [
+            {
+                "name": "slides.list",
+                "description": "List Slides",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "slides.create",
+                "description": "Create Slide Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "slides.store",
+                "description": "Save New Slide",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "slides.show",
+                "description": "View Slide Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "slides.edit",
+                "description": "Edit Slide Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "slides.update",
+                "description": "Save Slide Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "slides.delete",
+                "description": "Delete Slide",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Pages",
+        "description": null,
+        "permissions": [
+            {
+                "name": "pages.list",
+                "description": "List Pages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.create",
+                "description": "Create Page Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.store",
+                "description": "Save New Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.show",
+                "description": "View Page Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.edit",
+                "description": "Edit Page Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.update",
+                "description": "Save Page Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.delete",
+                "description": "Delete Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "pages.update_mine",
+                "description": "Edit My Assigned Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Posts",
+        "description": null,
+        "permissions": [
+            {
+                "name": "posts.list",
+                "description": "List Posts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "posts.create",
+                "description": "Create Post Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "posts.store",
+                "description": "Save New Post",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "posts.show",
+                "description": "View Post Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "posts.edit",
+                "description": "Edit Post Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "posts.update",
+                "description": "Save Post Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "posts.delete",
+                "description": "Delete Post",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Events",
+        "description": null,
+        "permissions": [
+            {
+                "name": "events.list",
+                "description": "List Events",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger"
+                ]
+            },
+            {
+                "name": "events.create",
+                "description": "Create Event Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "events.store",
+                "description": "Save New Event",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "events.show",
+                "description": "View Event Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger"
+                ]
+            },
+            {
+                "name": "events.edit",
+                "description": "Edit Event Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "events.update",
+                "description": "Save Event Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "events.delete",
+                "description": "Delete Event",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Services",
+        "description": null,
+        "permissions": [
+            {
+                "name": "services.index",
+                "description": "List Services",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "services.create",
+                "description": "Create Service Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services.store",
+                "description": "Save New Service",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services.show",
+                "description": "View Service Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "services.edit",
+                "description": "Edit Service Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services.update",
+                "description": "Save Service Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services.destroy",
+                "description": "Delete Service",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "services.like",
+                "description": "Like\/Unlike Service",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Types",
+        "description": null,
+        "permissions": [
+            {
+                "name": "types.index",
+                "description": "List Types",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "types.create",
+                "description": "Create Type Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "types.store",
+                "description": "Save New Type",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "types.show",
+                "description": "View Type Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "types.edit",
+                "description": "Edit Type Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "types.update",
+                "description": "Save Type Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "types.destroy",
+                "description": "Delete Type",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Partners",
+        "description": null,
+        "permissions": [
+            {
+                "name": "partners.index",
+                "description": "List Partners",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "partners.create",
+                "description": "Create Partner Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "partners.store",
+                "description": "Save New Partner",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "partners.show",
+                "description": "View Partner Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "partners.edit",
+                "description": "Edit Partner Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "partners.update",
+                "description": "Save Partner Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "partners.destroy",
+                "description": "Delete Partner",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Stages",
+        "description": null,
+        "permissions": [
+            {
+                "name": "stages.index",
+                "description": "List Stages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "stages.create",
+                "description": "Create Stage Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "stages.store",
+                "description": "Save New Stage",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "stages.show",
+                "description": "View Stage Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "stages.edit",
+                "description": "Edit Stage Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "stages.update",
+                "description": "Save Stage Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "stages.destroy",
+                "description": "Delete Stage",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Press (Media)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "press.index",
+                "description": "List Press Releases",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "press.create",
+                "description": "Create Press Release Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "press.store",
+                "description": "Save New Press Release",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "press.show",
+                "description": "View Press Release Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "press.edit",
+                "description": "Edit Press Release Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "press.update",
+                "description": "Save Press Release Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "press.destroy",
+                "description": "Delete Press Release",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Tags",
+        "description": null,
+        "permissions": [
+            {
+                "name": "Tags.index",
+                "description": "List Tags",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Tags.create",
+                "description": "Create Tag Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Tags.store",
+                "description": "Save New Tag",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Tags.show",
+                "description": "View Tag Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Tags.edit",
+                "description": "Edit Tag Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Tags.update",
+                "description": "Save Tag Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Tags.destroy",
+                "description": "Delete Tag",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Labels",
+        "description": null,
+        "permissions": [
+            {
+                "name": "Labels.index",
+                "description": "List Labels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Labels.create",
+                "description": "Create Label Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Labels.store",
+                "description": "Save New Label",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Labels.show",
+                "description": "View Label Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Labels.edit",
+                "description": "Edit Label Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Labels.update",
+                "description": "Save Label Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Labels.destroy",
+                "description": "Delete Label",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Time Sheets",
+        "description": null,
+        "permissions": [
+            {
+                "name": "TimeSheet.index",
+                "description": "List Time Sheets (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "TimeSheet.create",
+                "description": "Create Time Sheet Entry Form (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "TimeSheet.store",
+                "description": "Save New Time Sheet Entry (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "TimeSheet.show",
+                "description": "View Time Sheet Entry Details (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "TimeSheet.edit",
+                "description": "Edit Time Sheet Entry Form (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "TimeSheet.update",
+                "description": "Save Time Sheet Entry Update (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "TimeSheet.destroy",
+                "description": "Delete Time Sheet Entry (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "time_sheets.reports.finance.view",
+                "description": "View Finance Time Sheet Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "time_sheets.reports.finance.export",
+                "description": "Export Finance Time Sheet Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "time_sheets.view.mine",
+                "description": "View User's Time Sheet",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "time_sheets.clock.update.mine",
+                "description": "Update User's Clock In\/Out",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Categories (General)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "Category.index",
+                "description": "List Categories",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Category.create",
+                "description": "Create Category Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Category.store",
+                "description": "Save New Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Category.show",
+                "description": "View Category Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Category.edit",
+                "description": "Edit Category Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Category.update",
+                "description": "Save Category Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "Category.destroy",
+                "description": "Delete Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Subcategories",
+        "description": null,
+        "permissions": [
+            {
+                "name": "subcategories.index",
+                "description": "List Subcategories",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.create",
+                "description": "Create Subcategory Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.store",
+                "description": "Save New Subcategory",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.show",
+                "description": "View Subcategory Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.edit",
+                "description": "Edit Subcategory Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.update",
+                "description": "Save Subcategory Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.destroy",
+                "description": "Delete Subcategory",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "subcategories.list_by_category",
+                "description": "Get Subcategories by Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Organizations",
+        "description": null,
+        "permissions": [
+            {
+                "name": "organizations.index",
+                "description": "List Organizations",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organizations.create",
+                "description": "Create Organization Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organizations.store",
+                "description": "Save New Organization",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organizations.show",
+                "description": "View Organization Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organizations.edit",
+                "description": "Edit Organization Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organizations.update",
+                "description": "Save Organization Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "organizations.destroy",
+                "description": "Delete Organization",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Assessments",
+        "description": null,
+        "permissions": [
+            {
+                "name": "questions.index",
+                "description": "List Assessment Questions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "questions.create",
+                "description": "Create Assessment Question Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "questions.store",
+                "description": "Save New Assessment Question",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "questions.show",
+                "description": "View Assessment Question Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "questions.edit",
+                "description": "Edit Assessment Question Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "questions.update",
+                "description": "Save Assessment Question Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "questions.destroy",
+                "description": "Delete Assessment Question",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.index",
+                "description": "List Assessment Weights",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.create",
+                "description": "Create Assessment Weight Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.store",
+                "description": "Save New Assessment Weight",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.show",
+                "description": "View Assessment Weight Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.edit",
+                "description": "Edit Assessment Weight Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.update",
+                "description": "Save Assessment Weight Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "weights.destroy",
+                "description": "Delete Assessment Weight",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.index",
+                "description": "List Assessments (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.create",
+                "description": "Create Assessment Form (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.store",
+                "description": "Save New Assessment (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.show",
+                "description": "View Assessment Details (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.edit",
+                "description": "Edit Assessment Form (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.update",
+                "description": "Save Assessment Update (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.destroy",
+                "description": "Delete Assessment (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.questions_manage",
+                "description": "Manage Assessment Questions (Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.take",
+                "description": "Take\/View Assessment (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.assign",
+                "description": "Assign New Assessment to User",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.results_analysis_view",
+                "description": "View Assessment Analysis",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.results_history_view",
+                "description": "View Assessment History",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.results_by_category_view",
+                "description": "View Assessment Results by Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.results_answers_view",
+                "description": "View Assessment Answers",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "assessments.results_export_pdf",
+                "description": "Export Assessment to PDF",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "User Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "users.index",
+                "description": "List Users",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.create",
+                "description": "Create User Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.store",
+                "description": "Save New User",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.show",
+                "description": "View User Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.edit",
+                "description": "Edit User Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.update",
+                "description": "Save User Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.destroy",
+                "description": "Delete User",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "users.view_companies",
+                "description": "View User's Associated Companies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Cities",
+        "description": null,
+        "permissions": [
+            {
+                "name": "cities.index",
+                "description": "List Cities",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "cities.create",
+                "description": "Create City Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "cities.store",
+                "description": "Save New City",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "cities.show",
+                "description": "View City Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "cities.edit",
+                "description": "Edit City Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "cities.update",
+                "description": "Save City Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "cities.destroy",
+                "description": "Delete City",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Permissions (RBAC)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "permissions.index",
+                "description": "List Permissions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permissions.create",
+                "description": "Create Permission Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permissions.store",
+                "description": "Save New Permission",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permissions.show",
+                "description": "View Permission Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permissions.edit",
+                "description": "Edit Permission Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permissions.update",
+                "description": "Save Permission Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permissions.destroy",
+                "description": "Delete Permission",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "List Permission Group",
+                "description": "permission-groups.index",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.edit",
+                "description": "Edit Permission Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "List Permission Group",
+                "description": "permission-groups.index",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.index",
+                "description": "Permission Groups List",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.create",
+                "description": "Create Permission Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.edit",
+                "description": "Edit Per",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.update",
+                "description": "Update Permission Groups",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Roles (RBAC)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "roles.index",
+                "description": "List Roles",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "roles.create",
+                "description": "Create Role Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "roles.store",
+                "description": "Save New Role",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "roles.show",
+                "description": "View Role Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "roles.edit",
+                "description": "Edit Role Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "roles.update",
+                "description": "Save Role Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "roles.destroy",
+                "description": "Delete Role",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "FAQs",
+        "description": null,
+        "permissions": [
+            {
+                "name": "faqs.index",
+                "description": "List FAQs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "faqs.create",
+                "description": "Create FAQ Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "faqs.store",
+                "description": "Save New FAQ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "faqs.show",
+                "description": "View FAQ Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "faqs.edit",
+                "description": "Edit FAQ Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "faqs.update",
+                "description": "Save FAQ Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "faqs.destroy",
+                "description": "Delete FAQ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Question Categories",
+        "description": null,
+        "permissions": [
+            {
+                "name": "question-categories.index",
+                "description": "List Question Categories",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "question-categories.create",
+                "description": "Create Question Category Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "question-categories.store",
+                "description": "Save New Question Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "question-categories.show",
+                "description": "View Question Category Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "question-categories.edit",
+                "description": "Edit Question Category Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "question-categories.update",
+                "description": "Save Question Category Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "question-categories.destroy",
+                "description": "Delete Question Category",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Questions Bank",
+        "description": null,
+        "permissions": [
+            {
+                "name": "questions-bank.index",
+                "description": "List Questions in Bank",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "questions-bank.create",
+                "description": "Create Question in Bank Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "questions-bank.store",
+                "description": "Save New Question in Bank",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "questions-bank.show",
+                "description": "View Question Details in Bank",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "questions-bank.edit",
+                "description": "Edit Question in Bank Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "questions-bank.update",
+                "description": "Save Question Update in Bank",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "questions-bank.destroy",
+                "description": "Delete Question from Bank",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Quizzes",
+        "description": null,
+        "permissions": [
+            {
+                "name": "quizzes.index",
+                "description": "List Quizzes",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.create",
+                "description": "Create Quiz Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.store",
+                "description": "Save New Quiz",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.show",
+                "description": "View Quiz Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.edit",
+                "description": "Edit Quiz Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.update",
+                "description": "Save Quiz Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.destroy",
+                "description": "Delete Quiz",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.questions_manage",
+                "description": "Manage Quiz Questions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.questions_update",
+                "description": "Save Quiz Questions Assignment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.dashboard_view",
+                "description": "View Quiz Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.view_overview_mine",
+                "description": "View Quiz Overview (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.view_response_mine",
+                "description": "View Quiz Response (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.take_start",
+                "description": "Start Taking Quiz (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Surveys",
+        "description": null,
+        "permissions": [
+            {
+                "name": "surveys.index",
+                "description": "List Surveys",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.create",
+                "description": "Create Survey Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.store",
+                "description": "Save New Survey",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.show",
+                "description": "View Survey Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.edit",
+                "description": "Edit Survey Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.update",
+                "description": "Save Survey Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.destroy",
+                "description": "Delete Survey",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.questions_manage",
+                "description": "Manage Survey Questions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.results_view",
+                "description": "View Survey Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.questions_update",
+                "description": "Save Survey Questions Assignment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.take",
+                "description": "Take Survey (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.submit",
+                "description": "Submit Survey (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.dashboard_count_view",
+                "description": "View Total Surveys (Dashboard)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "surveys.questions_delete",
+                "description": "Remove Question",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Rooms (Booking)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "rooms.index",
+                "description": "List Rooms",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.create",
+                "description": "Create Room Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.store",
+                "description": "Save New Room",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.show",
+                "description": "View Room Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.edit",
+                "description": "Edit Room Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.update",
+                "description": "Save Room Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.destroy",
+                "description": "Delete Room",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.images_manage",
+                "description": "Manage Room Images",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "rooms.images_delete",
+                "description": "Delete Room Images",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Bookings",
+        "description": null,
+        "permissions": [
+            {
+                "name": "booking.index",
+                "description": "List Bookings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "booking.create",
+                "description": "Create Booking Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "booking.store",
+                "description": "Save New Booking",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "booking.show",
+                "description": "View Booking Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "booking.edit",
+                "description": "Edit Booking Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "booking.update",
+                "description": "Save Booking Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "booking.destroy",
+                "description": "Delete Booking",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "bookings.review_pending",
+                "description": "Review Pending Bookings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "bookings.approve",
+                "description": "Approve Booking Request",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "bookings.review_upcoming_approved",
+                "description": "Review Upcoming Approved Bookings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "bookings.review_upcoming_busy",
+                "description": "Review Upcoming Busy Slots",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "bookings.review_past",
+                "description": "Review Old\/Past Bookings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Programs",
+        "description": null,
+        "permissions": [
+            {
+                "name": "programlist.index",
+                "description": "List Programs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programlist.create",
+                "description": "Create Program Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programlist.store",
+                "description": "Save New Program",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programlist.show",
+                "description": "View Program Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programlist.edit",
+                "description": "Edit Program Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programlist.update",
+                "description": "Save Program Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programlist.destroy",
+                "description": "Delete Program",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programs.export",
+                "description": "Export Program Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programs.send_email",
+                "description": "Send Email related to Program",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programs.view",
+                "description": "View Program Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programs.report",
+                "description": "Program single Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "programs.edit",
+                "description": "Allow user to edit the program",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mentorship Tasks (Admin\/Mentor)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "mentorship_tasks.dashboard.view",
+                "description": "View Mentorship Task Home\/Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.create",
+                "description": "Create Mentorship Task Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.store",
+                "description": "Save New Mentorship Task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.show",
+                "description": "View Mentorship Task Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.edit",
+                "description": "Edit Mentorship Task Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.update",
+                "description": "Save Mentorship Task Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.destroy",
+                "description": "Delete Mentorship Task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorship_tasks.comment",
+                "description": "Send Comment on Mentorship Task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.complete",
+                "description": "Mark Mentorship Task as Complete",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorship_tasks.update_special",
+                "description": "Update Mentorship Task (Special)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "General \/ Core",
+        "description": null,
+        "permissions": [
+            {
+                "name": "core.admin_access",
+                "description": "Access Admin Area",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "core.dashboard_view",
+                "description": "Access Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "service_requests.list_all",
+                "description": "View All Service Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "service_requests.list_archived",
+                "description": "View Old Service Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "service_requests.list_mine",
+                "description": "View My Service Requests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "users.directory_view",
+                "description": "View User Directory",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "integrations.meeting_redirect",
+                "description": "Redirect to Meeting",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile.interests_manage",
+                "description": "View\/Manage My Interests",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Import",
+        "description": null,
+        "permissions": [
+            {
+                "name": "import.view_form",
+                "description": "Show Import Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "import.execute_users",
+                "description": "Import Users",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "User Profile",
+        "description": null,
+        "permissions": [
+            {
+                "name": "user.profile_view",
+                "description": "View Own Profile Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_view",
+                "description": "Show Own Profile Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_update_basic",
+                "description": "Update Own Basic Profile Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_update_bio",
+                "description": "Update Own Profile Bio",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_update_password",
+                "description": "Update Own Profile Password",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_update_password",
+                "description": "Update Account Password (General)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_email_confirm",
+                "description": "Confirm Email Address",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.profile_Edit",
+                "description": "Edit Own Profile Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "user.account_update_password",
+                "description": "Update Own Profile Password",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mentors",
+        "description": null,
+        "permissions": [
+            {
+                "name": "mentors.profile_view",
+                "description": "Show Mentor Profile",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentors.list",
+                "description": "List Mentors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentors.add",
+                "description": "Add New Mentor",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Company Profile",
+        "description": null,
+        "permissions": [
+            {
+                "name": "company.profile_view",
+                "description": "View Company Profile (Generic)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_view_mine",
+                "description": "View My Company Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_update_mine",
+                "description": "Update My Company Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_teams_add",
+                "description": "Add Team Member to Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_teams_edit",
+                "description": "Edit Team Member in Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_teams_delete",
+                "description": "Delete Team Member from Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_milestones_add",
+                "description": "Add Milestone to Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_milestones_edit",
+                "description": "Edit Milestone in Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_milestones_delete",
+                "description": "Delete Milestone from Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.profile_documents_delete",
+                "description": "Delete Document (General)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Utilities",
+        "description": null,
+        "permissions": [
+            {
+                "name": "utils.locations_list_states_by_country",
+                "description": "Get States by Country",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Messaging",
+        "description": null,
+        "permissions": [
+            {
+                "name": "messages.send",
+                "description": "Send New Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.reply",
+                "description": "Send Reply to Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.recipients_list_by_program",
+                "description": "Get Users List by Program (for composing)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.list",
+                "description": "List Messages (Inbox\/Outbox Entry Point)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.view",
+                "description": "Show Message Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.drafts_save",
+                "description": "Save Message as Draft",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.drafts_delete",
+                "description": "Delete Draft Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.drafts_list",
+                "description": "Get All Draft Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.folders_inbox",
+                "description": "View Inbox",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.folders_outbox",
+                "description": "View Outbox",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.delete",
+                "description": "Delete Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.folders_trash",
+                "description": "View Trash Folder",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.star_toggle",
+                "description": "Toggle Message Star Status",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.folders_starred",
+                "description": "View Starred Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.read_status_toggle",
+                "description": "Toggle Message Read Status",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.read_status_mark_read",
+                "description": "Mark Message as Read",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.read_status_mark_unread",
+                "description": "Mark Message as Unread",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.save",
+                "description": "Save New Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Audit Logs",
+        "description": null,
+        "permissions": [
+            {
+                "name": "audit-logs.index",
+                "description": "List Audit Logs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "audit-logs.show",
+                "description": "View Audit Log Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "audit-logs.destroy",
+                "description": "Delete Audit Log",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Form Builder",
+        "description": null,
+        "permissions": [
+            {
+                "name": "forms.builder_view",
+                "description": "Show Form Builder UI",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms.render_view",
+                "description": "Show Rendered Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms.design_save",
+                "description": "Save Form Design",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms.submissions_create",
+                "description": "Submit Form Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms.index",
+                "description": "Form List",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "forms_submissions.index",
+                "description": "Show Form Submissions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "form_submission_details.index",
+                "description": "Show Form Submissions Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Cycles",
+        "description": null,
+        "permissions": [
+            {
+                "name": "cycles.list",
+                "description": "List All Cycles",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "cycles.list_mine",
+                "description": "List My Assigned Cycles",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "cycles.modify",
+                "description": "Modify Cycle Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "cycles.users_manage",
+                "description": "Manage Users in Cycle",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Screening",
+        "description": null,
+        "permissions": [
+            {
+                "name": "screening.access",
+                "description": "Access Screening Module",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.view",
+                "description": "View Screening Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.form_view",
+                "description": "Open Screening Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.index",
+                "description": "List Screening Sessions\/Entries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.show",
+                "description": "Show Specific Screening Session\/Entry",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.update",
+                "description": "Update Screening Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.store",
+                "description": "Store New Screening Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.zoom_add",
+                "description": "Add Zoom Link to Screening",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.results_view",
+                "description": "View Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.users_view_details",
+                "description": "Get User Details for Screening",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.sessions_delete",
+                "description": "Delete Screening Session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.change_step",
+                "description": "Change Step Screening",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "screening.evaluation_show",
+                "description": "View Screening Evaluation Model",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_save_draft",
+                "description": "Save Screening Evaluation AS Draft",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger"
+                ]
+            },
+            {
+                "name": "screening.evaluation_publish",
+                "description": "Publish Screening Evaluation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_add_criteria",
+                "description": "Add Screening Evaluation Criteria",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_edit_criteria",
+                "description": "Edit Screening Evaluation Criteria",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_delete_criteria",
+                "description": "Delete Screening Evaluation Criteria",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_add_sub_criteria",
+                "description": "Add Screening Evaluation Sub Criteria",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_edit_sub_criteria",
+                "description": "Edit Screening Evaluation Sub Criteria",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluation_delete_sub_criteria",
+                "description": "Delete Screening Evaluation Sub Criteria",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "screening.evaluate_save_draft",
+                "description": "Save Screening Evaluation AS Draft (Judger)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "judger"
+                ]
+            },
+            {
+                "name": "screening.evaluate_publish",
+                "description": "Publish Screening Evaluation (Judger)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "judger"
+                ]
+            },
+            {
+                "name": "screening.get",
+                "description": "Get Judger Users",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": []
+            }
+        ]
+    },
+    {
+        "name": "Mentorship Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "mentorships.surveys_list",
+                "description": "List Mentorship Surveys",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.surveys_create",
+                "description": "Create Mentorship Survey Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.surveys_store",
+                "description": "Save New Mentorship Survey",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.surveys_edit",
+                "description": "Edit Mentorship Survey Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.surveys_update",
+                "description": "Save Mentorship Survey Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.surveys_delete",
+                "description": "Delete Mentorship Survey",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.sessions_list",
+                "description": "View Mentorship Sessions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.list_mine",
+                "description": "View My Mentorships (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.sessions_rate",
+                "description": "Rate Mentorship Session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.sessions_delete",
+                "description": "Delete Mentorship Session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.export",
+                "description": "Export Mentorship Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.dates_view",
+                "description": "Get Mentorship Dates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.sessions_list_detailed",
+                "description": "List Mentorship Sessions (Specific View)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentors.settings_modify",
+                "description": "Request MentorShip - Startup",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.waitlist_add",
+                "description": "Add User to Mentorship Waitlist - Request Mentorship (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.sessions_modify",
+                "description": "Modify Mentorship Session Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.sessions_view_details",
+                "description": "Get Mentorship Session Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.requests_list",
+                "description": "List Mentorship Requests\/Assignments",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.requests_view",
+                "description": "View Mentorship Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentorships.requests_assign",
+                "description": "Assign Mentor to Request",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Training Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "trainings.list",
+                "description": "List All Trainings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.edit",
+                "description": "Edit Training Details Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.store",
+                "description": "Save New Training",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.delete",
+                "description": "Delete Training",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.content_delete",
+                "description": "Delete Training Content",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.content_create",
+                "description": "Add Training Content Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.content_edit",
+                "description": "Edit Training Content Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.content_view",
+                "description": "View Training Content",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.content_store",
+                "description": "Save New Training Content",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.files_upload",
+                "description": "Upload Training Files",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.list_mine",
+                "description": "View My Trainings (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.attendance_offline_manage",
+                "description": "Manage Offline Attendance",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.attendance_qr_code_create",
+                "description": "Create QR Code for Attendance",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.attendance_offline_view",
+                "description": "Get Offline Attendance Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.sessions_list",
+                "description": "List Training Sessions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.sessions_create",
+                "description": "Add Training Session Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.sessions_delete",
+                "description": "Delete Training Session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.sessions_view",
+                "description": "View Training Session Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.sessions_edit",
+                "description": "Edit Training Session Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.descriptions_view",
+                "description": "Get Training Descriptions (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.results_export",
+                "description": "Export Training Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.tl_update_all",
+                "description": "Change All Training TLs (?)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.create",
+                "description": "Create Training Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.surveys_list",
+                "description": "List Training Surveys",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.surveys_create",
+                "description": "Create Training Survey Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.surveys_store",
+                "description": "Save New Training Survey",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.surveys_edit",
+                "description": "Edit Training Survey Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.surveys_update",
+                "description": "Save Training Survey Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.surveys_delete",
+                "description": "Delete Training Survey",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.reports_session",
+                "description": "View Training Session Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.reports_recording",
+                "description": "View\/Manage Training Session Recording",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.reports_attendance",
+                "description": "View Training Attendance Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.records_edit",
+                "description": "Edit Training Record (?)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.course_view",
+                "description": "View Course Details (User\/Admin)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.results_view",
+                "description": "View Training Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.my_sessions_mine",
+                "description": "View My Trainings sessions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Mentorship Tasks (Startup)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "mentorshipTasks.index",
+                "description": "List Mentorship Tasks",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.mentorshipTasks.home",
+                "description": "View My Mentorship Task Home\/Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.mentorshipTasks.index",
+                "description": "List My Mentorship Tasks",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.mentorshipTasks.show",
+                "description": "View My Mentorship Task Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "mentorship_tasks.complete_mine",
+                "description": "Mark My Mentorship Task as Complete",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "mentorship_tasks.comment_mine",
+                "description": "Send Comment on My Mentorship Task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Startup Funding Rounds",
+        "description": null,
+        "permissions": [
+            {
+                "name": "startup.fundingRounds.create",
+                "description": "Create Funding Round Form (My Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.fundingRounds.store",
+                "description": "Save New Funding Round (My Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.fundingRounds.show",
+                "description": "View Funding Round Details (My Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.fundingRounds.edit",
+                "description": "Edit Funding Round Form (My Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.fundingRounds.update",
+                "description": "Save Funding Round Update (My Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "startup.fundingRounds.destroy",
+                "description": "Delete Funding Round (My Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Calendar",
+        "description": null,
+        "permissions": [
+            {
+                "name": "calendar.events_list",
+                "description": "View Calendar",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "calendar.events_view",
+                "description": "Show Calendar Event Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "calendar.events_edit",
+                "description": "Edit Calendar Event Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "calendar.events_update",
+                "description": "Save Calendar Event Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "calendar.events_delete",
+                "description": "Delete Calendar Event",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "calendar.ajax",
+                "description": "Calendar AJAX Actions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Calendar Integrations",
+        "description": null,
+        "permissions": [
+            {
+                "name": "integrations.calendar_google_login",
+                "description": "Initiate Google Calendar Login",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "integrations.calendar_google_callback",
+                "description": "Handle Google Calendar Callback",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "integrations.calendar_google_sync",
+                "description": "Sync Events with Google Calendar",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "integrations.calendar_microsoft_login",
+                "description": "Initiate Microsoft Calendar Login",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "integrations.calendar_microsoft_callback",
+                "description": "Handle Microsoft Calendar Callback",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "integrations.calendar_microsoft_sync",
+                "description": "Sync Events with Microsoft Calendar",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Reports",
+        "description": null,
+        "permissions": [
+            {
+                "name": "reports.list",
+                "description": "View Reports Index",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "reports.view.ajax",
+                "description": "View Report Data (AJAX)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Authentication Integrations",
+        "description": null,
+        "permissions": [
+            {
+                "name": "integrations.auth_microsoft_redirect",
+                "description": "Redirect to Microsoft Login",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "integrations.auth_microsoft_callback",
+                "description": "Handle Microsoft Login Callback",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "integrations.auth_linkedin_login",
+                "description": "Initiate LinkedIn Login",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "integrations.auth_linkedin_callback",
+                "description": "Handle LinkedIn Login Callback",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "My Files",
+        "description": null,
+        "permissions": [
+            {
+                "name": "my_files.list",
+                "description": "List My Files",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger"
+                ]
+            },
+            {
+                "name": "my_files.view_file",
+                "description": "Show\/Download File",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger"
+                ]
+            },
+            {
+                "name": "my_files.view_image",
+                "description": "Show Image File",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "SWOT Analysis",
+        "description": null,
+        "permissions": [
+            {
+                "name": "swot.view",
+                "description": "View SWOT Analysis",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": []
+            },
+            {
+                "name": "swot.generate",
+                "description": "Generate SWOT Analysis",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": []
+            },
+            {
+                "name": "swot.save",
+                "description": "Save SWOT Analysis",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": []
+            },
+            {
+                "name": "swot.export",
+                "description": "Export SWOT Analysis",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": []
+            }
+        ]
+    },
+    {
+        "name": "Dashboard Widgets (Cards)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "dashboard.widgets_cards_managers_view",
+                "description": "Show Managers Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_organizations_view",
+                "description": "Show Organizations Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_requests_view",
+                "description": "Show Service Requests Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets.cards.new_messages.view",
+                "description": "Show New Messages Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_contact_us_view",
+                "description": "Show Contact Us Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_startups_view",
+                "description": "Show Startups Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_mentors_view",
+                "description": "Show Mentors Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_mentorship_requests_view",
+                "description": "Show Mentorship Requests Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_mentorship_sessions_durations_view",
+                "description": "Show Mentorship Session Durations Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_judgers_view",
+                "description": "Show Judgers Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_training_sessions_view",
+                "description": "Show Training Sessions Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_training_sessions_durations_view",
+                "description": "Show Training Session Durations Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_services_view",
+                "description": "Show Services Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_my_requests_view",
+                "description": "Show My Requests Card (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_my_mentors_view",
+                "description": "Show My Mentors Card (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_filtration_view",
+                "description": "Show Filtration Card (?)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_evaluation_view",
+                "description": "Show Evaluation Card (?)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_coming_sessions_view",
+                "description": "Show Coming Sessions Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_startup_attendance_rate_view",
+                "description": "Show Startup Attendance Rate Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_sessions_without_tasks_view",
+                "description": "Show Sessions Without Tasks Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_completed_tasks_view",
+                "description": "Show Completed Tasks Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_non_completed_tasks_view",
+                "description": "Show Non-Completed Tasks Card",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_startup_by_program_view",
+                "description": "Show Startup by Program Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_startups_by_sdgs_view",
+                "description": "Show Startups by SDGs Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_demographics_view",
+                "description": "Show Demographics Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_top_startups_sectors_view",
+                "description": "Show Top Startups Sectors Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_male_female_ratio_view",
+                "description": "Show Male\/Female Ratio Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_company_by_business_model_view",
+                "description": "Show Company by Business Model Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_startups_development_stage_view",
+                "description": "Show Startups Development Stage Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_sector_breakdown_view",
+                "description": "Show Sector Breakdown Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_startups_hq_view",
+                "description": "Show Startups HQ Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_graphs_startups_target_markets_view",
+                "description": "Show Startups Target Markets Graph",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Dashboard Widgets (Graphs)",
+        "description": null,
+        "permissions": [
+            {
+                "name": "dashboard.widgets_graphs_program_progress_view",
+                "description": "Show Program Progress Graph (Admin \/ Org)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_available_surveys_view",
+                "description": "Show Available Surveys Table (Mentor \/ Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_latest_events_view",
+                "description": "Show Latest Events Table",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_my_last_training_view",
+                "description": "Show My Last Training Table (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_my_final_session_view",
+                "description": "Show My Final Session Table (User)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_my_current_schedule_view",
+                "description": "Show My Current Schedule Table (Mentor \/ Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_my_judging_list_view",
+                "description": "Show My Judging List Table (Judger)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_program_final_screening_view",
+                "description": "Show Program Final Screening Table",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "judger",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Projects",
+        "description": null,
+        "permissions": [
+            {
+                "name": "projects.programs_link",
+                "description": "Link Programs to Project",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.programs_unlink",
+                "description": "Unlink Program from Project",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.team_add_member",
+                "description": "Add Team Members to Project",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.team_remove_member",
+                "description": "Remove Team Member from Project",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.index",
+                "description": "List Projects",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.create",
+                "description": "Create Project Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.store",
+                "description": "Save New Project",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.show",
+                "description": "View Project Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.edit",
+                "description": "Edit Project Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.update",
+                "description": "Save Project Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "projects.destroy",
+                "description": "Delete Project",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Organizations Settings",
+        "description": null,
+        "permissions": [
+            {
+                "name": "settings.organization_manage",
+                "description": "Manage Organization Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "settings.organization_meeting_manage",
+                "description": "Manage Meeting Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "settings.organization_social_manage",
+                "description": "Manage Social Integration Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "settings.organization.general.manage",
+                "description": "Manage General Platform Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "organization.users_invite",
+                "description": "Invite New Organizations Team member",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "organization.users_invitations_resend",
+                "description": "Resend Invitation Email to the Organizations team member",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "organization.users_invitations_cancel",
+                "description": "Cancel Organizations team member Invitation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Security \/ Two-Factor Auth",
+        "description": null,
+        "permissions": [
+            {
+                "name": "invitations.set_password_view_form",
+                "description": "Show Set Password Form (Invitation)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "invitations.accept",
+                "description": "Accept Invitation & Set Password",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa.phone_save_session",
+                "description": "Save Phone Session Info (2FA Setup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa_code_send",
+                "description": "Send 2FA Verification Code",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa_code_verify",
+                "description": "Verify 2FA Code",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa_verify_login",
+                "description": "Verify 2FA Login Attempt",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa_disable",
+                "description": "Disable 2FA for Account",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa_enable",
+                "description": "Enable 2FA for Account",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "security.2fa_generate_secret",
+                "description": "Generate 2FA Secret Key",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Currencies",
+        "description": null,
+        "permissions": [
+            {
+                "name": "currencies.index",
+                "description": "List Currencies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "currencies.create",
+                "description": "Create Currency Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "currencies.store",
+                "description": "Save New Currency",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "currencies.edit",
+                "description": "Edit Currency Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "currencies.update",
+                "description": "Save Currency Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "currencies.destroy",
+                "description": "Delete Currency",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "currencies.rates_update_all",
+                "description": "Update All Currency Rates",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "License Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "license.activate_view_form",
+                "description": "Show License Activation Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "license.activate_execute",
+                "description": "Activate License",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Permission Groups",
+        "description": "Permission Groups",
+        "permissions": [
+            {
+                "name": "permission-groups.create",
+                "description": "Create Permission Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.store",
+                "description": "Store Permission Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.show",
+                "description": "",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.update",
+                "description": "",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "permission-groups.destroy",
+                "description": "",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Dashboard (Startup)",
+        "description": "Dashboard (Startup)",
+        "permissions": [
+            {
+                "name": "dashboard.widgets_cards_programs_view",
+                "description": "Show Programs Card - (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": []
+            },
+            {
+                "name": "dashboard.widgets_cards_rate_view",
+                "description": "Show Rate Card (?)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_latest_services_view",
+                "description": "Show Latest Services Table (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "judger",
+                    "registered"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_current_enrolled_program_view",
+                "description": "Show Program List (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_mentors_sessions_view",
+                "description": "Show Mentors Sessions Table (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_mentors_view",
+                "description": "Show Mentors Table (Startup)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "mentorship.sessions_Rate",
+                "description": "Rate mentorship session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Dashboard (Mentor)",
+        "description": "Dashboard (Mentor)",
+        "permissions": [
+            {
+                "name": "dashboard.widgets_tables.my_next_mentorship_sessions_view",
+                "description": "Show My Next Mentorship Sessions Table (Mentor)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "mentor"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Importer Tool",
+        "description": null,
+        "permissions": [
+            {
+                "name": "importer.index",
+                "description": "View Importer Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "importer.upload",
+                "description": "Upload Importer File",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "importer.import",
+                "description": "Importer Parsing",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "importer.organizations",
+                "description": "Fetch Organizations",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    }
+]

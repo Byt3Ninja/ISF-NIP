@@ -339,6 +339,7 @@ class HomeController extends Controller
                     service_categories sc ON s.service_category_id = sc.id
                 WHERE
                     s.deleted_at IS NULL
+                    AND s.organization_id IS NOT NULL
             ";
             if( $has_org ) { $services_q .= " AND s.organization_id = " . $user->organization_id; }
             $services = collect( DB::select( $services_q ) )->map(function( $service ) use ( $l ) {
@@ -355,7 +356,7 @@ class HomeController extends Controller
             });
         } else { $services = collect([]); }
 
-        if( array_intersect(['dashboard_cards.my_services_requests'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions) )
         {
             $my_requests_q = "SELECT
                     sr.id
@@ -403,7 +404,9 @@ class HomeController extends Controller
                 return $oneUser;
             })->values();
         } else { $my_mentors = collect([]); }
-
+        $cycle = $user->company->cycle ?? 0;
+        $mentorIds = DB::table('cycles_mentors')->where('cycle_id', $cycle)->pluck('user_id')->toArray();
+        $my_mentors =  $my_mentors->whereIn('id', $mentorIds);
         if( array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions) )
         {
             $today = date("Y-m-d");
@@ -1066,8 +1069,8 @@ class HomeController extends Controller
                 else { return true; }
             })->values()->map(function($item) {
                 $item->end_at = null;
-                if( $item->type == 'sessions' ) { $item->end_at = Carbon::parse($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s'); }
-                elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = Carbon::parse($item->datetime)->format('Y-m-d H:i:s'); }
+                if( $item->type == 'sessions' ) { $item->end_at = Carbon::createFromTimestamp($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s'); }
+                elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s'); }
                 return $item;
             })->filter(function($item) {
                 return now() > $item->end_at;
@@ -1234,7 +1237,7 @@ class HomeController extends Controller
             elseif( !$middleware->count() ) { return false; }
             return true;
         })->values();
-
+        
         $data['my_schedules'] = $my_schedules;
         $data['upcoming_sessions'] = $upcoming_sessions;
         $data['cType'] = $cType;
@@ -1319,7 +1322,7 @@ class HomeController extends Controller
             ],
             [
                 'color' => 'danger',
-                'href' => '/dashboard/users#search=Mentor',
+                'href' => '/dashboard/show/Mentors',
                 'icon' => 'ti-school',
                 'text' => __('admin.Mentors'),
                 'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
@@ -1366,7 +1369,7 @@ class HomeController extends Controller
                 'color' => 'info',
                 'href' => '/dashboard/training/sessions',
                 'icon' => 'ti-alarm',
-                'text' => __('admin.Training sessions Duration'),
+                'text' => 'Training sessions Duration',
                 'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
                 'count' => $training_sessions->sum('duration') / 60,
                 'isRating' => false,

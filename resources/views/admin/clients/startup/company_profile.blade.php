@@ -703,8 +703,8 @@
                     ->where('stype', 1)
                     ->orderBy('arr')
                     ->first(['id']);
-                    $weight = $company->companyWeight($company->id, $form->id, 0);
-                    $judges = $company->judges($company->id, $form->id);
+                    $weight = $company->companyWeight($company->id, $form?->id, 0);
+                    $judges = $company->judges($company->id, $form?->id);
                     $judges = \App\User::whereIn('id', $judges)->get();
                     @endphp
                     <span
@@ -777,15 +777,15 @@
       <div class="modal-header">
         <h4 class="modal-title" id="myModalLabel33">
           {{ __('messages.SendMessageTo') }}
-          {{ $company->user->{'first_name_' . $l} }}
-          {{ $company->user->{'last_name_' . $l} }}
+          {{ $company?->user?->{'first_name_' . $l} }}
+          {{ $company?->user?->{'last_name_' . $l} }}
           ({{ $company->{'name_' . $l} }}).
         </h4>
       </div>
       <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
         {!! csrf_field() !!}
         <input type="hidden" name="sender" value="{{ $_user->id }}">
-        <input type="hidden" name="receiver" value="{{ $company->user->id }}">
+        <input type="hidden" name="receiver" value="{{ $company?->user?->id }}">
         <div class="modal-body">
           <div class="form-group mb-3">
             <label class="form-label fs-6 mb-1">{{ __('messages.Subject') }}:</label>

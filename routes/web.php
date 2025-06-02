@@ -43,6 +43,7 @@ Route::get('default-permissions', function() { App\Permission::default_permissio
 
 /// Frontend routes ///
 Route::get('lang/{locale}', 'IndexController@lang');
+Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
 Route::get('home', 'IndexController@home');
 Route::get('about', 'IndexController@home');
@@ -60,6 +61,18 @@ Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
  // test middleware
+ Route::get('/testting', function () {
+    $stamp = '1746024780';
+    $format = 'Y-m-d';
+    try {
+        $parser = 'carbon';
+        $date = Carbon\Carbon::parse($stamp)->format($format);
+    } catch (\Exception $e) {
+        $parser = 'date';
+        $date = date($format, $stamp);
+    }
+    dd( $date, $parser );
+ });
  Route::get('/2otp', function () {
     return redirect('/dashboard');
 })->middleware(['auth', '2fa']);
@@ -144,10 +157,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('settings.system_social_home_image_update');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('settings.system_social_achievements_update');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('settings.system_social_whatsapp_update');
-    Route::get('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.start');
-    Route::get('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.status');
-    Route::get('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.qr.data');
-    Route::get('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.qr.image');
+  
+    Route::get('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[0-9]+')->name('whatsapp.session.start');
+    Route::get('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[0-9]+')->name('whatsapp.session.status');
+    Route::get('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.data');
+    Route::get('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.image');
+    Route::delete('whatsapp/session/{sessionId}/terminate', 'WhatsAppSessionController@terminate')->where('sessionId', '[0-9]+')->name('whatsapp.session.terminate');
+    Route::post('whatsapp/session/{sessionId}/send', 'WhatsAppSessionController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
 
     
 
@@ -304,9 +320,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.folders_starred');
     Route::post('/messages/toggleMarkReadStatus', 'MessengerController@toggleMarkReadStatus')->name('messages.read_status_toggle');
     //Contact US Messages
-    // Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
-    // Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
-    // Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
+    Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
+    Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
+    Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
     Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.read_status_mark_read');
     Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.read_status_mark_unread');
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.view');
@@ -355,6 +371,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Screening
     Route::get('screening', 'ScreeningController@index');
+    Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
@@ -460,6 +477,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('surveys/{survey}/questions', 'surveysController@save_questions')->name('surveys.questions_update');
     Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.take');
     Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
+    Route::post('surveys/{survey}/questions/delete', 'surveysController@delete_questions')->name('surveys.questions_delete');
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
@@ -507,7 +525,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
         Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
         Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
-        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.show');
+        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.display');
         Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach');
         Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach');
 

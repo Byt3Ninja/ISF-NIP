@@ -513,4 +513,40 @@ public function update(Request $request)
 
 		}
 	}
+
+	public function get($formId, $stepId, $panel)
+{
+    try {
+        $judges = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Judger');
+        })->get();
+
+        $options = '';
+        foreach ($judges as $judge) {
+            $options .= "<option value=\"{$judge->id}\">{$judge->first_name_en} {$judge->last_name_en}</option>";
+        }
+
+        $screening = Screening::where('step_id', $stepId)
+            ->where('panel', $panel)
+            ->first();
+
+        $selected = $screening && $screening->users ? json_decode($screening->users, true) : [];
+
+        $selected = array_map('strval', (array)$selected);
+
+        return response()->json([
+            'options' => $options,
+            'selected' => $selected
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error in screening get:', [
+            'form_id' => $formId,
+            'step_id' => $stepId,
+            'panel' => $panel,
+            'error' => $e->getMessage()
+        ]);
+        return response()->json(['error' => 'Failed to fetch users'], 500);
+    }
+}
+
 }

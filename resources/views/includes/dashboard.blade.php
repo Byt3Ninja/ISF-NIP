@@ -312,7 +312,7 @@
 													{{ $step->title }}
 													@endif
 												</td>
-												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ $step->status
+												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ __('admin.'.$step->status)
 														}}</span></td>
 												<td>{{ $step->from }}</td>
 												<td>{{ $step->to }}</td>
@@ -880,8 +880,7 @@
 										<th class="fw-semibold">{{__('dashboard.Your session was in')}}</th>
 										<th class="fw-semibold">{{__('dashboard.Did you attend this session?')}}</th>
 										<th class="fw-semibold">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
-										<th class="fw-semibold">{{ __('dashboard.Your opinion important kindly write any notes about this
-											session') }}</th>
+										<th class="fw-semibold">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
 										<th class="fw-semibold text-center">{{__('dashboard.Submit')}}</th>
 									</tr>
 								</thead>

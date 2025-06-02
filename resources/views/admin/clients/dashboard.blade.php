@@ -41,10 +41,16 @@
     $organization_id = $_user->organization_id ?? 0;
     if( $organization_id == 0 ) { $organization_id = $_user->company->cycledata->organization_id ?? 0; }
     $s_count = \App\Service::whereHas('organizations')->count();
-    $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+    $s_r_count = \App\ServicesRequests::join('services','service_id','services.id')
+    ->where('user_id', $user_id)
+    ->count();
     $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
-    $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
-    $m_count = count($mentors);
+    $mentors = \App\User::role('Mentor');
+    $mentorIds = \App\CyclesMentors::where('cycle_id', $circle_id)
+    ->pluck('user_id')
+    ->toArray();
+    $mentors = $mentors->whereIn('id', $mentorIds);
+    $m_count = $mentors->count();
     $surveyEligible = [];
     if( $_user->company && $circle_id != 0 )
     {
@@ -128,7 +134,7 @@
         if( empty( $trainingSession->datetime ) ) { continue; }
         else
         {
-          $endAt = Carbon\carbon::parse($trainingSession->datetime)->format('Y-m-d H:i:s');
+          $endAt = FormatDate($trainingSession->datetime, 'Y-m-d H:i:s');
           if( now() > $endAt )
           {
             $surveyEligible[] = [
@@ -206,11 +212,11 @@
 		$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
     	$q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
 		})->orderBy('start')->take(5)->get();
-		$s_count = \App\Service::count();
-		$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+		// $s_count = \App\Service::count();
+	
 		$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
-		$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
-		$m_count = count($mentors);
+		// $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
+		// $m_count = count($mentors);
 		/// Next session
 		// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
 		$days = request()->query('days', 14);
@@ -879,8 +885,8 @@
                       
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span></td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') ?? '-' }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') ?? '-' }}</td>
+                    <td>{{ FormatDate($step->from, 'Y-m-d') ?? '-' }}</td>
+                    <td>{{ FormatDate($step->to, 'Y-m-d') ?? '-' }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}

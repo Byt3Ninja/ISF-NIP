@@ -1,66 +1,193 @@
-<form class="form d-flex flex-column h-100" action="{{ route('settings.system_social_whatsapp_update') }}" method="POST"
-  enctype="multipart/form-data">
-  {!! csrf_field() !!}
-  @method('PUT')
-  <input type="hidden" name="id" value="{{ $Title->id }}">
-
-  <div class="form-content flex-grow-1">
-    <div class="form-group mb-3">
-      <label class="form-label mb-1" for="whatsApp_URL_callback">{{ __('settings.whatsApp_URL_callback') }}</label>
-      <input id="whatsApp_URL_callback" type="text" class="form-control" value="{{ $Title->whatsApp_URL_callback }}"
-        name="whatsApp_URL_callback">
+<!-- WhatsApp Authentication Interface -->
+<div class="">
+  <!-- Main Authentication Card -->
+  <div class="mb-4">
+    <div class="">
+      {{-- <div class="d-flex align-items-center">
+        <i class="fab fa-whatsapp fa-2x me-3"></i>
+        <div>
+          <h5 class="mb-0">{{ __('admin.whatsapp_authentication') }}</h5>
+          <small class="opacity-75">{{ __('admin.connect_whatsapp_account') }}</small>
+        </div>
+      </div> --}}
     </div>
-    <div class="form-group mb-3">
-      <label class="form-label mb-1" for="whatsApp_INSTANCE_ID">{{ __('settings.whatsApp_INSTANCE_ID') }}</label>
-      <input type="text" class="form-control" value="{{ $Title->whatsApp_INSTANCE_ID }}" name="whatsApp_INSTANCE_ID"
-        id="whatsApp_INSTANCE_ID">
-    </div>
-    <div class="form-group mb-3">
-      <label class="form-label mb-1" for="whatsApp_ACCESS_TOKEN">{{ __('settings.whatsApp_ACCESS_TOKEN') }}</label>
-      <input type="text" class="form-control" value="{{ $Title->whatsApp_ACCESS_TOKEN }}" name="whatsApp_ACCESS_TOKEN"
-        id="whatsApp_ACCESS_TOKEN">
-    </div>
+    
+    <div class="">
+      <!-- Connection Status -->
+      <div id="connectionStatus" class="connection-status mb-4">
+        <div class="status-indicator disconnected" id="statusIndicator">
+          <div class="status-dot"></div>
+          <div class="status-info">
+            <h6 id="connectionTitle" class="mb-1">{{ __('admin.whatsapp_not_connected') }}</h6>
+            <small id="connectionSubtitle" class="text-muted">{{ __('admin.start_session_to_connect') }}</small>
+          </div>
+        </div>
+      </div>
 
-    <h1>WhatsApp Session Manager</h1>
+      <!-- Session Input -->
+      <div class="input-group mb-8 shadow-none">
+        <label for="sessionIdInput" class="form-label">{{ __('admin.session_id') }}</label>
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="fas fa-id-card"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="sessionIdInput" 
+            placeholder="{{ __('admin.enter_session_id') }}" 
+            value=""
+            pattern="[0-9]+"
+            title="{{ __('admin.only_numbers_allowed') }}"
+          >
+          {{-- <button class="btn btn-outline-info" type="button" onclick="generateRandomSessionId()">
+            <i class="fas fa-random"></i>
+          </button> --}}
+        </div>
+        <div class="form-text">
+          <i class="fas fa-info-circle"></i>
+          {{ __('admin.unique_identifier_session') }}
+        </div>
+      </div>
 
-        <div class="action-group">
-            <h2>Manage Specific Session</h2>
-            <label for="sessionIdInput">Session ID:</label>
-            <input type="text" id="sessionIdInput" placeholder="e.g., my-session-name">
+      <!-- Action Buttons -->
+      <div class="action-buttons mb-4">
+        <button id="connectButton" class="btn btn-primary btn-lg me-2" onclick="startAuthentication()">
+          <i class="fas fa-qrcode"></i>
+          <span>{{ __('admin.connect_whatsapp') }}</span>
+        </button>
+        <button id="statusButton" class="btn btn-outline-primary" onclick="checkConnectionStatus()">
+          <i class="fas fa-signal"></i>
+          {{ __('admin.status') }}
+        </button>
+        <button id="disconnectButton" class="btn btn-outline-danger" onclick="disconnectSession()" style="display: none;">
+          <i class="fas fa-sign-out-alt"></i>
+          {{ __('admin.disconnect') }}
+        </button>
+        <button id="clearSessionButton" class="btn btn-outline-warning" onclick="clearStoredSession()" title="{{ __('admin.clear_stored_session') }}">
+          <i class="fas fa-trash"></i>
+          {{ __('admin.clear_session') }}
+        </button>
+      </div>
 
-            {{-- Button to trigger the primary workflow --}}
-            <button id="monitorButton">Start & Monitor Session</button>
-            <hr style="margin: 15px 0; border: none; border-top: 1px dashed #eee;">
+      <!-- QR Code Display -->
+      <div id="qrCodeSection" class="qr-section" style="display: none;">
+        <div class="card border-success">
+          <div class="card-header bg-light">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="mb-0">
+                  <i class="fas fa-qrcode text-success"></i>
+                  {{ __('admin.scan_qr_code') }}
+                </h6>
+              </div>
+              <div id="qrTimer" class="timer-display"></div>
+            </div>
+          </div>
+          <div class="card-body text-center">
+            <div id="qrImageContainer" class="qr-image-container mb-3">
+              <img id="qrImage" src="" alt="WhatsApp QR Code" class="qr-image">
+              <div id="qrLoader" class="qr-loader">
+                <div class="spinner-border text-success" role="status">
+                  <span class="visually-hidden">{{ __('admin.Loading') }}...</span>
+                </div>
+                <p class="mt-2">{{ __('admin.generating_qr_code') }}</p>
+              </div>
+            </div>
+            <div class="qr-instructions">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <p class="small mb-0">{{ __('admin.open_whatsapp_phone') }}</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <p class="small mb-0">{{ __('admin.go_to_settings_linked_devices') }}</p>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <p class="small mb-0">{{ __('admin.tap_link_device_scan') }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {{-- Add other direct action buttons if needed --}}
-            {{-- <button id="restartButton" class="secondary">Restart</button> --}}
-            {{-- <button id="terminateButton" class="danger">Terminate</button> --}}
+      <!-- Connection Progress -->
+      <div id="connectionProgress" class="connection-progress" style="display: none;">
+        <div class="progress mb-2">
+          <div id="progressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span id="progressText" class="small text-muted">{{ __('admin.waiting_for_connection') }}...</span>
+          <span id="progressAttempt" class="small text-muted">0/36</span>
+        </div>
+      </div>
+
+      <!-- Success State -->
+      <div id="successState" class="success-state" style="display: none;">
+        <div class="alert alert-success border-0">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+            <div>
+              <h6 class="alert-heading mb-1">{{ __('admin.whatsapp_connected_successfully') }}</h6>
+              <p class="mb-0">{{ __('admin.whatsapp_account_linked') }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Connected Session Info -->
+        <div id="sessionInfo" class="session-info mt-3">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="small text-muted">{{ __('admin.session_id_caps') }}</label>
+                <div id="connectedSessionId" class="fw-bold">-</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-item">
+                <label class="small text-muted">{{ __('admin.connected_since_caps') }}</label>
+                <div id="connectedSince" class="fw-bold">-</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {{-- Feedback Area --}}
-        <div id="feedbackArea" class="feedback" style="display: none;"></div>
+        <!-- Test Message Section -->
+        <div class="test-section mt-4">
+          <h6 class="mb-3">
+            <i class="fas fa-paper-plane"></i>
+            {{ __('admin.send_test_message') }}
+          </h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="testPhoneNumber" class="form-label">{{ __('admin.phone_number') }}</label>
+              <input type="tel" class="form-control" id="testPhoneNumber" placeholder="{{ __('admin.phone_placeholder') }}">
+            </div>
+            <div class="col-md-6">
+              <label for="testMessage" class="form-label">{{ __('admin.message') }}</label>
+              <input type="text" class="form-control" id="testMessage" placeholder="{{ __('admin.hello_whatsapp_api') }}">
+            </div>
+            <div class="col-12">
+              <button id="sendTestButton" class="btn btn-primary" onclick="sendTestMessage()">
+                <i class="fas fa-paper-plane me-2"></i>
+                {{ __('admin.send_test_message') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {{-- QR Code Display Area --}}
-         <div id="qrCodeImageArea" class="output-area" style="display: none;">
-             <strong>Scan QR Code:</strong>
-              <p style="font-size: 0.9em; color: #666; text-align: center;">Scan this QR code with WhatsApp on your phone.</p>
-             <img id="qrImageElement" src="" alt="WhatsApp QR Code">
-         </div>
-
-        {{-- Polling Feedback Area --}}
-        <div id="pollingFeedbackArea" class="output-area" style="display: none;">
-             <strong>Monitoring Status:</strong>
-             <span id="pollingStatusContent">Waiting to start...</span>
-         </div>
-
+      <!-- Status Messages -->
+      <div id="statusMessages" class="status-messages flex flex-column"></div>
     </div>
-
-
-
-
-
-
-  <div class="form-group d-flex justify-content-end mt-auto">
-    <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
   </div>
-</form>
+</div>

@@ -78,7 +78,7 @@ use Illuminate\Support\Facades\Http;
     public function handleGoogleCallback(){
       
         try {
-            $guser = Socialite::driver('google')->user();
+            $guser = Socialite::driver('google')->stateless()->user();
             $finduser = User::where('google_id', $guser->id)->first();
             
 			if (!$finduser) {

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\LoginSecurity;
 use Auth;
 use Hash;
 use Illuminate\Http\Request;
