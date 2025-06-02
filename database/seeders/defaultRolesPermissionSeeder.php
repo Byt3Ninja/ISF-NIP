@@ -62,7 +62,7 @@ class defaultRolesPermissionSeeder extends Seeder
 				{
 					$groupsToCreate[] = [
 						'name' => $name,
-						'description' => $name['description'],
+						'description' => $permissionGroup['description'],
 					];
 				}
 			}
