@@ -40,6 +40,30 @@ class defaultRolesPermissionSeeder extends Seeder
 			foreach( $parsedFile as $permissionGroup )
 			{
 				$name = $permissionGroup['name'];
+				$check = $db_groups->where('name', $name)->first();
+				if( empty( $check ) )
+				{
+					$groupsToCreate[] = [
+						'name' => $name,
+						'description' => $permissionGroup['description'],
+					];
+				}
+			}
+			if( count( $groupsToCreate ) )
+			{
+				permissionsGroup::insert( $groupsToCreate );
+				foreach( $groupsToCreate as $group )
+				{
+					$name = $group['name'];
+					$this->command->info("Permission Group created successfully for: {$name}");
+				}
+				$db_groups = collect( DB::select('SELECT * FROM permission_groups') );
+			}
+
+			foreach( $parsedFile as $permissionGroup )
+			{
+				$name = $permissionGroup['name'];
+				$getGroup = $db_groups->where('name', $name)->first();
 				$permissions = $permissionGroup['permissions'];
 				foreach( $permissions as $permission )
 				{
@@ -54,16 +78,9 @@ class defaultRolesPermissionSeeder extends Seeder
 							'description' => $permission['description'],
 							'guard_name' => $permission['guard_name'],
 							'is_core' => $permission['is_core'],
+							'permission_group_id' => $getGroup->id,
 						];
 					}
-				}
-				$check = $db_groups->where('name', $name)->first();
-				if( empty( $check ) )
-				{
-					$groupsToCreate[] = [
-						'name' => $name,
-						'description' => $permissionGroup['description'],
-					];
 				}
 			}
 
@@ -90,16 +107,6 @@ class defaultRolesPermissionSeeder extends Seeder
 				$db_roles = collect( DB::select('SELECT * FROM roles') );
 			}
 
-			if( count( $groupsToCreate ) )
-			{
-				permissionsGroup::insert( $groupsToCreate );
-				foreach( $groupsToCreate as $group )
-				{
-					$name = $group['name'];
-					$this->command->info("Permission Group created successfully for: {$name}");
-				}
-				$db_groups = collect( DB::select('SELECT * FROM permission_groups') );
-			}
 			if( count( $permissionsToCreate ) )
 			{
 				Permission::insert( $permissionsToCreate );
@@ -145,6 +152,7 @@ class defaultRolesPermissionSeeder extends Seeder
 				RolePermissions::insert( $default_roles_permissions );
 			}
 
+			app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 			$this->command->info('Default roles and permissions successfully deployed!');
 		}
 	}

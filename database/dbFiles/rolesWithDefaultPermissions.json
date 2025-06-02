@@ -2613,6 +2613,16 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "surveys.questions_delete",
+                "description": "Remove Question",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
