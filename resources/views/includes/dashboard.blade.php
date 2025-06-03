@@ -296,6 +296,7 @@
 												<th>{{ $l == 'ar' ? 'بدأت في' : 'Start At' }}</th>
 												<th>{{ $l == 'ar' ? 'انتهت في' : 'End at' }}</th>
 												<th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
+												<th>{{ $l == 'ar' ? 'الاجراءات' : 'Actions' }}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -303,7 +304,7 @@
 											<tr>
 												<td>
 													@if( $step->stype == 1 )
-													@if( $step->arr == 'Completed' || $step->arr == 'انتهت' )
+													@if( $step->status == 'Completed' || $step->status == 'انتهت' )
 													@if( $company->approved && $_user->ableTo('cycles.list_mine', $permissions) )
 													<a href="/dashboard/cycles/{{ $step->fLink }}"> {{ $step->title }} </a>
 													@else
@@ -323,6 +324,22 @@
 												<td style="height: 50px;">
 													<span style="width: 350px; height: 100%; display: inline-block; white-space: normal;"> {{
 														$step->description ? $step->description : '...' }} </span>
+												</td>
+												<td>
+													{{-- @if( $step->stype == 1 && $step->arr != 'Completed' && $step->arr != 'انتهت' )
+													<a href="/dashboard/cycles/{{ $step->id }}" class="btn btn-icon rounded-circle btn-label-primary"
+														title="{{ __('dashboard.Join') }}"> <i class="ti ti-arrows-join"></i> </a>
+													@elseif( $step->stype == 2 )
+													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-icon rounded-circle btn-label-primary"
+														title="{{ __('dashboard.View') }}"> <i class="ti ti-eye"></i> </a>
+													@endif --}}
+														@if ($step->stype == 1 && $step->status == 'Not started') 
+															<a href="/dashboard/show-form/{{ $step->data }}">
+																<span class="btn btn-icon btn-label-primary rounded-circle">
+																		<i class="ti ti-eye"></i>
+																</span>
+															</a>
+														@endif
 												</td>
 											</tr>
 											@endforeach

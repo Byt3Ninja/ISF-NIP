@@ -840,7 +840,8 @@ class HomeController extends Controller
                 s.stype,
                 s.from,
                 s.to,
-                s.description
+                s.description,
+                s.data
             FROM
                 steps s
             WHERE
