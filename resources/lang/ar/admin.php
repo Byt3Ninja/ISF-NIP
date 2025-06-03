@@ -1900,6 +1900,9 @@ return [
 	// Additional WhatsApp interface translations
 	'only_numbers_allowed' => 'أرقام فقط مسموحة',
 	'session_id_label' => 'معرف الجلسة',
+	'Checking existing session status' => 'فحص حالة الجلسة الحالية',
+	'Found existing session' => 'تم العثور على جلسة موجودة',
+	'Displaying QR code for reconnection' => 'عرض رمز QR لإعادة الاتصال',
 	'connected_since' => 'متصل منذ',
 	'send_test_message' => 'إرسال رسالة تجريبية',
 	'phone_number' => 'رقم الهاتف',

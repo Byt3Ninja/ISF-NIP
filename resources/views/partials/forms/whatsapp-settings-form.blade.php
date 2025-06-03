@@ -187,7 +187,7 @@
       </div>
 
       <!-- Status Messages -->
-      <div id="statusMessages" class="status-messages flex flex-column"></div>
+      <div id="statusMessages" class="status-messages mt-2"></div>
     </div>
   </div>
 </div>
