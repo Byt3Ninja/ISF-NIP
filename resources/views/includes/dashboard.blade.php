@@ -760,7 +760,7 @@
 																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
 																	</button> --}}
 																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
-																		class="dropdown-item"><i class="ti ti-trash me-2"></i> Delete</button>
+																		class="dropdown-item"><i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
 																</div>
 															</div>
 														</td>
