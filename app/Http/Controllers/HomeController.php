@@ -323,7 +323,7 @@ class HomeController extends Controller
 
         if( array_intersect(['dashboard.widgets_cards_services_view'], $permissions) )
         {
-            $services_q = "SELECT
+            $services_q = "SELECT DISTINCT
                     s.id,
                     s.name_en,
                     s.name_ar,
@@ -337,9 +337,10 @@ class HomeController extends Controller
                     services s
                 LEFT JOIN
                     service_categories sc ON s.service_category_id = sc.id
+                INNER JOIN
+                     organization_service so ON s.id = so.service_id
                 WHERE
                     s.deleted_at IS NULL
-                    AND s.organization_id IS NOT NULL
             ";
             if( $has_org ) { $services_q .= " AND s.organization_id = " . $user->organization_id; }
             $services = collect( DB::select( $services_q ) )->map(function( $service ) use ( $l ) {
@@ -680,10 +681,12 @@ class HomeController extends Controller
         $latest_services = collect( DB::select( $latest_services_q ) )->map(function( $item ) use ( $l ) {
             $service = new stdClass;
             $service->id = $item->id;
-            $service->name = $item->{'name_' . $l};
+            $service->name_en = $item->name_en;
+            $service->name_ar = $item->name_ar;
             $service->category = new stdClass;
             $service->category->id = $item->category_id;
-            $service->category->name = $item->{'category_name_' . $l};
+            $service->category->name_en = $item->category_name_en;
+            $service->category->name_ar = $item->category_name_ar;
             return $service;
         });
 
@@ -1261,7 +1264,7 @@ class HomeController extends Controller
                 'color' => 'success',
                 'href' => '/dashboard/users#search=Manager',
                 'icon' => 'ti ti-user-share',
-                'text' => __('admin.Managers'),
+                'text' => 'Managers',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_managers_view'],
                 'count' => $managers->count(),
                 'isRating' => false,
@@ -1270,7 +1273,7 @@ class HomeController extends Controller
                 'color' => 'warning',
                 'href' => '/dashboard/organizations',
                 'icon' => 'ti-businessplan',
-                'text' => __('admin.Organizations'),
+                'text' => 'Organizations',
                 'permissions' => ['organizations.index', 'dashboard.widgets_cards_organizations_view'],
                 'count' => $organizations->count(),
                 'isRating' => false,
@@ -1279,7 +1282,7 @@ class HomeController extends Controller
                 'color' => 'secondary',
                 'href' => '/dashboard/requests/all',
                 'icon' => 'ti-speakerphone',
-                'text' => __('admin.Services Requests'),
+                'text' => 'Services Requests',
                 'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
                 'count' => $services_requests->count(),
                 'isRating' => false,
@@ -1288,7 +1291,7 @@ class HomeController extends Controller
                 'color' => 'success',
                 'href' => '/dashboard/inbox',
                 'icon' => 'ti-message',
-                'text' => __('admin.New messages'),
+                'text' => 'New messages',
                 'permissions' => ['inbox', 'dashboard.widgets.cards.new_messages.view'],
                 'count' => $messenger->count(),
                 'isRating' => false,
@@ -1297,7 +1300,7 @@ class HomeController extends Controller
                 'color' => 'danger',
                 'href' => '/dashboard/mymsg',
                 'icon' => 'ti-network',
-                'text' => __('admin.Contact us'),
+                'text' => 'Contact us',
                 'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
                 'count' => $messages->count(),
                 'isRating' => false,
@@ -1306,7 +1309,7 @@ class HomeController extends Controller
                 'color' => 'danger',
                 'href' => '/dashboard/cycles',
                 'icon' => 'ti-circles',
-                'text' => __('admin.Cycles'),
+                'text' => 'Cycles',
                 'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
                 'count' => $cycles->count(),
                 'isRating' => false,
@@ -1315,7 +1318,7 @@ class HomeController extends Controller
                 'color' => 'info',
                 'href' => '/dashboard/companies',
                 'icon' => 'ti-building',
-                'text' => __('admin.Startups'),
+                'text' => 'Startups',
                 'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
                 'count' => $companies->count(),
                 'isRating' => false,
@@ -1324,7 +1327,7 @@ class HomeController extends Controller
                 'color' => 'danger',
                 'href' => '/dashboard/show/Mentors',
                 'icon' => 'ti-school',
-                'text' => __('admin.Mentors'),
+                'text' => 'Mentors',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
                 'count' => $mentors->count(),
                 'isRating' => false,
@@ -1333,7 +1336,7 @@ class HomeController extends Controller
                 'color' => 'secondary',
                 'href' => '/dashboard/mentorship/sessions',
                 'icon' => 'ti-brand-my-oppo',
-                'text' => __('admin.Mentorship requests'),
+                'text' => 'Mentorship requests',
                 'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_requests_view'],
                 'count' => $mentorship_requests->count(),
                 'isRating' => false,
@@ -1342,7 +1345,7 @@ class HomeController extends Controller
                 'color' => 'success',
                 'href' => '/dashboard/mentorship/sessions',
                 'icon' => 'ti-calendar-event',
-                'text' => __('admin.Mentorship requests Duration'),
+                'text' => 'Mentorship requests Duration',
                 'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
                 'count' => $mentorship_requests->sum('period') / 60,
                 'isRating' => false,
@@ -1351,7 +1354,7 @@ class HomeController extends Controller
                 'color' => 'primary',
                 'href' => '/dashboard/users#search=Judger',
                 'icon' => 'ti-certificate',
-                'text' => __('admin.Judgers'),
+                'text' => 'Judgers',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
                 'count' => $judgers->count(),
                 'isRating' => false,
@@ -1360,7 +1363,7 @@ class HomeController extends Controller
                 'color' => 'warning',
                 'href' => '/dashboard/training/sessions',
                 'icon' => 'ti-camera-question',
-                'text' => __('admin.Training sessions'),
+                'text' => 'Training sessions',
                 'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_view'],
                 'count' => $training_sessions->count(),
                 'isRating' => false,
@@ -1378,7 +1381,7 @@ class HomeController extends Controller
                 'color' => 'success',
                 'href' => '/dashboard/directory',
                 'icon' => 'ti ti-briefcase',
-                'text' => __('dashboard.Services'),
+                'text' => 'Services',
                 'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
                 'count' => $services->count(),
                 'isRating' => false,
@@ -1387,7 +1390,7 @@ class HomeController extends Controller
                 'color' => 'primary',
                 'href' => '/dashboard/requests/mine',
                 'icon' => 'ti ti-speakerphone',
-                'text' => __('dashboard.My Requests'),
+                'text' => 'My Requests',
                 'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
                 'count' => $my_requests->count(),
                 'isRating' => false,
@@ -1396,7 +1399,7 @@ class HomeController extends Controller
                 'color' => 'secondary',
                 'href' => '/dashboard/show/Mentors',
                 'icon' => 'ti ti-school',
-                'text' => __('dashboard.Mentors'),
+                'text' => 'Mentors',
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
                 'count' => $my_mentors->count(),
                 'isRating' => false,
@@ -1405,7 +1408,7 @@ class HomeController extends Controller
                 'color' => 'secondary',
                 'href' => '#',
                 'icon' => 'ti ti-chalkboard',
-                'text' => __('dashboard.First screening'),
+                'text' => 'First screening',
                 'permissions' => ['dashboard.widgets_cards_filtration_view'],
                 'count' => $filtration->count(),
                 'isRating' => false,
@@ -1414,7 +1417,7 @@ class HomeController extends Controller
                 'color' => 'warning',
                 'href' => '#',
                 'icon' => 'ti ti-calendar',
-                'text' => __('dashboard.Final screening'),
+                'text' => 'Final screening',
                 'permissions' => ['dashboard.widgets_cards_evaluation_view'],
                 'count' => $evaluation->count(),
                 'isRating' => false,
@@ -1423,7 +1426,7 @@ class HomeController extends Controller
                 'color' => 'secondary',
                 'href' => '#',
                 'icon' => 'ti ti-chalkboard',
-                'text' => __('dashboard.Coming sessions'),
+                'text' => 'Coming sessions',
                 'permissions' => ['dashboard.widgets_cards_coming_sessions_view'],
                 'count' => $upcoming_sessions->count(),
                 'isRating' => false,
@@ -1432,7 +1435,7 @@ class HomeController extends Controller
                 'color' => 'warning',
                 'href' => '#',
                 'icon' => 'ti ti-calendar',
-                'text' => __('dashboard.Cycles'),
+                'text' => 'Cycles',
                 'permissions' => ['dashboard_cards.my_programs'],
                 'count' => $my_cycles->count(),
                 'isRating' => false,
@@ -1441,7 +1444,7 @@ class HomeController extends Controller
                 'color' => 'info',
                 'href' => '#',
                 'icon' => 'ti ti-server',
-                'text' => __('admin.Company Attendance Rate'),
+                'text' => 'Company Attendance Rate',
                 'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
                 'count' => $attends_rate,
                 'isRating' => false,
@@ -1450,7 +1453,7 @@ class HomeController extends Controller
                 'color' => 'danger',
                 'href' => '#',
                 'icon' => 'ti ti-star',
-                'text' => __('cycles.Rate'),
+                'text' => 'Rate',
                 'permissions' => ['dashboard.widgets_cards_rate_view'],
                 'count' => $my_rating,
                 'isRating' => true, // Only this card has the isRating key
@@ -1459,7 +1462,7 @@ class HomeController extends Controller
                 'color' => 'warning',
                 'href' => '#',
                 'icon' => 'ti ti-select',
-                'text' => __('mentor.mentorshipRequests.withoutTasks'),
+                'text' => 'withoutTasks',
                 'permissions' => ['dashboard.widgets_cards_sessions_without_tasks_view'],
                 'count' => $sessionWithoutTasks->count(),
                 'isRating' => false,
@@ -1468,7 +1471,7 @@ class HomeController extends Controller
                 'color' => 'success',
                 'href' => '#',
                 'icon' => 'ti ti-check',
-                'text' => __('mentor.mentorshipTasks.completedTasks'),
+                'text' => 'completedTasks',
                 'permissions' => ['dashboard.widgets_cards_completed_tasks_view'],
                 'count' => $completedTasks->count(),
                 'isRating' => false,
@@ -1477,7 +1480,7 @@ class HomeController extends Controller
                 'color' => 'info',
                 'href' => '#',
                 'icon' => 'ti ti-archive',
-                'text' => __('mentor.mentorshipTasks.nonCompletedTasks'),
+                'text' => 'nonCompletedTasks',
                 'permissions' => ['dashboard.widgets_cards_non_completed_tasks_view'],
                 'count' => $nonCompletedTasks->count(),
                 'isRating' => false,

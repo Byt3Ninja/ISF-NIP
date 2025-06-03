@@ -1949,5 +1949,11 @@ return [
 	'Session Status Details' => 'تفاصيل حالة الجلسة',
 	'session_connected' => 'الجلسة متصلة',
 	'Invalid session ID format. only numbers allowed' => 'صيغة معرف الجلسة غير صالحة. مسموح فقط بالأرقام',
-	'Already connecting or connected. Please wait or disconnect first' => 'جارٍ الاتصال أو متصل بالفعل. يرجى الانتظار أو قطع الاتصال أولاً'
+	'Already connecting or connected. Please wait or disconnect first' => 'جارٍ الاتصال أو متصل بالفعل. يرجى الانتظار أو قطع الاتصال أولاً',
+	'First screening' => 'المرحلة الأولى',
+	'Final screening' => 'المرحلة النهاية',
+	'Coming sessions' => 'الجلسات القادمة',
+	'withoutTasks'=>'عدد الجلسات بدون مهام',
+    'completedTasks'=>'عدد المهام المنتهية',
+	'nonCompletedTasks'=>'عدد المهام الغير منتهية'
 ];

@@ -84,7 +84,11 @@
 							</div>
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
-						<p class="mb-1 text-center">{{ $card['text'] }}</p>
+						<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
+                                {{ __($card['text']) ?: $card['text'] }}
+                            @else
+                                {{ __('admin.' . $card['text']) ?: $card['text'] }}
+                            @endif</p>
 					</div>
 				</div>
 			</a>
@@ -127,17 +131,17 @@
 						@foreach( $latest_services as $service )
 						<div class="d-flex justify-content-between align-items-center my-2">
 							<div class="widget-todo-title-area d-flex align-items-center">
-								<a href="/dashboard/directory?find={{ $service->name }}">
+								<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}">
 									<span class="widget-todo-title ml-50 text-secondary">
 										<i class="ti ti-link"></i>
-										{{ $service->name }}</span>
+										{{ $service->{'name_' . $l}  }}</span>
 								</a>
 							</div>
 							<div class="widget-todo-item-action d-flex align-items-center">
 								<div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-content-center"
 									style="width: 200px; height: 30px">
 									<a href="/dashboard/directory?type={{ $service->category->id }}">
-										{{ $service->category->name }}
+										{{ $service->category->{'name_' . $l}  }}
 									</a>
 								</div>
 							</div>
