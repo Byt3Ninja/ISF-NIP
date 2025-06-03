@@ -11,21 +11,21 @@ use Illuminate\Http\Client\RequestException; // To catch HTTP errors
 
 class WhatsAppSessionController extends Controller
 {
-    protected string $baseUrl;
-    protected ?string $apiKey; // Nullable in case it's missing
+    // protected string $baseUrl;
+    // protected ?string $apiKey; // Nullable in case it's missing
 
     public function __construct()
     {
         // Load config values in the constructor
-        $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
-        $this->apiKey = config('whatsapp.api_key');
+        // $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
+        // $this->apiKey = config('whatsapp.api_key');
 
-        // Basic check if config is set
-        if (empty($this->baseUrl) || empty($this->apiKey)) {
-            // You might throw an exception or handle this more gracefully
-            // depending on your application's needs.
-             Log::error('WhatsApp API Base URL or API Key is not configured.');
-        }
+        // // Basic check if config is set
+        // if (empty($this->baseUrl) || empty($this->apiKey)) {
+        //     // You might throw an exception or handle this more gracefully
+        //     // depending on your application's needs.
+        //      Log::error('WhatsApp API Base URL or API Key is not configured.');
+        // }
     }
 
     /**
@@ -35,16 +35,25 @@ class WhatsAppSessionController extends Controller
      */
     protected function prepareHttpClient()
     {
+        $settings = Settings::where('id', 1)->first();
+        if($settings->whatsApp_URL_callback == null){
+            return response()->json([
+                'success' => false,
+                'error' => 'URL is not Found in Database.',
+            ], 500);
+        }
+        $baseUrl = $settings->whatsApp_URL_callback;
+        $apiKey = $settings->whatsapp_api_key;
        
-        if (!$this->apiKey) {
+        if (!$apiKey) {
             // Handle case where API key is missing
             throw new \Exception("WhatsApp API Key is not configured.");
         }
        
         return Http::withHeaders([
             'Accept' => 'application/json',
-            'x-api-key' => $this->apiKey,
-        ])->baseUrl($this->baseUrl) // Set base URL for convenience
+            'x-api-key' => $apiKey,
+        ])->baseUrl($baseUrl) // Set base URL for convenience
           ->timeout(30); // Set a reasonable timeout (in seconds)
     }
 
