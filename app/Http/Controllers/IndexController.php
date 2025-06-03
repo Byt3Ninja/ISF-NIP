@@ -21,8 +21,8 @@ class IndexController extends Controller
     private $SocialIcons; // Social media icons
     private $contact; // Footer contact details
 
-     protected string $baseUrl;
-    protected ?string $apiKey; // Nullable in case it's missing
+    //  protected string $baseUrl;
+    // protected ?string $apiKey; // Nullable in case it's missing
     private $Settings;
     public function __construct()
     {
@@ -33,15 +33,15 @@ class IndexController extends Controller
        $this->contact = Settings::findorfail('11');
         }
         // Load config values in the constructor
-        $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
-        $this->apiKey = config('whatsapp.api_key');
+        // $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
+        // $this->apiKey = config('whatsapp.api_key');
 
-        // Basic check if config is set
-        if (empty($this->baseUrl) || empty($this->apiKey)) {
-            // You might throw an exception or handle this more gracefully
-            // depending on your application's needs.
-             Log::error('WhatsApp API Base URL or API Key is not configured.');
-        }
+        // // Basic check if config is set
+        // if (empty($this->baseUrl) || empty($this->apiKey)) {
+        //     // You might throw an exception or handle this more gracefully
+        //     // depending on your application's needs.
+        //      Log::error('WhatsApp API Base URL or API Key is not configured.');
+        // }
     }
 
     public function lang($locale)
