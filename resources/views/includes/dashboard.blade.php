@@ -740,7 +740,10 @@
 													@foreach( $my_schedules as $key => $schedule )
 													<tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
 														<td> {{ $loop->iteration }} </td>
-														<td> {{ str_replace('"', '', $schedule->days) }} </td>
+														@php
+														$days = str_replace('"', '', $schedule->days);
+														@endphp
+														<td> {{ __('admin.'.$days) }} </td>
 														<td> {{ __('dashboard.from') }} {{ $schedule->t_from }} {{ __('dashboard.to') }} {{
 															$schedule->t_to }} </td>
 														<td> {{ $schedule->notes }} </td>
@@ -757,7 +760,7 @@
 																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
 																	</button> --}}
 																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
-																		class="dropdown-item"><i class="ti ti-trash me-2"></i> Delete</button>
+																		class="dropdown-item"><i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
 																</div>
 															</div>
 														</td>
