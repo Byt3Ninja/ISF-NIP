@@ -300,6 +300,7 @@
 											</tr>
 										</thead>
 										<tbody>
+											{{-- {{ dd($steps) }} --}}
 											@foreach( $steps as $step )
 											<tr>
 												<td>
@@ -333,7 +334,7 @@
 													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-icon rounded-circle btn-label-primary"
 														title="{{ __('dashboard.View') }}"> <i class="ti ti-eye"></i> </a>
 													@endif --}}
-														@if ($step->stype == 1 && $step->status == 'Not started') 
+														@if ($step->data && $step->status == 'Started') 
 															<a href="/dashboard/show-form/{{ $step->data }}">
 																<span class="btn btn-icon btn-label-primary rounded-circle">
 																		<i class="ti ti-eye"></i>
