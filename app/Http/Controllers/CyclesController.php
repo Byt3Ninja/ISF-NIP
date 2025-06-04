@@ -23,6 +23,7 @@ use App\TrainingSession;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -444,6 +445,7 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
+            DB::transaction(function () use ($request) {
             $private = null;
             if ($request->private) {
                 $private = sha1(now());
@@ -514,6 +516,7 @@ class CyclesController extends Controller
                     $messenger->save();
                 }
             }
+            });
             return redirect()->back()->with('message', 'Saved');
         } else {
             // Show Cycle
