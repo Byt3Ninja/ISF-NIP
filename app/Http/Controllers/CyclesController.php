@@ -496,23 +496,13 @@ class CyclesController extends Controller
             
                 if ($admin) {
                     Mail::to($admin->email)->send(new ProgramCreatedNotification($cycle, $admin));
-            
-                    $message = new Message();
-                    $message->name = auth()->user()->first_name_en . ' ' . auth()->user()->last_name_en;
-                    $message->internal_id = $admin->id;
-                    $message->email = auth()->user()->email; 
-                    $message->subject = 'New Program Created';
-                    $message->message = "A new program titled \"{$cycle->title}\" has been created by " . auth()->user()->name . ".";
-                    $message->user_id = auth()->id(); 
-                    $message->save();
-            
+                    
                     $messenger = new Messenger();
                     $messenger->sender = auth()->id(); 
                     $messenger->receiver = $admin->id; 
                     $messenger->subject = 'New Program Created';
                     $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
                     $messenger->read = 0; 
-                    $messenger->messgeId = $message->id; 
                     $messenger->save();
                 }
             }
