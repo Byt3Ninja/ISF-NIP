@@ -1955,5 +1955,6 @@ return [
 	'Coming sessions' => 'الجلسات القادمة',
 	'withoutTasks'=>'عدد الجلسات بدون مهام',
     'completedTasks'=>'عدد المهام المنتهية',
-	'nonCompletedTasks'=>'عدد المهام الغير منتهية'
+	'nonCompletedTasks'=>'عدد المهام الغير منتهية',
+	'Error, cannot add late date' => 'خطاء، لا يمكن اضافة تاريخ متاخر',
 ];
