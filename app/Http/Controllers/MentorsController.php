@@ -329,7 +329,7 @@ class MentorsController extends Controller
 		}
 
 		if ($request->mentorid) {
-			if ($request->date < date("Y-m-d 00:00:00")) {
+			if ($request->date < date("Y-m-d 23:59:59")) {
 				return back()->with(['msg' => "Error, cannot add late date.", 'class' => 'danger']);
 			}
 			$fileName = '';
