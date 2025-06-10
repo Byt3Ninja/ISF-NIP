@@ -23,6 +23,7 @@ use App\TrainingSession;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -190,6 +191,10 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date',
                 'end' => 'required|date',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
 
             
@@ -435,7 +440,12 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
+            DB::transaction(function () use ($request) {
             $private = null;
             if ($request->private) {
                 $private = sha1(now());
@@ -486,26 +496,17 @@ class CyclesController extends Controller
             
                 if ($admin) {
                     Mail::to($admin->email)->send(new ProgramCreatedNotification($cycle, $admin));
-            
-                    $message = new Message();
-                    $message->name = auth()->user()->first_name_en . ' ' . auth()->user()->last_name_en;
-                    $message->internal_id = $admin->id;
-                    $message->email = auth()->user()->email; 
-                    $message->subject = 'New Program Created';
-                    $message->message = "A new program titled \"{$cycle->title}\" has been created by " . auth()->user()->name . ".";
-                    $message->user_id = auth()->id(); 
-                    $message->save();
-            
+                    
                     $messenger = new Messenger();
                     $messenger->sender = auth()->id(); 
                     $messenger->receiver = $admin->id; 
                     $messenger->subject = 'New Program Created';
                     $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
                     $messenger->read = 0; 
-                    $messenger->messgeId = $message->id; 
                     $messenger->save();
                 }
             }
+            });
             return redirect()->back()->with('message', 'Saved');
         } else {
             // Show Cycle

@@ -778,18 +778,18 @@ class SettingsController extends Controller
 
     public function update_settingsWhatsapp(Request $request)
     {
-      
+    
         $id = $request->input('id');
         $whatsApp_URL_callback = $request->input('whatsApp_URL_callback');
-        $whatsApp_INSTANCE_ID = $request->input('whatsApp_INSTANCE_ID');
-        $whatsApp_ACCESS_TOKEN = $request->input('whatsApp_ACCESS_TOKEN');
+        $whatsapp_api_key = $request->input('whatsapp_api_key');
+        // $whatsApp_ACCESS_TOKEN = $request->input('whatsApp_ACCESS_TOKEN');
 
 
         $updateSittings = Settings::where('id', $id)->first();
 
         $updateSittings->whatsApp_URL_callback = $whatsApp_URL_callback;
-        $updateSittings->whatsApp_INSTANCE_ID = $whatsApp_INSTANCE_ID;
-        $updateSittings->whatsApp_ACCESS_TOKEN = $whatsApp_ACCESS_TOKEN;
+        $updateSittings->whatsapp_api_key = $whatsapp_api_key;
+        // $updateSittings->whatsApp_ACCESS_TOKEN = $whatsApp_ACCESS_TOKEN;
         $updateSittings->save();
 
 

@@ -126,7 +126,7 @@ return [
 	'MentorList'=>'Mentor List',
 	'Assessment'=>'Assessment',
 	'whatsApp_URL_callback' => 'WhatsApp URL Callback',
-	'whatsApp_INSTANCE_ID' => 'WhatsApp INSTANCE ID',
+	'whatsapp_api_key' => 'WhatsApp API Key',
 	'whatsApp_ACCESS_TOKEN' => 'WhatsApp ACCESS TOKEN',
 	'GOOGLE_CALENDAR_CLIENT_ID' => 'GOOGLE CALENDAR CLIENT ID',
 	'GOOGLE_CALENDAR_CLIENT_SECRET' => 'GOOGLE CALENDAR CLIENT SECRET',

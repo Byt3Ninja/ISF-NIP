@@ -1900,6 +1900,9 @@ return [
 	// Additional WhatsApp interface translations
 	'only_numbers_allowed' => 'أرقام فقط مسموحة',
 	'session_id_label' => 'معرف الجلسة',
+	'Checking existing session status' => 'فحص حالة الجلسة الحالية',
+	'Found existing session' => 'تم العثور على جلسة موجودة',
+	'Displaying QR code for reconnection' => 'عرض رمز QR لإعادة الاتصال',
 	'connected_since' => 'متصل منذ',
 	'send_test_message' => 'إرسال رسالة تجريبية',
 	'phone_number' => 'رقم الهاتف',
@@ -1946,5 +1949,12 @@ return [
 	'Session Status Details' => 'تفاصيل حالة الجلسة',
 	'session_connected' => 'الجلسة متصلة',
 	'Invalid session ID format. only numbers allowed' => 'صيغة معرف الجلسة غير صالحة. مسموح فقط بالأرقام',
-	'Already connecting or connected. Please wait or disconnect first' => 'جارٍ الاتصال أو متصل بالفعل. يرجى الانتظار أو قطع الاتصال أولاً'
+	'Already connecting or connected. Please wait or disconnect first' => 'جارٍ الاتصال أو متصل بالفعل. يرجى الانتظار أو قطع الاتصال أولاً',
+	'First screening' => 'المرحلة الأولى',
+	'Final screening' => 'المرحلة النهاية',
+	'Coming sessions' => 'الجلسات القادمة',
+	'withoutTasks'=>'عدد الجلسات بدون مهام',
+    'completedTasks'=>'عدد المهام المنتهية',
+	'nonCompletedTasks'=>'عدد المهام الغير منتهية',
+	'Error, cannot add late date' => 'خطاء، لا يمكن اضافة تاريخ متاخر',
 ];

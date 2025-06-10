@@ -244,6 +244,48 @@ class WhatsAppAuthenticator {
 
   async loadStoredSession() {
     try {
+      // First, check if there's a session ID in the database
+      const dbSessionResponse = await this.apiCall('/dashboard/whatsapp/getWASession');
+      
+      if (dbSessionResponse.success && dbSessionResponse.sessionId) {
+        const dbSessionId = dbSessionResponse.sessionId;
+        const dbSessionStatus = dbSessionResponse.status;
+        
+        // Update UI with database session ID
+        if (this.sessionIdInput) {
+          this.sessionIdInput.value = dbSessionId;
+        }
+        
+        // Show checking status
+        this.updateConnectionStatus('checking');
+        this.showMessage('{{__('admin.Checking existing session status')}}...', 'info', 3000);
+
+        if (dbSessionStatus === 'connected') {
+          // Session is connected in the database
+          this.currentSessionId = dbSessionId;
+          this.updateConnectionStatus('connected', dbSessionId);
+          
+          // Store session in localStorage for future use
+          this.storeSession(dbSessionId);
+          
+          // Show success state
+          if (this.successState) {
+            this.successState.style.display = 'block';
+          }
+
+          this.showMessage(`{{__('admin.Already connected to WhatsApp with session')}}: ${dbSessionId}`, 'success');
+          return;
+        } else {
+          // Session exists in database but not connected - automatically show QR code
+          this.showMessage(`{{__('admin.Found existing session')}} ${dbSessionId}. {{__('admin.Displaying QR code for reconnection')}}...`, 'info', 3000);
+          
+          // Automatically start the authentication process with the existing session ID
+          await this.autoStartAuthentication(dbSessionId);
+          return;
+        }
+      }
+      
+      // If no session in database, check localStorage as fallback
       const storedSessionId = localStorage.getItem(this.storageKey);
       const storedConnectionTime = localStorage.getItem(`${this.storageKey}_connected_at`);
       
@@ -287,11 +329,79 @@ class WhatsAppAuthenticator {
         this.updateConnectionStatus('disconnected');
       }
     } catch (error) {
-      // Error checking stored session, clear it
+      // Error checking session, clear localStorage and show disconnected state
       this.clearStoredSession();
       this.updateConnectionStatus('disconnected');
-      this.showMessage('Error checking stored session. Please reconnect.', 'warning');
-      console.error('Error checking stored session:', error);
+      this.showMessage('Error checking session status. Please reconnect.', 'warning');
+      console.error('Error checking session:', error);
+    }
+  }
+
+  async autoStartAuthentication(sessionId) {
+    // This method automatically starts authentication for existing sessions
+    // without user interaction (no validation needed since session ID comes from database)
+    
+    this.resetInterface();
+    this.updateConnectionStatus('connecting');
+    
+    try {
+      // Start session
+      await this.apiCall(`/dashboard/whatsapp/session/${sessionId}/start`);
+      
+      // Show QR code section
+      if (this.qrCodeSection) {
+        this.qrCodeSection.style.display = 'block';
+      }
+      
+      // Load QR code
+      await this.loadQRCode(sessionId);
+      
+      // Start monitoring
+      this.startPolling(sessionId);
+      this.startQRTimer();
+      
+    } catch (error) {
+      console.log('error', error);
+      
+      // Parse error response if it's a JSON string
+      let errorData = error;
+      if (typeof error.message === 'string') {
+        try {
+          errorData = JSON.parse(error.message);
+        } catch (parseError) {
+          // If parsing fails, use the original error
+          errorData = { api_error: error.message };
+        }
+      }
+      
+      // Extract the specific error message
+      const errorMessage = errorData.api_error || errorData.error || error.message || 'Unknown error occurred';
+      
+      // Check if session already exists - if so, proceed with QR code
+      if (errorData.api_status === 422 && errorMessage.toLowerCase().includes('session already exists')) {
+        this.showMessage(`Session already exists for ${sessionId}. Proceeding to QR code...`, 'info');
+        
+        // Show QR code section
+        if (this.qrCodeSection) {
+          this.qrCodeSection.style.display = 'block';
+        }
+        
+        // Load QR code directly since session exists
+        try {
+          await this.loadQRCode(sessionId);
+          
+          // Start monitoring
+          this.startPolling(sessionId);
+          this.startQRTimer();
+        } catch (qrError) {
+          this.showMessage(`Failed to load QR code: ${qrError.message}`, 'error');
+          this.updateConnectionStatus('disconnected');
+        }
+      } else {
+        // Handle other errors normally
+        this.showMessage(`Failed to auto-reconnect session: ${errorMessage}`, 'error');
+        this.updateConnectionStatus('disconnected');
+      }
     }
   }
 
@@ -500,11 +610,34 @@ class WhatsAppAuthenticator {
       // Extract the specific error message
       const errorMessage = errorData.api_error || errorData.error || error.message || 'Unknown error occurred';
       
-      this.showMessage(`Failed to start session: ${errorMessage}`, 'error');
-      this.updateConnectionStatus('disconnected');
-      
-      // Display sweet alert of error with proper error message
-      alert(`Error: ${errorMessage}`);
+      // Check if session already exists - if so, proceed with QR code
+      if (errorData.api_status === 422 && errorMessage.toLowerCase().includes('session already exists')) {
+        this.showMessage(`Session already exists for ${sessionId}. Proceeding to QR code...`, 'info');
+        
+        // Show QR code section
+        if (this.qrCodeSection) {
+          this.qrCodeSection.style.display = 'block';
+        }
+        
+        // Load QR code directly since session exists
+        try {
+          await this.loadQRCode(sessionId);
+          
+          // Start monitoring
+          this.startPolling(sessionId);
+          this.startQRTimer();
+        } catch (qrError) {
+          this.showMessage(`Failed to load QR code: ${qrError.message}`, 'error');
+          this.updateConnectionStatus('disconnected');
+        }
+      } else {
+        // Handle other errors normally
+        this.showMessage(`Failed to start session: ${errorMessage}`, 'error');
+        this.updateConnectionStatus('disconnected');
+        
+        // Display sweet alert of error with proper error message
+        alert(`Error: ${errorMessage}`);
+      }
     }
   }
 
@@ -546,7 +679,7 @@ class WhatsAppAuthenticator {
         }
 
         const response = await fetch(qrUrl, {
-          method: 'GET',
+          method: 'POST',
           headers: headers,
           credentials: 'same-origin' // Include cookies for authentication
         });
@@ -829,7 +962,7 @@ class WhatsAppAuthenticator {
     }
 
     try {
-      await this.apiCall(`/dashboard/whatsapp/session/${this.currentSessionId}/send`, 'POST', {
+      await this.apiCall(`/dashboard/whatsapp/session/send`, 'POST', {
         to: phoneNumber,
         message: message
       });
@@ -871,7 +1004,7 @@ class WhatsAppAuthenticator {
     this.updateConnectionStatus('disconnected');
   }
 
-  async apiCall(endpoint, method = 'GET', data = null) {
+  async apiCall(endpoint, method = 'POST', data = null) {
     const options = {
       method: method,
       headers: {

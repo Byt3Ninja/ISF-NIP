@@ -84,7 +84,11 @@
 							</div>
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
-						<p class="mb-1 text-center">{{ $card['text'] }}</p>
+						<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
+                                {{ __($card['text']) ?: $card['text'] }}
+                            @else
+                                {{ __('admin.' . $card['text']) ?: $card['text'] }}
+                            @endif</p>
 					</div>
 				</div>
 			</a>
@@ -127,17 +131,17 @@
 						@foreach( $latest_services as $service )
 						<div class="d-flex justify-content-between align-items-center my-2">
 							<div class="widget-todo-title-area d-flex align-items-center">
-								<a href="/dashboard/directory?find={{ $service->name }}">
+								<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}">
 									<span class="widget-todo-title ml-50 text-secondary">
 										<i class="ti ti-link"></i>
-										{{ $service->name }}</span>
+										{{ $service->{'name_' . $l}  }}</span>
 								</a>
 							</div>
 							<div class="widget-todo-item-action d-flex align-items-center">
 								<div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-content-center"
 									style="width: 200px; height: 30px">
 									<a href="/dashboard/directory?type={{ $service->category->id }}">
-										{{ $service->category->name }}
+										{{ $service->category->{'name_' . $l}  }}
 									</a>
 								</div>
 							</div>
@@ -292,14 +296,16 @@
 												<th>{{ $l == 'ar' ? 'بدأت في' : 'Start At' }}</th>
 												<th>{{ $l == 'ar' ? 'انتهت في' : 'End at' }}</th>
 												<th>{{ $l == 'ar' ? 'الوصف' : 'Description' }}</th>
+												<th>{{ $l == 'ar' ? 'الاجراءات' : 'Actions' }}</th>
 											</tr>
 										</thead>
 										<tbody>
+											{{-- {{ dd($steps) }} --}}
 											@foreach( $steps as $step )
 											<tr>
 												<td>
 													@if( $step->stype == 1 )
-													@if( $step->arr == 'Completed' || $step->arr == 'انتهت' )
+													@if( $step->status == 'Completed' || $step->status == 'انتهت' )
 													@if( $company->approved && $_user->ableTo('cycles.list_mine', $permissions) )
 													<a href="/dashboard/cycles/{{ $step->fLink }}"> {{ $step->title }} </a>
 													@else
@@ -319,6 +325,22 @@
 												<td style="height: 50px;">
 													<span style="width: 350px; height: 100%; display: inline-block; white-space: normal;"> {{
 														$step->description ? $step->description : '...' }} </span>
+												</td>
+												<td>
+													{{-- @if( $step->stype == 1 && $step->arr != 'Completed' && $step->arr != 'انتهت' )
+													<a href="/dashboard/cycles/{{ $step->id }}" class="btn btn-icon rounded-circle btn-label-primary"
+														title="{{ __('dashboard.Join') }}"> <i class="ti ti-arrows-join"></i> </a>
+													@elseif( $step->stype == 2 )
+													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-icon rounded-circle btn-label-primary"
+														title="{{ __('dashboard.View') }}"> <i class="ti ti-eye"></i> </a>
+													@endif --}}
+														@if ($step->data && $step->status == 'Started') 
+															<a href="/dashboard/show-form/{{ $step->data }}">
+																<span class="btn btn-icon btn-label-primary rounded-circle">
+																		<i class="ti ti-eye"></i>
+																</span>
+															</a>
+														@endif
 												</td>
 											</tr>
 											@endforeach
@@ -736,7 +758,10 @@
 													@foreach( $my_schedules as $key => $schedule )
 													<tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
 														<td> {{ $loop->iteration }} </td>
-														<td> {{ $schedule->_days }} </td>
+														@php
+														$days = str_replace('"', '', $schedule->days);
+														@endphp
+														<td> {{ __('admin.'.$days) }} </td>
 														<td> {{ __('dashboard.from') }} {{ $schedule->t_from }} {{ __('dashboard.to') }} {{
 															$schedule->t_to }} </td>
 														<td> {{ $schedule->notes }} </td>
@@ -745,15 +770,15 @@
 																<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
 																	data-bs-toggle="dropdown"> <i class="ti ti-dots-vertical"></i> </button>
 																<div class="dropdown-menu">
-																	<button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
-																			class="ti ti-pencil me-2"></i> Edit </button>
-																	<button class="dropdown-item"
+																	{{-- <button class="dropdown-item" onclick="mentorSchedule(1, undefined, 0)" type="button"> <i
+																			class="ti ti-pencil me-2"></i> Edit </button> --}}
+																	{{-- <button class="dropdown-item"
 																		onclick="mentorSchedule(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
 																		<i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
 																		{{ $schedule->active ? 'Deactivate' : 'Activate' }}
-																	</button>
+																	</button> --}}
 																	<button onclick="mentorSchedule(3,{{ $schedule->id }},0)" type="button"
-																		class="dropdown-item"><i class="ti ti-trash me-2"></i> Delete</button>
+																		class="dropdown-item"><i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
 																</div>
 															</div>
 														</td>

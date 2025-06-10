@@ -278,7 +278,8 @@ document.getElementById('bulk-delete-btn').addEventListener('click', function() 
 
 $(document).on('click', '.delete-question', function(e) {
     e.preventDefault();
-   Swal.fire({
+    const questionId = $(this).data('id');
+    Swal.fire({
         title: "{{ __('admin.SureDelete') }}",
         text: "{{ __('admin.Recover') }}",
         icon: "warning",

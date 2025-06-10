@@ -77,14 +77,14 @@
           <div class="card shadow-sm mb-4" style="border-radius: 1rem;">
             <div class="card-header">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="card-title mb-0">Course Title</h5>
+                <h5 class="card-title mb-0">{{ $training->title }}</h5>
                 <div class="d-flex align-items-center gap-2">
-                  <span class="badge bg-label-danger">Course Type</span>
-                  <span class="badge bg-label-primary"><i class="ti ti-calendar ti-16px"></i> 20-12-2024</span>
+                  <span class="badge bg-label-danger">{{ $training->CoursLevel }}</span>
+                  <span class="badge bg-label-primary"><i class="ti ti-calendar ti-16px"></i> {{ $training->start_date }}</span>
                 </div>
               </div>
               <p class="card-text text-muted mb-0">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque impedit exercitationem, quasi rem, maxime dolores commodi quis perferendis minima minus ea atque inventore in adipisci facere maiores? Explicabo, labore rem!
+                {{ $training->dsc }}
               </p>
             </div>
 
@@ -156,12 +156,12 @@
                     <div class="d-flex justify-content-start align-items-center user-name">
                       <div class="avatar-wrapper">
                         <div class="avatar me-4">
-                          <img src="/icons/account.svg" alt="Avatar" class="rounded-circle" />
+                          <img src="{{ asset('/191014/'. $training->img_url) ?? '/images/placeholder.jpg' }}" alt="Avatar" class="rounded-circle" />
                         </div>
                       </div>
                       <div class="d-flex flex-column">
-                        <h6 class="mb-1">Devonne Wallbridge</h6>
-                        <small>Devonne@gmail.com</small>
+                        <h6 class="mb-1">{{ $training->{'name_'.$l} }}</h6>
+                        <small>{{ $training->email }}</small>
                       </div>
                     </div>
                   </div>

@@ -446,7 +446,16 @@ class TrainingController extends Controller
 			$contents = TrainingContent::where('training_id', $id)->orderBy('arr')->get(['id', 'title', 'training_id']);
 			$ccontent = TrainingContent::where('training_id', $id);
 			$ccontent = $c == 0 ? $ccontent->orderBy('arr', 'ASC') : $ccontent->where('id', $c);
-			$ccontent = $ccontent->first(['id', 'title', 'content']);
+			$ccontent = $ccontent->first(['id', 'title', 'content', 'created_at']);
+
+			$training = "SELECT *,
+			Concat(u.first_name_en, ' ', u.last_name_en) AS name_en,
+			Concat(u.first_name_ar, ' ', u.last_name_ar) AS name_ar
+			FROM trainings AS t 
+			LEFT JOIN users AS u ON t.user_id = u.id
+			WHERE t.id = ? AND t.deleted_at IS NULL";
+			$training = DB::select($training, [$id]);
+			$training = $training[0];
 
 			if (count($contents) == 0) {
 				return back()->with(['class' => 'danger', 'message' => 'Error, content not exist.']);
@@ -463,7 +472,7 @@ class TrainingController extends Controller
 
 
 			$quizzes = Quizzes::where('training_id', $id)->where('status', 'published')->get();
-			return view('admin/clients/training', compact('contents', 'ccontent', 'quizzes', 'progressPercentage'));
+			return view('admin/clients/training', compact('contents', 'ccontent', 'quizzes', 'progressPercentage', 'training'));
 		} else {
 			return back()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
 		}
@@ -840,7 +849,7 @@ if ($type == 'sessions' || $type == 'offline') {
 		if ($type == 'sessions') {
 			$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 
@@ -920,7 +929,7 @@ if ($type == 'sessions' || $type == 'offline') {
 		$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
 			// $session = TrainingSession::find($trainingSession->sid);
 			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, null, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
 

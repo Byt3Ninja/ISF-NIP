@@ -158,12 +158,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('settings.system_social_achievements_update');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('settings.system_social_whatsapp_update');
   
-    Route::get('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[0-9]+')->name('whatsapp.session.start');
-    Route::get('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[0-9]+')->name('whatsapp.session.status');
-    Route::get('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.data');
-    Route::get('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.image');
+    Route::post('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[0-9]+')->name('whatsapp.session.start');
+    Route::post('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[0-9]+')->name('whatsapp.session.status');
+    Route::post('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.data');
+    Route::post('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.image');
     Route::delete('whatsapp/session/{sessionId}/terminate', 'WhatsAppSessionController@terminate')->where('sessionId', '[0-9]+')->name('whatsapp.session.terminate');
-    Route::post('whatsapp/session/{sessionId}/send', 'WhatsAppSessionController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
+    Route::post('whatsapp/session/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
+    Route::post('whatsapp/getWASession', 'WhatsAppSessionController@getWASessionID')->name('whatsapp.session.getsessionid');
 
     
 
