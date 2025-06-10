@@ -323,7 +323,7 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off">
+        autocomplete="off" onsubmit="disableSubmitButton()">
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.New step data') }} - <span id="formtitle">{{
@@ -388,7 +388,7 @@
             {{-- <i class="ti ti-x"></i> --}}
             <span class="">{{ __('cycles.Close') }}</span>
           </button>
-          <button type="submit" value="submit" class="btn btn-primary ml-1">
+          <button type="submit" id="submitBtn" value="submit" class="btn btn-primary ml-1">
             {{-- <i class="ti ti-check d-block d-sm-none"></i> --}}
             <span class="">{{ __('cycles.Submit') }}</span>
           </button>
@@ -494,6 +494,9 @@
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
 <script>
+  function disableSubmitButton() {
+    document.getElementById("submitBtn").disabled = true;
+}
     console.log('loaded');
     const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
     // console.log('stepFormRamgePicker', stepFormRamgePicker);
