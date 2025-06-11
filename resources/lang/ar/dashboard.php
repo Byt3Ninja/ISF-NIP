@@ -156,4 +156,5 @@ return [
     'No category' => 'لا توجد فئة',
     'No Category' => 'لا توجد فئة',
     'No Organization' => 'لا توجد منظمة',
+    'cannot_schedule_past_meeting' => 'لا يمكنك إضافة موعد في الماضي',
 ];

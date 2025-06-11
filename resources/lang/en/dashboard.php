@@ -156,4 +156,5 @@ return [
     'No category' => 'No category',
     'No Category' => 'No Category',
     'No Organization' => 'No Organization',
+    'cannot_schedule_past_meeting' => 'You cannot schedule a Meeting in the Past',
 ];
