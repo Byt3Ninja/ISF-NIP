@@ -522,8 +522,18 @@ class CyclesController extends Controller
     function view($c, Request $request)
     {
        
-        $cycle2 = Cycle::where('id', $c)->first();
-        if($cycle2->allow_non_company == 1){
+        // $cycle2 = Cycle::where('id', $c)->first();
+        
+        
+        $private = Cycle::where('private', $c)->first();
+
+        if ($private == null) {
+            $private = Cycle::where('id', $c)->first();
+            $c = $private->id;
+        } else {
+            $c = $private->id;
+        }
+            if($private->allow_non_company == 1){
            
             if(!Auth::user()->HaveCompany){
                 $user = Auth::user();
@@ -536,15 +546,7 @@ class CyclesController extends Controller
                 User::where('id', $user->id)->update(['company_id' => $result->id, 'HaveCompany' => 1]);
             }
             }
-        
-        $private = Cycle::where('private', $c)->first();
 
-        if ($private == null) {
-            $private = Cycle::where('id', $c)->first();
-            $c = $private->id;
-        } else {
-            $c = $private->id;
-        }
       $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
         if (!$user->HaveCompany) {
