@@ -131,7 +131,7 @@
 											</tr>
 											</thead>
 											<tbody>
-												@foreach( $quizzes as $quiz )
+												@foreach( $quizzes as $key => $quiz )
 													@php
 														$participates = collect($quiz->results)->groupBy('user_id');
 														$passed_participates = $participates->filter(function( $item ) use ( $quiz ) {
@@ -147,7 +147,7 @@
 														});
 													@endphp
 													<tr>
-														<td><a href="{{ URL::to('dashboard/quizzes/' . $quiz->id . '/edit') }}">{{ $quiz->id }}</a></td>
+														<td><a href="{{ URL::to('dashboard/quizzes/' . $quiz->id . '/edit') }}">{{ $key + 1 }}</a></td>
 														<td>{!! $quiz->title !!}</td>
 														<td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $quiz->organization->id . '/edit') }}"> {{ $quiz->organization->{'org_name_'.$l} }}</a></td>
 														<td class="text-center"><a href="{{ URL::to('dashboard/training/all/' . $quiz->training->id) }}"> {{ $quiz->training->title }}</a></td>
