@@ -1908,4 +1908,5 @@ return [
     'nonCompletedTasks' => 'Non Completed Tasks',
 	'Error, cannot add late date' => 'Error, cannot add late date',
 	'sessionUpdated' => 'Session Updated Successfully',
+	'Current Image' => 'Current Image',
 ];

@@ -2,12 +2,22 @@
 @section('title', __('admin.Services') )
 @section('index_url', route('services.index') )
 @section('subTitle', __('admin.Edit service'))
+
+@section('style')
+<style>
+    .ql-toolbar.ql-snow {
+        border-top-right-radius: 0.5rem;
+        border-top-left-radius: 0.5rem;
+    }
+</style>
+@stop
+
 @section('content')
 <!-- BEGIN: Content-->
-  <div class="content-wrapper">
+<div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-        
+        <div class="content-overlay"></div>
+
         <div class="content-body">
             <!-- BuilderForm start -->
             <section id="basic-input">
@@ -23,7 +33,8 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                    aria-label="Close"></button>
                                                 <div class="d-flex align-items-center">
                                                     <i class="ti ti-error"></i>
                                                     <span>
@@ -49,7 +60,8 @@
                                         </div>
                                     </div>
                                     @endif
-                                    <form method="post" action="{{route('services.update', ['service' => $service->id])}}"
+                                    <form method="post"
+                                        action="{{route('services.update', ['service' => $service->id])}}"
                                         enctype="multipart/form-data">
                                         {!! csrf_field() !!}
                                         @method('patch')
@@ -57,31 +69,37 @@
                                             <div class="col-md-12">
 
                                                 <fieldset class="form-group">
-                                                    <label for="basicInput">{{ __('admin.Service_Name')}}</label>
-                                                    <input style="direction: ltr;" type="text" class="form-control" id="name_en" name='name_en'
-                                                        required 
+                                                    <label class="fs-5 mb-2" for="basicInput">{{
+                                                        __('admin.Service_Name')}}</label>
+                                                    <input style="direction: ltr;" type="text" class="form-control"
+                                                        id="name_en" name='name_en' required
                                                         value="{{ $service->name_en }}">
                                                 </fieldset>
                                                 <fieldset class="form-group mt-3">
-                                                    <label for="basicInput">{{__('admin.Price')}}</label>
-                                                    <input style="direction: ltr;" type="text" class="form-control col-md-4 col-sm-12" id="price" name='price'
-                                                           required placeholder="{{__('admin.Price in EGP')}}"
-                                                           value="{{ $service->price}}">
+                                                    <label class="fs-5 mb-2"
+                                                        for="basicInput">{{__('admin.Price')}}</label>
+                                                    <input style="direction: ltr;" type="text"
+                                                        class="form-control col-md-4 col-sm-12" id="price" name='price'
+                                                        required placeholder="{{__('admin.Price in EGP')}}"
+                                                        value="{{ $service->price}}">
                                                 </fieldset>
                                                 <fieldset class="form-group mt-3">
-                                                    <label for="basicInput">{{ __('admin.Description')}}</label>
-                                                    <textarea class="form-control" id="basicTextarea"
-                                                        name='description_en' required>{!! $service->description_en !!}</textarea>
+                                                    <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Description')
+                                                        }}</label>
+                                                    <input type="hidden" name="description_en" id="description_en"
+                                                        value="{{ old('description_en', $service->description_en) }}" />
+                                                    <div id="quill-editor" style="height: 200px;">{!!
+                                                        old('description_en', $service->description_en) !!}</div>
                                                 </fieldset>
 
                                                 <fieldset class="form-group mt-3">
-                                                    <label for="basicInput">{{ __('admin.Services Categories')}}</label>
+                                                    <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Services Categories')}}</label>
                                                     <select class="select2 form-control" required
                                                         id="service_category_id" name='service_category_id'>
                                                         <option value="">{{ __('admin.Services Categories')}}</option>
                                                         @foreach($serviceCategories as $category)
-                                                        <option value="{{$category->id}}"
-                                                            {{ ($category->id == $service->service_category_id ? "selected":"") }}>
+                                                        <option value="{{$category->id}}" {{ ($category->id ==
+                                                            $service->service_category_id ? "selected":"") }}>
                                                             {{$category->{'name_'.$l} }}</option>
                                                         @endforeach
                                                     </select>
@@ -91,81 +109,100 @@
                                                     <label class="fs-5 mb-2">{{ __('admin.Organizations') }}</label>
                                                     <div class="row">
                                                         @foreach ($organizations as $organization)
-                                                            <div class="col-md-4">
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input" type="checkbox" 
-                                                                        id="organization_{{ $organization->id }}" 
-                                                                        name="organization_ids[]" 
-                                                                        value="{{ $organization->id }}"
-                                                                        {{ in_array($organization->id, old('organization_ids', $service->organizations->pluck('id')->toArray() ?? [])) ? 'checked' : '' }}>
-                                                                    <label class="form-check-label" for="organization_{{ $organization->id }}">
-                                                                        {{ $organization->{'name_' . app()->getLocale()} }}
-                                                                    </label>
-                                                                </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    id="organization_{{ $organization->id }}"
+                                                                    name="organization_ids[]"
+                                                                    value="{{ $organization->id }}" {{
+                                                                    in_array($organization->id, old('organization_ids',
+                                                                $service->organizations->pluck('id')->toArray() ?? []))
+                                                                ? 'checked' : '' }}>
+                                                                <label class="form-check-label"
+                                                                    for="organization_{{ $organization->id }}">
+                                                                    {{ $organization->{'name_' . app()->getLocale()} }}
+                                                                </label>
                                                             </div>
+                                                        </div>
                                                         @endforeach
                                                     </div>
                                                 </fieldset>
-                                                  <!-- Vendor Details -->
-                                                  <fieldset class="form-group mt-3">
+                                                <!-- Vendor Details -->
+                                                <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>
-                                                    <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_name"
-                                                           value="{{ old('vendor_name', $service->vendor_name) }}">
+                                                    <input type="text" class="form-control col-md-6 col-sm-12"
+                                                        name="vendor_name"
+                                                        value="{{ old('vendor_name', $service->vendor_name) }}">
                                                 </fieldset>
 
                                                 <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Email') }}</label>
-                                                    <input type="email" class="form-control col-md-6 col-sm-12" name="vendor_email"
-                                                           value="{{ old('vendor_email', $service->vendor_email) }}">
+                                                    <input type="email" class="form-control col-md-6 col-sm-12"
+                                                        name="vendor_email"
+                                                        value="{{ old('vendor_email', $service->vendor_email) }}">
                                                 </fieldset>
 
                                                 <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Phone') }}</label>
-                                                    <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_phone"
-                                                           value="{{ old('vendor_phone', $service->vendor_phone) }}">
+                                                    <input type="text" class="form-control col-md-6 col-sm-12"
+                                                        name="vendor_phone"
+                                                        value="{{ old('vendor_phone', $service->vendor_phone) }}">
                                                 </fieldset>
 
                                                 <!-- Visibility Controls -->
-<fieldset class="form-group mt-3">
-    <div class="form-check">
-        <input type="hidden" name="hide_price" value="0">
-        <input type="checkbox" class="form-check-input" id="hide_price" name="hide_price" value="1"
-               {{ old('hide_price', $service->hide_price) == 1 ? 'checked' : '' }}>
-        <label class="form-check-label" for="hide_price">{{ __('admin.Hide_Price') }}</label>
-    </div>
-</fieldset>
+                                                <fieldset class="form-group mt-3">
+                                                    <div class="form-check">
+                                                        <input type="hidden" name="hide_price" value="0">
+                                                        <input type="checkbox" class="form-check-input" id="hide_price"
+                                                            name="hide_price" value="1" {{ old('hide_price',
+                                                            $service->hide_price) == 1 ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="hide_price">{{
+                                                            __('admin.Hide_Price') }}</label>
+                                                    </div>
+                                                </fieldset>
 
-<fieldset class="form-group mt-3">
-    <div class="form-check">
-        <input type="hidden" name="hide_vendor_info" value="0">
-        <input type="checkbox" class="form-check-input" id="hide_vendor_info" name="hide_vendor_info" value="1"
-               {{ old('hide_vendor_info', $service->hide_vendor_info) == 1 ? 'checked' : '' }}>
-        <label class="form-check-label" for="hide_vendor_info">{{ __('admin.Hide_Vendor') }}</label>
-    </div>
-</fieldset>
+                                                <fieldset class="form-group mt-3">
+                                                    <div class="form-check">
+                                                        <input type="hidden" name="hide_vendor_info" value="0">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="hide_vendor_info" name="hide_vendor_info" value="1" {{
+                                                            old('hide_vendor_info', $service->hide_vendor_info) == 1 ?
+                                                        'checked' : '' }}>
+                                                        <label class="form-check-label" for="hide_vendor_info">{{
+                                                            __('admin.Hide_Vendor') }}</label>
+                                                    </div>
+                                                </fieldset>
 
-                <fieldset class="form-group">
-                      <label for="basicInput">{{ __('admin.Image')}}</label>
-                       <div class="input-group">
-                         <div class="input-group-prepend">
-                          <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-                        </div>
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="img_url"
-                                name="img_url" accept="image/*" aria-describedby="inputGroupFileAddon01">
-                            <label class="custom-file-label"
-                            for="inputGroupFile01">{{__('admin.SelectFile')}}</label>
-                            </div>
-                           </div>
+                                                <fieldset class="form-group mt-3">
+                                                    <label for="img_url" class="fs-5 mb-2">{{
+                                                        __('admin.Image')}}</label>
+                                                    <div class="input-group">
+                                                        <input type="file" class="form-control" id="img_url"
+                                                            name="img_url" accept="image/*">
+                                                        <label class="input-group-text" for="img_url">
+                                                            <i class="ti ti-upload me-1"></i>{{ __('admin.SelectFile')}}
+                                                        </label>
+                                                    </div>
+                                                    @if($service->img_url)
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">{{ __('admin.Current Image')
+                                                            }}:</small>
+                                                        <div class="mt-1">
+                                                            <img src="{{ asset($service->img_url) }}"
+                                                                alt="Service Image" class="img-thumbnail"
+                                                                style="max-width: 150px; max-height: 150px;">
+                                                        </div>
+                                                    </div>
+                                                    @endif
+                                                </fieldset>
 
-                         </fieldset>
-
-                        </div>
+                                            </div>
                                         </div>
                                         @if( $_user->ableToAny(['services.edit', 'services.update'], $permissions) )
                                         <div class="row">
                                             <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                <button type="submit"
+                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
                                             </div>
                                         </div>
                                         @endif
@@ -174,7 +211,7 @@
                             </div>
                         </div>
                     </div>
-                   
+
                 </div>
             </section>
             <!-- BuilderForm end -->
@@ -184,14 +221,19 @@
 <!-- END: Content-->
 @stop
 @section('pagescripts')
-<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+@parent
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
-    CKEDITOR.replace('description_ar', {
-        language: 'ar'
-    });
-    CKEDITOR.replace('description_en', {
-        language: 'en'
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+      var quill = new Quill('#quill-editor', {
+        theme: 'snow'
+      });
 
+      var descriptionInput = document.getElementById('description_en');
+      quill.on('text-change', function () {
+        descriptionInput.value = quill.root.innerHTML;
+      });
+    });
 </script>
 @stop
