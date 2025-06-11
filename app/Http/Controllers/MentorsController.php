@@ -329,8 +329,8 @@ class MentorsController extends Controller
 		}
 
 		if ($request->mentorid) {
-			if ($request->date < date("Y-m-d 23:59:59")) {
-				return back()->with(['msg' => "Error, cannot add late date.", 'class' => 'danger']);
+			if (Carbon::parse($request->date)->lessThan(now())) {
+				return back()->with(['error' => 'cannot_schedule_past_meeting']);
 			}
 			$fileName = '';
 			if ($request->hasFile('file_url')) {
@@ -341,20 +341,19 @@ class MentorsController extends Controller
 			$cycle = Cycle::find($request->cycle_id);
 			$autoApprove = $cycle->auto_approve_mentorship_requests;
 	
-			 $approved = null;
- 				$userid = Auth::id();
+			$approved = null;
+ 			$userid = Auth::id();
+			$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
+			$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
+			$onlineMeeting = $this->meetingService->createMeeting($data);
+			if (!$onlineMeeting['success']) {
+    			return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
+			}
+			$startUrl = $onlineMeeting['data']['start_url'];
+			$joinUrl = $onlineMeeting['data']['join_url'];
 			 if ($autoApprove == 1) {
 				
-				 $approved = 'Yes';
-				 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
-				 $data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
-				
-				$onlineMeeting = $this->meetingService->createMeeting($data);
-			
-				if (!$onlineMeeting['success']) {
-					return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
-				}
-				
+			    $approved = 'Yes';	
 				// $date = substr($date1, 0, -2);
 				// $dateAM = substr($date1, -2);																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
 				$dateFormat = new \DateTime($request->date);
@@ -364,8 +363,8 @@ class MentorsController extends Controller
 					'user_id' => $userid,
 					'comment' => $request->notes,
 					'approved' => 'Yes',
-					'start_url' => $onlineMeeting['data']['start_url'],
-					'join_url' => $onlineMeeting['data']['join_url'],
+					'start_url' => $startUrl,
+					'join_url' => $joinUrl,
 					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 					'period' => $period,
 					'organization_id' => $request->organization_id,
@@ -375,11 +374,12 @@ class MentorsController extends Controller
 				
 				$mentor = User::find($request->mentorid);
 			}else{
-			
 			MentorshipRequest::create([
 				'mentor_id' => $request->mentorid,
 				'user_id' => Auth::id(),
 				'comment' => $request->notes,
+				'start_url' => $startUrl,
+				'join_url' => $joinUrl,
 				'zoom_date' => $datefrom,
 				'period' => $period,
 				'fileurl' => $fileName,
