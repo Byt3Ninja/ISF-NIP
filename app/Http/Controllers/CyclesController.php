@@ -672,7 +672,9 @@ class CyclesController extends Controller
                 'question' => $field_options->label,
                 'answer' => $request->{$field_name},
                 'screening' => '{}',
-                'comments' => '{}'
+                'comments' => '{}',
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         }
 
