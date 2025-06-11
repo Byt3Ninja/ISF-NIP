@@ -927,16 +927,19 @@ if ($type == 'sessions' || $type == 'offline') {
 		if ($type == 'sessions') {
 			// Add Zoom
 		$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
+		if ($trainingSession instanceof \Illuminate\Http\RedirectResponse) {
+   			 return $trainingSession; 
+		}
 			// $session = TrainingSession::find($trainingSession->sid);
 			// ======> notify Trainer <=================
 			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+			return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 
 		} elseif ($type == 'online') {
 			$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online, $request->sid);
 			SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+			return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 
 		} elseif ($type == 'offline') {
 			$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email, $request->sid);
@@ -945,7 +948,7 @@ if ($type == 'sessions' || $type == 'offline') {
 			$address = $request->training_Address ?? 'No Address';
 			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
-			return back()->with(['message' => 'Session Updated Successfully', 'class' => 'success']);
+			return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 		} else {
 			return back()->with(['message' => 'Can\'t edit session', 'class' => 'danger']);
 		}

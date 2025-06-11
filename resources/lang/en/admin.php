@@ -1907,4 +1907,5 @@ return [
     'completedTasks' => 'Completed Tasks',
     'nonCompletedTasks' => 'Non Completed Tasks',
 	'Error, cannot add late date' => 'Error, cannot add late date',
+	'sessionUpdated' => 'Session Updated Successfully',
 ];
