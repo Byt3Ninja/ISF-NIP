@@ -329,7 +329,7 @@ class MentorsController extends Controller
 		}
 
 		if ($request->mentorid) {
-			if (Carbon::parse($request->date)->lessThan(now())) {
+			if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
 				return back()->with(['error' => 'cannot_schedule_past_meeting']);
 			}
 			$fileName = '';
