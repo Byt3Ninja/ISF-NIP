@@ -188,7 +188,7 @@
                                                         <small class="text-muted">{{ __('admin.Current Image')
                                                             }}:</small>
                                                         <div class="mt-1">
-                                                            <img src="{{ asset($service->img_url) }}"
+                                                            <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}"
                                                                 alt="Service Image" class="img-thumbnail"
                                                                 style="max-width: 150px; max-height: 150px;">
                                                         </div>

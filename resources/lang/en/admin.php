@@ -1909,4 +1909,6 @@ return [
 	'Error, cannot add late date' => 'Error, cannot add late date',
 	'sessionUpdated' => 'Session Updated Successfully',
 	'Current Image' => 'Current Image',
+	'ServiceAdded' => 'Service Added Successfully',
+	'ServiceUpdated' => 'Service Updated Successfully',
 ];
