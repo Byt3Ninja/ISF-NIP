@@ -44,11 +44,11 @@
                             <th>#</th>
                             <th class="text-center">{{__('admin.Organization')}}</th>
                             <th class="text-center">{{ __('cycles.English Name') }}</th>
-                            <th class="text-center">{{ __('cycles.Arabic Name') }}</th>
                             <th class="text-center">{{ __('cycles.Price') }}</th>
                             <th class="text-center">{{ __('admin.Vendor_Name') }}</th>
                             <th class="text-center">{{ __('admin.Vendor_Email') }}</th>
                             <th class="text-center">{{ __('admin.Vendor_Phone') }}</th>
+                            <th class="text-center">{{ __('admin.Image') }}</th>
                             <th class="text-center">{{ __('cycles.Created At') }}</th>
                             @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )<th class="text-center">{{ __('admin.Actions') }}</th>@endif
                           </tr>
@@ -78,6 +78,11 @@
                               <td class="text-center">{{ $service->vendor_name ?? '-'}}</td>
                               <td class="text-center">{{ $service->vendor_email ?? '-' }}</td>
                               <td class="text-center">{{ $service->vendor_phone ?? '-'}}</td>
+                               @if ($service->img_url)
+                                  <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="Service Image" style="width: 50px; height: 50px;">
+                              @else
+                                   -
+                              @endif
                               <td class="text-center">{{ $service->created_at }}</td>
                               @if($_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions))
                               <td class="text-center">

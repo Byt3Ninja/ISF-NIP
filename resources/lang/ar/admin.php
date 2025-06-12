@@ -1959,4 +1959,6 @@ return [
 	'Error, cannot add late date' => 'خطاء، لا يمكن اضافة تاريخ متاخر',
 	'sessionUpdated' => 'تم تحديث الجلسة بنجاح',
 	'Current Image' => 'الصورة الحالية',
+	'ServiceAdded' => 'تم اضافة الخدمة بنجاح',
+	'ServiceUpdated' => 'تم تحديث الخدمة بنجاح',
 ];
