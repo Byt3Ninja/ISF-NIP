@@ -73,7 +73,6 @@
                                 @endif
                             </td>
                               <td class="text-center">{{ $service->name_en }}</td>
-                              <td class="text-center">{{ $service->name_ar }}</td>
                               <td class="text-center">{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
                               <td class="text-center">{{ $service->vendor_name ?? '-'}}</td>
                               <td class="text-center">{{ $service->vendor_email ?? '-' }}</td>
