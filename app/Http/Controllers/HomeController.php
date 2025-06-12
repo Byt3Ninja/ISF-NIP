@@ -342,7 +342,6 @@ class HomeController extends Controller
                 WHERE
                     s.deleted_at IS NULL
             ";
-            if( $has_org ) { $services_q .= " AND s.organization_id = " . $user->organization_id; }
             $services = collect( DB::select( $services_q ) )->map(function( $service ) use ( $l ) {
                 $output = new stdClass;
                 $output->id = $service->id;
