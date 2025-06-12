@@ -78,11 +78,13 @@
                               <td class="text-center">{{ $service->vendor_name ?? '-'}}</td>
                               <td class="text-center">{{ $service->vendor_email ?? '-' }}</td>
                               <td class="text-center">{{ $service->vendor_phone ?? '-'}}</td>
-                               @if ($service->img_url)
+                              <td class="text-center">
+                              @if ($service->img_url)
                                   <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="Service Image" style="width: 50px; height: 50px;">
                               @else
                                    -
                               @endif
+                             </td>
                               <td class="text-center">{{ $service->created_at }}</td>
                               @if($_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions))
                               <td class="text-center">
