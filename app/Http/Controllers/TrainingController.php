@@ -859,6 +859,7 @@ class TrainingController extends Controller
 
 
 		$sessions = $sessions->get();
+		// dd($sessions->toArray());
 		return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
 	} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
@@ -888,15 +889,18 @@ class TrainingController extends Controller
 			$type = $request->type;
 			$l = app()->getLocale();
 	if ($type == 'sessions' || $type == 'offline') {
-			$startDate = FormatDate($request->datetime, 'Y-m-d');
+		
+			$startDate = $request->datetime;
 			$startTime = $request->starttime;   // وقت البداية
 			$endTime = $request->endtime;   // وقت النهاية
-			$start_datetime = $startDate.' '. $startTime;
-			$end_datetime = $startDate.' '.$endTime;
+			$start_datetime = strtotime($startDate.' '. $startTime);
+			$end_datetime = strtotime($startDate.' '.$endTime);
 	} else if ($type == 'online') {
 		[$startDate, $endDate] = explode(' - ', $dateRange);
-		$start_datetime = FormatDate($startDate, 'Y-m-d') ;
-		$end_datetime = FormatDate($endDate, 'Y-m-d');
+		
+		$start_datetime = strtotime($startDate) ;
+		$end_datetime = strtotime($endDate);
+	
 	}
 			
 				
