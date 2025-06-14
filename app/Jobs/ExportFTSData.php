@@ -158,7 +158,7 @@ class ExportFTSData implements ShouldQueue
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
     Mail::to($userEmail)
-        ->send(new ExportMail($tempFilePath, $fileName));
+        ->queue(new ExportMail($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

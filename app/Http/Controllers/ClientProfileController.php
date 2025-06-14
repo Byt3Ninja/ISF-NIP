@@ -217,7 +217,7 @@ class ClientProfileController extends Controller
                      // إرسال رابط التحقق
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
+                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
                     return redirect()->route('user.profile_view')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
                 }
 
@@ -244,7 +244,7 @@ class ClientProfileController extends Controller
                      // إرسال رابط التحقق
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
+                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
                     return redirect()->route('user.profile_view')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
                 }
             
