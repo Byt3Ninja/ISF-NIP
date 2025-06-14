@@ -63,7 +63,7 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		// تحقق من أن البريد الإلكتروني موجود
 	
-
+	try {
 		$courses = collect(DB::select("SELECT id FROM training_contents WHERE training_id = ?", [$course_id]));
 		$course_contents = $courses->count();
 		// 'cycle',
@@ -139,11 +139,14 @@ class TrainingController extends Controller
 		})->values();
 
 		return Excel::download(new TrainingResultExport($compaines), 'training_results_report.xlsx');
-		
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@exportTresult: ' . $e->getMessage());
+		}
 	}
 
 	public function changAllTL(Request $request)
 	{
+		try {
 		$this->validate($request, [
 			'checkget' => 'required|integer',
 			'compid' => 'required|array',
@@ -198,10 +201,14 @@ class TrainingController extends Controller
 			return response()->json(['state' => 'failed'], 500);
 		}
 		return response()->json(['state' => 'success'], 200);
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@changAllTL: ' . $e->getMessage());
+		}
 	}
 
 	public function all(Request $request, $id = 0)
 	{
+		try {
 		$courses = Training::orderBy('created_at', 'DESC');
 		if ($request->catTr_id) {
 			$courses = $courses->whereHas('categories', function ($query) use ($request) {
@@ -222,6 +229,9 @@ class TrainingController extends Controller
 		$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
 		return view('admin/settings/training/all', compact('courses', 'id', 'contents'));
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@all: ' . $e->getMessage());
+		}
 	}
 
 	public function edit($id)
@@ -232,6 +242,7 @@ class TrainingController extends Controller
 
 	public function store(Request $request)
 	{
+		try {
 		if ($request->hasFile('image'))
 		{
 			$img_url = $request->file('image');
@@ -343,10 +354,14 @@ class TrainingController extends Controller
 		}
 
 		return redirect('/dashboard/training/all/')->with(['class' => 'success', 'message' => 'Saved']);
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@store: ' . $e->getMessage());
+		}
 	}
 
 	public function delete($id, Request $request)
 	{
+		try {
 		if ($request)
 		{
 			Training::where('id', $id)->delete();
@@ -355,10 +370,14 @@ class TrainingController extends Controller
 			DB::table('categories_training')->where('training_id', $id)->delete();
 			return response()->json(['state' => 'success']);
 		} else { return response()->json(['state' => 'failed'], 500); }
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@delete: ' . $e->getMessage());
+		}
 	}
 
 	public function addcontent($id)
 	{
+		try {
 		$check = Training::findOrFail($id);
 		$arr = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get(['title', 'arr']);
 		if (count($arr) == 0) { $arr = []; }
@@ -367,10 +386,14 @@ class TrainingController extends Controller
 		} else {
 			return back()->with(['class' => 'danger', 'message' => 'must add training course first.']);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@addcontent: ' . $e->getMessage());
+		}
 	}
 
 	public function editcontent($id)
 	{
+		try {
 		$content = TrainingContent::findOrFail($id);
 		$arr = TrainingContent::where('training_id', $content->training_id)->orderBy('arr', 'ASC')->get(['title', 'arr']);
 		if ($content) {
@@ -378,20 +401,28 @@ class TrainingController extends Controller
 		} else {
 			return back()->with(['class' => 'danger', 'message' => 'Error, content not exist.']);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@editcontent: ' . $e->getMessage());
+		}
 	}
 
 	public function viewcontent($id)
 	{
+		try {
 		$content = TrainingContent::findOrFail($id);
 		if ($content) {
 			return view('admin/settings/training/view_content', compact('content'));
 		} else {
 			return back()->with(['class' => 'danger', 'message' => 'Error, content not exist.']);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@viewcontent: ' . $e->getMessage());
+		}
 	}
 
 	public function storecontent(Request $request)
 	{
+		try {
 		if ($request->tcontent)
 		{
 			$id = $request->id ?? null;
@@ -411,10 +442,15 @@ class TrainingController extends Controller
 			// return redirect('/dashboard/training/all/' . $request->training_id)->with(['class' => 'success', 'message' => 'Saved']);
 		}
 		return back()->withInput()->with(['class' => 'danger', 'message' => 'Error']);
+
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@storecontent: ' . $e->getMessage());
+		}
 	}
 
 	public function delcontent($id, Request $request)
 	{
+		try{
 		if ($request)
 		{
 			$removedid = TrainingContent::where('id', $id)->first(['training_id'])->training_id;
@@ -428,6 +464,9 @@ class TrainingController extends Controller
 		} else {
 			return response()->json(['state' => 'failed'], 500);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@attendanceReport: ' . $e->getMessage());
+		}
 	}
 
 	public function upload(Request $request)
@@ -439,274 +478,287 @@ class TrainingController extends Controller
 
 	public function my($id, Request $request)
 	{
-		$step = optional(Auth::user()->company)->step;
-		$tr = Step::findOrfail($step);
-		$c = $request->c ?? 0;
-		if ($tr->stype == 4) {
-			$contents = TrainingContent::where('training_id', $id)->orderBy('arr')->get(['id', 'title', 'training_id']);
-			$ccontent = TrainingContent::where('training_id', $id);
-			$ccontent = $c == 0 ? $ccontent->orderBy('arr', 'ASC') : $ccontent->where('id', $c);
-			$ccontent = $ccontent->first(['id', 'title', 'content', 'created_at']);
+		try {
+			$step = optional(Auth::user()->company)->step;
+			$tr = Step::findOrfail($step);
+			$c = $request->c ?? 0;
+			if ($tr->stype == 4) {
+				$contents = TrainingContent::where('training_id', $id)->orderBy('arr')->get(['id', 'title', 'training_id']);
+				$ccontent = TrainingContent::where('training_id', $id);
+				$ccontent = $c == 0 ? $ccontent->orderBy('arr', 'ASC') : $ccontent->where('id', $c);
+				$ccontent = $ccontent->first(['id', 'title', 'content', 'created_at']);
 
-			$training = "SELECT *,
-			Concat(u.first_name_en, ' ', u.last_name_en) AS name_en,
-			Concat(u.first_name_ar, ' ', u.last_name_ar) AS name_ar
-			FROM trainings AS t 
-			LEFT JOIN users AS u ON t.user_id = u.id
-			WHERE t.id = ? AND t.deleted_at IS NULL";
-			$training = DB::select($training, [$id]);
-			$training = $training[0];
+				$training = "SELECT *,
+				Concat(u.first_name_en, ' ', u.last_name_en) AS name_en,
+				Concat(u.first_name_ar, ' ', u.last_name_ar) AS name_ar
+				FROM trainings AS t 
+				LEFT JOIN users AS u ON t.user_id = u.id
+				WHERE t.id = ? AND t.deleted_at IS NULL";
+				$training = DB::select($training, [$id]);
+				$training = $training[0];
 
-			if (count($contents) == 0) {
-				return back()->with(['class' => 'danger', 'message' => 'Error, content not exist.']);
+				if (count($contents) == 0) {
+					return back()->with(['class' => 'danger', 'message' => 'Error, content not exist.']);
+				}
+				// save progress
+				TrainingCompleted::updateOrInsert(['training_id' => $ccontent->id, 'user_id' => Auth::id()], ['course_id' => $id]);
+
+				$completedCount = TrainingCompleted::where('course_id', $id)
+				->where('user_id', Auth::id())
+				->count();
+
+				$totalContent = $contents->count();
+				$progressPercentage = $totalContent > 0 ? round(($completedCount / $totalContent) * 100) : 0;
+
+
+				$quizzes = Quizzes::where('training_id', $id)->where('status', 'published')->get();
+				return view('admin/clients/training', compact('contents', 'ccontent', 'quizzes', 'progressPercentage', 'training'));
+			} else {
+				return back()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
 			}
-			// save progress
-			TrainingCompleted::updateOrInsert(['training_id' => $ccontent->id, 'user_id' => Auth::id()], ['course_id' => $id]);
-
-			$completedCount = TrainingCompleted::where('course_id', $id)
-		    ->where('user_id', Auth::id())
-		    ->count();
-
-	        $totalContent = $contents->count();
-	        $progressPercentage = $totalContent > 0 ? round(($completedCount / $totalContent) * 100) : 0;
-
-
-			$quizzes = Quizzes::where('training_id', $id)->where('status', 'published')->get();
-			return view('admin/clients/training', compact('contents', 'ccontent', 'quizzes', 'progressPercentage', 'training'));
-		} else {
-			return back()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
-		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@my: ' . $e->getMessage());
+}
 	}
 
 	public function myQuiz($id, $quizId, Request $request)
 	{
-		$user = auth()->user();
-		if ($user->hasAnyRole(['Registered'])) {
-			if (!$user->HaveCompany) {
-				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
-			}
-			if (!$user->company) {
-				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
-			}
-
-			$company = $user->company;
-			$cycleData = $company->cycledata;
-
-			if (empty($cycleData)) {
-				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
-			}
-			if (empty($cycleData->organization_id)) {
-				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
-			}
-
-			$organization_id = $cycleData->organization_id;
-			$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
-			$questions = $quiz->questions;
-			$tags = $questions->flatMap(function ($question) {
-				return $question->tags;
-			})->unique()->values()->toArray();
-			$training = $quiz->training;
-			if (empty($training)) {
-				return abort(404);
-			}
-			$available = true;
-			$available_at = null;
-			$allowActions = false;
-			$time_remaining = null;
-			$attempts = $quiz->myAttempts;
-			foreach ($attempts as $index => $attempt) {
-				if (!$attempt->status) {
-					if ($attempt->started_at->diffInMinutes(now()) > $quiz->time_limit) {
-						$attempt->status = true;
-						$attempt->ended_at = $attempt->started_at->copy()->addMinutes($quiz->time_limit);
-						$attempt->save();
-						$attempts[$index]->status = $attempt->status;
-						$attempts[$index]->ended_at = $attempt->ended_at;
-					}
+		try{
+			$user = auth()->user();
+			if ($user->hasAnyRole(['Registered'])) {
+				if (!$user->HaveCompany) {
+					return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 				}
-			}
-			$active_now = null;
-			$get_active = $attempts->where('status', false)->first();
-			if (!empty($get_active)) {
-				$active_now = $get_active->id;
-			}
-			$failures = $attempts->where('score', '<', $quiz->passing_criteria);
-			$success = $attempts->where('score', '>=', $quiz->passing_criteria);
-			if ($failures->count() >= $quiz->attempts || $success->count() > 0) {
-				$allowActions = true;
-			}
-			$available = now() > $quiz->start && now() < $quiz->end ? true : false;
-			$completion_percentage = $training->progress()['percentage'];
-			$available = $available && $completion_percentage >= 100 ? true : false;
-			if ($available && $attempts->count() == 0) {
+				if (!$user->company) {
+					return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				}
+
+				$company = $user->company;
+				$cycleData = $company->cycledata;
+
+				if (empty($cycleData)) {
+					return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				}
+				if (empty($cycleData->organization_id)) {
+					return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				}
+
+				$organization_id = $cycleData->organization_id;
+				$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
+				$questions = $quiz->questions;
+				$tags = $questions->flatMap(function ($question) {
+					return $question->tags;
+				})->unique()->values()->toArray();
+				$training = $quiz->training;
+				if (empty($training)) {
+					return abort(404);
+				}
 				$available = true;
-			} else {
-				$available = $available && $failures->count() < $quiz->attempts ? true : false;
-				$available = $available && $success->count() == 0 ? true : false;
-				$lastAttempt = $attempts->last();
-				if ($lastAttempt && $failures->count() < $quiz->attempts) {
-					if ($lastAttempt->score < $quiz->passing_criteria) {
-						$retryAfter = Carbon::createFromFormat('H:i', $quiz->retry_after);
-						$last = !empty($lastAttempt->ended_at) ? $lastAttempt->ended_at : $lastAttempt->updated_at;
-						$available_at = $last->addHours($retryAfter->hour)->addMinutes($retryAfter->minute);
-						$available = $available && now() >= $available_at ? true : false;
+				$available_at = null;
+				$allowActions = false;
+				$time_remaining = null;
+				$attempts = $quiz->myAttempts;
+				foreach ($attempts as $index => $attempt) {
+					if (!$attempt->status) {
+						if ($attempt->started_at->diffInMinutes(now()) > $quiz->time_limit) {
+							$attempt->status = true;
+							$attempt->ended_at = $attempt->started_at->copy()->addMinutes($quiz->time_limit);
+							$attempt->save();
+							$attempts[$index]->status = $attempt->status;
+							$attempts[$index]->ended_at = $attempt->ended_at;
+						}
 					}
 				}
+				$active_now = null;
+				$get_active = $attempts->where('status', false)->first();
+				if (!empty($get_active)) {
+					$active_now = $get_active->id;
+				}
+				$failures = $attempts->where('score', '<', $quiz->passing_criteria);
+				$success = $attempts->where('score', '>=', $quiz->passing_criteria);
+				if ($failures->count() >= $quiz->attempts || $success->count() > 0) {
+					$allowActions = true;
+				}
+				$available = now() > $quiz->start && now() < $quiz->end ? true : false;
+				$completion_percentage = $training->progress()['percentage'];
+				$available = $available && $completion_percentage >= 100 ? true : false;
+				if ($available && $attempts->count() == 0) {
+					$available = true;
+				} else {
+					$available = $available && $failures->count() < $quiz->attempts ? true : false;
+					$available = $available && $success->count() == 0 ? true : false;
+					$lastAttempt = $attempts->last();
+					if ($lastAttempt && $failures->count() < $quiz->attempts) {
+						if ($lastAttempt->score < $quiz->passing_criteria) {
+							$retryAfter = Carbon::createFromFormat('H:i', $quiz->retry_after);
+							$last = !empty($lastAttempt->ended_at) ? $lastAttempt->ended_at : $lastAttempt->updated_at;
+							$available_at = $last->addHours($retryAfter->hour)->addMinutes($retryAfter->minute);
+							$available = $available && now() >= $available_at ? true : false;
+						}
+					}
+				}
+				if ($quiz->start > now()) {
+					$diff = $quiz->start->diff(now());
+					$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
+				} elseif (!empty($available_at) && now() < $available_at) {
+					$diff = $available_at->diff(now());
+					$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
+				}
+				return view('admin/clients/quiz/overview', compact('quiz', 'training', 'questions', 'tags', 'attempts', 'available', 'available_at', 'time_remaining', 'completion_percentage', 'allowActions', 'active_now'));
+			} else {
+				return abort(401);
 			}
-			if ($quiz->start > now()) {
-				$diff = $quiz->start->diff(now());
-				$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
-			} elseif (!empty($available_at) && now() < $available_at) {
-				$diff = $available_at->diff(now());
-				$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
-			}
-			return view('admin/clients/quiz/overview', compact('quiz', 'training', 'questions', 'tags', 'attempts', 'available', 'available_at', 'time_remaining', 'completion_percentage', 'allowActions', 'active_now'));
-		} else {
-			return abort(401);
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@myQuiz: ' . $e->getMessage());
 		}
 	}
 
 	public function doQuiz($id, $quizId, Request $request)
 	{
-		$user = auth()->user();
-		if ($user->hasAnyRole(['Registered'])) {
-			if (!$user->HaveCompany) {
-				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
-			}
-			if (!$user->company) {
-				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
-			}
+		try{
+			$user = auth()->user();
+			if ($user->hasAnyRole(['Registered'])) {
+				if (!$user->HaveCompany) {
+					return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				}
+				if (!$user->company) {
+					return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				}
 
-			$company = $user->company;
-			$cycleData = $company->cycledata;
+				$company = $user->company;
+				$cycleData = $company->cycledata;
 
-			if (empty($cycleData)) {
-				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
-			}
-			if (empty($cycleData->organization_id)) {
-				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
-			}
+				if (empty($cycleData)) {
+					return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				}
+				if (empty($cycleData->organization_id)) {
+					return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				}
 
-			$organization_id = $cycleData->organization_id;
-			$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
-			$training = $quiz->training;
-			if (empty($training)) {
-				return abort(404);
-			}
+				$organization_id = $cycleData->organization_id;
+				$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
+				$training = $quiz->training;
+				if (empty($training)) {
+					return abort(404);
+				}
 
-			if ($request->has('response') && $request->has('answer')) {
-				$response = QuizResponses::where('user_id', $user->id)->find($request->input('response'));
-				if (!empty($response)) {
-					$result = $response->result;
-					$time_limit = $result->started_at->copy()->addMinutes($quiz->time_limit);
-					$remaining = $time_limit->diffInSeconds(now());
-					if ($remaining > 0) {
-						$answer = $request->input('answer');
-						$question = $response->question;
-						if ($question->type == 'tfq') {
-							$answer = $answer === "true" || $answer === true || $answer === 1 || $answer === '1' ? true : false;
-							$response->response = $answer;
-							$response->status = $answer == $question->correct;
-							$response->save();
-						} elseif ($question->type == 'mcq') {
-							$correct_answers = $question->answers->where('status', true)->map(function ($item) {
-								return md5($item['text'] . '+' . $item['status']);
-							})->values()->toArray();
+				if ($request->has('response') && $request->has('answer')) {
+					$response = QuizResponses::where('user_id', $user->id)->find($request->input('response'));
+					if (!empty($response)) {
+						$result = $response->result;
+						$time_limit = $result->started_at->copy()->addMinutes($quiz->time_limit);
+						$remaining = $time_limit->diffInSeconds(now());
+						if ($remaining > 0) {
+							$answer = $request->input('answer');
+							$question = $response->question;
+							if ($question->type == 'tfq') {
+								$answer = $answer === "true" || $answer === true || $answer === 1 || $answer === '1' ? true : false;
+								$response->response = $answer;
+								$response->status = $answer == $question->correct;
+								$response->save();
+							} elseif ($question->type == 'mcq') {
+								$correct_answers = $question->answers->where('status', true)->map(function ($item) {
+									return md5($item['text'] . '+' . $item['status']);
+								})->values()->toArray();
 
-							$response->response = $answer;
-							$response->status = in_array($answer, $correct_answers);
-							$response->save();
+								$response->response = $answer;
+								$response->status = in_array($answer, $correct_answers);
+								$response->save();
+							}
+							$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
+						} else {
+							$result->status = true;
+							$result->ended_at = $time_limit->format('Y-m-d H:i:s');
+							$result->save();
+							return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
 						}
-						$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
-					} else {
-						$result->status = true;
-						$result->ended_at = $time_limit->format('Y-m-d H:i:s');
-						$result->save();
-						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
 					}
 				}
-			}
-			$questions = $quiz->questions;
-			if ($quiz->shuffle) {
-				$questions = $questions->shuffle();
-			}
-			$attempts = $quiz->myAttempts;
-			foreach ($attempts as $index => $attempt) {
-				if (!$attempt->status) {
-					if ($attempt->started_at->diffInMinutes(now()) > $quiz->time_limit) {
-						$attempt->status = true;
-						$attempt->ended_at = $attempt->started_at->copy()->addMinutes($quiz->time_limit);
-						$attempt->save();
-						$attempts[$index]->status = $attempt->status;
-						$attempts[$index]->ended_at = $attempt->ended_at;
+				$questions = $quiz->questions;
+				if ($quiz->shuffle) {
+					$questions = $questions->shuffle();
+				}
+				$attempts = $quiz->myAttempts;
+				foreach ($attempts as $index => $attempt) {
+					if (!$attempt->status) {
+						if ($attempt->started_at->diffInMinutes(now()) > $quiz->time_limit) {
+							$attempt->status = true;
+							$attempt->ended_at = $attempt->started_at->copy()->addMinutes($quiz->time_limit);
+							$attempt->save();
+							$attempts[$index]->status = $attempt->status;
+							$attempts[$index]->ended_at = $attempt->ended_at;
+						}
 					}
 				}
-			}
-			$failures = $attempts->where('score', '<', $quiz->passing_criteria);
-			$success = $attempts->where('score', '>=', $quiz->passing_criteria);
-			if ($success->count() > 0 || $failures->where('status', true)->count() >= $quiz->attempts) {
-				return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizAlreadyCompleted'), 'class' => 'danger']);
-			}
-
-			$result = $attempts->where('status', false)->first();
-			if (!empty($result)) {
-				$responses = $result->responses->where('user_id', $user->id);
-			} else {
-				$result = new QuizResults;
-				$result->quiz_id = $quiz->id;
-				$result->user_id = $user->id;
-				$result->score = 0;
-				$result->started_at = now()->format('Y-m-d H:i:s');
-				$result->ended_at = null;
-				$result->status = false;
-				$result->save();
-
-				$responses = [];
-				foreach ($questions as $question) {
-					$responses[] = [
-						'result_id' => $result->id,
-						'quiz_id' => $quiz->id,
-						'question_id' => $question->id,
-						'user_id' => $user->id,
-						'response' => null,
-						'status' => false,
-					];
+				$failures = $attempts->where('score', '<', $quiz->passing_criteria);
+				$success = $attempts->where('score', '>=', $quiz->passing_criteria);
+				if ($success->count() > 0 || $failures->where('status', true)->count() >= $quiz->attempts) {
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizAlreadyCompleted'), 'class' => 'danger']);
 				}
-				QuizResponses::insert($responses);
-				$responses = QuizResponses::where('quiz_id', $quiz->id)->where('user_id', $user->id)->where('result_id', $result->id)->get();
-			}
-			$time_limit = $result->started_at->copy()->addMinutes($quiz->time_limit);
-			$remaining = $time_limit->diffInSeconds(now());
 
-			if ($remaining > 0) {
-				$response = $responses->whereNull('response')->first();
-				if (empty($response)) {
-					$answers = QuizResponses::where('quiz_id', $quizId)->where('user_id', $user->id)->where('result_id', $result->id)->get();
-					$score = $answers->where('status', true)->count();
-					$result->score = round(floatval($score / $answers->count()), 2) * 100;
-					$result->status = true;
-					$result->ended_at = now()->format('Y-m-d H:i:s');
+				$result = $attempts->where('status', false)->first();
+				if (!empty($result)) {
+					$responses = $result->responses->where('user_id', $user->id);
+				} else {
+					$result = new QuizResults;
+					$result->quiz_id = $quiz->id;
+					$result->user_id = $user->id;
+					$result->score = 0;
+					$result->started_at = now()->format('Y-m-d H:i:s');
+					$result->ended_at = null;
+					$result->status = false;
 					$result->save();
-					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
-				}
-				$question = $response->question;
 
-				$diff = now()->diff($time_limit);
-				$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
-				return view('admin/clients/quiz/taking', compact('quiz', 'training', 'questions', 'question', 'response', 'time_remaining'));
+					$responses = [];
+					foreach ($questions as $question) {
+						$responses[] = [
+							'result_id' => $result->id,
+							'quiz_id' => $quiz->id,
+							'question_id' => $question->id,
+							'user_id' => $user->id,
+							'response' => null,
+							'status' => false,
+						];
+					}
+					QuizResponses::insert($responses);
+					$responses = QuizResponses::where('quiz_id', $quiz->id)->where('user_id', $user->id)->where('result_id', $result->id)->get();
+				}
+				$time_limit = $result->started_at->copy()->addMinutes($quiz->time_limit);
+				$remaining = $time_limit->diffInSeconds(now());
+
+				if ($remaining > 0) {
+					$response = $responses->whereNull('response')->first();
+					if (empty($response)) {
+						$answers = QuizResponses::where('quiz_id', $quizId)->where('user_id', $user->id)->where('result_id', $result->id)->get();
+						$score = $answers->where('status', true)->count();
+						$result->score = round(floatval($score / $answers->count()), 2) * 100;
+						$result->status = true;
+						$result->ended_at = now()->format('Y-m-d H:i:s');
+						$result->save();
+						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
+					}
+					$question = $response->question;
+
+					$diff = now()->diff($time_limit);
+					$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
+					return view('admin/clients/quiz/taking', compact('quiz', 'training', 'questions', 'question', 'response', 'time_remaining'));
+				} else {
+					$result->status = true;
+					$result->ended_at = $time_limit->format('Y-m-d H:i:s');
+					$result->save();
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
+				}
 			} else {
-				$result->status = true;
-				$result->ended_at = $time_limit->format('Y-m-d H:i:s');
-				$result->save();
-				return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
+				return abort(401);
 			}
-		} else {
-			return abort(401);
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@doQuiz: ' . $e->getMessage());
 		}
 	}
 
 	public function myQuizResponses($id, $quizId, $resultId)
 	{
+		try{
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
@@ -738,41 +790,49 @@ class TrainingController extends Controller
 		} else {
 			return abort(401);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@myQuizResponses: ' . $e->getMessage());
+		}
 	}
 
 	public function results($id = 0)
 	{
-		$organization_id = auth()->user()->organization_id;
-		$sessions = TrainingSession::when(!is_null($organization_id), function ($q) use ($organization_id) {
-			return $q->whereHas('step', function ($query) use ($organization_id) {
-				$query->whereHas('cycle', function ($qer) use ($organization_id) {
-					$qer->where('organization_id', $organization_id);
+		try{
+			$organization_id = auth()->user()->organization_id;
+			$sessions = TrainingSession::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->whereHas('step', function ($query) use ($organization_id) {
+					$query->whereHas('cycle', function ($qer) use ($organization_id) {
+						$qer->where('organization_id', $organization_id);
+					});
 				});
-			});
-		})->where('type', 'online')->orderBy('datetime')->get();
-		if ($id == 0) {
-			$id = $sessions->pluck('id')->first();
-			$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
-		} else {
-			$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
-		}
-		$contents = 0;
-		
-		if ($csession) {
-			$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
-		}
-		$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
-		foreach ($steps11 as $steps1) {
-			$companies = Company::where('cycle', $steps1->cycle_id)->get();
-		}
-		$uniqueCycleIds = $companies->pluck('cycle')->unique();
-		$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-		
+			})->where('type', 'online')->orderBy('datetime')->get();
+			if ($id == 0) {
+				$id = $sessions->pluck('id')->first();
+				$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
+			} else {
+				$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
+			}
+			$contents = 0;
+			
+			if ($csession) {
+				$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
+			}
+			$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
+			foreach ($steps11 as $steps1) {
+				$companies = Company::where('cycle', $steps1->cycle_id)->get();
+			}
+			$uniqueCycleIds = $companies->pluck('cycle')->unique();
+			$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
+			
 
-		return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
+			return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
+		}catch (\Throwable $e) {
+			Log::error('Error in TrainingController@myQuiz: ' . $e->getMessage());
+		}
 	}
 	public function sessions(Request $request, $id = 0)
 	{
+		try{
 		$organization_id = auth()->user()->organization_id;
 		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->whereHas('cycle', function ($query) use ($organization_id) {
@@ -800,83 +860,95 @@ class TrainingController extends Controller
 
 		$sessions = $sessions->get();
 		return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
+		}
 	}
 
 	public function mysessions()
 	{
+		try{
 		$sessions = [];
 		if (Auth::user()->company) {
 			$sessions = TrainingSession::where('step_id', Auth::user()->company->step)->orderBy('datetime', 'DESC')->get();
 		}
 		return view('admin/settings/training/mysessions', compact('sessions'));
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@mysessions: ' . $e->getMessage());
+		}
 	}
 
 	public function addsession(Request $request)
 	{
-		$addOrEdit = 'add';
-		$this->meetingService =  OnlineMeetingFactory::create();
-		
-		$dateRange = $request->date_range; 
-		$type = $request->type;
-		$l = app()->getLocale();
-if ($type == 'sessions' || $type == 'offline') {
-		$startDate = FormatDate($request->datetime, 'Y-m-d');
-		$startTime = $request->starttime;   // وقت البداية
-		$endTime = $request->endtime;   // وقت النهاية
-		$start_datetime = $startDate.' '. $startTime;
-		$end_datetime = $startDate.' '.$endTime;
-} else if ($type == 'online') {
-    [$startDate, $endDate] = explode(' - ', $dateRange);
-    $start_datetime = FormatDate($startDate, 'Y-m-d') ;
-    $end_datetime = FormatDate($endDate, 'Y-m-d');
-}
-		
+		try{
+			$addOrEdit = 'add';
+			$this->meetingService =  OnlineMeetingFactory::create();
 			
-		if($start_datetime == null || $end_datetime == null){
-			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
-		}
-
-		$step = $request->step_id;
-		$title = $request->title;
-		$dsc = $request->dsc;
-		$datetime = $start_datetime;
-		$datetimeStamp = Carbon::parse($datetime)->timestamp;
-		$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
-		$start = Carbon::parse($datetime);
-		$end = Carbon::parse($end_datetime);
-		$duration = $start->diffInMinutes($end);
-
-		if ($type == 'sessions') {
-			$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
-			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
-			// ==========> End Notify <================
-			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
-
-		} elseif ($type == 'online') {
-				$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online);
-			if( !in_array(env('APP_ENV', 'local'), ['local']) )
-            {
-				SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);	
+			$dateRange = $request->date_range; 
+			$type = $request->type;
+			$l = app()->getLocale();
+	if ($type == 'sessions' || $type == 'offline') {
+			$startDate = FormatDate($request->datetime, 'Y-m-d');
+			$startTime = $request->starttime;   // وقت البداية
+			$endTime = $request->endtime;   // وقت النهاية
+			$start_datetime = $startDate.' '. $startTime;
+			$end_datetime = $startDate.' '.$endTime;
+	} else if ($type == 'online') {
+		[$startDate, $endDate] = explode(' - ', $dateRange);
+		$start_datetime = FormatDate($startDate, 'Y-m-d') ;
+		$end_datetime = FormatDate($endDate, 'Y-m-d');
+	}
+			
+				
+			if($start_datetime == null || $end_datetime == null){
+				return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 			}
-			return back()->with(['message' => 'Saved', 'class' => 'success']);
 
-		} elseif ($type == 'offline') {
-			$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email);
-			// ======> notify Trainer <=================
-			$join_url = $request->training_location ?? 'No Location';
-			$address  = $request->training_Address ?? 'No Address';
-			SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
-			// ==========> End Notify <================
-			return back()->with(['message' => 'Saved', 'class' => 'success']);
-			
-		} else {
-			return back()->with(['message' => 'Can\'t add session', 'class' => 'danger']);
+			$step = $request->step_id;
+			$title = $request->title;
+			$dsc = $request->dsc;
+			$datetime = $start_datetime;
+			$datetimeStamp = Carbon::parse($datetime)->timestamp;
+			$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
+			$start = Carbon::parse($datetime);
+			$end = Carbon::parse($end_datetime);
+			$duration = $start->diffInMinutes($end);
+
+			if ($type == 'sessions') {
+				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
+				// ======> notify Trainer <=================
+				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+				// ==========> End Notify <================
+				return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
+
+			} elseif ($type == 'online') {
+					$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online);
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null,$addOrEdit);	
+				}
+				return back()->with(['message' => 'Saved', 'class' => 'success']);
+
+			} elseif ($type == 'offline') {
+				$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email);
+				// ======> notify Trainer <=================
+				$join_url = $request->training_location ?? 'No Location';
+				$address  = $request->training_Address ?? 'No Address';
+				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+				// ==========> End Notify <================
+				return back()->with(['message' => 'Saved', 'class' => 'success']);
+				
+			} else {
+				return back()->with(['message' => 'Can\'t add session', 'class' => 'danger']);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@addsession: ' . $e->getMessage());
 		}
 	}
 
 	public function editsession(Request $request , $id)
 	{
+		try{
 		// dd($request->all());
 		$this->meetingService =  OnlineMeetingFactory::create();
 		$addOrEdit = 'edit';
@@ -951,6 +1023,9 @@ if ($type == 'sessions' || $type == 'offline') {
 			return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 		} else {
 			return back()->with(['message' => 'Can\'t edit session', 'class' => 'danger']);
+		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@editsession: ' . $e->getMessage());
 		}
 		
 	}
@@ -1059,8 +1134,6 @@ if ($type == 'sessions' || $type == 'offline') {
 
 		return $trainingSession;
 	}
-	
-
 	public function session(Request $request)
 	{
 		
@@ -1100,7 +1173,6 @@ if ($type == 'sessions' || $type == 'offline') {
 			return response()->json(['state' => 'failed'], 500);
 		}
 	}
-
 	public function getattendanceOffline(Request $request)
 	{
 		if ($request->id) {
@@ -1122,6 +1194,7 @@ if ($type == 'sessions' || $type == 'offline') {
 
 	public function QrCodeTraining(Request $request)
 	{ 
+		try{
 		if ($request->id) {
 			$session = DB::table('training_sessions')->where('id', $request->id)->first();
 			
@@ -1146,28 +1219,36 @@ if ($type == 'sessions' || $type == 'offline') {
 				}else{
 				return response()->json(['state' => 'failed'], 500);
 				}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@QrCodeTraining: ' . $e->getMessage());
+		}
 	}
 
 	public function delsession($id, Request $request)
 	{
-		// $zoomid = TrainingSession::findOrFail($id)->zoom_id;
-		if ($request)
-		{
-			// if ($zoomid) {
-			// 	$zoom = $this->delete($zoomid);
-			// 	if (!$zoom['success']) {
-			// 		return response()->json(['state' => 'failed'], 500);
-			// 	}
-			// }
-			TrainingSession::findOrFail($id)->delete();
-			return response()->json(['state' => 'success'], 200);
-		} else {
-			return response()->json(['state' => 'failed'], 500);
+		try{
+			// $zoomid = TrainingSession::findOrFail($id)->zoom_id;
+			if ($request)
+			{
+				// if ($zoomid) {
+				// 	$zoom = $this->delete($zoomid);
+				// 	if (!$zoom['success']) {
+				// 		return response()->json(['state' => 'failed'], 500);
+				// 	}
+				// }
+				TrainingSession::findOrFail($id)->delete();
+				return response()->json(['state' => 'success'], 200);
+			} else {
+				return response()->json(['state' => 'failed'], 500);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@delsession: ' . $e->getMessage());
 		}
 	}
 
 	public function sessionReport(Request $request, $id)
 	{
+		try{
 		$session = TrainingSession::find($id);
 		if (!$session || !$session->zoom_id) {
 			return response()->json(['success' => false, 'message' => 'Session not found'], 404);
@@ -1210,12 +1291,16 @@ if ($type == 'sessions' || $type == 'offline') {
 		else {
 			return redirect()->back()->with('message', __('session report is not available yet'));
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage());
+		}
 	}
 
 
 
 	public function sessionRecord($id)
 	{
+		try{
 		$session = TrainingSession::find($id);
 		if (!$session || !$session->zoom_id) {
 			return redirect()->back()->withErrors(['error' => 'Session Not Found',]);
@@ -1254,10 +1339,14 @@ if ($type == 'sessions' || $type == 'offline') {
 
 		return redirect()->back()->with('message', __('admin.Session Record updated'));
 
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage());
+		}
 	}
 
 	public function attendanceReport(Request $request, $id)
 	{
+		try{
 		$session = TrainingSession::find($id);
 
 		if (!$session || !$session->zoom_id) {
@@ -1293,7 +1382,7 @@ if ($type == 'sessions' || $type == 'offline') {
 
 			$attendanceReportResponse = $this->meetingService->getMeetingAttendanceReport($session->zoom_id, $reportId);
 
-			dd($attendanceReportResponse);
+			// dd($attendanceReportResponse);
 			if ($attendanceReportResponse['success']) {
 				return response()->json([
 					'success' => true,
@@ -1311,6 +1400,9 @@ if ($type == 'sessions' || $type == 'offline') {
 			'success' => false,
 			'message' => 'Invalid meeting service instance.',
 		], 500);
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@attendanceReport: ' . $e->getMessage());
+		}
 	}
 
 	public function getdsc($id)
@@ -1325,6 +1417,7 @@ if ($type == 'sessions' || $type == 'offline') {
 
 	public function create($id = 0)
 	{
+		try{
 		$courses = Training::orderBy('created_at', 'DESC')->get();
 		if ($id == 0 && count($courses)) {
 			$id = $courses->pluck('id')[0];
@@ -1344,10 +1437,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		// })->get();
 
 		return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes'));
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@create: ' . $e->getMessage());
+		}
 	}
 
 	public function list_surveys($id, Request $request)
 	{
+		try{
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
@@ -1371,10 +1468,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		} else {
 			abort(404);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@list_surveys: ' . $e->getMessage());
+		}
 	}
 
 	public function create_survey($id, Request $request)
 	{
+		try{
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
@@ -1387,10 +1488,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		} else {
 			abort(404);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@create_survey: ' . $e->getMessage());
+		}
 	}
 
 	public function store_survey($id, Request $request)
 	{
+		try{
 		$this->validate($request, [
 			'id' => 'exists:cycles,id',
 			'survey_id' => 'required|exists:surveys,id',
@@ -1407,10 +1512,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		$scope->save();
 
 		return redirect()->route('trainings.surveys_list', ['id' => $id])->with('success', 'StoredSuccessfully');
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@store_survey: ' . $e->getMessage());
+		}
 	}
 
 	public function edit_survey($id, $survey, Request $request)
 	{
+		try{
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
@@ -1428,10 +1537,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		} else {
 			abort(404);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@edit_survey: ' . $e->getMessage());
+		}
 	}
 
 	public function update_survey($id, $survey, Request $request)
 	{
+		try{
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
@@ -1452,10 +1565,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		} else {
 			abort(404);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@update_survey: ' . $e->getMessage());
+		}
 	}
 
 	public function destroy_survey($id, $survey, Request $request)
 	{
+		try{
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
@@ -1471,10 +1588,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		} else {
 			abort(404);
 		}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@destroy_survey: ' . $e->getMessage());
+		}
 	}
 
 	public function editTR($id)
 	{
+		try{
 		$course = Training::where('id', $id)->orderBy('created_at', 'DESC')->first();
 		if ($id == 0 && count($course)) {
 			$id = $course->pluck('id')[0];
@@ -1495,10 +1616,14 @@ if ($type == 'sessions' || $type == 'offline') {
 
 
 		return view('admin/settings/training/editCours', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags'));
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@editTR: ' . $e->getMessage());
+		}
 	}
 
 	public function showCourse($id)
 	{
+		try{
 		$course = Training::where('id', $id)->orderBy('created_at', 'DESC')->first();
 		if ($id == 0 && count($course)) {
 			$id = $course->pluck('id')[0];
@@ -1515,14 +1640,14 @@ if ($type == 'sessions' || $type == 'offline') {
 		$training = Training::find($id);
 
 		$tags = $training->tags;
-
-
-
-
 		return view('admin/settings/training/viewCourse', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags'));
+	} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@showCourse: ' . $e->getMessage());
+		}
 	}
 	public function attendanceOffline(Request $request , $id)
 	{
+		try{
 		$session = TrainingSession::find($id);
 		$step_Traning = $session->step_id;
 		$cycle_Traning = $session->step->cycle->id;
@@ -1573,5 +1698,8 @@ if ($type == 'sessions' || $type == 'offline') {
 		}
 		
 			return response()->json(['message' => 'youareNotRegisterAttendece']);
+			} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@attendanceOffline: ' . $e->getMessage());
+		}
 	}
 }
