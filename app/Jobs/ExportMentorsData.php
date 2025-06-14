@@ -270,7 +270,7 @@ MentorshipRequest::when(!is_null($organization_id), function($q) use($organizati
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
     Mail::to(auth()->user()->email)
-        ->send(new ExportMail($tempFilePath, $fileName));
+        ->queue(new ExportMail($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

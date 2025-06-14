@@ -110,7 +110,7 @@ class ExportTresultData implements ShouldQueue
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
     Mail::to($Authuser->email)
-        ->send(new ExportMail($tempFilePath, $fileName));
+        ->queue(new ExportMail($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

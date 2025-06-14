@@ -495,7 +495,8 @@ class CyclesController extends Controller
                 $admin = User::role('Admin')->orderBy('id')->first();
             
                 if ($admin) {
-                    Mail::to($admin->email)->send(new ProgramCreatedNotification($cycle, $admin));
+                   
+                    Mail::to($admin->email)->queue(new ProgramCreatedNotification($cycle, $admin));
                     
                     $messenger = new Messenger();
                     $messenger->sender = auth()->id(); 
