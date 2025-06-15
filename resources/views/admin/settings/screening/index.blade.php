@@ -1,6 +1,15 @@
 @extends('layouts.admin')
 @php
   $status = strtolower($evaluationForm->status);
+  if( $cstep->data == 'grouptogroup' )
+  {
+    //
+  }
+  else
+  {
+    $judgersList = collect( json_decode($cstep->list) ?? [] );
+    $judgersList = $judgersList->map(function($judger) { return intval($judger); });
+  }
 @endphp
 @section('style')
 <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
@@ -302,7 +311,7 @@
                       <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}>
                         {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!}
                         @foreach ($judges as $judge)
-                        <option value="{{ $judge->id }}" {{ is_array($cstep->list) && in_array($judge->id, json_decode($cstep->list) ?? []) ? 'selected' : '' }}>
+                        <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
                           {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
                         </option>
                         @endforeach
