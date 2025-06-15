@@ -40,7 +40,7 @@ class UserController extends Controller
 	 */
 	public function index()
 	{
-		$users = User::with('company')->with('roles')->get();
+		$users = User::with('company')->with('roles')->orderBy('id', 'DESC')->get();
 		return view('admin/users/index', compact('users'));
 	}
 

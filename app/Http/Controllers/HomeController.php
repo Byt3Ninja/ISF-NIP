@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Step;
 use App\User;
+use stdClass;
 use App\Cycle;
 use App\Sector;
 use App\Company;
@@ -16,14 +17,15 @@ use App\Settings;
 use App\Messenger;
 use App\Screening;
 use App\TimeSheet;
+use Carbon\Carbon;
 use App\BuilderForm;
 use App\Organization;
-use App\Documentation;
 use App\SurveyScopes;
-use App\SurveyResponses;
 
+use App\Documentation;
 use App\Finalscreening;
 use App\MentorshipTask;
+use App\SurveyResponses;
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
@@ -33,10 +35,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ServiceRequestNotification;
-use stdClass;
-use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -2651,7 +2652,8 @@ class HomeController extends Controller
             $service = Service::find($request->id);
     
             if ($service && $service->vendor_email) {
-                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+                // Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+                Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
             }
     
             return response()->json(['state' => 'success']);
