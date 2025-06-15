@@ -475,7 +475,7 @@ class HomeController extends Controller
             });
         } else { $evaluation = collect([]); }
 
-        if( array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'my_next_mentorship_sessions'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
         {
             $upcoming_sessions_q = "SELECT
                     mr.id AS `id`,
@@ -513,7 +513,7 @@ class HomeController extends Controller
             }
             if( $user->hasAnyRole(['mentor']) )
             {
-                $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
+                $upcoming_sessions_q .= " AND mr.mentor_id = " . $user->id;
             }
             $params = [];
             $params[] = date("Y-m-d 00:00:00");
