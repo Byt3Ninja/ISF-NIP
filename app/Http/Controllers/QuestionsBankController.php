@@ -8,7 +8,9 @@ use App\Organization;
 use App\QuestionsBank;
 use App\QuestionCategories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use stdClass;
 
 class QuestionsBankController extends Controller
 {
@@ -26,7 +28,7 @@ class QuestionsBankController extends Controller
 	{
 		$user = auth()->user();
 		$organization_id = $user->organization_id;
-		$questions = QuestionsBank::with(['organization']);
+		/* $questions = QuestionsBank::with(['organization']);
 		if (!empty($organization_id)) {
 			if (is_array($organization_id)) {
 				$questions = $questions->whereIn('organization_id', $organization_id);
@@ -38,7 +40,79 @@ class QuestionsBankController extends Controller
 		if($request->has('search')) {
 			$questions = $questions->where('group',$request->search);
 		}
-		$questions = $questions->get();
+		$questions = $questions->get(); */
+
+		$inputs = [];
+		$questions_q = "SELECT
+				qb.id,
+				qb.group,
+				qb.question,
+				qb.type,
+				qb.survey_type,
+				qb.tags,
+				qb.difficulty,
+				org.id AS org_id,
+				org.name_ar AS org_name_ar,
+				org.name_en AS org_name_en,
+				orgs.id AS orgs_id,
+				orgs.name_ar AS orgs_name_ar,
+				orgs.name_en AS orgs_name_en
+			FROM
+				questions_bank qb
+			LEFT JOIN
+				organizations org ON qb.organization_id = org.id
+			LEFT JOIN
+				organization_question_bank oqb ON qb.id = oqb.question_id
+			LEFT JOIN
+				organizations orgs ON oqb.organization_id = orgs.id
+			WHERE
+				qb.id > 0
+		";
+		if( $request->has('search') && !empty( $request->input('search', null) ) )
+		{
+			$inputs[] = $request->input('search', null);
+			$questions_q .= " AND qb.group = ?";
+		}
+		if( !empty( $organization_id ) )
+		{
+			if( is_array( $organization_id ) )
+			{
+				$invoicesPlaceholders = implode(',', array_fill(0, count( $organization_id ), '?'));
+				$questions_q .= " AND ( qb.organization_id IN ( $invoicesPlaceholders ) OR oqb.organization_id IN ( $invoicesPlaceholders ) )";
+				$inputs = array_merge( $inputs, $organization_id );
+				$inputs = array_merge( $inputs, $organization_id );
+			}
+			else
+			{
+				$questions_q .= " AND ( qb.organization_id = ? OR oqb.organization_id = ? )";
+				$inputs[] = $organization_id;
+				$inputs[] = $organization_id;
+			}
+		}
+		$l = app()->getLocale();
+		$questions = collect( DB::select( $questions_q, $inputs ) )->groupBy('id')->map(function( $item ) use ( $l ) {
+			$q = $item->first();
+			$question = new stdClass;
+			$question->id = $q->id;
+			$question->group = $q->group;
+			$question->question = $q->question;
+			$question->type = $q->type;
+			$question->survey_type = $q->survey_type;
+			$question->tags = json_decode( $q->tags );
+			$question->difficulty = $q->difficulty;
+			$question->organization = new stdClass;
+			$question->organization->id = $q->org_id;
+			$question->organization->name = $q->{'org_name_' . $l};
+			$question->organizations = $item->filter(function( $q ) {
+				return !empty( $q->orgs_id );
+			})->map(function( $org ) use ( $l ) {
+				$organization = new stdClass;
+				$organization->id = $org->orgs_id;
+				$organization->name = $org->{'orgs_name_' . $l};
+				return $organization;
+			})->values();
+			return $question;
+		})->values();
 
 		$categories = Category::where('category_type', 'Assesment')->get();
 		$subcategories = SubCategory::where('Type', 'Assesment')->get();

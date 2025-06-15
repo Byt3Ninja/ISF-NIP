@@ -77,9 +77,13 @@
 														<td><a href="{{ URL::to('dashboard/questions-bank/' . $question->id . '/edit') }}">{{ $question->id }}</a></td>
 														<td>{{ $question->question }}</td>
 														<td>
-															<a href="{{ URL::to('dashboard/organizations/' . optional($question->organization)->id . '/edit') }}">
-																{{ optional($question->organization)->{'name_'.$l} }}
-															</a>
+															@foreach( $question->organizations as $organization )
+																<div>
+																	<a href="{{ URL::to('dashboard/organizations/' . optional($organization)->id . '/edit') }}">
+																		{{ optional($organization)->name }}
+																	</a>
+																</div>
+															@endforeach
 														</td>
 														<td class="text-center">
 															@if( $question->group == 'quiz' )
