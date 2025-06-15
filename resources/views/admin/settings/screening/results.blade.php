@@ -221,16 +221,29 @@
                           <option value="0">All</option>
                           @php
                           $uniqueJudges = collect();
+                          $companyIds = $companies->pluck('id');
+    $allScreeningData = \App\Formdata::whereIn('company_id', $companyIds)
+                                ->where('form_id', $form?->id)
+                                ->pluck('screening');
+    $allJudgeIds = [];
+    foreach ($allScreeningData as $screeningList) {
+        if ($screeningList) { 
+            $allJudgeIds = array_merge($allJudgeIds, array_keys($screeningList));
+        }
+    }
+    $uniqueJudgeIds = array_unique($allJudgeIds);
+    $uniqueJudges = \App\User::whereIn('id', $uniqueJudgeIds)
+                        ->get();
                           @endphp
-                          @foreach($companies as $company)       
-                            @php
+                          {{-- @foreach($companies as $company)        --}}
+                            {{-- @php
                           $judges = \App\User::whereIn('id', $company->judges($company->id, $form->id))->get();
                           $uniqueJudges = $uniqueJudges->merge($judges)->unique('id');
-                          @endphp
+                          @endphp --}}
                           @foreach ($uniqueJudges as $judge)
                           <option value="{{ $judge->id }}" {{ $judge->id == request('judge_id') ? 'selected' : '' }}>{{ $judge->{'first_name_'.$l} }} {{ $judge->{'last_name_'.$l} }}</option>
                           @endforeach
-                          @endforeach
+                          {{-- @endforeach --}}
                         </select>
                       </div>
       
