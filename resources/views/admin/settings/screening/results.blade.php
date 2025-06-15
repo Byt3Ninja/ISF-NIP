@@ -343,7 +343,7 @@
                             </td>
 
                             <td>
-                              @php($weight = $company->companyWeight($company->id, $form->id ?? '', 0))
+                              @php($weight = $company->companyWeight($company->id, $form?->id ?? '', 0))
                               <span style="color: "
                                 class="badge btn-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">
                                 {{ $weight }} %</span>
