@@ -435,7 +435,7 @@
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
             </a>
           </li>
-          <li class="{{ Request::is('dashboard/cycles*') ? 'active' : '' }} menu-item">
+          <li class="{{ preg_match('#^dashboard/cycles(/\d+)?$#', Request::path()) ? 'active' : '' }} menu-item">
             <a href="/dashboard/cycles" class="menu-link">
               <span class="menu-item">{{ __('cycles.steps') }}</span>
               <i class="bx bx-message"></i>
