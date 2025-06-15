@@ -326,7 +326,7 @@
                             </td>
                             <td>
 
-                              @if ($form->id)
+                              @if ($form && $form?->id)
                                 <input type="hidden" class="formid" value="{{ $form->id }}">
                                 @foreach (\App\User::whereIn('id', $company->judges($company->id, $form->id))->get() as $judger)
                                   <div class="d-flex align-items-center mr-1">
