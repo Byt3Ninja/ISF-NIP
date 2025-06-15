@@ -506,10 +506,12 @@ class HomeController extends Controller
                     AND mr.zoom_date >= ?
                     AND mr.approved = 'Yes'
             ";
+            if( !$user->hasAnyRole(["registered"]) ){
             if( $has_org ) { $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id; }
             if( !empty( $user->company_id ) && !is_null( $user->company_id ) && trim( $user->company_id ) )
             {
                 $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
+            }
             }
             if( $user->hasAnyRole(['mentor']) )
             {
