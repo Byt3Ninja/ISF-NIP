@@ -2,8 +2,9 @@
   <div class="modal-dialog modal-md modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header mb-0">
-        <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="text-primary"
-            id="rname"></span></h4>
+        <h4 class="modal-title">
+          {{__('dashboard.Add mentorship session with')}} <span class="text-primary" id="rname"></span>
+        </h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
