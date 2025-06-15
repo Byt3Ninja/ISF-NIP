@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           confirmButtonText: t.delete,
           cancelButtonText: t.cancel,
           customClass: {
-            confirmButton: 'btn btn-primary me-3',
+            confirmButton: 'btn btn-danger me-3',
             cancelButton: 'btn btn-secondary'
           },
           buttonsStyling: false
@@ -295,6 +295,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
               title: t.deleted,
               text: t.deleteConfirmation,
               icon: 'success',
+              showCancelButton: false,
+              showConfirmButton: true,
               confirmButtonText: t.ok,
               customClass: {
                 confirmButton: 'btn btn-primary'

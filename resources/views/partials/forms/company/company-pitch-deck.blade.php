@@ -420,12 +420,18 @@
     var cardElement = $(this).closest('.file-card');
 
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: 'لن تتمكن من استعادة هذا الملف!',
-      icon: 'warning',
+     	title: "{{__('admin.SureDelete')}}",
+      text: "{{__('admin.Recover')}}",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'نعم، احذف الملف!',
-      cancelButtonText: 'إلغاء'
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+          confirmButton: 'btn btn-danger me-2',
+          cancelButton: 'btn btn-label-secondary',
+      },
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({

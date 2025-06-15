@@ -237,18 +237,18 @@ document.getElementById('add-questions-form').addEventListener('submit', functio
 
 document.getElementById('bulk-delete-btn').addEventListener('click', function() {
   Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-primary',
-            cancelButton: 'btn btn-secondary'
-        },
-        buttonsStyling: false
+    title: "{{__('admin.SureDelete')}}",
+      text: "{{__('admin.Recover')}}",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'btn btn-danger me-2',
+        cancelButton: 'btn btn-label-secondary',
+      },
+      buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed) {
             const form = document.createElement('form');

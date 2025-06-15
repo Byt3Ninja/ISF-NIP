@@ -163,7 +163,7 @@
 								Swal.fire({
 									icon: 'success',
 									title: "{{ __('admin.Deleted') }}!",
-									html: "{{ __('admin.FileDeleted') }}.",
+									html: "{{ __('admin.DeletedSuccessfully') }}.",
 									showCancelButton: false,
 									showConfirmButton: true,
 									confirmButtonText: "{{ __('admin.OK') }}",

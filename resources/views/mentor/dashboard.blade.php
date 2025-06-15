@@ -824,14 +824,20 @@
           } else if (type === 2) {
             location.reload();
             } else if (type === 3) {
-            Swal.fire({
-              title: 'Deleted!',
-              text: 'The schedule has been deleted successfully.',
-              icon: 'success',
-              confirmButtonText: 'OK'
+              Swal.fire({
+                icon: 'success',
+                title: "{{ __('admin.Deleted') }}!",
+                html: "{{ __('admin.DeletedSuccessfully') }}.",
+                showCancelButton: false,
+                showConfirmButton: true,
+                confirmButtonText: "{{ __('admin.OK') }}",
+                customClass: {
+                  confirmButton: 'btn btn-primary',
+                },
+                buttonsStyling: false,
             }).then((result) => {
               if (result.isConfirmed) {
-              location.reload();
+                location.reload();
               }
             });
           }

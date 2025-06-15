@@ -195,8 +195,8 @@
 					cancelButtonText: "{{ __('admin.No') }}",
 					reverseButtons: true,
 					customClass: {
-							confirmButton: 'btn btn-danger me-2',
-							cancelButton: 'btn btn-label-secondary',
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
 					},
 					buttonsStyling: false,
 				})
@@ -207,7 +207,7 @@
 								Swal.fire({
 									icon: 'success',
 									title: "{{ __('admin.Deleted') }}!",
-									html: "{{ __('admin.FileDeleted') }}.",
+									html: "{{ __('admin.DeletedSuccessfully') }}.",
 									showCancelButton: false,
 									showConfirmButton: true,
 									confirmButtonText: "{{ __('admin.OK') }}",

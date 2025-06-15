@@ -1143,18 +1143,18 @@
     let token = '{{ csrf_token() }}';
 
     Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-primary',
-            cancelButton: 'btn btn-secondary'
-        },
-        buttonsStyling: false
+      title: "{{__('admin.SureDelete')}}",
+      text: "{{__('admin.Recover')}}",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+          confirmButton: 'btn btn-danger me-2',
+          cancelButton: 'btn btn-label-secondary',
+      },
+      buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed) {
             $.post(url, {
@@ -1162,12 +1162,18 @@
                 '_token': token
             }, function(response) {
                 Swal.fire({
-                    title: '{{ __('admin.Deleted') }}!',
-                    text: '{{ __('admin.Course Deleted') }}.',
-                    icon: 'success',
-                    showConfirmButton: false,      
-                    timer: 1500,                    
-                    timerProgressBar: true
+                  title: '{{ __('admin.Deleted') }}!',
+                  text: '{{ __('admin.Course Deleted') }}.',
+                  icon: 'success',
+                  showCancelButton: false,
+                  showConfirmButton: true,
+                  confirmButtonText: "{{ __('admin.OK') }}",
+                  customClass: {
+                      confirmButton: 'btn btn-primary',
+                  },
+                  buttonsStyling: false,
+                  timer: 1500,                    
+                  timerProgressBar: true
                 }).then(() => {
                     window.location.href = '/dashboard/training/sessions/{{ $id }}';
                 });

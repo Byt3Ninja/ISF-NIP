@@ -595,20 +595,18 @@
             var token = '{{ csrf_token() }}';
 
             Swal.fire({
-                title: "{{ __('admin.SureDelete') }}",
-                text: "{{ __('admin.Recover') }}",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: "{{ __('admin.DYes') }}",
-                cancelButtonText: "{{ __('admin.No') }}",
-                reverseButtons: true,
-                customClass: {
-                    confirmButton: 'btn btn-danger me-2',
-                    cancelButton: 'btn btn-outline-secondary',
-                },
-                buttonsStyling: false,
+							title: "{{__('admin.SureDelete')}}",
+							text: "{{__('admin.Recover')}}",
+							icon: "warning",
+							showCancelButton: true,
+							confirmButtonText: "{{ __('admin.DYes') }}",
+							cancelButtonText: "{{ __('admin.No') }}",
+							reverseButtons: true,
+							customClass: {
+									confirmButton: 'btn btn-danger me-2',
+									cancelButton: 'btn btn-label-secondary',
+							},
+							buttonsStyling: false,
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Show loading
@@ -628,7 +626,13 @@
                                 icon: 'success',
                                 title: "{{ __('admin.Deleted') }}!",
                                 text: "{{ __('admin.FileDeleted') }}",
-                                showConfirmButton: false,
+                              	showCancelButton: false,
+																showConfirmButton: true,
+																confirmButtonText: "{{ __('admin.OK') }}",
+																customClass: {
+																		confirmButton: 'btn btn-primary',
+																},
+																buttonsStyling: false,
                                 timer: 1500,
                             }).then(() => {
                                 location.reload();
@@ -661,14 +665,15 @@
             if (!surveyId || !type) {
                 e.preventDefault();
                 Swal.fire({
-                    icon: 'warning',
-                    title: '{{ __('admin.ValidationError') }}',
-                    text: '{{ __('admin.PleaseFillRequiredFields') }}',
-                    confirmButtonText: '{{ __('admin.OK') }}',
-                    customClass: {
-                        confirmButton: 'btn btn-warning',
-                    },
-                    buttonsStyling: false,
+									icon: 'warning',
+									title: '{{ __('admin.ValidationError') }}',
+									text: '{{ __('admin.PleaseFillRequiredFields') }}',
+									confirmButtonText: '{{ __('admin.OK') }}',
+									showCancelButton: false,
+									customClass: {
+										confirmButton: 'btn btn-warning',
+									},
+									buttonsStyling: false,
                 });
                 return false;
             }

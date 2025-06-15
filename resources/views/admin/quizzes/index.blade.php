@@ -219,11 +219,15 @@
 				title: "{{__('admin.SureDelete')}}",
 				text: "{{__('admin.Recover')}}",
 				icon: "warning",
-				buttonsStyling: true,
 				showCancelButton: true,
-				confirmButtonClass: "btn-danger",
-				confirmButtonText: "{{__('admin.DYes')}}",
-				cancelButtonText: "{{__('admin.No')}}!",
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+					confirmButton: 'btn btn-danger me-2',
+					cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			})
 			.then((result) => {
 				if (result.value)
@@ -234,7 +238,14 @@
 							Swal.fire({
 								icon: 'success',
 								title: "{{ __('admin.Deleted') }}!",
-								html: "{{ __('admin.FileDeleted') }}.",
+								html: "{{ __('admin.DeletedSuccessfully') }}.",
+								showCancelButton: false,
+								showConfirmButton: true,
+								confirmButtonText: "{{ __('admin.OK') }}",
+								customClass: {
+									confirmButton: 'btn btn-primary',
+								},
+								buttonsStyling: false,
 							});
 							location.reload();
 						}

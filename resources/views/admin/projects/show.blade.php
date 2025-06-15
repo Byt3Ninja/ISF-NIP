@@ -308,17 +308,18 @@
 
       let confirmationMessage = "{{ __('admin.delete_program') }}"; 
       Swal.fire({
-        title: "{{ __('admin.delete_project') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning", // استخدم icon بدلاً من type
+       	title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
         showCancelButton: true,
         confirmButtonText: "{{ __('admin.DYes') }}",
         cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
         customClass: {
-            confirmButton: 'btn btn-danger',
-            cancelButton: 'btn btn-secondary'
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
         },
-        buttonsStyling: false
+        buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed) {
           $.ajax({
@@ -369,18 +370,19 @@
       let deleteUrl = button.data('url');
       let confirmationMessage = "{{ __('admin.delete_team_member') }}"; 
       Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning", // استخدم icon بدلاً من type
+       	title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
         showCancelButton: true,
         confirmButtonText: "{{ __('admin.DYes') }}",
         cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
         customClass: {
-            confirmButton: 'btn btn-danger',
-            cancelButton: 'btn btn-secondary'
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
         },
-        buttonsStyling: false
-    }).then((result) => {
+        buttonsStyling: false,
+      }).then((result) => {
         if (result.isConfirmed) {
           $.ajax({
             url: deleteUrl,

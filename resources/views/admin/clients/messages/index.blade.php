@@ -343,17 +343,28 @@
           text: "{{ __('admin.Select at least one message') }}",
           icon: "warning",
           confirmButtonText: "{{ __('admin.OK') }}"
+          showCancelButton: false,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
         });
         return;
       }
 
       Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
+      	title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}!",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
       })
         .then((result) => {
         if (result.value) {

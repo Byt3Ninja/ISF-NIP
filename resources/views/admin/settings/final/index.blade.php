@@ -599,12 +599,18 @@
             headers
           });
           Swal.fire({
-            title: '{{ __('cycles.sure delete step') }}',
-            text: "{{ __('admin.Recover') }}",
-            icon: 'warning',
+          	title: "{{__('admin.SureDelete')}}",
+            text: "{{__('admin.Recover')}}",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: '{{ __('admin.DYes') }}',
-            cancelButtonText: '{{ __('admin.No') }}'
+            confirmButtonText: "{{ __('admin.DYes') }}",
+            cancelButtonText: "{{ __('admin.No') }}",
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-danger me-2',
+                cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
           }).then((result) => {
             if (result.isConfirmed) {
               $.ajax({
@@ -653,13 +659,19 @@
       let url = '/dashboard/final/delsession/' + id;
       let token = '{{ csrf_token() }}';
       Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
+        title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+      })
         .then((result) => {
           if (result.value) {
             $.post(url, {

@@ -158,7 +158,7 @@
         confirmButtonText: '{{ __('admin.Delete') }}',
         cancelButtonText: '{{ __('admin.Cancel') }}',
         customClass: {
-          confirmButton: 'btn btn-primary me-3',
+          confirmButton: 'btn btn-danger me-3',
           cancelButton: 'btn btn-secondary'
         },
         buttonsStyling: false
@@ -168,11 +168,13 @@
             title: '{{ __('admin.Deleted') }}',
             text: '{{ __('admin.Deleted Successfully') }}',
             icon: 'success',
-            confirmButtonText: '{{ __('admin.OK') }}',
+          	showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonText: "{{ __('admin.OK') }}",
             customClass: {
-              confirmButton: 'btn btn-primary'
+                confirmButton: 'btn btn-primary',
             },
-            buttonsStyling: false
+            buttonsStyling: false,
           });
         }
         });
