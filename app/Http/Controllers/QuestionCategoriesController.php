@@ -20,7 +20,7 @@ class QuestionCategoriesController extends Controller
         $organization_id = $user->organization_id;
 		$categories = QuestionCategories::with(['organization']);
 		if( !empty( $organization_id ) ) { $categories = $categories->where('organization_id', $organization_id); }
-		$categories = $categories->orderBy('id', 'DESC')->get();
+		$categories = $categories->orderBy('id', 'desc')->get();
 
 		return view('admin.QuestionCategories.index', compact('categories'));
 	}

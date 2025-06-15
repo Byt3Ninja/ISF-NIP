@@ -1911,4 +1911,7 @@ return [
 	'Current Image' => 'Current Image',
 	'ServiceAdded' => 'Service Added Successfully',
 	'ServiceUpdated' => 'Service Updated Successfully',
+	'Export' => 'Export',
+	'no_entries_available' => 'No entries available',
+	'All_Types' => 'All Types',
 ];

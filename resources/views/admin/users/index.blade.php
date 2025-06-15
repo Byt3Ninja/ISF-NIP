@@ -1,9 +1,8 @@
 @extends('layouts.admin')
-@section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
+
 @section('title', __('admin.Users'))
 @section('subTitle', __('admin.Users`s List'))
+
 @section('content')
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
@@ -68,7 +67,7 @@
             </div>
             <!-- datatable start -->
             <div class="table-responsive mt-2">
-              <table id="users-list-datatable" class="table">
+              <table id="users-list-datatable" class="table datatables-ajax">
                 <thead>
                   <tr class="table-light">
                     <th>#</th>
@@ -88,7 +87,7 @@
                 </thead>
                 <tbody>
                   @foreach ($users as $user)
-                  <tr>
+                  <tr id="row_{{ $user->id }}">
                     <td><a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a></td>
                     <td style="font-size: small;"><a href="{{ route('users.edit', ['user' => $user->id]) }}">
                         {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}</a></td>
@@ -122,53 +121,102 @@
   </div>
 </div>
 <!-- END: Content-->
-
 @stop
+
 @section('scripts')
-<script src="/app-assets/js/scripts/pages/page-users.js"></script>
-<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
-
 <script>
-  $(document).on("click", "#deleteAction", function(e) {
-      var url = $(this).data('url');
-      var token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
-
-            $.post(url, {
-                '_method': 'DELETE',
-                '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.FileDeleted') }}.',
-                  'success'
-                );
-
-                location.reload();
-              }
-            ).fail(
-              function(error) {
-                console.log(error);
-              }
-            );
-          } else {
-            console.log('Canceled')
-          }
-        })
+  $(document).ready(function() {
+    // Initialize DataTable
+    $('#users-list-datatable').DataTable({
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
+      language: {
+        @if($l == 'ar')
+        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+        @else
+        "search": "{{ __('admin.Search') }}:",
+        "lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
+        "info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
+        "infoEmpty": "{{ __('admin.no_entries_available') }}",
+        "infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
+        "paginate": {
+          "first": "{{ __('admin.First') }}",
+          "last": "{{ __('admin.Last') }}",
+          "next": "{{ __('admin.Next') }}",
+          "previous": "{{ __('admin.Previous') }}"
+        },
+        "emptyTable": "{{ __('admin.No_data_available_in_table') }}",
+        "zeroRecords": "{{ __('admin.No_matching_records_found') }}"
+        @endif
+      },
+      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      displayLength: 10,
+      lengthMenu: [10, 25, 50, 75, 100],
+      order: [[0, 'desc']],
+      columnDefs: [
+        {
+          targets: [8], // Actions column
+          orderable: false,
+          searchable: false
+        }
+      ]
     });
+
+    // Handle delete action
+    $(document).on("click", "#deleteAction", function (e) {
+      e.preventDefault();
+      var url = $(this).data('url');
+      var id = $(this).data('id');
+      var token = '{{ csrf_token() }}';
+      
+      Swal.fire({
+        title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+      })
+      .then((result) => {
+        if (result.value) {
+          $.post(url, {'_method': 'DELETE' , '_token': token},
+            function(response) {
+              Swal.fire({
+                icon: 'success',
+                title: "{{ __('admin.Deleted') }}!",
+                html: "{{ __('admin.FileDeleted') }}.",
+                showCancelButton: false,
+                showConfirmButton: true,
+                confirmButtonText: "{{ __('admin.OK') }}",
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                },
+                buttonsStyling: false,
+              }).then(function() {
+                // Redirect to the index page
+                window.location.href = "{{ route('users.index') }}";
+              });
+              // Remove the row from DataTable
+              $('#users-list-datatable').DataTable().row('#row_' + id).remove().draw();
+            }
+          ).fail(function(error) { 
+            console.log(error);
+            Swal.fire({
+              icon: 'error',
+              title: "{{ __('admin.Error') }}!",
+              text: "{{ __('admin.SomethingWentWrong') }}",
+            });
+          });
+        }
+      });
+    });
+  });
 </script>
 @stop

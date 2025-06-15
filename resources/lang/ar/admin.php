@@ -1961,4 +1961,7 @@ return [
 	'Current Image' => 'الصورة الحالية',
 	'ServiceAdded' => 'تم اضافة الخدمة بنجاح',
 	'ServiceUpdated' => 'تم تحديث الخدمة بنجاح',
+	'Export' => 'تصدير',
+	'no_entries_available' => 'لا توجد إدخالات متاحة',
+	'All_Types' => 'جميع الأنواع',
 ];
