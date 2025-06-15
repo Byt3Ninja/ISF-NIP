@@ -197,60 +197,140 @@ $('#flatpickr-datetimeLimit').on('change', e => {
   const dayName = moment(selectedDate, 'YYYY-MM-DD').format('ddd');
   console.log('Day Name:', dayName);
 
-  const filteredDateObj = responseData.find(item => item.days.includes(dayName));
-  console.log('filteredDateObj', filteredDateObj);
+  // Find ALL schedule entries for the selected day (not just the first one)
+  const filteredDateObjs = responseData.filter(item => item.days.includes(dayName));
+  console.log('filteredDateObjs', filteredDateObjs);
 
-  if (filteredDateObj && filteredDateObj.tfrom && filteredDateObj.tto) {
-
+  if (filteredDateObjs.length > 0) {
     const timeFromSelect = $('#timeFrom');
     const timeToSelect = $('#timeTo');
   
     // Clear previous options
     timeFromSelect.empty();
     timeToSelect.empty();
-  
-    // Parse tfrom and tto into moment objects
-    const startTime = moment(filteredDateObj.tfrom, 'HH:mm:ss');
-    const endTime = moment(filteredDateObj.tto, 'HH:mm:ss');
-  
-    // Loop through time range with 30-minute intervals
-    let currentTime = startTime.clone();
-    let isFirstOptionSet = false;
-    while (currentTime.isBefore(endTime)) {
-      const timeFormatted = currentTime.format('HH:mm:ss');
-      const displayTime = currentTime.format('hh:mm A');
-      const option = $('<option>').val(timeFormatted).text(displayTime);
 
-      // Append options to timeFrom
-      timeFromSelect.append(option.clone());
+    // Merge and sort time periods
+    const mergedPeriods = mergeTimePeriods(filteredDateObjs);
+    console.log('mergedPeriods', mergedPeriods);
 
-      // For timeTo, only add options that are at least 30 minutes after the first option
-      if (currentTime.isAfter(startTime)) {
-        timeToSelect.append(option.clone());
+    // Generate time slots for "From" dropdown (excludes end times)
+    const fromTimeSlots = generateFromTimeSlots(mergedPeriods);
+    console.log('fromTimeSlots', fromTimeSlots);
+
+    // Populate timeFrom dropdown with available slots (no end times)
+    fromTimeSlots.forEach((timeSlot, index) => {
+      const option = $('<option>').val(timeSlot.value).text(timeSlot.display);
+      timeFromSelect.append(option);
+    });
+
+    // Auto-select first option in timeFrom
+    if (fromTimeSlots.length > 0) {
+      timeFromSelect.val(fromTimeSlots[0].value);
+      // Update timeTo options based on first timeFrom selection
+      updateTimeToOptions(fromTimeSlots[0].value);
+      
+      // Auto-select the first available option in timeTo
+      if (timeToSelect.children().length > 0) {
+        timeToSelect.val(timeToSelect.find('option:first').val()).trigger('change');
       }
-
-      // Auto-select first option in timeFrom
-      if (!isFirstOptionSet) {
-        timeFromSelect.val(timeFormatted);
-        isFirstOptionSet = true;
-      }
-
-      // Increment by 30 minutes
-      currentTime.add(30, 'minutes');
-    }
-    
-    // Add the endTime as the last option for timeTo
-    const endTimeFormatted = endTime.format('HH:mm:ss');
-    const endTimeDisplay = endTime.format('hh:mm A');
-    const endOption = $('<option>').val(endTimeFormatted).text(endTimeDisplay);
-    timeToSelect.append(endOption);
-
-    // Auto-select the first available option in timeTo (which should be 30 minutes after timeFrom start)
-    if (timeToSelect.children().length > 0) {
-      timeToSelect.val(timeToSelect.find('option:first').val()).trigger('change');
     }
   }
 });
+
+// Function to merge overlapping or consecutive time periods
+function mergeTimePeriods(periods) {
+  if (periods.length === 0) return [];
+
+  // Convert periods to moments and sort by start time
+  const sortedPeriods = periods
+    .filter(period => period.tfrom && period.tto)
+    .map(period => ({
+      start: moment(period.tfrom, 'HH:mm:ss'),
+      end: moment(period.tto, 'HH:mm:ss')
+    }))
+    .sort((a, b) => a.start.diff(b.start));
+
+  const merged = [];
+  let current = sortedPeriods[0];
+
+  for (let i = 1; i < sortedPeriods.length; i++) {
+    const next = sortedPeriods[i];
+    
+    // Check if periods overlap or are consecutive (touching)
+    if (current.end.isSameOrAfter(next.start)) {
+      // Merge periods by extending the end time
+      current.end = moment.max(current.end, next.end);
+    } else {
+      // No overlap, add current period to merged and move to next
+      merged.push(current);
+      current = next;
+    }
+  }
+  
+  // Add the last period
+  merged.push(current);
+  
+  return merged;
+}
+
+// Function to generate time slots for "From" dropdown (excludes end times)
+function generateFromTimeSlots(mergedPeriods) {
+  const allSlots = [];
+  
+  mergedPeriods.forEach(period => {
+    let currentTime = period.start.clone();
+    
+    // Generate 30-minute intervals within this period, but exclude the very end
+    while (currentTime.isBefore(period.end)) {
+      allSlots.push({
+        value: currentTime.format('HH:mm:ss'),
+        display: currentTime.format('hh:mm A'),
+        moment: currentTime.clone()
+      });
+      currentTime.add(30, 'minutes');
+    }
+  });
+  
+  // Remove duplicates and sort
+  const uniqueSlots = allSlots.filter((slot, index, self) => 
+    index === self.findIndex(s => s.value === slot.value)
+  ).sort((a, b) => a.moment.diff(b.moment));
+  
+  return uniqueSlots;
+}
+
+// Function to generate time slots for "To" dropdown (includes end times)
+function generateToTimeSlots(mergedPeriods) {
+  const allSlots = [];
+  
+  mergedPeriods.forEach(period => {
+    let currentTime = period.start.clone();
+    
+    // Generate 30-minute intervals within this period
+    while (currentTime.isBefore(period.end)) {
+      allSlots.push({
+        value: currentTime.format('HH:mm:ss'),
+        display: currentTime.format('hh:mm A'),
+        moment: currentTime.clone()
+      });
+      currentTime.add(30, 'minutes');
+    }
+    
+    // Always add the end time for "To" options
+    allSlots.push({
+      value: period.end.format('HH:mm:ss'),
+      display: period.end.format('hh:mm A'),
+      moment: period.end.clone()
+    });
+  });
+  
+  // Remove duplicates and sort
+  const uniqueSlots = allSlots.filter((slot, index, self) => 
+    index === self.findIndex(s => s.value === slot.value)
+  ).sort((a, b) => a.moment.diff(b.moment));
+  
+  return uniqueSlots;
+}
 
 // Function to update timeTo options based on selected timeFrom
 function updateTimeToOptions(timeFromValue) {
@@ -260,36 +340,30 @@ function updateTimeToOptions(timeFromValue) {
   if (!selectedDate || !timeFromValue) return;
 
   const dayName = moment(selectedDate, 'YYYY-MM-DD').format('ddd');
-  const filteredDateObj = responseData.find(item => item.days.includes(dayName));
+  const filteredDateObjs = responseData.filter(item => item.days.includes(dayName));
   
-  if (!filteredDateObj || !filteredDateObj.tfrom || !filteredDateObj.tto) return;
+  if (filteredDateObjs.length === 0) return;
 
   // Clear current options
   timeToSelect.empty();
 
-  // Parse times
+  // Merge time periods and generate all slots for "To" (includes end times)
+  const mergedPeriods = mergeTimePeriods(filteredDateObjs);
+  const allToTimeSlots = generateToTimeSlots(mergedPeriods);
+
+  // Parse the selected from time
   const selectedFromTime = moment(timeFromValue, 'HH:mm:ss');
-  const endTime = moment(filteredDateObj.tto, 'HH:mm:ss');
 
-  // Start from 30 minutes after the selected from time
-  let currentTime = selectedFromTime.clone().add(30, 'minutes');
+  // Find valid end times (at least 30 minutes after the selected from time)
+  const validEndSlots = allToTimeSlots.filter(slot => 
+    slot.moment.isAfter(selectedFromTime.clone().add(29, 'minutes'))
+  );
 
-  // Add time options from 30 minutes after timeFrom until the end time
-  while (currentTime.isSameOrBefore(endTime)) {
-    const timeFormatted = currentTime.format('HH:mm:ss');
-    const displayTime = currentTime.format('hh:mm A');
-    const option = $('<option>').val(timeFormatted).text(displayTime);
+  // Populate timeTo dropdown with valid options
+  validEndSlots.forEach(slot => {
+    const option = $('<option>').val(slot.value).text(slot.display);
     timeToSelect.append(option);
-    currentTime.add(30, 'minutes');
-  }
-
-  // If no options were added, at least add the end time if it's after the from time
-  if (timeToSelect.children().length === 0 && endTime.isAfter(selectedFromTime)) {
-    const endTimeFormatted = endTime.format('HH:mm:ss');
-    const endTimeDisplay = endTime.format('hh:mm A');
-    const endOption = $('<option>').val(endTimeFormatted).text(endTimeDisplay);
-    timeToSelect.append(endOption);
-  }
+  });
 
   // Auto-select the first available option if none is selected
   if (timeToSelect.val() === null && timeToSelect.children().length > 0) {
