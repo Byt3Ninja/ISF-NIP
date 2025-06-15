@@ -135,7 +135,7 @@ class AssessmentController extends Controller
      */
     public function show(string $id)
     {
-        if( Auth::user()->hasRole('Admin') )
+       if (Auth::user()->hasAnyRole(['Admin', 'organizationManager']))
         {
             $l = app()->getLocale();
             $assessment_user = Assessment::where('id', $id)->first();

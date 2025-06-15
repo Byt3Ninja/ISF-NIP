@@ -5,12 +5,12 @@
 @section('subTitle', __('admin.Add new service'))
 
 @section('style')
-  <style>
+<style>
   .ql-toolbar.ql-snow {
     border-top-right-radius: 0.5rem;
     border-top-left-radius: 0.5rem;
   }
-  </style>
+</style>
 @stop
 
 @section('content')
@@ -149,25 +149,19 @@
                           </div>
                         </fieldset>
 
-                        <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Image') }}</label>
-                          <br />
-                          <div>
-                            {{-- <div class="input-group-prepend">
-                              <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-                            </div> --}}
-                            <div class="d-flex align-items-center border rounded py-1 px-2">
-                              <input type="file" class="custom-file-input" id="img_url" name="img_url" accept="image/*"
-                                aria-describedby="inputGroupFileAddon01">
-                              <label class="fs-5 mb-2 custom-file-label" for="inputGroupFile01">{{
-                                __('admin.SelectFile') }}</label>
-                            </div>
+                        <fieldset class="form-group mt-3">
+                          <label for="img_url" class="fs-5 mb-2">{{ __('admin.Image') }}</label>
+                          <div class="input-group">
+                            <input type="file" class="form-control" id="img_url" name="img_url" accept="image/*">
+                            <label class="input-group-text" for="img_url">
+                              <i class="ti ti-upload me-1"></i>{{ __('admin.SelectFile') }}
+                            </label>
                           </div>
                         </fieldset>
                       </div>
                     </div>
                     @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
-                    <div class="row">
+                    <div class="row mt-6">
                       <div class="col-12 d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Save') }}</button>
                       </div>

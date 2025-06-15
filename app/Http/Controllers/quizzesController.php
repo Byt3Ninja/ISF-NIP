@@ -52,7 +52,7 @@ class quizzesController extends Controller
 			$quizzes_q .= "AND q.organization_id = $request->org_id ";
 		}
 		if($request->status != 0){
-			$quizzes_q .= "AND q.status = $request->status ";
+			$quizzes_q .= " AND q.status = '$request->status' ";
 		}
 		if($request->Program_id != 0){
 			$quizzes_q .= "AND c.id = $request->Program_id ";

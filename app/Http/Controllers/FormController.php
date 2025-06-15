@@ -181,7 +181,7 @@ $data = $forms->map(function ($form) use ($l, &$C) {
           $submission->step_name = $first->S_title;
           $submission->program_name = $first->CYC_title;
           $submission->organization_name = $first->O_name_en;
-          $submission->submissionDate = $first->FD_created_at;
+          $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
       
           // answers
           $submission->answers = $group->map(function ($item) {

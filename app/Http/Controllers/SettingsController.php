@@ -941,7 +941,7 @@ class SettingsController extends Controller
 		if ($invitation) {
 			$invitation->expires_at = now()->addDays(2);
 			$invitation->save();
-			Mail::to($request->email)->send(new UserInvitation($invitation));
+			Mail::to($request->email)->queue(new UserInvitation($invitation));
 			return back()->with('message', 'InvitationSent');
 		}
 
@@ -955,7 +955,7 @@ class SettingsController extends Controller
 				$invitation->save();
 
 				// Send invitation email
-				Mail::to($request->email)->send(new UserInvitation($invitation));
+				Mail::to($request->email)->queue(new UserInvitation($invitation));
 
 				return back()->with('message', 'InvitationSent');
 	}
@@ -1036,7 +1036,7 @@ class SettingsController extends Controller
 		$invitation->expires_at = now()->addDays(2);
 		$invitation->save();
 
-		Mail::to($invitation->email)->send(new UserInvitation($invitation));
+		Mail::to($invitation->email)->queue(new UserInvitation($invitation));
 
 		return back()->with('message', 'InvitationResent');
 	}
