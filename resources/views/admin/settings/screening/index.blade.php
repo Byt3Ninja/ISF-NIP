@@ -247,66 +247,66 @@
                   <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
                   <div class="form-group">
                     @if ($cstep->data == 'grouptogroup')
-                    @foreach (json_decode($cstep->list) ?? [] as $key => $clist)
-                    <div class="form-row">
-                      <p style="margin:5px;">{{ __('cycles.panel list') . ' ' . $key }}</p>
-                      <div class="row col-md-12">
-                        <div class="col-md-11">
-                          <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
-                            multiple="multiple">
-                            @foreach ($judges as $judge)
-                            <option value="{{ $judge->id }}" {{ in_array($judge->id, is_array($clist) ? $clist : [], true) ? 'selected' : '' }}>
-                              {{ $judge->name }} ({{ $judge->email }})
-                            </option>
-                            @endforeach
-                          </select>
+                      @foreach (json_decode($cstep->list) ?? [] as $key => $clist)
+                        <div class="form-row">
+                          <p style="margin:5px;">{{ __('cycles.panel list') . ' ' . $key }}</p>
+                          <div class="row col-md-12">
+                            <div class="col-md-11">
+                              <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
+                                multiple="multiple">
+                                @foreach ($judges as $judge)
+                                <option value="{{ $judge->id }}" {{ in_array($judge->id, is_array($clist) ? $clist : [], true) ? 'selected' : '' }}>
+                                  {{ $judge->name }} ({{ $judge->email }})
+                                </option>
+                                @endforeach
+                              </select>
+                            </div>
+                            @php
+                            $panel = \App\Screening::where('step_id', $cstep->id)
+                                ->where('panel', $key)
+                                ->first();
+                            if ($panel && $panel->users) {
+                                $panel = json_encode($panel->users);
+                            } else {
+                                $panel = '';
+                            }
+                            @endphp
+                            <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
+                            <div class="col-md-1">
+                              <button type="button" class="btn btn-warning" onclick="openusers({{ $key }})">
+                                <i class="ti ti-edit text-info"></i>
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        @php
-                        $panel = \App\Screening::where('step_id', $cstep->id)
-                            ->where('panel', $key)
-                            ->first();
-                        if ($panel && $panel->users) {
-                            $panel = json_encode($panel->users);
-                        } else {
-                            $panel = '';
-                        }
-                        @endphp
-                        <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
-                        <div class="col-md-1">
-                          <button type="button" class="btn btn-warning" onclick="openusers({{ $key }})">
-                            <i class="ti ti-edit text-info"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    @endforeach
-                    @php($key = ($key ?? 0) + 1)
-                    <div class="form-row">
-                      <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
-                      <div class="row col-md-12">
-                        <div class="col-md-11">
-                          <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
-                            multiple="multiple">
-                            @foreach ($judges as $judge)
-                            <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
-                            @endforeach
-                          </select>
-                        </div>
-                        <div class="col-md-1 float-right">
-                          <button class="btn btn-primary" type="submit"><i class="ti ti-plus"></i></button>
-                        </div>
-                      </div>
-                    </div>
-                    @else
-                    <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
-                    <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}>
-                      {!! $cstep->data == 'onetoall' ? '<option selected>' . __('cycles.Please select one name') . '</option>' : '' !!}
-                      @foreach ($judges as $judge)
-                      <option value="{{ $judge->id }}" {{ is_array($cstep->list) && in_array($judge->id, json_decode($cstep->list) ?? []) ? 'selected' : '' }}>
-                        {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
-                      </option>
                       @endforeach
-                    </select>
+                      @php($key = ($key ?? 0) + 1)
+                      <div class="form-row">
+                        <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
+                        <div class="row col-md-12">
+                          <div class="col-md-11">
+                            <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
+                              multiple="multiple">
+                              @foreach ($judges as $judge)
+                              <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
+                              @endforeach
+                            </select>
+                          </div>
+                          <div class="col-md-1 float-right">
+                            <button class="btn btn-primary" type="submit"><i class="ti ti-plus"></i></button>
+                          </div>
+                        </div>
+                      </div>
+                    @else
+                      <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
+                      <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}>
+                        {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!}
+                        @foreach ($judges as $judge)
+                        <option value="{{ $judge->id }}" {{ is_array($cstep->list) && in_array($judge->id, json_decode($cstep->list) ?? []) ? 'selected' : '' }}>
+                          {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
+                        </option>
+                        @endforeach
+                      </select>
                     @endif
                   </div>
                   <div class="custom-control custom-switch custom-control-inline mt-4">
