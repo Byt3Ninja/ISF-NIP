@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Step;
 use App\Tags;
 use App\User;
+use stdClass;
 use App\Cycle;
 use App\Company;
 use App\Quizzes;
@@ -21,6 +22,7 @@ use http\Env\Response;
 use App\TrainingContent;
 use App\TrainingSession;
 use App\SessionRecording;
+use App\MentorshipRequest;
 use App\TrainingCompleted;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -32,20 +34,19 @@ use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TrainerEmail;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\SendWhatsAppMessageJob;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use App\Factories\OnlineMeetingFactory;
-use Illuminate\Support\Facades\Storage;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use App\Notifications\NewTrainingNotification;
-use App\Jobs\SendWhatsAppMessageJob;
-use App\Jobs\SendTrainingNotificationJob;
-use Intervention\Image\ImageManagerStatic as Image;
-use stdClass;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TrainingResultExport;
+use App\Factories\OnlineMeetingFactory;
+use Illuminate\Support\Facades\Storage;
+use App\Jobs\SendTrainingNotificationJob;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Notifications\NewTrainingNotification;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class TrainingController extends Controller
 {
@@ -1252,17 +1253,24 @@ class TrainingController extends Controller
 
 	public function sessionReport(Request $request, $id)
 	{
+		$this->meetingService =  OnlineMeetingFactory::create();
 		try{
-		$session = TrainingSession::find($id);
-		if (!$session || !$session->zoom_id) {
-			return response()->json(['success' => false, 'message' => 'Session not found'], 404);
-		}
+	 	$type = $request->query('type');
+        $zoomId = null;
+        $mentorshipRequest = null;
 
+    if ($type === 'training') {
+        $session = TrainingSession::findOrFail($id);
+        $zoomId = $session->zoom_id;
+    } elseif ($type === 'mentorship') {
+        $mentorshipRequest = MentorshipRequest::findOrFail($id);
+        $zoomId = $mentorshipRequest->zoom_id;
+    }
 		if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionReport')) {
-			return redirect()->back()->with('message', __('admin.session report is not available yet'));
+			return redirect()->back()->with(['message2' => 'session_report_not_available']);
 		}
 
-		$response = $this->meetingService->getSessionReport($session->zoom_id);
+		$response = $this->meetingService->getSessionReport($zoomId);
 		if ($response['success'])
 		{
 			$participants = $response['data']['participants'] ?? [];
@@ -1277,10 +1285,11 @@ class TrainingController extends Controller
 
 				SessionReport::updateOrCreate(
 					[
-						'session_id' => $session->id,
+						'session_id' => $session->id ?? $mentorshipRequest->id,
 						'participant_user_id' => $participant['user_id'] ?? null,
 					],
 					[
+						'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
 						'participant_email' => $participant['user_email'] ?? null,
 						'participant_name' => $participant['name'] ?? null,
 						'participant_join_date' => $joinDate,
@@ -1289,14 +1298,15 @@ class TrainingController extends Controller
 					]
 				);
 			}
-			return redirect()->back()->with('message', __('admin.Session report updated.'));
+			return redirect()->back()->with(['message' => 'Session report updated', 'class' => 'success']);
 
 		}
 		else {
-			return redirect()->back()->with('message', __('session report is not available yet'));
+			return redirect()->back()->with(['message2' => 'session report is not available yet']);
 		}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage());
+			 return redirect()->back()->with(['message2' => 'error_updating_report' . ': ' . $e->getMessage()]);
 		}
 	}
 
@@ -1304,24 +1314,37 @@ class TrainingController extends Controller
 
 	public function sessionRecord($id)
 	{
+		$this->meetingService =  OnlineMeetingFactory::create();
 		try{
-		$session = TrainingSession::find($id);
-		if (!$session || !$session->zoom_id) {
-			return redirect()->back()->withErrors(['error' => 'Session Not Found',]);
-		}
+		$sessionId = null;
+        $zoomId = null;
+        $mentorshipRequest = null;
 
+		$type = request()->query('type');
+
+        if ($type === 'training') {
+            $session = TrainingSession::findOrFail($id);
+            $zoomId = $session->zoom_id;
+            $sessionId = $session->id;
+        } elseif ($type === 'mentorship') {
+            $mentorshipRequest = MentorshipRequest::findOrFail($id);
+            $zoomId = $mentorshipRequest->zoom_id;
+        } else {
+            return redirect()->back()->with('message2', __('Invalid session type.'));
+        }
+      
 		if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
-			return redirect()->back()->with('message', __('admin.Session Recording is not available yet'));
-		}
+            return redirect()->back()->with('message2', __('Session Recording is not available yet'));
+        }
 
-		$response = $this->meetingService->getSessionRecord($session->zoom_id);
+		$response = $this->meetingService->getSessionRecord($zoomId);
 
 		$recordingFiles = $response['data']['recording_files'] ?? [];
 		$password = $response['data']['password'] ?? null;
 
 		$firstFile = $recordingFiles[0] ?? null;
 
-		if ($firstFile) {
+		if($response['success']){
 			$recordingTime = isset($firstFile['recording_start'])
 				? Carbon::parse($firstFile['recording_start'])->toDateTimeString()
 				: null;
@@ -1331,7 +1354,8 @@ class TrainingController extends Controller
 					'recording_id' => $firstFile['id'],
 				],
 				[
-					'session_id' => $session->id,
+					'session_id' => $sessionId ?? $mentorshipRequest->id,
+					'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
 					'recording_type' => $firstFile['recording_type'] ?? null,
 					'recording_view_url' => $firstFile['play_url'] ?? null,
 					'recording_download_url' => $firstFile['download_url'] ?? null,
@@ -1339,12 +1363,16 @@ class TrainingController extends Controller
 					'passcode' => $password,
 				]
 			);
+			return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
+		}
+		else{
+			return redirect()->back()->with('message2', __('Session Recording is not available yet'));
 		}
 
-		return redirect()->back()->with('message', __('admin.Session Record updated'));
 
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage());
+			return redirect()->back()->with(['message2' => __('error_updating_recordings') . ': ' . $e->getMessage()]);
 		}
 	}
 

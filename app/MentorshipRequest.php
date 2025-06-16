@@ -56,4 +56,14 @@ class MentorshipRequest extends Model
  {
     return $this->hasMany(MentorshipTask::class, 'mentorship_request_id');
  }
+
+    public function reports()
+    {
+        return $this->hasMany(SessionReport::class, 'mentorship_request_id', 'id');
+    }
+
+    public function recordings()
+    {
+        return $this->hasMany(SessionRecording::class, 'mentorship_request_id', 'id');
+    }
 }

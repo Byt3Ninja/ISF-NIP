@@ -1914,4 +1914,7 @@ return [
 	'Export' => 'Export',
 	'no_entries_available' => 'No entries available',
 	'All_Types' => 'All Types',
+	'session_report_not_available' => 'Session Report Not Available Yet',
+	'session record is not available yet' => 'Session Record is not Available Yet',
+	'error_updating_recordings' => 'Error Updating Recordings',
 ];
