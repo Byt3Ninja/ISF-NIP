@@ -80,7 +80,7 @@ function renderScheduleData(response) {
     $.each(response, function (i, item) {
       if (flatpickrDateTimeLimit) {
         var enabledDays = response.reduce((acc, item) => {
-          return acc.concat(item.days.filter(day => day !== undefined && day !== null));
+          return acc.concat(item?.days?.filter(day => day !== undefined && day !== null));
         }, []);
 
         // console.log('enabledDays', enabledDays);
