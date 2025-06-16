@@ -68,7 +68,13 @@ class ScreeningController extends Controller
 		} else {
 			$form = collect([]);
 		}
-		$cstep->judgers = count(json_decode($cstep->list, true)??[]) ?? 0 ;
+		$judgers_count = 0;
+		$cList = collect(json_decode($cstep->list, true) ?? []);
+		if( in_array( $cstep->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
+		else
+		{
+			$judgers_count = $cList->flatten()->unique()->count();
+		}
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
 		$judgers_list = collect( json_decode($cstep->list) )->map(function($user) {
@@ -95,7 +101,7 @@ class ScreeningController extends Controller
 		}
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		$companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get();
-		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
+		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
 	public function update(Request $request)

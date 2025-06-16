@@ -236,7 +236,7 @@
                 </dl>
                 <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Registered Judges') }}</dt>
-                  <dd class="col-sm-9">{{ $cstep->judgers }}</dd>
+                  <dd class="col-sm-9">{{ $judgers_count }} </dd>
                 </dl>
               </div>
             </div>
