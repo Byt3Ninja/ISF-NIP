@@ -52,7 +52,7 @@ function request(id, mentor, organization_id = null, cycle_id = null) {
     data: { id: id, rtype: 5, _token: _token },
     success: function (response) {
       responseData = normalizeResponseDays(response); // Normalize days
-      console.log('response', responseData);
+      // console.log('response', responseData);
 
       $('#addOrganizationID').val(organization_id);
       $('#addCycleID').val(cycle_id);
@@ -60,7 +60,7 @@ function request(id, mentor, organization_id = null, cycle_id = null) {
       onSuccess(responseData);
     },
     error: function (error) {
-      console.log(error);
+      // console.log(error);
       alert(en ? 'Error Occurred, Try again!' : 'حدث خطأ، حاول مرة أخرى!');
     }
   });
@@ -83,7 +83,7 @@ function renderScheduleData(response) {
           return acc.concat(item.days);
         }, []);
 
-        console.log('enabledDays', enabledDays);
+        // console.log('enabledDays', enabledDays);
 
         flatpickrDateTimeLimit.flatpickr({
           dateFormat: 'Y-m-d',
@@ -187,19 +187,23 @@ $('#session-form').on('submit', e => {
 });
 
 $('#flatpickr-datetimeLimit').on('change', e => {
-  console.log('responseData', responseData);
-  console.log('changed', e.target.value);
+  // console.log('responseData', responseData);
+  // console.log('changed', e.target.value);
   $('#flatpickr-datetimeLimit').removeClass('is-invalid');
   $('.date-error').hide();
 
   // Get the day name of the selected date
   const selectedDate = e.target.value;
   const dayName = moment(selectedDate, 'YYYY-MM-DD').format('ddd');
-  console.log('Day Name:', dayName);
+  // console.log('Day Name:', dayName);
 
   // Find ALL schedule entries for the selected day (not just the first one)
-  const filteredDateObjs = responseData.filter(item => item.days.includes(dayName));
-  console.log('filteredDateObjs', filteredDateObjs);
+  const filteredDateObjs = responseData.filter(item => {
+    const modifiedDays = item?.days.filter((day) => day !== undefined && day !== null);
+    // console.log('item.days', modifiedDays);
+    return modifiedDays.includes(dayName);
+  });
+  // console.log('filteredDateObjs', filteredDateObjs);
 
   if (filteredDateObjs.length > 0) {
     const timeFromSelect = $('#timeFrom');
@@ -211,11 +215,11 @@ $('#flatpickr-datetimeLimit').on('change', e => {
 
     // Merge and sort time periods
     const mergedPeriods = mergeTimePeriods(filteredDateObjs);
-    console.log('mergedPeriods', mergedPeriods);
+    // console.log('mergedPeriods', mergedPeriods);
 
     // Generate time slots for "From" dropdown (excludes end times)
     const fromTimeSlots = generateFromTimeSlots(mergedPeriods);
-    console.log('fromTimeSlots', fromTimeSlots);
+    // console.log('fromTimeSlots', fromTimeSlots);
 
     // Populate timeFrom dropdown with available slots (no end times)
     fromTimeSlots.forEach((timeSlot, index) => {
