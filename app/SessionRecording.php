@@ -11,6 +11,7 @@ class SessionRecording extends Model
 
     protected $fillable = [
         'session_id',
+        'mentorship_request_id',
         'recording_type',
         'recording_id',
         'recording_view_url',

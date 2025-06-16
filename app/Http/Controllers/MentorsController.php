@@ -349,6 +349,7 @@ class MentorsController extends Controller
 			if (!$onlineMeeting['success']) {
     			return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
 			}
+			$meetingId = $onlineMeeting['data']['id'];
 			$startUrl = $onlineMeeting['data']['start_url'];
 			$joinUrl = $onlineMeeting['data']['join_url'];
 			 if ($autoApprove == 1) {
@@ -365,6 +366,7 @@ class MentorsController extends Controller
 					'approved' => 'Yes',
 					'start_url' => $startUrl,
 					'join_url' => $joinUrl,
+					'zoom_id' => $meetingId,
 					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 					'period' => $period,
 					'organization_id' => $request->organization_id,
@@ -380,6 +382,7 @@ class MentorsController extends Controller
 				'comment' => $request->notes,
 				'start_url' => $startUrl,
 				'join_url' => $joinUrl,
+				'zoom_id' => $meetingId,
 				'zoom_date' => $datefrom,
 				'period' => $period,
 				'fileurl' => $fileName,
