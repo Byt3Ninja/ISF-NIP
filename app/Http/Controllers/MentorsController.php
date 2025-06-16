@@ -890,6 +890,8 @@ Thanks from " . env('APP_NAME');
 		}
 	}
 
+	
+
 	public function delSession($id, Request $request)
 	{
 		// $zoomId = TrainingSession::findOrFail($id)->zoom_id;

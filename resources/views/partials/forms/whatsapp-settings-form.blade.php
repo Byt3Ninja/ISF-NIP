@@ -11,29 +11,7 @@
         </div>
       </div> --}}
     </div>
-    @if($_user->hasRole('admin'))
-      <form class="form d-flex flex-column h-100"  action="{{ Route('settings.system_social_whatsapp_update') }}" method="POST" >
-            @method('PUT')
-        {!! csrf_field() !!}
-          <input type="hidden" name="id" value="1">
-        <div class="form-content flex-grow-1">
-          
-            <div class="form-group mb-3">
-              <label class="form-label mb-1" for="whatsApp_URL_callback"> WhatsApp URL Callback</label>
-              <input type="text" class="form-control" value="{{ $Title->whatsApp_URL_callback }}" name="whatsApp_URL_callback">
-            </div>
-        
-            <div class="form-group mb-3">
-              <label class="form-label mb-1" for="whatsapp_api_key"> WhatsApp Api Key </label>
-              <input type="text" class="form-control" value="{{ $Title->whatsapp_api_key }}" name="whatsapp_api_key">
-            </div>
-        </div>
-
-        <div class="form-group d-flex justify-content-end mt-auto">
-          <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-        </div>
-      </form>
-    @endif
+    
     
     <div class="">
       <!-- Connection Status -->

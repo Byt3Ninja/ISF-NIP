@@ -23,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn('session');
-            $table->dropColumn('status_session');
+            $table->dropColumn('whatsApp_SESSION_ID');
+            $table->dropColumn('whatsApp_Status_Sessions');
         });
     }
 };
