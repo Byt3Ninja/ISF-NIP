@@ -321,5 +321,6 @@ return [
     'View Report' => 'View Report',
     'Display course contents' => 'Display course contents',
     'Select judges' => 'Select Judges',
+    'Show Form' => 'Show Form',
 ];
 

@@ -318,5 +318,6 @@ return [
     'View Report' => 'عرض التقرير',
     'Display course contents' => 'عرض محتويات الكورس التعليمي',
     'Select judges' => 'حدد المحكمين',
+    'Show Form' => 'عرض النموذج',
   ];
 

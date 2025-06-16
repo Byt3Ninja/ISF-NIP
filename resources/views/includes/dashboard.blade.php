@@ -300,7 +300,6 @@
 											</tr>
 										</thead>
 										<tbody>
-											{{-- {{ dd($steps) }} --}}
 											@foreach( $steps as $step )
 											<tr>
 												<td>
@@ -334,13 +333,21 @@
 													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-icon rounded-circle btn-label-primary"
 														title="{{ __('dashboard.View') }}"> <i class="ti ti-eye"></i> </a>
 													@endif --}}
-														@if ($step->data && $step->status == 'Started') 
-															<a href="/dashboard/show-form/{{ $step->data }}">
+													 @if($step->stype == 1 && isset($step->form) && $step->form)
+															<a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+																<button class="btn btn-sm btn-label-primary">
+																	<i class="ti ti-eye me-2" title="{{ __('cycles.Show Form') }}"></i>
+																	<span class="fw-semibold">{{ __('cycles.Show Form') }}</span>
+																</button>
+															</a>
+														@endif
+														{{-- @if ($step->data && $step->status == 'Started')  --}}
+															{{-- <a href="/dashboard/show-form/{{ $step->data }}">
 																<span class="btn btn-icon btn-label-primary rounded-circle">
 																		<i class="ti ti-eye"></i>
 																</span>
-															</a>
-														@endif
+															</a> --}}
+														{{-- @endif --}}
 												</td>
 											</tr>
 											@endforeach
