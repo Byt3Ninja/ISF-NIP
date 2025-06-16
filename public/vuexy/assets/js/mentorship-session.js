@@ -199,9 +199,9 @@ $('#flatpickr-datetimeLimit').on('change', e => {
 
   // Find ALL schedule entries for the selected day (not just the first one)
   const filteredDateObjs = responseData.filter(item => {
-    const modifiedDays = item?.days.filter((day) => day !== undefined && day !== null);
+    const modifiedDays = item?.days?.filter((day) => day !== undefined && day !== null);
     // console.log('item.days', modifiedDays);
-    return modifiedDays.includes(dayName);
+    return modifiedDays && modifiedDays.includes(dayName);
   });
   // console.log('filteredDateObjs', filteredDateObjs);
 
@@ -344,7 +344,7 @@ function updateTimeToOptions(timeFromValue) {
   if (!selectedDate || !timeFromValue) return;
 
   const dayName = moment(selectedDate, 'YYYY-MM-DD').format('ddd');
-  const filteredDateObjs = responseData.filter(item => item.days.includes(dayName));
+  const filteredDateObjs = responseData.filter(item => item.days && item.days.includes(dayName));
   
   if (filteredDateObjs.length === 0) return;
 
