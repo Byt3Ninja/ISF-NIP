@@ -77,6 +77,7 @@ Route::post('eventregister', 'IndexController@eventregister');
     return redirect('/dashboard');
 })->middleware(['auth', '2fa']);
 
+Route::get('/db-migrate', 'IndexController@dbMigrate');
 Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('invitations.set_password_view_form');
