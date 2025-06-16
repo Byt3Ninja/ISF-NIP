@@ -5,8 +5,10 @@ use Closure;
 use App\Messages;
 use App\Settings;
 use App\Events\WebMessage;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWhatsAppMessageJob;
@@ -265,14 +267,17 @@ class IndexController extends Controller
      */
      public function sendMessage(Request $request): JsonResponse
     {
+
+
         $request->validate([
             'to' => 'required|string',
             'message' => 'required|string'
         ]);
         $phoneNumber = $request->input('to');
         $message = $request->input('message');
-        SendWhatsAppMessageJob::dispatch($phoneNumber, $message);
-
+     
+     SendWhatsAppMessageJob::dispatch($phoneNumber, $message, auth()->user()->organization);
+        
         return response()->json([
                 'success' => true,
                 'message' => 'Message sent successfully.'.$message,
@@ -319,5 +324,26 @@ class IndexController extends Controller
         //     ], 500);
         // }
     }
+
+
+    public function mineRate()
+	{
+		$requests_q = "SELECT *
+               FROM mentorship_requests 
+               WHERE mentorship_requests.done IS NULL
+               AND mentorship_requests.zoom_date <= ?";
+       $now = date('Y-m-d 23:59:59');
+        $result = DB::select($requests_q, [$now]);
+        $result = collect($result);
+ 
+            foreach ($result as $request) {
+            if($request->approved == 'Yes'){
+                MentorshipRequest::where('id', $request->id)->update(['done' => 1]);
+            }else{
+                MentorshipRequest::where('id', $request->id)->update(['done' => 0,'approved'=> 'No']);
+            }
+                }
+		
+	}
 
 }

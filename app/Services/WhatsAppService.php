@@ -14,8 +14,8 @@ class WhatsAppService
 //     protected $client;
 //     protected $instanceId;
 //     protected $accessToken;
-//  protected string $baseUrl;
-//     protected ?string $apiKey; // Nullable in case it's missing
+    protected string $baseUrl;
+    protected ?string $apiKey; // Nullable in case it's missing
 
     public function __construct()
     {
@@ -27,15 +27,15 @@ class WhatsAppService
         // $this->instanceId = $settings->whatsApp_INSTANCE_ID ?? '';
         // $this->accessToken = $settings->whatsApp_ACCESS_TOKEN ?? '';
          // Load config values in the constructor
-        // $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
-        // $this->apiKey = config('whatsapp.api_key');
+        $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
+        $this->apiKey = config('whatsapp.api_key');
 
-        // // Basic check if config is set
-        // if (empty($this->baseUrl) || empty($this->apiKey)) {
-        //     // You might throw an exception or handle this more gracefully
-        //     // depending on your application's needs.
-        //      Log::error('WhatsApp API Base URL or API Key is not configured.');
-        // }
+        // Basic check if config is set
+        if (empty($this->baseUrl) || empty($this->apiKey)) {
+            // You might throw an exception or handle this more gracefully
+            // depending on your application's needs.
+             Log::error('WhatsApp API Base URL or API Key is not configured.');
+        }
     }
 
     /**
@@ -45,15 +45,15 @@ class WhatsAppService
      */
      protected function prepareHttpClient()
     {
-        $settings = Settings::where('id', 1)->first();
-        if($settings->whatsApp_URL_callback == null){
-            return response()->json([
-                'success' => false,
-                'error' => 'URL is not Found in Database.',
-            ], 500);
-        }
-        $baseUrl = $settings->whatsApp_URL_callback;
-        $apiKey = $settings->whatsapp_api_key;
+        // $settings = Settings::where('id', 1)->first();
+        // if($settings->whatsApp_URL_callback == null){
+        //     return response()->json([
+        //         'success' => false,
+        //         'error' => 'URL is not Found in Database.',
+        //     ], 500);
+        // }
+        $baseUrl = $this->baseUrl;
+        $apiKey = $this->apiKey;
        
         if (!$apiKey) {
             // Handle case where API key is missing
@@ -112,19 +112,25 @@ $client = new Client();
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-public function sendMessage($phoneNumber, $message)
+public function sendMessage($phoneNumber, $message, $userOrganization)
 {
-    $settings = Settings::where('id', 1)->first();
-         if($settings->whatsApp_Status_Session == 1){    
+    
+    if($userOrganization && $userOrganization->org_whatsApp_Status_Session == 1){
+    $sessionId = $userOrganization->org_whatsApp_SESSION_ID;
+    }else{
+    $settings = Settings::find(1);
+        if($settings && $settings->whatsApp_Status_Session == 1){ 
             $sessionId = $settings->whatsApp_SESSION_ID;
         }else{
             return response()->json([
                 'success' => false,
-                'error' => 'Session is not connected.',
+                'error' => 'Session is not connectedddd.',
                 'api_status' => 500,
-                'api_error' => 'Session is not connected.'
+                'api_error' => 'Session is not connectedddd.'
             ], 500);
         }
+    }
+    // $sessionId = 147;
         $endpoint = "/client/sendMessage/{$sessionId}";
         try {
             $response = $this->prepareHttpClient()->post($endpoint, [

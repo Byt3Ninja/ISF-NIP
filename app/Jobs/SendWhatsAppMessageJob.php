@@ -16,14 +16,16 @@ class SendWhatsAppMessageJob implements ShouldQueue
 
     protected $phoneNumber;
     protected $message;
+    protected $organization;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($phoneNumber, $message)
+    public function __construct($phoneNumber, $message, $organization = null)
     {
         $this->phoneNumber = $phoneNumber;
         $this->message = $message;
+        $this->organization = $organization;
     }
 
     /**
@@ -31,9 +33,9 @@ class SendWhatsAppMessageJob implements ShouldQueue
      */
     public function handle(WhatsAppService $whatsAppService): void
     {
-        $result = $whatsAppService->sendMessage($this->phoneNumber, $this->message);
-        
-        // تسجيل النتيجة في اللوج إن أردت
+       
+        $result = $whatsAppService->sendMessage($this->phoneNumber, $this->message, $this->organization);
+  
         Log::info('Message sent to user: ' . $this->phoneNumber . ' Result: ' . json_encode($result));
     }
 }
