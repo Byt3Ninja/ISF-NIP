@@ -12,6 +12,7 @@ use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test', function () {});
+Route::get('os-get-non', function() { phpinfo(); });
 Route::get('default-permissions', function() { App\Permission::default_permissions(); });
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
