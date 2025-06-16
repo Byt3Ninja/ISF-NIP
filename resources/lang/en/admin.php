@@ -1917,4 +1917,7 @@ return [
 	'session_report_not_available' => 'Session Report Not Available Yet',
 	'session record is not available yet' => 'Session Record is not Available Yet',
 	'error_updating_recordings' => 'Error Updating Recordings',
+	'Notification' => 'Notification',
+	'mark_all_as_read' => 'Mark all as read',
+	'NoNotifications' => 'No new notifications',
 ];
