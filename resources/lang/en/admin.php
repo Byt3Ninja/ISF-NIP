@@ -204,7 +204,7 @@ return [
 	'Enable accounts auto activation' => 'Enable accounts auto activation',
 	'DownEditDelete' => 'Download | Edit | Delete',
 	'Title' => 'Title',
-	'Registered' => 'Registered',
+	'Registered' => 'Startup',
 	'Event Link' => 'Event Link',
 	'EditEvents' => 'Edit Events',
 	'eventsettings' => 'Event settings',
