@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendWhatsAppMessageJob;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Client\RequestException;
 use App\Http\Controllers\WhatsAppSessionController;
 
@@ -42,6 +43,32 @@ class IndexController extends Controller
         //     // depending on your application's needs.
         //      Log::error('WhatsApp API Base URL or API Key is not configured.');
         // }
+    }
+
+    public function dbMigrate(Request $request)
+    {
+        if( $request->has('token') )
+        {
+            $token = $request->input('token', null);
+            if( $token == 'dbMigrate@PreForm!@NoW' )
+            {
+                try {
+                    Artisan::call('migrate', [
+                        '--force' => true, // Avoid confirmation prompt
+                    ]);
+                    $output = Artisan::output();
+                    return response()->json([
+                        'status' => 'success',
+                        'output' => $output,
+                    ]);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $e->getMessage(),
+                    ], 500);
+                }
+            }
+        }
     }
 
     public function lang($locale)
