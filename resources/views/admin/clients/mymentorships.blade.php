@@ -42,16 +42,16 @@
 
                                   <div class="d-flex align-items-center">
                                     <a class="media-left">
-                                      <img src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-3"
+                                      <img src="{{ $session->mentor?->image_url }}" alt="avatar" class="rounded-circle me-3"
                                         height="40" width="40">
                                     </a>
                                     <div class="media-body">
 
-                                      <a href="{{ route('mentors.profile_view', $session->mentor->id) }}">
+                                      <a href="{{ route('mentors.profile_view', $session->mentor->id ?? '0') }}">
 
-                                        <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor->{'first_name_' . $l} }}
-                                          {{ $session->mentor->{'last_name_' . $l} }}</h6>
-                                        <span class="font-small-2 text-nowrap">{{ $session->mentor->{'title_' . $l} }}</span>
+                                        <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor?->{'first_name_' . $l} }}
+                                          {{ $session->mentor?->{'last_name_' . $l} }}</h6>
+                                        <span class="font-small-2 text-nowrap">{{ $session->mentor?->{'title_' . $l} }}</span>
                                       </a>
                                     </div>
                                   </div>
@@ -68,6 +68,7 @@
                                     </span>
                                   @endif
                                 </td>
+                                @if($session->zoom_date > now())
                                 @if ($session->approved == 'Yes')
                                   <td class="text-success py-1">
                                     @if ($session->join_url)
@@ -83,7 +84,13 @@
                                   <td class="text-warning py-1">
                                     {!! '<span class="warning">' . __('Waiting') . '</span>' !!}
                                 @endif
-                                </td>
+                                  </td>
+                                @else
+                                <td class="text-danger py-1">
+                                    {{ __('admin.expired') }}
+                                  </td>
+                                @endif
+                                
                                 {{--                                                                <td class="text-center"> --}}
                                 {{--                                                                    <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info"> --}}
                                 {{--                                                                        <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a> --}}
