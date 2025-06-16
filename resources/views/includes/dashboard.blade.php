@@ -326,13 +326,12 @@
 														$step->description ? $step->description : '...' }} </span>
 												</td>
 												<td>
-													{{-- @if( $step->stype == 1 && $step->arr != 'Completed' && $step->arr != 'انتهت' )
-													<a href="/dashboard/cycles/{{ $step->id }}" class="btn btn-icon rounded-circle btn-label-primary"
-														title="{{ __('dashboard.Join') }}"> <i class="ti ti-arrows-join"></i> </a>
-													@elseif( $step->stype == 2 )
-													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-icon rounded-circle btn-label-primary"
-														title="{{ __('dashboard.View') }}"> <i class="ti ti-eye"></i> </a>
-													@endif --}}
+													@if( $step->stype == 1 )
+													@if( $step->status == 'Started' )
+													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-label-primary"
+														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
+													@endif
+													@endif
 													 @if($step->stype == 1 && isset($step->form) && $step->form)
 															<a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
 																<button class="btn btn-sm btn-label-primary">
