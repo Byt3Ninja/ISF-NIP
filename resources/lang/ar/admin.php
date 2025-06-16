@@ -1967,4 +1967,6 @@ return [
 	'session_report_not_available' => 'لا توجد تقرير عن الجلسات',
 	'session record is not available yet' => 'لا توجد سجلات عن الجلسة بعد',
 	'error_updating_recordings' => 'خطاء في تحديث التسجيلات',
+	'Notification' => 'إشعار',
+	'NoNotifications' => 'لا توجد اشعارات',
 ];

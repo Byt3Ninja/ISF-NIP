@@ -599,6 +599,24 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
 
 
+    Route::post('/notifications/mark-all-read', function () {
+        $user = Auth::user();
+        if ($user) {
+            $user->unreadNotifications()->get()->each->markAsRead();
+            return response()->json(['success' => true, 'message' => 'All notifications marked as read']);
+        }
+        return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+    });
+
+    Route::post('/notifications/mark-read/{id}', function ($id) {
+        $user = Auth::user();
+        if ($user) {
+            $notification = $user->notifications()->findOrFail($id);
+            $notification->markAsRead();
+            return response()->json(['success' => true, 'message' => 'Notification marked as read']);
+        }
+    });
+
 });
 
 
