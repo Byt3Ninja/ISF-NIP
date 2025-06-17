@@ -131,7 +131,7 @@ class ImporterController extends Controller
                 }
 
                 // Startup validations
-                if (isset($row['Startup Name'])) {
+                if (!isset($row['Startup Name'])) {
                     $rowErrors[] = "Missing Startup Name";
                 }
 
@@ -412,7 +412,7 @@ class ImporterController extends Controller
                     'last_name_en' => isset($mappings['last_name_en']) ? trim($row[$rowKeys[$mappings['last_name_en']]]) : null,
                     'last_name_ar' => isset($mappings['last_name_en']) ? trim($row[$rowKeys[$mappings['last_name_en']]]) : null,
                     'gender' => isset($mappings['gender']) ? trim($row[$rowKeys[$mappings['gender']]]) : null,
-                    'phone' => isset($mappings['phone']) ? trim($row[$rowKeys[$mappings['phone']]]) : null,
+                    'phone' => isset($mappings['phone']) && isset($mappings['country_code'])? trim($row[$rowKeys[$mappings['country_code']]]) . trim($row[$rowKeys[$mappings['phone']]]): null,
                     'country_code' => isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) : null,
                     'HaveCompany' => 1,
                     'created_at' => Carbon::now(),
