@@ -918,7 +918,7 @@ class TrainingController extends Controller
 			if ($type == 'sessions') {
 				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 				// ======> notify Trainer <=================
-				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 				// ==========> End Notify <================
 				return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 
@@ -1007,7 +1007,7 @@ class TrainingController extends Controller
 			}
 			// $session = TrainingSession::find($trainingSession->sid);
 			// ======> notify Trainer <=================
-			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
+			SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email,$addOrEdit);
 			// ==========> End Notify <================
 			return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 
