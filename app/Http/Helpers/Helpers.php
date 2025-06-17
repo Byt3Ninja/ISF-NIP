@@ -51,7 +51,19 @@ if (!function_exists('FormatDate')) {
     function FormatDate($stamp, $format)
     {
         try {
-            $date = Carbon::createFromTimestamp($stamp)->format($format);
+            if ($stamp === null) {
+            return '';
+        }
+
+        // لو timestamp (رقم)
+        if (is_numeric($stamp)) {
+            return date($format, $stamp);
+        }
+
+        // لو كائن DateTime أو Carbon
+        if ($stamp instanceof \DateTimeInterface) {
+            return $stamp->format($format);
+        }
         } catch (\Exception $e) {
             $date = date($format, $stamp);
         }
