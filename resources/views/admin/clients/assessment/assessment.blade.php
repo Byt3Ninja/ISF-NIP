@@ -410,8 +410,14 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
             icon: 'success',
             title: 'Success',
             text: '{{ __('admin.Assessment_completed_successfully') }}',
-            showConfirmButton: false,
-            timer: 1500
+           	showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonText: "{{ __('admin.OK') }}",
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+            timer: 2000,
           });
 
           localStorage.setItem('activeCategoryTab', 0);

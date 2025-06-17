@@ -54,6 +54,12 @@
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif
+         @if (session()->has('message2'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{ __('admin.' . session()->get('message2')) }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          @endif
       </section>
       @if (count($steps) > 0)
       <section>
@@ -170,8 +176,21 @@
                         <td>{{ $key + 1 }}</td>
                         <td>{{ __('cycles.' . $session->type) }}</td>
                         <td>{{ $session->title }}</td>
-                        <td>{{ $session->datetime}}</td>
-                        <td>{{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}</td>
+                        <td>
+                          @if($session->type == "online")
+                          {{ FormatDate($session->datetime, 'Y-m-d') ?? '-' }}
+                          @else
+                          {{ FormatDate($session->datetime, 'Y-m-d H:i') ?? '-' }}
+                          @endif
+                          
+                        </td>
+                        <td>
+                          @if($session->type == "online")
+                          {{ FormatDate($session->enddatetime, 'Y-m-d') ?? '-' }}
+                          @else
+                          {{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}
+                          @endif
+                        </td>
                         <td>
                           @if ($session->type == 'sessions')
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
@@ -307,9 +326,6 @@
         @if ($session->reports->count() > 0)
         <div class="d-flex justify-content-between align-items-center mt-3">
           <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', $session->id) }}" class="btn btn-info">
-            {{ __('admin.update_reports') }}
-          </a>
         </div>
         <table class="table table-bordered mt-2">
           <thead>
@@ -340,7 +356,7 @@
         <!-- No Reports: Display Update Button -->
         <div class="d-flex justify-content-between align-items-center mt-3">
           <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', $session->id) }}" class="btn btn-info">
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'training']) }}" class="btn btn-info">
             {{ __('admin.update_reports') }}
           </a>
         </div>
@@ -350,7 +366,7 @@
         @if ($session->recordings->count() > 0)
         <div class="d-flex justify-content-between align-items-center mt-4">
           <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording', $session->id) }}" class="btn btn-warning">
+          <a href="{{ route('trainings.reports_recording', ['id' => $session->id, 'type' => 'training']) }}" class="btn btn-warning">
             {{ __('admin.update_recordings') }}
           </a>
         </div>
@@ -1143,18 +1159,18 @@
     let token = '{{ csrf_token() }}';
 
     Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-primary',
-            cancelButton: 'btn btn-secondary'
-        },
-        buttonsStyling: false
+      title: "{{__('admin.SureDelete')}}",
+      text: "{{__('admin.Recover')}}",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+          confirmButton: 'btn btn-danger me-2',
+          cancelButton: 'btn btn-label-secondary',
+      },
+      buttonsStyling: false,
     }).then((result) => {
         if (result.isConfirmed) {
             $.post(url, {
@@ -1162,12 +1178,18 @@
                 '_token': token
             }, function(response) {
                 Swal.fire({
-                    title: '{{ __('admin.Deleted') }}!',
-                    text: '{{ __('admin.Course Deleted') }}.',
-                    icon: 'success',
-                    showConfirmButton: false,      
-                    timer: 1500,                    
-                    timerProgressBar: true
+                  title: '{{ __('admin.Deleted') }}!',
+                  text: '{{ __('admin.Course Deleted') }}.',
+                  icon: 'success',
+                  showCancelButton: false,
+                  showConfirmButton: true,
+                  confirmButtonText: "{{ __('admin.OK') }}",
+                  customClass: {
+                      confirmButton: 'btn btn-primary',
+                  },
+                  buttonsStyling: false,
+                  timer: 1500,                    
+                  timerProgressBar: true
                 }).then(() => {
                     window.location.href = '/dashboard/training/sessions/{{ $id }}';
                 });

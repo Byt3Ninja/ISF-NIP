@@ -201,24 +201,25 @@
     $('.delete-button').on('click', function(e) {
       e.preventDefault();
       var form = $(this).closest('form');
-        Swal.fire({
-        title: "{{ __('admin.delete_project') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning", // استخدم icon بدلاً من type
+      Swal.fire({
+        title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
         showCancelButton: true,
         confirmButtonText: "{{ __('admin.DYes') }}",
         cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
         customClass: {
-            confirmButton: 'btn btn-danger',
-            cancelButton: 'btn btn-secondary'
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
         },
-        buttonsStyling: false
-    }).then((result) => {
-        if (result.isConfirmed) {
-          form.submit();
-        }
+        buttonsStyling: false,
+      }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
       });
-    });
 
     // $('form').on('submit', function(e) {
     //   console.log('start date input', $('#start_date').val());

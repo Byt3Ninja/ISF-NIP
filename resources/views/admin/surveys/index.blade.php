@@ -189,18 +189,18 @@ $(document).on("click", "#deleteAction", function(e) {
   var token = '{{ csrf_token() }}';
  
     Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-primary',
-            cancelButton: 'btn btn-secondary'
-        },
-        buttonsStyling: false
+      title: "{{ __('admin.SureDelete') }}",
+      text: "{{ __('admin.Recover') }}",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'btn btn-danger me-2',
+        cancelButton: 'btn btn-secondary'
+      },
+      buttonsStyling: false
     })
     .then((result) => {
       if (result.value) {
@@ -212,6 +212,14 @@ $(document).on("click", "#deleteAction", function(e) {
             Swal.fire({
               icon: 'success',
               title: "{{ __('admin.Deleted') }}!",
+              html: "{{ __('admin.DeletedSuccessfully') }}.",
+              showCancelButton: false,
+              showConfirmButton: true,
+              confirmButtonText: "{{ __('admin.OK') }}",
+              customClass: {
+                  confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
             });
             location.reload();
           }

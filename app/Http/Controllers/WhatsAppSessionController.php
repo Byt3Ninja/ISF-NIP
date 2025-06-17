@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Organization;
 use App\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,21 +12,21 @@ use Illuminate\Http\Client\RequestException; // To catch HTTP errors
 
 class WhatsAppSessionController extends Controller
 {
-    // protected string $baseUrl;
-    // protected ?string $apiKey; // Nullable in case it's missing
+    protected string $baseUrl;
+    protected ?string $apiKey; // Nullable in case it's missing
 
     public function __construct()
     {
         // Load config values in the constructor
-        // $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
-        // $this->apiKey = config('whatsapp.api_key');
+        $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
+        $this->apiKey = config('whatsapp.api_key');
 
-        // // Basic check if config is set
-        // if (empty($this->baseUrl) || empty($this->apiKey)) {
-        //     // You might throw an exception or handle this more gracefully
-        //     // depending on your application's needs.
-        //      Log::error('WhatsApp API Base URL or API Key is not configured.');
-        // }
+        // Basic check if config is set
+        if (empty($this->baseUrl) || empty($this->apiKey)) {
+            // You might throw an exception or handle this more gracefully
+            // depending on your application's needs.
+             Log::error('WhatsApp API Base URL or API Key is not configured.');
+        }
     }
 
     /**
@@ -35,6 +36,8 @@ class WhatsAppSessionController extends Controller
      */
     protected function prepareHttpClient()
     {
+        
+
         $settings = Settings::where('id', 1)->first();
         if($settings->whatsApp_URL_callback == null){
             return response()->json([
@@ -42,8 +45,8 @@ class WhatsAppSessionController extends Controller
                 'error' => 'URL is not Found in Database.',
             ], 500);
         }
-        $baseUrl = $settings->whatsApp_URL_callback;
-        $apiKey = $settings->whatsapp_api_key;
+        $baseUrl = $this->baseUrl;
+        $apiKey = $this->apiKey;
        
         if (!$apiKey) {
             // Handle case where API key is missing
@@ -66,21 +69,23 @@ class WhatsAppSessionController extends Controller
      */
     public function start(string $sessionId): JsonResponse
     {
-        // Check if session already exists in database and is not connected
-        $settings = Settings::where('id', 1)->first();
+        $organization = auth()->user()->organization;
+
         
-        if ($settings && 
-            $settings->whatsApp_SESSION_ID === $sessionId && 
-            $settings->whatsApp_Status_Session == '0') {
+        // Check if session already exists in database and is not connected
+        
+        // if ($settings && 
+        //     $settings->whatsApp_SESSION_ID === $sessionId && 
+        //     $settings->whatsApp_Status_Session == '0') {
             
-            // Session exists but is not connected, return success without API call
-            return response()->json([
-                'success' => true,
-                'message' => "Session '{$sessionId}' already exists and is ready to connect.",
-                'session_exists' => true,
-                'status' => 'not_connected'
-            ]);
-        }
+        //     // Session exists but is not connected, return success without API call
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => "Session '{$sessionId}' already exists and is ready to connect.",
+        //         'session_exists' => true,
+        //         'status' => 'not_connected'
+        //     ]);
+        // }
         
         $endpoint = "/session/start/{$sessionId}";
 
@@ -89,15 +94,17 @@ class WhatsAppSessionController extends Controller
 
             // Throw an exception for client (4xx) or server (5xx) errors
             $response->throw();
-            
-            // Update settings with new session ID
-            if (!$settings) {
-                $settings = new Settings();
-                $settings->id = 1;
+
+           $organization = auth()->user()->organization;
+            if($organization){
+                $organization->org_whatsApp_SESSION_ID = $sessionId;
+                $organization->save();
+            }else{
+                // Update settings with new session ID
+                $settings = Settings::where('id', 1)->first();
+                $settings->whatsApp_SESSION_ID = $sessionId;
+                $settings->save();
             }
-            $settings->whatsApp_SESSION_ID = $sessionId;
-            $settings->save();
-            
             // Assuming success returns JSON based on Swagger
             return response()->json([
                 'success' => true,
@@ -141,20 +148,35 @@ class WhatsAppSessionController extends Controller
             $response->throw();
 
             $apiResponse = $response->json();
+                $organization = auth()->user()->organization;
+                if($organization){
+                   
+                    if($apiResponse['success'] == false) {
+                        $organization->org_whatsApp_SESSION_ID = $sessionId;
+                        $organization->org_whatsApp_Status_Session = '0';
+                        $organization->save();
+                    }else{
+                        $organization->org_whatsApp_SESSION_ID = $sessionId;
+                        $organization->org_whatsApp_Status_Session = '1';
+                        $organization->save();
+                    }
 
-            if($apiResponse['success'] == false) {
-                $settings = Settings::where('id', 1)->first();
-                $settings->whatsApp_SESSION_ID = $sessionId;
-                $settings->whatsApp_Status_Session = '0';
-                $settings->save();
-
-            }else{
-                $settings = Settings::where('id', 1)->first();
-                $settings->whatsApp_SESSION_ID = $sessionId;
-                $settings->whatsApp_Status_Session = '1';
-                $settings->save();
-            }
-            
+                }else{
+                    
+                    if($apiResponse['success'] == false) {
+                        $settings = Settings::where('id', 1)->first();
+                        $settings->whatsApp_SESSION_ID = $sessionId;
+                        $settings->whatsApp_Status_Session = '0';
+                        $settings->save();
+                        
+                    }else{
+                        $settings = Settings::where('id', 1)->first();
+                        $settings->whatsApp_SESSION_ID = $sessionId;
+                        $settings->whatsApp_Status_Session = '1';
+                        $settings->save();
+                    }
+                }
+                
             // Normalize the response to have consistent structure
             return response()->json([
                 'success' => $apiResponse['success'] ?? true,
@@ -340,19 +362,25 @@ class WhatsAppSessionController extends Controller
      * @param string $sessionId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function terminate(string $sessionId): JsonResponse
+    public function terminate(string $sessionId)
     {
         $endpoint = "/session/logout/{$sessionId}";
 
         try {
             $response = $this->prepareHttpClient()->delete($endpoint);
+          
             $response->throw();
-
-            $settings = Settings::where('id', 1)->first();
-            $settings->whatsApp_SESSION_ID = null;
-            $settings->whatsApp_Status_Session = '0';
-            $settings->save();
-
+                $organization = auth()->user()->organization;
+                if($organization){
+                    $organization->org_whatsApp_SESSION_ID = null;
+                    $organization->org_whatsApp_Status_Session = '0';
+                    $organization->save();
+                }else{
+                    $settings = Settings::where('id', 1)->first();
+                    $settings->whatsApp_SESSION_ID = null;
+                    $settings->whatsApp_Status_Session = '0';
+                    $settings->save();
+                }
             return response()->json([
                 'success' => true,
                 'message' => "Session '{$sessionId}' terminated successfully.",
@@ -429,13 +457,24 @@ class WhatsAppSessionController extends Controller
 
     public function getWASessionID()
     {
-        $settings = Settings::where('id', 1)->first();
+        $organizationID = auth()->user()->organization;
 
-        return response()->json([
+        if($organizationID){
+            $organiztion = Organization::where('id', $organizationID->id)->first();
+            return response()->json([
+                'success' => true,
+                'sessionId' => $organiztion->org_whatsApp_SESSION_ID,
+                'status' => $organiztion->org_whatsApp_Status_Session == 1 ? 'connected' : 'not_connected',
+            ]);
+        }else{
+            $settings = Settings::where('id', 1)->first();
+            
+            return response()->json([
                 'success' => true,
                 'sessionId' => $settings->whatsApp_SESSION_ID,
                 'status' => $settings->whatsApp_Status_Session == 1 ? 'connected' : 'not_connected',
             ]);
+        }
     }
 
 }

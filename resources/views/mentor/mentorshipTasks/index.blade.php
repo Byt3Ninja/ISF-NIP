@@ -675,14 +675,18 @@
 		function deleteFileHandler(fileName, fileId, ele) {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
-				icon: 'warning',
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
 				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, delete it!',
-				backdrop: true
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			}).then((result) => {
 				if (result.isConfirmed) {
 					$('#viewTaskModal').modal('show');
@@ -1176,14 +1180,18 @@
 		const deleteFileHandler = (fileName, fileId, ele) => {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
-				icon: 'warning',
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
 				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, delete it!',
-				backdrop: true // Ensure SweetAlert modal overlays on any modal
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			}).then((result) => {
 				if (result.isConfirmed) {
 					$('#viewTaskModal').modal('show');
@@ -1420,6 +1428,7 @@
 							title: response.title,
 							text: response.message,
 							showConfirmButton: false,
+							showCancelButton: false,
 							timer: 4500
 						});
 						reloadKanban();
@@ -1534,6 +1543,7 @@
 							title: response.title,
 							text: response.message,
 							showConfirmButton: false,
+							showCancelButton: false,
 							timer: 4500
 						});
 						reloadKanban();
@@ -1594,6 +1604,7 @@
 							title: response.title,
 							text: response.message,
 							showConfirmButton: false,
+							showCancelButton: false,
 							timer: 4500
 						});
 						reloadKanban();

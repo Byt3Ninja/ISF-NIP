@@ -1,11 +1,21 @@
 @extends('layouts.admin')
 @php
   $status = strtolower($evaluationForm->status);
+  if( $cstep->data == 'grouptogroup' )
+  {
+    //
+  }
+  else
+  {
+    $judgersList = collect( json_decode($cstep->list) ?? [] );
+    $judgersList = $judgersList->map(function($judger) { return intval($judger); });
+  }
 @endphp
 @section('style')
 <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 <link rel="stylesheet" href="/path/to/select2.min.css">
 <style>
+  .remove-panel-btn { cursor: pointer; }
   /* Tabs Content */
   .tab-content {
     display: none;
@@ -226,7 +236,7 @@
                 </dl>
                 <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Registered Judges') }}</dt>
-                  <dd class="col-sm-9">{{ $cstep->judgers }}</dd>
+                  <dd class="col-sm-9">{{ $judgers_count }} </dd>
                 </dl>
               </div>
             </div>
@@ -234,7 +244,7 @@
         </div>
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
-            <div class="card-header border-bottom border-light mb-4">
+            <div class="card-header border-bottom border-light mb-0">
               <h4 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h4>
               <p>{{ __('cycles.Select judges from the menu') }}:</p>
             </div>
@@ -245,75 +255,111 @@
                   <input type="hidden" value="" name="judges" id="judges">
                   <input type="hidden" value="{{ $cstep->id }}" name="step">
                   <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
-                  <div class="form-group">
-                    @if ($cstep->data == 'grouptogroup')
-                    @foreach (json_decode($cstep->list) ?? [] as $key => $clist)
-                    <div class="form-row">
-                      <p style="margin:5px;">{{ __('cycles.panel list') . ' ' . $key }}</p>
-                      <div class="row col-md-12">
-                        <div class="col-md-11">
-                          <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
-                            multiple="multiple">
-                            @foreach ($judges as $judge)
-                            <option value="{{ $judge->id }}" {{ in_array($judge->id, is_array($clist) ? $clist : [], true) ? 'selected' : '' }}>
-                              {{ $judge->name }} ({{ $judge->email }})
-                            </option>
-                            @endforeach
-                          </select>
-                        </div>
-                        @php
-                        $panel = \App\Screening::where('step_id', $cstep->id)
-                            ->where('panel', $key)
-                            ->first();
-                        if ($panel && $panel->users) {
-                            $panel = json_encode($panel->users);
-                        } else {
-                            $panel = '';
-                        }
-                        @endphp
-                        <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
-                        <div class="col-md-1">
-                          <button type="button" class="btn btn-warning" onclick="openusers({{ $key }})">
-                            <i class="ti ti-edit text-info"></i>
-                          </button>
-                        </div>
-                      </div>
+                  @if ($cstep->data == 'grouptogroup')
+                    <div class="text-end py-3"> <button id="addPanelBtn" type="button" class="btn btn-label-primary"> <i class="fas fa-fw fa-sm fa-plus me-2"></i> {{ __('admin.Add_New') }} </button> </div>
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-hover">
+                        <thead>
+                          <tr>
+                            <th style="width: 20% !important;" scope="col">{{ __('admin.Panel') }}</th>
+                            <th style="width: 40% !important;" scope="col">{{ __('admin.Judges') }}</th>
+                            <th style="width: 40% !important;" scope="col">{{ __('admin.Users') }}</th>
+                          </tr>
+                        </thead>
+                        <tbody id="panels-list-body">
+                          @foreach( $judgers_list as $key => $list )
+                            <tr data-panel="{{ $key }}">
+                              <td>
+                                <i title="Remove panel" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+                                {{ __('admin.Panel_list') }} {{ $key }}
+                              </td>
+                              <td>
+                                <select name="judges[{{ $key }}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
+                                  @foreach( $judges as $judge )
+                                    <option {{ in_array( $judge->id, $list['judgers'] ) ? 'selected' : '' }} value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
+                                  @endforeach
+                                </select>
+                              </td>
+                              <td>
+                                <select name="users[{{ $key }}][]" class="select2 form-control panel users-selectors" multiple="multiple">
+                                  @foreach( $companies as $company )
+                                    <option {{ in_array( $company->id, $list['companies'] ) ? 'selected' : '' }} value="{{ $company->id }}">{{ $company->{'name_' . $l} }}</option>
+                                  @endforeach
+                                </select>
+                              </td>
+                            </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
                     </div>
-                    @endforeach
-                    @php($key = ($key ?? 0) + 1)
-                    <div class="form-row">
-                      <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
-                      <div class="row col-md-12">
-                        <div class="col-md-11">
-                          <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
-                            multiple="multiple">
-                            @foreach ($judges as $judge)
-                            <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
-                            @endforeach
-                          </select>
+                    {{-- <div class="form-group">
+                      @foreach (json_decode($cstep->list) ?? [] as $key => $clist)
+                        <div class="form-row">
+                          <p style="margin:5px;">{{ __('cycles.panel list') . ' ' . $key }}</p>
+                          <div class="row col-md-12">
+                            <div class="col-md-11">
+                              <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
+                                multiple="multiple">
+                                @foreach ($judges as $judge)
+                                <option value="{{ $judge->id }}" {{ in_array($judge->id, is_array($clist) ? $clist : [], true) ? 'selected' : '' }}>
+                                  {{ $judge->name }} ({{ $judge->email }})
+                                </option>
+                                @endforeach
+                              </select>
+                            </div>
+                            @php
+                            $panel = \App\Screening::where('step_id', $cstep->id)
+                                ->where('panel', $key)
+                                ->first();
+                            if ($panel && $panel->users) {
+                                $panel = json_encode($panel->users);
+                            } else {
+                                $panel = '';
+                            }
+                            @endphp
+                            <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
+                            <div class="col-md-1">
+                              <button type="button" class="btn btn-warning" onclick="openusers({{ $key }})">
+                                <i class="ti ti-edit text-info"></i>
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        <div class="col-md-1 float-right">
-                          <button class="btn btn-primary" type="submit"><i class="ti ti-plus"></i></button>
-                        </div>
-                      </div>
-                    </div>
-                    @else
-                    <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
-                    <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}>
-                      {!! $cstep->data == 'onetoall' ? '<option selected>' . __('cycles.Please select one name') . '</option>' : '' !!}
-                      @foreach ($judges as $judge)
-                      <option value="{{ $judge->id }}" {{ is_array($cstep->list) && in_array($judge->id, json_decode($cstep->list) ?? []) ? 'selected' : '' }}>
-                        {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
-                      </option>
                       @endforeach
-                    </select>
-                    @endif
-                  </div>
-                  <div class="custom-control custom-switch custom-control-inline mt-4">
-                    <span>{{ __('cycles.Notify them') }}</span> 
-                    <input name="notify" type="checkbox" class="custom-control-input" id="customSwitch1">
-                    <label class="custom-control-label mr-1" for="customSwitch1"></label>
-                    <br><br>
+                      @php($key = ($key ?? 0) + 1)
+                      <div class="form-row">
+                        <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
+                        <div class="row col-md-12">
+                          <div class="col-md-11">
+                            <select name="judges[{{ $key }}][]" class="select2 form-control panel{{ $key }}"
+                              multiple="multiple">
+                              @foreach ($judges as $judge)
+                              <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
+                              @endforeach
+                            </select>
+                          </div>
+                          <div class="col-md-1 float-right">
+                            <button class="btn btn-primary" type="submit"><i class="ti ti-plus"></i></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div> --}}
+                  @else
+                    <div class="form-group">
+                      <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
+                      <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}>
+                        {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!}
+                        @foreach ($judges as $judge)
+                        <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
+                          {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
+                        </option>
+                        @endforeach
+                      </select>
+                    </div>
+                  @endif
+                  <div class="form-check my-4">
+                    <input class="form-check-input" type="checkbox" id="customSwitch1"  name="notify" />
+                    <label class="form-check-label" for="customSwitch1">{{ __('cycles.Notify them') }}</label>
                   </div>
                   <div class="row">
                     <div class="col-12 d-flex justify-content-end">
@@ -330,23 +376,23 @@
       <section>
         <!-- Evaluation Model CRUD Tab -->
         <div id="evaluation-model" class="card card-body tab-content active mt-6">
-          <h4>Manage Evaluation Model</h4>
-          <p class="text-muted">Define the categories, sub-criteria, and weights used for startup evaluations.</p>
+          <h4>{{ __('cycles.ManageEvaluationModel') }}</h4>
+          <p class="text-muted">{{ __('cycles.EvaluationModelDescription') }}</p>
           <div>
             <div class="d-flex align-items-center gap-4 mb-4">
               @if( $_user->ableTo('screening.evaluation_save_draft', $permissions) && $status == 'draft' )
               <button id="draft-model-btn" class="btn btn-light">
-                <i class="fas fa-save me-2"></i> Save as Draft
+                <i class="fas fa-save me-2"></i> {{ __('cycles.SaveDraft') }}
               </button>
               @endif
               @if( $_user->ableTo('screening.evaluation_publish', $permissions) )
                 @if( $status == 'draft' )
                   <button id="save-model-btn" class="btn btn-primary">
-                    <i class="ti ti-world me-2"></i> Publish
+                    <i class="ti ti-world me-2"></i> {{ __('cycles.Publish') }}
                   </button>
                 @else
                   <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
-                    <i class="ti ti-check me-2"></i> Published
+                    <i class="ti ti-check me-2"></i> {{ __('cycles.Published') }}
                   </button>
                 @endif
               @endif
@@ -356,7 +402,7 @@
           <div id="model-editor"></div>
           @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
           <button id="add-category-btn" class="btn btn-label-primary">
-            <i class="fas fa-plus me-2"></i> Add New Criteria
+            <i class="fas fa-plus me-2"></i> {{ __('cycles.AddNewCriteria') }}
           </button>
           @endif
         </div>
@@ -467,565 +513,644 @@
 @stop
 
 @section('pagescripts')
-<script src="/path/to/select2.min.js"></script>
-<script src="/js/jquery.datetimepicker.full.min.js"></script>
-<script>
-  $('.date').datetimepicker({
-    timepicker: false,
-    format: 'Y-m-d'
-  });
+  <script src="/path/to/select2.min.js"></script>
+  <script src="/js/jquery.datetimepicker.full.min.js"></script>
+  <script type="text/javascript">
+    $('.date').datetimepicker({
+      timepicker: false,
+      format: 'Y-m-d'
+    });
 
-  function DoChange(set) {
-    switch (set) {
-      case 1:
-        $('#stepForm').modal('show');
-        break;
-      case 2:
-        $.ajaxSetup({
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
-        });
-        if (confirm('{{ __('cycles.Are you sure, Delete current step and all its contents?') }}')) {
-          $.ajax({
-            type: "POST",
-            url: "/dashboard/cycles/modify",
-            data: {
-              "stepid": {{ $cstep->id ?? 0 }},
-              "type": 6,
-            },
-            success: function(response) {
-              console.log(response);
-              location.href = '/dashboard/screening';
-            },
-            error: function(error) {
-              console.log(error);
-              alert("Error Occurred, Try again!");
+    function DoChange(set) {
+      switch (set) {
+        case 1:
+          $('#stepForm').modal('show');
+          break;
+        case 2:
+          $.ajaxSetup({
+            headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
           });
-        }
-    }
-  }
-
-  function openusers(panel) {
-    $('#pid').val(panel);
-    $('#cpanel').text(panel);
-    let theurl = "/dashboard/screening/get/{{ $form->id ?? 0 }}/{{ $cstep->id ?? 0 }}/" + panel;
-    $.ajax({
-      type: "GET",
-      url: theurl,
-      success: function(response) {
-        console.log(response);
-        $('#panelusers').html(response);
-        $('#usersForm').modal('show');
-      },
-      error: function(error) {
-        console.log(error);
-        alert("Error Occurred, Try again!");
+          if (confirm("{{ __('cycles.Are you sure, Delete current step and all its contents?') }}")) {
+            $.ajax({
+              type: "POST",
+              url: "/dashboard/cycles/modify",
+              data: {
+                "stepid": {{ $cstep->id ?? 0 }},
+                "type": 6,
+              },
+              success: function(response) {
+                console.log(response);
+                location.href = '/dashboard/screening';
+              },
+              error: function(error) {
+                console.log(error);
+                alert("Error Occurred, Try again!");
+              }
+            });
+          }
       }
-    });
-  }
+    }
 
-  $(document).ready(function() {
-    // Initialize select2 for all selects
-    $('.select2').each(function() {
-      const $select = $(this);
-      const isScreeningType = $select.attr('id') === 'ScreeningSelect';
-      $select.select2({
-        placeholder: isScreeningType ? '{{ __('cycles.Choose screening type') }}' : '{{ __('cycles.Select judges') }}',
-        allowClear: isScreeningType,
-        dropdownParent: isScreeningType ? $('#stepForm') : null,
-        width: '100%'
+    function openusers(panel) {
+      $('#pid').val(panel);
+      $('#cpanel').text(panel);
+      let theurl = "/dashboard/screening/get/{{ $form->id ?? 0 }}/{{ $cstep->id ?? 0 }}/" + panel;
+      $.ajax({
+        type: "GET",
+        url: theurl,
+        success: function(response) {
+          console.log(response);
+          $('#panelusers').html(response);
+          $('#usersForm').modal('show');
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
       });
-    });
+    }
 
-    // Reinitialize ScreeningSelect when modal is shown to ensure interactivity
-    $('#stepForm').on('shown.bs.modal', function() {
-      $('#ScreeningSelect').select2('destroy').select2({
-        placeholder: '{{ __('cycles.Choose screening type') }}',
-        allowClear: true,
-        dropdownParent: $('#stepForm'),
-        width: '100%'
+    $(document).ready(function() {
+      // Initialize select2 for all selects
+      $('.select2').each(function() {
+        const $select = $(this);
+        const isScreeningType = $select.attr('id') === 'ScreeningSelect';
+        let placeHolder = '';
+        if( $select.attr('id') === 'ScreeningSelect' ) { placeHolder = "{{ __('cycles.Choose screening type') }}"; }
+        else if( $select.hasClass('judgers-selectors') ) { placeHolder = "{{ __('cycles.Select judges') }}"; }
+        else if( $select.hasClass('users-selectors') ) { placeHolder = "{{ __('cycles.Select Company') }}"; }
+
+        $select.select2({
+          placeholder: placeHolder,
+          allowClear: isScreeningType,
+          dropdownParent: isScreeningType ? $('#stepForm') : null,
+          width: '100%'
+        });
       });
-      console.log('ScreeningSelect reinitialized in modal');
-      // Ensure dropdown is not disabled
-      $('#ScreeningSelect').prop('disabled', false);
-    });
 
-    // Function to update hidden judges input
-    function updateJudgesInput() {
-      let allJudges = [];
+      // Reinitialize ScreeningSelect when modal is shown to ensure interactivity
+      $('#stepForm').on('shown.bs.modal', function() {
+        $('#ScreeningSelect').select2('destroy').select2({
+          placeholder: '{{ __('cycles.Choose screening type') }}',
+          allowClear: true,
+          dropdownParent: $('#stepForm'),
+          width: '100%'
+        });
+        console.log('ScreeningSelect reinitialized in modal');
+        // Ensure dropdown is not disabled
+        $('#ScreeningSelect').prop('disabled', false);
+      });
 
+      // Function to update hidden judges input
+      function updateJudgesInput() {
+        let allJudges = [];
+
+        @if ($cstep->data == 'grouptogroup')
+          // Collect judges from all panel selects
+          $('select[class*="panel"]').each(function() {
+            const selectedValues = $(this).val() || [];
+            console.log('Panel select:', $(this).attr('class'), 'Values:', selectedValues);
+            allJudges = allJudges.concat(selectedValues);
+          });
+        @else
+          // Collect judges from judges-select for onetoall or grouptoall
+          const selectedValues = $('#judges-select').val() || [];
+          console.log('Judges select:', selectedValues);
+          allJudges = selectedValues;
+        @endif
+
+        // Update hidden input with unique judge IDs as JSON string
+        allJudges = [...new Set(allJudges)].map(id => parseInt(id));
+        console.log('All judges:', allJudges);
+        $('#judges').val(JSON.stringify(allJudges));
+      }
+
+      // Initialize on page load
+      updateJudgesInput();
+
+      // Update on change for all judge selects
       @if ($cstep->data == 'grouptogroup')
-        // Collect judges from all panel selects
-        $('select[class*="panel"]').each(function() {
-          const selectedValues = $(this).val() || [];
-          console.log('Panel select:', $(this).attr('class'), 'Values:', selectedValues);
-          allJudges = allJudges.concat(selectedValues);
-        });
+        $(document).on('change', 'select[class*="panel"]', updateJudgesInput);
       @else
-        // Collect judges from judges-select for onetoall or grouptoall
-        const selectedValues = $('#judges-select').val() || [];
-        console.log('Judges select:', selectedValues);
-        allJudges = selectedValues;
+        $('#judges-select').on('change', updateJudgesInput);
       @endif
 
-      // Update hidden input with unique judge IDs as JSON string
-      allJudges = [...new Set(allJudges)].map(id => parseInt(id));
-      console.log('All judges:', allJudges);
-      $('#judges').val(JSON.stringify(allJudges));
-    }
-
-    // Initialize on page load
-    updateJudgesInput();
-
-    // Update on change for all judge selects
-    @if ($cstep->data == 'grouptogroup')
-      $(document).on('change', 'select[class*="panel"]', updateJudgesInput);
-    @else
-      $('#judges-select').on('change', updateJudgesInput);
-    @endif
-
-    $('form[action="/dashboard/screening/update"]').on('submit', function(e) {
-      const judgesVal = $('#judges').val();
-      const judges = judgesVal ? JSON.parse(judgesVal) : [];
-      console.log('Submitting judges:', judges);
-      if (!judges || judges.length === 0) {
-        e.preventDefault();
-        alert('{{ __('Please_Choose_Judges') }}');
-        return false;
-      }
-    });
-
-    $('#stepForm form').on('submit', function(e) {
-      const screeningType = $('#ScreeningSelect').val();
-      console.log('Submitting screening type:', screeningType);
-      if (!screeningType) {
-        e.preventDefault();
-        alert('{{ __('Please select a screening type') }}');
-        return false;
-      }
-    });
-
-    // Debug screening type changes
-    $('#ScreeningSelect').on('change', function() {
-      console.log('Screening type changed to:', $(this).val());
-    });
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // --- Tab Navigation ---
-    const navLinks = document.querySelectorAll('.nav-link');
-    const tabContents = document.querySelectorAll('.main-content .tab-content');
-
-    function setActiveTab(targetId) {
-      navLinks.forEach(l => {
-        l.classList.toggle('active', l.getAttribute('href') === `#${targetId}`);
-      });
-      tabContents.forEach(t => {
-        t.classList.toggle('active', t.id === targetId);
-      });
-    }
-
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
-        setActiveTab(targetId);
-        if (targetId === 'evaluation-model') {
-          renderModelEditor();
+      $('form[action="/dashboard/screening/update"]').on('submit', function(e) {
+        const judgesVal = $('#judges').val();
+        const judges = judgesVal ? JSON.parse(judgesVal) : [];
+        console.log('Submitting judges:', judges);
+        if (!judges || judges.length === 0) {
+          e.preventDefault();
+          alert('{{ __('Please_Choose_Judges') }}');
+          return false;
         }
       });
+
+      $('#stepForm form').on('submit', function(e) {
+        const screeningType = $('#ScreeningSelect').val();
+        console.log('Submitting screening type:', screeningType);
+        if (!screeningType) {
+          e.preventDefault();
+          alert('{{ __('Please select a screening type') }}');
+          return false;
+        }
+      });
+
+      // Debug screening type changes
+      $('#ScreeningSelect').on('change', function() {
+        console.log('Screening type changed to:', $(this).val());
+      });
     });
 
-    const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
-    setActiveTab(initialTab);
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Tab Navigation ---
+      const navLinks = document.querySelectorAll('.nav-link');
+      const tabContents = document.querySelectorAll('.main-content .tab-content');
 
-    // --- Chart Initialization ---
-    const revenueChartCanvas = document.getElementById('revenueChart');
-    if (revenueChartCanvas) {
-      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-      const ctx = revenueChartCanvas.getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: { /* ... chart data ... */ },
-        options: { /* ... chart options ... */ }
-      });
-    }
-
-    // --- Evaluation Model CRUD Logic ---
-    const modelEditorContainer = document.getElementById('model-editor');
-    @if( $status == 'draft' )
-      @if( $_user->ableTo('screening.evaluation_add_criteria') )
-      const addCategoryBtn = document.getElementById('add-category-btn');
-      @endif
-      @if( $_user->ableTo('screening.evaluation_publish') )
-      const saveModelBtn = document.getElementById('save-model-btn');
-      @endif
-      @if( $_user->ableTo('screening.evaluation_save_draft') )
-      const draftModelBtn = document.getElementById('draft-model-btn');
-      @endif
-    @endif
-
-    const modelValidationSummary = document.getElementById('model-validation-summary');
-    let evaluationModelData = @json( $evaluationForm );
-
-    function renderModelEditor() {
-      if (!modelEditorContainer) return;
-      modelEditorContainer.innerHTML = '';
-
-      evaluationModelData.categories.forEach((category, categoryIndex) => {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'category-editor';
-        categoryDiv.setAttribute('data-category-id', category.id);
-
-        let subCriteriaHTML = '<div class="sub-criteria-list">';
-        category.subCriteria.forEach((sub, subIndex) => {
-          subCriteriaHTML += `
-            <div class="sub-criterion-editor" data-subcriterion-id="${sub.id}">
-              <input type="text" class="form-control subcriterion-name" placeholder="Sub Criteria Name" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-              <input type="number" class="form-control weight-input subcriterion-weight" placeholder="Weight (%)" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-              @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
-              <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="Delete Sub Criteria">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-              @endif
-            </div>
-          `;
+      function setActiveTab(targetId) {
+        navLinks.forEach(l => {
+          l.classList.toggle('active', l.getAttribute('href') === `#${targetId}`);
         });
-        subCriteriaHTML += '</div>';
+        tabContents.forEach(t => {
+          t.classList.toggle('active', t.id === targetId);
+        });
+      }
 
-        categoryDiv.innerHTML = `
-          <div class="category-header">
-            <div class="w-100 d-flex justify-content-between align-items-center">
-              <input id="category-input" type="text" class="form-control category-name" placeholder="Category Name" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
-              <div class="d-flex align-items-center">
-                <input type="number" class="form-control weight-input category-weight" placeholder="Weight (%)" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
-                @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
-                <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="Delete Criteria">
-                  <i class="fas fa-trash-alt me-2"></i> Delete Criteria
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href').substring(1);
+          setActiveTab(targetId);
+          if (targetId === 'evaluation-model') {
+            renderModelEditor();
+          }
+        });
+      });
+
+      const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
+      setActiveTab(initialTab);
+
+      // --- Chart Initialization ---
+      const revenueChartCanvas = document.getElementById('revenueChart');
+      if (revenueChartCanvas) {
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+        const ctx = revenueChartCanvas.getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: { /* ... chart data ... */ },
+          options: { /* ... chart options ... */ }
+        });
+      }
+
+      // --- Evaluation Model CRUD Logic ---
+      const modelEditorContainer = document.getElementById('model-editor');
+      @if( $status == 'draft' )
+        @if( $_user->ableTo('screening.evaluation_add_criteria') )
+        const addCategoryBtn = document.getElementById('add-category-btn');
+        @endif
+        @if( $_user->ableTo('screening.evaluation_publish') )
+        const saveModelBtn = document.getElementById('save-model-btn');
+        @endif
+        @if( $_user->ableTo('screening.evaluation_save_draft') )
+        const draftModelBtn = document.getElementById('draft-model-btn');
+        @endif
+      @endif
+
+      const modelValidationSummary = document.getElementById('model-validation-summary');
+      let evaluationModelData = @json( $evaluationForm );
+
+      // Helper function to show dismissible alerts
+      function showAlert(element, message, type = 'info', timeout = null) {
+        const alertTypes = {
+          'success': 'alert-success',
+          'danger': 'alert-danger', 
+          'warning': 'alert-warning',
+          'info': 'alert-info'
+        };
+        
+        const alertClass = alertTypes[type] || 'alert-info';
+        
+        element.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('cycles.Close') }}"></button>
+        `;
+        element.className = `alert ${alertClass} alert-dismissible`;
+        element.style.display = 'block';
+        
+        // Initialize Bootstrap alert dismiss functionality
+        const dismissButton = element.querySelector('.btn-close');
+        if (dismissButton) {
+          dismissButton.addEventListener('click', function() {
+            element.style.display = 'none';
+            element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+          });
+        }
+        
+        // Auto-dismiss after timeout if specified
+        if (timeout) {
+          setTimeout(() => {
+            if (element.classList.contains(alertClass)) {
+              element.style.display = 'none';
+              element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+            }
+          }, timeout);
+        }
+      }
+
+      function renderModelEditor() {
+        if (!modelEditorContainer) return;
+        modelEditorContainer.innerHTML = '';
+
+        evaluationModelData.categories.forEach((category, categoryIndex) => {
+          const categoryDiv = document.createElement('div');
+          categoryDiv.className = 'category-editor';
+          categoryDiv.setAttribute('data-category-id', category.id);
+
+          let subCriteriaHTML = '<div class="sub-criteria-list">';
+          category.subCriteria.forEach((sub, subIndex) => {
+            subCriteriaHTML += `
+              <div class="sub-criterion-editor" data-subcriterion-id="${sub.id}">
+                <input type="text" class="form-control subcriterion-name" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                <input type="number" class="form-control weight-input subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
+                <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="{{ __('cycles.Delete Sub Criteria') }}">
+                  <i class="fas fa-trash-alt"></i>
                 </button>
                 @endif
               </div>
+            `;
+          });
+          subCriteriaHTML += '</div>';
+
+          categoryDiv.innerHTML = `
+            <div class="category-header">
+              <div class="w-100 d-flex justify-content-between align-items-center">
+                <input id="category-input" type="text" class="form-control category-name" placeholder="{{ __('cycles.Category Name') }}" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
+                <div class="d-flex align-items-center">
+                  <input type="number" class="form-control weight-input category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
+                  @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
+                  <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="{{ __('cycles.Delete Criteria') }}">
+                    <i class="fas fa-trash-alt me-2"></i> {{ __('cycles.Delete Criteria') }}
+                  </button>
+                  @endif
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="validation-message category-validation" style="display: none;"></div>
-          ${subCriteriaHTML}
-          @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
-          <div class="category-actions">
-            <button class="btn btn-label-secondary btn-sm add-subcriterion-btn" data-category-index="${categoryIndex}">
-              <i class="fas fa-plus me-2"></i> Add Sub-criteria
-            </button>
-          </div>
-          @endif
-        `;
-        modelEditorContainer.appendChild(categoryDiv);
-      });
+            <div class="validation-message category-validation" style="display: none;"></div>
+            ${subCriteriaHTML}
+            @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
+            <div class="category-actions">
+              <button class="btn btn-label-secondary btn-sm add-subcriterion-btn" data-category-index="${categoryIndex}">
+                <i class="fas fa-plus me-2"></i> {{ __('cycles.Add Sub-criteria') }}
+              </button>
+            </div>
+            @endif
+          `;
+          modelEditorContainer.appendChild(categoryDiv);
+        });
 
-      attachEventListeners();
-      validateModel(false);
-    }
+        attachEventListeners();
+        validateModel(false);
+      }
 
-    function attachEventListeners() {
+      function attachEventListeners() {
+        @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
+        document.querySelectorAll('.delete-category-btn').forEach(btn => {
+          btn.replaceWith(btn.cloneNode(true));
+        });
+        document.querySelectorAll('.delete-category-btn').forEach(btn => {
+          btn.addEventListener('click', handleDeleteCategory);
+        });
+        @endif
+
+        @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
+        document.querySelectorAll('.delete-subcriterion-btn').forEach(btn => {
+          btn.replaceWith(btn.cloneNode(true));
+        });
+        document.querySelectorAll('.delete-subcriterion-btn').forEach(btn => {
+          btn.addEventListener('click', handleDeleteSubCriterion);
+        });
+        @endif
+
+        @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
+        document.querySelectorAll('.add-subcriterion-btn').forEach(btn => {
+          btn.replaceWith(btn.cloneNode(true));
+        });
+        document.querySelectorAll('.add-subcriterion-btn').forEach(btn => {
+          btn.addEventListener('click', handleAddSubCriterion);
+        });
+        @endif
+
+        document.querySelectorAll('.category-name, .category-weight, .subcriterion-name, .subcriterion-weight').forEach(input => {
+          input.replaceWith(input.cloneNode(true));
+        });
+        document.querySelectorAll('.category-name, .category-weight, .subcriterion-name, .subcriterion-weight').forEach(input => {
+          input.addEventListener('input', handleInputChange);
+          input.addEventListener('change', () => validateModel(false));
+        });
+      }
+
+      function handleAddCategory() {
+        evaluationModelData.categories.push({
+          id: null,
+          name: "",
+          weight: 0,
+          subCriteria: []
+        });
+        renderModelEditor();
+      }
+
+      @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
+      function handleAddSubCriterion(event) {
+        const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
+        if (isNaN(categoryIndex) || !evaluationModelData.categories[categoryIndex]) return;
+
+        evaluationModelData.categories[categoryIndex].subCriteria.push({
+          id: null,
+          name: "",
+          weight: 0
+        });
+        renderModelEditor();
+      }
+      @endif
+
       @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
-      document.querySelectorAll('.delete-category-btn').forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true));
-      });
-      document.querySelectorAll('.delete-category-btn').forEach(btn => {
-        btn.addEventListener('click', handleDeleteCategory);
-      });
+      function handleDeleteCategory(event) {
+        const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
+        if (isNaN(categoryIndex)) return;
+
+        const categoryName = evaluationModelData.categories[categoryIndex]?.name || '{{ __('cycles.this category') }}';
+        if (confirm(`{{ __('cycles.Are you sure you want to delete') }} "${categoryName}" {{ __('cycles.and all its sub-criteria?') }}`)) {
+          evaluationModelData.categories.splice(categoryIndex, 1);
+          renderModelEditor();
+        }
+      }
       @endif
 
       @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
-      document.querySelectorAll('.delete-subcriterion-btn').forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true));
-      });
-      document.querySelectorAll('.delete-subcriterion-btn').forEach(btn => {
-        btn.addEventListener('click', handleDeleteSubCriterion);
-      });
-      @endif
+      function handleDeleteSubCriterion(event) {
+        const btn = event.target.closest('button');
+        const categoryIndex = parseInt(btn.dataset.categoryIndex);
+        const subIndex = parseInt(btn.dataset.subIndex);
+        if (isNaN(categoryIndex) || isNaN(subIndex)) return;
 
-      @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
-      document.querySelectorAll('.add-subcriterion-btn').forEach(btn => {
-        btn.replaceWith(btn.cloneNode(true));
-      });
-      document.querySelectorAll('.add-subcriterion-btn').forEach(btn => {
-        btn.addEventListener('click', handleAddSubCriterion);
-      });
-      @endif
-
-      document.querySelectorAll('.category-name, .category-weight, .subcriterion-name, .subcriterion-weight').forEach(input => {
-        input.replaceWith(input.cloneNode(true));
-      });
-      document.querySelectorAll('.category-name, .category-weight, .subcriterion-name, .subcriterion-weight').forEach(input => {
-        input.addEventListener('input', handleInputChange);
-        input.addEventListener('change', () => validateModel(false));
-      });
-    }
-
-    function handleAddCategory() {
-      evaluationModelData.categories.push({
-        id: null,
-        name: "",
-        weight: 0,
-        subCriteria: []
-      });
-      renderModelEditor();
-    }
-
-    @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
-    function handleAddSubCriterion(event) {
-      const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
-      if (isNaN(categoryIndex) || !evaluationModelData.categories[categoryIndex]) return;
-
-      evaluationModelData.categories[categoryIndex].subCriteria.push({
-        id: null,
-        name: "",
-        weight: 0
-      });
-      renderModelEditor();
-    }
-    @endif
-
-    @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
-    function handleDeleteCategory(event) {
-      const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
-      if (isNaN(categoryIndex)) return;
-
-      const categoryName = evaluationModelData.categories[categoryIndex]?.name || 'this category';
-      if (confirm(`Are you sure you want to delete "${categoryName}" and all its sub-criteria?`)) {
-        evaluationModelData.categories.splice(categoryIndex, 1);
-        renderModelEditor();
-      }
-    }
-    @endif
-
-    @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
-    function handleDeleteSubCriterion(event) {
-      const btn = event.target.closest('button');
-      const categoryIndex = parseInt(btn.dataset.categoryIndex);
-      const subIndex = parseInt(btn.dataset.subIndex);
-      if (isNaN(categoryIndex) || isNaN(subIndex)) return;
-
-      const subName = evaluationModelData.categories[categoryIndex]?.subCriteria[subIndex]?.name || 'this sub-criterion';
-      if (confirm(`Are you sure you want to delete "${subName}"?`)) {
-        evaluationModelData.categories[categoryIndex].subCriteria.splice(subIndex, 1);
-        renderModelEditor();
-      }
-    }
-    @endif
-
-    function handleInputChange(event) {
-      const input = event.target;
-      const categoryIndex = parseInt(input.dataset.categoryIndex);
-      const subIndex = input.dataset.subIndex !== undefined ? parseInt(input.dataset.subIndex) : null;
-
-      if (isNaN(categoryIndex)) return;
-
-      const category = evaluationModelData.categories[categoryIndex];
-      if (!category) return;
-
-      if (input.classList.contains('category-name')) {
-        category.name = input.value;
-      } else if (input.classList.contains('category-weight')) {
-        category.weight = parseFloat(input.value) / 100 || 0;
-      } else if (subIndex !== null) {
-        const subCriterion = category.subCriteria[subIndex];
-        if (!subCriterion) return;
-        if (input.classList.contains('subcriterion-name')) {
-          subCriterion.name = input.value;
-        } else if (input.classList.contains('subcriterion-weight')) {
-          subCriterion.weight = parseFloat(input.value) / 100 || 0;
-        }
-      }
-    }
-
-    @if( $status == 'draft' )
-      @if( $_user->ableTo('screening.evaluation_publish') )
-      function handleSaveModel() {
-        if (validateModel(true)) {
-          $.ajaxSetup({
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-          });
-          $.ajax({
-            type: "POST",
-            url: "{{ route('screening.evaluation_publish') }}",
-            data: {
-              "action": "publish",
-              "criteria": evaluationModelData.categories,
-              "stepId": {{ $cstep->id }},
-            },
-            success: function(response) {
-              console.log(response);
-              if (response.status) {
-                evaluationModelData.categories = response.data;
-                modelValidationSummary.textContent = 'Model saved successfully!';
-                modelValidationSummary.className = 'alert alert-success alert-dismissible';
-                modelValidationSummary.style.display = 'block';
-              } else {
-                modelValidationSummary.textContent = response.message;
-                modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-                modelValidationSummary.style.display = 'block';
-              }
-            },
-            error: function(error) {
-              console.error("Error saving model:", error);
-              modelValidationSummary.textContent = 'Error saving model. Please try again.';
-              modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-              modelValidationSummary.style.display = 'block';
-            }
-          });
-        } else {
-          alert("Please fix the validation errors before saving.");
+        const subName = evaluationModelData.categories[categoryIndex]?.subCriteria[subIndex]?.name || '{{ __('cycles.this sub-criterion') }}';
+        if (confirm(`{{ __('cycles.Are you sure you want to delete') }} "${subName}"?`)) {
+          evaluationModelData.categories[categoryIndex].subCriteria.splice(subIndex, 1);
+          renderModelEditor();
         }
       }
       @endif
 
-      @if( $_user->ableTo('screening.evaluation_save_draft') )
-      function handleDraftModel() {
-        if (validateModel(true)) {
-          $.ajaxSetup({
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-          });
-          $.ajax({
-            type: "POST",
-            url: "{{ route('screening.evaluation_save_draft') }}",
-            data: {
-              "action": "draft",
-              "criteria": evaluationModelData.categories,
-              "stepId": {{ $cstep->id }},
-            },
-            success: function(response) {
-              console.log(response);
-              if (response.status) {
-                evaluationModelData.categories = response.data;
-                modelValidationSummary.textContent = 'Model saved successfully!';
-                modelValidationSummary.className = 'alert alert-success alert-dismissible';
-                modelValidationSummary.style.display = 'block';
-              } else {
-                modelValidationSummary.textContent = response.message;
-                modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-                modelValidationSummary.style.display = 'block';
-              }
-            },
-            error: function(error) {
-              console.error("Error saving model:", error);
-              modelValidationSummary.textContent = 'Error saving model. Please try again.';
-              modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-              modelValidationSummary.style.display = 'block';
-            }
-          });
-        } else {
-          alert("Please fix the validation errors before saving.");
-        }
-      }
-      @endif
-    @endif
+      function handleInputChange(event) {
+        const input = event.target;
+        const categoryIndex = parseInt(input.dataset.categoryIndex);
+        const subIndex = input.dataset.subIndex !== undefined ? parseInt(input.dataset.subIndex) : null;
 
-    function validateModel(showGlobalSummary) {
-      let isValid = true;
-      let totalCategoryWeight = 0;
-      let globalErrorMessages = [];
+        if (isNaN(categoryIndex)) return;
 
-      evaluationModelData.categories.forEach((category, categoryIndex) => {
-        const categoryElement = modelEditorContainer.querySelector(`.category-editor[data-category-id="${category.id}"]`);
-        const categoryValidationDiv = categoryElement ? categoryElement.querySelector('.category-validation') : null;
-        let categoryErrorMessage = '';
+        const category = evaluationModelData.categories[categoryIndex];
+        if (!category) return;
 
-        totalCategoryWeight += category.weight;
-
-        let totalSubCriterionWeight = 0;
-        if (category.subCriteria.length > 0) {
-          category.subCriteria.forEach(sub => {
-            totalSubCriterionWeight += sub.weight;
-          });
-
-          if (Math.abs(totalSubCriterionWeight - 1.0) > 0.001) {
-            isValid = false;
-            categoryErrorMessage = `Sub-criterion weights must sum to 100% (currently ${(totalSubCriterionWeight * 100).toFixed(1)}%).`;
-            globalErrorMessages.push(`Category "${category.name}": ${categoryErrorMessage}`);
-          }
-        } else if (category.weight > 0) {
-          categoryErrorMessage = `Warning: Category has weight but no sub-criteria. It won't contribute to score.`;
-          if (categoryValidationDiv) {
-            categoryValidationDiv.className = 'alert alert-warning alert-dismissible';
+        if (input.classList.contains('category-name')) {
+          category.name = input.value;
+        } else if (input.classList.contains('category-weight')) {
+          category.weight = parseFloat(input.value) / 100 || 0;
+        } else if (subIndex !== null) {
+          const subCriterion = category.subCriteria[subIndex];
+          if (!subCriterion) return;
+          if (input.classList.contains('subcriterion-name')) {
+            subCriterion.name = input.value;
+          } else if (input.classList.contains('subcriterion-weight')) {
+            subCriterion.weight = parseFloat(input.value) / 100 || 0;
           }
         }
+      }
 
-        if (categoryValidationDiv) {
-          if (categoryErrorMessage && categoryErrorMessage.startsWith('Warning:')) {
-            categoryValidationDiv.textContent = categoryErrorMessage;
-            categoryValidationDiv.className = 'alert alert-warning alert-dismissible';
-            categoryValidationDiv.style.display = 'block';
-          } else if (categoryErrorMessage) {
-            categoryValidationDiv.textContent = categoryErrorMessage;
-            categoryValidationDiv.className = 'alert alert-danger alert-dismissible';
-            categoryValidationDiv.style.display = 'block';
+      @if( $status == 'draft' )
+        @if( $_user->ableTo('screening.evaluation_publish') )
+        function handleSaveModel() {
+          if (validateModel(true)) {
+            $.ajaxSetup({
+              headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+              }
+            });
+            $.ajax({
+              type: "POST",
+              url: "{{ route('screening.evaluation_publish') }}",
+              data: {
+                "action": "publish",
+                "criteria": evaluationModelData.categories,
+                "stepId": {{ $cstep->id }},
+              },
+              success: function(response) {
+                console.log(response);
+                if (response.status) {
+                  evaluationModelData.categories = response.data;
+                  showAlert(modelValidationSummary, '{{ __('cycles.Model saved successfully!') }}', 'success', 3000);
+                } else {
+                  showAlert(modelValidationSummary, response.message, 'danger');
+                }
+              },
+              error: function(error) {
+                console.error("Error saving model:", error);
+                showAlert(modelValidationSummary, '{{ __('cycles.Error saving model. Please try again.') }}', 'danger');
+              }
+            });
           } else {
-            categoryValidationDiv.style.display = 'none';
+            alert("{{ __('cycles.Please fix the validation errors before saving.') }}");
           }
         }
-      });
+        @endif
 
-      if (Math.abs(totalCategoryWeight - 1.0) > 0.001) {
-        isValid = false;
-        globalErrorMessages.push(`Total category weights must sum to 100% (currently ${(totalCategoryWeight * 100).toFixed(1)}%).`);
-      }
+        @if( $_user->ableTo('screening.evaluation_save_draft') )
+        function handleDraftModel() {
+          if (validateModel(true)) {
+            $.ajaxSetup({
+              headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+              }
+            });
+            $.ajax({
+              type: "POST",
+              url: "{{ route('screening.evaluation_save_draft') }}",
+              data: {
+                "action": "draft",
+                "criteria": evaluationModelData.categories,
+                "stepId": {{ $cstep->id }},
+              },
+              success: function(response) {
+                console.log(response);
+                if (response.status) {
+                  evaluationModelData.categories = response.data;
+                  showAlert(modelValidationSummary, '{{ __('cycles.Model saved successfully!') }}', 'success', 3000);
+                } else {
+                  showAlert(modelValidationSummary, response.message, 'danger');
+                }
+              },
+              error: function(error) {
+                console.error("Error saving model:", error);
+                showAlert(modelValidationSummary, '{{ __('cycles.Error saving model. Please try again.') }}', 'danger');
+              }
+            });
+          } else {
+            alert("{{ __('cycles.Please fix the validation errors before saving.') }}");
+          }
+        }
+        @endif
+      @endif
 
-      if (showGlobalSummary) {
-        if (!isValid) {
-          modelValidationSummary.innerHTML = '<strong>Validation Errors:</strong><br>' + globalErrorMessages.join('<br>');
-          modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-          modelValidationSummary.style.display = 'block';
-        } else {
-          modelValidationSummary.textContent = 'Model structure is valid.';
-          modelValidationSummary.className = 'alert alert-success alert-dismissible';
-          modelValidationSummary.style.display = 'block';
-          setTimeout(() => {
-            if (modelValidationSummary.classList.contains('alert-success')) {
-              modelValidationSummary.style.display = 'none';
+      function validateModel(showGlobalSummary) {
+        let isValid = true;
+        let totalCategoryWeight = 0;
+        let globalErrorMessages = [];
+
+        evaluationModelData.categories.forEach((category, categoryIndex) => {
+          const categoryElement = modelEditorContainer.querySelector(`.category-editor[data-category-id="${category.id}"]`);
+          const categoryValidationDiv = categoryElement ? categoryElement.querySelector('.category-validation') : null;
+          let categoryErrorMessage = '';
+
+          totalCategoryWeight += category.weight;
+
+          let totalSubCriterionWeight = 0;
+          if (category.subCriteria.length > 0) {
+            category.subCriteria.forEach(sub => {
+              totalSubCriterionWeight += sub.weight;
+            });
+
+            if (Math.abs(totalSubCriterionWeight - 1.0) > 0.001) {
+              isValid = false;
+              categoryErrorMessage = `{{ __('cycles.Sub-criterion weights must sum to 100%') }} ({{ __('cycles.currently') }} ${(totalSubCriterionWeight * 100).toFixed(1)}%).`;
+              globalErrorMessages.push(`{{ __('cycles.Category') }} "${category.name}": ${categoryErrorMessage}`);
             }
-          }, 3000);
+          } else if (category.weight > 0) {
+            categoryErrorMessage = `{{ __('cycles.Warning: Category has weight but no sub-criteria. It won\'t contribute to score.') }}`;
+          }
+
+          if (categoryValidationDiv) {
+            if (categoryErrorMessage && categoryErrorMessage.startsWith('Warning:')) {
+              showAlert(categoryValidationDiv, categoryErrorMessage, 'warning');
+            } else if (categoryErrorMessage) {
+              showAlert(categoryValidationDiv, categoryErrorMessage, 'danger');
+            } else {
+              categoryValidationDiv.style.display = 'none';
+            }
+          }
+        });
+
+        if (Math.abs(totalCategoryWeight - 1.0) > 0.001) {
+          isValid = false;
+          globalErrorMessages.push(`{{ __('cycles.Total category weights must sum to 100%') }} ({{ __('cycles.currently') }} ${(totalCategoryWeight * 100).toFixed(1)}%).`);
         }
-      } else {
-        if (!modelValidationSummary.classList.contains('alert-danger') && !modelValidationSummary.classList.contains('alert-success')) {
-          modelValidationSummary.style.display = 'none';
+
+        if (showGlobalSummary) {
+          if (!isValid) {
+            showAlert(modelValidationSummary, '<strong>{{ __('cycles.Validation Errors:') }}</strong><br>' + globalErrorMessages.join('<br>'), 'danger');
+          } else {
+            showAlert(modelValidationSummary, '{{ __('cycles.Model structure is valid.') }}', 'success', 3000);
+          }
+        } else {
+          if (!modelValidationSummary.classList.contains('alert-danger') && !modelValidationSummary.classList.contains('alert-success')) {
+            modelValidationSummary.style.display = 'none';
+          }
         }
+
+        return isValid;
       }
 
-      return isValid;
-    }
-
-    @if( $status == 'draft' )
-      @if( $_user->ableTo('screening.evaluation_add_criteria') )
-      addCategoryBtn.addEventListener('click', handleAddCategory);
+      @if( $status == 'draft' )
+        @if( $_user->ableTo('screening.evaluation_add_criteria') )
+        addCategoryBtn.addEventListener('click', handleAddCategory);
+        @endif
+        @if( $_user->ableTo('screening.evaluation_publish') )
+        saveModelBtn.addEventListener('click', handleSaveModel);
+        @endif
+        @if( $_user->ableTo('screening.evaluation_save_draft') )
+        draftModelBtn.addEventListener('click', handleDraftModel);
+        @endif
       @endif
-      @if( $_user->ableTo('screening.evaluation_publish') )
-      saveModelBtn.addEventListener('click', handleSaveModel);
-      @endif
-      @if( $_user->ableTo('screening.evaluation_save_draft') )
-      draftModelBtn.addEventListener('click', handleDraftModel);
-      @endif
-    @endif
 
-    if (document.getElementById('evaluation-model').classList.contains('active')) {
-      renderModelEditor();
-    }
-  });
-
-  setTimeout(() => {
-    const alerts = document.querySelectorAll('.alert-dismissible');
-    alerts.forEach(alert => {
-      alert.style.transition = 'opacity 0.5s ease';
-      alert.style.opacity = '0';
-      setTimeout(() => alert.remove(), 500);
+      if (document.getElementById('evaluation-model').classList.contains('active')) {
+        renderModelEditor();
+      }
     });
-  }, 20000);
-</script>
+
+    $(document).on('click', '#addPanelBtn', function(e) {
+      e.preventDefault();
+      // let tBody = $('#panels-list-body');
+      // let lastTr = tBody.children('tr').last();
+      // let lastTrData = $(lastTr).data('panel');
+      lastTrData = $('#panels-list-body tr').length ?? 0;
+      let panel = lastTrData + 1;
+      let html = `<tr data-panel="${panel}">
+        <td>
+          <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+          {{ __('cycles.Panel list') }} ${panel}
+        </td>
+        <td>
+          <select name="judges[${panel}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
+            @foreach( $judges as $judge )
+              <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
+            @endforeach
+          </select>
+        </td>
+        <td>
+          <select name="users[${panel}][]" class="select2 form-control panel users-selectors" multiple="multiple">
+            @foreach( $companies as $company )
+              <option value="{{ $company->id }}">{{ $company->{'name_' . $l} }}</option>
+            @endforeach
+          </select>
+        </td>
+      </tr>`;
+
+      $('#panels-list-body').append( html );
+      $('.judgers-selectors').each(function() {
+        const $select = $(this);
+        $select.select2({
+          placeholder: "{{ __('cycles.Select judges') }}",
+          allowClear: false,
+          dropdownParent: null,
+          width: '100%'
+        });
+      });
+      $('.users-selectors').each(function() {
+        const $select = $(this);
+        $select.select2({
+          placeholder: "{{ __('cycles.Select Company') }}",
+          allowClear: false,
+          dropdownParent: null,
+          width: '100%'
+        });
+      });
+    });
+
+    $(document).on('click', '.remove-panel-btn', function(e) {
+      e.preventDefault();
+      $(this).closest('tr').remove();
+      let index = 1;
+      $('#panels-list-body tr').each(function() {
+        const $tr = $(this);
+        let line = `
+            <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+            {{ __('cycles.Panel list') }} ${index}
+        `;
+        index++
+        $($tr).find('td').eq(0).html(line);
+        $($tr).find('td').eq(1).find('select').attr('name', `judges[${index}][]`);
+        $($tr).find('td').eq(2).find('select').attr('name', `users[${index}][]`);
+      });
+    });
+
+    setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert-dismissible');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s ease';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 20000);
+  </script>
 @stop

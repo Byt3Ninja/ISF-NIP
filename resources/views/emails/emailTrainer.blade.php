@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 
 <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
+
 <head>
     <title></title>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <!--[if mso]>
     <xml>
         <o:OfficeDocumentSettings>
@@ -13,7 +14,7 @@
         </o:OfficeDocumentSettings>
     </xml><![endif]--><!--[if !mso]><!-->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900"
-          rel="stylesheet" type="text/css"/><!--<![endif]-->
+        rel="stylesheet" type="text/css" /><!--<![endif]-->
     <style>
         * {
             box-sizing: border-box;
@@ -46,7 +47,7 @@
             overflow: hidden;
         }
 
-        .image_block img + div {
+        .image_block img+div {
             display: none;
         }
 
@@ -93,345 +94,381 @@
     </style>
 </head>
 @php
-$setting = \App\settings::where('id', 1)->first();
+    $setting = \App\settings::where('id', 1)->first();
 @endphp
+
 <body class="body"
-      style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
-<table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation"
-       style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f8f8f9;" width="100%">
-    <tbody>
-    <tr>
-        <td>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-1" role="presentation"
-                   style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #1aa19c;" width="100%">
-                <tbody>
-                <tr>
-                    <td>
-                        <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack"
-                               role="presentation"
-                               style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #1aa19c; width: 640px; margin: 0 auto;"
-                               width="640">
-                            <tbody>
+    style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
+    <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation"
+        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f8f8f9;" width="100%">
+        <tbody>
+            <tr>
+                <td>
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-1"
+                        role="presentation"
+                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #1aa19c;" width="100%">
+                        <tbody>
                             <tr>
-                                <td class="column column-1"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                    width="100%">
-                                    <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-1"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad">
-                                                <div align="center" class="alignment">
+                                <td>
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                        class="row-content stack" role="presentation"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #1aa19c; width: 640px; margin: 0 auto;"
+                                        width="640">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1"
+                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                                    width="100%">
                                                     <table border="0" cellpadding="0" cellspacing="0"
-                                                           role="presentation"
-                                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                           width="100%">
+                                                        class="divider_block block-1" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
                                                         <tr>
-                                                            <td class="divider_inner"
-                                                                style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;">
-                                                                <span style="word-break: break-word;"> </span></td>
+                                                            <td class="pad">
+                                                                <div align="center" class="alignment">
+                                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                                        role="presentation"
+                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                        width="100%">
+                                                                        <tr>
+                                                                            <td class="divider_inner"
+                                                                                style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;">
+                                                                                <span
+                                                                                    style="word-break: break-word;"> </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     </table>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </td>
                             </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-2" role="presentation"
-                   style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                <tbody>
-                <tr>
-                    <td>
-                        <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack"
-                               role="presentation"
-                               style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fff; color: #000000; width: 640px; margin: 0 auto;"
-                               width="640">
-                            <tbody>
+                        </tbody>
+                    </table>
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-2"
+                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+                        <tbody>
                             <tr>
-                                <td class="column column-1"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                    width="100%">
-                                    <table border="0" cellpadding="0" cellspacing="0" class="image_block block-1"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
-                                                <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto"
-                                                                                        src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}"
-                                                                                        style="display: block; height: auto; border: 0; width: 100%;"
-                                                                                        title="I'm an image"
-                                                                                        width="560"/></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-2"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad" style="padding-top:50px;">
-                                                <div align="center" class="alignment">
+                                <td>
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                        class="row-content stack" role="presentation"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fff; color: #000000; width: 640px; margin: 0 auto;"
+                                        width="640">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1"
+                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                                    width="100%">
                                                     <table border="0" cellpadding="0" cellspacing="0"
-                                                           role="presentation"
-                                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                           width="100%">
+                                                        class="image_block block-1" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
                                                         <tr>
-                                                            <td class="divider_inner"
-                                                                style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;">
-                                                                <span style="word-break: break-word;"> </span></td>
+                                                            <td class="pad"
+                                                                style="padding-left:40px;padding-right:40px;width:100%;">
+                                                                <div align="center" class="alignment"
+                                                                    style="line-height:10px">
+                                                                    <div style="max-width: 560px;"><img
+                                                                            alt="I'm an image" height="auto"
+                                                                            src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}"
+                                                                            style="display: block; height: auto; border: 0; width: 100%;"
+                                                                            title="I'm an image" width="560" /></div>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     </table>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3"
-                                           role="presentation"
-                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad"
-                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:30px;line-height:150%;text-align:center;mso-line-height-alt:45px;">
-                                                    <p style="margin: 0; word-break: break-word;"><span
-                                                                style="word-break: break-word; color: #000000;"><strong>New Training invitation</strong></span>
-                                                    </p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-4"
-                                           role="presentation"
-                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad"
-                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                                                    <p style="margin: 0;">Dear {{$trainer_name}},</p>
-                                                    <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">Kindly note you have a new online training
-                                                        session, with Title :</p>
-                                                    <p style="margin: 0;">"{{ $title }}"</p>
-                                                    <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">Session will start at: {{ $date }}</p>
-                                                    <p style="margin: 0;"> </p>
-                                                        @if($type == 'sessions')
-                                                    <p style="margin: 0;">
-                                                        🔗 **Link:** {{ $join_url }} 
-                                                    </p>
-                                                    @elseif($type == 'online')
-                                                    <p style="margin: 0;">
-                                                        🔗 **Link:** {{ $join_url }} 
-                                                    </p>
-                                                    @elseif($type == 'offline')
-                                                    <p style="margin: 0;">
-                                                        🔗 **Google Map Link:** {{ $join_url }} 
-                                                    </p>
-                                                    <p style="margin: 0;">
-                                                        🔗 **Address:** {{ $Address }}
-                                                    </p>
-                                                    @endif
-                                                    <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">Best regards,</p>
-                                                    <p style="margin: 0;">{{ $organization_name_en }}</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-5"
-                                           role="presentation"
-                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad"
-                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
-                                                    <p style="margin: 0;">عزيزي {{ $trainer_name }},</p>
-                                                    <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">"يرجى العلم أن لديكم دورة تدريبية جديدة عبر
-                                                        الإنترنت بعنوان: "{{ $title }}</p>
-                                                    <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">سيبدأ التدريب في الميعاد:<br/>{{ $date }}
-                                                    </p>
-                                                    <p style="margin: 0;"> </p>
-                                                        @if($type == 'sessions')
-                                                    <p style="margin: 0;">
-                                                        🔗 **لينك:** {{ $join_url }} 
-                                                    </p>
-                                                    @elseif($type == 'online')
-                                                    <p style="margin: 0;">
-                                                        🔗 **لينك:** {{ $join_url }} 
-                                                    </p>
-                                                    @elseif($type == 'offline')
-                                                    <p style="margin: 0;">
-                                                        🔗 **لينك خرائط جوجل:** {{ $join_url }} 
-                                                    </p>
-                                                    <p style="margin: 0;">
-                                                        🔗 **عنوان:** {{ $Address }}
-                                                    </p>
-                                                    @endif
-                                                    <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">أطيب التحيات،</p>
-                                                    <p style="margin: 0;">{{ $organization_name_ar }}</p>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="divider_block block-2" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td class="pad" style="padding-top:50px;">
+                                                                <div align="center" class="alignment">
+                                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                                        role="presentation"
+                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                        width="100%">
+                                                                        <tr>
+                                                                            <td class="divider_inner"
+                                                                                style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;">
+                                                                                <span
+                                                                                    style="word-break: break-word;"> </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="paragraph_block block-3" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td class="pad"
+                                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                                                                <div
+                                                                    style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:30px;line-height:150%;text-align:center;mso-line-height-alt:45px;">
+                                                                    <p style="margin: 0; word-break: break-word;"><span
+                                                                            style="word-break: break-word; color: #000000;"><strong>New
+                                                                                Training invitation</strong></span>
+                                                                    </p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="paragraph_block block-4" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td class="pad"
+                                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                                                                <div
+                                                                    style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
+                                                                    <p style="margin: 0;">Dear {{$trainer_name}},</p>
+                                                                    <p style="margin: 0;"> </p>
+                                                                    <p style="margin: 0;">Kindly note you have a new
+                                                                        online training
+                                                                        session, with Title :</p>
+                                                                    <p style="margin: 0;">"{{ $title }}"</p>
+                                                                    <p style="margin: 0;"> </p>
+                                                                    <p style="margin: 0;">Session will start at:
+                                                                        {{ FormatDate($date, 'd-m-Y h:i A') }}
+                                                                    </p>
+                                                                    <p style="margin: 0;"> </p>
+                                                                    @if($type == 'sessions')
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **Link:** {{ $join_url }}
+                                                                        </p>
+                                                                    @elseif($type == 'online')
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **Link:** {{ $join_url }}
+                                                                        </p>
+                                                                    @elseif($type == 'offline')
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **Google Map Link:** {{ $join_url }}
+                                                                        </p>
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **Address:** {{ $Address }}
+                                                                        </p>
+                                                                    @endif
+                                                                    <p style="margin: 0;"> </p>
+                                                                    <p style="margin: 0;">Best regards,</p>
+                                                                    <p style="margin: 0;">{{ $organization_name_en }}
+                                                                    </p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="paragraph_block block-5" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td class="pad"
+                                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                                                                <div
+                                                                    style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
+                                                                    <p style="margin: 0;">عزيزي {{ $trainer_name }},</p>
+                                                                    <p style="margin: 0;"> </p>
+                                                                    <p style="margin: 0;">"يرجى العلم أن لديكم دورة
+                                                                        تدريبية جديدة عبر
+                                                                        الإنترنت بعنوان: "{{ $title }}</p>
+                                                                    <p style="margin: 0;"> </p>
+                                                                    <p style="margin: 0;">سيبدأ التدريب في
+                                                                        الوقت:<br />{{ FormatDate($date, 'd-m-Y h:i A') }}
+                                                                    </p>
+                                                                    <p style="margin: 0;"> </p>
+                                                                    @if($type == 'sessions')
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **لينك:** {{ $join_url }}
+                                                                        </p>
+                                                                    @elseif($type == 'online')
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **لينك:** {{ $join_url }}
+                                                                        </p>
+                                                                    @elseif($type == 'offline')
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **لينك خرائط جوجل:** {{ $join_url }}
+                                                                        </p>
+                                                                        <p style="margin: 0;">
+                                                                            🔗 **عنوان:** {{ $Address }}
+                                                                        </p>
+                                                                    @endif
+                                                                    <p style="margin: 0;"> </p>
+                                                                    <p style="margin: 0;">أطيب التحيات،</p>
+                                                                    <p style="margin: 0;">{{ $organization_name_ar }}
+                                                                    </p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </td>
                             </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3" role="presentation"
-                   style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                <tbody>
-                <tr>
-                    <td>
-                        <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack"
-                               role="presentation"
-                               style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #f8f8f9; width: 640px; margin: 0 auto;"
-                               width="640">
-                            <tbody>
+                        </tbody>
+                    </table>
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3"
+                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+                        <tbody>
                             <tr>
-                                <td class="column column-1"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                    width="100%">
-                                    <table border="0" cellpadding="20" cellspacing="0" class="divider_block block-1"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad">
-                                                <div align="center" class="alignment">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                           role="presentation"
-                                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                           width="100%">
+                                <td>
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                        class="row-content stack" role="presentation"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #f8f8f9; width: 640px; margin: 0 auto;"
+                                        width="640">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1"
+                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                                    width="100%">
+                                                    <table border="0" cellpadding="20" cellspacing="0"
+                                                        class="divider_block block-1" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
                                                         <tr>
-                                                            <td class="divider_inner"
-                                                                style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;">
-                                                                <span style="word-break: break-word;"> </span></td>
+                                                            <td class="pad">
+                                                                <div align="center" class="alignment">
+                                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                                        role="presentation"
+                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                        width="100%">
+                                                                        <tr>
+                                                                            <td class="divider_inner"
+                                                                                style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;">
+                                                                                <span
+                                                                                    style="word-break: break-word;"> </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     </table>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </td>
                             </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-4" role="presentation"
-                   style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                <tbody>
-                <tr>
-                    <td>
-                        <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack"
-                               role="presentation"
-                               style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #2b303a; width: 640px; margin: 0 auto;"
-                               width="640">
-                            <tbody>
+                        </tbody>
+                    </table>
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-4"
+                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+                        <tbody>
                             <tr>
-                                <td class="column column-1"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                    width="100%">
-                                    <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-1"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad">
-                                                <div align="center" class="alignment">
+                                <td>
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                        class="row-content stack" role="presentation"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; background-color: #2b303a; width: 640px; margin: 0 auto;"
+                                        width="640">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1"
+                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                                    width="100%">
                                                     <table border="0" cellpadding="0" cellspacing="0"
-                                                           role="presentation"
-                                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                           width="100%">
+                                                        class="divider_block block-1" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
                                                         <tr>
-                                                            <td class="divider_inner"
-                                                                style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;">
-                                                                <span style="word-break: break-word;"> </span></td>
+                                                            <td class="pad">
+                                                                <div align="center" class="alignment">
+                                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                                        role="presentation"
+                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                        width="100%">
+                                                                        <tr>
+                                                                            <td class="divider_inner"
+                                                                                style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;">
+                                                                                <span
+                                                                                    style="word-break: break-word;"> </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     </table>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="image_block block-2"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad" style="width:100%;">
-                                                <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto"
-                                                                                        src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}"
-                                                                                        style="display: block; height: auto; border: 0; width: 100%;"
-                                                                                        title="I'm an image"
-                                                                                        width="640"/></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-3"
-                                           role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad"
-                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:25px;">
-                                                <div align="center" class="alignment">
                                                     <table border="0" cellpadding="0" cellspacing="0"
-                                                           role="presentation"
-                                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                           width="100%">
+                                                        class="image_block block-2" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
                                                         <tr>
-                                                            <td class="divider_inner"
-                                                                style="font-size: 1px; line-height: 1px; border-top: 1px solid #555961;">
-                                                                <span style="word-break: break-word;"> </span></td>
+                                                            <td class="pad" style="width:100%;">
+                                                                <div align="center" class="alignment"
+                                                                    style="line-height:10px">
+                                                                    <div style="max-width: 640px;"><img
+                                                                            alt="I'm an image" height="auto"
+                                                                            src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}"
+                                                                            style="display: block; height: auto; border: 0; width: 100%;"
+                                                                            title="I'm an image" width="640" /></div>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                     </table>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-4"
-                                           role="presentation"
-                                           style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                           width="100%">
-                                        <tr>
-                                            <td class="pad"
-                                                style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
-                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
-                                                    <p style="margin: 0; word-break: break-word;"><span
-                                                                style="word-break: break-word; color: #95979c;">Growthlabs Copyright © {{date('Y')}}</span>
-                                                    </p>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="divider_block block-3" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td class="pad"
+                                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:25px;">
+                                                                <div align="center" class="alignment">
+                                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                                        role="presentation"
+                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                        width="100%">
+                                                                        <tr>
+                                                                            <td class="divider_inner"
+                                                                                style="font-size: 1px; line-height: 1px; border-top: 1px solid #555961;">
+                                                                                <span
+                                                                                    style="word-break: break-word;"> </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="paragraph_block block-4" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td class="pad"
+                                                                style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
+                                                                <div
+                                                                    style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
+                                                                    <p style="margin: 0; word-break: break-word;"><span
+                                                                            style="word-break: break-word; color: #95979c;">Growthlabs
+                                                                            Copyright © {{date('Y')}}</span>
+                                                                    </p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </td>
                             </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </td>
-    </tr>
-    </tbody>
-</table><!-- End -->
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table><!-- End -->
 </body>
+
 </html>

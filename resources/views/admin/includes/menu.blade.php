@@ -5,14 +5,6 @@
     $_user->organization = $_user->company->cycledata->organization;
   }
 @endphp
-<style>
-  /* Add this to your CSS file */
-.logo-img {
-    max-width: 50%;
-    height: auto;
-    display: block;
-}
-</style>
 <!-- Menu -->
 @php
       $updateSittings = App\Settings::where('id', 1)->first();
@@ -20,28 +12,39 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
-      
       @if (!is_null($_user->organization))
-      @php
-       $imageUrl = $_user->organization->img_url ? asset($_user->organization->img_url) : null;
+        @php
+          $imageUrl = $_user->organization->img_url ? asset($_user->organization->img_url) : null;
 
-     // استخراج المسار من الرابط
-     $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+          // استخراج المسار من الرابط
+          $imagePath = parse_url($imageUrl, PHP_URL_PATH);
 
-     // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
-     $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
-    @endphp
-          <img src="{{ $imageUrl }}" alt="avatar" class="logo-img">
-         
+          // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
+          $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+        @endphp
+        <img
+          src="{{ $imageUrl }}"
+          alt="avatar"
+          class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
+          style="width: 50px; height: 50px;"
+        />
       @else
       @if(!empty($setting->Logo))
-          <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
-          @else
-            <img src="/images/background/logo.png" alt="avatar" class="logo-img">
-          @endif
-          
+        <img
+          src="/images/logo/{{ $setting->Logo }}" alt="avatar" 
+          class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
+          style="width: 50px; height: 50px;"
+        />
+        @else
+          <img 
+            src="/images/background/logo.png" 
+            alt="avatar" 
+            class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
+            style="width: 50px; height: 50px;"
+          />
+        @endif
       @endif
-  </a>
+    </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
       <i class="ti menu-toggle-icon d-none d-xl-block align-middle"></i>
@@ -435,7 +438,7 @@
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
             </a>
           </li>
-          <li class="{{ Request::is('dashboard/cycles*') ? 'active' : '' }} menu-item">
+          <li class="{{ preg_match('#^dashboard/cycles(/\d+)?$#', Request::path()) ? 'active' : '' }} menu-item">
             <a href="/dashboard/cycles" class="menu-link">
               <span class="menu-item">{{ __('cycles.steps') }}</span>
               <i class="bx bx-message"></i>

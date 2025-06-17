@@ -962,7 +962,7 @@ class WhatsAppAuthenticator {
     }
 
     try {
-      await this.apiCall(`/dashboard/whatsapp/session/send`, 'POST', {
+      await this.apiCall(`/dashboard/whatsapp/session/${this.currentSessionId}/send`, 'POST', {
         to: phoneNumber,
         message: message
       });

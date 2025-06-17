@@ -11,6 +11,7 @@ class SessionReport extends Model
 
     protected $fillable = [
         'session_id',
+        'mentorship_request_id',
         'participant_user_id',
         'participant_email',
         'participant_name',

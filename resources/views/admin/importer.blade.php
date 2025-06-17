@@ -716,11 +716,13 @@
                         title: '{{ __('admin.Import Completed') }}',
                         text: '',
                         icon: 'success',
-                        confirmButtonText: '{{ __('admin.OK') }}',
+                       	showCancelButton: false,
+                        showConfirmButton: true,
+                        confirmButtonText: "{{ __('admin.OK') }}",
                         customClass: {
-                            confirmButton: 'btn btn-primary'
+                            confirmButton: 'btn btn-primary',
                         },
-                        buttonsStyling: false
+                        buttonsStyling: false,
                     });
                 } else {
                     updateStatusMessage(result.message || '{{ __('admin.Error during import') }}', 'error');

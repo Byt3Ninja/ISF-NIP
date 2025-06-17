@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Step;
 use App\User;
+use stdClass;
 use App\Cycle;
 use App\Sector;
 use App\Company;
@@ -16,14 +17,15 @@ use App\Settings;
 use App\Messenger;
 use App\Screening;
 use App\TimeSheet;
+use Carbon\Carbon;
 use App\BuilderForm;
 use App\Organization;
-use App\Documentation;
 use App\SurveyScopes;
-use App\SurveyResponses;
 
+use App\Documentation;
 use App\Finalscreening;
 use App\MentorshipTask;
+use App\SurveyResponses;
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
@@ -33,10 +35,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ServiceRequestNotification;
-use stdClass;
-use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -474,7 +475,7 @@ class HomeController extends Controller
             });
         } else { $evaluation = collect([]); }
 
-        if( array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'my_next_mentorship_sessions'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
         {
             $upcoming_sessions_q = "SELECT
                     mr.id AS `id`,
@@ -506,13 +507,15 @@ class HomeController extends Controller
                     AND mr.approved = 'Yes'
             ";
             if( $has_org ) { $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id; }
+            if( !$user->hasAnyRole(["registered"]) ){
             if( !empty( $user->company_id ) && !is_null( $user->company_id ) && trim( $user->company_id ) )
             {
                 $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
             }
+            }
             if( $user->hasAnyRole(['mentor']) )
             {
-                $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
+                $upcoming_sessions_q .= " AND mr.mentor_id = " . $user->id;
             }
             $params = [];
             $params[] = date("Y-m-d 00:00:00");
@@ -2651,7 +2654,8 @@ class HomeController extends Controller
             $service = Service::find($request->id);
     
             if ($service && $service->vendor_email) {
-                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+                // Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+                Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
             }
     
             return response()->json(['state' => 'success']);

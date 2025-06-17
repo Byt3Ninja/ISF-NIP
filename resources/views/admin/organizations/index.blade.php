@@ -253,18 +253,19 @@
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
         Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning", // استخدم icon بدلاً من type
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        customClass: {
-            confirmButton: 'btn btn-danger',
-            cancelButton: 'btn btn-secondary'
-        },
-        buttonsStyling: false
-    })
+        	title: "{{__('admin.SureDelete')}}",
+					text: "{{__('admin.Recover')}}",
+					icon: "warning",
+					showCancelButton: true,
+					confirmButtonText: "{{ __('admin.DYes') }}",
+					cancelButtonText: "{{ __('admin.No') }}",
+					reverseButtons: true,
+					customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+					},
+					buttonsStyling: false,
+      })
           .then((result) => {
             if (result.value) {
               $.post(url, {
@@ -275,7 +276,7 @@
                   // Swal.fire({
                   //   type: 'success',
                   //   title: "{{ __('admin.Deleted') }}!",
-                  //   html: "{{ __('admin.FileDeleted') }}.",
+                  //   html: "{{ __('admin.DeletedSuccessfully') }}.",
                   // });
                   location.reload();
                 }

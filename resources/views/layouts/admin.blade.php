@@ -118,7 +118,7 @@
       @endif
     @endauth
 
-    @if (auth()->user()->hasRole('Registered'))
+   @if (auth()->user()->hasAnyrole('Registered','Mentor'))
       <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
       <script>
         const pusherConfig = @json(getPusherConfig());
@@ -203,6 +203,26 @@
           const eventData = JSON.parse(event.data);
           // console.log("Message:", eventData.message);
         });
+
+       const mentorshipChannel = pusher.subscribe("request-mentorship");
+       mentorshipChannel.bind("RequestMentorship", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
+     const startupChannel = pusher.subscribe("startup-joining");
+       startupChannel.bind("StartupJoining", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
+    const judgerChannel = pusher.subscribe("judges");
+       judgerChannel.bind("JudgeAssigned", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
+     const mentorStartupChannel = pusher.subscribe("mentorship-session");
+       judgerChannel.bind("MentorshipSessionUpdated", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
 
         // Listen for Pusher internal events for debugging
         pusher.connection.bind("state_change", function (states) {

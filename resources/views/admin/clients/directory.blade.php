@@ -327,7 +327,13 @@
         title: '{{ __('admin.Service request') }}',
         text: message,
         icon: 'success',
-        confirmButtonText: 'OK'
+        showCancelButton: false,
+        showConfirmButton: true,
+        confirmButtonText: "{{ __('admin.OK') }}",
+        customClass: {
+            confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       });
     }
   </script>

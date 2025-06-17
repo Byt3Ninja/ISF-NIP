@@ -13,6 +13,7 @@ use App\Http\Controllers\Judger\JudgerScreeningController;
 
 Route::get('test', function () {});
 Route::get('default-permissions', function() { App\Permission::default_permissions(); });
+Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -77,6 +78,7 @@ Route::post('eventregister', 'IndexController@eventregister');
     return redirect('/dashboard');
 })->middleware(['auth', '2fa']);
 
+Route::get('/db-migrate', 'IndexController@dbMigrate');
 Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('invitations.set_password_view_form');
@@ -163,7 +165,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.data');
     Route::post('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.image');
     Route::delete('whatsapp/session/{sessionId}/terminate', 'WhatsAppSessionController@terminate')->where('sessionId', '[0-9]+')->name('whatsapp.session.terminate');
-    Route::post('whatsapp/session/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
+    Route::post('whatsapp/session/{sessionId}/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
     Route::post('whatsapp/getWASession', 'WhatsAppSessionController@getWASessionID')->name('whatsapp.session.getsessionid');
 
     
@@ -598,6 +600,24 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/importer/import', [ImporterController::class, 'import'])->name('importer.import');
     Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
 
+
+    Route::post('/notifications/mark-all-read', function () {
+        $user = Auth::user();
+        if ($user) {
+            $user->unreadNotifications()->get()->each->markAsRead();
+            return response()->json(['success' => true, 'message' => 'All notifications marked as read']);
+        }
+        return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
+    });
+
+    Route::post('/notifications/mark-read/{id}', function ($id) {
+        $user = Auth::user();
+        if ($user) {
+            $notification = $user->notifications()->findOrFail($id);
+            $notification->markAsRead();
+            return response()->json(['success' => true, 'message' => 'Notification marked as read']);
+        }
+    });
 
 });
 
