@@ -208,6 +208,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                 'host_video'        => ($data['host_video'] == "1"),
                 'participant_video' => ($data['participant_video'] == "1"),
                 'waiting_room'      => false, // Consider making this configurable
+                'join_before_host'  => true, 
                 'auto_recording'    => 'cloud',
                 "share_recording"   => "publicly",
                 "viewer_download"   => true
