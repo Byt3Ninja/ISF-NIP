@@ -130,6 +130,11 @@ class ImporterController extends Controller
                     $rowErrors[] = "Founder first name exceeds 255 characters";
                 }
 
+                // Startup validations
+                if (isset($row['Startup Name'])) {
+                    $rowErrors[] = "Missing Startup Name";
+                }
+
                 if (isset($row['Founder Last Name']) && empty(trim($row['Founder Last Name']))) {
                     $rowErrors[] = "Missing founder last name";
                 } elseif (isset($row['Founder Last Name']) && strlen(trim($row['Founder Last Name'])) > 255) {
@@ -142,17 +147,19 @@ class ImporterController extends Controller
                     $rowErrors[] = "Invalid founder email format";
                 }
 
-                if (isset($row['Phone']) && !empty($row['Phone'])) {
-                    $phone = trim($row['Phone']);
+              if (empty($row['Phone'])) {
+                    $rowErrors[] = "Phone is required";
+                 } else {
+                   $phone = trim($row['Phone']);
                     Log::info('Phone validation', [
-                        'row_number' => $index + 2,
-                        'original_phone' => $row['Phone'],
-                        'trimmed_phone' => $phone
-                    ]);
-                    if (!preg_match('/^\d{10,}$/', $phone)) {
-                        $rowErrors[] = "Phone must contain only numbers (at least 11 digits, no hyphens or special characters)";
-                    }
+                    'row_number' => $index + 2,
+                    'original_phone' => $row['Phone'],
+                    'trimmed_phone' => $phone
+                 ]);
+                if (!preg_match('/^\d{10,}$/', $phone)) {
+                  $rowErrors[] = "Phone must contain only numbers (at least 11 digits, no hyphens or special characters)";
                 }
+              }
 
                 if (!empty($rowErrors)) {
                     $errors[] = "Row " . ($index + 2) . ": " . implode(', ', $rowErrors);
