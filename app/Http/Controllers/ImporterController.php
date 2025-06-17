@@ -131,7 +131,7 @@ class ImporterController extends Controller
                 }
 
                 // Startup validations
-                if (!isset($row['Startup Name'])) {
+                if (isset($row['Startup Name']) && empty(trim($row['Startup Name']))) {
                     $rowErrors[] = "Missing Startup Name";
                 }
 
