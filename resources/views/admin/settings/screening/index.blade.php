@@ -376,23 +376,23 @@
       <section>
         <!-- Evaluation Model CRUD Tab -->
         <div id="evaluation-model" class="card card-body tab-content active mt-6">
-          <h4>Manage Evaluation Model</h4>
-          <p class="text-muted">Define the categories, sub-criteria, and weights used for startup evaluations.</p>
+          <h4>{{ __('cycles.ManageEvaluationModel') }}</h4>
+          <p class="text-muted">{{ __('cycles.EvaluationModelDescription') }}</p>
           <div>
             <div class="d-flex align-items-center gap-4 mb-4">
               @if( $_user->ableTo('screening.evaluation_save_draft', $permissions) && $status == 'draft' )
               <button id="draft-model-btn" class="btn btn-light">
-                <i class="fas fa-save me-2"></i> Save as Draft
+                <i class="fas fa-save me-2"></i> {{ __('cycles.SaveDraft') }}
               </button>
               @endif
               @if( $_user->ableTo('screening.evaluation_publish', $permissions) )
                 @if( $status == 'draft' )
                   <button id="save-model-btn" class="btn btn-primary">
-                    <i class="ti ti-world me-2"></i> Publish
+                    <i class="ti ti-world me-2"></i> {{ __('cycles.Publish') }}
                   </button>
                 @else
                   <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
-                    <i class="ti ti-check me-2"></i> Published
+                    <i class="ti ti-check me-2"></i> {{ __('cycles.Published') }}
                   </button>
                 @endif
               @endif
@@ -402,7 +402,7 @@
           <div id="model-editor"></div>
           @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
           <button id="add-category-btn" class="btn btn-label-primary">
-            <i class="fas fa-plus me-2"></i> Add New Criteria
+            <i class="fas fa-plus me-2"></i> {{ __('cycles.AddNewCriteria') }}
           </button>
           @endif
         </div>
@@ -721,6 +721,44 @@
       const modelValidationSummary = document.getElementById('model-validation-summary');
       let evaluationModelData = @json( $evaluationForm );
 
+      // Helper function to show dismissible alerts
+      function showAlert(element, message, type = 'info', timeout = null) {
+        const alertTypes = {
+          'success': 'alert-success',
+          'danger': 'alert-danger', 
+          'warning': 'alert-warning',
+          'info': 'alert-info'
+        };
+        
+        const alertClass = alertTypes[type] || 'alert-info';
+        
+        element.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('cycles.Close') }}"></button>
+        `;
+        element.className = `alert ${alertClass} alert-dismissible`;
+        element.style.display = 'block';
+        
+        // Initialize Bootstrap alert dismiss functionality
+        const dismissButton = element.querySelector('.btn-close');
+        if (dismissButton) {
+          dismissButton.addEventListener('click', function() {
+            element.style.display = 'none';
+            element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+          });
+        }
+        
+        // Auto-dismiss after timeout if specified
+        if (timeout) {
+          setTimeout(() => {
+            if (element.classList.contains(alertClass)) {
+              element.style.display = 'none';
+              element.classList.remove('alert-success', 'alert-danger', 'alert-warning', 'alert-info');
+            }
+          }, timeout);
+        }
+      }
+
       function renderModelEditor() {
         if (!modelEditorContainer) return;
         modelEditorContainer.innerHTML = '';
@@ -734,10 +772,10 @@
           category.subCriteria.forEach((sub, subIndex) => {
             subCriteriaHTML += `
               <div class="sub-criterion-editor" data-subcriterion-id="${sub.id}">
-                <input type="text" class="form-control subcriterion-name" placeholder="Sub Criteria Name" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-                <input type="number" class="form-control weight-input subcriterion-weight" placeholder="Weight (%)" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                <input type="text" class="form-control subcriterion-name" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                <input type="number" class="form-control weight-input subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
                 @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
-                <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="Delete Sub Criteria">
+                <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="{{ __('cycles.Delete Sub Criteria') }}">
                   <i class="fas fa-trash-alt"></i>
                 </button>
                 @endif
@@ -749,12 +787,12 @@
           categoryDiv.innerHTML = `
             <div class="category-header">
               <div class="w-100 d-flex justify-content-between align-items-center">
-                <input id="category-input" type="text" class="form-control category-name" placeholder="Category Name" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
+                <input id="category-input" type="text" class="form-control category-name" placeholder="{{ __('cycles.Category Name') }}" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
                 <div class="d-flex align-items-center">
-                  <input type="number" class="form-control weight-input category-weight" placeholder="Weight (%)" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
+                  <input type="number" class="form-control weight-input category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
                   @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
-                  <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="Delete Criteria">
-                    <i class="fas fa-trash-alt me-2"></i> Delete Criteria
+                  <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="{{ __('cycles.Delete Criteria') }}">
+                    <i class="fas fa-trash-alt me-2"></i> {{ __('cycles.Delete Criteria') }}
                   </button>
                   @endif
                 </div>
@@ -765,7 +803,7 @@
             @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
             <div class="category-actions">
               <button class="btn btn-label-secondary btn-sm add-subcriterion-btn" data-category-index="${categoryIndex}">
-                <i class="fas fa-plus me-2"></i> Add Sub-criteria
+                <i class="fas fa-plus me-2"></i> {{ __('cycles.Add Sub-criteria') }}
               </button>
             </div>
             @endif
@@ -843,8 +881,8 @@
         const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
         if (isNaN(categoryIndex)) return;
 
-        const categoryName = evaluationModelData.categories[categoryIndex]?.name || 'this category';
-        if (confirm(`Are you sure you want to delete "${categoryName}" and all its sub-criteria?`)) {
+        const categoryName = evaluationModelData.categories[categoryIndex]?.name || '{{ __('cycles.this category') }}';
+        if (confirm(`{{ __('cycles.Are you sure you want to delete') }} "${categoryName}" {{ __('cycles.and all its sub-criteria?') }}`)) {
           evaluationModelData.categories.splice(categoryIndex, 1);
           renderModelEditor();
         }
@@ -858,8 +896,8 @@
         const subIndex = parseInt(btn.dataset.subIndex);
         if (isNaN(categoryIndex) || isNaN(subIndex)) return;
 
-        const subName = evaluationModelData.categories[categoryIndex]?.subCriteria[subIndex]?.name || 'this sub-criterion';
-        if (confirm(`Are you sure you want to delete "${subName}"?`)) {
+        const subName = evaluationModelData.categories[categoryIndex]?.subCriteria[subIndex]?.name || '{{ __('cycles.this sub-criterion') }}';
+        if (confirm(`{{ __('cycles.Are you sure you want to delete') }} "${subName}"?`)) {
           evaluationModelData.categories[categoryIndex].subCriteria.splice(subIndex, 1);
           renderModelEditor();
         }
@@ -912,24 +950,18 @@
                 console.log(response);
                 if (response.status) {
                   evaluationModelData.categories = response.data;
-                  modelValidationSummary.textContent = 'Model saved successfully!';
-                  modelValidationSummary.className = 'alert alert-success alert-dismissible';
-                  modelValidationSummary.style.display = 'block';
+                  showAlert(modelValidationSummary, '{{ __('cycles.Model saved successfully!') }}', 'success', 3000);
                 } else {
-                  modelValidationSummary.textContent = response.message;
-                  modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-                  modelValidationSummary.style.display = 'block';
+                  showAlert(modelValidationSummary, response.message, 'danger');
                 }
               },
               error: function(error) {
                 console.error("Error saving model:", error);
-                modelValidationSummary.textContent = 'Error saving model. Please try again.';
-                modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-                modelValidationSummary.style.display = 'block';
+                showAlert(modelValidationSummary, '{{ __('cycles.Error saving model. Please try again.') }}', 'danger');
               }
             });
           } else {
-            alert("Please fix the validation errors before saving.");
+            alert("{{ __('cycles.Please fix the validation errors before saving.') }}");
           }
         }
         @endif
@@ -954,24 +986,18 @@
                 console.log(response);
                 if (response.status) {
                   evaluationModelData.categories = response.data;
-                  modelValidationSummary.textContent = 'Model saved successfully!';
-                  modelValidationSummary.className = 'alert alert-success alert-dismissible';
-                  modelValidationSummary.style.display = 'block';
+                  showAlert(modelValidationSummary, '{{ __('cycles.Model saved successfully!') }}', 'success', 3000);
                 } else {
-                  modelValidationSummary.textContent = response.message;
-                  modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-                  modelValidationSummary.style.display = 'block';
+                  showAlert(modelValidationSummary, response.message, 'danger');
                 }
               },
               error: function(error) {
                 console.error("Error saving model:", error);
-                modelValidationSummary.textContent = 'Error saving model. Please try again.';
-                modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-                modelValidationSummary.style.display = 'block';
+                showAlert(modelValidationSummary, '{{ __('cycles.Error saving model. Please try again.') }}', 'danger');
               }
             });
           } else {
-            alert("Please fix the validation errors before saving.");
+            alert("{{ __('cycles.Please fix the validation errors before saving.') }}");
           }
         }
         @endif
@@ -997,25 +1023,18 @@
 
             if (Math.abs(totalSubCriterionWeight - 1.0) > 0.001) {
               isValid = false;
-              categoryErrorMessage = `Sub-criterion weights must sum to 100% (currently ${(totalSubCriterionWeight * 100).toFixed(1)}%).`;
-              globalErrorMessages.push(`Category "${category.name}": ${categoryErrorMessage}`);
+              categoryErrorMessage = `{{ __('cycles.Sub-criterion weights must sum to 100%') }} ({{ __('cycles.currently') }} ${(totalSubCriterionWeight * 100).toFixed(1)}%).`;
+              globalErrorMessages.push(`{{ __('cycles.Category') }} "${category.name}": ${categoryErrorMessage}`);
             }
           } else if (category.weight > 0) {
-            categoryErrorMessage = `Warning: Category has weight but no sub-criteria. It won't contribute to score.`;
-            if (categoryValidationDiv) {
-              categoryValidationDiv.className = 'alert alert-warning alert-dismissible';
-            }
+            categoryErrorMessage = `{{ __('cycles.Warning: Category has weight but no sub-criteria. It won\'t contribute to score.') }}`;
           }
 
           if (categoryValidationDiv) {
             if (categoryErrorMessage && categoryErrorMessage.startsWith('Warning:')) {
-              categoryValidationDiv.textContent = categoryErrorMessage;
-              categoryValidationDiv.className = 'alert alert-warning alert-dismissible';
-              categoryValidationDiv.style.display = 'block';
+              showAlert(categoryValidationDiv, categoryErrorMessage, 'warning');
             } else if (categoryErrorMessage) {
-              categoryValidationDiv.textContent = categoryErrorMessage;
-              categoryValidationDiv.className = 'alert alert-danger alert-dismissible';
-              categoryValidationDiv.style.display = 'block';
+              showAlert(categoryValidationDiv, categoryErrorMessage, 'danger');
             } else {
               categoryValidationDiv.style.display = 'none';
             }
@@ -1024,23 +1043,14 @@
 
         if (Math.abs(totalCategoryWeight - 1.0) > 0.001) {
           isValid = false;
-          globalErrorMessages.push(`Total category weights must sum to 100% (currently ${(totalCategoryWeight * 100).toFixed(1)}%).`);
+          globalErrorMessages.push(`{{ __('cycles.Total category weights must sum to 100%') }} ({{ __('cycles.currently') }} ${(totalCategoryWeight * 100).toFixed(1)}%).`);
         }
 
         if (showGlobalSummary) {
           if (!isValid) {
-            modelValidationSummary.innerHTML = '<strong>Validation Errors:</strong><br>' + globalErrorMessages.join('<br>');
-            modelValidationSummary.className = 'alert alert-danger alert-dismissible';
-            modelValidationSummary.style.display = 'block';
+            showAlert(modelValidationSummary, '<strong>{{ __('cycles.Validation Errors:') }}</strong><br>' + globalErrorMessages.join('<br>'), 'danger');
           } else {
-            modelValidationSummary.textContent = 'Model structure is valid.';
-            modelValidationSummary.className = 'alert alert-success alert-dismissible';
-            modelValidationSummary.style.display = 'block';
-            setTimeout(() => {
-              if (modelValidationSummary.classList.contains('alert-success')) {
-                modelValidationSummary.style.display = 'none';
-              }
-            }, 3000);
+            showAlert(modelValidationSummary, '{{ __('cycles.Model structure is valid.') }}', 'success', 3000);
           }
         } else {
           if (!modelValidationSummary.classList.contains('alert-danger') && !modelValidationSummary.classList.contains('alert-success')) {
@@ -1077,8 +1087,8 @@
       let panel = lastTrData + 1;
       let html = `<tr data-panel="${panel}">
         <td>
-          <i title="Remove panel" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
-          Panel list ${panel}
+          <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+          {{ __('cycles.Panel list') }} ${panel}
         </td>
         <td>
           <select name="judges[${panel}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
@@ -1124,8 +1134,8 @@
       $('#panels-list-body tr').each(function() {
         const $tr = $(this);
         let line = `
-            <i title="Remove panel" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
-            Panel list ${index}
+            <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+            {{ __('cycles.Panel list') }} ${index}
         `;
         index++
         $($tr).find('td').eq(0).html(line);
