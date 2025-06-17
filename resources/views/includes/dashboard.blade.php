@@ -872,12 +872,12 @@
 														<td> {{ $session->admin_comment ?? '...' }} </td>
 														<td>
 															@php
+															date_default_timezone_set('Africa/Cairo');
 															$now = date('Y-m-d H:i');
 															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
 															@endphp
 															@if ($now >= $start_time && $now <= $end_time)
-															
 															<a href="{{ $session->start_url }}" target="_blank">
 																<button title="Start Meeting" type="button" data-value="{{ $session->id }}"
 																	type="button" class="btn btn-label-primary rounded">
