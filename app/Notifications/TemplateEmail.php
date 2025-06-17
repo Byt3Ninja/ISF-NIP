@@ -20,9 +20,9 @@ class TemplateEmail extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(array $Message = [])
     {
-        //
+        $this->Message = $Message;
     }
 
     /**
@@ -61,10 +61,10 @@ class TemplateEmail extends Notification implements ShouldQueue
      * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray($notifiable)
+    public function toDatabase(object $notifiable): array
     {
-        return [
-            //
+       return [
+            'message' => implode(',', array_map('trim', $this->Message)),
         ];
     }
 }
