@@ -219,6 +219,11 @@
         const eventData = JSON.parse(event.data);
     });
 
+     const mentorStartupChannel = pusher.subscribe("mentorship-session");
+       judgerChannel.bind("MentorshipSessionUpdated", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
         // Listen for Pusher internal events for debugging
         pusher.connection.bind("state_change", function (states) {
           // console.log("Connection state changed:", states);

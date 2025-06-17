@@ -23,6 +23,7 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use App\Factories\OnlineMeetingFactory;
 use App\Notifications\MentorshipRequestNotification;
+use App\Events\MentorshipSessionUpdated;
 
 class MentorsController extends Controller
 {
@@ -738,34 +739,26 @@ Thanks from " . env('APP_NAME');
 				$date_Request = $session->zoom_date;
 				$rFullName = $rName->name;
 				$rFullName_usr = $rName_usr->name;
-				$MSG = new TemplateEmail;
-				if ($request->stat == 'Yes') {
-				$MSG->Message = [
-					"New Mentorship session - VI portal",
-					"Dear " . $rFullName . ",",
-					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start: " . $date_Request . ", Check your account to join the session ",
-					"/dashboard"
-				];
-				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-					$Massage = "Dear " . $rFullName . ",
+				  $MSG = new TemplateEmail([
+                    "New Mentorship session - VI portal",
+                    "Dear " . $rFullName . ",",
+                    ($request->stat == 'Yes') ?
+                        "Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start: " . $date_Request . ", Check your account to join the session " :
+                        "Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
+                    "/dashboard"
+                ]);
+                $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
+                $Massage = ($request->stat == 'Yes') ?
+                    "Dear " . $rFullName . ",
 you have a new mentorship session with '" . $rFullName_usr . "',
 Session will start:" . $date_Request . ",
 Check your account to join the session,
-Thanks from " . env('APP_NAME');
-
-			}else{
-				$MSG->Message = [
-					"New Mentorship session - VI portal",
-					"Dear " . $rFullName . ",",
-					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
-					"/dashboard"
-				];
-				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-					$Massage = "Dear " . $rFullName . ",
+Thanks from " . env('APP_NAME') :
+                    "Dear " . $rFullName . ",
 you have a new mentorship session with '" . $rFullName_usr . "',
 is Rejected
 Thanks from " . env('APP_NAME');
-			}
+	
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {
@@ -780,33 +773,25 @@ Thanks from " . env('APP_NAME');
 				$user = new User();
 				$user->email = $rName_usr->email;
 				$user->id = $rName_usr->id;
-				$MSG = new TemplateEmail;
-				if ($request->stat == 'Yes') {
-				$MSG->Message = [
-					"New Mentorship session - VI portal",
-					"Dear " . $rFullName_usr . ",",
-					"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start: " . $date_Request . ", Check your account to join the session ",
-					"/dashboard"
-				];
-				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-					$Massage = "Dear " . $rFullName_usr . ",
+				 $MSG = new TemplateEmail([
+                    "New Mentorship session - VI portal",
+                    "Dear " . $rFullName_usr . ",",
+                    ($request->stat == 'Yes') ?
+                        "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start: " . $date_Request . ", Check your account to join the session " :
+                        "Kindly note you have a new mentorship session with '" . $rFullName . "', is Rejected",
+                    "/dashboard"
+                ]);
+                $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+                $Massage = ($request->stat == 'Yes') ?
+                    "Dear " . $rFullName_usr . ",
 you have a new mentorship session with '" . $rFullName . "',
 Session will start:" . $date_Request . ",
 Check your account to join the session,
-Thanks from " . env('APP_NAME');
-			}else{
-					$MSG->Message = [
-						"New Mentorship session - VI portal",
-						"Dear " . $rFullName_usr . ",",
-						"Kindly note you have a new mentorship session with '" . $rFullName . "', is Rejected",
-						"/dashboard"
-					];
-					$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-					$Massage = "Dear " . $rFullName_usr . ",
+Thanks from " . env('APP_NAME') :
+                    "Dear " . $rFullName_usr . ",
 you have a new mentorship session with '" . $rFullName . "',
 is Rejected
 Thanks from " . env('APP_NAME');
-				}
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {
@@ -818,7 +803,7 @@ Thanks from " . env('APP_NAME');
 					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 				/// End of mail send
-				return response()->json('success');
+ 				broadcast(new MentorshipSessionUpdated($session->mentor_id, $session->user_id, $MSG->Message, $request->stat));				return response()->json('success');
 			} elseif ($type == 5) {
 				$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
 				$sessions = MentorshipRequest::where('mentor_id', $request->id)
