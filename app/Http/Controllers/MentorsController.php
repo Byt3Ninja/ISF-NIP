@@ -15,12 +15,13 @@ use App\Events\WebMessage;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use App\Jobs\ExportMentorsData;
-use Illuminate\Support\Facades\DB;
+use App\Events\RequestMentorship;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use App\Factories\OnlineMeetingFactory;
-use Illuminate\Support\Facades\Log;
 use App\Notifications\MentorshipRequestNotification;
 
 class MentorsController extends Controller
@@ -408,6 +409,8 @@ class MentorsController extends Controller
 				} catch (\Throwable $th) {
 					throw $th;
 				}
+				// Broadcast the RequestMentorship event
+       			broadcast(new RequestMentorship($data));
 				$phoneNumber = $mentor->country_code_w_a . $mentor->whatsapp;
 				$Massage = "Dear " . $mentor->name . ",
  '" . $data['company_name'] . "' has sent you a mentorship request,

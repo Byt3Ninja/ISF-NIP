@@ -27,7 +27,7 @@ class StartupJoiningNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail','database'];
     }
 
     /**
@@ -50,6 +50,15 @@ class StartupJoiningNotification extends Notification
         return [
             'message' => __('admin.Startup_Joined_New_Program_subject'),
             'user_id' => $notifiable->id,
+        ];
+    }
+
+     public function toDatabase(object $notifiable): array
+    {
+       return [
+            'message' => ' Congratulations! You have successfully joined the ' . ($this->data['cycle'] ?? 'N/A') . 
+                ' We are excited to have you on board and look forward to supporting your journey.
+                Thanks from ' . env('APP_NAME'),
         ];
     }
 }

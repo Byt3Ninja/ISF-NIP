@@ -21,6 +21,7 @@ use http\Env\Response;
 use App\Finalscreening;
 use App\TrainingSession;
 use Illuminate\Http\Request;
+use App\Events\StartupJoining;
 use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
@@ -694,6 +695,7 @@ class CyclesController extends Controller
         if( !in_array(env('APP_ENV', 'local'), ['local']) )
         {
             try {
+                broadcast(new StartupJoining($data));
                 $user->notify(new StartupJoiningNotification($data));
                 log::info('Sent notification to ' . $user->email);
             } catch (\Throwable $th) {

@@ -13,6 +13,7 @@ use App\Events\ChangeStep;
 use Illuminate\Support\Arr;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
+use App\Events\JudgeAssigned;
 use App\Jobs\ExportScreeneData;
 use App\Jobs\ExportResScreenData;
 use App\Services\WhatsAppService;
@@ -198,6 +199,11 @@ class ScreeningController extends Controller
 							" to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
 							"/dashboard"
 						];
+						broadcast(new JudgeAssigned(
+    						$rname->id,
+    						"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period is from " . $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ".",
+    						"/dashboard"
+						));
 						if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 							try {
 								$user->notify($MSG);
