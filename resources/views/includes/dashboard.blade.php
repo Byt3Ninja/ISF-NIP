@@ -557,26 +557,32 @@
 						<div class="col-md-12">
 							<div class="card mt-10">
 								<div class="card-header border-bottom">
-									<h5 class="card-title align-items-center">
-										<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
-										@if($days!=14)
-										<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14
-											{{__('cycles.days')}}</div>
-										@else
-										<div onclick="redirectWithDays('14')" class="btn btn-label-warning" id="forteenDays"> 14
-											{{__('cycles.days')}}</div>
-										@endif
-										@if($days!=7)
-										<div onclick="redirectWithDays('7')" class="btn btn-label-success" id="sevenDays"> 7
-											{{__('cycles.days')}}</div>
-										@else
-										<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7
-											{{__('cycles.days')}}</div>
-										@endif
-										<a href="/dashboard/mentorship/mine">
-											<div class="btn btn-label-info">{{__('cycles.showAll')}}</div>
+									<div class="d-flex justify-content-between align-items-center">
+										<div class="d-flex align-items-center">
+											<i class='ti ti-calendar-event me-2'></i> 
+											<h5 class="card-title mb-0">
+												{{ __("dashboard.UpcomingMentorsSession") }}
+												{{-- @if($days!=14)
+												<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14
+													{{__('cycles.days')}}</div>
+												@else
+												<div onclick="redirectWithDays('14')" class="btn btn-label-warning" id="forteenDays"> 14
+													{{__('cycles.days')}}</div>
+												@endif
+												@if($days!=7)
+												<div onclick="redirectWithDays('7')" class="btn btn-label-success" id="sevenDays"> 7
+													{{__('cycles.days')}}</div>
+												@else
+												<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7
+													{{__('cycles.days')}}</div>
+												@endif --}}
+											</h5>
+										</div>
+										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
+											<i class="ti ti-eye me-2 ti-16px"></i>
+											{{__('cycles.showAll')}}
 										</a>
-									</h5>
+									</div>
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
@@ -612,13 +618,14 @@
 													<td>
 														<div style="cursor: pointer;" class="d-flex align-items-center"
 															onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
-															<div class="chip-body">
-																<div class="avatar">
-																	<img class="img-fluid rounded-circle me-3" src="{{$session->mentor->image_url}}"
-																		alt="Mentor photo" height="20" width="20">
-																</div>
-																<span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
+															<div class="avatar">
+																<img 
+																	class="img-fluid rounded-circle me-3" 
+																	src="{{$session->mentor->image_url ?? '/icons/account.svg'}}"
+																	alt="image" height="20" width="20"
+																/>
 															</div>
+															<span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
 														</div>
 													</td>
 													@if ($_user->hasRole('Admin'))
@@ -632,7 +639,11 @@
 																class="warning">'.__('Waiting').'</span>' !!} </div>
 													</td>
 													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
-													<td> <a href="{{ $session->join_url }}" target="_blank">({{ __('dashboard.Join now') }})</a>
+													<td> 
+														<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+															<i class="ti ti-brand-zoom me-2"></i>
+															{{ __('dashboard.Join now') }}
+														</a>
 													</td>
 												</tr>
 												@endforeach

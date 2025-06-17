@@ -58,7 +58,11 @@
 
                                 </td>
                                 <td>{{ $session->zoom_date }} ({{ $session->period }}M)</td>
-                                <td>{{ $session->admin_comment ?? $session->comment }}</td>
+                                <td>
+                                  <p class="line-clamp-3" style="max-width: 300px;">
+                                    {{ $session->admin_comment ?? $session->comment }}
+                                  </p>
+                                </td>
 
 
                                 <td>

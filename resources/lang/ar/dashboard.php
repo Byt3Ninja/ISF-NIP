@@ -29,6 +29,7 @@ return [
     'My Requests' => 'طلباتي',
     'Mentors' => 'المرشدين',
     'MentorsSession' => 'جلسات المرشدين',
+    'UpcomingMentorsSession' => 'جلسات المرشدين القادمة',
     'No Cycles started yet' => 'لا يوجد برامج جديدة حاليا',
     'Your next mentorship session with' => 'اجتماعك القادم سيكون مع',
     'will start' => 'سوف يبدأ',
