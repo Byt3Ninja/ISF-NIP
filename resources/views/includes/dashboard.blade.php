@@ -872,7 +872,6 @@
 														<td> {{ $session->admin_comment ?? '...' }} </td>
 														<td>
 															@php
-															date_default_timezone_set('Africa/Cairo');
 															$now = date('Y-m-d H:i');
 															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
