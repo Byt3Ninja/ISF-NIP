@@ -1969,4 +1969,7 @@ return [
 	'error_updating_recordings' => 'خطاء في تحديث التسجيلات',
 	'Notification' => 'إشعار',
 	'NoNotifications' => 'لا توجد اشعارات',
+	'Panel' => 'لوحة',
+	'Judges' => 'محكمين',
+	'Panel_list' => 'قائمة اللوحات',
 ];

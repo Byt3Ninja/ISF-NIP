@@ -256,14 +256,14 @@
                   <input type="hidden" value="{{ $cstep->id }}" name="step">
                   <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
                   @if ($cstep->data == 'grouptogroup')
-                    <div class="text-end py-3"> <button id="addPanelBtn" type="button" class="btn btn-dark"> <i class="fas fa-fw fa-sm fa-plus"></i> Add new panel </button> </div>
+                    <div class="text-end py-3"> <button id="addPanelBtn" type="button" class="btn btn-label-primary"> <i class="fas fa-fw fa-sm fa-plus me-2"></i> {{ __('admin.Add_New') }} </button> </div>
                     <div class="table-responsive">
                       <table class="table table-bordered table-hover">
                         <thead>
                           <tr>
-                            <th style="width: 20% !important;" scope="col">Panel</th>
-                            <th style="width: 40% !important;" scope="col">Judges</th>
-                            <th style="width: 40% !important;" scope="col">Users</th>
+                            <th style="width: 20% !important;" scope="col">{{ __('admin.Panel') }}</th>
+                            <th style="width: 40% !important;" scope="col">{{ __('admin.Judges') }}</th>
+                            <th style="width: 40% !important;" scope="col">{{ __('admin.Users') }}</th>
                           </tr>
                         </thead>
                         <tbody id="panels-list-body">
@@ -271,7 +271,7 @@
                             <tr data-panel="{{ $key }}">
                               <td>
                                 <i title="Remove panel" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
-                                Panel list {{ $key }}
+                                {{ __('admin.Panel_list') }} {{ $key }}
                               </td>
                               <td>
                                 <select name="judges[{{ $key }}][]" class="select2 form-control panel judgers-selectors" multiple="multiple">
@@ -357,11 +357,9 @@
                       </select>
                     </div>
                   @endif
-                  <div class="custom-control custom-switch custom-control-inline mt-4">
-                    <span>{{ __('cycles.Notify them') }}</span> 
-                    <input name="notify" type="checkbox" class="custom-control-input" id="customSwitch1">
-                    <label class="custom-control-label mr-1" for="customSwitch1"></label>
-                    <br><br>
+                  <div class="form-check my-4">
+                    <input class="form-check-input" type="checkbox" id="customSwitch1"  name="notify" />
+                    <label class="form-check-label" for="customSwitch1">{{ __('cycles.Notify them') }}</label>
                   </div>
                   <div class="row">
                     <div class="col-12 d-flex justify-content-end">

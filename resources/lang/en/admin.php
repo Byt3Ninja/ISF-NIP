@@ -1920,4 +1920,7 @@ return [
 	'Notification' => 'Notification',
 	'mark_all_as_read' => 'Mark all as read',
 	'NoNotifications' => 'No new notifications',
+	'Panel' => 'Panel',
+	'Judges' => 'Judges',
+	'Panel_list' => 'Panel list',
 ];

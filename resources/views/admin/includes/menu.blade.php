@@ -25,21 +25,21 @@
         <img
           src="{{ $imageUrl }}"
           alt="avatar"
-          class="object-fit-cover me-2 rounded-circle border p-1 bg-white"
+          class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
           style="width: 50px; height: 50px;"
         />
       @else
       @if(!empty($setting->Logo))
         <img
           src="/images/logo/{{ $setting->Logo }}" alt="avatar" 
-          class="object-fit-cover me-2 rounded-circle border p-1 bg-white"
+          class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
           style="width: 50px; height: 50px;"
         />
         @else
           <img 
             src="/images/background/logo.png" 
             alt="avatar" 
-            class="object-fit-cover me-2 rounded-circle border p-1 bg-white"
+            class="object-fit-contain me-2 rounded-circle border p-1 bg-white"
             style="width: 50px; height: 50px;"
           />
         @endif
