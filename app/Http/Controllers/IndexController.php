@@ -31,9 +31,9 @@ class IndexController extends Controller
     {
         $this->Settings = Settings::where('id', 1)->first();
         $this->t = Settings::where('type', '1')->first(['ar_title', 'title']);
-        if($this->Settings->HomePage == true){
-       $this->SocialIcons = settings::where('type', 2)->whereNotNull('url')->orderBy('set_order')->get();
-       $this->contact = Settings::findorfail('11');
+        if ($this->Settings->HomePage == true) {
+            $this->SocialIcons = settings::where('type', 2)->whereNotNull('url')->orderBy('set_order')->get();
+            $this->contact = Settings::findorfail('11');
         }
         // Load config values in the constructor
         // $this->baseUrl = rtrim(config('whatsapp.base_url'), '/'); // Ensure no trailing slash
@@ -49,11 +49,9 @@ class IndexController extends Controller
 
     public function dbMigrate(Request $request)
     {
-        if( $request->has('token') )
-        {
+        if ($request->has('token')) {
             $token = $request->input('token', null);
-            if( $token == 'dbMigrate@PreForm!@NoW' )
-            {
+            if ($token == 'dbMigrate@PreForm!@NoW') {
                 try {
                     Artisan::call('migrate', [
                         '--force' => true, // Avoid confirmation prompt
@@ -75,8 +73,8 @@ class IndexController extends Controller
 
     public function lang($locale)
     {
-        $availLocale=['ar'=>'ar','en'=>'en'];
-        if(array_key_exists($locale,$availLocale)) {
+        $availLocale = ['ar' => 'ar', 'en' => 'en'];
+        if (array_key_exists($locale, $availLocale)) {
             App::setLocale($locale);
             session()->put('locale', $locale);
         }
@@ -85,41 +83,37 @@ class IndexController extends Controller
 
     public function home()
     {
-        if($this->Settings->HomePage == false){
+        if ($this->Settings->HomePage == false) {
 
-        if (auth()->check()){
-            return redirect(route('core.dashboard_view'));
+            if (auth()->check()) {
+                return redirect(route('core.dashboard_view'));
+            }
+            return view('auth.login')->with('t', $this->t);
+
+        } else {
+            $CR = Route::getFacadeRoot()->current()->uri();
+            if ($CR == "about") {
+                $about = App\Settings::findorfail('10');
+                return view('pages.about')->with('t', $this->t)->with('about', $about)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
+            } elseif ($CR == "contact") {
+                return view('pages.contact')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons);
+            } elseif ($CR == "events") {
+                return view('pages.events')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR', $CR);
+            } elseif ($CR == "faqs") {
+                $faqs = App\Faq::whereNotNull('Published')->get();
+                return view('pages.faqs')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR', $CR)->with('faqs', $faqs);
+            } elseif ($CR == "/") {
+                $CR = 'pages.home';
+            } else {
+                $CR = 'pages.' . $CR;
+            }
+            return view($CR)->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
         }
-        return view('auth.login')->with('t', $this->t);
-        
-    }else{
-       $CR = Route::getFacadeRoot()->current()->uri();
-       if ($CR == "about") {
-           $about = App\Settings::findorfail('10');
-           return view('pages.about')->with('t', $this->t)->with('about', $about)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
-       }
-       elseif ($CR == "contact") {
-           return view('pages.contact')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons);
-       }
-       elseif ($CR == "events") {
-           return view('pages.events')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR);
-       }
-       elseif ($CR == "faqs") {
-           $faqs = App\Faq::whereNotNull('Published')->get();
-           return view('pages.faqs')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR)->with('faqs',$faqs);
-       }
-       elseif ($CR == "/") {
-           $CR = 'pages.home';
-       } else {
-           $CR = 'pages.' . $CR;
-       }
-       return view($CR)->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
-    }
     }
 
     public function post($id)
     {
-        $post = App\Posts::where('published','on')->where('id', $id)->first();
+        $post = App\Posts::where('published', 'on')->where('id', $id)->first();
         if ($post) {
             return view('pages.blog-details')
                 ->with('t', $this->t)
@@ -131,10 +125,10 @@ class IndexController extends Controller
 
     public function page($id)
     {
-        $page = App\Pages::where('published','on')->where('url', $id)->first();
+        $page = App\Pages::where('published', 'on')->where('url', $id)->first();
         if ($page) {
             return view('pages.page')
-                ->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact)->with('page',$page);
+                ->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact)->with('page', $page);
         } else {
             return abort(404);
         }
@@ -160,10 +154,13 @@ class IndexController extends Controller
             $user = new App\User();
             $user->email = $setmail->title;
             $MSG = new App\Notifications\TemplateEmail;
-            $MSG->Message = ["New subscribe to Newsletter ",
-                "Add my Email to your newsletter list: ", $Email, "subscribe from VI website"];
-            if( !in_array(env('APP_ENV', 'local'), ['local']) )
-            {
+            $MSG->Message = [
+                "New subscribe to Newsletter ",
+                "Add my Email to your newsletter list: ",
+                $Email,
+                "subscribe from VI website"
+            ];
+            if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
                     $user->notify($MSG);
                 } catch (\Throwable $th) {
@@ -182,7 +179,7 @@ class IndexController extends Controller
         if ($Email == filter_var($Email, FILTER_VALIDATE_EMAIL)) {
             $new = new Messages();
             $new->name = $request->input('Name');
-            $new->internal_id = $request->internal_id ?? null ;
+            $new->internal_id = $request->internal_id ?? null;
             $new->phone = $request->input('Phone');
             $new->email = $Email;
             $new->subject = $request->input('Subject');
@@ -217,10 +214,12 @@ class IndexController extends Controller
     public function eventregister(Request $request)
     {
         $Email = $request->input('Email');
-        $ChkReg = App\EventsUser::where('email',$Email)->where('event_id',$request->input('eventid'))->get('id');
+        $ChkReg = App\EventsUser::where('email', $Email)->where('event_id', $request->input('eventid'))->get('id');
         if ($Email = filter_var($Email, FILTER_VALIDATE_EMAIL)) {
-            $ChkReg = App\EventsUser::where('email',$Email)->where('event_id',$request->input('eventid'))->first('id');
-            if ($ChkReg) {return redirect()->back()->with('message', 'already');}
+            $ChkReg = App\EventsUser::where('email', $Email)->where('event_id', $request->input('eventid'))->first('id');
+            if ($ChkReg) {
+                return redirect()->back()->with('message', 'already');
+            }
             $new = new App\EventsUser();
             $new->name = $request->input('Name');
             $new->phone = $request->input('Phone');
@@ -236,20 +235,20 @@ class IndexController extends Controller
         }
     }
 
-       
- /**
+
+    /**
      * Prepare HTTP client with common headers.
      *
      * @return \Illuminate\Http\Client\PendingRequest
      */
     //  protected function prepareHttpClient()
     // {
-       
+
     //     if (!$this->apiKey) {
     //         // Handle case where API key is missing
     //         throw new \Exception("WhatsApp API Key is not configured.");
     //     }
-       
+
     //     return Http::withHeaders([
     //         'Accept' => 'application/json',
     //         'x-api-key' => $this->apiKey,
@@ -265,7 +264,7 @@ class IndexController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-     public function sendMessage(Request $request): JsonResponse
+    public function sendMessage(Request $request): JsonResponse
     {
 
 
@@ -275,13 +274,13 @@ class IndexController extends Controller
         ]);
         $phoneNumber = $request->input('to');
         $message = $request->input('message');
-     
-     SendWhatsAppMessageJob::dispatch($phoneNumber, $message, auth()->user()->organization);
-        
+
+        SendWhatsAppMessageJob::dispatch($phoneNumber, $message, auth()->user()->organization);
+
         return response()->json([
-                'success' => true,
-                'message' => 'Message sent successfully.'.$message,
-            ]);
+            'success' => true,
+            'message' => 'Message sent successfully.' . $message,
+        ]);
 
         //  $settings = Settings::where('id', 1)->first();
         //  if($settings->whatsApp_Status_Session == 1){    
@@ -317,7 +316,7 @@ class IndexController extends Controller
         //     ], $e->response?->status() ?? 500);
         // } catch (\Exception $e) {
         //     Log::error("General error sending WhatsApp message from session {$sessionId}: " . $e->getMessage());
-          
+
         //     return response()->json([
         //         'success' => false,
         //         'error' => 'An unexpected error occurred while sending the message.'
@@ -326,24 +325,24 @@ class IndexController extends Controller
     }
 
 
-    public function mineRate()
-	{
-		$requests_q = "SELECT *
-               FROM mentorship_requests 
-               WHERE mentorship_requests.done IS NULL
-               AND mentorship_requests.zoom_date <= ?";
-       $now = date('Y-m-d 23:59:59');
-        $result = DB::select($requests_q, [$now]);
-        $result = collect($result);
- 
-            foreach ($result as $request) {
-            if($request->approved == 'Yes'){
-                MentorshipRequest::where('id', $request->id)->update(['done' => 1]);
-            }else{
-                MentorshipRequest::where('id', $request->id)->update(['done' => 0,'approved'=> 'No']);
-            }
-                }
-		
-	}
+    // public function mineRate()
+    // {
+    // 	$requests_q = "SELECT *
+    //            FROM mentorship_requests 
+    //            WHERE mentorship_requests.done IS NULL
+    //            AND mentorship_requests.zoom_date <= ?";
+    //    $now = date('Y-m-d 23:59:59');
+    //     $result = DB::select($requests_q, [$now]);
+    //     $result = collect($result);
+
+    //         foreach ($result as $request) {
+    //         if($request->approved == 'Yes'){
+    //             MentorshipRequest::where('id', $request->id)->update(['done' => 1]);
+    //         }else{
+    //             MentorshipRequest::where('id', $request->id)->update(['done' => 0,'approved'=> 'No']);
+    //         }
+    //             }
+
+    // }
 
 }

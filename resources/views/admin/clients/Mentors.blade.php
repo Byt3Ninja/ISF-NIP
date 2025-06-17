@@ -768,6 +768,7 @@
             $('#tto').val(response.tto);
             $('#notes').val(response.notes);
             $('#SendRequest').modal('show');
+            console.log(response);
           },
           error: function(error) {
             console.log(error);

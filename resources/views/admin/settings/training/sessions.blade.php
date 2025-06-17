@@ -176,8 +176,21 @@
                         <td>{{ $key + 1 }}</td>
                         <td>{{ __('cycles.' . $session->type) }}</td>
                         <td>{{ $session->title }}</td>
-                        <td>{{ $session->datetime}}</td>
-                        <td>{{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}</td>
+                        <td>
+                          @if($session->type == "online")
+                          {{ FormatDate($session->datetime, 'Y-m-d') ?? '-' }}
+                          @else
+                          {{ FormatDate($session->datetime, 'Y-m-d H:i') ?? '-' }}
+                          @endif
+                          
+                        </td>
+                        <td>
+                          @if($session->type == "online")
+                          {{ FormatDate($session->enddatetime, 'Y-m-d') ?? '-' }}
+                          @else
+                          {{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}
+                          @endif
+                        </td>
                         <td>
                           @if ($session->type == 'sessions')
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
