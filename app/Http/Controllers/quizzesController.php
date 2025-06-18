@@ -49,16 +49,16 @@ class quizzesController extends Controller
 		WHERE t.deleted_at IS NULL ";
 		if( $request->org_id != 0 )
 		{
-			$quizzes_q .= "AND q.organization_id = $request->org_id ";
+			$quizzes_q .= "AND q.organization_id = ? ";
 		}
 		if($request->status != 0){
-			$quizzes_q .= " AND q.status = '$request->status' ";
+			$quizzes_q .= "AND q.status = ? ";
 		}
 		if($request->Program_id != 0){
-			$quizzes_q .= "AND c.id = $request->Program_id ";
+			$quizzes_q .= "AND c.id = ? ";
 		}
 
-		$quizzes_q = DB::select($quizzes_q);
+		$quizzes_q = DB::select($quizzes_q, [$request->org_id, $request->status, $request->Program_id]);
 		$quizzes = collect($quizzes_q);
 
 		$quizzes = $quizzes->map(function ($quiz) {
