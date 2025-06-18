@@ -46,8 +46,8 @@ class MentorshipTaskController extends Controller
 			abort(404);
 		} else {
 			$lang = app()->getLocale();
-			$condition = "mentorship_tasks.mentorship_request_id = $request->mentorship_id ";
-			$tasks = $this->handleTask($lang, $condition, 'list');
+			$condition = "mentorship_tasks.mentorship_request_id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $request->mentorship_id, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
@@ -225,8 +225,8 @@ class MentorshipTaskController extends Controller
 			}
 			$task->labels()->sync($allowedLabels);
 
-			$condition = "mentorship_tasks.mentorship_request_id = $id ";
-			$tasks = $this->handleTask($lang, $condition, 'list');
+			$condition = "mentorship_tasks.mentorship_request_id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $id, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
 			$_tasks = $tasks->groupBy('status');
@@ -331,8 +331,8 @@ class MentorshipTaskController extends Controller
 					\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 
-		$condition = "mentorship_tasks.mentorship_request_id = $task->mentorship_request_id ";
-		$tasks = $this->handleTask($lang, $condition, 'list');
+		$condition = "mentorship_tasks.mentorship_request_id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $task->mentorship_request_id, 'list');
 		$tasks = $tasks->sortBy('row_no')->values();
 		$available_statuses = ['pending', 'progress', 'review', 'completed'];
 		$_tasks = $tasks->groupBy('status');
@@ -449,8 +449,8 @@ class MentorshipTaskController extends Controller
 			$task->labels()->sync($allowedLabels);
 			MentorshipTaskLog::insert($logsToAdd);
 
-			$condition = "mentorship_tasks.mentorship_request_id = $id ";
-			$tasks = $this->handleTask($lang, $condition, 'list');
+			$condition = "mentorship_tasks.mentorship_request_id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $id, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
 			$_tasks = $tasks->groupBy('status');
@@ -515,8 +515,8 @@ class MentorshipTaskController extends Controller
 			return response()->json($output, 422);
 		}
 		$task->delete();
-		$condition = "mentorship_tasks.mentorship_request_id = $id ";
-		$tasks = $this->handleTask($lang, $condition, 'list');
+		$condition = "mentorship_tasks.mentorship_request_id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $id, 'list');
 		$tasks = $tasks->sortBy('row_no')->values();
 		$available_statuses = ['pending', 'progress', 'review', 'completed'];
 		$_tasks = $tasks->groupBy('status');
@@ -650,8 +650,8 @@ class MentorshipTaskController extends Controller
 			}
 			MentorshipTaskFile::insert($filesToAdd);
 			$lang = app()->getLocale();
-			$condition = "mentorship_tasks.id = $card ";
-			$tasks = $this->handleTask($lang, $condition, 'show');
+			$condition = "mentorship_tasks.id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $card, 'show');
 			$task = $tasks->first();
 			return response()->json([
 				'status' => true,
@@ -767,9 +767,9 @@ class MentorshipTaskController extends Controller
 	public function display(string $id)
 	{
 		$lang = app()->getLocale();
-		$condition = "mentorship_tasks.id = $id ";
+		$condition = "mentorship_tasks.id = ? ";
 		$instance = Storage::disk('mentorship_tasks');
-		$tasks = $this->handleTask($lang, $condition, 'show');
+		$tasks = $this->handleTask($lang, $condition, $id, 'show');
 		if ($tasks == '404') {
 			abort(404);
 		} else {
@@ -792,8 +792,8 @@ class MentorshipTaskController extends Controller
 	public function show(string $id)
 	{
 		$lang = app()->getLocale();
-		$condition = "mentorship_tasks.id = $id ";
-		$tasks = $this->handleTask($lang, $condition, 'show');
+		$condition = "mentorship_tasks.id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $id, 'show');
 		if ($tasks == '404') {
 			abort(404);
 		} else {
@@ -969,7 +969,7 @@ class MentorshipTaskController extends Controller
 		return URL::to("/191014/$image");
 	}
 
-	private function handleTask($lang, $condition, $type)
+	private function handleTask($lang, $condition = null, $data = null, $type)
 	{
 		$query = "SELECT
 				mentorship_tasks.id AS id,
@@ -1047,9 +1047,8 @@ class MentorshipTaskController extends Controller
 				users user ON logs.user_id = user.id
 			WHERE
 				$condition
-				AND mentorship_tasks.parent_id IS null
-		";
-		$tasks = DB::select($query);
+				AND mentorship_tasks.parent_id IS null";
+		$tasks = DB::select($query, [$data]);
 		if (empty($tasks) && $type == 'show') {
 			return '404';
 		} else {
@@ -1227,9 +1226,9 @@ class MentorshipTaskController extends Controller
 			LEFT JOIN
 				labels l ON l.company_id = c.id
 			WHERE
-				mr.id = $id
+				mr.id = ?
 		";
-		$sessions = collect(DB::select($sessions));
+		$sessions = collect(DB::select($sessions, [$id]));
 		$sessions = $sessions->groupBy('id')->map(function ($groupedSession) {
 			$session = $groupedSession->first();
 			return [
