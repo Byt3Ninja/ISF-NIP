@@ -110,7 +110,7 @@
                 "default_for": [
                     "admin"
                 ]
-            }, 
+            },
             {
                 "name": "whatsapp.session.start",
                 "description": "WhatsApp Sessions Start",
@@ -120,7 +120,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }, 
+            },
             {
                 "name": "whatsapp.session.status",
                 "description": "WhatsApp Sessions Status",
@@ -130,7 +130,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }, 
+            },
             {
                 "name": "whatsapp.session.qr.data",
                 "description": "WhatsApp Sessions Qr Data",
@@ -140,7 +140,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }, 
+            },
             {
                 "name": "whatsapp.session.qr.image",
                 "description": "WhatsApp Sessions Qr Image",
@@ -160,7 +160,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }, 
+            },
             {
                 "name": "whatsapp.session.send",
                 "description": "WhatsApp Sessions Send Message",
@@ -170,7 +170,7 @@
                     "admin",
                     "organizationmanager"
                 ]
-            }, 
+            },
             {
                 "name": "whatsapp.session.getsessionid",
                 "description": "Get WhatsApp Sessions Id",
@@ -3134,6 +3134,16 @@
             {
                 "name": "mentorship_tasks.update_special",
                 "description": "Update Mentorship Task (Special)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.display",
+                "description": "Show Mentorship Task ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
