@@ -64,10 +64,8 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 
-  {{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
-  <link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
-  <link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css"> --}}
-
+  {{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css"> --}}
+  
   <!-- Page CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
