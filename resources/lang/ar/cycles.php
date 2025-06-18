@@ -260,7 +260,7 @@ return [
     'CoursStart'=>' تاريخ البداية ',
     'CoursEnd'=>' تاريخ الانتهاء ',
     'Draft'=>' حفظ ',
-    'Published'=>' نشر ',
+    'Published'=>' تم النشر ',
     'SaveProgram'=>' حفظ البرنامج ',
     'Cancel'=>' ألغاء ',
     'Beginner'=>' مبتداء ',
@@ -348,5 +348,6 @@ return [
     'Model structure is valid.' => 'هيكل النموذج صحيح.',
     'Panel list' => 'قائمة اللجنة',
     'Remove panel' => 'إزالة اللجنة',
+    'Important Notice' => 'إشعار مهم',
   ];
 

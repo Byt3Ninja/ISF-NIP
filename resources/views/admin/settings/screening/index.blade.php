@@ -378,6 +378,25 @@
         <div id="evaluation-model" class="card card-body tab-content active mt-6">
           <h4>{{ __('cycles.ManageEvaluationModel') }}</h4>
           <p class="text-muted">{{ __('cycles.EvaluationModelDescription') }}</p>
+          
+          <!-- Screamer Warning -->
+          @if( $_user->ableTo('screening.evaluation_publish', $permissions) )
+          <div></div>
+          @else
+          <div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-left: 4px solid #ff9f43;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>{{ __('cycles.Important Notice') }}:</strong><br>
+            <span dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
+              @if($l == 'ar')
+                يرجى الملاحظة أنه عند حفظ معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل الحفظ.
+              @else
+                Please note that once you save the criteria for companies applying to join the program, you will not be able to modify them later. Please review the criteria carefully before saving.
+              @endif
+            </span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          @endif
+          
           <div>
             <div class="d-flex align-items-center gap-4 mb-4">
               @if( $_user->ableTo('screening.evaluation_save_draft', $permissions) && $status == 'draft' )
@@ -773,7 +792,10 @@
             subCriteriaHTML += `
               <div class="sub-criterion-editor" data-subcriterion-id="${sub.id}">
                 <input type="text" class="form-control subcriterion-name" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-                <input type="number" class="form-control weight-input subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                <div class="input-group w-px-150">
+                  <input type="number" class="form-control subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                  <span class="input-group-text bg-label-secondary">%</span>
+                </div>
                 @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
                 <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="{{ __('cycles.Delete Sub Criteria') }}">
                   <i class="fas fa-trash-alt"></i>
@@ -789,7 +811,10 @@
               <div class="w-100 d-flex justify-content-between align-items-center">
                 <input id="category-input" type="text" class="form-control category-name" placeholder="{{ __('cycles.Category Name') }}" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
                 <div class="d-flex align-items-center">
-                  <input type="number" class="form-control weight-input category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
+                  <div class="input-group w-px-150">
+                    <input type="number" class="form-control category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
+                    <span class="input-group-text bg-label-secondary">%</span>
+                  </div>
                   @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
                   <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="{{ __('cycles.Delete Criteria') }}">
                     <i class="fas fa-trash-alt me-2"></i> {{ __('cycles.Delete Criteria') }}

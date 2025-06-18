@@ -351,5 +351,6 @@ return [
     'Model structure is valid.' => 'Model structure is valid.',
     'Panel list' => 'Panel list',
     'Remove panel' => 'Remove panel',
+    'Important Notice' => 'Important Notice',
 ];
 
