@@ -25,7 +25,8 @@
                 @endif
               </div>
               <div class="d-flex flex-column">
-                <h6 class="mb-0 text-capitalize text-secondary text-nowrap">{{ str_replace('-', ' ', $st->status) }}
+                <h6 class="mb-0 text-capitalize text-secondary text-nowrap">
+                  {{ __('admin.' . $st->status) }}
                 </h6>
                 <span class="fs-5 text-dark fw-bold">{{ $st->count }}</span>
               </div>

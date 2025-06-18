@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             orderable: false, 
             searchable: false,
             render: function (data, type, full, meta) {
-              return `<a href="/dashboard/company/profile/${data.company_id}" class="btn btn-sm btn-primary">
+              return `<a href="/dashboard/companyProfile/${data.company_id}" class="btn btn-sm btn-primary">
                         <i class="ti ti-eye me-1"></i>${t.view}
                       </a>`;
             }

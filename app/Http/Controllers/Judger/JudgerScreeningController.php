@@ -154,10 +154,10 @@ class JudgerScreeningController extends Controller
 
         $statusCounts = $companies->groupBy('status')->map->count();
         $statusData = [
-            (object) ['status' => 'startups', 'count' => $companies->count()],
-            (object) ['status' => 'not-started', 'count' => $statusCounts['not-started'] ?? 0],
-            (object) ['status' => 'in-progress', 'count' => $statusCounts['in-progress'] ?? 0],
-            (object) ['status' => 'completed', 'count' => $statusCounts['completed'] ?? 0],
+            (object) ['status' => 'Startups', 'count' => $companies->count()],
+            (object) ['status' => 'NotStarted', 'count' => $statusCounts['not-started'] ?? 0],
+            (object) ['status' => 'In_Progress', 'count' => $statusCounts['in-progress'] ?? 0],
+            (object) ['status' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
         ];
         $statuses = ['not-started', 'in-progress', 'completed'];
 
