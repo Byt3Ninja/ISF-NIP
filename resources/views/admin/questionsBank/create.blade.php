@@ -43,8 +43,6 @@
 		{
 			box-shadow: none !important;
 		}
-		[dir="rtl"] .ajs-header { text-align: left !important; }
-		[dir="ltr"] .ajs-header { text-align: right !important; }
 
 		@media screen and (max-width: 768px) {
 
@@ -319,12 +317,20 @@
 	<script src="/vuexy/assets/js/forms-selects.js"></script>
 	<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
 	<script type="text/javascript">
-		alertify.defaults.transition = 'zoom';
-		alertify.defaults.theme = {
-			ok: 'btn btn-sm btn-success',
-			cancel: 'btn btn-sm btn-danger',
-			input: 'form-control'
+		// Custom SweetAlert2 helper for this application
+		const showAlert = (title, text, icon = 'info') => {
+			return Swal.fire({
+				title: title,
+				text: text,
+				icon: icon,
+				confirmButtonText: '{{ __('admin.OK') }}',
+				customClass: {
+					confirmButton: 'btn btn-primary'
+				},
+				buttonsStyling: false
+			});
 		};
+
 		var orgnizations = @json($json_organizations);
 
 		function handleChangeQuestionType() {
@@ -387,7 +393,7 @@
 				{
 					if( $("input[name='quiz_answer_text[]']").length >= 5 )
 					{
-						alertify.alert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreFiveAllowed") }}');
+						showAlert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreFiveAllowed") }}', 'warning');
 						return false;
 					}
 				}
@@ -396,7 +402,7 @@
 				{
 					if( $("input[name='quiz_answer_text[]']").length >= 3 )
 					{
-						alertify.alert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreThreeAllowed") }}');
+						showAlert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreThreeAllowed") }}', 'warning');
 						return false;
 					}
 				}

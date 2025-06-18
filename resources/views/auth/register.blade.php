@@ -64,9 +64,9 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 
-  <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
+  {{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
   <link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
-  <link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css">
+  <link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css"> --}}
 
   <!-- Page CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
@@ -408,7 +408,7 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  {{-- <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script> --}}
 
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
