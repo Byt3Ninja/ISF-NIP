@@ -328,7 +328,7 @@
 												<td>
 													@if( $step->stype == 1 )
 													@if( $step->status == 'Started' )
-													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-label-primary"
+													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
 														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
 													@endif
 													@endif
