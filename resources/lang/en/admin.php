@@ -1925,4 +1925,6 @@ return [
 	'Panel_list' => 'Panel list',
 	'error_updating_report' => 'Error Updating Report',
 	'error_updating_recordings' => 'Error Updating Recordings',
+	'All_Steps' => 'All Steps',
+	'View_Details' => 'View Details',
 ];

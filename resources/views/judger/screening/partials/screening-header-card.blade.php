@@ -10,7 +10,7 @@
 
 <div class="card card-body mb-6">
   <div class="row">
-    <div class="col-12 mb-6">
+    <div class="col-12">
       <div class="row">
         @forEach($statusData as $i => $st)
         <div class="col-6 col-md-3 mb-2 mb-md-0">
@@ -35,7 +35,7 @@
         @endforeach
       </div>
     </div>
-    <div class="col-12">
+    {{-- <div class="col-12">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
         <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
           <h6 class="mb-0 fw-bold">Filter</h6>
@@ -66,6 +66,6 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> --}}
   </div>
 </div>

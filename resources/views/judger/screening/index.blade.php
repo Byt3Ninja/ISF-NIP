@@ -1,168 +1,365 @@
 @extends('layouts.admin')
 
-@section('style')
-  <style>
-    .line-clamp-4 {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 4;
-      overflow: hidden;
-    }
-    .fs-sm {
-      font-size: 0.8rem;
-    }
-    .card {
-      position: relative;
-      overflow: hidden;
-    }
-    .card-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: var(--bs-white);
-      color: var(--bs-white);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-    }
-    .card:hover .card-overlay {
-      opacity: 1;
-    }
-  </style>
-@stop
-
 @section('content')
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      @include('judger.screening.partials.screening-header-card')
-      {{--  <div class="row">
-        @forEach($screeningData as $screening)
-          <div class="col-12 col-md-6 col-lg-3 col-xl-4 mb-6">
-            @include('judger.screening.partials.screening-card', ['screening' => $screening])
-          </div>
-        @endforeach
-      </div>  --}}
-      <div class="row">
-        <div class="col-12 col-md-12 col-lg-12 col-xl-12 mb-6">
-          <div class="card screening-card">
-            <div class="card-body">
-              <div class="table-responsive">
-
-              </div>
-              <table class="table mt-3">
-                <thead class="bg-label-light">
-                  <tr>
-                    <th>{{ __('admin.Program_name') }}</th>
-                    <th>{{ __('admin.Step Name') }}</th>
-                    <th>{{ __('admin.Startup Name') }}</th>
-                    <th>{{ __('admin.Status') }}</th>
-                    <th>{{ __('admin.Actions') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach( $companies as $company )
-                    <tr>
-                      <td>{{ $company->program->name }}</td>
-                      <td>{{ $company->step->name }}</td>
-                      <td>{{ $company->name }}</td>
-                      <td> <i class="{{ $company->icon }}"></i> {{ $company->status }} </td>
-                      <td>
-                        <a href="{{ route('company.profile_view', ['id' => $company->id]) }}" class="btn btn-sm btn-primary">Details</a>
-                      </td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+<!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
+  <div class="container-xxl flex-grow-1 container-p-y">
+    @include('judger.screening.partials.screening-header-card')
+    
+    <!-- Screening Table -->
+    <div class="card">
+      <div class="card-datatable table-responsive pt-0">
+        <table class="datatables-screening table">
+          <thead class="table-light">
+            <tr>
+              <th class="text-nowrap">{{ __('admin.Program_name') }}</th>
+              <th class="text-nowrap">{{ __('admin.Step Name') }}</th>
+              <th class="text-nowrap">{{ __('admin.Startup Name') }}</th>
+              <th class="text-nowrap">{{ __('admin.Status') }}</th>
+              <th class="text-nowrap">{{ __('admin.Actions') }}</th>
+            </tr>
+          </thead>
+        </table>
       </div>
     </div>
+    <!--/ Screening Table -->
   </div>
+  <!--/ Content -->
+</div>
+<!-- / Content wrapper -->
 @stop
 
 @section('pagescripts')
-  <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-      const searchInput = document.getElementById('searchInput');
-      const cards = document.querySelectorAll('.screening-card');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  const lang = document.documentElement.lang;
 
-      searchInput.addEventListener('input', function() {
-        const searchTerm = searchInput.value.toLowerCase();
-        cards.forEach(card => {
-          const title = card.querySelector('.card-title').textContent.toLowerCase();
-          const desc = card.querySelector('.card-text').textContent.toLowerCase();
-          const status = card.querySelector('.status').textContent.toLowerCase();
-          if (title.includes(searchTerm) || desc.includes(searchTerm) || status.includes(searchTerm)) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      });
-    });
+// Translations for multilingual support
+const translations = {
+  en: {
+    screeningList: 'Screening List',
+    actions: 'Actions',
+    search: 'Search',
+    view: 'View Details',
+    programName: 'Program Name',
+    stepName: 'Step Name',
+    startupName: 'Startup Name',
+    status: 'Status',
+    detailsOf: 'Details of',
+    show: 'Show',
+    entries: 'entries',
+    showing: 'Showing',
+    to: 'to',
+    of: 'of',
+    filtered: 'filtered',
+    noMatchingRecords: 'No matching records found',
+    noDataAvailable: 'No data available in table',
+    allPrograms: 'All Programs',
+    allSteps: 'All Steps',
+    allStatus: 'All Status',
+    pending: 'Pending',
+    inProgress: 'In Progress',
+    completed: 'Completed',
+    notStarted: 'Not Started',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    export: 'Export',
+    notstarted: 'Not Started',
+    inprogress: 'In Progress',
+    completed: 'Completed',
+  },
+  ar: {
+    screeningList: 'قائمة الفحص',
+    actions: 'الإجراءات',
+    search: 'بحث',
+    view: 'عرض التفاصيل',
+    programName: 'اسم البرنامج',
+    stepName: 'اسم  المرحلة',
+    startupName: 'اسم الشركة الناشئة',
+    status: 'الحالة',
+    detailsOf: 'تفاصيل',
+    show: 'عرض',
+    entries: 'المدخلات',
+    showing: 'عرض',
+    to: 'إلى',
+    of: 'من',
+    filtered: 'مصفاة',
+    noMatchingRecords: 'لا توجد سجلات مطابقة',
+    noDataAvailable: 'لا توجد بيانات متاحة في الجدول',
+    allPrograms: 'جميع البرامج',
+    allSteps: 'جميع المراحل',
+    allStatus: 'جميع الحالات',
+    pending: 'معلق',
+    inProgress: 'قيد التنفيذ',
+    completed: 'مكتمل',
+    notStarted: 'لم تبدأ',
+    approved: 'موافق عليه',
+    rejected: 'مرفوض',
+    export: 'تصدير',
+    notstarted: 'لم تبدأ',
+    inprogress: 'قيد التنفيذ',
+    completed: 'مكتمل',
+  }
+};
 
-    const statusFilter = document.querySelectorAll('input[name="statusFilter"]');
-    statusFilter.forEach(radio => {
-      radio.addEventListener('change', function() {
-        const selectedStatus = this.value;
-        const cards = document.querySelectorAll('.screening-card');
-        console.log('selectedStatus:', selectedStatus);
-        cards.forEach(card => {
-          const status = card.querySelector('.status').getAttribute('data-id').toLowerCase();
-          if (selectedStatus === 'all' || status.includes(selectedStatus)) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      });
-    });
-  </script>
+const t = translations[lang] || translations.en;
 
-  <script type="text/javascript">
-    $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "columnDefs": [{
-          "orderable": false,
-          "targets": [4]
-        }, ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+document.addEventListener('DOMContentLoaded', function (e) {
+  // datatable (jquery)
+  $(function () {
+    var dt_screening_table = $('.datatables-screening'),
+      dt_screening;
+  
+    if (dt_screening_table.length) {
+      const data = [
+        @foreach($companies as $company)
+        {
+          program_name: "{{ $company->program->name }}",
+          step_name: "{{ $company->step->name }}",
+          startup_name: "{{ $company->name }}",
+          startup_logo: "{{ $company->logo ?? '/images/logo-placeholder.png' }}",
+          status: "{{ $company->status }}",
+          company_id: "{{ $company->id }}",
+          icon: "{{ $company->icon ?? '' }}"
+        },
+        @endforeach
+      ];
+
+      dt_screening = dt_screening_table.DataTable({
+        data: data,
+        columns: [
+          { data: 'program_name', title: t.programName },
+          { data: 'step_name', title: t.stepName },
+          { 
+            data: 'startup_name', 
+            title: t.startupName,
+            render: function (data, type, full, meta) {
+              return `<div class="d-flex align-items-center">
+                        <img src="${full.startup_logo}" 
+                             onerror="this.src='/images/logo-placeholder.png'"
+                             class="rounded-circle me-2" 
+                             width="32" height="32" alt="Company Logo">
+                        <span>${data}</span>
+                      </div>`;
+            }
+          },
+          { 
+            data: 'status', 
+            title: t.status,
+            render: function (data, type, full, meta) {
+              let badgeClass = 'bg-label-secondary';
+              if (data === 'NotStarted') badgeClass = 'bg-success';
+              else if (data === 'rejected') badgeClass = 'bg-danger';
+              else if (data === 'in_progress') badgeClass = 'bg-warning';
+              else if (data === 'completed') badgeClass = 'bg-info';
+              else if (data === 'approved') badgeClass = 'bg-success';
+              
+              return `<span class=" badge ${badgeClass}">
+                        <i class="${full.icon} me-2"></i> ${t[data.toLowerCase().replace('-' , '')] || data}
+                      </span>`;
+            }
+          },
+          { 
+            data: null, 
+            title: t.actions, 
+            orderable: false, 
+            searchable: false,
+            render: function (data, type, full, meta) {
+              return `<a href="/dashboard/company/profile/${data.company_id}" class="btn btn-sm btn-primary">
+                        <i class="ti ti-eye me-1"></i>${t.view}
+                      </a>`;
             }
           }
-        @endif
+        ],
+        order: [[0, 'asc']],
+        dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
+        displayLength: 25,
+        lengthMenu: [10, 25, 50, 75, 100],
+        language: {
+          paginate: {
+            next: '<i class="ti ti-chevron-right ti-sm"></i>',
+            previous: '<i class="ti ti-chevron-left ti-sm"></i>'
+          },
+          search: `${t.search}:`,
+          searchPlaceholder: `${t.search}...`,
+          lengthMenu: `${t.show} <select class="form-select form-select-sm">` +
+            `<option value="10">10</option>` +
+            `<option value="25">25</option>` +
+            `<option value="50">50</option>` +
+            `<option value="75">75</option>` +
+            `<option value="100">100</option>` +
+            '</select> ' + t.entries,
+          info: `${t.showing} <span class="text-primary">_START_</span> ${t.to} <span class="text-primary">_END_</span> ${t.of} <span class="text-primary">_TOTAL_</span> ${t.entries}`,
+          infoEmpty: `${t.showing} 0 ${t.to} 0 ${t.of} 0 ${t.entries}`,
+          infoFiltered: `(${t.filtered} ${t.of} _MAX_ ${t.entries})`,
+          zeroRecords: `${t.noMatchingRecords}`,
+          emptyTable: `${t.noDataAvailable}`,
+        },
+        responsive: {
+          details: {
+            display: $.fn.dataTable.Responsive.display.modal({
+              header: function (row) {
+                var data = row.data();
+                return `${t.detailsOf} ${data['startup_name']}`;
+              }
+            }),
+            type: 'column',
+            renderer: function (api, rowIdx, columns) {
+              var data = $.map(columns, function (col, i) {
+                return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+                  ? '<tr data-dt-row="' +
+                  col.rowIndex +
+                  '" data-dt-column="' +
+                  col.columnIndex +
+                  '">' +
+                  '<td>' +
+                  col.title +
+                  ':' +
+                  '</td> ' +
+                  '<td>' +
+                  col.data +
+                  '</td>' +
+                  '</tr>'
+                  : '';
+              }).join('');
+
+              return data ? $('<table class="table"/><tbody />').append(data) : false;
+            }
+          }
+        },
+        initComplete: function (settings, json) {
+          $('.card-header').after('<hr class="my-0">');
+
+          // Add export dropdown after the Export button
+          const exportDropdown = `
+            <div class="dropdown d-inline-block ms-2">
+              <button class="btn btn-label-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-download me-1"></i> ${t.export}
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" id="exportExcel"><i class="fas fa-file-excel me-2 text-success"></i>Excel</a></li>
+                <li><a class="dropdown-item" href="#" id="exportCSV"><i class="fas fa-file-csv me-2 text-danger"></i>CSV</a></li>
+              </ul>
+            </div>
+          `;
+          $('.dt-action-buttons').html(exportDropdown);
+
+          // Export Excel functionality
+          $('#exportExcel').on('click', function(e) {
+            e.preventDefault();
+            exportToExcel();
+          });
+
+          // Export CSV functionality
+          $('#exportCSV').on('click', function(e) {
+            e.preventDefault();
+            exportToCSV();
+          });
+
+          // Add custom filters for Program, Step, and Status
+          
+          // Program filter
+          const programFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-150"><option value="">${t.allPrograms}</option></select>`)
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_screening.column(0).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          // Step filter
+          const stepFilter = $(`<select class="form-select form-select-sm me-3 w-px-150"><option value="">${t.allSteps}</option></select>`)
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_screening.column(1).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          // Status filter
+          const statusFilter = $(`<select class="form-select form-select-sm w-px-150"><option value="">${t.allStatus}</option></select>`)
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_screening.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          // Populate program filter dynamically
+          const programs = [...new Set(data.map(item => item.program_name))];
+          programs.forEach(prog => {
+            programFilter.append('<option value="' + prog + '">' + prog + '</option>');
+          });
+
+          // Populate step filter dynamically
+          const steps = [...new Set(data.map(item => item.step_name))];
+          steps.forEach(step => {
+            stepFilter.append('<option value="' + step + '">' + step + '</option>');
+          });
+
+          // Populate status filter dynamically
+          const statuses = [...new Set(data.map(item => item.status))];
+          statuses.forEach(status => {
+            const displayStatus = t[status.toLowerCase().replace('-' , '')]
+            statusFilter.append('<option value="' + status + '">' + displayStatus + '</option>');
+          });
+        }
       });
-    });
-  </script>
+
+      $('div.head-label').html(`<h5 class="card-title mb-0">${t.screeningList}</h5>`);
+
+      // Export functions
+      function exportToExcel() {
+        // Get filtered data
+        const filteredData = dt_screening.rows({ search: 'applied' }).data().toArray();
+        
+        // Create worksheet data
+        const wsData = [
+          [t.programName, t.stepName, t.startupName, t.status], // Headers
+          ...filteredData.map(row => [
+            row.program_name,
+            row.step_name,
+            row.startup_name,
+            row.status.replace('-', ' ')
+          ])
+        ];
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Screening Data");
+        
+        // Save file
+        XLSX.writeFile(wb, "screening_data.xlsx");
+      }
+
+      function exportToCSV() {
+        // Get filtered data
+        const filteredData = dt_screening.rows({ search: 'applied' }).data().toArray();
+        
+        // Create CSV content
+        const csvContent = [
+          [t.programName, t.stepName, t.startupName, t.status].join(','), // Headers
+          ...filteredData.map(row => [
+            `"${row.program_name}"`,
+            `"${row.step_name}"`,
+            `"${row.startup_name}"`,
+            `"${row.status.replace('-', ' ')}"`
+          ].join(','))
+        ].join('\n');
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'screening_data.csv';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  });
+});
+</script>
 @stop

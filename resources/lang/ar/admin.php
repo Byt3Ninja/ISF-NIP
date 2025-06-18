@@ -1974,4 +1974,6 @@ return [
 	'Panel_list' => 'قائمة اللوحات',
 	'error_updating_report' => 'خطاء في تحديث التقرير',
 	'error_updating_recordings' => 'خطاء في تحديث التسجيلات',
+	'All_Steps' => 'جميع المراحل',
+	'View_Details' => 'عرض التفاصيل'
 ];

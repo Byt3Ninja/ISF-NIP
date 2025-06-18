@@ -602,7 +602,7 @@
 												@foreach($nextSessions as $session)
 												<tr>
 													<td>
-														<div class="d-flex align-items-center">
+														<div class="d-flex align-items-center gap-2">
 															<a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
 																<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
 																	height="40" width="40">
