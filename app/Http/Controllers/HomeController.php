@@ -414,12 +414,41 @@ class HomeController extends Controller
             $inputs = [$today];
             $filtration_q = "SELECT
                     s.id,
+                    s.arr,
                     s.title,
-                    s.stype as `type`
+                    s.from,
+                    s.to,
+                    s.description,
+                    s.stype as `type`,
+                    c.id AS cycle_id,
+                    c.title AS `cycle_title`,
+                    c.start AS `cycle_start`,
+                    c.end AS `cycle_end`,
+                    sc.user_id AS `screening_user_id`,
+                    sc.users AS `screening_users`,
+                    sc.panel AS `screening_panel`,
+                    cp.id AS company_id,
+                    cp.name_en AS `company_name_en`,
+                    cp.name_ar AS `company_name_ar`,
+                    cp.logo AS `company_logo`,
+                    u.id AS company_user_id,
+                    u.first_name_en AS company_user_first_name_en,
+                    u.last_name_en AS company_user_last_name_en,
+                    u.first_name_ar AS company_user_first_name_ar,
+                    u.last_name_ar AS company_user_last_name_ar,
+                    u.title_ar AS company_user_title_ar,
+                    u.title_en AS company_user_title_en,
+                    u.img_url AS company_user_img_url
                 FROM
                     steps s
                 LEFT JOIN
                     cycles c ON c.id = s.cycle_id
+                LEFT JOIN
+                    screenings sc ON sc.step_id = s.id
+                LEFT JOIN
+                    companies cp ON cp.step = sc.step_id
+                LEFT JOIN
+                    users u ON u.company_id = cp.id AND u.HaveCompany = 1
                 WHERE
                     ? BETWEEN s.from AND s.to
                     AND s.deleted_at IS NULL
@@ -440,6 +469,59 @@ class HomeController extends Controller
             if( $has_org ) { $filtration_q .= " AND c.organization_id = " . $user->organization_id; }
             $filtration = collect( DB::select($filtration_q, $inputs) );
         } else { $filtration = collect([]); }
+
+        $filtration = $filtration->groupBy('id')->map(function( $groupedSteps ) use ( $l ) {
+            $s = $groupedSteps->first();
+            $step = new stdClass;
+            $step->id = $s->id;
+            $step->arr = $s->arr;
+            $step->type = $s->type;
+            $step->title = $s->title;
+            $step->from = Carbon::parse( $s->from )->format('d-m-Y') ?? '-';
+            $step->to = Carbon::parse( $s->to )->format('d-m-Y') ?? '-';
+            $step->description = $s->description;
+            $step->cycle = new stdClass;
+            $step->cycle->id = $s->cycle_id;
+            $step->cycle->title = $s->cycle_title;
+            $step->cycle->start = Carbon::parse( $s->cycle_start )->format('d-m-Y') ?? '-';
+            $step->cycle->end = Carbon::parse( $s->cycle_end )->format('d-m-Y') ?? '-';
+            $step->groups = $groupedSteps->map(function( $oneStep ) {
+                $users = $oneStep->screening_users;
+                $groups = json_decode('[' . str_replace(['[', ']'], ' ', json_encode($users)) . ']');
+                return $groups;
+            });
+            $step->companies = $groupedSteps->filter(function($step) {
+                return !is_null( $step->company_id );
+            })->groupBy('company_id')->map(function( $oneStep ) use ( $l ) {
+                $c = $oneStep->first();
+                $company = new stdClass;
+                $company->id = $c->company_id;
+                $company->name = $c->{"company_name_" . $l};
+                $company->logo = Company::logo_handler( $c->company_logo );
+                $company->users = $oneStep->filter(function($step) {
+                    return !is_null( $step->company_user_id );
+                })->map(function( $step ) use ( $l ) {
+                    $user = new stdClass;
+                    $user->id = $step->company_user_id;
+                    $user->first_name = $step->{"company_user_first_name_" . $l};
+                    $user->last_name = $step->{"company_user_last_name_" . $l};
+                    $user->name = $user->first_name . ' ' . $user->last_name;
+                    $user->title = $step->{"company_user_title_" . $l};
+                    $user->logo = User::image_handler( $step->company_user_img_url );
+                    return $user;
+                })->unique('id')->values();
+                return $company;
+            })->values();
+            $step->panel = $groupedSteps->map(function( $oneStep ) {
+                return $oneStep->screening_panel;
+            });
+            return $step;
+        })->values();
+
+        $mySteps = Screening::where('user_id', $user->id)
+            // ->whereIn('step_id', $filtration->pluck('id')->toArray())
+            ->get();
+        $groups = $mySteps->whereIn('step_id', $filtration->pluck('id')->toArray())->pluck('users')->flatten()->unique()->whereNotNull()->values();
 
         if( array_intersect(['dashboard.widgets_cards_evaluation_view'], $permissions) )
         {
@@ -507,11 +589,9 @@ class HomeController extends Controller
                     AND mr.approved = 'Yes'
             ";
             if( $has_org ) { $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id; }
-            if( !$user->hasAnyRole(["registered"]) ){
             if( !empty( $user->company_id ) && !is_null( $user->company_id ) && trim( $user->company_id ) )
             {
                 $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
-            }
             }
             if( $user->hasAnyRole(['mentor']) )
             {
@@ -1883,19 +1963,29 @@ class HomeController extends Controller
             ],
         ];
 
-           $dateRate = date("Y-m-d 17:00:00");
-        $notRated_men = "SElECT *, 
-        CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
-        CONCAT(TRIM(COALESCE(u.first_name_ar, '')), ' ', TRIM(COALESCE(u.last_name_ar, ''))) AS MentorName_ar,
-        mr.id as mr_id
-        FROM mentorship_requests as mr
-        LEFT JOIN users as u ON u.id = mr.mentor_id 
-        
-        WHERE zoom_date < ? AND user_id = ? AND approved = 'Yes' AND rating IS NULL ORDER BY zoom_date ASC ";
+        $dateRate = date("Y-m-d 17:00:00");
+        $notRated_men = "SELECT
+                *, 
+                CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
+                CONCAT(TRIM(COALESCE(u.first_name_ar, '')), ' ', TRIM(COALESCE(u.last_name_ar, ''))) AS MentorName_ar,
+                mr.id as mr_id
+            FROM
+                mentorship_requests as mr
+            LEFT JOIN
+                users as u ON u.id = mr.mentor_id 
+            WHERE
+                zoom_date < ?
+                AND user_id = ?
+                AND approved = 'Yes'
+                AND rating IS NULL
+            ORDER BY
+                zoom_date ASC
+        ";
         $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
         $data['notrated_mens'] = $notRated_men;
-      
+        $data['initial_screening_steps'] = $filtration;
+
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
