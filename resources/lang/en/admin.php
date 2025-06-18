@@ -1923,4 +1923,6 @@ return [
 	'Panel' => 'Panel',
 	'Judges' => 'Judges',
 	'Panel_list' => 'Panel list',
+	'error_updating_report' => 'Error Updating Report',
+	'error_updating_recordings' => 'Error Updating Recordings',
 ];

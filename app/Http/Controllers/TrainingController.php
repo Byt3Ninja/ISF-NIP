@@ -1258,6 +1258,7 @@ class TrainingController extends Controller
 		{
 	 		$type = $request->query('type');
 			$zoomId = null;
+			$session = null;
 			$mentorshipRequest = null;
 
 			if ($type === 'training') {
@@ -1286,7 +1287,7 @@ class TrainingController extends Controller
 
 					SessionReport::updateOrCreate(
 						[
-							'session_id' => $session->id ?? $mentorshipRequest->id,
+							'session_id' => $session ? $session->id : null,
 							'participant_user_id' => $participant['user_id'] ?? null,
 						],
 						[
@@ -1327,12 +1328,10 @@ class TrainingController extends Controller
 			} elseif ($type === 'mentorship') {
 				$mentorshipRequest = MentorshipRequest::findOrFail($id);
 				$zoomId = $mentorshipRequest->zoom_id;
-			} else {
-				return redirect()->back()->with('message2', __('Invalid session type.'));
 			}
 			
 			if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
-				return redirect()->back()->with('message2', __('Session Recording is not available yet'));
+				return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
 			}
 
 			$response = $this->meetingService->getSessionRecord($zoomId);
@@ -1353,7 +1352,7 @@ class TrainingController extends Controller
 						'recording_id' => $firstFile['id'],
 					],
 					[
-						'session_id' => $sessionId ?? $mentorshipRequest->id,
+						'session_id' => $sessionId ? $sessionId : null,
 						'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
 						'recording_type' => $firstFile['recording_type'] ?? null,
 						'recording_view_url' => $firstFile['play_url'] ?? null,
@@ -1364,12 +1363,12 @@ class TrainingController extends Controller
 				);
 				return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
 			} else {
-				return redirect()->back()->with('message2', __('Session Recording is not available yet'));
+				return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
 			}
 
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage());
-			return redirect()->back()->with(['message2' => __('error_updating_recordings') . ': ' . $e->getMessage()]);
+			return redirect()->back()->with(['message2' => 'error_updating_recordings' . ': ' . $e->getMessage()]);
 		}
 	}
 

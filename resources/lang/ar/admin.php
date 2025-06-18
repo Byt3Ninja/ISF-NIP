@@ -1972,4 +1972,6 @@ return [
 	'Panel' => 'لوحة',
 	'Judges' => 'محكمين',
 	'Panel_list' => 'قائمة اللوحات',
+	'error_updating_report' => 'خطاء في تحديث التقرير',
+	'error_updating_recordings' => 'خطاء في تحديث التسجيلات',
 ];
