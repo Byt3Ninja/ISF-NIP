@@ -75,7 +75,7 @@
 }
 
 .screening-gavel {
-  position: absolute;
+  position: fixed;
   background-color: var(--bs-primary-border-subtle);
   height: 56px;
   width: 70px;
@@ -91,7 +91,7 @@
     border-top-right-radius: 35px;
     border-bottom-right-radius: 35px;
   @endif
-  z-index: 2;
+  z-index: 1000;
   border: 1px solid var(--bs-primary);
   cursor: pointer;
 }
