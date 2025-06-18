@@ -905,6 +905,104 @@
 				</div>
 			</div>
 			@endif
+
+			@if( array_intersect(['dashboard.widgets_tables_my_judging_list_view'], $permissions) )
+			<div class="col-12">
+				<div class="card mt-10">
+					<section>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="card">
+									<div class="card-header border-bottom mb-4">
+										<h5 class="card-title align-items-center">
+											<i class="ti ti-calendar-stats ti-24px"></i>
+											<span class="mx-2">{{ __('dashboard.Your Judging List') }}</span>
+										</h5>
+									</div>
+									<div class="card-body">
+										@if( $initial_screening_steps->count() > 0)
+										@foreach( $initial_screening_steps as $step )
+										<div class="mt-6">
+											<div class="card-header bg-label-light p-3 mb-2">
+												<h5 class="mb-0">
+													<i class="ti ti-bell ti-24px"></i>
+													<span class="mx-2">
+													  {{ $step->title }} - ({{ $step->cycle->title }})
+													  - {{ __('dashboard.start from') }} {{ $step->from }}
+													  {{ __('dashboard.to') }} {{ $step->to }}
+													</span>
+												  </h5>
+											</div>
+											<div class="card-body">
+												<p class="card-text">{{ $step->description }}</p>
+												<small class="text-muted">
+													{{ __('dashboard.This Cycle Start from') }}
+													{{ $step->cycle->start }}
+													{{ __('dashboard.to') }}
+													{{ $step->cycle->end }}
+												</small>
+											</div>
+											<div class="table-responsive">
+												<table class="table">
+													<thead>
+														<tr>
+														  <th>{{ __('dashboard.Company') }}</th>
+														  <th>{{ __('dashboard.User/Title') }}</th>
+														  {{--  <th>{{ __('dashboard.Screening completed') }}</th>  --}}
+														  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
+														</tr>
+													  </thead>
+													  <tbody>
+														@foreach( $step->companies as $company )
+														<tr>
+															<td>
+																<div class="d-flex align-items-center">
+																	<img src="{{ $company->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																	@if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+																	{{ $company->name }}
+																	@if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
+																</div>
+															</td>
+															<td>
+																<div class="d-flex align-items-center">
+																@if( $company->users->first() )
+																	<img src="{{ $company->users->first()->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																	<div>
+																		<h6 class="mb-0">{{ $company->users->first()->name }}</h6>
+																		<small class="text-muted">{{ $company->users->first()->title }}</small>
+																	</div>
+																@else
+																-
+																@endif
+																</div>
+															</td>
+														</tr>
+														@endforeach
+													  </tbody>
+												</table>
+											</div>
+										</div>
+										@endforeach
+										@else
+										<div class="d-flex flex-column justify-content-center align-items-center p-5">
+											<img src="/icons/not-found.svg" width="130" height="130" alt="No screening started yet">
+											<h6 class="text-center text-secondary mt-3">{{ __('dashboard.No screening started yet') }}</h6>
+										</div>
+										@endif
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+			@endif
+
+			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
+			<div class="col-12">
+				// allowed to list final screening
+			</div>
+			@endif
 		</div>
 		<div class="row mt-6">
 			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
