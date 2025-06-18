@@ -180,16 +180,16 @@ class ZoomService implements OnlineMeetingServiceInterface
 
         $timeZone = 'Africa/Cairo'; // Default
         if ($user) { // $user should be available if ensureCredentialsInitialized passed
-            if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
-                $setting = Settings::where('id', 1)->first();
-                if ($setting && $setting->timezone) {
-                    $timeZone = $setting->timezone;
-                }
-            } elseif ($user->hasRole('organizationManager')) {
-                $org = $user->organization;
+            if (Schema::hasTable('settings')) {
+                 $org = $user->organization;
                 if ($org && $org->time_zone) {
                     $timeZone = $org->time_zone;
+                }else{
+                 $setting = Settings::where('id', 1)->first();
+                 if ($setting && $setting->timezone) {
+                    $timeZone = $setting->timezone;
                 }
+                }  
             }
         }
 
@@ -467,7 +467,7 @@ class ZoomService implements OnlineMeetingServiceInterface
             ];
         }
 
-        $url = $this->retrieveZoomUrl() . "meetings/{$meetingId}/recordings"; // Using retrieved API URL
+        $url = "https://api.zoom.us/v2/meetings/{$meetingId}/recordings";
 
         try {
             $response = $this->client->get($url, [

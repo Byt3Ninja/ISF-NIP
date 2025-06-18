@@ -354,8 +354,7 @@ class MentorsController extends Controller
 			$meetingId = $onlineMeeting['data']['id'];
 			$startUrl = $onlineMeeting['data']['start_url'];
 			$joinUrl = $onlineMeeting['data']['join_url'];
-			 if ($autoApprove == 1) {
-				
+			if ($autoApprove == 1) {
 			    $approved = 'Yes';	
 				// $date = substr($date1, 0, -2);
 				// $dateAM = substr($date1, -2);																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
@@ -460,6 +459,7 @@ Thanks from " . env('APP_NAME');
 					'admin_id' => Auth::id(),
 					'start_url' => $onlineMeeting['data']['start_url'],
 					'join_url' => $onlineMeeting['data']['join_url'],
+					'zoom_id' => $onlineMeeting['data']['id'],
 					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 					'period' => $request->period,
 					'organization_id' => $request->organization_id,
@@ -717,17 +717,17 @@ Thanks from " . env('APP_NAME');
 					$mRequest = MentorshipRequest::findOrFail($request->id);
 					$topic = "Online mentorship meeting (M" . $mRequest->mentor_id . '- U' . $mRequest->user_id . ')';
 					$data = ['topic' => $topic, "start_time" => $mRequest->zoom_date, 'duration' => $mRequest->period, 'host_video' => 1, 'participant_video' => 1];
-					$onlineMeeting = $this->meetingService->createMeeting($data);
+					// $onlineMeeting = $this->meetingService->createMeeting($data);
 
-					if (!$onlineMeeting['success']) {
-						return response()->json('failed, Online meeting api error');
-					}
-					$start = $onlineMeeting['data']['start_url'];
-					$join = $onlineMeeting['data']['join_url'];
+					// if (!$onlineMeeting['success']) {
+					// 	return response()->json('failed, Online meeting api error');
+					// }
+					// $start = $onlineMeeting['data']['start_url'];
+					// $join = $onlineMeeting['data']['join_url'];
 				}
 				
 					
-				MentorshipRequest::find($request->id)->update(['approved' => $request->stat, 'start_url' => $start, 'join_url' => $join]);
+				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
 				
 				/// Notify Mentor
 				$session = MentorshipRequest::findOrFail($request->id);
@@ -739,7 +739,7 @@ Thanks from " . env('APP_NAME');
 				$date_Request = $session->zoom_date;
 				$rFullName = $rName->name;
 				$rFullName_usr = $rName_usr->name;
-				  $MSG = new TemplateEmail([
+				$MSG = new TemplateEmail([
                     "New Mentorship session - VI portal",
                     "Dear " . $rFullName . ",",
                     ($request->stat == 'Yes') ?
@@ -749,16 +749,8 @@ Thanks from " . env('APP_NAME');
                 ]);
                 $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
                 $Massage = ($request->stat == 'Yes') ?
-                    "Dear " . $rFullName . ",
-you have a new mentorship session with '" . $rFullName_usr . "',
-Session will start:" . $date_Request . ",
-Check your account to join the session,
-Thanks from " . env('APP_NAME') :
-                    "Dear " . $rFullName . ",
-you have a new mentorship session with '" . $rFullName_usr . "',
-is Rejected
-Thanks from " . env('APP_NAME');
-	
+                    "Dear " . $rFullName . ", you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $date_Request . ", Check your account to join the session,Thanks from " . env('APP_NAME') :
+                    "Dear " . $rFullName . ", you have a new mentorship session with '" . $rFullName_usr . "',is Rejected Thanks from " . env('APP_NAME');
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {
@@ -783,15 +775,8 @@ Thanks from " . env('APP_NAME');
                 ]);
                 $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
                 $Massage = ($request->stat == 'Yes') ?
-                    "Dear " . $rFullName_usr . ",
-you have a new mentorship session with '" . $rFullName . "',
-Session will start:" . $date_Request . ",
-Check your account to join the session,
-Thanks from " . env('APP_NAME') :
-                    "Dear " . $rFullName_usr . ",
-you have a new mentorship session with '" . $rFullName . "',
-is Rejected
-Thanks from " . env('APP_NAME');
+                    "Dear " . $rFullName_usr . ", you have a new mentorship session with '" . $rFullName . "', Session will start:" . $date_Request . ", Check your account to join the session,Thanks from " . env('APP_NAME') :
+                    "Dear " . $rFullName_usr . ",you have a new mentorship session with '" . $rFullName . "',is Rejected Thanks from " . env('APP_NAME');
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {

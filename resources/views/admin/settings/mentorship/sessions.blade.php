@@ -237,7 +237,7 @@
         @if ($session->reports->count() > 0)
         <div class="d-flex justify-content-between align-items-center mt-3">
           <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', $session->id) }}" class="btn btn-info">
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
             {{ __('admin.update_reports') }}
           </a>
         </div>
@@ -321,7 +321,7 @@
         <!-- No Recordings: Display Update Button -->
         <div class="d-flex justify-content-between align-items-center mt-4">
           <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording', $session->id) }}" class="btn btn-warning">
+          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
             {{ __('admin.update_recordings') }}
           </a>
         </div>
