@@ -1067,7 +1067,9 @@ class MentorshipTaskController extends Controller
 			});
 			$users = collect([]);
 			if (count($ids_to_search)) {
-				$users = collect(DB::select("SELECT id, CONCAT(TRIM(COALESCE(first_name_$lang, '')), ' ', TRIM(COALESCE(last_name_$lang, ''))) AS name, img_url FROM users WHERE id IN (" . implode(",", $ids_to_search) . ")"))->map(function ($user) {
+				$placeholders = implode(',', array_fill(0, count($ids_to_search), '?'));
+				$sql = "SELECT id, CONCAT(TRIM(COALESCE(first_name_$lang, '')), ' ', TRIM(COALESCE(last_name_$lang, ''))) AS name, img_url FROM users WHERE id IN ($placeholders)";
+				$users = collect(DB::select($sql, $ids_to_search))->map(function ($user) {
 					$user->img_url = $this->getImage($user->img_url);
 					return $user;
 				});
