@@ -743,8 +743,8 @@ Thanks from " . env('APP_NAME');
                     "New Mentorship session - VI portal",
                     "Dear " . $rFullName . ",",
                     ($request->stat == 'Yes') ?
-                        "Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start: " . $date_Request . ", Check your account to join the session " :
-                        "Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
+                        "We would like to inform you that your request for a guidance session has been approved by the program manager. Thank you for being so interested." :
+                        "We would like to inform you that your request for a guidance session has been denied by the program manager. Thank you for your interest, and we wish you success in your endeavors.",
                     "/dashboard"
                 ]);
                 $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
@@ -769,8 +769,8 @@ Thanks from " . env('APP_NAME');
                     "New Mentorship session - VI portal",
                     "Dear " . $rFullName_usr . ",",
                     ($request->stat == 'Yes') ?
-                        "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start: " . $date_Request . ", Check your account to join the session " :
-                        "Kindly note you have a new mentorship session with '" . $rFullName . "', is Rejected",
+                        "We would like to inform you that your request for a guidance session has been approved by the program manager. Thank you for being so interested." :
+                        "We would like to inform you that your request for a guidance session has been denied by the program manager. Thank you for your interest, and we wish you success in your endeavors.",
                     "/dashboard"
                 ]);
                 $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
