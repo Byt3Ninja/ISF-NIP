@@ -11,7 +11,11 @@
                 <option value="">{{ __('admin.Organization') }}</option>
                 <option value="0">All</option>
                 @php
-                  $organizations = App\Organization::all();
+                  if(auth()->user()->hasAnyRole(['organizationManager'])) {
+                $organizations = App\Organization::where('id',auth()->user()->organization_id)->get();
+              }else{
+                $organizations = App\Organization::all();
+              }
                 @endphp
                 @foreach ($organizations as $organization)
                   <option value="{{ $organization->id }}"
