@@ -22,8 +22,9 @@ use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use App\Factories\OnlineMeetingFactory;
-use App\Notifications\MentorshipRequestNotification;
 use App\Events\MentorshipSessionUpdated;
+use App\Jobs\SendMentorshipNotification;
+use App\Notifications\MentorshipRequestNotification;
 
 class MentorsController extends Controller
 {
@@ -728,67 +729,15 @@ Thanks from " . env('APP_NAME');
 				
 					
 				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
-				
-				/// Notify Mentor
-				$session = MentorshipRequest::findOrFail($request->id);
-				$rName = User::findOrFail($session->mentor_id);
-				$rName_usr = User::findOrFail($session->user_id);
-				$user = new User();
-				$user->email = $rName->email;
-				$user->id = $rName->id;
-				$date_Request = $session->zoom_date;
-				$rFullName = $rName->name;
-				$rFullName_usr = $rName_usr->name;
-				$MSG = new TemplateEmail([
-                    "New Mentorship session - VI portal",
-                    "Dear " . $rFullName . ",",
-                    ($request->stat == 'Yes') ?
-                        "We would like to inform you that your request for a guidance session has been approved by the program manager. Thank you for being so interested." :
-                        "We would like to inform you that your request for a guidance session has been denied by the program manager. Thank you for your interest, and we wish you success in your endeavors.",
-                    "/dashboard"
-                ]);
-                $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
-                $Massage = ($request->stat == 'Yes') ?
-                    "Dear " . $rFullName . ", you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $date_Request . ", Check your account to join the session,Thanks from " . env('APP_NAME') :
-                    "Dear " . $rFullName . ", you have a new mentorship session with '" . $rFullName_usr . "',is Rejected Thanks from " . env('APP_NAME');
-				if( !in_array(env('APP_ENV', 'local'), ['local']) )
-				{
-					try {
-						$user->notify($MSG);
-					} catch (\Throwable $th) {
-						// throw $th;
-					}
-					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-				}
-				/// Notify User
-				$user = new User();
-				$user->email = $rName_usr->email;
-				$user->id = $rName_usr->id;
-				 $MSG = new TemplateEmail([
-                    "New Mentorship session - VI portal",
-                    "Dear " . $rFullName_usr . ",",
-                    ($request->stat == 'Yes') ?
-                        "We would like to inform you that your request for a guidance session has been approved by the program manager. Thank you for being so interested." :
-                        "We would like to inform you that your request for a guidance session has been denied by the program manager. Thank you for your interest, and we wish you success in your endeavors.",
-                    "/dashboard"
-                ]);
-                $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-                $Massage = ($request->stat == 'Yes') ?
-                    "Dear " . $rFullName_usr . ", you have a new mentorship session with '" . $rFullName . "', Session will start:" . $date_Request . ", Check your account to join the session,Thanks from " . env('APP_NAME') :
-                    "Dear " . $rFullName_usr . ",you have a new mentorship session with '" . $rFullName . "',is Rejected Thanks from " . env('APP_NAME');
-				if( !in_array(env('APP_ENV', 'local'), ['local']) )
-				{
-					try {
-						$user->notify($MSG);
-					} catch (\Throwable $th) {
-						// throw $th;
-					}
-					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-				}
-				/// End of mail send
- 				broadcast(new MentorshipSessionUpdated($session->mentor_id, $session->user_id, $MSG->Message, $request->stat));				return response()->json('success');
+                // $availableAt = Carbon::now()->toDateTimeString();
+                // Log::info('Dispatching SendMentorshipNotification job', [
+                //     'session_id' => $request->id,
+                //     'status' => $request->stat,
+                //     'available_at' => $availableAt
+                // ]);
+
+                // SendMentorshipNotification::dispatch($request->id, $request->stat);
+				return response()->json('success');
 			} elseif ($type == 5) {
 				$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
 				$sessions = MentorshipRequest::where('mentor_id', $request->id)

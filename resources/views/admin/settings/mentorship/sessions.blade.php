@@ -402,46 +402,46 @@
 @section('pagescripts')
   <script>
     $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
-        "columnDefs": [
-
-          {
-            "orderable": true,
-            "targets": 7
-          }, // تفعيل الفرز للعمود الأول فقط
-        ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
+    $('#userstable').DataTable().destroy();
+    $('#userstable').DataTable({
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [],
+    "columnDefs": [
+      {
+        "orderable": true,
+        "targets": 7
+      }
+    ],
+    @if ($l == 'ar')
+      "language": {
+        "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+        "sLoadingRecords": "جارٍ التحميل...",
+        "sProcessing": "جارٍ التحميل...",
+        "sLengthMenu": "أظهر _MENU_ مدخلات",
+        "sZeroRecords": "لم يعثر على أية سجلات",
+        "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+        "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+        "sInfoPostFix": "",
+        "sSearch": "ابحث:",
+        "sUrl": "",
+        "oPaginate": {
+          "sFirst": "الأول",
+          "sPrevious": "السابق",
+          "sNext": "التالي",
+          "sLast": "الأخير"
+        },
+        "oAria": {
+          "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+          "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+        }
+      }
+    @endif
+    });
     });
   </script>
   <script>

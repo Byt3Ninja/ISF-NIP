@@ -18,6 +18,7 @@ class MentorshipSessionUpdated implements ShouldBroadcast
     public $userId;
     public $Message;
     public $status;
+
     /**
      * Create a new event instance.
      */
@@ -41,10 +42,16 @@ class MentorshipSessionUpdated implements ShouldBroadcast
         ];
     }
 
-     public function broadcastWith()
+    /**
+     * Customize the broadcast data.
+     *
+     * @return array
+     */
+    public function broadcastWith()
     {
-       return [
-            'message' => implode(',', array_map('trim', $this->Message)),
+        return [
+            'message' => $this->Message['email'],
+            'status' => $this->status,
         ];
     }
 }
