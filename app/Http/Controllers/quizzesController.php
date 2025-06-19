@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Step;
 use App\Cycle;
 use App\Quizzes;
@@ -21,7 +22,10 @@ class quizzesController extends Controller
 	 *
 	 * @return void
 	 */
-	public function __construct() { $this->middleware('auth'); }
+	public function __construct()
+	{
+		$this->middleware('auth');
+	}
 
 	public function index(Request $request)
 	{
@@ -47,18 +51,20 @@ class quizzesController extends Controller
 		LEFT JOIN cycles c ON c.organization_id = o.id
 		LEFT JOIN quiz_results qr ON qr.quiz_id = q.id
 		WHERE t.deleted_at IS NULL ";
-		if( $request->org_id != 0 )
-		{
+		if ($request->org_id != 0) {
 			$quizzes_q .= "AND q.organization_id = ? ";
+			$bindings[] = $request->org_id;
 		}
-		if($request->status != 0){
+		if ($request->status != 0) {
 			$quizzes_q .= "AND q.status = ? ";
+			$bindings[] = $request->status;
 		}
-		if($request->Program_id != 0){
+		if ($request->Program_id != 0) {
 			$quizzes_q .= "AND c.id = ? ";
+			$bindings[] = $request->Program_id;
 		}
 
-		$quizzes_q = DB::select($quizzes_q, [$request->org_id, $request->status, $request->Program_id]);
+		$quizzes_q = DB::select($quizzes_q, $bindings ?? []);
 		$quizzes = collect($quizzes_q);
 
 		$quizzes = $quizzes->map(function ($quiz) {
@@ -79,8 +85,8 @@ class quizzesController extends Controller
 			$quiz_obj->created_at = $quiz->created_at;
 			$quiz_obj->updated_at = $quiz->updated_at;
 
-			 $quiz_obj->organization = new stdClass();
-			 $quiz_obj->organization->id = $quiz->org_id;
+			$quiz_obj->organization = new stdClass();
+			$quiz_obj->organization->id = $quiz->org_id;
 			$quiz_obj->organization->org_name_ar = $quiz->org_name_ar;
 			$quiz_obj->organization->org_name_en = $quiz->org_name_en;
 
@@ -98,12 +104,11 @@ class quizzesController extends Controller
 			$quiz_obj->cycle->cycle_id = $quiz->cycle_id;
 			$quiz_obj->cycle->cycle_title = $quiz->cycle_title;
 			return $quiz_obj;
-			
 		});
 
-		
-		
-		
+
+
+
 
 		// $quizzes2 = Quizzes::with(['organization', 'training', 'results'])->get();
 
@@ -122,11 +127,11 @@ class quizzesController extends Controller
 		// if($request->Program_id != 0){
 		// 	// $cycle = Cycle::where('id',$request->Program_id)->first();
 		// 	$get_step = Step::where('stype', 4)->where('cycle_id', $request->Program_id)->get();
-			
+
 		// 	$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function($training) {
 		// 		return $training->training_Address != null && is_numeric($training->training_Address);
 		// 	})->pluck('training_Address')->unique()->values()->toArray();
-			
+
 		// 	$quizzes = $quizzes->whereIn('training_id', $training_ids);
 		// }
 		// $quizzes = $quizzes->get();
@@ -138,7 +143,9 @@ class quizzesController extends Controller
 	{
 		$user = auth()->user();
 		$organizations = new Organization;
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$organizations = $organizations->where('id', $user->organization_id);
+		}
 		$organizations = $organizations->get();
 		$trainings = Training::get();
 		return view('admin.quizzes.create', compact('organizations', 'trainings'));
@@ -185,17 +192,21 @@ class quizzesController extends Controller
 	 * @param  \App\User  $Type
 	 * @return \Illuminate\Http\Response
 	 */
-	public function edit( $id )
+	public function edit($id)
 	{
 		$user = auth()->user();
 		$quiz = Quizzes::with(['questions', 'organization']);
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $quiz = $quiz->where('organization_id', $user->organization_id); }
-		$quiz = $quiz->find( $id );
-		if( empty( $quiz ) ) { return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']); }
-		else
-		{
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$quiz = $quiz->where('organization_id', $user->organization_id);
+		}
+		$quiz = $quiz->find($id);
+		if (empty($quiz)) {
+			return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']);
+		} else {
 			$organizations = new Organization;
-			if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
+			if (isset($user->organization_id) && !empty($user->organization_id)) {
+				$organizations = $organizations->where('id', $user->organization_id);
+			}
 			$organizations = $organizations->get();
 			$trainings = Training::get();
 			return view('admin.quizzes.edit', compact('quiz', 'organizations', 'trainings'));
@@ -213,11 +224,13 @@ class quizzesController extends Controller
 	{
 		$user = auth()->user();
 		$quiz = Quizzes::with(['questions', 'organization']);
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $quiz = $quiz->where('organization_id', $user->organization_id); }
-		$quiz = $quiz->find( $id );
-		if( empty( $quiz ) ) { return back()->with(['error' => 'quizNotFound']); }
-		else
-		{
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$quiz = $quiz->where('organization_id', $user->organization_id);
+		}
+		$quiz = $quiz->find($id);
+		if (empty($quiz)) {
+			return back()->with(['error' => 'quizNotFound']);
+		} else {
 			$this->validate($request, [
 				'organization_id' => 'required|exists:organizations,id',
 				'training_id' => 'required|exists:trainings,id',
@@ -251,47 +264,54 @@ class quizzesController extends Controller
 		}
 	}
 
-	public function destroy( $id )
+	public function destroy($id)
 	{
-		$quiz = Quizzes::find( $id );
-		if( !empty( $quiz ) )
-		{
+		$quiz = Quizzes::find($id);
+		if (!empty($quiz)) {
 			$quiz->delete();
 		}
 	}
 
-	public function get_questions( $id )
+	public function get_questions($id)
 	{
 		$user = auth()->user();
 		$quiz = Quizzes::with(['questions', 'organization']);
-		
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $quiz = $quiz->where('organization_id', $user->organization_id); }
-		$quiz = $quiz->find( $id );
-		
-		if( empty( $quiz ) ) { return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']); }
-		else
-		{
-			
+
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$quiz = $quiz->where('organization_id', $user->organization_id);
+		}
+		$quiz = $quiz->find($id);
+
+		if (empty($quiz)) {
+			return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']);
+		} else {
+
 			$questions = QuestionsBank::where('group', 'quiz')->with(['category']);
-			if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $questions = $questions->where('organization_id', $quiz->organization_id); }
+			if (isset($user->organization_id) && !empty($user->organization_id)) {
+				$questions = $questions->where('organization_id', $quiz->organization_id);
+			}
 			$questions = $questions->get();
 			$tags = array_unique(array_reduce($questions->pluck('tags')->toArray(), 'array_merge', []));
 			return view('admin.quizzes.questions', compact('quiz', 'questions', 'tags'));
 		}
 	}
 
-	public function save_questions( $id, Request $request )
+	public function save_questions($id, Request $request)
 	{
 		$user = auth()->user();
 		$quiz = Quizzes::with(['questions', 'organization']);
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $quiz = $quiz->where('organization_id', $user->organization_id); }
-		$quiz = $quiz->find( $id );
-		if( empty( $quiz ) ) { return back()->with(['error' => 'quizNotFound']); }
-		else
-		{
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$quiz = $quiz->where('organization_id', $user->organization_id);
+		}
+		$quiz = $quiz->find($id);
+		if (empty($quiz)) {
+			return back()->with(['error' => 'quizNotFound']);
+		} else {
 			$questions_ids = $request->has('questions_ids') ? $request->questions_ids : [];
 			QuizQuestions::where('quiz_id', $id)->delete();
-			$quiz->questions()->sync( array_map(function($id, $key) { return ['row_no' => $key + 1, 'question_id' => $id]; }, $questions_ids, array_keys($questions_ids)) );
+			$quiz->questions()->sync(array_map(function ($id, $key) {
+				return ['row_no' => $key + 1, 'question_id' => $id];
+			}, $questions_ids, array_keys($questions_ids)));
 
 			return redirect()->route('quizzes.questions_manage', ['quiz' => $id])->with('success', 'StoredSuccessfully');
 		}
@@ -300,21 +320,23 @@ class quizzesController extends Controller
 	public function my()
 	{
 		$user = auth()->user();
-		if( $user->hasAnyRole(['Registered']) )
-		{
-			if( !$user->HaveCompany ) { return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
-			if( !$user->company ) { return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
+		if ($user->hasAnyRole(['Registered'])) {
+			if (!$user->HaveCompany) {
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+			}
+			if (!$user->company) {
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-			if( !empty( $cycleData->organization_id ) )
-			{
+			if (!empty($cycleData->organization_id)) {
 				$organization_id = $cycleData->organization_id;
 				$get_step = Step::where('stype', 4)->where('cycle_id', $cycleData->id)->get();
-				$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function($training) {
+				$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function ($training) {
 					return $training->training_Address != null && is_numeric($training->training_Address);
 				})->pluck('training_Address')->unique()->values()->toArray();
 
@@ -323,12 +345,12 @@ class quizzesController extends Controller
 					->whereIn('training_id', $training_ids)
 					->with(['training', 'myAttempts', 'questions'])
 					->get();
-			}
-			else
-			{
+			} else {
 				$quizzes = collect([]);
 			}
 			return view('admin/clients/quiz/dashboard', compact('quizzes'));
-		} else { return abort(401); }
+		} else {
+			return abort(401);
+		}
 	}
 }
