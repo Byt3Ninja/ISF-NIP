@@ -349,5 +349,6 @@ return [
     'Panel list' => 'قائمة اللجنة',
     'Remove panel' => 'إزالة اللجنة',
     'Important Notice' => 'إشعار مهم',
+    'Select_Currency' => 'اختر العملة',
   ];
 

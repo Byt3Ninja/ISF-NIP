@@ -27,6 +27,8 @@
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
+        <option value="SAR">SAR (ريال)</option>
+        <option value="EGP">EGP (الجنيه المصري)</option>
       </select>
     </div>
   </div>
