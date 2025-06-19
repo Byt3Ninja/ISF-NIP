@@ -52,21 +52,17 @@ if (!function_exists('FormatDate')) {
     {
         try {
             if ($stamp === null) {
+                return '';
+            }
+            if (is_numeric($stamp)) {
+                return date($format, $stamp);
+            }
+            if ($stamp instanceof \DateTimeInterface) {
+                return $stamp->format($format);
+            }
+            return date($format, strtotime($stamp));
+        } catch (\Exception $e) {
             return '';
         }
-
-        // لو timestamp (رقم)
-        if (is_numeric($stamp)) {
-            return date($format, $stamp);
-        }
-
-        // لو كائن DateTime أو Carbon
-        if ($stamp instanceof \DateTimeInterface) {
-            return $stamp->format($format);
-        }
-        } catch (\Exception $e) {
-            $date = date($format, $stamp);
-        }
-        return $date;
     }
 }
