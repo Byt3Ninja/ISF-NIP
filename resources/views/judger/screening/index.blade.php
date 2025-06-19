@@ -62,8 +62,6 @@ const translations = {
     inProgress: 'In Progress',
     completed: 'Completed',
     notStarted: 'Not Started',
-    approved: 'Approved',
-    rejected: 'Rejected',
     export: 'Export',
     notstarted: 'Not Started',
     inprogress: 'In Progress',
@@ -94,8 +92,6 @@ const translations = {
     inProgress: 'قيد التنفيذ',
     completed: 'مكتمل',
     notStarted: 'لم تبدأ',
-    approved: 'موافق عليه',
-    rejected: 'مرفوض',
     export: 'تصدير',
     notstarted: 'لم تبدأ',
     inprogress: 'قيد التنفيذ',
@@ -148,15 +144,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
             data: 'status', 
             title: t.status,
             render: function (data, type, full, meta) {
-              let badgeClass = 'bg-label-secondary';
-              if (data === 'NotStarted') badgeClass = 'bg-success';
-              else if (data === 'rejected') badgeClass = 'bg-danger';
-              else if (data === 'in_progress') badgeClass = 'bg-warning';
-              else if (data === 'completed') badgeClass = 'bg-info';
-              else if (data === 'approved') badgeClass = 'bg-success';
+              // For filtering, return the normalized status
+              if (type === 'filter' || type === 'type') {
+                return data.toLowerCase().replace(/[-_\s]/g, '');
+              }
               
+              let badgeClass = 'bg-label-secondary';
+              if (data === 'NotStarted') badgeClass = 'bg-label-secondary';
+              else if (data === 'in_progress') badgeClass = 'bg-label-warning';
+              else if (data === 'completed') badgeClass = 'bg-label-success';
+              
+              // Normalize status for translation lookup
+              const normalizedStatus = data.toLowerCase().replace(/[-_\s]/g, '');
               return `<span class=" badge ${badgeClass}">
-                        <i class="${full.icon} me-2"></i> ${t[data.toLowerCase().replace('-' , '')] || data}
+                        <i class="${full.icon} me-2"></i> ${t[normalizedStatus] || data}
                       </span>`;
             }
           },
@@ -298,8 +299,11 @@ document.addEventListener('DOMContentLoaded', function (e) {
           // Populate status filter dynamically
           const statuses = [...new Set(data.map(item => item.status))];
           statuses.forEach(status => {
-            const displayStatus = t[status.toLowerCase().replace('-' , '')]
-            statusFilter.append('<option value="' + status + '">' + displayStatus + '</option>');
+            // Normalize the status value to match what's in the data and for consistent filtering
+            const normalizedStatus = status.toLowerCase().replace(/[-_\s]/g, '');
+            const displayStatus = t[normalizedStatus] || status;
+            // Use normalized status as value to match the filtering logic
+            statusFilter.append('<option value="' + normalizedStatus + '">' + displayStatus + '</option>');
           });
         }
       });
