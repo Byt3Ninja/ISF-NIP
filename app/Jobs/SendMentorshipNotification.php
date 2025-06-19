@@ -35,34 +35,41 @@ class SendMentorshipNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        $session = MentorshipRequest::findOrFail($this->sessionId);
-        $mentor = User::findOrFail($session->mentor_id);
-        $user = User::findOrFail($session->user_id);
-        $locale = App::getLocale() ?? 'en';
+        try {
+            $session = MentorshipRequest::findOrFail($this->sessionId);
+            $mentor = User::findOrFail($session->mentor_id);
+            $user = User::findOrFail($session->user_id);
+            $locale = App::getLocale() ?? 'en';
 
-        // Log job execution
-        Log::info('Handling SendMentorshipNotification', [
-            'session_id' => $this->sessionId,
-            'status' => $this->status,
-            'locale' => $locale
-        ]);
+            // Log job execution
+            Log::info('Handling SendMentorshipNotification', [
+                'session_id' => $this->sessionId,
+                'status' => $this->status,
+                'locale' => $locale
+            ]);
 
-        // Notify Mentor
-        $this->sendNotification(
-            $mentor,
-            $user->name,
-            __("messages.dear", ['name' => $mentor->name], $locale)
-        );
+            // Notify Mentor
+            $this->sendNotification(
+                $mentor,
+                $user->name,
+                __("messages.dear", ['name' => $mentor->name], $locale)
+            );
 
-        // Notify User
-        $this->sendNotification(
-            $user,
-            $mentor->name,
-            __("messages.dear", ['name' => $user->name], $locale)
-        );
+            // Notify User
+            $this->sendNotification(
+                $user,
+                $mentor->name,
+                __("messages.dear", ['name' => $user->name], $locale)
+            );
 
-        // Broadcast event
-        broadcast(new MentorshipSessionUpdated($mentor->id, $user->id, $this->createMessage($user->name, $locale), $this->status));
+            // Broadcast event
+            broadcast(new MentorshipSessionUpdated($mentor->id, $user->id, $this->createMessage($user->name, $locale), $this->status));
+        } catch (\Throwable $th) {
+            Log::error('SendMentorshipNotification failed', [
+                'error' => $th->getMessage(),
+                'session_id' => $this->sessionId
+            ]);
+        }
     }
 
     /**
