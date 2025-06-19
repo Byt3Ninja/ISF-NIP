@@ -486,14 +486,16 @@
                         @endforeach
                   </select>
               </div>
+              @if (count($companies) > 0)
               <div class="col-md-3"><label for="mentorFilterCompany" class="form-label">{{ __('admin.Company') }}</label>
-                    <select class="form-select select2" id="mentorFilterCompany" name="company">
-                        <option value="">{{ __('admin.All') }}</option>
-                            @foreach($companies as $company)
-                              <option value="{{ $company->id }}" {{ request('company') == $company->id ? 'selected' : '' }}>{{ $company->{'name_'.app()->getLocale()}  }}</option>
-                            @endforeach
-                    </select>
+                <select class="form-select select2" id="mentorFilterCompany" name="company">
+                    <option value="">{{ __('admin.All') }}</option>
+                        @foreach($companies as $company)
+                          <option value="{{ $company->id }}" {{ request('company') == $company->id ? 'selected' : '' }}>{{ $company->{'name_'.app()->getLocale()}  }}</option>
+                        @endforeach
+                </select>
               </div>
+              @endif
               <div class="col-md-3"><label for="mentorFilterDateStart" class="form-label">{{ __('admin.From Date') }}</label><input
                   type="date" class="form-control" id="mentorFilterDateStart" name="zoom_date"></div>
               <div class="col-md-3 text-start"><button type="submit" class="btn btn-primary w-50"><i
@@ -535,7 +537,9 @@
               @endphp
 
               <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-building-user text-primary me-2"></i> Mentorship Details by Company</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-building-user text-primary me-2"></i> 
+                  {{ __('admin.Mentorship Details by Company') }}
+                </h4>
                 <div class="table-responsive">
                   <!-- Copied Mentorship Table 1 Structure Here -->
                   <table class="table table-hover align-middle mentorship-company-table">
@@ -580,7 +584,7 @@
                      @endphp
 
                <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-tie text-primary me-2"></i> Mentor Performance</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-tie text-primary me-2"></i> {{ __('admin.Mentor Performance') }}</h4>
                 <div class="table-responsive">
                   <!-- Copied Mentorship Table 2 Structure Here -->
                   <table class="table table-hover align-middle mentorship-mentor-table">
@@ -621,14 +625,16 @@
             <div class="col-lg-5">
               <!-- Chart 1: Session Distribution -->
               <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-pie text-primary me-2"></i> Session Distribution</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary">
+                  <i class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.Session Distribution') }}
+              </h4>
                 <div class="chart-container">
                   <canvas id="mentorSessionsChart"></canvas>
                 </div>
               </div>
               <!-- Chart 2: Mentor Average Rating -->
               <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> Mentor Average Ratings</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i>{{ __('admin.Mentor Average Ratings') }}</h4>
                 <div class="chart-container">
                   <canvas id="mentorRatingChart"></canvas>
                 </div>
@@ -646,6 +652,7 @@
             <h5 class="fw-semibold"><i class="fas fa-filter"></i>
               {{ __('admin.Filter Options (Workshops)') }}</h5>
             <form class="row g-3 align-items-end workshops-filter-form" method="GET" action="{{ route('programs.report',$cycle->id) }}">
+              @if (count($trainerNames) > 0)
               <div class="col-md-3"><label for="wsFilterTrainer" class="form-label">{{ __('admin.Trainer') }}</label><select
                   class="form-select select2" id="wsFilterTrainer" name="trainer">
                   <option selected value="">{{ __('admin.All') }}</option>
@@ -653,6 +660,7 @@
                       <option value="{{ $trainer }}" {{ request('trainer') == $trainer ? 'selected' : '' }}>{{ $trainer }}</option>
                     @endforeach
                 </select></div>
+              @endif
               <div class="col-md-3"><label for="wsFilterWorkshop" class="form-label">{{ __('admin.Workshop Name') }}</label>
                 <input type="text" class="form-control" id="wsFilterWorkshop" name="workshop_name"></div>
               <div class="col-md-3"><label for="wsFilterType" class="form-label">{{ __('admin.Workshop Type') }}</label>
@@ -756,7 +764,7 @@
               </div>
               <!-- Company Performance Table -->
               <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-graduation-cap text-primary me-2"></i> Company Performance</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-graduation-cap text-primary me-2"></i> {{ __('admin.Company Performance') }}</h4>
                 <div class="table-responsive">
                   <!-- Copied Workshop Table 2 Structure Here -->
                   <table class="table table-hover align-middle workshop-company-perf-table">
@@ -800,14 +808,14 @@
             <div class="col-lg-5">
               <!-- Chart 1: Workshop Type Distribution -->
               <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-pie text-primary me-2"></i> Workshop Type Distribution</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.Workshop Type Distribution') }}</h4>
                 <div class="chart-container">
                   <canvas id="workshopTypeChart"></canvas>
                 </div>
               </div>
               <!-- Chart 2: Average Rating per Trainer -->
               <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> Average Trainer Ratings</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Average Trainer Ratings') }}</h4>
                 <div class="chart-container">
                   <canvas id="trainerRatingChart"></canvas>
                 </div>
@@ -820,7 +828,7 @@
 
   @if ($surveyResponses->isEmpty())
     <p class="text-muted text-center p-3 border rounded">
-      <i class="fas fa-info-circle me-1"></i> {{ __('No survey responses found.') }}
+      <i class="fas fa-info-circle me-1"></i> {{ __('admin.No survey responses found') }}
     </p>
   @else
     <div class="table-responsive">
@@ -878,30 +886,31 @@
           <!-- Filters for this specific report -->
           <div class="bg-label-light p-4 rounded-3">
             <h5 class="fw-semibold"><i class="fas fa-filter"></i>
-              Filter Options (Final)</h5>
+              {{ __('admin.Filter Options (Final)') }}
+            </h5>
             <form class="row g-2 align-items-end final-eval-filter-form">
-              <div class="col-md-4"><label for="feFilterStatus" class="form-label">Status</label><select
+              <div class="col-md-4"><label for="feFilterStatus" class="form-label">{{ __('admin.Status') }}</label><select
                   class="form-select select2" id="feFilterStatus">
-                  <option selected value="">All</option>
-                  <option value="Highest Rated">Highest</option>
-                  <option value="Good Performance">Good</option>
-                  <option value="Needs Improvement">Improvement</option>
+                  <option selected value="">{{ __('admin.All') }}</option>
+                  <option value="Highest Rated">{{ __('admin.Highest Rated') }}</option>
+                  <option value="Good Performance">{{ __('admin.Good Performance') }}</option>
+                  <option value="Needs Improvement">{{ __('admin.Needs Improvement') }}</option>
                 </select></div>
-              <div class="col-md-4"><label for="feFilterMinScore" class="form-label">Minimum Score</label><input
+              <div class="col-md-4"><label for="feFilterMinScore" class="form-label">{{ __('admin.Minimum Score') }}</label><input
                   type="number" class="form-control" id="feFilterMinScore" min="0" max="100" step="5"
                   placeholder="e.g., 70"></div>
               <div class="col-md-4 text-start"><button type="submit" class="btn btn-primary w-50"><i
-                    class="fas fa-search me-2"></i> Search</button></div>
+                    class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button></div>
             </form>
           </div>
           <!-- Content from final evaluation report -->
           <div class="row mt-4">
             <div class="col-lg-8">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-clipboard-list text-primary me-2"></i> Final Company Evaluations</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-clipboard-list text-primary me-2"></i> {{ __('admin.Final Company Evaluations') }}</h4>
                 <div class="export-buttons"> <button type="button" class="btn btn-label-danger btn-sm"><i
-                      class="fas fa-file-pdf me-1"></i> PDF</button> <button type="button"
-                    class="btn btn-label-success btn-sm ms-2"><i class="fas fa-file-excel me-1"></i> Excel</button>
+                      class="fas fa-file-pdf me-1"></i> {{ __('admin.exportPDF') }}</button> <button type="button"
+                    class="btn btn-label-success btn-sm ms-2"><i class="fas fa-file-excel me-1"></i> {{ __('admin.exportExcel') }}</button>
                 </div>
               </div>
               <div class="table-responsive">
@@ -909,11 +918,11 @@
                 <table class="table table-striped table-hover align-middle final-eval-table">
                   <thead>
                     <tr>
-                      <th scope="col">Rank</th>
-                      <th scope="col">Company Name</th>
-                      <th scope="col">Total Score</th>
-                      <th scope="col">Judge Comments (Summary)</th>
-                      <th scope="col">Status</th>
+                      <th scope="col">{{ __('admin.Rank') }}</th>
+                      <th scope="col">{{ __('admin.StartUp_name') }}</th>
+                      <th scope="col">{{ __('admin.Total Score') }}</th>
+                      <th scope="col">{{ __('admin.Judge Comments (Summary)') }}</th>
+                      <th scope="col">{{ __('admin.Status') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -937,7 +946,7 @@
               </div>
               <!-- Chart: Score Distribution -->
               <div class="mt-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> Score Distribution</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Score Distribution') }}</h4>
                 <div class="chart-container">
                   <canvas id="finalEvalScoreDistributionChart"></canvas>
                 </div>
@@ -946,7 +955,7 @@
             <div class="col-lg-4">
               <!-- Evaluator Status -->
               <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-check text-primary me-2"></i> Evaluator Status</h4>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-check text-primary me-2"></i> {{ __('admin.Evaluator Status') }}</h4>
                 <div class="evaluator-card">
                   <div class="evaluator-img"><i class="fas fa-user"></i></div>
                   <div class="evaluator-info">
@@ -989,10 +998,10 @@
               </div>
               <!-- Results Summary -->
               <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-bullseye text-primary me-2"></i> Final Results Summary</h4>
-                <h6 class="mb-2 fw-bold text-success">Highest Rated:</h6>
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-bullseye text-primary me-2"></i> {{ __('admin.Final Results Summary') }}</h4>
+                <h6 class="mb-2 fw-bold text-success">{{ __('admin.Highest Rated') }}:</h6>
                 <ul class="summary-list" id="feTopCompaniesList"></ul>
-                <h6 class="mt-4 mb-2 fw-bold text-danger">Needs Improvement:</h6>
+                <h6 class="mt-4 mb-2 fw-bold text-danger">{{ __('admin.Needs Improvement') }}:</h6>
                 <ul class="summary-list" id="feImprovementCompaniesList"></ul>
               </div>
             </div>
@@ -1020,11 +1029,12 @@
   <!-- Combined & Organized JavaScript -->
   <script>
   document.addEventListener("DOMContentLoaded", function () {
+    const currentLanguage = document.documentElement.lang || 'en';
     const ctx = document.getElementById('summaryStatusDistributionChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'doughnut', 
       data: {
-        labels: ['Good', 'Needs Improvement', 'Excellent'],
+        labels: currentLanguage === 'ar' ? ['جيد', 'يحتاج إلى تحسين', 'ممتاز'] : ['Good', 'Needs Improvement', 'Excellent'],
         datasets: [{
           label: 'Status Distribution',
           data: [10, 5, 15],
@@ -1224,10 +1234,12 @@
 
       const ctxWsType = document.getElementById('workshopTypeChart')?.getContext('2d');
        if (ctxWsType) {
+        const currentLanguage = document.documentElement.lang || 'en';
         new Chart(ctxWsType, {
             type: 'pie',
             data: {
-                labels: ['Live Training', 'In-Person', 'Online'],
+                // labels: ['Live Training', 'In-Person', 'Online'],
+                labels: currentLanguage === 'ar' ? ['تدريب مباشر', 'حضوري', 'عبر الإنترنت'] : ['Live Training', 'In-Person', 'Online'],
                 datasets: [{
                     label: '{{ __('admin.workshop_count') }}',
                     data: [
@@ -1455,27 +1467,80 @@
 
 <script>
 $(document).ready(function () {
-    $('#workshopTable').DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'pdfHtml5',
-                text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                className: 'btn btn-label-danger btn-sm',
-                exportOptions: {
-                    columns: ':visible'
-                }
-            },
-            {
-                extend: 'excelHtml5',
-                text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                className: 'btn btn-label-success btn-sm',
-                exportOptions: {
-                    columns: ':visible'
-                }
-            }
-        ],
-    });
+  // Get current language
+  const currentLang = document.documentElement.lang || 'en';
+  
+  // Define translations
+  const translations = {
+    ar: {
+      show: 'عرض',
+      entries: 'مدخلات',
+      search: 'بحث:',
+      first: 'الأول',
+      last: 'الأخير',
+      next: 'التالي',
+      previous: 'السابق',
+      noData: 'لا توجد بيانات متاحة في الجدول',
+      noMatching: 'لم يتم العثور على سجلات مطابقة',
+      showingEmpty: 'عرض 0 إلى 0 من أصل 0 مدخلات',
+      showing: 'عرض _START_ إلى _END_ من أصل _TOTAL_ مدخلات',
+      filtered: '(مرشح من _MAX_ إجمالي المدخلات)',
+      processing: 'جاري المعالجة...'
+    },
+    en: {
+      show: 'Show',
+      entries: 'entries',
+      search: 'Search:',
+      first: 'First',
+      last: 'Last',
+      next: 'Next',
+      previous: 'Previous',
+      noData: 'No data available in table',
+      noMatching: 'No matching records found',
+      showingEmpty: 'Showing 0 to 0 of 0 entries',
+      showing: 'Showing _START_ to _END_ of _TOTAL_ entries',
+      filtered: '(filtered from _MAX_ total entries)',
+      processing: 'Processing...'
+    }
+  };
+
+  $('#workshopTable').DataTable({
+    dom: 'Bfrtip',
+    buttons: [
+      {
+        extend: 'pdfHtml5',
+        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+        className: 'btn btn-label-danger btn-sm',
+        exportOptions: {
+          columns: ':visible'
+        }
+      },
+      {
+        extend: 'excelHtml5',
+        text: '<i class="fas fa-file-excel me-1"></i> Excel',
+        className: 'btn btn-label-success btn-sm',
+        exportOptions: {
+          columns: ':visible'
+        }
+      }
+    ],
+    language: {
+      lengthMenu: `${translations[currentLang].show} _MENU_ ${translations[currentLang].entries}`,
+      search: translations[currentLang].search,
+      paginate: {
+        first: translations[currentLang].first,
+        last: translations[currentLang].last,
+        next: translations[currentLang].next,
+        previous: translations[currentLang].previous
+      },
+      emptyTable: translations[currentLang].noData,
+      zeroRecords: translations[currentLang].noMatching,
+      infoEmpty: translations[currentLang].showingEmpty,
+      info: translations[currentLang].showing,
+      infoFiltered: translations[currentLang].filtered,
+      processing: translations[currentLang].processing
+    }
+  });
 });
 </script>
 
