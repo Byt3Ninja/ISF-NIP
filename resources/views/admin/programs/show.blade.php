@@ -318,7 +318,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex flex-column">
                       <div class="d-flex align-items-center mb-2">
                         <i class="ti ti-user-circle text-primary ti-24px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Responsible')}}</span>
+                        <h6 class="mb-0">{{__('admin.Mentors')}}</span>
                       </div>
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
