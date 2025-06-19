@@ -62,20 +62,20 @@ class MentorsController extends Controller
 			return $q->where('organization_id', $organization_id);
 		})->get();
 
-		if($request->step_id != 0){
+		if ($request->step_id != 0) {
 			$companies = Company::where('cycle', $id)
-    ->where('step', '>', 0)
-    ->when($request->has('step_id'), function ($query) use ($request) {
-        return $query->where('step', $request->step_id);
-    })
-    ->get();
+				->where('step', '>', 0)
+				->when($request->has('step_id'), function ($query) use ($request) {
+					return $query->where('step', $request->step_id);
+				})
+				->get();
 		}
 
-		
+
 		return view('admin.settings.mentorship.index', compact('mentors', 'id', 'companies', 'cycles'));
 	}
 
-	public function list(Request $request, $id = 0 )
+	public function list(Request $request, $id = 0)
 	{
 		$l = app()->getLocale();
 		$organization_id = auth()->user()->organization_id;
@@ -91,46 +91,44 @@ class MentorsController extends Controller
 		})->get();
 
 		$selectedSpecialization = $request->specialization; // الحصول على قيمة التصفية من query string
-   
+
 		if ($selectedSpecialization != 0) {
 			$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
-				$mentorSpecialization = $mentor->bio->{'specialization_'.$l} ?? null;
-		
+				$mentorSpecialization = $mentor->bio->{'specialization_' . $l} ?? null;
+
 				return !is_null($mentorSpecialization) && $mentorSpecialization == $selectedSpecialization;
 			});
-    }
+		}
 
 
-	if ($request->rate != 0) {
-		$rating = $request->rate;
-		$mentors = $mentors->filter(function ($mentor) use ($rating) {
-			$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
-			return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
-		});
-		
-	}
+		if ($request->rate != 0) {
+			$rating = $request->rate;
+			$mentors = $mentors->filter(function ($mentor) use ($rating) {
+				$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
+				return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
+			});
+		}
 
-	// تصفية حسب حالة الـ checked
-    if ($request->assigning != 0) {
-		$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
+		// تصفية حسب حالة الـ checked
+		if ($request->assigning != 0) {
+			$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
 
-    $mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
-        $isChecked = in_array($mentor->id, $cList);
+			$mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
+				$isChecked = in_array($mentor->id, $cList);
 
-        // إذا كان المستخدم اختار "checked"، نعيد فقط المدربين الموجودين في الدورة
-        if ($checkedStatus == 'checked') {
-            return $isChecked;
-        }
-        // إذا كان المستخدم اختار "unchecked"، نعيد فقط المدربين غير المسجلين
-        elseif ($checkedStatus == 'Notchecked') {
-            return !$isChecked;
-        }
-        return true; // في حالة عدم تحديد أي فلتر
-    });
-	
-    }
+				// إذا كان المستخدم اختار "checked"، نعيد فقط المدربين الموجودين في الدورة
+				if ($checkedStatus == 'checked') {
+					return $isChecked;
+				}
+				// إذا كان المستخدم اختار "unchecked"، نعيد فقط المدربين غير المسجلين
+				elseif ($checkedStatus == 'Notchecked') {
+					return !$isChecked;
+				}
+				return true; // في حالة عدم تحديد أي فلتر
+			});
+		}
 
-		
+
 
 		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles'));
 	}
@@ -153,9 +151,9 @@ class MentorsController extends Controller
 		$organization_id = auth()->user()->organization_id;
 		$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
-		}) ->with(['steps' => function ($q) {
-        	$q->orderBy('arr');
-    	}])->find($id);
+		})->with(['steps' => function ($q) {
+			$q->orderBy('arr');
+		}])->find($id);
 
 		if (!empty($cycle)) {
 			$organization_id = $cycle->organization_id;
@@ -172,8 +170,8 @@ class MentorsController extends Controller
 				return $survey;
 			});
 
-       	  	$available_surveys = Surveys::where('organization_id', $cycle->organization_id)->get();
-			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle','available_surveys'));
+			$available_surveys = Surveys::where('organization_id', $cycle->organization_id)->get();
+			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle', 'available_surveys'));
 		} else {
 			abort(404);
 		}
@@ -182,7 +180,7 @@ class MentorsController extends Controller
 	public function total_surveys()
 	{
 		if (Auth::user()->hasAnyRole('organizationManager')) {
-		$organization_id = auth()->user()->organization_id;
+			$organization_id = auth()->user()->organization_id;
 			$surveys = SurveyScopes::where('organization_id', $organization_id)->with(['survey', 'responses'])->get();
 			$surveys = $surveys->map(function ($survey) {
 				$responses = $survey->responses;
@@ -195,8 +193,7 @@ class MentorsController extends Controller
 				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
 				return $survey;
 			});
-
-		}else{
+		} else {
 			$organization_id = auth()->user()->organization_id;
 			$surveys = SurveyScopes::with(['survey', 'responses'])->get();
 			$surveys = $surveys->map(function ($survey) {
@@ -204,19 +201,18 @@ class MentorsController extends Controller
 				$eligibleUsers = $responses->count();
 				$engagedUsers = $responses->whereNotNull('responses')->count();
 				$notEngagedUsers = $responses->whereNull('responses')->count();
-				
+
 				$survey->eligibleUsers = $eligibleUsers;
 				$survey->engagedUsers = $engagedUsers;
 				$survey->notEngagedUsers = $notEngagedUsers;
-				
+
 				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
 				return $survey;
 			});
 		}
 
 
-			return view('admin.surveys.totalsurvey', compact('surveys'));
-		
+		return view('admin.surveys.totalsurvey', compact('surveys'));
 	}
 
 	public function create_survey($id, Request $request)
@@ -322,12 +318,12 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-		
-		$datefrom = $request->date .' '. $request->timeFrom;
-		$dateto = $request->date .' '. $request->timeTo;
-		if($request->period == ''){
+
+		$datefrom = $request->date . ' ' . $request->timeFrom;
+		$dateto = $request->date . ' ' . $request->timeTo;
+		if ($request->period == '') {
 			$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
-		}else{
+		} else {
 			$period = $request->period;
 		}
 
@@ -343,20 +339,20 @@ class MentorsController extends Controller
 
 			$cycle = Cycle::find($request->cycle_id);
 			$autoApprove = $cycle->auto_approve_mentorship_requests;
-	
+
 			$approved = null;
- 			$userid = Auth::id();
+			$userid = Auth::id();
 			$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
 			$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 			if (!$onlineMeeting['success']) {
-    			return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
+				return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
 			}
 			$meetingId = $onlineMeeting['data']['id'];
 			$startUrl = $onlineMeeting['data']['start_url'];
 			$joinUrl = $onlineMeeting['data']['join_url'];
 			if ($autoApprove == 1) {
-			    $approved = 'Yes';	
+				$approved = 'Yes';
 				// $date = substr($date1, 0, -2);
 				// $dateAM = substr($date1, -2);																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
 				$dateFormat = new \DateTime($request->date);
@@ -375,29 +371,28 @@ class MentorsController extends Controller
 					'cycle_id' => $request->cycle_id,
 					'fileurl' => $fileName,
 				]);
-				
+
 				$mentor = User::find($request->mentorid);
-			}else{
-			MentorshipRequest::create([
-				'mentor_id' => $request->mentorid,
-				'user_id' => Auth::id(),
-				'comment' => $request->notes,
-				'start_url' => $startUrl,
-				'join_url' => $joinUrl,
-				'zoom_id' => $meetingId,
-				'zoom_date' => $datefrom,
-				'period' => $period,
-				'fileurl' => $fileName,
-				'organization_id' => $request->organization_id,
-				'cycle_id' => $request->cycle_id,
-				'approved' => $approved,
-			]);
-		}
-			if( !in_array(env('APP_ENV', 'local'), ['local']) )
-            {
-			$data = [];
-			$mentor = User::find($request->mentorid);
-			// ======> notify Mentor <=================
+			} else {
+				MentorshipRequest::create([
+					'mentor_id' => $request->mentorid,
+					'user_id' => Auth::id(),
+					'comment' => $request->notes,
+					'start_url' => $startUrl,
+					'join_url' => $joinUrl,
+					'zoom_id' => $meetingId,
+					'zoom_date' => $datefrom,
+					'period' => $period,
+					'fileurl' => $fileName,
+					'organization_id' => $request->organization_id,
+					'cycle_id' => $request->cycle_id,
+					'approved' => $approved,
+				]);
+			}
+			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+				$data = [];
+				$mentor = User::find($request->mentorid);
+				// ======> notify Mentor <=================
 				$data['Mentorname'] = $mentor->first_name_en . " " . $mentor->last_name_en;
 				$data['email'] = $mentor->email;
 				$data['date'] = $request->date;
@@ -411,7 +406,7 @@ class MentorsController extends Controller
 					throw $th;
 				}
 				// Broadcast the RequestMentorship event
-       			broadcast(new RequestMentorship($data));
+				broadcast(new RequestMentorship($data));
 				$phoneNumber = $mentor->country_code_w_a . $mentor->whatsapp;
 				$Massage = "Dear " . $mentor->name . ",
  '" . $data['company_name'] . "' has sent you a mentorship request,
@@ -419,7 +414,7 @@ request will start: " . $data['date'] . ",
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-		}
+			}
 			// Notify Admin here
 			event(new WebMessage('NewMent', Auth::user()->first_name_en . ' ' . Auth::user()->last_name_en));
 			return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);
@@ -433,18 +428,18 @@ Thanks from " . env('APP_NAME');
 
 		if ($request->userid) {
 			$dates = explode(',', $request->date);
-			
+
 			$dateDatabase = MentorshipRequest::whereIn('zoom_date', $dates)->where('mentor_id', $request->mentorid)->where('user_id', $request->userid)->get();
-			if(count($dateDatabase) > 0) {
-					return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
-				}
+			if (count($dateDatabase) > 0) {
+				return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
+			}
 			foreach ($dates as $key) {
 				$date = ltrim($key);
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
-				
+
 				$onlineMeeting = $this->meetingService->createMeeting($data);
-			
+
 				if (!$onlineMeeting['success']) {
 					return back()->with(['message2' => "meeting_error"]);
 				}
@@ -483,20 +478,19 @@ Thanks from " . env('APP_NAME');
 					"Kindly note you have a new mentorship session with '" . $startup_owner_name . "', Session will start:" . $date . ", Check your account to join the session ",
 					"/dashboard"
 				];
-				if( !in_array(env('APP_ENV', 'local'), ['local']) )
-				{
+				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					try {
 						$user->notify($MSG);
 					} catch (\Throwable $th) {
 						// throw $th;
 					}
 					$phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
-						$Massage = "Dear " . $mentor_name . ", 
+					$Massage = "Dear " . $mentor_name . ", 
 This Is notification new mentorship session with '" . $startup_owner_name . "',
 Session will start:" . $date . ",
 Check your account to join the session ";
-						$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-						Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 				/// Notify Startup Owner
 				$user = new User();
@@ -509,8 +503,7 @@ Check your account to join the session ";
 					"Kindly note you have a new mentorship session with '" . $mentor_name . "', Session will start:" . $date . ", Check your account to join the session ",
 					"/dashboard"
 				];
-				if( !in_array(env('APP_ENV', 'local'), ['local']) )
-				{
+				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					try {
 						$user->notify($MSG);
 					} catch (\Throwable $th) {
@@ -520,12 +513,12 @@ Check your account to join the session ";
 					$Massage = "Dear " . $startup_owner->name . ",
 This Is notification new mentorship session with '" . $startup_owner_name . "',
 Session will start: " . $date . ",
-Session Link: " . $onlineMeeting['data']['join_url']. ",
+Session Link: " . $onlineMeeting['data']['join_url'] . ",
 Thanks from " . env('APP_NAME');
 					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
-				
+
 				/// End of mail send
 			}
 			return back()->with([
@@ -557,7 +550,6 @@ Thanks from " . env('APP_NAME');
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
-
 		} elseif ($request->show == 'approved') {
 			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
@@ -572,7 +564,6 @@ Thanks from " . env('APP_NAME');
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
-
 		} elseif ($request->show == 'disapproved') {
 			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
@@ -601,12 +592,12 @@ Thanks from " . env('APP_NAME');
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
 		}
-		
-		$sessions = $sessions->map( function( $session ) {
+
+		$sessions = $sessions->map(function ($session) {
 			$session->date = Carbon::parse($session->zoom_date);
 			return $session;
 		});
-		
+
 		return view('admin.settings.mentorship.sessions', compact('sessions'));
 	}
 
@@ -622,9 +613,9 @@ Thanks from " . env('APP_NAME');
 
 	public function modifySession(Request $request)
 	{
-	
+
 		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
-		
+
 		if ($request) {
 			$approved = $start = $join = null;
 			if ($request->approved) {
@@ -655,13 +646,12 @@ Thanks from " . env('APP_NAME');
 				"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $request->date . ", Check your account to join the session ",
 				"/dashboard"
 			];
-            if( !in_array(env('APP_ENV', 'local'), ['local']) )
-            {
-                try {
-                    $user->notify($MSG);
-                } catch (\Throwable $th) {
-                    // throw $th;
-                }
+			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+				try {
+					$user->notify($MSG);
+				} catch (\Throwable $th) {
+					// throw $th;
+				}
 				$phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
 				$Massage = "Dear " . $rName->name . ",
 you have a new mentorship session with '" . $rFullName . "',
@@ -670,7 +660,7 @@ Check your account to join the session,
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-            }
+			}
 			/// Notify User
 			$user = new User();
 			$user->email = $rName_usr->email;
@@ -682,13 +672,12 @@ Thanks from " . env('APP_NAME');
 				"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $request->date . ", Check your account to join the session ",
 				"/dashboard"
 			];
-            if( !in_array(env('APP_ENV', 'local'), ['local']) )
-            {
-                try {
-                    $user->notify($MSG);
-                } catch (\Throwable $th) {
-                    // throw $th;
-                }
+			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+				try {
+					$user->notify($MSG);
+				} catch (\Throwable $th) {
+					// throw $th;
+				}
 				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
 				$Massage = "Dear " . $rName_usr->name . ",
 you have a new mentorship session with '" . $rFullName . "',
@@ -697,7 +686,7 @@ Check your account to join the session,
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-            }
+			}
 			/// End of mail send
 			return back()->with(['message' => 'Saved_successfully']);
 		} else {
@@ -708,13 +697,13 @@ Thanks from " . env('APP_NAME');
 	public function modify(Request $request)
 	{
 		try {
-			
+
 			$type = $request->rtype;
 			if ($type == 6) {
-				
+
 				$start = $join = null;
 				if ($request->stat == 'Yes') {
-					
+
 					$mRequest = MentorshipRequest::findOrFail($request->id);
 					$topic = "Online mentorship meeting (M" . $mRequest->mentor_id . '- U' . $mRequest->user_id . ')';
 					$data = ['topic' => $topic, "start_time" => $mRequest->zoom_date, 'duration' => $mRequest->period, 'host_video' => 1, 'participant_video' => 1];
@@ -726,17 +715,14 @@ Thanks from " . env('APP_NAME');
 					// $start = $onlineMeeting['data']['start_url'];
 					// $join = $onlineMeeting['data']['join_url'];
 				}
-				
-					
-				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
-                // $availableAt = Carbon::now()->toDateTimeString();
-                // Log::info('Dispatching SendMentorshipNotification job', [
-                //     'session_id' => $request->id,
-                //     'status' => $request->stat,
-                //     'available_at' => $availableAt
-                // ]);
 
-                // SendMentorshipNotification::dispatch($request->id, $request->stat);
+
+				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
+				$availableAt = Carbon::now()->toDateTimeString();
+
+
+				SendMentorshipNotification::dispatch($request->id, $request->stat);
+
 				return response()->json('success');
 			} elseif ($type == 5) {
 				$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
@@ -777,12 +763,12 @@ Thanks from " . env('APP_NAME');
 							if (!is_null($from) && !is_null($to)) {
 								Schedule::create([
 									'user_id' => $userId,
-									'type'=> $request->input('type'),
+									'type' => $request->input('type'),
 									'days' => $day,
 									'tfrom' => $from,
 									'tto' => $to,
-									'notes'=> $request->input('notes'),
-									
+									'notes' => $request->input('notes'),
+
 								]);
 							}
 						}
@@ -812,13 +798,12 @@ Thanks from " . env('APP_NAME');
 		}
 	}
 
-	
+
 
 	public function delSession($id, Request $request)
 	{
 		// $zoomId = TrainingSession::findOrFail($id)->zoom_id;
-		if ($request)
-		{
+		if ($request) {
 			// if( $zoomId )
 			// {
 			// 	 $zoom = $this->delete( $zoomId );
@@ -838,6 +823,6 @@ Thanks from " . env('APP_NAME');
 	// 		$dates  = "Select mentor_id, zoom_date, user_id from mentorship_requests where mentor_id = $mentor_id AND approved = 'Yes' ";
 	// 		$dates = DB::select($dates);
 	// 		return response()->json(['dates' => $dates]);
-		
+
 	// }
 }
