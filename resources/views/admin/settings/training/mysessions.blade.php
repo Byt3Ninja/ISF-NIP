@@ -53,11 +53,20 @@
                             $session->title .
                             '</a>'
                           : $session->title !!}</td>
-                        <td>{{ FormatDate($session->datetime, 'Y-m-d H:i') }}</td>
-                        <td>{{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}</td>
+                        <td>
+                          
+                          {{ $session->datetime1 ?? '-' }}
+                          
+
+                        </td>
+                        <td>
+                      
+                          {{ $session->enddatetime ?? '-' }}
+                          
+                        </td>
                         <td>
                           @if ($session->type == 'sessions')
-                          @if(FormatDate($session->enddatetime, 'Y-m-d H:i') > now()->format('Y-m-d H:i'))
+                          @if($session->enddatetime > now()->format('Y-m-d H:i'))
                           {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
                           <a title="Click to join" href="{{ $session->join_url }}" target="_blank">
                             <button title="Join only" type="button"
@@ -491,7 +500,7 @@
 
             // 6. Date
             if (response.datetime) {
-              $sessionStartDate.text(response.datetime);
+              $sessionStartDate.text(response.datetime1);
             }
             if (response.enddatetime) {
               $sessionEndDate.text(response.enddatetime);
