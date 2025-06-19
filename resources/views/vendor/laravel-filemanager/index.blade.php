@@ -111,7 +111,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel">{{ trans('laravel-filemanager::lfm.title-upload') }}</h4>
-          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aia-hidden="true">&times;</span></button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
           <form action="{{ route('unisharp.lfm.upload') }}" role='form' id='uploadForm' name='uploadForm' method='post' enctype='multipart/form-data' class="dropzone">
@@ -128,7 +128,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
+          <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
         </div>
       </div>
     </div>
@@ -139,8 +139,8 @@
       <div class="modal-content">
         <div class="modal-body"></div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
-          <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
+          <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
+          <button type="button" class="btn btn-primary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
         </div>
       </div>
     </div>
@@ -156,8 +156,8 @@
           <input type="text" class="form-control">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
-          <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
+          <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
+          <button type="button" class="btn btn-primary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
         </div>
       </div>
     </div>
@@ -279,13 +279,36 @@
             this.defaultOptions.error(file, response.join('\n'));
           }
         });
+        
+        // Handle cancel button click to properly close modal and reset dropzone
+        this.on('reset', function() {
+          $('#uploadModal').modal('hide');
+        });
       },
       headers: {
         'Authorization': 'Bearer ' + getUrlParam('token')
       },
       acceptedFiles: "{{ implode(',', $helper->availableMimeTypes()) }}",
       maxFilesize: ({{ $helper->maxUploadSize() }} / 1000)
-    }
+    };
+
+    // Additional modal handling for better user experience
+    $(document).ready(function() {
+      // Ensure modal closes properly when clicking close buttons
+      $('#uploadModal').on('hidden.bs.modal', function () {
+        // Reset the dropzone when modal is closed
+        if (Dropzone.instances.length > 0) {
+          Dropzone.instances[0].removeAllFiles(true);
+        }
+      });
+      
+      // Handle ESC key to close modal
+      $(document).keyup(function(e) {
+        if (e.keyCode === 27) { // ESC key
+          $('#uploadModal').modal('hide');
+        }
+      });
+    });
   </script>
 </body>
 </html>
