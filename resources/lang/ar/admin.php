@@ -1994,5 +1994,7 @@ return [
 	'Filter Options (Final)' => 'خيارات التصفية (نهائي)',
 	'Rank' => 'الرتبة',
 	'Total Score' => 'إجمالي الدرجات',
-	'Judge Comments (Summary)' => 'تعليقات المحكمين (ملخص)'
+	'Judge Comments (Summary)' => 'تعليقات المحكمين (ملخص)',
+	'Manage Team' => 'إدارة الفريق',
+	'ApplyHackathon' => 'تقديم'
 ];

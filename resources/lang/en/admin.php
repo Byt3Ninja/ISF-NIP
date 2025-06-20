@@ -1945,5 +1945,7 @@ return [
 	'Filter Options (Final)' => 'Filter Options (Final)',
 	'Rank' => 'Rank',
 	'Total Score' => 'Total Score',
-	'Judge Comments (Summary)' => 'Judge Comments (Summary)'
+	'Judge Comments (Summary)' => 'Judge Comments (Summary)',
+	'Manage Team' => 'Manage Team',
+	'ApplyHackathon' => 'Apply'
 ];

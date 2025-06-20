@@ -41,7 +41,7 @@
         <button type="button" class="btn btn-{{ $hackathon['status'] == 'Upcoming' ? 'primary' : 'success'}}" style="flex: 1;" data-bs-toggle="modal"
           data-bs-target="#applyModal{{ $loop->index + 1 }}">
           <i class="ti ti-{{  $hackathon['status'] == 'Upcoming' ? 'send' : 'users' }} me-1"></i>
-          {{ $hackathon['status'] == 'Upcoming' ? 'Apply' : 'Manage Team'}}
+          {{ $hackathon['status'] == 'Upcoming' ? __('admin.ApplyHackathon') : __('admin.Manage Team') }}
         </button>
       </div>
       @if ($hackathon['status'] == 'Upcoming')
