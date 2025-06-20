@@ -34,7 +34,31 @@
       'status' => 'Ongoing',
       'description' => 'Develop innovative solutions for sustainable development goals.',
       'tags' => ['Sustainability', 'Green Tech'],
-    ]
+    ],
+    [
+      'title' => 'HealthTech Hackathon',
+      'date' => 'May 10 - 12, 2024',
+      'location' => 'Virtual',
+      'status' => 'Upcoming',
+      'description' => 'Create innovative health tech solutions to improve patient care.',
+      'tags' => ['HealthTech', 'AI'],
+    ],
+    [
+      'title' => 'FinTech Innovation Challenge',
+      'date' => 'June 5 - 7, 2024',
+      'location' => 'Hybrid (Dubai & Online)',
+      'status' => 'Upcoming',
+      'description' => 'Develop cutting-edge financial technology solutions.',
+      'tags' => ['FinTech', 'Blockchain'],
+    ],
+    [
+      'title' => 'Smart Cities Hackathon',
+      'date' => 'July 15 - 17, 2024',
+      'location' => 'Virtual',
+      'status' => 'Upcoming',
+      'description' => 'Innovate solutions for smart city challenges.',
+      'tags' => ['Smart Cities', 'IoT'],
+    ],
   ];
 @endphp
 
@@ -152,8 +176,7 @@
     <div class="row">
       <div class="col-12">
         <h5 class="fw-bold">
-          <i class="ti ti-calendar-event me-1"></i>
-          {{ $l == 'en' ? 'Upcoming & Ongoing Hackathons' : 'الهاكثونات القادمة والجارية' }}
+          <i class="ti ti-calendar-event ti-md me-1"></i> {{ $l == 'en' ? 'Upcoming & Ongoing Hackathons' : 'الهاكثونات القادمة والجارية' }}
         </h5>
       </div>
     </div>
@@ -166,116 +189,11 @@
       @endforeach
     </div>
 
-      <!-- Hackathon Card 1 - Upcoming -->
-      {{-- <div class="col-lg-4 col-md-6">
-        <div class="card h-100">
-          <div class="card-header p-0">
-            <img src="https://placehold.co/600x250/696cff/ffffff?text=AI+Hackathon" class="card-img-top"
-              alt="هاكثون الذكاء الاصطناعي" style="height: 200px; object-fit: cover;">
-            <div class="position-absolute top-0 end-0 m-3">
-              <span class="badge bg-label-primary hackathon-status-badge">{{ $l == 'en' ? 'Upcoming' : 'قادم' }}</span>
-            </div>
-          </div>
-          <div class="card-body d-flex flex-column mt-4">
-            <h5 class="card-title fw-bold">
-              {{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}
-            </h5>
-            <div class="mb-3">
-              <small class="text-muted d-block">
-                <i class="ti ti-calendar me-1"></i>
-                {{ $l == 'en' ? 'March 15 - 17, 2024' : '15 - 17 مارس 2024' }}
-              </small>
-              <small class="text-muted d-block">
-                <i class="ti ti-map-pin me-1"></i>
-                {{ $l == 'en' ? 'Virtual' : 'افتراضي' }}
-              </small>
-            </div>
-            <p class="card-text text-muted">
-              {{ $l == 'en' ? 'Innovate solutions using artificial intelligence to address urgent industrial
-              challenges.' : 'ابتكر حلولاً باستخدام الذكاء الاصطناعي لمواجهة تحديات صناعية ملحة.' }}
-            </p>
-            <div class="mb-3">
-              <span class="badge bg-label-primary me-1">{{ $l == 'en' ? 'AI' : 'الذكاء الاصطناعي' }}</span>
-              <span class="badge bg-label-info me-1">{{ $l == 'en' ? 'Big Data' : 'البيانات الضخمة' }}</span>
-            </div>
-            <div class="mt-auto">
-                <div class="d-flex w-100 mb-2" role="group">
-                <a href="#" class="btn btn-outline-primary me-2" style="flex: 1;">
-                  <i class="ti ti-info-circle me-1"></i>
-                  {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
-                </a>
-                <button type="button" class="btn btn-primary" style="flex: 1;" data-bs-toggle="modal" data-bs-target="#applyModal1">
-                  <i class="ti ti-send me-1"></i>
-                  {{ $l == 'en' ? 'Apply' : 'قدم الآن' }}
-                </button>
-                </div>
-              <small class="text-muted text-center d-block  fw-medium mt-2">
-                {{ $l == 'en' ? 'Applications open until March 10, 2024' : 'التقديم مفتوح حتى 10 مارس 2024' }}
-              </small>
-            </div>
-          </div>
-        </div>
-      </div> --}}
-
-      <!-- Hackathon Card 2 - Ongoing -->
-      {{-- <div class="col-lg-4 col-md-6">
-        <div class="card h-100">
-          <div class="card-header p-0">
-            <img src="https://placehold.co/600x250/28c76f/ffffff?text=Sustainability" class="card-img-top"
-              alt="هاكثون الاستدامة" style="height: 200px; object-fit: cover;">
-            <div class="position-absolute top-0 end-0 m-3">
-              <span class="badge bg-label-success hackathon-status-badge">{{ $l == 'en' ? 'Ongoing' : 'جاري' }}</span>
-            </div>
-          </div>
-          <div class="card-body d-flex flex-column mt-4">
-            <h5 class="card-title fw-bold">
-              {{ $l == 'en' ? 'Green Sustainability Solutions' : 'هاكثون حلول الاستدامة الخضراء' }}
-            </h5>
-            <div class="mb-3">
-              <small class="text-muted d-block">
-                <i class="ti ti-calendar me-1"></i>
-                {{ $l == 'en' ? 'March 1 - 3, 2024 (Ongoing)' : '01 - 03 مارس 2024 (جاري الآن)' }}
-              </small>
-              <small class="text-muted d-block">
-                <i class="ti ti-map-pin me-1"></i>
-                {{ $l == 'en' ? 'Hybrid (Riyadh & Online)' : 'هجين (الرياض وعبر الإنترنت)' }}
-              </small>
-            </div>
-            <p class="card-text text-muted">
-              {{ $l == 'en' ? 'Develop innovative solutions for more sustainable and environmentally friendly cities.' :
-              'طور حلولاً مبتكرة لمدن أكثر استدامة ومراعاة للبيئة.' }}
-            </p>
-            <div class="mb-3">
-              <span class="badge bg-label-success me-1">{{ $l == 'en' ? 'Sustainability' : 'الاستدامة' }}</span>
-              <span class="badge bg-label-info me-1">{{ $l == 'en' ? 'Smart Cities' : 'المدن الذكية' }}</span>
-            </div>
-            <div class="mt-auto">
-              <div class="d-flex w-100 mb-2" role="group">
-                <a href="#" class="btn btn-outline-success me-2" style="flex: 1;">
-                  <i class="ti ti-info-circle me-1"></i>
-                  {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
-                </a>
-                <a href="#" class="btn btn-success" style="flex: 1;">
-                  <i class="ti ti-users me-1"></i>
-                  {{ $l == 'en' ? 'Manage Team' : 'إدارة الفريق' }}
-                </a>
-              </div>
-              <small class="text-warning text-center d-block fw-medium mt-2">
-                {{ $l == 'en' ? 'Applications closed - Hackathon in progress' : 'التقديم مغلق - الهاكثون جاري' }}
-              </small>
-            </div>
-          </div>
-        </div>
-      </div> --}}
-      <!-- Add more hackathon cards here -->
-    </div>
-
     <!-- Past Hackathons -->
     <div class="row">
       <div class="col-12">
         <h5 class="fw-bold">
-          <i class="ti ti-calendar-check me-1"></i>
-          {{ $l == 'en' ? 'Past Hackathons' : 'الهاكثونات السابقة' }}
+          <i class="ti ti-calendar-check ti-md me-1"></i> {{ $l == 'en' ? 'Past Hackathons' : 'الهاكثونات السابقة' }}
         </h5>
       </div>
     </div>
