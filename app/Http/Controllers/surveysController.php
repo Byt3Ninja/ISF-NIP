@@ -7,6 +7,7 @@ use App\Organization;
 use App\QuestionsBank;
 use App\SurveyQuestions;
 use App\SurveyResponses;
+use App\OrgQuestionsBank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,51 +27,56 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$surveys = Surveys::with('organization')
-        ->when($user->organization_id, function ($query) use ($user) {
-            return $query->where('organization_id', $user->organization_id);
-        })
-        ->get();
+		->when($user->organization_id, function ($query) use ($user) {
+			return $query->where('organization_id', $user->organization_id);
+		})
+		->get();
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
 	public function create()
 	{
 		$user = auth()->user();
-		$organizations = Organization::when($user->organization_id, function ($query) use ($user) {
-            return $query->where('id', $user->organization_id);
-        })->get();
+		$organization_id = null;
+		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
 
-        $questions = QuestionsBank::where('group', 'survey')
-            ->when($user->organization_id, function ($query) use ($user) {
-                return $query->where('organization_id', $user->organization_id);
-            })->get();
-   		
-		
-    	return view('admin.surveys.create', compact('organizations','questions'));
+		$organizations = Organization::when($organization_id, function ($query) use ($organization_id) {
+			return $query->where('id', $organization_id);
+		})->get();
+
+		$questions = QuestionsBank::where('group', 'survey');
+		if( !is_null( $organization_id ) )
+		{
+			$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
+			$questions = $questions->whereIn('id', $organization_questions_ids);
+			// $questions = $questions->where('organization_id', $organization_id);
+		}
+		$questions = $questions->get();
+		return view('admin.surveys.create', compact('organizations','questions'));
 	}
 
 	public function store(Request $request)
 	{
 		$this->validate($request, [
-        'title' => 'required|string',
-        'organization_id' => 'required|exists:organizations,id',
-        'description' => 'nullable|string',
-        'selected_questions' => 'nullable|array',
-        'selected_questions.*' => 'exists:questions_bank,id',
-    ]);
+			'title' => 'required|string',
+			'organization_id' => 'required|exists:organizations,id',
+			'description' => 'nullable|string',
+			'selected_questions' => 'nullable|array',
+			'selected_questions.*' => 'exists:questions_bank,id',
+		]);
 
-    $survey = new Surveys;
-    $survey->title = $request->title;
-    $survey->organization_id = $request->organization_id;
-    $survey->description = $request->description;
-    $survey->save();
+		$survey = new Surveys;
+		$survey->title = $request->title;
+		$survey->organization_id = $request->organization_id;
+		$survey->description = $request->description;
+		$survey->save();
 
-    $questions_ids = $request->input('selected_questions', []);
-    $survey->questions()->sync(array_map(function ($id, $key) {
-        return ['row_no' => $key + 1, 'question_id' => $id];
-    }, $questions_ids, array_keys($questions_ids)));
+		$questions_ids = $request->input('selected_questions', []);
+		$survey->questions()->sync(array_map(function ($id, $key) {
+			return ['row_no' => $key + 1, 'question_id' => $id];
+		}, $questions_ids, array_keys($questions_ids)));
 
-      return redirect()->route('surveys.index')->with('success', 'SurveyStoredSuccessfully');
+		return redirect()->route('surveys.index')->with('success', 'SurveyStoredSuccessfully');
 	}
 
 	/**
@@ -82,21 +88,24 @@ class surveysController extends Controller
 	public function edit($id)
 	{
 		$user = auth()->user();
+		$organization_id = null;
+		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
 
-   		$survey = Surveys::with(['organization', 'questions'])->findOrFail($id);
-    
-   		$organizations = Organization::when($user->organization_id, function ($query) use ($user) {
-        	return $query->where('id', $user->organization_id);
-   	 	})->get();
+		$survey = Surveys::with(['organization', 'questions'])->findOrFail($id);
+		$organizations = Organization::when($organization_id, function ($query) use ($organization_id) {
+			return $query->where('id', $organization_id);
+		})->get();
 
-   		 $availableQuestions = QuestionsBank::where('group', 'survey')
-        	->when($user->organization_id, function ($query) use ($user) {
-            	return $query->where('organization_id', $user->organization_id);
-        })
-        ->select('id', 'question', 'survey_type', 'answers')
-        ->get();
-    
-   		 return view('admin.surveys.edit', compact('survey', 'organizations', 'availableQuestions'));
+
+		$availableQuestions = QuestionsBank::where('group', 'survey');
+		if( !is_null( $organization_id ) )
+		{
+			$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
+			$availableQuestions = $availableQuestions->whereIn('id', $organization_questions_ids);
+			// $availableQuestions = $availableQuestions->where('organization_id', $organization_id);
+		}
+		$availableQuestions = $availableQuestions->select('id', 'question', 'survey_type', 'answers')->get();
+   		return view('admin.surveys.edit', compact('survey', 'organizations', 'availableQuestions'));
 	}
 
 	/**
@@ -108,30 +117,30 @@ class surveysController extends Controller
 	 */
 	public function update($id, Request $request)
 	{
-      $survey = Surveys::findOrFail($id);
+		$survey = Surveys::findOrFail($id);
 
-  	  $this->validate($request, [
-        'title' => 'required|string',
-        'organization_id' => 'required|exists:organizations,id',
-        'description' => 'nullable|string',
-        'selected_questions' => 'nullable|array',
-        'selected_questions.*' => 'exists:questions_bank,id',
-    ], [
-        'selected_questions.array' => __('admin.SelectedQuestionsMustBeArray'),
-        'selected_questions.*.exists' => __('admin.InvalidQuestionSelected'),
-    ]);
+		$this->validate($request, [
+			'title' => 'required|string',
+			'organization_id' => 'required|exists:organizations,id',
+			'description' => 'nullable|string',
+			'selected_questions' => 'nullable|array',
+			'selected_questions.*' => 'exists:questions_bank,id',
+		], [
+			'selected_questions.array' => __('admin.SelectedQuestionsMustBeArray'),
+			'selected_questions.*.exists' => __('admin.InvalidQuestionSelected'),
+		]);
 
-    $survey->title = $request->title;
-    $survey->organization_id = $request->organization_id;
-    $survey->description = $request->description;
-    $survey->save();
+		$survey->title = $request->title;
+		$survey->organization_id = $request->organization_id;
+		$survey->description = $request->description;
+		$survey->save();
 
-    $questions_ids = $request->input('selected_questions', []);
-    $survey->questions()->sync(array_map(function ($id, $key) {
-        return ['row_no' => $key + 1, 'question_id' => $id];
-    }, $questions_ids, array_keys($questions_ids)));
+		$questions_ids = $request->input('selected_questions', []);
+		$survey->questions()->sync(array_map(function ($id, $key) {
+			return ['row_no' => $key + 1, 'question_id' => $id];
+		}, $questions_ids, array_keys($questions_ids)));
 
-    return redirect()->route('surveys.index')->with('success', 'SurveyUpdatedSuccessfully');
+		return redirect()->route('surveys.index')->with('success', 'SurveyUpdatedSuccessfully');
 	}
 
 	public function destroy($id)
@@ -147,15 +156,16 @@ class surveysController extends Controller
 		$user = auth()->user();
 		$organization_id = null;
 		$survey = Surveys::with(['questions'])->find($id);
-		if (isset($user->organization_id) && !empty($user->organization_id)) {
-			$organization_id = $user->organization_id;
-		}
-		if (empty($survey)) {
-			return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
-		} else {
+		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
+		if( empty( $survey ) ) { return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']); }
+		else
+		{
 			$questions = QuestionsBank::where('group', 'survey');
-			if (!is_null($organization_id)) {
-				$questions = $questions->where('organization_id', $organization_id);
+			if( !is_null( $organization_id ) )
+			{
+				$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
+				$questions = $questions->whereIn('id', $organization_questions_ids);
+				// $questions = $questions->where('organization_id', $organization_id);
 			}
 			$questions = $questions->get();
 			return view('admin.surveys.questions', compact('survey', 'questions'));
@@ -298,16 +308,16 @@ class surveysController extends Controller
 	}
 
 	public function delete_questions($id, Request $request)
-{
-    $survey = Surveys::find($id);
-    if (empty($survey)) {
-        return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
-    }
-    $question_ids = $request->input('question_ids', []);
-    if (empty($question_ids)) {
-        return redirect()->route('surveys.questions_manage', ['survey' => $id])->with(['error' => 'noQuestionsSelected']);
-    }
-    $survey->questions()->detach($question_ids);
-    return redirect()->route('surveys.questions_manage', ['survey' => $id])->with('success', 'DeletedSuccessfully');
-}
+	{
+		$survey = Surveys::find($id);
+		if (empty($survey)) {
+			return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
+		}
+		$question_ids = $request->input('question_ids', []);
+		if (empty($question_ids)) {
+			return redirect()->route('surveys.questions_manage', ['survey' => $id])->with(['error' => 'noQuestionsSelected']);
+		}
+		$survey->questions()->detach($question_ids);
+		return redirect()->route('surveys.questions_manage', ['survey' => $id])->with('success', 'DeletedSuccessfully');
+	}
 }
