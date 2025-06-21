@@ -189,10 +189,10 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date',
                 'end' => 'required|date',
-                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:5120',
             ]);
 
 
