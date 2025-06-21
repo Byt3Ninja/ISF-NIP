@@ -870,8 +870,8 @@ class TrainingController extends Controller
 					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d');
 					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d');
 				} else {
-					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d H:i');
-					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d H:i');
+					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d h:i A');
+					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d h:i A');
 				}
 
 				return $session;
@@ -1421,9 +1421,13 @@ class TrainingController extends Controller
 			if (strtolower(trim($session->type)) == "online") {
 				$session->datetime1 = FormatDate($session->datetime, 'Y-m-d');
 				$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d');
+				$session->Course_id = $session->training_Address;
 			} else {
-				$session->datetime1 = FormatDate($session->datetime, 'Y-m-d H:i');
-				$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d H:i');
+				$session->datetime1 = FormatDate($session->datetime, 'Y-m-d h:i A');
+				$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d h:i A');
+				$session->starttime = FormatDate($session->datetime, 'h:i A');
+				$session->endtime = FormatDate($session->enddatetime, 'h:i A');
+				$session->date = FormatDate($session->datetime, 'Y-m-d');
 			}
 
 
