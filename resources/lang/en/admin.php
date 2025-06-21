@@ -1955,4 +1955,5 @@ return [
 	'GBP' => 'GBP',
 	'SAR' => 'SAR',
 	'EGP' => 'EGP',
+	'Add_new_Courses' => 'Add New Courses',
 ];
