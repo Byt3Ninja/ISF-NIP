@@ -166,11 +166,11 @@
                                         value="{{ $ccycle->currency_type ?? '' }}"
                                     >
                                         <option value="" disabled selected>{{ __('cycles.Select_Currency') }}</option>
-                                        <option value="USD" {{ $ccycle->currency_type == 'USD' ? 'selected' : '' }}>USD</option>
-                                        <option value="EUR" {{ $ccycle->currency_type == 'EUR' ? 'selected' : '' }}>EUR</option>
-                                        <option value="GBP" {{ $ccycle->currency_type == 'GBP' ? 'selected' : '' }}>GBP</option>
-                                        <option value="SAR" {{ $ccycle->currency_type == 'SAR' ? 'selected' : '' }}>SAR (ريال)</option>
-                                        <option value="EGP" {{ $ccycle->currency_type == 'EGP' ? 'selected' : '' }}>EGP (الجنيه المصري)</option>
+                                        <option value="USD" {{ $ccycle->currency_type == 'USD' ? 'selected' : '' }}>{{ __('admin.USD') }}</option>
+                                        <option value="EUR" {{ $ccycle->currency_type == 'EUR' ? 'selected' : '' }}>{{ __('admin.EUR') }}</option>
+                                        <option value="GBP" {{ $ccycle->currency_type == 'GBP' ? 'selected' : '' }}>{{ __('admin.GBP') }}</option>
+                                        <option value="SAR" {{ $ccycle->currency_type == 'SAR' ? 'selected' : '' }}>{{ __('admin.SAR') }}</option>
+                                        <option value="EGP" {{ $ccycle->currency_type == 'EGP' ? 'selected' : '' }}>{{ __('admin.EGP') }}</option>
                                     </select>
                                 </div>
                             </div>
