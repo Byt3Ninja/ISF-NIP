@@ -136,9 +136,10 @@ class MentorsController extends Controller
 	public function assign($id, Request $request)
 	{
 		if ($request->id) {
+			$users = explode(',', $request->selected_mentors);
 			CyclesMentors::where('cycle_id', $request->id)->delete();
-			if ($request->users) {
-				foreach ($request->users as $user) {
+			if ($users) {
+				foreach ($users as $user) {
 					CyclesMentors::insert(['cycle_id' => $request->id, 'user_id' => $user]);
 				}
 			}
