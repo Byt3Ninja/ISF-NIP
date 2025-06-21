@@ -231,7 +231,7 @@ class CyclesController extends Controller
                 $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
                 $cycle->legal_guideline_file =  $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
             }
-            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
+            if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
                 $originalName = $request->file('delegation_pdf')->getClientOriginalName();
                 $cycle->delegation_file =  $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
             }
@@ -481,7 +481,7 @@ class CyclesController extends Controller
                     $cycle->legal_guideline_file = $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
                 }
 
-                if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
+                if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
                     $originalName = $request->file('delegation_pdf')->getClientOriginalName();
                     $cycle->delegation_file = $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
                 }
