@@ -1753,24 +1753,24 @@ return [
 	'Step Name' => 'اسم المرحلة',
 	'Mentor Zoom Date' => 'تاريخ زووم للمرشد',
 	'upload_Csv' => 'قم بتحميل ملف CSV، وعيّن الأعمدة إلى تفاصيل البرنامج والشركة والمؤسس، ثم قم بالاستيراد.',
-  	'Please upload a file first' => 'يرجى تحميل ملف أولاً',
-    'Uploaded file seems empty or lacks headers' => 'يبدو أن الملف المحمل فارغ أو يفتقر إلى رؤوس الأعمدة. يرجى تحميل ملف CSV صالح.',
-    'Please fix the errors below' => 'يرجى تصحيح الأخطاء أدناه',
-    'Program Mappings' => 'ربط البرامج',
-    'Email *' => 'البريد الإلكتروني *',
-    'First Name (EN) *' => 'الاسم الأول (بالإنجليزية) *',
-    'Last Name (EN) *' => 'اسم العائلة (بالإنجليزية) *',
-    'Please fix the errors Above' => 'يرجى تصحيح الأخطاء أعلاه',
-    'Successfully imported' => 'تم الاستيراد بنجاح',
-    'Import Result Summary' => 'ملخص نتائج الاستيراد',
-    'Rows Attempted' => 'عدد الصفوف التي تم محاولة استيرادها',
-    'Successful Imports' => 'الاستيرادات الناجحة',
-    'Failed Rows' => 'الصفوف الفاشلة',
-    'Skipped Rows' => 'الصفوف المتخطاة',
-    'Duplicates Found' => 'تم العثور على مكررات',
-    'imported' => 'تم الاستيراد بنجاح',
-    'Total Rows in CSV' => 'إجمالي الصفوف في ملف CSV',
-    'records' => 'سجلات',
+	'Please upload a file first' => 'يرجى تحميل ملف أولاً',
+	'Uploaded file seems empty or lacks headers' => 'يبدو أن الملف المحمل فارغ أو يفتقر إلى رؤوس الأعمدة. يرجى تحميل ملف CSV صالح.',
+	'Please fix the errors below' => 'يرجى تصحيح الأخطاء أدناه',
+	'Program Mappings' => 'ربط البرامج',
+	'Email *' => 'البريد الإلكتروني *',
+	'First Name (EN) *' => 'الاسم الأول (بالإنجليزية) *',
+	'Last Name (EN) *' => 'اسم العائلة (بالإنجليزية) *',
+	'Please fix the errors Above' => 'يرجى تصحيح الأخطاء أعلاه',
+	'Successfully imported' => 'تم الاستيراد بنجاح',
+	'Import Result Summary' => 'ملخص نتائج الاستيراد',
+	'Rows Attempted' => 'عدد الصفوف التي تم محاولة استيرادها',
+	'Successful Imports' => 'الاستيرادات الناجحة',
+	'Failed Rows' => 'الصفوف الفاشلة',
+	'Skipped Rows' => 'الصفوف المتخطاة',
+	'Duplicates Found' => 'تم العثور على مكررات',
+	'imported' => 'تم الاستيراد بنجاح',
+	'Total Rows in CSV' => 'إجمالي الصفوف في ملف CSV',
+	'records' => 'سجلات',
 	'Shareholder' => 'مساهم',
 	'Investor' => 'مستثمر',
 	'Current_Step' => 'المرحلة الحالية',
@@ -1793,7 +1793,7 @@ return [
 	'My Requests' => 'طلباتي',
 	'Started' => 'بدأت',
 	'Not started' => 'لم تبدأ',
-	
+
 	// Mentorship Surveys Translations
 	'Program Duration' => 'مدة البرنامج',
 	'Mentorship Timeline' => 'الجدول الزمني للإرشاد',
@@ -1840,7 +1840,7 @@ return [
 	'surveyResults' => 'نتائج الاستطلاع',
 	'exportCSV' => 'تصدير CSV',
 	'exportExcel' => 'تصدير Excel',
-	 'exportPDF' => 'تصدير PDF',
+	'exportPDF' => 'تصدير PDF',
 	'allStatus' => 'جميع الحالات',
 	'allMentors' => 'جميع المرشدين',
 	'allPrograms' => 'جميع البرامج',
@@ -1852,23 +1852,23 @@ return [
 	'loading' => 'جاري التحميل',
 	'loadingResponses' => 'جاري تحميل الردود',
 	'errorLoadingResponses' => 'خطأ في تحميل الردود',
-	
+
 	// DataTable Language Keys
 	'show' => 'عرض',
 	'entries' => 'عنصر',
 	'showing' => 'عرض',
 	'filteredFrom' => 'مفلتر من',
 	'totalEntries' => 'إجمالي العناصر',
-	
+
 	// DataTable Data State Keys
 	'noDataAvailable' => 'لا توجد بيانات متاحة في الجدول',
 	'noMatchingRecords' => 'لم يتم العثور على سجلات مطابقة',
 	'BulkDelete' => 'حذف مجموعة',
 	'SelectForDelete' => 'حدد العناصر التي تريد حذفها',
 	'noQuestionsSelected' => 'لم يتم اختيار أسئلة للحذف',
-    // 'DeletedSuccessfully' => 'تم حذف الأسئلة بنجاح',
-    // 'StoredSuccessfully' => 'تم حفظ الأسئلة بنجاح',
-    'surveyNotFound' => 'الاستبيان غير موجود',
+	// 'DeletedSuccessfully' => 'تم حذف الأسئلة بنجاح',
+	// 'StoredSuccessfully' => 'تم حفظ الأسئلة بنجاح',
+	'surveyNotFound' => 'الاستبيان غير موجود',
 	'Add Answer' => 'اضافة جواب',
 	'typeAnswer' => 'اكتب نص الإجابة',
 	'Finished' => 'منتهية',
@@ -1897,7 +1897,7 @@ return [
 	'connected_since' => 'متصل منذ',
 	'test_phone_number_placeholder' => '+1234567890',
 	'test_message_placeholder' => 'مرحبا من واتساب API!',
-	
+
 	// Additional WhatsApp interface translations
 	'only_numbers_allowed' => 'أرقام فقط مسموحة',
 	'session_id_label' => 'معرف الجلسة',
@@ -1918,17 +1918,17 @@ return [
 	'establishing_connection_subtitle' => 'يرجى الانتظار بينما نقوم بإنشاء الاتصال',
 	'whatsapp_connected_title' => 'واتساب متصل',
 	'account_linked_subtitle' => 'حسابك مرتبط وجاهز',
-	
+
 	// Task management translations
 	'add_comment' => 'إضافة تعليق',
 	'add_comment_placeholder' => 'إضافة تعليق',
 	'pending' => 'في الانتظار',
 	'mark_all_as_read' => 'تحديد الكل كمقروء',
-	
+
 	// General interface translations
 	'session_id_caps' => 'معرف الجلسة',
 	'connected_since_caps' => 'متصل منذ',
-	
+
 	'whatsapp_not_connected_title' => 'واتساب غير متصل',
 	'checking_connection_title' => 'فحص الاتصال',
 	'verifying_session_subtitle' => 'التحقق من الجلسة...',
@@ -1954,9 +1954,9 @@ return [
 	'First screening' => 'المرحلة الأولى',
 	'Final screening' => 'المرحلة النهاية',
 	'Coming sessions' => 'الجلسات القادمة',
-	'withoutTasks'=>'عدد الجلسات بدون مهام',
-    'completedTasks'=>'عدد المهام المنتهية',
-	'nonCompletedTasks'=>'عدد المهام الغير منتهية',
+	'withoutTasks' => 'عدد الجلسات بدون مهام',
+	'completedTasks' => 'عدد المهام المنتهية',
+	'nonCompletedTasks' => 'عدد المهام الغير منتهية',
 	'Error, cannot add late date' => 'خطاء، لا يمكن اضافة تاريخ متاخر',
 	'sessionUpdated' => 'تم تحديث الجلسة بنجاح',
 	'Current Image' => 'الصورة الحالية',
@@ -1996,5 +1996,12 @@ return [
 	'Total Score' => 'إجمالي الدرجات',
 	'Judge Comments (Summary)' => 'تعليقات المحكمين (ملخص)',
 	'Manage Team' => 'إدارة الفريق',
-	'ApplyHackathon' => 'تقديم'
+	'ApplyHackathon' => 'تقديم',
+	'Start_Date' => 'تاريخ البدء',
+	'End_Date' => 'تاريخ الانتهاء',
+	'USD' => 'دولار أمريكي',
+	'EUR' => 'يورو',
+	'GBP' => 'جنيه إسترليني',
+	'SAR' => ' ريال سعودي ',
+	'EGP' => 'جنيه مصري',
 ];
