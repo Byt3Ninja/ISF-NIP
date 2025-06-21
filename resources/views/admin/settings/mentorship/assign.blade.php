@@ -128,6 +128,7 @@
                   enctype="multipart/form-data">
                   {!! csrf_field() !!}
                   <input type="hidden" name="cycle" value="{{ $id }}">
+                   <input type="hidden" id="selected-mentors" name="selected_mentors" value="">
                   <div class="table-responsive">
                     <table class="table" id="mentorstable">
                       <thead class="bg-label-light">
@@ -140,7 +141,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <input type="hidden" id="selected-mentors" name="selected_mentors" value="">
+                       
                         @foreach ($mentors as $mentor)
                           <tr>
                             <td>
@@ -151,7 +152,7 @@
                                     type='checkbox' 
                                     id="checkbox{{ $mentor->id }}" 
                                     {{ in_array($mentor->id, $cList) ? 'checked' : '' }}
-                                    name='users[]'
+                                    {{-- name='users[]' --}}
                                     value="{{ $mentor->id }}"
                                   />
                                 </div>
