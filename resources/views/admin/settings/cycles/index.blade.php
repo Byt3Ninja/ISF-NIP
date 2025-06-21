@@ -268,7 +268,7 @@
             id="organization_id">
           @endif
           <div class="col-12 mb-4">
-            <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input id='start' name='start' type="hidden" />
             <input id='end' name='end' type="hidden" />
             <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
@@ -357,7 +357,7 @@
             </div>
           </div>
           <div class="col-12 mb-4">
-            <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="fromDate" name="fromDate" />
             <input type="hidden" id="toDate" name="toDate" />
             <input type="text" id="stepFormRamgePicker" class="form-control" name="date_range" required />
@@ -441,7 +441,7 @@
               required>
           </div>
           <div class="col-12 mb-4">
-            <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="mfromDate" name="fromDate" />
             <input type="hidden" id="mtoDate" name="toDate" />
             <input type="text" id="step-range-picker" class="form-control" name="date_range" required />
