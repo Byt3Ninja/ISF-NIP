@@ -60,6 +60,25 @@
       'tags' => ['Smart Cities', 'IoT'],
     ],
   ];
+
+  $pastHackathons = [
+    [
+      'title' => 'Cybersecurity Challenge',
+      'date' => 'January 10 - 12, 2024',
+      'location' => 'Virtual',
+      'status' => 'Completed',
+      'description' => 'Develop solutions to enhance cybersecurity in digital platforms.',
+      'tags' => ['Cybersecurity', 'AI'],
+    ],
+    [
+      'title' => 'E-commerce Innovation Hackathon',
+      'date' => 'February 5 - 7, 2024',
+      'location' => 'Hybrid (Cairo & Online)',
+      'status' => 'Completed',
+      'description' => 'Create innovative solutions for the e-commerce industry.',
+      'tags' => ['E-commerce', 'AI'],
+    ],
+  ];
 @endphp
 
 <body>
@@ -203,44 +222,9 @@
         <div class="card">
           <div class="card-body p-0">
             <div class="list-group list-group-flush">
-              <a href="#"
-                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4">
-                <div>
-                  <h6 class="mb-1 fw-semibold">
-                    {{ $l == 'en' ? 'FinTech Hackathon 2023' : 'هاكثون التقنية المالية 2023' }}
-                  </h6>
-                  <small class="text-muted">
-                    <i class="ti ti-calendar me-1"></i>
-                    {{ $l == 'en' ? 'November 10 - 12, 2023' : '10 - 12 نوفمبر 2023' }}
-                  </small>
-                </div>
-                <div class="d-flex align-items-center">
-                  <span class="badge bg-label-success me-2">{{ $l == 'en' ? 'Completed' : 'مكتمل' }}</span>
-                  <span class="badge bg-label-warning">
-                    <i class="ti ti-trophy me-1"></i>
-                    {{ $l == 'en' ? 'View Results' : 'عرض النتائج' }}
-                  </span>
-                </div>
-              </a>
-              <a href="#"
-                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4">
-                <div>
-                  <h6 class="mb-1 fw-semibold">
-                    {{ $l == 'en' ? 'Mobile Apps Challenge 2023' : 'تحدي تطبيقات الموبايل 2023' }}
-                  </h6>
-                  <small class="text-muted">
-                    <i class="ti ti-calendar me-1"></i>
-                    {{ $l == 'en' ? 'September 15 - 17, 2023' : '15 - 17 سبتمبر 2023' }}
-                  </small>
-                </div>
-                <div class="d-flex align-items-center">
-                  <span class="badge bg-label-success me-2">{{ $l == 'en' ? 'Completed' : 'مكتمل' }}</span>
-                  <span class="badge bg-label-warning">
-                    <i class="ti ti-trophy me-1"></i>
-                    {{ $l == 'en' ? 'View Results' : 'عرض النتائج' }}
-                  </span>
-                </div>
-              </a>
+              @foreach ($pastHackathons as $hackathon)
+                @include('admin.hackathon.partials.hackathon-item', ['hackathon' => $hackathon, 'l' => $l])
+              @endforeach
             </div>
           </div>
         </div>
@@ -251,127 +235,17 @@
   <!-- Include original footer -->
   <footer class="footer mt-auto py-3 bg-dark text-white">
     <div class="container text-center">
-      <span>© 2024 {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع
-        الحقوق محفوظة.' }}</span>
+      <span>
+        © 2024 {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع الحقوق محفوظة.' }}
+      </span>
     </div>
   </footer>
 
   <!-- Apply Modal -->
-  <div class="modal fade" id="applyModal1" tabindex="-1" aria-labelledby="applyModal1Label" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="applyModal1Label">
-            <i class="ti ti-send me-2"></i>
-            {{ $l == 'en' ? 'Apply for Future of AI Hackathon' : 'تقديم طلب الانضمام لهاكثون مستقبل الذكاء الاصطناعي' }}
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-info d-flex align-items-center" role="alert">
-            <i class="ti ti-info-circle me-2"></i>
-            <div>
-              {{ $l == 'en' ? 'You are about to apply for the "Future of AI Hackathon". Please review the terms and
-              conditions before proceeding.' : 'أنت على وشك تقديم طلب للانضمام إلى "هاكثون مستقبل الذكاء الاصطناعي".
-              يرجى مراجعة شروط وأحكام الهاكثون قبل المتابعة.' }}
-            </div>
-          </div>
-
-          <form id="hackathonApplicationForm">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="applicantName" class="form-label fw-bold">{{ $l == 'en' ? 'Full Name' : 'الاسم الكامل' }}</label>
-                <input type="text" class="form-control" id="applicantName"
-                  value="{{ $l == 'en' ? 'Entrepreneur (From Profile)' : 'رائد أعمال (من الملف الشخصي)' }}" readonly>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="applicantEmail" class="form-label fw-bold">{{ $l == 'en' ? 'Email' : 'البريد الإلكتروني' }}</label>
-                <input type="email" class="form-control" id="applicantEmail"
-                  value="{{ $l == 'en' ? 'user@example.com (From Profile)' : 'user@example.com (من الملف الشخصي)' }}"
-                  readonly>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="motivation" class="form-label fw-bold">{{ $l == 'en' ? 'Why do you want to participate? (Optional)' :
-                'لماذا ترغب في المشاركة؟ (اختياري)' }}</label>
-              <textarea class="form-control" id="motivation" rows="3"
-                placeholder="{{ $l == 'en' ? 'Tell us about your motivation...' : 'أخبرنا عن دافعك...' }}"></textarea>
-            </div>
-
-            <div class="form-check mb-3">
-              <input type="checkbox" class="form-check-input" id="externalTeamCheck">
-              <label class="form-check-label" for="externalTeamCheck">
-                {{ $l == 'en' ? 'I am part of an external team (if allowed)' : 'أنا جزء من فريق مشارك من خارج المسرعة
-                (إذا كان مسموحاً)' }}
-              </label>
-            </div>
-
-            <div id="externalTeamDetails" class="mb-3" style="display:none;">
-              <label for="externalTeamName" class="form-label fw-bold">{{ $l == 'en' ? 'External Team Name' : 'اسم الفريق
-                الخارجي' }}</label>
-              <input type="text" class="form-control" id="externalTeamName"
-                placeholder="{{ $l == 'en' ? 'Team name' : 'اسم الفريق' }}">
-            </div>
-
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" value="" id="termsAndConditions" required>
-              <label class="form-check-label" for="termsAndConditions">
-                {{ $l == 'en' ? 'I agree to the' : 'أوافق على' }}
-                <a href="#terms" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-primary">
-                  {{ $l == 'en' ? 'Terms and Conditions' : 'الشروط والأحكام' }}
-                </a>
-                {{ $l == 'en' ? 'of the hackathon.' : 'الخاصة بالهاكثون.' }}
-              </label>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-            <i class="ti ti-x me-1"></i>
-            {{ $l == 'en' ? 'Close' : 'إغلاق' }}
-          </button>
-          <button type="button" class="btn btn-primary" onclick="submitApplication()">
-            <i class="ti ti-check me-1"></i>
-            {{ $l == 'en' ? 'Confirm Application' : 'تأكيد التقديم' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  @include('admin.hackathon.partials.hackathon-apply', ['l' => $l])
 
   <!-- Terms Modal -->
-  <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="termsModalLabel">
-            <i class="ti ti-file-text me-2"></i>
-            {{ $l == 'en' ? 'Hackathon Terms and Conditions' : 'شروط وأحكام الهاكثون' }}
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>{{ $l == 'en' ? 'This is placeholder text for terms and conditions...' : 'هذا نص وهمي للشروط والأحكام...'
-            }}</p>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam tincidunt arcu vel arcu fermentum, eget
-            accumsan dolor dignissim. Nam eget quam mauris. In hac habitasse platea dictumst.</p>
-          <ol>
-            <li>{{ $l == 'en' ? 'First term: ...' : 'البند الأول: ...' }}</li>
-            <li>{{ $l == 'en' ? 'Second term: ...' : 'البند الثاني: ...' }}</li>
-            <li>{{ $l == 'en' ? 'Third term: ...' : 'البند الثالث: ...' }}</li>
-          </ol>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-target="#applyModal1" data-bs-toggle="modal"
-            data-bs-dismiss="modal">
-            <i class="ti ti-check me-1"></i>
-            {{ $l == 'en' ? 'I Agree and Return to Application' : 'أوافق وأعود للتقديم' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  @include('admin.hackathon.partials.hackathon-terms', ['l' => $l])
 
   <!-- Core JS -->
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
