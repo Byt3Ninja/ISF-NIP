@@ -60,7 +60,7 @@
         oninput="this.value = this.value.trimStart()" required>
     </div>
     <div class="col-12 mb-4">
-      <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to') }}:</label>
+      <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
       <input type="text" name="date_range" id="date-range-picker" class="form-control" />
     </div>
     {{-- <div class="row">
