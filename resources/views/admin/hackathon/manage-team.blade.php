@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html 
+  lang="{{ $l }}" 
+  dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" 
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-navbar-fixed layout-compact" 
+  data-theme="theme-default" 
+  data-assets-path="/vuexy/assets/"
+  data-template="vertical-menu-template" 
+  data-style="light"
+>
+
+<head>
+  @include('admin.includes.head')
+
+  <!-- Additional Styles -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
+</head>
+
+<body>
+  <!-- Include original navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/dashboard/hackathon">
+        <i class="ti ti-tournament text-primary me-2"></i> {{ $l == 'en' ? 'Hackathon Platform' : 'منصة الهاكثونات' }}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/hackathon">
+              <i class="ti ti-home"></i>
+              {{ $l == 'en' ? 'Home' : 'الرئيسية' }}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/dashboard/hackathon/my-team">
+              <i class="ti ti-users"></i> {{ $l == 'en' ? 'My Team' : 'فريقي' }}
+            </a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <i class="ti ti-user-circle"></i> {{ $l == 'en' ? 'Hello, Entrepreneur' : 'مرحباً، رائد أعمال' }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+              <li><a class="dropdown-item" href="#"><i class="ti ti-user"></i> {{ $l == 'en' ? 'My Profile' : 'ملفي الشخصي' }}</a></li>
+              <li><a class="dropdown-item active" href="#"><i class="ti ti-users"></i> {{ $l == 'en' ? 'My Team' : 'فريقي' }}</a></li>
+              <li><a class="dropdown-item" href="/dashboard"><i class="ti ti-dashboard"></i> {{ $l == 'en' ? 'Admin Dashboard' : 'لوحة تحكم الإدارة' }}</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="#"><i class="ti ti-logout"></i> {{ $l == 'en' ? 'Logout' : 'تسجيل الخروج' }}</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="overflow-x-hidden mx-auto mb-12 mt-6" style="width: 90%;">
+    <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span id="hackathon-title-team-page" class="text-primary">{{ $l == 'en' ? 'AI Hackathon' : 'هاكثون الذكاء الاصطناعي' }}</span></h2>
+
+    <!-- No Team Section -->
+    <div id="no-team-section" class="card card-body text-center p-5" style="display:none;">
+      <i class="ti ti-users ti-xl text-muted mb-3"></i>
+      <h4>{{ $l == 'en' ? 'You haven\'t joined or created a team yet.' : 'لم تنضم إلى فريق بعد أو لم تقم بإنشاء فريق.' }}</h4>
+      <p>{{ $l == 'en' ? 'You can create a new team or join an existing team from the hackathon details page.' : 'يمكنك إنشاء فريق جديد أو الانضمام إلى فريق موجود من خلال صفحة تفاصيل الهاكثون.' }}</p>
+      <a href="#" class="btn btn-primary mt-3">
+        <i class="ti ti-arrow-left me-1"></i> {{ $l == 'en' ? 'Back to Hackathon & Setup Team' : 'العودة لصفحة الهاكثون وتكوين فريق' }}
+      </a>
+    </div>
+
+    <!-- Team Management Section -->
+    <div id="team-management-section" class="row">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l == 'en' ? 'Heroes Team' : 'فريق الأبطال' }}</span></h5>
+          </div>
+          <div class="card-body">
+            <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span id="member-count">2</span>/5):</h6>
+            <ul class="list-group mb-3" id="team-members-list">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="avatar avatar-sm me-2">
+                    <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle">
+                  </div>
+                  <strong>{{ $l == 'en' ? 'You (Team Leader)' : 'أنت (قائد الفريق)' }}</strong>
+                </div>
+                <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="avatar avatar-sm me-2">
+                    <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle">
+                  </div>
+                  {{ $l == 'en' ? 'Team Member 2 (username)' : 'عضو الفريق 2 (اسم المستخدم)' }}
+                </div>
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}" onclick="confirmRemoveMember('{{ $l == 'en' ? 'Team Member 2 (username)' : 'عضو الفريق 2 (اسم المستخدم)' }}')">
+                  <i class="ti ti-user-minus"></i>
+                </button>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+                <div>
+                  <i class="ti ti-user-plus me-2"></i>
+                  {{ $l == 'en' ? 'Pending invitation to: user3@example.com' : 'دعوة معلقة لـ: user3@example.com' }}
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation('user3@example.com')">
+                  <i class="ti ti-x"></i>
+                </button>
+              </li>
+            </ul>
+
+            <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
+            <form id="inviteMemberForm" class="row g-3 align-items-center">
+              <div class="col-auto flex-grow-1">
+                <input type="email" class="form-control" id="memberEmail" 
+                       placeholder="{{ $l == 'en' ? 'Member email address' : 'بريد العضو الإلكتروني' }}" required>
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-success">
+                  <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
+                </button>
+              </div>
+            </form>
+            <hr>
+            <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:' }}</h6>
+            <div id="join-requests-list">
+              <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.' }}</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="/dashboard/hackathon/my-team" class="btn btn-info">
+              <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
+            </a>
+            <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
+              <i class="ti ti-logout me-1"></i> {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
+            </button>
+            <button class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()" id="disbandTeamBtn" style="display:none;">
+              <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ti ti-target me-2"></i> {{ $l == 'en' ? 'Team Goal & Project' : 'هدف الفريق ومشروعه' }}</h5>
+          </div>
+          <div class="card-body">
+            <h6>{{ $l == 'en' ? 'Project Idea (Initial):' : 'فكرة المشروع (مبدئية):' }}</h6>
+            <p id="team-project-idea">{{ $l == 'en' ? 'Smart system for real estate market data analysis using artificial intelligence.' : 'نظام ذكي لتحليل بيانات السوق العقاري باستخدام الذكاء الاصطناعي.' }}</p>
+            <button class="btn btn-sm btn-outline-secondary mb-3" data-bs-toggle="modal" data-bs-target="#editProjectIdeaModal">
+              <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+            </button>
+
+            <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
+            <p id="team-target-track">{{ $l == 'en' ? 'AI in Financial Services' : 'الذكاء الاصطناعي في الخدمات المالية' }}</p>
+             
+            <h6>{{ $l == 'en' ? 'Project Status:' : 'حالة المشروع:' }}</h6>
+            <div class="progress mb-2" style="height: 20px;">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}</div>
+            </div>
+            <small class="text-muted">{{ $l == 'en' ? 'Current Phase: Idea development and initial prototype.' : 'المرحلة الحالية: تطوير الفكرة والنموذج الأولي.' }}</small>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ti ti-video me-2"></i> {{ $l == 'en' ? 'Upcoming Mentorship Sessions for Your Team' : 'جلسات الإرشاد القادمة لفريقكم' }}</h5>
+          </div>
+          <div class="card-body" id="team-mentorship-sessions">
+            <div id="no-mentorship-sessions" class="text-muted">
+              <p>{{ $l == 'en' ? 'No mentorship sessions currently scheduled for your team.' : 'لا توجد جلسات إرشاد مجدولة حالياً لفريقكم.' }}</p>
+            </div>
+            <ul class="list-group list-group-flush" id="booked-sessions-list" style="display:none;">
+              <li class="list-group-item px-0">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">{{ $l == 'en' ? 'With' : 'مع' }} <strong>{{ $l == 'en' ? 'Dr. Ahmed Abdullah' : 'د. أحمد عبدالله' }}</strong> ({{ $l == 'en' ? 'AI Expert' : 'خبير ذكاء اصطناعي' }})</h6>
+                  <small>{{ $l == 'en' ? 'Tomorrow, 02:00 PM' : 'غداً, 02:00 م' }}</small>
+                </div>
+                <p class="mb-1">{{ $l == 'en' ? 'Topic: Product development strategy and idea validation.' : 'الموضوع: استراتيجية تطوير المنتج والتحقق من الفكرة.' }}</p>
+                <small class="text-success">
+                  <i class="ti ti-video me-1"></i> {{ $l == 'en' ? 'Virtual meeting link:' : 'رابط الاجتماع الافتراضي:' }} <a href="#" target="_blank">{{ $l == 'en' ? 'Click here to join' : 'اضغط هنا للانضمام' }}</a>
+                </small>
+              </li>
+            </ul>
+            <a href="#" class="btn btn-outline-primary btn-sm mt-3" id="link-to-book-mentorship">
+              <i class="ti ti-calendar-plus me-1"></i> {{ $l == 'en' ? 'Request New Mentorship Session / View Mentors' : 'طلب جلسة إرشاد جديدة / عرض المرشدين' }}
+            </a>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ti ti-link me-2"></i>{{ $l == 'en' ? 'Important Hackathon Links' : 'روابط مهمة للهاكثون' }}</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" id="link-hackathon-details"><i class="ti ti-info-circle me-1"></i> {{ $l == 'en' ? 'Back to Hackathon Details' : 'العودة لصفحة تفاصيل الهاكثون' }}</a></li>
+              <li class="mb-2"><a href="#" id="link-submit-project" class="text-success fw-bold"><i class="ti ti-upload me-1"></i> {{ $l == 'en' ? 'Go to Project Submission Page' : 'الذهاب لصفحة رفع المشروع' }}</a></li>
+              <li><a href="#"><i class="ti ti-file-text me-1"></i> {{ $l == 'en' ? 'Hackathon Rules & Guidelines' : 'قواعد وتعليمات الهاكثون' }}</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Project Idea Modal -->
+  <div class="modal fade" id="editProjectIdeaModal" tabindex="-1" aria-labelledby="editProjectIdeaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProjectIdeaModalLabel">{{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="projectIdeaForm">
+            <div class="mb-3">
+              <label for="projectIdeaText" class="form-label">{{ $l == 'en' ? 'Project Idea' : 'فكرة المشروع' }}</label>
+              <textarea class="form-control" id="projectIdeaText" rows="4"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="targetTrackSelect" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
+              <select class="form-select" id="targetTrackSelect">
+                <option selected>{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
+                <option value="ai_health">{{ $l == 'en' ? 'AI in Healthcare' : 'الذكاء الاصطناعي في الرعاية الصحية' }}</option>
+                <option value="ai_finance">{{ $l == 'en' ? 'AI in Financial Services' : 'الذكاء الاصطناعي في الخدمات المالية' }}</option>
+                <option value="ai_smartcity">{{ $l == 'en' ? 'AI for Smart Cities' : 'الذكاء الاصطناعي للمدن الذكية' }}</option>
+                <option value="other">{{ $l == 'en' ? 'Other (please specify)' : 'آخر (يرجى التحديد)' }}</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}</button>
+          <button type="button" class="btn btn-primary" onclick="saveProjectIdea()">{{ $l == 'en' ? 'Save Changes' : 'حفظ التغييرات' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include original footer -->
+  <footer class="footer mt-auto py-3 bg-dark text-white">
+    <div class="container text-center">
+      <span>
+        © 2024 {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع الحقوق محفوظة.' }}
+      </span>
+    </div>
+  </footer>
+
+  <!-- Core JS -->
+  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <script src="/vuexy/assets/js/main.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+
+  <!-- Custom JS -->
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+
+  <script>
+    const HACKATHON_ID_TEAM_PAGE = new URLSearchParams(window.location.search).get('hackathonId') || '1';
+    const HACKATHON_NAME = "{{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}"; 
+    const IS_TEAM_LEADER = true; 
+
+    $(document).ready(function() {
+      // Initialize tooltips
+      $('[data-bs-toggle="tooltip"]').tooltip();
+      
+      // Set dynamic content
+      $('#breadcrumb-hackathon-name').text(HACKATHON_NAME);
+      $('#breadcrumb-hackathon-name').attr('href', `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}`);
+      $('#hackathon-title-team-page').text(HACKATHON_NAME);
+      $('#link-hackathon-details').attr('href', `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}`);
+      $('#link-submit-project').attr('href', `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}&submissionOpen=true#submission`);
+      $('#link-to-book-mentorship').attr('href', `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}#mentorship`);
+
+      const userHasTeam = new URLSearchParams(window.location.search).get('teamCreated') === 'true' || true; 
+
+      if (userHasTeam) {
+        $('#team-management-section').show(); 
+        $('#no-team-section').hide();
+        const joinedTeamName = new URLSearchParams(window.location.search).get('joinedTeamName');
+        if(joinedTeamName) {
+          $('#team-name-display').text(joinedTeamName);
+        }
+        if(IS_TEAM_LEADER) {
+          $('#disbandTeamBtn').show();
+        }
+        
+        // Mentorship sessions display logic
+        const teamHasBookedSessions = true; // This would be dynamic based on actual team data
+        if (teamHasBookedSessions) {
+          $('#no-mentorship-sessions').hide();
+          $('#booked-sessions-list').show();
+        } else {
+          $('#no-mentorship-sessions').show();
+          $('#booked-sessions-list').hide();
+        }
+
+      } else {
+        $('#team-management-section').hide();
+        $('#no-team-section').show();
+        // Hide mentorship section if no team
+        $('#team-mentorship-sessions').hide();
+      }
+
+      $('#inviteMemberForm').on('submit', function(e) {
+        e.preventDefault();
+        const email = $('#memberEmail').val();
+        if (email) {
+          Swal.fire({
+            icon: 'success',
+            title: '{{ $l == 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!' }}',
+            text: `{{ $l == 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى' }} ${email}.`,
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonText: "{{ __('admin.OK') }}",
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+          
+          const list = $('#team-members-list');
+          const newItem = $(`
+            <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+              <div><i class="ti ti-user-plus me-2"></i> {{ $l == 'en' ? 'Pending invitation to:' : 'دعوة معلقة لـ:' }} ${email}</div>
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation('${email}')">
+                <i class="ti ti-x"></i>
+              </button>
+            </li>
+          `);
+          list.append(newItem);
+          $('[data-bs-toggle="tooltip"]').tooltip();
+          $('#memberEmail').val('');
+        }
+      });
+
+      $('#editProjectIdeaModal').on('show.bs.modal', function (event) {
+        $('#projectIdeaText').val($('#team-project-idea').text());
+      });
+    });
+
+    function saveProjectIdea() {
+      const newIdea = $('#projectIdeaText').val();
+      const newTrack = $('#targetTrackSelect option:selected').text();
+      $('#team-project-idea').text(newIdea);
+      if(newTrack !== "{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}") {
+        $('#team-target-track').text(newTrack);
+      }
+      $('#editProjectIdeaModal').modal('hide');
+      
+      Swal.fire({
+        icon: 'success',
+        title: '{{ $l == 'en' ? 'Project Idea Saved!' : 'تم حفظ فكرة المشروع!' }}',
+        text: '{{ $l == 'en' ? 'Project idea saved successfully.' : 'تم حفظ فكرة المشروع بنجاح.' }}',
+        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        confirmButtonText: "{{ __('admin.OK') }}",
+        customClass: {
+            confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+    }
+
+    function confirmLeaveTeam() {
+      Swal.fire({
+        title: '{{ $l == 'en' ? 'Are you sure?' : 'هل أنت متأكد؟' }}',
+        text: '{{ $l == 'en' ? 'Are you sure you want to leave this team?' : 'هل أنت متأكد أنك تريد مغادرة هذا الفريق؟' }}',
+        icon: 'warning',
+        confirmButtonText: '{{ $l == 'en' ? 'Yes, leave team' : 'نعم، مغادرة الفريق' }}',
+        cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary'
+        },
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            icon: 'success',
+            title: '{{ $l == 'en' ? 'Team Left!' : 'تم مغادرة الفريق!' }}',
+            text: '{{ $l == 'en' ? 'You have left the team.' : 'لقد غادرت الفريق.' }}',
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonText: "{{ __('admin.OK') }}",
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          }).then(() => {
+            window.location.href = `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}&applied=true`;
+          });
+        }
+      });
+    }
+
+    function confirmRemoveMember(memberName) {
+      Swal.fire({
+        title: '{{ $l == 'en' ? 'Remove Team Member?' : 'إزالة عضو الفريق؟' }}',
+        text: `{{ $l == 'en' ? 'Are you sure you want to remove' : 'هل أنت متأكد أنك تريد إزالة' }} ${memberName} {{ $l == 'en' ? 'from the team?' : 'من الفريق؟' }}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '{{ $l == 'en' ? 'Yes, remove member' : 'نعم، إزالة العضو' }}',
+        cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary'
+        },
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Here you would typically make an AJAX call to remove the member
+          // For now, we'll just show a success message and remove the element
+          Swal.fire({
+            icon: 'success',
+            title: '{{ $l == 'en' ? 'Member Removed!' : 'تم إزالة العضو!' }}',
+            text: `${memberName} {{ $l == 'en' ? 'has been removed from the team.' : 'تم إزالته من الفريق.' }}`,
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          }).then(() => {
+            // Remove the member from the list (in a real scenario, this would be handled by server response)
+            event.target.closest('li').remove();
+            // Update member count
+            const currentCount = parseInt($('#member-count').text());
+            $('#member-count').text(currentCount - 1);
+          });
+        }
+      });
+    }
+
+    function confirmCancelInvitation(email) {
+      Swal.fire({
+        title: '{{ $l == 'en' ? 'Cancel Invitation?' : 'إلغاء الدعوة؟' }}',
+        text: `{{ $l == 'en' ? 'Are you sure you want to cancel the invitation sent to' : 'هل أنت متأكد أنك تريد إلغاء الدعوة المرسلة إلى' }} ${email}{{ $l == 'en' ? '?' : '؟' }}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '{{ $l == 'en' ? 'Yes, cancel invitation' : 'نعم، إلغاء الدعوة' }}',
+        cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+        customClass: {
+            confirmButton: 'btn btn-warning me-2',
+            cancelButton: 'btn btn-label-secondary'
+        },
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Here you would typically make an AJAX call to cancel the invitation
+          // For now, we'll just show a success message and remove the element
+          Swal.fire({
+            icon: 'success',
+            title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
+            text: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          }).then(() => {
+            // Remove the invitation from the list (in a real scenario, this would be handled by server response)
+            event.target.closest('li').remove();
+          });
+        }
+      });
+    }
+
+    function confirmDisbandTeam() {
+      Swal.fire({
+        title: '{{ $l == 'en' ? 'Are you sure?' : 'هل أنت متأكد؟' }}',
+        text: '{{ $l == 'en' ? 'Are you sure you want to disband this team? This action cannot be undone and will remove all members.' : 'هل أنت متأكد أنك تريد حل هذا الفريق؟ هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى إزالة جميع الأعضاء.' }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '{{ $l == 'en' ? 'Yes, disband team' : 'نعم، حل الفريق' }}',
+        cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary'
+        },
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            icon: 'success',
+            title: '{{ $l == 'en' ? 'Team Disbanded!' : 'تم حل الفريق!' }}',
+            text: '{{ $l == 'en' ? 'Team has been disbanded successfully.' : 'تم حل الفريق بنجاح.' }}',
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonText: "{{ __('admin.OK') }}",
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          }).then(() => {
+            window.location.href = `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}&applied=true`;
+          });
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

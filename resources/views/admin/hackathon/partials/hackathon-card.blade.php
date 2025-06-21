@@ -34,12 +34,20 @@
     @php( $isUpcoming = $hackathon['status'] == 'Upcoming' )
     <div class="mt-auto">
       <div class="d-flex w-100 mb-2" role="group">
-        <a href="#" class="btn btn-outline-primary me-2" style="flex: 1;">
+        <a href="/dashboard/hackathon/details" class="btn btn-outline-primary me-2" style="flex: 1;">
           <i class="ti ti-info-circle me-1"></i>
           {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
         </a>
-        <button type="button" class="btn btn-{{ $hackathon['status'] == 'Upcoming' ? 'primary' : 'success'}}" style="flex: 1;" data-bs-toggle="modal"
-          data-bs-target="#applyModal{{ $loop->index + 1 }}">
+        <button 
+          type="button" 
+          class="btn btn-{{ $hackathon['status'] == 'Upcoming' ? 'primary' : 'success'}}" style="flex: 1;" data-bs-toggle="modal"
+          @if($hackathon['status'] == 'Upcoming')
+          data-bs-target="#applyModal{{ $loop->index + 1 }}"
+          @else
+          onclick="window.location.href='/dashboard/hackathon/manage'"
+          {{-- onclick="window.location.href='{{ route('admin.hackathon.manage', $hackathon['id']) }}'" --}}
+          @endif
+        >
           <i class="ti ti-{{  $hackathon['status'] == 'Upcoming' ? 'send' : 'users' }} me-1"></i>
           {{ $hackathon['status'] == 'Upcoming' ? __('admin.ApplyHackathon') : __('admin.Manage Team') }}
         </button>
