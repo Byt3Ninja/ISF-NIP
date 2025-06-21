@@ -1483,7 +1483,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 class="form-control" required>
               </div>
               <div class="col-12 mb-4">
-                <label for="step-range-picker" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+                <label for="step-range-picker" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
                 <input type="hidden" name="fromDate" id="mfromDate">
                 <input type="hidden" name="toDate" id="mtoDate">
                 <input type="text" id="step-range-picker" class="form-control" name="date_range" />
