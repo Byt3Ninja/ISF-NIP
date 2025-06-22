@@ -1423,9 +1423,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			  alert("Error Occurred, Try again!");
 			}
 		  });
-		});
-	
-
-      
+		});      
 </script>
 @stop

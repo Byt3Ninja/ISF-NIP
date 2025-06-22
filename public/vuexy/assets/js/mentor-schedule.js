@@ -450,7 +450,13 @@ function mentorSchedule(type, id, stat) {
           title: __('Deleted'),
           text: __('ScheduleDeleted'),
           icon: 'success',
-          confirmButtonText: __('OK')
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: __('OK'),
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
         }).then((result) => {
           if (result.isConfirmed) {
             location.reload();
