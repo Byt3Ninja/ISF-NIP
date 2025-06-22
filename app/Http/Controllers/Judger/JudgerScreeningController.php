@@ -189,7 +189,7 @@ class JudgerScreeningController extends Controller
                 if( $evaluationForm->status == 'Published' )
                 {
                     $toCreate = [];
-                    $myResponses = ScreeningEvaluationResults::where('evaluation_id', $evaluation_id)->where('user_id', $user_id)->get();
+                    $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluation_id)->where('user_id', $user_id)->get();
                     $have_published = $myResponses->where('status', true);
                     if( $have_published->count() > 0 ) { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'You have already published an evaluation form'], 200); }
                     else
@@ -207,6 +207,7 @@ class JudgerScreeningController extends Controller
                                     'evaluation_id' => $evaluation_id,
                                     'criteria_id' => $element['id'],
                                     'user_id' => $user_id,
+                                    'company_id' => $company->id,
                                     'score' => $element['score'],
                                     'comment' => $element['comment'],
                                     'status' => $type == 'publish' ? true : false

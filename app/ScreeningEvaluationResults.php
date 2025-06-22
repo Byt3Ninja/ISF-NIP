@@ -14,6 +14,7 @@ class ScreeningEvaluationResults extends Model
 	protected $casts = [
 		'evaluation_id' => 'integer',
 		'user_id' => 'integer',
+		'company_id' => 'integer',
 		'criteria_id' => 'integer',
 		'score' => 'double',
 		'comment' => 'string',
@@ -33,5 +34,10 @@ class ScreeningEvaluationResults extends Model
 	public function criteria()
 	{
 		return $this->belongsTo(ScreeningEvaluationCriteria::class, 'criteria_id');
+	}
+
+	public function company()
+	{
+		return $this->belongsTo(Company::class, 'company_id');
 	}
 }
