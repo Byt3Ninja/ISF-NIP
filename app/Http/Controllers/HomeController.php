@@ -982,11 +982,11 @@ class HomeController extends Controller
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
-            if ($stepData->arr > $step->arr) {
+            if ($step && $stepData->arr > $step->arr) {
                 $status = $l == 'ar' ? 'انتهت' : 'Completed';
                 $color = 'label-success';
                 $textColor = 'success';
-            } elseif ($stepData->arr == $step->arr) {
+            } elseif ($step && $stepData->arr == $step->arr) {
                 $status = $l == 'ar' ? 'بدأت' : 'Started';
                 $color = 'label-primary';
                 $textColor = 'primary';
