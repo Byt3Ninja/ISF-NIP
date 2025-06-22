@@ -3150,6 +3150,146 @@
                     "admin",
                     "mentor"
                 ]
+            },
+            {
+                "name": "mentorshipTasks.index",
+                "description": "View list of mentorship tasks",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.create",
+                "description": "View create task form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.store",
+                "description": "Create new mentorship task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.show",
+                "description": "View details of a specific task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.edit",
+                "description": "View edit form for a mentorship task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.update",
+                "description": "Update an existing mentorship task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.destroy",
+                "description": "Delete a mentorship task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.add_task",
+                "description": "Add a task to the mentorship board",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.move_task",
+                "description": "Move task to a different column or position",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.edit_task",
+                "description": "Quick edit task details (without form)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.remove_task",
+                "description": "Remove a task from the board",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.post_comment",
+                "description": "Post a comment on a task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.upload_attachments",
+                "description": "Upload file attachments to a task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "mentorshipTasks.delete_attachments",
+                "description": "Remove file attachments from a task",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor"
+                ]
             }
         ]
     },

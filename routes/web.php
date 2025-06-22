@@ -532,14 +532,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorships.sessions_list_detailed');
         Route::get('meetingRedirect/{mentorship_request_id}', 'MentorshipController@meetingRedirect')->name('integrations.meeting_redirect');
         Route::resource('mentorshipTasks', 'MentorshipTaskController');
-        Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask');
-        Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask');
-        Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
-        Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
-        Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
+        Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask')->name('mentorshipTasks.add_task');
+        Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask')->name('mentorshipTasks.move_task');
+        Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask')->name('mentorshipTasks.edit_task');
+        Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask')->name('mentorshipTasks.remove_task');
+        Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment')->name('mentorshipTasks.post_comment');
         Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.display');
-        Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach');
-        Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach');
+        Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach')->name('mentorshipTasks.upload_attachments');
+        Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach')->name('mentorshipTasks.delete_attachments');
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorship_tasks.comment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorship_tasks.update_special');
