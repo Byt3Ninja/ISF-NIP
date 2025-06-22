@@ -192,7 +192,7 @@
                             <div class="d-flex align-items-center gap-1">
                               <select id="cstep" class="select form-control"
                                 onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
-                                <option value="0">{{ __('cycles.Disapprove') }}</option>
+                                <option value="">{{ __('cycles.Disapprove') }}</option>
                                 @foreach (\App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->get() as $step)
                                   <option value="{{ $step->id }}"
                                     {{ $step->id == $company->step ? 'selected' : '' }}>

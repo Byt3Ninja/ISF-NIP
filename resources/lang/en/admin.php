@@ -1956,4 +1956,10 @@ return [
 	'SAR' => 'SAR',
 	'EGP' => 'EGP',
 	'Add_new_Courses' => 'Add New Courses',
+	'Evaluator Name' => 'Evaluator Name',
+	'Total Evaluations' => 'Total Evaluations',
+	'No evaluators found' => 'No evaluators found',
+	'No companies found' => 'No companies found',
+	'company_name' => 'Company Name',
+	'Auto-mapping completed' => 'Auto-mapping completed',
 ];
