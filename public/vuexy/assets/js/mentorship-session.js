@@ -70,6 +70,18 @@ function onSuccess(response) {
   $('#SendRequest').modal('show');
   $('#SendRequest li').remove();
 
+  // Clear date value when modal shows
+  $('#flatpickr-datetimeLimit').val('').removeClass('is-invalid');
+  $('.date-error').hide();
+  
+  // Clear time dropdowns
+  $('#timeFrom').empty();
+  $('#timeTo').empty();
+  
+  // Hide duration container and feedback messages
+  $('#duration-container').removeClass('d-flex').addClass('d-none');
+  $('#time-feedback').hide();
+
   renderScheduleData(response);
 }
 
@@ -205,20 +217,33 @@ $('#flatpickr-datetimeLimit').on('change', e => {
   });
   // console.log('filteredDateObjs', filteredDateObjs);
 
-  if (filteredDateObjs.length > 0) {
-    const timeFromSelect = $('#timeFrom');
-    const timeToSelect = $('#timeTo');
+  // Always clear time options when date changes, regardless of availability
+  const timeFromSelect = $('#timeFrom');
+  const timeToSelect = $('#timeTo');
   
-    // Clear previous options
-    timeFromSelect.empty();
-    timeToSelect.empty();
+  // Clear previous options
+  timeFromSelect.empty();
+  timeToSelect.empty();
+
+  if (filteredDateObjs.length > 0) {
 
     // Merge and sort time periods
     const mergedPeriods = mergeTimePeriods(filteredDateObjs);
     // console.log('mergedPeriods', mergedPeriods);
 
+    // Check if selected date is today
+    const isToday = moment(selectedDate, 'YYYY-MM-DD').isSame(moment(), 'day');
+    
     // Generate time slots for "From" dropdown (excludes end times)
-    const fromTimeSlots = generateFromTimeSlots(mergedPeriods);
+    let fromTimeSlots = generateFromTimeSlots(mergedPeriods);
+    
+    // Filter out past times if the selected date is today
+    if (isToday) {
+      const currentTime = moment();
+      fromTimeSlots = fromTimeSlots.filter(slot => 
+        slot.moment.isAfter(currentTime)
+      );
+    }
     // console.log('fromTimeSlots', fromTimeSlots);
 
     // Populate timeFrom dropdown with available slots (no end times)
@@ -238,6 +263,19 @@ $('#flatpickr-datetimeLimit').on('change', e => {
         timeToSelect.val(timeToSelect.find('option:first').val()).trigger('change');
       }
     }
+  } else {
+    // No availability found - show message that no times are available
+    $('<option>')
+      .val('')
+      .text(en ? 'No available times for this date' : 'لا توجد أوقات متاحة لهذا التاريخ')
+      .prop('disabled', true)
+      .appendTo(timeFromSelect);
+      
+    $('<option>')
+      .val('')
+      .text(en ? 'No available times for this date' : 'لا توجد أوقات متاحة لهذا التاريخ')
+      .prop('disabled', true)
+      .appendTo(timeToSelect);
   }
 });
 
@@ -353,10 +391,21 @@ function updateTimeToOptions(timeFromValue) {
 
   // Merge time periods and generate all slots for "To" (includes end times)
   const mergedPeriods = mergeTimePeriods(filteredDateObjs);
-  const allToTimeSlots = generateToTimeSlots(mergedPeriods);
+  let allToTimeSlots = generateToTimeSlots(mergedPeriods);
 
   // Parse the selected from time
   const selectedFromTime = moment(timeFromValue, 'HH:mm:ss');
+
+  // Check if selected date is today
+  const isToday = moment(selectedDate, 'YYYY-MM-DD').isSame(moment(), 'day');
+  
+  // Filter out past times if the selected date is today
+  if (isToday) {
+    const currentTime = moment();
+    allToTimeSlots = allToTimeSlots.filter(slot => 
+      slot.moment.isAfter(currentTime)
+    );
+  }
 
   // Find valid end times (at least 30 minutes after the selected from time)
   const validEndSlots = allToTimeSlots.filter(slot => 
