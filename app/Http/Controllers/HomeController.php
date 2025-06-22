@@ -982,16 +982,18 @@ class HomeController extends Controller
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
-            if ($step && $stepData->arr > $step->arr) {
-                $status = $l == 'ar' ? 'انتهت' : 'Completed';
-                $color = 'label-success';
-                $textColor = 'success';
-            } elseif ($step && $stepData->arr == $step->arr) {
-                $status = $l == 'ar' ? 'بدأت' : 'Started';
-                $color = 'label-primary';
-                $textColor = 'primary';
-            }
+            if (!empty($step) && !empty($stepData)) {
 
+                if ($stepData->arr > $step->arr) {
+                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                    $color = 'label-success';
+                    $textColor = 'success';
+                } elseif ($stepData->arr == $step->arr) {
+                    $status = $l == 'ar' ? 'بدأت' : 'Started';
+                    $color = 'label-primary';
+                    $textColor = 'primary';
+                }
+            }
             $trType = $fLink = null;
             if ($company->approved) {
                 $trType = 'my/' . $step->id;
