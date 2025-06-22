@@ -327,7 +327,18 @@ class MentorsController extends Controller
 		} else {
 			$period = $request->period;
 		}
+		$dayName = Carbon::parse($request->date)->format('l');
 
+		$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ?  AND tfrom <= ? AND tto >= ?";
+		$schedules = DB::select($schedules_q, [
+			$request->mentorid,
+			'%' . $dayName . '%',
+			$request->timeFrom,
+			$request->timeTo
+		]);
+		if($schedules == null){
+			return back()->with(['error' => 'mentor_not_available_in_this_time']);
+		}
 		if ($request->mentorid) {
 			if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
 				return back()->with(['error' => 'cannot_schedule_past_meeting']);

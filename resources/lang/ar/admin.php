@@ -2011,4 +2011,5 @@ return [
 	'company_name' => 'اسم الشركة',
 	'Auto-mapping completed'=> 'تم تخصيص الأوتوماتيكي',
 	'Course Name' => 'اسم الدورة',
+	'mentor_not_available_in_this_time' => 'المرشد غير متاح في هذا الوقت',
 ];
