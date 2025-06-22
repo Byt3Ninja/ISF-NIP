@@ -147,32 +147,52 @@
 
             <div class="session-details">
               <div id="trainer-info-wrapper"> <!-- Add this wrapper -->
-  <div class="d-flex align-items-center py-3 border-bottom border-top">
-    <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
-      <i class="ti ti-school ti-lg text-dark"></i>
-    </div>
-    <div class="trainer-details mb-3" id="session-trainer-info">
-      <h6 class="mb-1">
-        {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
-      </h6>
-      <small>
-        <i class="fas fa-envelope me-1"></i>
-        <strong>{{ __('admin.Trainer Email') }}:</strong>
-        <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
-      </small>
-    </div>
-  </div>
-</div>
+                <div class="d-flex align-items-center py-3 border-bottom border-top">
+                  <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
+                    <i class="ti ti-school ti-lg text-dark"></i>
+                  </div>
+                  <div class="trainer-details mb-3" id="session-trainer-info">
+                    <h6 class="mb-1">
+                      {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
+                    </h6>
+                    <small>
+                      <i class="fas fa-envelope me-1"></i>
+                      <strong>{{ __('admin.Trainer Email') }}:</strong>
+                      <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div id="course-info-wrapper" style="display: none;">
+                <div class="d-flex align-items-center py-3 border-bottom border-top">
+                  <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
+                    <i class="ti ti-book ti-lg text-dark"></i>
+                  </div>
+                  <div class="course-details mb-3" id="session-course-info">
+                    <h6 class="mb-1">
+                      {{ __('admin.Course Name') }}: 
+                    </h6>
+                    <span id="session-course-name"></span>
+                  </div>
+                </div>
+              </div>
 
 
               <div class="row border-bottom" id="date-info">
-                <div class="col-md-6">
+                <div id="date-only-col" class="col-md-6" style="display: none;">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.Date') }}</div>
+                    <div id="session-date"></div>
+                  </div>
+                </div>
+                <div id="start-date-col" class="col-md-6" style="display: none;">
                   <div class="py-3">
                     <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.StartDate') }}</div>
                     <div id="session-start-date"></div>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div id="end-date-col" class="col-md-6" style="display: none;">
                   <div class="py-3">
                     <div class="info-label"><i class="fas fa-calendar-check me-2"></i>{{ __('admin.EndDate') }}</div>
                     <div id="session-end-date"></div>
@@ -424,6 +444,7 @@
     const $trainerEmailLink = $('#session-trainer-email');
 
     const $datetime = $('#session-datetime');
+    const $sessionDate = $('#session-date');
     const $sessionStartDate = $('#session-start-date');
     const $sessionEndDate = $('#session-end-date');
     const $sessionDuration = $('#session-duration');
@@ -499,16 +520,49 @@
 
 
             // 6. Date
-            if (response.datetime) {
-              $sessionStartDate.text(response.datetime1);
+            if (response.date && (response.type === 'sessions' || response.type === 'offline')) {
+              $('#date-only-col').show();
+              $('#start-date-col').hide();
+              $('#end-date-col').hide();
+              $sessionDate.text(response.date);
+            } else {
+              $('#date-only-col').hide();
+              $('#start-date-col').show();
+              $('#end-date-col').show();
+              
+              if (response.datetime) {
+                $sessionStartDate.text(response.datetime1);
+              }
+              if (response.enddatetime) {
+                $sessionEndDate.text(response.enddatetime);
+              }
             }
-            if (response.enddatetime) {
-              $sessionEndDate.text(response.enddatetime);
+
+            let duration = response.duration || '';
+
+            const startTime = response.starttime;
+            const endTime = response.endtime;
+            
+            // Calculate duration from time strings
+            if (startTime && endTime) {
+              const start = moment(startTime, 'h:mm A');
+              const end = moment(endTime, 'h:mm A');
+              
+              // Handle case where end time is next day
+              if (end.isBefore(start)) {
+                end.add(1, 'day');
+              }
+              
+              duration = end.diff(start, 'minutes');
+            }
+            
+            if (duration) {
+              $sessionDuration.text(duration + ' ' + '{{ __('admin.minutes') }}');
             }
 
             // 7. Duration
-            if (response.duration) {
-              $sessionDuration.text(response.duration + ' ' + '{{ __('admin.minutes') }}');
+            if (duration && (response.type === 'sessions' || response.type === 'offline')) {
+              $sessionDuration.text(duration + ' ' + '{{ __('admin.minutes') }}');
             }
 
             // 8. Join Link
@@ -527,8 +581,16 @@
             // 9. Zoom ID
             if (response.type == 'sessions') {
               $zoomId.text(response.zoom_id);
-            }else{
+            } else{
               $('#zoom-info').hide();
+            }
+
+            // 10. Course
+            if (response.type === 'online' && response.course_Name) {
+              $('#course-info-wrapper').show();
+              $('#session-course-name').text(response.course_Name);
+            } else {
+              $('#course-info-wrapper').hide();
             }
 
             $modal.modal('show');

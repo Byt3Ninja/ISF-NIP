@@ -1962,4 +1962,5 @@ return [
 	'No companies found' => 'No companies found',
 	'company_name' => 'Company Name',
 	'Auto-mapping completed' => 'Auto-mapping completed',
+	'Course Name' => 'Course Name',
 ];

@@ -2010,5 +2010,5 @@ return [
 	'No evaluators found' => 'لا توجد محكمين',
 	'company_name' => 'اسم الشركة',
 	'Auto-mapping completed'=> 'تم تخصيص الأوتوماتيكي',
-
+	'Course Name' => 'اسم الدورة',
 ];
