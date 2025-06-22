@@ -555,11 +555,13 @@ class TrainingController extends Controller
 	{
 		try {
 			$organization_id = auth()->user()->organization_id;
+
 			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->whereHas('cycle', function ($query) use ($organization_id) {
 					$query->where('organization_id', $organization_id);
 				});
 			})->where('stype', 4)->get();
+
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
 			}
@@ -646,6 +648,13 @@ class TrainingController extends Controller
 
 			if ($type == 'sessions') {
 				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
+
+				if ($trainingSession == "Error") {
+					return back()->with([
+						'message' => "Configration Error, please check your Zoom settings",
+						'class' => 'danger'
+					]);
+				}
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
@@ -723,8 +732,11 @@ class TrainingController extends Controller
 			if ($type == 'sessions') {
 				// Add Zoom
 				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
-				if ($trainingSession instanceof \Illuminate\Http\RedirectResponse) {
-					return $trainingSession;
+				if ($trainingSession == "Error") {
+					return back()->with([
+						'message' => "Configration Error, please check your Zoom settings",
+						'class' => 'danger'
+					]);
 				}
 				// $session = TrainingSession::find($trainingSession->sid);
 				// ======> notify Trainer <=================
@@ -760,10 +772,7 @@ class TrainingController extends Controller
 			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 			if (!$onlineMeeting['success']) {
-				return back()->with([
-					'message' => $onlineMeeting['data'],
-					'class' => 'danger'
-				]);
+				return "Error";
 			}
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
