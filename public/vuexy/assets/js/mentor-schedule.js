@@ -30,11 +30,28 @@ const translations = {
 };
 
 // Generate time options for select dropdowns
-  function generateTimeOptions() {
+  function generateTimeOptions(fromTime = null) {
     let options = '';
+    let startHour = 0;
+    let startMinute = 0;
 
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
+    // If fromTime is provided, start from the next time slot after fromTime
+    if (fromTime) {
+      const [hour, minute] = fromTime.split(':').map(Number);
+      startHour = hour;
+      startMinute = minute + 30; // Start from next 30-minute slot
+      
+      // If minutes overflow to next hour
+      if (startMinute >= 60) {
+        startHour += 1;
+        startMinute = 0;
+      }
+    }
+
+    for (let hour = startHour; hour < 24; hour++) {
+      const minuteStart = (hour === startHour) ? startMinute : 0;
+      
+      for (let minute = minuteStart; minute < 60; minute += 30) {
         const hour12 = hour % 12 === 0 ? 12 : hour % 12;
         const period = hour < 12 ? 'AM' : 'PM';
 
@@ -66,18 +83,60 @@ function calculateTotalTime($periodRow) {
     var fromTotalMinutes = (fromHours * 60) + fromMinutes;
     var toTotalMinutes = (toHours * 60) + toMinutes;
 
-    // Calculate the difference
+    // Calculate the difference - only allow same day schedules
     var diff = toTotalMinutes - fromTotalMinutes;
 
-    // Handle overnight schedules
-    if (diff < 0) {
-      diff += 24 * 60; // Add 24 hours in minutes
+    // If toTime is before fromTime, it means next day - not allowed
+    if (diff <= 0) {
+      $periodRow.find('.total-time').text('Invalid time range').addClass('text-danger');
+      $periodRow.find('select[name$="[to][]"]').addClass('is-invalid');
+      return;
+    } else {
+      $periodRow.find('.total-time').removeClass('text-danger').addClass('text-dark');
+      $periodRow.find('select[name$="[to][]"]').removeClass('is-invalid');
     }
 
     $periodRow.find('.total-time').text(diff + ' ' + __('Min'));
   } else {
     $periodRow.find('.total-time').text('0 ' + __('Min'));
   }
+}
+
+// Function to update "to" time options based on selected "from" time
+function updateToTimeOptions($periodRow) {
+  var fromTime = $periodRow.find('select[name$="[from][]"]').val();
+  var $toSelect = $periodRow.find('select[name$="[to][]"]');
+  var currentToValue = $toSelect.val();
+  
+  if (fromTime) {
+    // Generate new options starting from the selected "from" time
+    var newOptions = '<option value="">' + __('To') + '</option>' + generateTimeOptions(fromTime);
+    $toSelect.html(newOptions);
+    
+    // If the previously selected "to" time is still valid, keep it selected
+    if (currentToValue && isValidTimeRange(fromTime, currentToValue)) {
+      $toSelect.val(currentToValue);
+    } else {
+      $toSelect.val(''); // Clear invalid selection
+    }
+  } else {
+    // If no "from" time selected, show all options
+    var allOptions = '<option value="">' + __('To') + '</option>' + generateTimeOptions();
+    $toSelect.html(allOptions);
+  }
+}
+
+// Function to check if time range is valid (same day)
+function isValidTimeRange(fromTime, toTime) {
+  if (!fromTime || !toTime) return false;
+  
+  var [fromHours, fromMinutes] = fromTime.split(':').map(Number);
+  var [toHours, toMinutes] = toTime.split(':').map(Number);
+  
+  var fromTotalMinutes = (fromHours * 60) + fromMinutes;
+  var toTotalMinutes = (toHours * 60) + toMinutes;
+  
+  return toTotalMinutes > fromTotalMinutes;
 }
 
 // Get current language from HTML lang attribute or default to English
@@ -97,13 +156,23 @@ $(document).ready(function () {
   // Function to check if any input has changed
   function checkFormChanges() {
     var formChanged = false;
+    var hasInvalidTimeRanges = false;
+    
     $('#availability-form input, form textarea, form select').each(function () {
       if ($(this).data('initial-value') !== $(this).val()) {
         formChanged = true;
+      }
+    });
+    
+    // Check for invalid time ranges
+    $('.total-time').each(function() {
+      if ($(this).text().includes('Invalid')) {
+        hasInvalidTimeRanges = true;
         return false; // break the loop
       }
     });
-    $('#availability-form button[type="submit"]').prop('disabled', !formChanged);
+    
+    $('#availability-form button[type="submit"]').prop('disabled', !formChanged || hasInvalidTimeRanges);
   }
 
   // Store initial values of inputs
@@ -194,6 +263,12 @@ $(document).ready(function () {
   // Calculate total time for each period row when the time is changed
   $(document).on('change input blur', 'select, textarea', function () {
     var $periodRow = $(this).closest('.period-row');
+    
+    // If this is a "from" time select, update the "to" options
+    if ($(this).attr('name') && $(this).attr('name').includes('[from][]')) {
+      updateToTimeOptions($periodRow);
+    }
+    
     calculateTotalTime($periodRow);
 
     // Validate that both "from" and "to" times are required if one is changed
@@ -326,27 +401,33 @@ function mentorSchedule(type, id, stat) {
                   const fromSelect = document.querySelector(`#${fromSelectId}`);
                   const toSelect = document.querySelector(`#${toSelectId}`);
                   if (fromSelect) fromSelect.value = fromValue;
-                  if (toSelect) toSelect.value = toValue;
+                  
+                  // Update "to" options based on selected "from" time before setting value
+                  if (fromValue) {
+                    const toOptions = '<option value="">' + __('To') + '</option>' + generateTimeOptions(fromValue);
+                    toSelect.innerHTML = toOptions;
+                  }
+                  
+                  if (toSelect && isValidTimeRange(fromValue, toValue)) {
+                    toSelect.value = toValue;
+                  }
 
                   // Force a manual calculation of the duration based on the actual values
                   const from = dayPeriods[i].tfrom.substring(0, 5);  // Extract HH:MM from time string
                   const to = dayPeriods[i].tto.substring(0, 5);      // Extract HH:MM from time string
 
-                  // Calculate and update the time difference directly
-                  if (from && to) {
+                  // Calculate and update the time difference directly - only same day
+                  if (from && to && isValidTimeRange(from, to)) {
                     const [fromHours, fromMinutes] = from.split(':').map(Number);
                     const [toHours, toMinutes] = to.split(':').map(Number);
 
                     let fromTotalMinutes = (fromHours * 60) + fromMinutes;
                     let toTotalMinutes = (toHours * 60) + toMinutes;
 
-                    // Handle overnight schedules
-                    if (toTotalMinutes < fromTotalMinutes) {
-                      toTotalMinutes += 24 * 60; // Add 24 hours in minutes
-                    }
-
                     const diff = toTotalMinutes - fromTotalMinutes;
                     $(`#${periodRowId} .total-time`).text(diff + ' ' + __('Min'));
+                  } else {
+                    $(`#${periodRowId} .total-time`).text('Invalid time range').addClass('text-danger');
                   }
                 }, 100);
               }
