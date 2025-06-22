@@ -889,14 +889,12 @@ class HomeController extends Controller
                 LEFT JOIN
                     companies c ON c.id = fs.company_id
                 LEFT JOIN
-                    users u ON u.company_id = c.id AND u.id = $user->id
+                    users u ON u.company_id = c.id AND u.id = ?
                 WHERE
-                    fs.company_id = $company->id
-                    AND fs.step_id = $company->step
-                LIMIT
-                    1
-            ";
-            $myFinal = collect(DB::select($myFinal_q))->first();
+                    fs.company_id = ?
+                AND fs.step_id = ?
+                LIMIT 1";
+            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]))->first();
             if (!empty($myFinal)) {
                 $myFinal->judges = json_decode($myFinal->judges);
 
