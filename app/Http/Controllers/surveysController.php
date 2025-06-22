@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Cycle;
 use App\Surveys;
 use App\Organization;
+use App\SurveyScopes;
 use App\QuestionsBank;
 use App\SurveyQuestions;
 use App\SurveyResponses;
 use App\OrgQuestionsBank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class surveysController extends Controller
@@ -27,10 +30,10 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$surveys = Surveys::with('organization')
-		->when($user->organization_id, function ($query) use ($user) {
-			return $query->where('organization_id', $user->organization_id);
-		})
-		->get();
+			->when($user->organization_id, function ($query) use ($user) {
+				return $query->where('organization_id', $user->organization_id);
+			})
+			->get();
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
@@ -38,21 +41,22 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$organization_id = null;
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$organization_id = $user->organization_id;
+		}
 
 		$organizations = Organization::when($organization_id, function ($query) use ($organization_id) {
 			return $query->where('id', $organization_id);
 		})->get();
 
 		$questions = QuestionsBank::where('group', 'survey');
-		if( !is_null( $organization_id ) )
-		{
+		if (!is_null($organization_id)) {
 			$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
 			$questions = $questions->whereIn('id', $organization_questions_ids);
 			// $questions = $questions->where('organization_id', $organization_id);
 		}
 		$questions = $questions->get();
-		return view('admin.surveys.create', compact('organizations','questions'));
+		return view('admin.surveys.create', compact('organizations', 'questions'));
 	}
 
 	public function store(Request $request)
@@ -89,7 +93,9 @@ class surveysController extends Controller
 	{
 		$user = auth()->user();
 		$organization_id = null;
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$organization_id = $user->organization_id;
+		}
 
 		$survey = Surveys::with(['organization', 'questions'])->findOrFail($id);
 		$organizations = Organization::when($organization_id, function ($query) use ($organization_id) {
@@ -98,14 +104,13 @@ class surveysController extends Controller
 
 
 		$availableQuestions = QuestionsBank::where('group', 'survey');
-		if( !is_null( $organization_id ) )
-		{
+		if (!is_null($organization_id)) {
 			$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
 			$availableQuestions = $availableQuestions->whereIn('id', $organization_questions_ids);
 			// $availableQuestions = $availableQuestions->where('organization_id', $organization_id);
 		}
 		$availableQuestions = $availableQuestions->select('id', 'question', 'survey_type', 'answers')->get();
-   		return view('admin.surveys.edit', compact('survey', 'organizations', 'availableQuestions'));
+		return view('admin.surveys.edit', compact('survey', 'organizations', 'availableQuestions'));
 	}
 
 	/**
@@ -156,13 +161,14 @@ class surveysController extends Controller
 		$user = auth()->user();
 		$organization_id = null;
 		$survey = Surveys::with(['questions'])->find($id);
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
-		if( empty( $survey ) ) { return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']); }
-		else
-		{
+		if (isset($user->organization_id) && !empty($user->organization_id)) {
+			$organization_id = $user->organization_id;
+		}
+		if (empty($survey)) {
+			return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']);
+		} else {
 			$questions = QuestionsBank::where('group', 'survey');
-			if( !is_null( $organization_id ) )
-			{
+			if (!is_null($organization_id)) {
 				$organization_questions_ids = OrgQuestionsBank::where('organization_id', $organization_id)->pluck('question_id')->toArray();
 				$questions = $questions->whereIn('id', $organization_questions_ids);
 				// $questions = $questions->where('organization_id', $organization_id);
@@ -319,5 +325,155 @@ class surveysController extends Controller
 		}
 		$survey->questions()->detach($question_ids);
 		return redirect()->route('surveys.questions_manage', ['survey' => $id])->with('success', 'DeletedSuccessfully');
+	}
+
+	public function list_surveys($id, Request $request)
+	{
+		try {
+			$organization_id = auth()->user()->organization_id;
+			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->where('organization_id', $organization_id);
+			})->find($id);
+
+			if (!empty($cycle)) {
+				$organization_id = $cycle->organization_id;
+				$surveys = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->with(['survey'])->get();
+				$surveys = $surveys->map(function ($survey) {
+					$responses = $survey->responses;
+					$eligibleUsers = $responses->count();
+					$engagedUsers = $responses->whereNotNull('responses')->count();
+					$notEngagedUsers = $responses->whereNull('responses')->count();
+					$survey->eligibleUsers = $eligibleUsers;
+					$survey->engagedUsers = $engagedUsers;
+					$survey->notEngagedUsers = $notEngagedUsers;
+					$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
+					return $survey;
+				});
+				return view('admin.settings.training.surveys', compact('surveys', 'cycle'));
+			} else {
+				abort(404);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@list_surveys: ' . $e->getMessage());
+		}
+	}
+	public function create_survey($id, Request $request)
+	{
+		try {
+			$organization_id = auth()->user()->organization_id;
+			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->where('organization_id', $organization_id);
+			})->find($id);
+
+			if (!empty($cycle)) {
+				$organization_id = $cycle->organization_id;
+				$surveys = Surveys::where('organization_id', $organization_id)->get();
+				return view('admin.settings.training.create_survey', compact('surveys', 'cycle'));
+			} else {
+				abort(404);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@create_survey: ' . $e->getMessage());
+		}
+	}
+
+	public function store_survey($id, Request $request)
+	{
+		try {
+			$this->validate($request, [
+				'id' => 'exists:cycles,id',
+				'survey_id' => 'required|exists:surveys,id',
+			]);
+
+			$scope = new SurveyScopes;
+			$scope->survey_id = $request->survey_id;
+			$scope->cycle_id = $id;
+			$scope->organization_id = $request->organization_id;
+			$scope->scope = 'training';
+			$scope->trigger_by_session = $request->has('trigger_by_session') ? true : false;
+			$scope->trigger_by_due = $request->has('trigger_by_due') ? true : false;
+			$scope->trigger_by_quiz = $request->has('trigger_by_quiz') ? true : false;
+			$scope->save();
+
+			return redirect()->route('trainings.surveys_list', ['id' => $id])->with('success', 'StoredSuccessfully');
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@store_survey: ' . $e->getMessage());
+		}
+	}
+
+	public function edit_survey($id, $survey, Request $request)
+	{
+		try {
+			$organization_id = auth()->user()->organization_id;
+			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->where('organization_id', $organization_id);
+			})->find($id);
+
+			if (!empty($cycle)) {
+				$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->find($survey);
+				if (!empty($cycle)) {
+					$organization_id = $cycle->organization_id;
+					$surveys = Surveys::where('organization_id', $organization_id)->get();
+					return view('admin.settings.training.edit_survey', compact('surveys', 'cycle', 'scope'));
+				} else {
+					abort(404);
+				}
+			} else {
+				abort(404);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@edit_survey: ' . $e->getMessage());
+		}
+	}
+
+	public function update_survey($id, $survey, Request $request)
+	{
+		try {
+			$organization_id = auth()->user()->organization_id;
+			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->where('organization_id', $organization_id);
+			})->find($id);
+
+			if (!empty($cycle)) {
+				$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->find($survey);
+				if (!empty($cycle)) {
+					$scope->survey_id = $request->survey_id;
+					$scope->trigger_by_session = $request->has('trigger_by_session') ? true : false;
+					$scope->trigger_by_due = $request->has('trigger_by_due') ? true : false;
+					$scope->trigger_by_quiz = $request->has('trigger_by_quiz') ? true : false;
+					$scope->save();
+					return back()->withInput()->with('success', 'StoredSuccessfully');
+				} else {
+					abort(404);
+				}
+			} else {
+				abort(404);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@update_survey: ' . $e->getMessage());
+		}
+	}
+
+	public function destroy_survey($id, $survey, Request $request)
+	{
+		try {
+			$organization_id = auth()->user()->organization_id;
+			$cycle = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->where('organization_id', $organization_id);
+			})->find($id);
+
+			if (!empty($cycle)) {
+				$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->find($survey);
+				if (!empty($cycle)) {
+					$scope->delete();
+				} else {
+					abort(404);
+				}
+			} else {
+				abort(404);
+			}
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@destroy_survey: ' . $e->getMessage());
+		}
 	}
 }
