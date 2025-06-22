@@ -1963,4 +1963,5 @@ return [
 	'company_name' => 'Company Name',
 	'Auto-mapping completed' => 'Auto-mapping completed',
 	'Course Name' => 'Course Name',
+	'mentor_not_available_in_this_time' => 'Mentor not available in this time',
 ];
