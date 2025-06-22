@@ -58,30 +58,30 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if( env('NEW_DASHBOARD', false) == true ) { return $this->combinedDashboard(); }
-        else
-        {
+        if (env('NEW_DASHBOARD', false) == true) {
+            return $this->combinedDashboard();
+        } else {
             $user = auth()->user();
             if ($user->hasAnyRole('Admin|Editor|Manager')) {
-    
+
                 return $this->AdminDashboard();
             } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
-    
+
                 return view('admin.clients.dashboard');
             } elseif ($user->hasAnyRole('organizationManager')) {
-    
+
                 return $this->organizationDashboard();
             } elseif ($user->hasAnyRole('Mentor')) {
-    
+
                 if (!Auth::user()->bio) {
                     return redirect('/dashboard/myProfile#bio');
                 }
                 return $this->mentorDashboard();
             } elseif ($user->hasAnyRole('Judger')) {
-    
+
                 return $this->judgerDashboard();
             } elseif ($user->hasAnyRole('Disabled')) {
-    
+
                 return view('admin.clients.disabled');
             }
         }
@@ -94,11 +94,12 @@ class HomeController extends Controller
         $user = auth()->user();
         $l = App::getLocale();
         $permissions = [];
-        $has_org = !empty( $user->organization_id ) && !is_null( $user->organization_id ) && trim( $user->organization_id ) ? true : false;
-        if( auth()->check() ) { $permissions = $user->myPermissions(); }
+        $has_org = !empty($user->organization_id) && !is_null($user->organization_id) && trim($user->organization_id) ? true : false;
+        if (auth()->check()) {
+            $permissions = $user->myPermissions();
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_managers_view', 'dashboard.widgets_cards_mentors_view', 'dashboard.widgets_cards_judgers_view', 'dashboard.widgets_tables_mentors_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_managers_view', 'dashboard.widgets_cards_mentors_view', 'dashboard.widgets_cards_judgers_view', 'dashboard.widgets_tables_mentors_view'], $permissions)) {
             $users_q = "SELECT 
                     u.id,
                     u.img_url,
@@ -131,13 +132,15 @@ class HomeController extends Controller
                 WHERE
                     u.deleted_at IS NULL
             ";
-            $users = collect( DB::select( $users_q ) );
-            $users = $users->groupBy('id')->map(function ( $user ) use ( $l ) {
+            $users = collect(DB::select($users_q));
+            $users = $users->groupBy('id')->map(function ($user) use ($l) {
                 $oneUser = $user->first();
-                $roles = $user->map(function( $item ) { return strtolower( $item->role ); })->unique()->toArray();
+                $roles = $user->map(function ($item) {
+                    return strtolower($item->role);
+                })->unique()->toArray();
                 unset($oneUser->role);
                 $oneUser->roles = $roles;
-                $image = User::image_handler( $oneUser->img_url );
+                $image = User::image_handler($oneUser->img_url);
 
                 unset($oneUser->img_url);
                 $oneUser->name = $l == 'en' ? $oneUser->name_en : $oneUser->name_ar;
@@ -151,13 +154,18 @@ class HomeController extends Controller
                 $oneUser->title = $oneUser->{'title_' . $l};
                 unset($oneUser->title_ar);
                 unset($oneUser->title_en);
-                $oneUser->mentor_cycles = $user->map(function( $item ) { return $item->cycle_id; })->unique()->filter( function( $item ) { return $item != null; })->values()->toArray();
+                $oneUser->mentor_cycles = $user->map(function ($item) {
+                    return $item->cycle_id;
+                })->unique()->filter(function ($item) {
+                    return $item != null;
+                })->values()->toArray();
                 return $oneUser;
             })->values();
-        } else { $users = collect([]); }
+        } else {
+            $users = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_contact_us_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_contact_us_view'], $permissions)) {
             $messages_q = "SELECT 
                     m.id,
                     m.read
@@ -167,11 +175,12 @@ class HomeController extends Controller
                     m.deleted_at IS NULL
                     AND m.read != 1
             ";
-            $messages = collect( DB::select( $messages_q ) );
-        } else { $messages = collect([]); }
+            $messages = collect(DB::select($messages_q));
+        } else {
+            $messages = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets.cards.new_messages.view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets.cards.new_messages.view'], $permissions)) {
             $messenger_q = "SELECT 
                     m.id,
                     m.read
@@ -182,11 +191,12 @@ class HomeController extends Controller
                     AND m.read IS NULL
                     AND m.receiver = " . $user->id . "
             ";
-            $messenger = collect( DB::select( $messenger_q ) );
-        } else { $messenger = collect([]); }
+            $messenger = collect(DB::select($messenger_q));
+        } else {
+            $messenger = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions)) {
             $services_requests_q = "SELECT 
                     sr.id,
                     sr.service_id,
@@ -199,15 +209,15 @@ class HomeController extends Controller
                     sr.deleted_at IS NULL
                     AND sr.approved IS NULL
             ";
-            if( $has_org )
-            {
+            if ($has_org) {
                 $services_requests_q .= " AND s.organization_id = " . $user->organization_id;
             }
-            $services_requests = collect( DB::select( $services_requests_q ) );
-        } else { $services_requests = collect([]); }
+            $services_requests = collect(DB::select($services_requests_q));
+        } else {
+            $services_requests = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_organizations_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_organizations_view'], $permissions)) {
             $organizations_q = "SELECT 
                     o.id
                 FROM
@@ -215,14 +225,15 @@ class HomeController extends Controller
                 WHERE
                     o.deleted_at IS NULL
             ";
-            if( $has_org )
-            {
+            if ($has_org) {
                 $organizations_q .= " AND o.id = " . $user->organization_id;
             }
-            $organizations = collect( DB::select( $organizations_q ) );
-        } else { $organizations = collect([]); }
+            $organizations = collect(DB::select($organizations_q));
+        } else {
+            $organizations = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_programs_view'], $permissions) ) // remember to add more permissions here
+        if (array_intersect(['dashboard.widgets_cards_programs_view'], $permissions)) // remember to add more permissions here
         {
             $cycles_q = "SELECT 
                     c.id,
@@ -238,18 +249,17 @@ class HomeController extends Controller
                 WHERE
                     c.deleted_at IS NULL
             ";
-            if( $has_org )
-            {
+            if ($has_org) {
                 $cycles_q .= " AND c.organization_id = " . $user->organization_id;
             }
-            $cycles = collect( DB::select( $cycles_q ) );
-            $cycles = $cycles->groupBy('id')->map(function ( $groupedCycle ) use ( $l ) {
+            $cycles = collect(DB::select($cycles_q));
+            $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) use ($l) {
                 $cycle = $groupedCycle->first();
                 $output = new stdClass;
                 $output->id = $cycle->id;
                 $output->title = $cycle->title;
                 $output->organization_id = $cycle->organization_id;
-                $output->companies = $groupedCycle->map(function( $item ) use ( $l ) {
+                $output->companies = $groupedCycle->map(function ($item) use ($l) {
                     $company = new stdClass;
                     $company->id = $item->company_id;
                     $company->name = $item->{'name_' . $l};
@@ -257,10 +267,11 @@ class HomeController extends Controller
                 })->whereNotNull('id')->values();
                 return $output;
             })->values();
-        } else { $cycles = collect([]); }
+        } else {
+            $cycles = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_startups_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_startups_view'], $permissions)) {
             $companies_q = "SELECT 
                     s.id,
                     c.organization_id
@@ -271,15 +282,15 @@ class HomeController extends Controller
                 WHERE
                     s.deleted_at IS NULL
             ";
-            if( $has_org )
-            {
+            if ($has_org) {
                 $companies_q .= " AND c.organization_id = " . $user->organization_id;
             }
-            $companies = collect( DB::select( $companies_q ) );
-        } else { $companies = collect([]); }
+            $companies = collect(DB::select($companies_q));
+        } else {
+            $companies = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions)) {
             $mentorship_requests_q = "SELECT
                     mr.id,
                     mr.period
@@ -290,15 +301,15 @@ class HomeController extends Controller
                 WHERE
                     mr.deleted_at IS NULL
             ";
-            if( $has_org )
-            {
+            if ($has_org) {
                 $mentorship_requests_q .= " AND c.organization_id = " . $user->organization_id;
             }
-            $mentorship_requests = collect( DB::select( $mentorship_requests_q ) );
-        } else { $mentorship_requests = collect([]); }
+            $mentorship_requests = collect(DB::select($mentorship_requests_q));
+        } else {
+            $mentorship_requests = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_training_sessions_view', 'dashboard.widgets_cards_training_sessions_durations_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_training_sessions_view', 'dashboard.widgets_cards_training_sessions_durations_view'], $permissions)) {
             $training_sessions_q = "SELECT
                     ts.id,
                     ts.type,
@@ -312,18 +323,18 @@ class HomeController extends Controller
                 WHERE
                     ts.deleted_at IS NULL
             ";
-            if( $has_org )
-            {
+            if ($has_org) {
                 $training_sessions_q .= " AND c.organization_id = " . $user->organization_id;
             }
-            $training_sessions = collect( DB::select( $training_sessions_q ) )->map(function( $session ) {
-                $session->duration = !empty( $session->duration ) ? $session->duration : 0;
+            $training_sessions = collect(DB::select($training_sessions_q))->map(function ($session) {
+                $session->duration = !empty($session->duration) ? $session->duration : 0;
                 return $session;
             });
-        } else { $training_sessions = collect([]); }
+        } else {
+            $training_sessions = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_services_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_services_view'], $permissions)) {
             $services_q = "SELECT DISTINCT
                     s.id,
                     s.name_en,
@@ -343,11 +354,11 @@ class HomeController extends Controller
                 WHERE
                     s.deleted_at IS NULL
             ";
-            $services = collect( DB::select( $services_q ) )->map(function( $service ) use ( $l ) {
+            $services = collect(DB::select($services_q))->map(function ($service) use ($l) {
                 $output = new stdClass;
                 $output->id = $service->id;
                 $output->name = $service->{'name_' . $l};
-                $output->price = floatval( $service->price );
+                $output->price = floatval($service->price);
                 $output->description = $service->{'description_' . $l};
                 $service_category = new stdClass;
                 $service_category->id = $service->service_category_id;
@@ -355,10 +366,11 @@ class HomeController extends Controller
                 $output->service_category = $service_category;
                 return $output;
             });
-        } else { $services = collect([]); }
+        } else {
+            $services = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions)) {
             $my_requests_q = "SELECT
                     sr.id
                 FROM
@@ -367,13 +379,14 @@ class HomeController extends Controller
                     services s ON sr.service_id = s.id
                 WHERE
                     sr.deleted_at IS NULL
-                    AND sr.user_id = " . $user->id . "
+                    AND sr.user_id = ?
             ";
-            $my_requests = collect( DB::select( $my_requests_q ) );
-        } else { $my_requests = collect([]); }
+            $my_requests = collect(DB::select($my_requests_q, [$user->id]));
+        } else {
+            $my_requests = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_my_mentors_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_my_mentors_view'], $permissions)) {
             $my_mentors_q = "SELECT 
                     u.id,
                     CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS name_en,
@@ -395,21 +408,26 @@ class HomeController extends Controller
                     u.deleted_at IS NULL
                     AND r.default_for = 'mentor'
             ";
-            if( $has_org ) { $my_mentors_q .= " AND c.organization_id = " . $user->organization_id; }
-            $my_mentors = collect( DB::select( $my_mentors_q ) );
-            $my_mentors = $my_mentors->groupBy('id')->map(function ( $user ) {
+            if ($has_org) {
+                $my_mentors_q .= " AND c.organization_id = " . $user->organization_id;
+            }
+            $my_mentors = collect(DB::select($my_mentors_q));
+            $my_mentors = $my_mentors->groupBy('id')->map(function ($user) {
                 $oneUser = $user->first();
-                $roles = $user->map(function( $item ) { return strtolower( $item->role ); })->unique()->toArray();
+                $roles = $user->map(function ($item) {
+                    return strtolower($item->role);
+                })->unique()->toArray();
                 unset($oneUser->role);
                 $oneUser->roles = $roles;
                 return $oneUser;
             })->values();
-        } else { $my_mentors = collect([]); }
+        } else {
+            $my_mentors = collect([]);
+        }
         $cycle = $user->company->cycle ?? 0;
         $mentorIds = DB::table('cycles_mentors')->where('cycle_id', $cycle)->pluck('user_id')->toArray();
         $my_mentors =  $my_mentors->whereIn('id', $mentorIds);
-        if( array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions)) {
             $today = date("Y-m-d");
             $inputs = [$today];
             $filtration_q = "SELECT
@@ -460,59 +478,62 @@ class HomeController extends Controller
                         WHERE
                             deleted_at IS NULL
             ";
-            if( !$user->hasAnyRole(['admin', 'organizationmanager']) )
-            {
+            if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
                 $filtration_q .= " AND user_id = ? ";
                 $inputs[] = $user->id;
             }
             $filtration_q .= " )";
-            if( $has_org ) { $filtration_q .= " AND c.organization_id = " . $user->organization_id; }
-            $filtration = collect( DB::select($filtration_q, $inputs) );
-        } else { $filtration = collect([]); }
+            if ($has_org) {
+                $filtration_q .= " AND c.organization_id = " . $user->organization_id;
+            }
+            $filtration = collect(DB::select($filtration_q, $inputs));
+        } else {
+            $filtration = collect([]);
+        }
 
-        $filtration = $filtration->groupBy('id')->map(function( $groupedSteps ) use ( $l ) {
+        $filtration = $filtration->groupBy('id')->map(function ($groupedSteps) use ($l) {
             $s = $groupedSteps->first();
             $step = new stdClass;
             $step->id = $s->id;
             $step->arr = $s->arr;
             $step->type = $s->type;
             $step->title = $s->title;
-            $step->from = Carbon::parse( $s->from )->format('d-m-Y') ?? '-';
-            $step->to = Carbon::parse( $s->to )->format('d-m-Y') ?? '-';
+            $step->from = Carbon::parse($s->from)->format('d-m-Y') ?? '-';
+            $step->to = Carbon::parse($s->to)->format('d-m-Y') ?? '-';
             $step->description = $s->description;
             $step->cycle = new stdClass;
             $step->cycle->id = $s->cycle_id;
             $step->cycle->title = $s->cycle_title;
-            $step->cycle->start = Carbon::parse( $s->cycle_start )->format('d-m-Y') ?? '-';
-            $step->cycle->end = Carbon::parse( $s->cycle_end )->format('d-m-Y') ?? '-';
-            $step->groups = $groupedSteps->map(function( $oneStep ) {
+            $step->cycle->start = Carbon::parse($s->cycle_start)->format('d-m-Y') ?? '-';
+            $step->cycle->end = Carbon::parse($s->cycle_end)->format('d-m-Y') ?? '-';
+            $step->groups = $groupedSteps->map(function ($oneStep) {
                 $users = $oneStep->screening_users;
                 $groups = json_decode('[' . str_replace(['[', ']'], ' ', json_encode($users)) . ']');
                 return $groups;
             });
-            $step->companies = $groupedSteps->filter(function($step) {
-                return !is_null( $step->company_id );
-            })->groupBy('company_id')->map(function( $oneStep ) use ( $l ) {
+            $step->companies = $groupedSteps->filter(function ($step) {
+                return !is_null($step->company_id);
+            })->groupBy('company_id')->map(function ($oneStep) use ($l) {
                 $c = $oneStep->first();
                 $company = new stdClass;
                 $company->id = $c->company_id;
                 $company->name = $c->{"company_name_" . $l};
-                $company->logo = Company::logo_handler( $c->company_logo );
-                $company->users = $oneStep->filter(function($step) {
-                    return !is_null( $step->company_user_id );
-                })->map(function( $step ) use ( $l ) {
+                $company->logo = Company::logo_handler($c->company_logo);
+                $company->users = $oneStep->filter(function ($step) {
+                    return !is_null($step->company_user_id);
+                })->map(function ($step) use ($l) {
                     $user = new stdClass;
                     $user->id = $step->company_user_id;
                     $user->first_name = $step->{"company_user_first_name_" . $l};
                     $user->last_name = $step->{"company_user_last_name_" . $l};
                     $user->name = $user->first_name . ' ' . $user->last_name;
                     $user->title = $step->{"company_user_title_" . $l};
-                    $user->logo = User::image_handler( $step->company_user_img_url );
+                    $user->logo = User::image_handler($step->company_user_img_url);
                     return $user;
                 })->unique('id')->values();
                 return $company;
             })->values();
-            $step->panel = $groupedSteps->map(function( $oneStep ) {
+            $step->panel = $groupedSteps->map(function ($oneStep) {
                 return $oneStep->screening_panel;
             });
             return $step;
@@ -523,8 +544,7 @@ class HomeController extends Controller
             ->get();
         $groups = $mySteps->whereIn('step_id', $filtration->pluck('id')->toArray())->pluck('users')->flatten()->unique()->whereNotNull()->values();
 
-        if( array_intersect(['dashboard.widgets_cards_evaluation_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_evaluation_view'], $permissions)) {
             $evaluation_q = "SELECT
                     fs.id,
                     fs.company_id,
@@ -546,19 +566,23 @@ class HomeController extends Controller
                 WHERE   
                     fs.deleted_at IS NULL
             ";
-            if( !$user->hasAnyRole(['admin', 'organizationmanager']) )
-            {
+            if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
                 $evaluation_q .= " AND fs.judges LIKE '%\"{$user->id}\"%'";
             }
-            if( $has_org ) { $evaluation_q .= " AND cy.organization_id = " . $user->organization_id; }
-            $evaluation = collect( DB::select( $evaluation_q ) )->map(function($e) {
-                $e->judges = array_map(function($j) { return intval( $j ); }, json_decode( $e->judges, true ));
+            if ($has_org) {
+                $evaluation_q .= " AND cy.organization_id = " . $user->organization_id;
+            }
+            $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
+                $e->judges = array_map(function ($j) {
+                    return intval($j);
+                }, json_decode($e->judges, true));
                 return $e;
             });
-        } else { $evaluation = collect([]); }
+        } else {
+            $evaluation = collect([]);
+        }
 
-        if( array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
-        {
+        if (array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions)) {
             $upcoming_sessions_q = "SELECT
                     mr.id AS `id`,
                     mr.period,
@@ -588,19 +612,19 @@ class HomeController extends Controller
                     AND mr.zoom_date >= ?
                     AND mr.approved = 'Yes'
             ";
-            if( $has_org ) { $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id; }
-            if( !empty( $user->company_id ) && !is_null( $user->company_id ) && trim( $user->company_id ) )
-            {
+            if ($has_org) {
+                $upcoming_sessions_q .= " AND mr.organization_id = " . $user->organization_id;
+            }
+            if (!empty($user->company_id) && !is_null($user->company_id) && trim($user->company_id)) {
                 $upcoming_sessions_q .= " AND mr.user_id = " . $user->id;
             }
-            if( $user->hasAnyRole(['mentor']) )
-            {
+            if ($user->hasAnyRole(['mentor'])) {
                 $upcoming_sessions_q .= " AND mr.mentor_id = " . $user->id;
             }
             $params = [];
             $params[] = date("Y-m-d 00:00:00");
             $l = app()->getLocale();
-            $upcoming_sessions = collect( DB::select( $upcoming_sessions_q, $params ) )->map(function( $session ) use ( $l ) {
+            $upcoming_sessions = collect(DB::select($upcoming_sessions_q, $params))->map(function ($session) use ($l) {
                 $output = new stdClass;
                 $output->id = $session->id;
                 $output->period = $session->period;
@@ -608,27 +632,28 @@ class HomeController extends Controller
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
 
-                $image = User::image_handler( $session->user_image_url );
+                $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
                 $user->id = $session->user_id;
                 $user->image_url = $image;
                 $user->name = $session->{"first_name_{$l}"} . ' ' . $session->{"last_name_{$l}"};
                 $user->title = $session->{"user_title_{$l}"};
 
-                $companyLogo = Company::logo_handler( $session->company_logo );
+                $companyLogo = Company::logo_handler($session->company_logo);
                 $company = new stdClass;
                 $company->id = $session->company_id;
                 $company->logo_url = $companyLogo;
                 $company->name = $session->{"company_name_{$l}"};
                 $user->company = $company;
                 $output->user = $user;
-                
+
                 return $output;
             });
-        } else { $upcoming_sessions = collect([]); }
+        } else {
+            $upcoming_sessions = collect([]);
+        }
 
-        if( array_intersect(['dashboard_cards.my_programs'], $permissions) )
-        {
+        if (array_intersect(['dashboard_cards.my_programs'], $permissions)) {
             $my_cycles_q = "SELECT 
                     c.id AS `id`
                 FROM
@@ -640,11 +665,12 @@ class HomeController extends Controller
             ";
             $params = [];
             $params[] = $user->id;
-            $my_cycles = collect( DB::select( $my_cycles_q, $params ) );
-        } else { $my_cycles = collect([]); }
+            $my_cycles = collect(DB::select($my_cycles_q, $params));
+        } else {
+            $my_cycles = collect([]);
+        }
 
-        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_startup_attendance_rate_view'], $permissions) )
-        {
+        if ($user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_startup_attendance_rate_view'], $permissions)) {
             $completed_sessions_q = "SELECT 
                     mr.id AS `id`,
                     mr.done AS `done`
@@ -660,16 +686,17 @@ class HomeController extends Controller
             $params = [];
             $params[] = $user->id;
             $params[] = now()->format('Y-m-d');
-            $completed_sessions = collect( DB::select( $completed_sessions_q, $params ) );
+            $completed_sessions = collect(DB::select($completed_sessions_q, $params));
             $count = $completed_sessions->count();
-            $attends_rate = $count > 0 ? ( ( $completed_sessions->sum('done') / $count ) * 100 . '%' ) : '0%';
-        } else { $attends_rate = '0%'; }
+            $attends_rate = $count > 0 ? (($completed_sessions->sum('done') / $count) * 100 . '%') : '0%';
+        } else {
+            $attends_rate = '0%';
+        }
 
         $sessionWithoutTasks = collect([]);
         $completedTasks = collect([]);
         $nonCompletedTasks = collect([]);
-        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_sessions_without_tasks_view', 'dashboard.widgets_cards_completed_tasks_view', 'dashboard.widgets_cards_non_completed_tasks_view'], $permissions) )
-        {
+        if ($user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_sessions_without_tasks_view', 'dashboard.widgets_cards_completed_tasks_view', 'dashboard.widgets_cards_non_completed_tasks_view'], $permissions)) {
             $tasks_q = "SELECT 
                     mr.id,
                     mt.id AS `task_id`,
@@ -683,17 +710,22 @@ class HomeController extends Controller
                     mr.deleted_at IS NULL 
                     AND mr.mentor_id = ?
             ";
-            
+
             $params = [];
             $params[] = $user->id;
-            $tasks = collect( DB::select( $tasks_q, $params ) );
-            if( array_intersect(['dashboard.widgets_cards_sessions_without_tasks_view'], $permissions) ) { $sessionWithoutTasks = $tasks->whereNull('task_id')->values(); }
-            if( array_intersect(['dashboard.widgets_cards_completed_tasks_view'], $permissions) ) { $completedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'completed')->values(); }
-            if( array_intersect(['dashboard.widgets_cards_non_completed_tasks_view'], $permissions) ) { $nonCompletedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'pending')->values(); }
+            $tasks = collect(DB::select($tasks_q, $params));
+            if (array_intersect(['dashboard.widgets_cards_sessions_without_tasks_view'], $permissions)) {
+                $sessionWithoutTasks = $tasks->whereNull('task_id')->values();
+            }
+            if (array_intersect(['dashboard.widgets_cards_completed_tasks_view'], $permissions)) {
+                $completedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'completed')->values();
+            }
+            if (array_intersect(['dashboard.widgets_cards_non_completed_tasks_view'], $permissions)) {
+                $nonCompletedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'pending')->values();
+            }
         }
-        
-        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_rate_view'], $permissions) )
-        {
+
+        if ($user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_rate_view'], $permissions)) {
             $sessions_q = "SELECT 
                     mr.id AS `id`,
                     mr.rating AS `rating`
@@ -706,14 +738,24 @@ class HomeController extends Controller
 
             $params = [];
             $params[] = $user->id;
-            $sessions = collect( DB::select( $sessions_q, $params ) );
+            $sessions = collect(DB::select($sessions_q, $params));
             $my_rating = $sessions->avg('rating') ?? 0;
-        } else { $my_rating = 0; }
+        } else {
+            $my_rating = 0;
+        }
 
-        $judgers = $users->filter(function ( $user ) { return in_array('judger', $user->roles); })->values();
-        $mentors = $users->filter(function ( $user ) { return in_array('mentor', $user->roles); })->values();
-        $startups = $users->filter(function ( $user ) { return in_array('registered', $user->roles); })->values();
-        $managers = $users->filter(function ( $user ) { return in_array('admin', $user->roles) || in_array('manager', $user->roles); })->values();
+        $judgers = $users->filter(function ($user) {
+            return in_array('judger', $user->roles);
+        })->values();
+        $mentors = $users->filter(function ($user) {
+            return in_array('mentor', $user->roles);
+        })->values();
+        $startups = $users->filter(function ($user) {
+            return in_array('registered', $user->roles);
+        })->values();
+        $managers = $users->filter(function ($user) {
+            return in_array('admin', $user->roles) || in_array('manager', $user->roles);
+        })->values();
 
         $data = [];
         $cType = 0;
@@ -739,10 +781,12 @@ class HomeController extends Controller
             LIMIT
                 5
         ";
-        $latest_events = collect( DB::select( $latest_events_q, [now()->format('Y-m-d')] ) );
+        $latest_events = collect(DB::select($latest_events_q, [now()->format('Y-m-d')]));
 
         $conditions = '';
-        if( $has_org ) { $conditions = " WHERE s.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " WHERE s.organization_id = " . $user->organization_id;
+        }
         $latest_services_q = "SELECT
                 s.id,
                 s.name_en,
@@ -760,7 +804,7 @@ class HomeController extends Controller
             LIMIT
                 5
         ";
-        $latest_services = collect( DB::select( $latest_services_q ) )->map(function( $item ) use ( $l ) {
+        $latest_services = collect(DB::select($latest_services_q))->map(function ($item) use ($l) {
             $service = new stdClass;
             $service->id = $item->id;
             $service->name_en = $item->name_en;
@@ -789,16 +833,16 @@ class HomeController extends Controller
                 c.private IS null
                 AND ? BETWEEN c.start AND c.end
         ";
-        $workingCycles = collect( DB::select( $working_cycles_q, [now()->format('Y-m-d')] ) )->map(function( $item ) use ( $l ) {
+        $workingCycles = collect(DB::select($working_cycles_q, [now()->format('Y-m-d')]))->map(function ($item) use ($l) {
             $cycle = new stdClass;
             $cycle->id = $item->id;
             $cycle->title = $item->title;
             $cycle->description = $item->description;
-            $cycle->start = Carbon::parse( $item->start )->format('Y-m-d');
+            $cycle->start = Carbon::parse($item->start)->format('Y-m-d');
             $cycle->organization = new stdClass;
             $cycle->organization->id = $item->organization_id;
             $cycle->organization->name = $item->{'org_name_' . $l};
-            $cycle->organization->image_url = Organization::image_handler( $item->org_img_url );
+            $cycle->organization->image_url = Organization::image_handler($item->org_img_url);
             return $cycle;
         });
         $myFinal = null;
@@ -806,8 +850,7 @@ class HomeController extends Controller
         $company = $user->company;
         $sessions = collect([]);
         $organization_id = null;
-        if( $company && $company->cycledata )
-        {
+        if ($company && $company->cycledata) {
             $sessions_q = "SELECT
                     ts.id,
                     ts.type,
@@ -821,13 +864,11 @@ class HomeController extends Controller
                 FROM
                     training_sessions ts
                 WHERE
-                    ts.step_id = $company->step
+                    ts.step_id = ?
                 ORDER BY
                     ts.datetime ASC
-                LIMIT
-                    5
-            ";
-            $sessions = collect( DB::select( $sessions_q ) );
+                LIMIT 5";
+            $sessions = collect(DB::select($sessions_q, [$company->step]));
 
             $myFinal_q = "SELECT
                     fs.id,
@@ -855,10 +896,9 @@ class HomeController extends Controller
                 LIMIT
                     1
             ";
-            $myFinal = collect( DB::select( $myFinal_q ) )->first();
-            if( !empty( $myFinal ) )
-            {
-                $myFinal->judges = json_decode( $myFinal->judges );
+            $myFinal = collect(DB::select($myFinal_q))->first();
+            if (!empty($myFinal)) {
+                $myFinal->judges = json_decode($myFinal->judges);
 
                 $judgers_q = "SELECT
                         u.id,
@@ -872,11 +912,11 @@ class HomeController extends Controller
                     WHERE u.id IN (" . implode(',', $myFinal->judges) . ")
                 ";
 
-                $judgers = collect( DB::select( $judgers_q ) )->map(function( $item ) use ( $l ) {
+                $judgers = collect(DB::select($judgers_q))->map(function ($item) use ($l) {
                     $judger = new stdClass;
                     $judger->id = $item->id;
-                    $judger->name = trim( $item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l} );
-                    $judger->img_url = User::image_handler( $item->img_url );
+                    $judger->name = trim($item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l});
+                    $judger->img_url = User::image_handler($item->img_url);
                     return $judger;
                 });
 
@@ -885,30 +925,33 @@ class HomeController extends Controller
                 $myFinal->company->id = $company->id;
                 $myFinal->company->user = new stdClass;
                 $myFinal->company->user->id = $myFinal->user_id;
-                $myFinal->company->user->image_url = User::image_handler( $myFinal->user_image_url );
+                $myFinal->company->user->image_url = User::image_handler($myFinal->user_image_url);
                 $myFinal->company->user->first_name = $myFinal->{'user_first_name_' . $l};
                 $myFinal->company->user->last_name = $myFinal->{'user_last_name_' . $l};
-                $myFinal->company->user->name = trim( $myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name );
+                $myFinal->company->user->name = trim($myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name);
                 $myFinal->company->user->title = $myFinal->{'user_title_' . $l};
 
-                unset( $myFinal->user_id );
-                unset( $myFinal->user_image_url );
-                unset( $myFinal->user_first_name_en );
-                unset( $myFinal->user_first_name_ar );
-                unset( $myFinal->user_last_name_en );
-                unset( $myFinal->user_last_name_ar );
-                unset( $myFinal->user_title_en );
-                unset( $myFinal->user_title_ar );
+                unset($myFinal->user_id);
+                unset($myFinal->user_image_url);
+                unset($myFinal->user_first_name_en);
+                unset($myFinal->user_first_name_ar);
+                unset($myFinal->user_last_name_en);
+                unset($myFinal->user_last_name_ar);
+                unset($myFinal->user_title_en);
+                unset($myFinal->user_title_ar);
             }
 
             $stepData = $company->stepdata;
-            if( !empty( $stepData ) ) { $cType = $stepData->stype; }
+            if (!empty($stepData)) {
+                $cType = $stepData->stype;
+            }
             $cycle_id = $company->cycle;
             $cycleData = $company->cycledata;
-            if( $cycleData )
-            {
+            if ($cycleData) {
                 $organization = $cycleData->organization;
-                if( !empty( $organization ) ) { $organization_id = $organization->id; }
+                if (!empty($organization)) {
+                    $organization_id = $organization->id;
+                }
             }
         }
 
@@ -933,30 +976,30 @@ class HomeController extends Controller
             ORDER BY
                 s.arr asc
         ";
-        
-        $steps = collect( DB::select($steps_q) )->map(function( $step ) use ( $l, $company, $stepData, $cycle_id ) {
-            $step->from = Carbon::parse( $step->from )->format('d-m-Y');
-            $step->to = Carbon::parse( $step->to )->format('d-m-Y');
+
+        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id) {
+            $step->from = Carbon::parse($step->from)->format('d-m-Y');
+            $step->to = Carbon::parse($step->to)->format('d-m-Y');
 
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
-            if( $stepData->arr > $step->arr )
-            {
+            if ($stepData->arr > $step->arr) {
                 $status = $l == 'ar' ? 'انتهت' : 'Completed';
                 $color = 'label-success';
                 $textColor = 'success';
-            }
-            elseif( $stepData->arr == $step->arr )
-            {
+            } elseif ($stepData->arr == $step->arr) {
                 $status = $l == 'ar' ? 'بدأت' : 'Started';
                 $color = 'label-primary';
                 $textColor = 'primary';
             }
 
             $trType = $fLink = null;
-            if( $company->approved ) { $trType = 'my/' . $step->id; }
-            else { $fLink = 'view/' . $cycle_id; }
+            if ($company->approved) {
+                $trType = 'my/' . $step->id;
+            } else {
+                $fLink = 'view/' . $cycle_id;
+            }
 
             $step->status = $status;
             $step->color = $color;
@@ -1014,8 +1057,8 @@ class HomeController extends Controller
             ORDER BY
                 mr.zoom_date ASC
         ";
-        $nextSessions = collect( DB::select($nextSessions_q) );
-        $nextSessions = $nextSessions->groupBy('id')->map(function ( $groupedSession ) use ( $l ) {
+        $nextSessions = collect(DB::select($nextSessions_q));
+        $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
             $_session = $groupedSession->first();
             $session = new stdClass;
             $session->id = $_session->id;
@@ -1032,25 +1075,25 @@ class HomeController extends Controller
 
             $user = new stdClass;
             $user->id = $_session->user_id;
-            $user->image_url = User::image_handler( $_session->user_img_url );
+            $user->image_url = User::image_handler($_session->user_img_url);
             $user->first_name = $_session->{'user_first_name_' . $l};
             $user->last_name = $_session->{'user_last_name_' . $l};
-            $user->name = trim( $user->first_name . ' ' . $user->last_name );
+            $user->name = trim($user->first_name . ' ' . $user->last_name);
             $user->title = $_session->{'user_title_' . $l};
 
             $company = new stdClass;
             $company->id = $_session->company_id;
-            $company->logo_url = Company::logo_handler( $_session->company_logo );
+            $company->logo_url = Company::logo_handler($_session->company_logo);
             $company->name = $_session->{'company_name_' . $l};
             $user->company = $company;
             $session->user = $user;
-            
+
             $mentor = new stdClass;
             $mentor->id = $_session->mentor_id;
             $mentor->first_name = $_session->{'mentor_first_name_' . $l};
             $mentor->last_name = $_session->{'mentor_last_name_' . $l};
-            $mentor->name = trim( $mentor->first_name . ' ' . $mentor->last_name );
-            $mentor->image_url = User::image_handler( $_session->mentor_img_url );
+            $mentor->name = trim($mentor->first_name . ' ' . $mentor->last_name);
+            $mentor->image_url = User::image_handler($_session->mentor_img_url);
             $mentor->ratings = $groupedSession->sum('mentor_rating');
             $session->mentor = $mentor;
             return $session;
@@ -1072,28 +1115,27 @@ class HomeController extends Controller
             WHERE
                 s.user_id = $user->id
         ";
-        $my_schedules = collect( DB::select($my_schedules_q) )->map(function( $schedule ) {
+        $my_schedules = collect(DB::select($my_schedules_q))->map(function ($schedule) {
             $schedule->active = $schedule->active == 1 || $schedule->active == true ? true : false;
-            $date_from = Carbon::parse( $schedule->dfrom )->format('d-m-Y');
-            $date_to = Carbon::parse( $schedule->dto )->format('d-m-Y');
+            $date_from = Carbon::parse($schedule->dfrom)->format('d-m-Y');
+            $date_to = Carbon::parse($schedule->dto)->format('d-m-Y');
             $_days = '';
-            switch( $schedule->type )
-            {
+            switch ($schedule->type) {
                 case 'Weekly': {
-                    $_days = 'Weekly (' . str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) . ')';
-                    break;
-                }
+                        $_days = 'Weekly (' . str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) . ')';
+                        break;
+                    }
                 case 'WorkingDays': {
-                    $_days = __('dashboard.All working days');
-                    break;
-                }
+                        $_days = __('dashboard.All working days');
+                        break;
+                    }
                 case 'Period': {
-                    $_days = __('dashboard.from') . $date_from . __('dashboard.to') . $date_to;
-                    break;
-                }
+                        $_days = __('dashboard.from') . $date_from . __('dashboard.to') . $date_to;
+                        break;
+                    }
                 default: {
-                    $_days = $date_to;
-                }
+                        $_days = $date_to;
+                    }
             }
             $schedule->_days = $_days;
             $schedule->t_from = substr($schedule->tfrom, 0, 5);
@@ -1102,23 +1144,20 @@ class HomeController extends Controller
             return $schedule;
         });
 
-        $setting = collect( DB::select("SELECT * FROM settings where `id` = 1 limit 1") )->first();
+        $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();
 
-        if( $company && $cycle_id != 0 )
-        {
+        if ($company && $cycle_id != 0) {
             $surveyEligible = [];
-            foreach( $steps as $step )
-            {
-                if( ( optional($step)->stype == 3 || optional($step)->stype == 4 ) && ( now() > Carbon::parse( $step->to )->format('Y-m-d H:i:s') ) )
-                {
+            foreach ($steps as $step) {
+                if ((optional($step)->stype == 3 || optional($step)->stype == 4) && (now() > Carbon::parse($step->to)->format('Y-m-d H:i:s'))) {
                     $surveyEligible[] = [
-                      'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
-                      'triggered_at' => $step->id,
-                      'triggered_by' => 'due'
+                        'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
+                        'triggered_at' => $step->id,
+                        'triggered_by' => 'due'
                     ];
                 }
             }
-            
+
             $my_mentorship_requests_q = "SELECT
                     mr.id,
                     mr.period,
@@ -1130,11 +1169,11 @@ class HomeController extends Controller
                     AND mr.approved = 'Yes'
                     AND mr.cycle_id = $cycle_id
             ";
-            $my_mentorship_requests = collect( DB::select( $my_mentorship_requests_q ) )->map(function ($item) {
+            $my_mentorship_requests = collect(DB::select($my_mentorship_requests_q))->map(function ($item) {
                 $item->end_at = Carbon::parse($item->zoom_date)->addMinutes($item->period)->format('Y-m-d H:i:s');
                 return $item;
-            })->filter(function($item) {
-                return !empty( $item->zoom_date ) && !empty( $item->period ) && now() > $item->end_at;
+            })->filter(function ($item) {
+                return !empty($item->zoom_date) && !empty($item->period) && now() > $item->end_at;
             })->values();
 
             $my_trainings_q = "SELECT
@@ -1149,16 +1188,23 @@ class HomeController extends Controller
                 WHERE
                     s.cycle_id = $cycle_id;
             ";
-            $my_trainings = collect( DB::select($my_trainings_q) )->filter(function( $item ) {
-                if( $item->type == 'sessions' && ( empty( $item->datetime ) || empty( $item->duration ) ) ) { return false; }
-                elseif( in_array($item->type, ['online', 'offline', 'sessions']) && empty( $item->datetime ) ) { return false; }
-                else { return true; }
-            })->values()->map(function($item) {
+            $my_trainings = collect(DB::select($my_trainings_q))->filter(function ($item) {
+                if ($item->type == 'sessions' && (empty($item->datetime) || empty($item->duration))) {
+                    return false;
+                } elseif (in_array($item->type, ['online', 'offline', 'sessions']) && empty($item->datetime)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            })->values()->map(function ($item) {
                 $item->end_at = null;
-                if( $item->type == 'sessions' ) { $item->end_at = Carbon::createFromTimestamp($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s'); }
-                elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s'); }
+                if ($item->type == 'sessions') {
+                    $item->end_at = Carbon::createFromTimestamp($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s');
+                } elseif (in_array($item->type, ['online', 'offline', 'sessions'])) {
+                    $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s');
+                }
                 return $item;
-            })->filter(function($item) {
+            })->filter(function ($item) {
                 return now() > $item->end_at;
             })->values();
 
@@ -1177,34 +1223,38 @@ class HomeController extends Controller
                     q.status = 'published'
                     AND q.organization_id = $organization_id
             ";
-            $my_quizzes = collect( DB::select( $my_quizzes_q ) )->groupBy('id')->map(function($items) {
+            $my_quizzes = collect(DB::select($my_quizzes_q))->groupBy('id')->map(function ($items) {
                 $item = $items->first();
                 $quiz = new stdClass;
                 $quiz->id = $item->id;
                 $quiz->criteria = $item->criteria;
-                $quiz->end = Carbon::parse( $item->end )->format('Y-m-d H:i:s');
+                $quiz->end = Carbon::parse($item->end)->format('Y-m-d H:i:s');
                 $quiz->trials = $item->attempts;
-                $quiz->attempts = $items->map(function($result) {
+                $quiz->attempts = $items->map(function ($result) {
                     $attempt = new stdClass;
                     $attempt->id = $result->attempt_id;
                     $attempt->score = $result->attempt_score;
                     return $attempt;
                 });
                 return $quiz;
-            })->values()->filter(function($quiz) {
+            })->values()->filter(function ($quiz) {
                 $attempts = $quiz->attempts;
-                if( $attempts->count() > 0 )
-                {
-                    if(
+                if ($attempts->count() > 0) {
+                    if (
                         $attempts->where('score', '>=', $quiz->criteria)->count() >= 1
                         || $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
                         || now()->format('Y-m-d H:i:s') > $quiz->end
-                    ) { return true; } else { return false; }
-                } else { return false; }
+                    ) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             })->values();
 
-            foreach( $my_mentorship_requests as $mentorship )
-            {
+            foreach ($my_mentorship_requests as $mentorship) {
                 $surveyEligible[] = [
                     'triggered_on' => 'mentorship',
                     'triggered_at' => $mentorship->id,
@@ -1212,8 +1262,7 @@ class HomeController extends Controller
                 ];
             }
 
-            foreach( $my_trainings as $session )
-            {
+            foreach ($my_trainings as $session) {
                 $surveyEligible[] = [
                     'triggered_on' => 'training',
                     'triggered_at' => $session->id,
@@ -1221,8 +1270,7 @@ class HomeController extends Controller
                 ];
             }
 
-            foreach( $my_quizzes as $quiz )
-            {
+            foreach ($my_quizzes as $quiz) {
                 $surveyEligible[] = [
                     'triggered_on' => 'training',
                     'triggered_at' => $quiz->id,
@@ -1232,29 +1280,32 @@ class HomeController extends Controller
             $surveysToAdd = [];
             $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
 
-            foreach( $surveys as $survey_scope )
-            {
+            foreach ($surveys as $survey_scope) {
                 $my_responses = $survey_scope->myResponses;
-                if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
-                {
+                if ($survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible)) {
                     $due = $survey_scope->trigger_by_due;
                     $session = $survey_scope->trigger_by_session;
                     $mentorship = collect($surveyEligible['mentorship']);
                     $triggers = [];
-                    if( $due == true ) { $triggers[] = 'due';  }
-                    if( $session == true ) { $triggers[] = 'session'; }
-                    $triggers = array_unique( $triggers );
-                    if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
-                    else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
+                    if ($due == true) {
+                        $triggers[] = 'due';
+                    }
+                    if ($session == true) {
+                        $triggers[] = 'session';
+                    }
+                    $triggers = array_unique($triggers);
+                    if (count($triggers) == 0) {
+                        $mentorship = $mentorship->where('triggered_at', null);
+                    } else {
+                        $mentorship = $mentorship->whereIn('triggered_by', $triggers);
+                    }
                     $mentorship = $mentorship->values();
-                    foreach( $mentorship as $conditions )
-                    {
+                    foreach ($mentorship as $conditions) {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-                        if( empty( $checkResponse ) )
-                        {
+                        if (empty($checkResponse)) {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
-                                'survey_id' => $survey_scope->survey_id, 
+                                'survey_id' => $survey_scope->survey_id,
                                 'cycle_id' => $cycle_id,
                                 'scope_id' => $survey_scope->id,
                                 'triggered_on' => $conditions['triggered_on'],
@@ -1264,28 +1315,33 @@ class HomeController extends Controller
                             ];
                         }
                     }
-                }
-                elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
-                {
+                } elseif ($survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible)) {
                     $due = $survey_scope->trigger_by_due;
                     $quiz = $survey_scope->trigger_by_quiz;
                     $session = $survey_scope->trigger_by_session;
                     $training = collect($surveyEligible['training']);
-                    if( $due == true ) { $triggers[] = 'due';  }
-                    if( $quiz == true ) { $triggers[] = 'quiz'; }
-                    if( $session == true ) { $triggers[] = 'session'; }
-                    $triggers = array_unique( $triggers );
-                    if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
-                    else { $training = $training->whereIn('triggered_by', $triggers); }
+                    if ($due == true) {
+                        $triggers[] = 'due';
+                    }
+                    if ($quiz == true) {
+                        $triggers[] = 'quiz';
+                    }
+                    if ($session == true) {
+                        $triggers[] = 'session';
+                    }
+                    $triggers = array_unique($triggers);
+                    if (count($triggers) == 0) {
+                        $training = $training->where('triggered_at', null);
+                    } else {
+                        $training = $training->whereIn('triggered_by', $triggers);
+                    }
                     $training = $training->values();
-                    foreach( $training as $conditions )
-                    {
+                    foreach ($training as $conditions) {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-                        if( empty( $checkResponse ) )
-                        {
+                        if (empty($checkResponse)) {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
-                                'survey_id' => $survey_scope->survey_id, 
+                                'survey_id' => $survey_scope->survey_id,
                                 'cycle_id' => $cycle_id,
                                 'scope_id' => $survey_scope->id,
                                 'triggered_on' => $conditions['triggered_on'],
@@ -1298,32 +1354,44 @@ class HomeController extends Controller
                 }
             }
 
-            if( !empty($surveysToAdd) ) { SurveyResponses::insert( $surveysToAdd ); }
+            if (!empty($surveysToAdd)) {
+                SurveyResponses::insert($surveysToAdd);
+            }
         }
 
         $available_surveys = SurveyResponses::where('user_id', $user->id)->where('cycle_id', $cycle_id)->whereNull('responses')->get();
-        $available_surveys = $available_surveys->map(function( $item ) {
+        $available_surveys = $available_surveys->map(function ($item) {
             $middleware = collect([]);
-            if( $item->triggered_on == 'mentorship' )
-            {
-                if( $item->triggered_by == 'session' ) { $middleware = $item->mentorship_session; }
-                if( $item->triggered_by == 'due' ) { $middleware = $item->mentorship_step; }
-            }
-            elseif( $item->triggered_on == 'training' )
-            {
-                if( $item->triggered_by == 'session' ) { $middleware = $item->training_session; }
-                if( $item->triggered_by == 'due' ) { $middleware = $item->training_step; }
-                if( $item->triggered_by == 'quiz' ) { $middleware = $item->training_quiz; }
+            if ($item->triggered_on == 'mentorship') {
+                if ($item->triggered_by == 'session') {
+                    $middleware = $item->mentorship_session;
+                }
+                if ($item->triggered_by == 'due') {
+                    $middleware = $item->mentorship_step;
+                }
+            } elseif ($item->triggered_on == 'training') {
+                if ($item->triggered_by == 'session') {
+                    $middleware = $item->training_session;
+                }
+                if ($item->triggered_by == 'due') {
+                    $middleware = $item->training_step;
+                }
+                if ($item->triggered_by == 'quiz') {
+                    $middleware = $item->training_quiz;
+                }
             }
             $item->middleware = $middleware;
             return $item;
-        })->filter(function( $item ) {
+        })->filter(function ($item) {
             $middleware = $item->middleware;
-            if( is_null( $middleware ) || empty( $middleware ) ) { return false; }
-            elseif( !$middleware->count() ) { return false; }
+            if (is_null($middleware) || empty($middleware)) {
+                return false;
+            } elseif (!$middleware->count()) {
+                return false;
+            }
             return true;
         })->values();
-        
+
         $data['my_schedules'] = $my_schedules;
         $data['upcoming_sessions'] = $upcoming_sessions;
         $data['cType'] = $cType;
@@ -1580,12 +1648,14 @@ class HomeController extends Controller
             INNER JOIN 
                 countries c ON u.country_id = c.id
         ";
-        if( $has_org ) { $country_data_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $country_data_q .= " WHERE u.organization_id = " . $user->organization_id;
+        }
         $country_data_q .= " GROUP BY
                 c.name_en,
                 c.name_ar";
 
-        $country_data = collect( DB::select($country_data_q) )->map(function ($item) {
+        $country_data = collect(DB::select($country_data_q))->map(function ($item) {
             return [
                 'label_en' => $item->country_name_en,
                 'label_ar' => $item->country_name_ar,
@@ -1594,7 +1664,9 @@ class HomeController extends Controller
         });
 
         $conditions = '';
-        if( $has_org ) { $conditions = " WHERE cy.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " WHERE cy.organization_id = " . $user->organization_id;
+        }
         $sector_data_q = "SELECT
                 s.name_en AS `sector_name_en`,
                 s.name_ar AS `sector_name_ar`,
@@ -1611,7 +1683,7 @@ class HomeController extends Controller
                 s.name_ar
         ";
 
-        $sector_data = collect( DB::select( $sector_data_q ) )->map(function ($item) {
+        $sector_data = collect(DB::select($sector_data_q))->map(function ($item) {
             return [
                 'label_en' => $item->sector_name_en,
                 'label_ar' => $item->sector_name_ar,
@@ -1619,7 +1691,9 @@ class HomeController extends Controller
             ];
         });
 
-        if( $has_org ) { $conditions = " AND u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " AND u.organization_id = " . $user->organization_id;
+        }
         $project_types_q = "SELECT
                 c.business_type,
                 count(c.id) as total
@@ -1635,16 +1709,19 @@ class HomeController extends Controller
             GROUP BY
                 c.business_type
         ";
-        
-        $project_types = collect( DB::select( $project_types_q ) )->map(function ($item) {
+
+        $project_types = collect(DB::select($project_types_q))->map(function ($item) {
             return [
                 'label' => $item->business_type,
                 'count' => $item->total,
             ];
         });
 
-        if( $has_org ) { $conditions = " AND cy.organization_id = " . $user->organization_id; }
-        $developmentStages = collect(DB::select("SELECT 
+        if ($has_org) {
+            $conditions = " AND cy.organization_id = " . $user->organization_id;
+        }
+        $developmentStages = collect(DB::select(
+            "SELECT 
                 c.development_stage, 
                 COUNT(*) AS count 
             FROM
@@ -1657,17 +1734,17 @@ class HomeController extends Controller
             GROUP BY
                 c.development_stage"
         ));
-        $ids = $developmentStages->pluck('development_stage')->filter(function ($value) { return is_numeric($value); })->all();
+        $ids = $developmentStages->pluck('development_stage')->filter(function ($value) {
+            return is_numeric($value);
+        })->all();
         $stages = collect();
-        if( !empty( $ids ) )
-        {
+        if (!empty($ids)) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $stages = collect(DB::select("SELECT id, name_en, name_ar FROM stages WHERE id IN ($placeholders)", $ids))->keyBy('id');
         }
-        
-        $development_stages = $developmentStages->map(function ($item) use ( $stages ) {
-            if( is_numeric( $item->development_stage ) )
-            {
+
+        $development_stages = $developmentStages->map(function ($item) use ($stages) {
+            if (is_numeric($item->development_stage)) {
                 $stage = $stages->get($item->development_stage);
                 return [
                     'label_en' => $stage->name_en ?? null,
@@ -1707,7 +1784,7 @@ class HomeController extends Controller
                 company_count DESC
         ";
 
-        $target_market_data = collect( DB::select($target_market_data_q) )->map(function ( $item ) {
+        $target_market_data = collect(DB::select($target_market_data_q))->map(function ($item) {
             return [
                 'label_en' => $item->country_name_en,
                 'label_ar' => $item->country_name_ar,
@@ -1715,7 +1792,9 @@ class HomeController extends Controller
             ];
         });
 
-        if( $has_org ) { $conditions = " WHERE u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " WHERE u.organization_id = " . $user->organization_id;
+        }
         $project_status_q = "SELECT
                 c.title AS `cycle_title`,
                 count(ts.program_id) AS `total_programs`,
@@ -1734,7 +1813,7 @@ class HomeController extends Controller
                 c.end
         ";
 
-        $project_status = collect( DB::select( $project_status_q ) )->map(function ( $item ) {
+        $project_status = collect(DB::select($project_status_q))->map(function ($item) {
             return [
                 'cycle_title' => $item->cycle_title,
                 'total_programs' => $item->total_programs,
@@ -1743,7 +1822,9 @@ class HomeController extends Controller
             ];
         });
 
-        if( $has_org ) { $conditions = " AND u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " AND u.organization_id = " . $user->organization_id;
+        }
         $company_data_q = "SELECT
                 c.name_en AS `company_name_en`,
                 c.name_ar AS `company_name_ar`,
@@ -1759,9 +1840,9 @@ class HomeController extends Controller
                 c.deleted_at IS NULL
                 $conditions
         ";
-        $company_data = collect( DB::select( $company_data_q ) );
+        $company_data = collect(DB::select($company_data_q));
         $total_jobs = $company_data->whereNotNull('team_num')->values();
-        $total_jobs = $total_jobs->map(function ( $company ) {
+        $total_jobs = $total_jobs->map(function ($company) {
             return [
                 'company_name_en' => $company->company_name_en,
                 'company_name_ar' => $company->company_name_ar,
@@ -1774,7 +1855,7 @@ class HomeController extends Controller
         ];
 
         $founders = $company_data->whereNotNull('founder')->values();
-        $founders = $founders->map(function ( $company ) {
+        $founders = $founders->map(function ($company) {
             return [
                 'company_name_en' => $company->company_name_en,
                 'company_name_ar' => $company->company_name_ar,
@@ -1786,7 +1867,9 @@ class HomeController extends Controller
             'companies' => $founders,
         ];
 
-        if( $has_org ) { $conditions = " AND cy.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " AND cy.organization_id = " . $user->organization_id;
+        }
         $company_sdg_q = "SELECT
                 c.Sustainable_development
             FROM
@@ -1796,7 +1879,7 @@ class HomeController extends Controller
             WHERE
                 c.Sustainable_development IS NOT NULL
         ";
-        $sdg_data = collect( DB::select( $company_sdg_q ) )->flatMap(function ($item) {
+        $sdg_data = collect(DB::select($company_sdg_q))->flatMap(function ($item) {
             $sdgs = json_decode($item->Sustainable_development, true);
             return is_array($sdgs) ? $sdgs : [];
         })->countBy()->map(function ($count, $sdg) {
@@ -1807,7 +1890,9 @@ class HomeController extends Controller
             ];
         })->values();
 
-        if( $has_org ) { $conditions = " AND u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $conditions = " AND u.organization_id = " . $user->organization_id;
+        }
         $sector_distribution_q = "SELECT
                 c.sector,
                 s.name_en,
@@ -1828,7 +1913,7 @@ class HomeController extends Controller
             GROUP BY
                 c.sector, s.name_en, s.name_ar
         ";
-        $sector_distribution = collect( DB::select( $sector_distribution_q ) )->map(function ( $item ) {
+        $sector_distribution = collect(DB::select($sector_distribution_q))->map(function ($item) {
             return [
                 'sector_en' => $item->name_en ?? __('admin.undefined', [], 'en'),
                 'sector_ar' => $item->name_ar ?? __('admin.undefined', [], 'en'),
@@ -1837,8 +1922,10 @@ class HomeController extends Controller
         });
 
         $cycles_labels = $cycles->pluck('title')->toArray();
-        $cycles_startups_count = $cycles->map(function( $key ) { return $key->companies->count(); });
-        
+        $cycles_startups_count = $cycles->map(function ($key) {
+            return $key->companies->count();
+        });
+
         $users_gov_q = "SELECT
                 s.name_en AS `state_en`,
                 s.name_ar AS `state_ar`,
@@ -1848,12 +1935,14 @@ class HomeController extends Controller
             INNER JOIN
                 states s ON u.state_id = s.id
         ";
-        if( $has_org ) { $users_gov_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $users_gov_q .= " WHERE u.organization_id = " . $user->organization_id;
+        }
         $users_gov_q .= " GROUP BY
                         s.name_en,
                         s.name_ar";
 
-        $users_gov = collect( DB::select($users_gov_q) );
+        $users_gov = collect(DB::select($users_gov_q));
 
         $users_gender_q = "SELECT
                 u.gender,
@@ -1861,9 +1950,11 @@ class HomeController extends Controller
             FROM
                 users u
         ";
-        if( $has_org ) { $users_gender_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        if ($has_org) {
+            $users_gender_q .= " WHERE u.organization_id = " . $user->organization_id;
+        }
         $users_gender_q .= " GROUP BY gender";
-        $users_gender = collect( DB::select($users_gender_q) );
+        $users_gender = collect(DB::select($users_gender_q));
 
         $data['countries'] = $country_data;
         $data['sector_data'] = $sector_data;
@@ -1900,7 +1991,7 @@ class HomeController extends Controller
             ],
             [
                 'div-class' => 'col-12 mt-6',
-                'card-title' => __('admin.usersdetails') ,
+                'card-title' => __('admin.usersdetails'),
                 'type' => 'canvas',
                 'id' => 'verticalBarChart',
                 'permissions' => ['dashboard.widgets_graphs_demographics_view']
@@ -1914,7 +2005,7 @@ class HomeController extends Controller
             ],
             [
                 'div-class' => 'col-md-6 col-12 mt-6',
-                'card-title' => __('admin.totalusersmf') ,
+                'card-title' => __('admin.totalusersmf'),
                 'type' => 'div',
                 'id' => 'pieChart',
                 'permissions' => ['dashboard.widgets_graphs_male_female_ratio_view']
@@ -2278,7 +2369,7 @@ class HomeController extends Controller
                 ];
             }
         })->values();
-        
+
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
@@ -2335,14 +2426,14 @@ class HomeController extends Controller
 
         // Demographic
         $data['usersgov'] = User::join('states', 'users.state_id', '=', 'states.id')
-        ->where('users.organization_id', $organization_id)
-        ->select(
-            'states.name_en as state_en',
-            'states.name_ar as state_ar',
-            DB::raw('count(*) as total')
-        )
-        ->groupBy('states.name_en', 'states.name_ar')
-        ->get();
+            ->where('users.organization_id', $organization_id)
+            ->select(
+                'states.name_en as state_en',
+                'states.name_ar as state_ar',
+                DB::raw('count(*) as total')
+            )
+            ->groupBy('states.name_en', 'states.name_ar')
+            ->get();
 
 
         // Male and Female Ratio
@@ -2403,16 +2494,16 @@ class HomeController extends Controller
 
         // Sector Breakdown
         $sectorBreakdown = Sector::join('companies', 'companies.sector', '=', 'sectors.id')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-        ->where('cycles.organization_id', $organization_id) 
-        ->select(
-            'sectors.name_en as sector_name_en', 
-            'sectors.name_ar as sector_name_ar', 
-            DB::raw('count(companies.id) as total')
-        )
-        ->groupBy('sectors.name_en', 'sectors.name_ar')
-        ->get();
-    
+            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->where('cycles.organization_id', $organization_id)
+            ->select(
+                'sectors.name_en as sector_name_en',
+                'sectors.name_ar as sector_name_ar',
+                DB::raw('count(companies.id) as total')
+            )
+            ->groupBy('sectors.name_en', 'sectors.name_ar')
+            ->get();
+
         $data['sector_data'] = $sectorBreakdown->map(function ($item) {
             return [
                 'label_en' => $item->sector_name_en,
@@ -2629,7 +2720,7 @@ class HomeController extends Controller
             }
         });
 
-     
+
         return view('admin.organizations.dashboard', $data);
     }
 
@@ -2678,7 +2769,7 @@ class HomeController extends Controller
         $data['completedTasks'] = MentorshipTask::whereIn('mentorship_request_id', auth()->user()->mentorSessions()->pluck('id'))->where('status', 'completed')->whereNotNull('title')->count();
         $data['nonCompletedTasks'] = MentorshipTask::whereIn('mentorship_request_id', auth()->user()->mentorSessions()->pluck('id'))->where('status', 'pending')->whereNotNull('title')->count();
 
-        
+
         return view('mentor.dashboard', $data);
     }
 
@@ -2738,19 +2829,19 @@ class HomeController extends Controller
                 'comment' => $request->comment,
                 'date_time' => $request->datetime
             ]);
-    
+
             event(new WebMessage('NewServ', Auth::user()->first_name_en . ' ' . Auth::user()->last_name_en));
-    
+
             $service = Service::find($request->id);
-    
+
             if ($service && $service->vendor_email) {
                 // Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
                 Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
             }
-    
+
             return response()->json(['state' => 'success']);
         }
-    
+
         return response()->json(['state' => 'failed'], 500);
     }
     public function dark(Request $request)
