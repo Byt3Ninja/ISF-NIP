@@ -12,8 +12,10 @@ use App\UserScore;
 use App\Organization;
 use App\Finalscreening;
 use App\SurveyResponses;
+use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleData;
+use App\ScreeningEvaluationResults;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Session;
 
@@ -399,7 +401,88 @@ class ProgramController extends Controller
 
         $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
 
-        $averageFinalScore = $cycle->mentorshipRequests()->avg('rating');
+        // Final Evaluations
+$finalEvaluations = ScreeningEvaluation::whereIn('step_id', $cycle->steps->pluck('id'))
+    ->with([
+        'criteria' => fn($q) => $q->select('id', 'evaluation_id', 'title', 'weight', 'parent_id'),
+        'customFields.values.user.company'
+    ])
+    ->get();
+
+$evaluationResults = ScreeningEvaluationResults::whereIn('evaluation_id', $finalEvaluations->pluck('id'))
+    ->with(['criteria' => fn($q) => $q->select('id', 'evaluation_id', 'weight', 'parent_id'), 'user'])
+    ->get();
+
+$averageFinalScore = ScreeningEvaluationResults::whereIn('evaluation_id', $finalEvaluations->pluck('id'))
+    ->where('status', 1)
+    ->avg('score') ?: 0;
+$averageFinalScore = round((float)$averageFinalScore, 2);
+
+$companyEvaluations = [];
+foreach ($finalEvaluations as $evaluation) {
+    $finalCommentField = $evaluation->customFields->where('name', 'final_comment')->first();
+    $userValue = $finalCommentField ? $finalCommentField->values->first() : null;
+    $companyUser = $userValue ? $userValue->user : null;
+    $company = $companyUser ? $companyUser->company : null;
+
+    if (!$company || !$companies->contains('id', $company->id)) {
+        continue;
+    }
+
+    $results = $evaluationResults->where('evaluation_id', $evaluation->id)
+        ->where('status', 1);
+
+    $totalScore = $results->sum(function ($result) {
+        $criterion = $result->criteria;
+        if ($criterion && is_null($criterion->parent_id)) {
+            $score = (float)$result->score;
+            return ($criterion->weight * $score) / 100;
+        }
+        return 0;
+    });
+
+    $status = $totalScore >= 90 ? 'Highest Rated' : ($totalScore >= 70 ? 'Good Performance' : 'Needs Improvement');
+
+    $comments = $userValue && $userValue->value ? $userValue->value : $results->pluck('comment')->filter()->join('; ');
+
+    $companyEvaluations[] = [
+        'company_id' => $company->id,
+        'company_name' => $company->{'name_' . app()->getLocale()},
+        'total_score' => round($totalScore, 2),
+        'status' => $status,
+        'comments' => $comments,
+        'evaluation_status' => $evaluation->status,
+    ];
+}
+
+$companyEvaluations = collect($companyEvaluations)
+    ->groupBy('company_id')
+    ->map(function ($group) {
+        return $group->sortByDesc('total_score')->first();
+    })
+    ->sortByDesc('total_score')
+    ->values();
+
+$totalEvaluations = $finalEvaluations->count();
+$publishedEvaluations = $finalEvaluations->where('status', 1)->count();
+$evaluationCompletion = $totalEvaluations > 0 ? round(($publishedEvaluations / $totalEvaluations) * 100, 2) : 0;
+$statusDistribution = [
+    'Highest Rated' => $companyEvaluations->where('status', 'Highest Rated')->count(),
+    'Good Performance' => $companyEvaluations->where('status', 'Good Performance')->count(),
+    'Needs Improvement' => $companyEvaluations->where('status', 'Needs Improvement')->count(),
+];
+
+$evaluatorStatus = $evaluationResults->groupBy('user_id')->map(function ($results, $userId) {
+    $user = User::find($userId);
+    $name = $user ? ($user->first_name_en . ' ' . $user->last_name_en ?? $user->name ?? "Evaluator $userId") : "Evaluator $userId";
+    return [
+        'evaluator_id' => $userId,
+        'evaluator_name' => $name,
+        'total_evaluations' => $results->count(),
+        'published_evaluations' => $results->where('status', 1)->count(),
+        'draft_evaluations' => $results->where('status', 0)->count(),
+    ];
+})->values();
 
      
         return view('admin.programs.program-report', [
@@ -427,6 +510,10 @@ class ProgramController extends Controller
            'mentorNamesChart1' => $topMentorNames,
            'mentorSessionsArray' => $topMentorSessionsArray,
            'mentorAvgRatings' => $mentorAvgRatingsArray,
+           'companyEvaluations' => $companyEvaluations,
+           'evaluationCompletion' => $evaluationCompletion,
+           'statusDistribution' => $statusDistribution,
+           'evaluatorStatus' => $evaluatorStatus,
         ]);
    
     }

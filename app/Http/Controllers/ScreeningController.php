@@ -324,12 +324,8 @@ class ScreeningController extends Controller
 	{
 		$approved = $by = null;
 		$company = Company::where('id', $request->company)->first();
-		if ($company->step != 0) {
-        $data['last_step'] = Step::findOrFail($company->step)->title;
-        } else {
-          $data['last_step'] = __('cycles.Disapprove');
-        }
-		if ($request->step == 0) {
+		$data['last_step'] = Step::findOrFail($company->step)->title;
+		if ($request->step == "") {
 			$by = Auth::id();
 		} else {
 			$cstep = Step::findOrFail($request->step);
@@ -341,7 +337,7 @@ class ScreeningController extends Controller
 		}
 		
 		$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
-		if ($request->step != 0) {
+		if ($request->step != "") {
 			/// notify Company Owner via Mail
 			$company_owner = $company->user;
 			$data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;

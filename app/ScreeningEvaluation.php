@@ -114,4 +114,8 @@ class ScreeningEvaluation extends Model
 
 		return $myComment;
 	}
+	public function customFields()
+    {
+        return $this->hasMany(ScreeningEvaluationCustomFields::class, 'evaluation_id');
+    }
 }

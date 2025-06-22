@@ -2005,4 +2005,10 @@ return [
 	'SAR' => ' ريال سعودي ',
 	'EGP' => 'جنيه مصري',
 	'Add_new_Courses' => 'اضافة دورات جديدة',
+	'Evaluator Name' => 'اسم المحكم',
+	'Total Evaluations' => 'إجمالي التقييمات',
+	'No evaluators found' => 'لا توجد محكمين',
+	'company_name' => 'اسم الشركة',
+	'Auto-mapping completed'=> 'تم تخصيص الأوتوماتيكي',
+
 ];

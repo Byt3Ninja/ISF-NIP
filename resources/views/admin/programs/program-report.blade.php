@@ -292,14 +292,14 @@
             <div class="col-lg col-md-4 col-sm-6">
               <div class="kpi-card">
                 <i class="fas fa-star kpi-icon text-warning"></i>
-                 <div class="kpi-value">{{ number_format($averageFinalScore, 0) }}</div>
+                 <div class="kpi-value">{{ $averageFinalScore }}</div>
                  <div class="kpi-label">{{ __('admin.Average Final Score') }}</div>
               </div>
             </div>
             <div class="col-lg col-md-4 col-sm-6">
               <div class="kpi-card">
                 <i class="fas fa-check-circle kpi-icon text-danger"></i>
-                <div class="kpi-value" id="summaryEvaluationsComplete">83%</div>
+                <div class="kpi-value" id="summaryEvaluationsComplete">{{ $evaluationCompletion }}%</div>
                 <div class="kpi-label">{{ __('admin.Evaluation Completion') }}</div>
               </div>
             </div>
@@ -344,11 +344,11 @@
                   <h6 class="mt-4 fw-bold">{{ __('admin.Results Summary') }}:</h6>
                   <ul class="list-group list-group-flush">
                     <li class="list-group-item" id="summaryTopCompanies"><i class="fas fa-trophy text-muted"></i>
-                      {{ __('admin.Highest Rated') }}: --</li>
+                     {{ __('admin.Highest Rated') }}: {{ $statusDistribution['Highest Rated'] }}</li>
                     <li class="list-group-item" id="summaryGoodCompanies"><i class="fas fa-thumbs-up"
-                        style="color:#28a745"></i> {{ __('admin.Good Performance') }}: --</li>
+                        style="color:#28a745"></i> {{ __('admin.Good Performance') }}: {{ $statusDistribution['Good Performance'] }}</li>
                     <li class="list-group-item" id="summaryImprovementCompanies"><i class="fas fa-flag"
-                        style="color:#dc3545"></i> {{ __('admin.Needs Improvement') }}: --</li>
+                        style="color:#dc3545"></i> {{ __('admin.Needs Improvement') }}: {{ $statusDistribution['Needs Improvement'] }}</li>
                   </ul>
                 </div>
               </div>
@@ -389,15 +389,15 @@
                     </select>
                </div>
 
-              <div class="col-md-2 col-sm-6"> <label for="perfFilterMinRating" class="form-label fw-semibold">{{ __('admin.Min Rating') }}</label>
+              {{-- <div class="col-md-2 col-sm-6"> <label for="perfFilterMinRating" class="form-label fw-semibold">{{ __('admin.Min Rating') }}</label>
                 <input type="number" class="form-control" id="perfFilterMinRating" min="1" max="5" step="0.1"
                   placeholder="e.g., 3.5">
-              </div>
-              <div class="col-md-2 col-sm-6"> <label for="perfFilterMinProgress" class="form-label fw-semibold">{{ __('admin.Min Progress') }}
+              </div> --}}
+              {{-- <div class="col-md-2 col-sm-6"> <label for="perfFilterMinProgress" class="form-label fw-semibold">{{ __('admin.Min Progress') }}
                   (%)</label>
                 <input type="number" class="form-control form-control" id="perfFilterMinProgress" min="0" max="100"
                   step="5" placeholder="e.g., 50">
-              </div>
+              </div> --}}
               <div class="col-md-2 col-sm-12 text-start mt-3 mt-md-0"> <button type="submit"
                   class="btn btn-primary w-100"><i class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button> </div>
             </form>
@@ -442,9 +442,6 @@
                         <th scope="col">{{ __('admin.company name') }}</th>
                         <th scope="col">{{ __('admin.Sector') }}</th>
                         <th scope="col">{{ __('admin.Stage') }}</th>
-                        <th scope="col">{{ __('admin.Rating') }}</th>
-                        <th scope="col">{{ __('admin.Progress') }} (%)</th>
-                        <th scope="col">{{ __('admin.Notes') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -454,9 +451,6 @@
                               <td>{{ $company->{'name_'.$l} }}</td>
                               <td>{{ $company->sectoR?->{'name_'.$l} ?? '-' }}</td>
                               <td>{{ $company->stagE->{'name_'.$l} ?? '-' }}</td>
-                              <td>{{ '-' }}</td>
-                              <td>{{ '-' }}</td>
-                              <td>{{ '-' }}</td>
                            </tr>
                         @endforeach
                     </tbody>
@@ -726,7 +720,7 @@
                         <th class="text-center">{{ __('admin.Workshop Name') }}</th>
                         <th class="text-center">{{ __('admin.Trainer') }}</th>
                         <th class="text-center">{{ __('admin.Participants') }}</th>
-                        <th class="text-center">{{ __('admin.rating') }}</th>
+                        {{-- <th class="text-center">{{ __('admin.rating') }}</th> --}}
                         <th class="text-center">{{ __('admin.type') }}</th>
                       </tr>
                     </thead>
@@ -741,11 +735,11 @@
                                  {{  '-' }}
                             @endif
                          </td>
-                         <td>
+                         {{-- <td>
                              <span class="badge bg-label-primary rating-badge">
                                   {{ '-' }}
                               </span>
-                         </td>
+                         </td> --}}
                           <td class="text-center"> <span class="badge {{ $ws->type === 'sessions' ? 'bg-secondary' : ($ws->type === 'online' ? 'bg-info' : 
                               'bg-label-warning text-dark') }}">
                              {{ $ws->type === 'sessions' ? 'Live Training' : 
@@ -771,28 +765,14 @@
                     <thead>
                       <tr>
                         <th scope="col">{{ __('admin.company name') }}</th>
-                        <th scope="col">{{ __('admin.completion rate') }}</th>
-                        <th scope="col">{{ __('admin.Pass/Fail') }}</th>
+                        {{-- <th scope="col">{{ __('admin.completion rate') }}</th>
+                        <th scope="col">{{ __('admin.Pass/Fail') }}</th> --}}
                       </tr>
                     </thead>
                     <tbody>
                       @forelse($companies as $company)
                           <tr>
-                             <td>{{ $company->name }}</td>
-                             <td>
-                             @php
-                                 $rate = $company->completion_rate ?? 0;
-                                 $badgeClass = $rate >= 90 ? 'bg-success' : ($rate >= 75 ? 'bg-label-warning text-dark' : 'bg-label-secondary');
-                            @endphp
-                                    <span class="badge {{ $badgeClass }}">{{ $rate }}%</span>
-                            </td>
-                              <td>
-                                @if($company->has_passed)
-                                    <i class="fas fa-check-circle text-success pass-fail-icon"></i>
-                                @else
-                                    <i class="fas fa-times-circle text-danger pass-fail-icon"></i>
-                                @endif
-                               </td>
+                             <td>{{ $company->{'name_'.$l} }}</td>
                              </tr>
                               @empty
                                 <tr>
@@ -814,12 +794,12 @@
                 </div>
               </div>
               <!-- Chart 2: Average Rating per Trainer -->
-              <div class="mb-4">
+              {{-- <div class="mb-4">
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Average Trainer Ratings') }}</h4>
                 <div class="chart-container">
                   <canvas id="trainerRatingChart"></canvas>
                 </div>
-              </div>
+              </div> --}}
 
               <div>
   <h4 class="fw-semibold border-bottom border-2 border-primary">
@@ -881,134 +861,146 @@
         <!-- ==================================== -->
         <!-- 5. Final Evaluation Tab Pane        -->
         <!-- ==================================== -->
-        <div class="tab-pane fade" id="final-eval-tab-pane" role="tabpanel" aria-labelledby="final-eval-tab"
-          tabindex="0">
-          <!-- Filters for this specific report -->
-          <div class="bg-label-light p-4 rounded-3">
-            <h5 class="fw-semibold"><i class="fas fa-filter"></i>
-              {{ __('admin.Filter Options (Final)') }}
-            </h5>
-            <form class="row g-2 align-items-end final-eval-filter-form">
-              <div class="col-md-4"><label for="feFilterStatus" class="form-label">{{ __('admin.Status') }}</label><select
-                  class="form-select select2" id="feFilterStatus">
-                  <option selected value="">{{ __('admin.All') }}</option>
-                  <option value="Highest Rated">{{ __('admin.Highest Rated') }}</option>
-                  <option value="Good Performance">{{ __('admin.Good Performance') }}</option>
-                  <option value="Needs Improvement">{{ __('admin.Needs Improvement') }}</option>
-                </select></div>
-              <div class="col-md-4"><label for="feFilterMinScore" class="form-label">{{ __('admin.Minimum Score') }}</label><input
-                  type="number" class="form-control" id="feFilterMinScore" min="0" max="100" step="5"
-                  placeholder="e.g., 70"></div>
-              <div class="col-md-4 text-start"><button type="submit" class="btn btn-primary w-50"><i
-                    class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button></div>
-            </form>
-          </div>
-          <!-- Content from final evaluation report -->
-          <div class="row mt-4">
-            <div class="col-lg-8">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-clipboard-list text-primary me-2"></i> {{ __('admin.Final Company Evaluations') }}</h4>
-                <div class="export-buttons"> <button type="button" class="btn btn-label-danger btn-sm"><i
-                      class="fas fa-file-pdf me-1"></i> {{ __('admin.exportPDF') }}</button> <button type="button"
-                    class="btn btn-label-success btn-sm ms-2"><i class="fas fa-file-excel me-1"></i> {{ __('admin.exportExcel') }}</button>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <!-- Copied Final Eval Table Structure Here -->
-                <table class="table table-striped table-hover align-middle final-eval-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">{{ __('admin.Rank') }}</th>
-                      <th scope="col">{{ __('admin.StartUp_name') }}</th>
-                      <th scope="col">{{ __('admin.Total Score') }}</th>
-                      <th scope="col">{{ __('admin.Judge Comments (Summary)') }}</th>
-                      <th scope="col">{{ __('admin.Status') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="rank-col">1 <i class="fas fa-medal"></i></td>
-                      <td class="company-name">Alpha Tech</td>
-                      <td class="score-col">92.5 / 100</td>
-                      <td class="comments-col">Outstanding performance...</td>
-                      <td><span class="badge bg-label-success status-badge">Highest Rated</span></td>
-                    </tr>
-                    <tr>
-                      <td class="rank-col">2 <i class="fas fa-award"></i></td>
-                      <td class="company-name">Beta Solutions</td>
-                      <td class="score-col">85.0 / 100</td>
-                      <td class="comments-col">Innovative solution...</td>
-                      <td><span class="badge bg-label-primary status-badge">Good Performance</span></td>
-                    </tr>
-                    <!-- ... more rows -->
-                  </tbody>
+        <div class="tab-pane fade" id="final-eval-tab-pane" role="tabpanel" aria-labelledby="final-eval-tab" tabindex="0">
+    <!-- Filters for this specific report -->
+    <div class="bg-label-light p-4 rounded-3">
+        <h5 class="fw-semibold"><i class="fas fa-filter"></i> {{ __('admin.Filter Options (Final)') }}</h5>
+        <form class="row g-2 align-items-end final-eval-filter-form" method="GET" action="{{ route('programs.report', $cycle->id) }}">
+            <div class="col-md-4">
+                <label for="feFilterStatus" class="form-label">{{ __('admin.Status') }}</label>
+                <select class="form-select select2" id="feFilterStatus" name="status">
+                    <option value="">{{ __('admin.All') }}</option>
+                    <option value="Highest Rated" {{ request('status') == 'Highest Rated' ? 'selected' : '' }}>{{ __('admin.Highest Rated') }}</option>
+                    <option value="Good Performance" {{ request('status') == 'Good Performance' ? 'selected' : '' }}>{{ __('admin.Good Performance') }}</option>
+                    <option value="Needs Improvement" {{ request('status') == 'Needs Improvement' ? 'selected' : '' }}>{{ __('admin.Needs Improvement') }}</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="feFilterMinScore" class="form-label">{{ __('admin.Minimum Score') }}</label>
+                <input type="number" class="form-control" id="feFilterMinScore" name="min_score" min="0" max="100" step="5" value="{{ request('min_score') }}" placeholder="e.g., 70">
+            </div>
+            <div class="col-md-4 text-start">
+                <button type="submit" class="btn btn-primary w-50"><i class="fas fa-search meវ
+                search me-2"></i> {{ __('admin.Search') }}</button>
+            </div>
+        </form>
+    </div>
+    <!-- Content from final evaluation report -->
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-clipboard-list me-2 text-primary"></i> {{ __('admin.Final Company Evaluations') }}</h4>
+            </div>
+            <div class="table-responsive">
+                <table id="finalEvalTable" class="table table-striped table-hover align-middle final-eval-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ __('admin.Rank') }}</th>
+                            <th scope="col">{{ __('admin.company_name') }}</th>
+                            <th scope="col">{{ __('admin.Total Score') }}</th>
+                            <th scope="col">{{ __('admin.Judge Comments (Summary)') }}</th>
+                            <th scope="col">{{ __('admin.Status') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         @forelse ($companyEvaluations as $index => $eval)
+                      <tr>
+                        <td class="text-center rank-col">
+                          {{ $index + 1 }}
+                          @if ($index == 0)
+                            <i class="fas fa-medal text-gold"></i>
+                          @elseif ($index == 1)
+                            <i class="fas fa-award text-silver"></i>
+                          @elseif ($index == 2)
+                            <i class="fas fa-bronze text-bronze"></i>
+                          @endif
+                        </td>
+                        <td class="text-right-align">{{ $eval['company_name'] }}</td>
+                        <td class="text-center score-col">{{ $eval['total_score'] }} / 100</td>
+                        <td class="text-right-align comments-col">{{ $eval['comments'] }}</td>
+                        <td class="text-center">
+                          <span class="badge bg-label-{{ $eval['status'] == 'Highest Rated' ? 'success' : ($eval['status'] == 'Good Performance' ? 'primary' : 'danger') }} status-badge">
+                            {{ __($eval['status']) }}
+                          </span>
+                        </td>
+                      </tr>
+                    @empty
+                      <tr>
+                        <td colspan="5" class="text-center">{{ __('admin.No evaluations found') }}</td>
+                      </tr>
+                    @endforelse
+                    </tbody>
                 </table>
-              </div>
-              <!-- Chart: Score Distribution -->
-              <div class="mt-4">
+            </div>
+            <!-- Chart: Score Distribution -->
+            <div class="mt-4">
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Score Distribution') }}</h4>
                 <div class="chart-container">
-                  <canvas id="finalEvalScoreDistributionChart"></canvas>
+                    <canvas id="finalEvalScoreDistributionChart"></canvas>
                 </div>
-              </div>
             </div>
-            <div class="col-lg-4">
-              <!-- Evaluator Status -->
-              <div class="mb-4">
+        </div>
+        <div class="col-lg-4">
+            <!-- Evaluator Status -->
+            <div class="mb-4">
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-check text-primary me-2"></i> {{ __('admin.Evaluator Status') }}</h4>
-                <div class="evaluator-card">
-                  <div class="evaluator-img"><i class="fas fa-user"></i></div>
-                  <div class="evaluator-info">
-                    <div class="evaluator-name">Mohammed Abdullah</div>
-                    <div class="evaluator-status"><span class="text-success">10 C</span> / <span class="text-danger">2
-                        P</span></div>
-                    <div class="evaluator-progress">
-                      <div class="progress">
-                        <div class="progress-bar bg-success" style="width: 83%;"></div>
-                      </div>
-                    </div>
-                  </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>{{ __('admin.Evaluator Name') }}</th>
+                                <th>{{ __('admin.Total Evaluations') }}</th>
+                                <th>{{ __('admin.Published') }}</th>
+                                <th>{{ __('admin.Draft') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($evaluatorStatus as $evaluator)
+                                <tr>
+                                    <td>{{ $evaluator['evaluator_name'] }}</td>
+                                    <td>{{ $evaluator['total_evaluations'] }}</td>
+                                    <td>{{ $evaluator['published_evaluations'] }}</td>
+                                    <td>{{ $evaluator['draft_evaluations'] }}</td>
+                                </tr>
+                            @endforeach
+                            @if ($evaluatorStatus->isEmpty())
+                                <tr>
+                                    <td colspan="4" class="text-center">{{ __('admin.No evaluators found') }}</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
-                <div class="evaluator-card">
-                  <div class="evaluator-img"><i class="fas fa-user"></i></div>
-                  <div class="evaluator-info">
-                    <div class="evaluator-name">Fatima Al-Zahra</div>
-                    <div class="evaluator-status"><span class="text-success">12 C</span> / <span class="text-danger">0
-                        P</span></div>
-                    <div class="evaluator-progress">
-                      <div class="progress">
-                        <div class="progress-bar bg-success" style="width: 100%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="evaluator-card">
-                  <div class="evaluator-img"><i class="fas fa-user"></i></div>
-                  <div class="evaluator-info">
-                    <div class="evaluator-name">Khalid Mahmoud</div>
-                    <div class="evaluator-status"><span class="text-success">9 C</span> / <span class="text-danger">3
-                        P</span></div>
-                    <div class="evaluator-progress">
-                      <div class="progress">
-                        <div class="progress-bar bg-success" style="width: 75%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- Results Summary -->
-              <div>
+            </div>
+            <!-- Results Summary -->
+            <div>
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-bullseye text-primary me-2"></i> {{ __('admin.Final Results Summary') }}</h4>
                 <h6 class="mb-2 fw-bold text-success">{{ __('admin.Highest Rated') }}:</h6>
-                <ul class="summary-list" id="feTopCompaniesList"></ul>
+                <ul class="summary-list" id="feTopCompaniesList">
+                    @foreach ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->take(3) as $eval)
+                        <li><i class="fas fa-star"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score'] }}/100)</small></li>
+                    @endforeach
+                    @if ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->isEmpty())
+                        <li>{{ __('admin.No companies found') }}</li>
+                    @endif
+                </ul>
                 <h6 class="mt-4 mb-2 fw-bold text-danger">{{ __('admin.Needs Improvement') }}:</h6>
-                <ul class="summary-list" id="feImprovementCompaniesList"></ul>
-              </div>
+                <ul class="summary-list" id="feImprovementCompaniesList">
+                    @foreach ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1) as $eval)
+                        <li><i class="fas fa-wrench"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score'] }}/100)</small></li>
+                    @endforeach
+                    @if ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1)->isEmpty())
+                        <li>{{ __('admin.No companies found') }}</li>
+                    @endif
+                </ul>
             </div>
-          </div>
         </div>
+    </div>
+</div>
+    
 
-      </div> <!-- /tab-content -->
+
+    </div> <!-- /tab-content -->
     </div>
 
 
@@ -1293,44 +1285,67 @@
             // ==============================================
             // 4. Final Evaluation Report Logic
             // ==============================================
-             function setupFinalEvalReport() {
-                 const finalEvalData = getDataFromTable('#final-eval-tab-pane .final-eval-table', row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length < 4) return null;
-                    const scoreText = cells[1].textContent.trim();
-                    const scoreMatch = scoreText.match(/(\d+(\.\d+)?)\s*\/\s*100/);
-                    return {
-                        name: cells[0].textContent.trim(), score: scoreMatch ? parseFloat(scoreMatch[1]) : null,
-                        status: cells[3].querySelector('.status-badge') ? cells[3].querySelector('.status-badge').textContent.trim() : null
-                    };
-                 });
-                 const scores = finalEvalData.map(s => s.score).filter(s => s !== null);
+            function setupFinalEvalReport() {
+        const finalEvalData = getDataFromTable('#final-eval-tab-pane .final-eval-table', row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 5) return null;
+            const scoreText = cells[2].textContent.trim();
+            const scoreMatch = scoreText.match(/(\d+(\.\d+)?)\s*\/\s*100/);
+            return {
+                name: cells[1].textContent.trim(),
+                score: scoreMatch ? parseFloat(scoreMatch[1]) : null,
+                status: cells[4].querySelector('.status-badge') ? cells[4].querySelector('.status-badge').textContent.trim() : null
+            };
+        });
 
-                 // Chart: Score Distribution
-                 const scoreBins = [ { label: '90-100', min: 90, max: 100, count: 0 }, { label: '80-89', min: 80, max: 89.9, count: 0 }, { label: '70-79', min: 70, max: 79.9, count: 0 }, { label: '60-69', min: 60, max: 69.9, count: 0 }, { label: '< 60', min: 0, max: 59.9, count: 0 } ];
-                 scores.forEach(score => { for (const bin of scoreBins) { if (score >= bin.min && score <= bin.max) { bin.count++; break; } } });
-                 const ctxFeScoreDist = document.getElementById('finalEvalScoreDistributionChart')?.getContext('2d');
-                 if(ctxFeScoreDist) {
-                     new Chart(ctxFeScoreDist, {
-                        type: 'bar', data: { labels: scoreBins.map(bin => bin.label), datasets: [{ label: 'عدد الشركات', data: scoreBins.map(bin => bin.count), backgroundColor: ['#198754', '#0d6efd', '#0dcaf0', '#ffc107', '#dc3545'], borderColor: chartBorderColors, borderWidth: 1 }] },
-                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { font: chartFont, stepSize: 1 } }, x: { ticks: { font: chartFont } } }, plugins: { legend: { display: false }, tooltip: { bodyFont: chartFont, titleFont: chartFont } } }
-                    });
-                 }
+        // Chart: Score Distribution
+        const scoreBins = [
+            { label: '90-100', min: 90, max: 100, count: 0 },
+            { label: '80-89', min: 80, max: 89.9, count: 0 },
+            { label: '70-79', min: 70, max: 79.9, count: 0 },
+            { label: '60-69', min: 60, max: 69.9, count: 0 },
+            { label: '< 60', min: 0, max: 59.9, count: 0 }
+        ];
+        finalEvalData.forEach(item => {
+            if (item.score !== null) {
+                for (const bin of scoreBins) {
+                    if (item.score >= bin.min && item.score <= bin.max) {
+                        bin.count++;
+                        break;
+                    }
+                }
+            }
+        });
 
-                // Populate Summary Lists
-                const feTopCompaniesList = document.getElementById('feTopCompaniesList');
-                const feImprovementCompaniesList = document.getElementById('feImprovementCompaniesList');
-                feTopCompaniesList.innerHTML = ''; feImprovementCompaniesList.innerHTML = '';
-                const sortedFeData = [...finalEvalData].sort((a, b) => b.score - a.score);
-                sortedFeData.slice(0, 3).forEach(c => { feTopCompaniesList.innerHTML += `<li><i class="fas fa-star"></i> ${c.name} <small>(${c.score}/100)</small></li>`; });
-                sortedFeData.filter(c => c.score < 70).forEach(c => { feImprovementCompaniesList.innerHTML += `<li><i class="fas fa-wrench"></i> ${c.name} <small>(${c.score}/100)</small></li>`; });
-                 if (feImprovementCompaniesList.children.length === 0) feImprovementCompaniesList.innerHTML = '<li>لا توجد شركات حالياً.</li>';
-                 if (feTopCompaniesList.children.length === 0) feTopCompaniesList.innerHTML = '<li>لا توجد بيانات.</li>';
-
-
-                 // Filter Simulation
-                 document.querySelector('.final-eval-filter-form')?.addEventListener('submit', e => { e.preventDefault(); console.log('Final Eval Filter Submitted'); alert('محاكاة: تم تطبيق فلتر التقييم النهائي!'); });
-             }
+        const ctxFeScoreDist = document.getElementById('finalEvalScoreDistributionChart')?.getContext('2d');
+        if (ctxFeScoreDist) {
+            new Chart(ctxFeScoreDist, {
+                type: 'bar',
+                data: {
+                    labels: scoreBins.map(bin => bin.label),
+                    datasets: [{
+                        label: '{{ __('admin.company_counts') }}',
+                        data: scoreBins.map(bin => bin.count),
+                        backgroundColor: ['#198754', '#0d6efd', '#0dcaf0', '#ffc107', '#dc3545'],
+                        borderColor: chartBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: chartFont, stepSize: 1 } },
+                        x: { ticks: { font: chartFont } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { bodyFont: chartFont, titleFont: chartFont }
+                    }
+                }
+            });
+        }
+    }
 
              // ==============================================
              // 5. Program Summary Report Logic
@@ -1505,6 +1520,44 @@ $(document).ready(function () {
   };
 
   $('#workshopTable').DataTable({
+    dom: 'Bfrtip',
+    buttons: [
+      {
+        extend: 'pdfHtml5',
+        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+        className: 'btn btn-label-danger btn-sm',
+        exportOptions: {
+          columns: ':visible'
+        }
+      },
+      {
+        extend: 'excelHtml5',
+        text: '<i class="fas fa-file-excel me-1"></i> Excel',
+        className: 'btn btn-label-success btn-sm',
+        exportOptions: {
+          columns: ':visible'
+        }
+      }
+    ],
+    language: {
+      lengthMenu: `${translations[currentLang].show} _MENU_ ${translations[currentLang].entries}`,
+      search: translations[currentLang].search,
+      paginate: {
+        first: translations[currentLang].first,
+        last: translations[currentLang].last,
+        next: translations[currentLang].next,
+        previous: translations[currentLang].previous
+      },
+      emptyTable: translations[currentLang].noData,
+      zeroRecords: translations[currentLang].noMatching,
+      infoEmpty: translations[currentLang].showingEmpty,
+      info: translations[currentLang].showing,
+      infoFiltered: translations[currentLang].filtered,
+      processing: translations[currentLang].processing
+    }
+  });
+
+   $('#finalEvalTable').DataTable({
     dom: 'Bfrtip',
     buttons: [
       {
