@@ -491,18 +491,17 @@
         updateStatusMessage('{{ __('admin.Auto-mapping completed') }}', 'info', 3000);
     }
 
-    function updateButtonStates() {
-        backButton.classList.toggle('d-none', currentStep === 1 || currentStep === 4);
-        nextButton.classList.toggle('d-none', currentStep === 3 || currentStep === 4);
-        importButton.classList.toggle('d-none', currentStep !== 3);
-        nextButton.classList.toggle('d-none', currentStep === 4);
-        nextButton.disabled = (currentStep === 1 && !uploadedFile);
-        if (nextButton.disabled) {
-            nextButton.classList.add('disabled');
-        } else {
-            nextButton.classList.remove('disabled');
-        }
+   function updateButtonStates() {
+    backButton.classList.toggle('d-none', currentStep === 1 || currentStep === 4);
+    nextButton.classList.toggle('d-none', currentStep === 3 || currentStep === 4);
+    importButton.classList.toggle('d-none', currentStep !== 3);
+    nextButton.disabled = (currentStep === 1 && !uploadedFile);
+    if (nextButton.disabled) {
+        nextButton.classList.add('disabled');
+    } else {
+        nextButton.classList.remove('disabled');
     }
+}
 
     function updateSectionVisibility() {
         uploadSection.classList.toggle('d-none', currentStep !== 1);
