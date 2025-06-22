@@ -186,13 +186,19 @@ class ImporterController extends Controller
         }
     }
 
-     public function import(Request $request)
+   public function import(Request $request)
     {
         try {
             $input = $request->all();
             $mappings = $input['mappings'] ?? [];
             $data = $input['data'] ?? [];
             $organizationId = $input['organization_id'] ?? null;
+
+            Log::info('Import started', [
+                'organization_id' => $organizationId,
+                'mappings' => $mappings,
+                'data_count' => count($data)
+            ]);
 
             if (empty($mappings) || empty($data) || !$organizationId) {
                 return response()->json(['success' => false, 'message' => 'Missing required parameters'], 400);
@@ -234,11 +240,11 @@ class ImporterController extends Controller
                 if (isset($mappings['country_id']) && !empty($row[$rowKeys[$mappings['country_id']]])) {
                     $countryName = trim($row[$rowKeys[$mappings['country_id']]]);
                     if (!isset($countryCache[$countryName])) {
-                        $country = Country::firstOrCreate(
+                        Log::info('Processing country', ['country_name' => $countryName]);
+                        $country = Country::updateOrCreate(
                             ['name_en' => $countryName],
                             [
                                 'name_ar' => $countryName,
-                                'created_at' => Carbon::now(),
                                 'updated_at' => Carbon::now()
                             ]
                         );
@@ -260,11 +266,11 @@ class ImporterController extends Controller
                     if ($countryId) {
                         $stateKey = $countryId . ':' . $stateName;
                         if (!isset($stateCache[$stateKey])) {
-                            $state = State::firstOrCreate(
+                            Log::info('Processing state', ['country_id' => $countryId, 'state_name' => $stateName]);
+                            $state = State::updateOrCreate(
                                 ['country_id' => $countryId, 'name_en' => $stateName],
                                 [
                                     'name_ar' => $stateName,
-                                    'created_at' => Carbon::now(),
                                     'updated_at' => Carbon::now()
                                 ]
                             );
@@ -287,24 +293,69 @@ class ImporterController extends Controller
                     !empty($row[$rowKeys[$mappings['start']]]) &&
                     !empty($row[$rowKeys[$mappings['end']]])) {
                     $cycleTitle = trim($row[$rowKeys[$mappings['title']]]);
-                    $startDate = Carbon::parse(trim($row[$rowKeys[$mappings['start']]]))->toDateString();
-                    $endDate = Carbon::parse(trim($row[$rowKeys[$mappings['end']]]))->toDateString();
+                    $startDateRaw = trim($row[$rowKeys[$mappings['start']]]);
+                    $endDateRaw = trim($row[$rowKeys[$mappings['end']]]);
+                    try {
+                        $startDate = Carbon::createFromFormat('m/d/Y', $startDateRaw)->toDateString();
+                        $endDate = Carbon::createFromFormat('m/d/Y', $endDateRaw)->toDateString();
+                    } catch (\Exception $e) {
+                        $results['skipped']++;
+                        $results['skipped_rows'][] = "Row " . ($index + 2) . ": Invalid date format for start ($startDateRaw) or end ($endDateRaw) (use MM/DD/YYYY)";
+                        continue;
+                    }
 
-                    $cycleKey = $cycleTitle . ':' . $startDate . ':' . $endDate;
+                    $cycleKey = $cycleTitle; 
                     if (!isset($cycleCache[$cycleKey])) {
-                        $cycle = Cycle::firstOrCreate(
-                            [
-                                'organization_id' => $organizationId,
+                        $existingCycles = Cycle::whereRaw('LOWER(title) = ?', [strtolower($cycleTitle)])
+                            ->get(['id', 'title', 'start', 'end', 'organization_id'])
+                            ->toArray();
+                        Log::info('Checking existing cycles', [
+                            'raw_title' => $row[$rowKeys[$mappings['title']]],
+                            'normalized_title' => $cycleTitle,
+                            'existing_cycles' => $existingCycles
+                        ]);
+
+                        Log::info('Processing cycle', [
+                            'organization_id' => $organizationId,
+                            'title' => $cycleTitle,
+                            'start' => $startDate,
+                            'end' => $endDate
+                        ]);
+
+                        try {
+                            $cycle = Cycle::updateOrCreate(
+                                [
+                                    'title' => $cycleTitle
+                                ],
+                                [
+                                    'organization_id' => $organizationId,
+                                    'start' => $startDate,
+                                    'end' => $endDate,
+                                ]
+                            );
+                            
+
+                            Log::info('Cycle processed', [
+                                'cycle_id' => $cycle->id,
+                                'was_created' => $cycle->wasRecentlyCreated,
                                 'title' => $cycleTitle,
                                 'start' => $startDate,
-                                'end' => $endDate
-                            ],
-                            [
-                                'created_at' => Carbon::now(),
-                                'updated_at' => Carbon::now()
-                            ]
-                        );
-                        $cycleCache[$cycleKey] = $cycle->id;
+                                'end' => $endDate,
+                                'organization_id' => $organizationId
+                            ]);
+
+                            $cycleCache[$cycleKey] = $cycle->id;
+                        } catch (\Exception $e) {
+                            Log::error('Cycle update failed', [
+                                'title' => $cycleTitle,
+                                'organization_id' => $organizationId,
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                            $results['failed']++;
+                            $results['failed_rows'][] = "Row " . ($index + 2) . ": Failed to process cycle: " . $e->getMessage();
+                            continue;
+                        }
                     }
                 } else {
                     $results['skipped']++;
@@ -318,25 +369,19 @@ class ImporterController extends Controller
 
                 $email = null;
                 if (isset($mappings['email']) && isset($rowKeys[$mappings['email']])) {
-                    $email = trim($row[$rowKeys[$mappings['email']]]);
+                    $email = trim(strtolower($row[$rowKeys[$mappings['email']]]));
                 }
 
-                if (empty($email)) {
+                if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $results['skipped']++;
                     $results['skipped_rows'][] = "Row " . ($index + 2) . ": Missing or invalid email";
                     continue;
                 }
 
-                // Check for duplicate email 
                 $cycleId = null;
-                if (isset($mappings['title']) && isset($mappings['start']) && isset($mappings['end']) &&
-                    !empty($row[$rowKeys[$mappings['title']]]) &&
-                    !empty($row[$rowKeys[$mappings['start']]]) &&
-                    !empty($row[$rowKeys[$mappings['end']]])) {
+                if (isset($mappings['title']) && !empty($row[$rowKeys[$mappings['title']]])) {
                     $cycleTitle = trim($row[$rowKeys[$mappings['title']]]);
-                    $startDate = Carbon::parse(trim($row[$rowKeys[$mappings['start']]]))->toDateString();
-                    $endDate = Carbon::parse(trim($row[$rowKeys[$mappings['end']]]))->toDateString();
-                    $cycleKey = $cycleTitle . ':' . $startDate . ':' . $endDate;
+                    $cycleKey = $cycleTitle;
                     $cycleId = $cycleCache[$cycleKey] ?? null;
                 }
 
@@ -379,26 +424,34 @@ class ImporterController extends Controller
                     continue;
                 }
 
-                $company = Company::firstOrCreate(
+                $companyData = [
+                    'cycle' => $cycleId,
+                    'country_id' => $countryId,
+                    'state_id' => $stateId,
+                    'name_ar' => $nameEn,
+                    'address_en' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
+                    'address_ar' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
+                    'industries' => isset($mappings['industries']) ? trim($row[$rowKeys[$mappings['industries']]]) : null,
+                    'sector' => isset($mappings['sector']) ? trim($row[$rowKeys[$mappings['sector']]]) : null,
+                    'years_of_operations' => isset($mappings['years_of_operations']) ? trim($row[$rowKeys[$mappings['years_of_operations']]]) : null,
+                    'product_or_service' => isset($mappings['product_or_service']) ? trim($row[$rowKeys[$mappings['product_or_service']]]) : null,
+                    'targeted_market' => isset($mappings['targeted_market']) ? trim($row[$rowKeys[$mappings['targeted_market']]]) : null,
+                    'est_date' => $estDate,
+                    'updated_at' => Carbon::now()
+                ];
+
+                Log::info('Processing company', [
+                    'cycle' => $cycleId,
+                    'name_en' => $nameEn,
+                    'data' => $companyData
+                ]);
+
+                $company = Company::updateOrCreate(
                     [
                         'cycle' => $cycleId,
                         'name_en' => $nameEn
                     ],
-                    [
-                        'country_id' => $countryId,
-                        'state_id' => $stateId,
-                        'name_ar' => $nameEn,
-                        'address_en' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
-                        'address_ar' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
-                        'industries' => isset($mappings['industries']) ? trim($row[$rowKeys[$mappings['industries']]]) : null,
-                        'sector' => isset($mappings['sector']) ? trim($row[$rowKeys[$mappings['sector']]]) : null,
-                        'years_of_operations' => isset($mappings['years_of_operations']) ? trim($row[$rowKeys[$mappings['years_of_operations']]]) : null,
-                        'product_or_service' => isset($mappings['product_or_service']) ? trim($row[$rowKeys[$mappings['product_or_service']]]) : null,
-                        'targeted_market' => isset($mappings['targeted_market']) ? trim($row[$rowKeys[$mappings['targeted_market']]]) : null,
-                        'est_date' => $estDate,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now()
-                    ]
+                    $companyData
                 );
 
                 // Process Founder
@@ -406,20 +459,29 @@ class ImporterController extends Controller
                     'organization_id' => $organizationId,
                     'company_id' => $company->id,
                     'email' => $email,
-                    'password' => bcrypt('password'),
                     'first_name_en' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
                     'first_name_ar' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
                     'last_name_en' => isset($mappings['last_name_en']) ? trim($row[$rowKeys[$mappings['last_name_en']]]) : null,
                     'last_name_ar' => isset($mappings['last_name_en']) ? trim($row[$rowKeys[$mappings['last_name_en']]]) : null,
                     'gender' => isset($mappings['gender']) ? trim($row[$rowKeys[$mappings['gender']]]) : null,
-                    'phone' => isset($mappings['phone']) && isset($mappings['country_code'])? trim($row[$rowKeys[$mappings['country_code']]]) . trim($row[$rowKeys[$mappings['phone']]]): null,
+                    'phone' => isset($mappings['phone']) && isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) . trim($row[$rowKeys[$mappings['phone']]]) : null,
                     'country_code' => isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) : null,
                     'HaveCompany' => 1,
-                    'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ];
 
-                User::firstOrCreate(
+                $existingUser = User::where('email', $email)->first();
+                if (!$existingUser) {
+                    $userData['password'] = bcrypt('password');
+                }
+
+                Log::info('Processing user', [
+                    'email' => $email,
+                    'company_id' => $company->id,
+                    'data' => $userData
+                ]);
+
+                User::updateOrCreate(
                     ['email' => $email],
                     $userData
                 );
@@ -427,8 +489,13 @@ class ImporterController extends Controller
                 $results['imported']++;
             }
 
-
             DB::commit();
+
+            // Clean up the stored CSV file
+            if (session('csv_file_path')) {
+                Storage::disk('public')->delete(session('csv_file_path'));
+                session()->forget('csv_file_path');
+            }
 
             return response()->json([
                 'success' => true,
@@ -449,7 +516,6 @@ class ImporterController extends Controller
             return response()->json(['success' => false, 'message' => 'Import failed: ' . $e->getMessage()], 500);
         }
     }
-
    
 
      public function getOrganizations()
