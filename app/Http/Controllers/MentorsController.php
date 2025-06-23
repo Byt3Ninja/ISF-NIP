@@ -794,6 +794,15 @@ Thanks from " . env('APP_NAME');
 					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
+				broadcast(new MentorshipSessionUpdated(
+                $rName->id,               
+                $rName_usr->id,           
+                  [
+                   'email' => $rName->email,
+                   'name' => $rName->name,
+                  ],
+                  $request->stat
+                ));
 
 
 				return response()->json('success');
