@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class TemplateEmail extends Notification implements ShouldQueue
+class TemplateEmail extends Notification 
 {
     use Queueable;
     public $Message;
@@ -24,6 +24,7 @@ class TemplateEmail extends Notification implements ShouldQueue
     public function __construct(array $Message = [])
     {
         $this->Message = $Message;
+        dd($this->Message);
     }
 
     /**
@@ -71,7 +72,7 @@ class TemplateEmail extends Notification implements ShouldQueue
             'message' => $this->Message,
         ]);
         return [
-            'message' => implode(',', array_map('trim', $this->Message)),
+            'message' => $this->Message,
         ];
     }
 }

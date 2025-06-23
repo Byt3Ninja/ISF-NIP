@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Factories\OnlineMeetingFactory;
 use App\Events\MentorshipSessionUpdated;
 use App\Jobs\SendMentorshipNotification;
+use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
 
 class MentorsController extends Controller
@@ -483,7 +484,7 @@ Thanks from " . env('APP_NAME');
 				$user = new User();
 				$user->email = $mentor->email;
 				$user->id = $mentor->id;
-				$MSG = new TemplateEmail;
+				$MSG = new MentorshipSession;
 				$MSG->Message = [
 					"New Mentorship session - VI portal",
 					"Dear " . $mentor_name . ",",
@@ -508,7 +509,7 @@ Check your account to join the session ";
 				$user = new User();
 				$user->email = $startup_owner->email;
 				$user->id = $startup_owner->id;
-				$MSG = new TemplateEmail;
+				$MSG = new MentorshipSession;
 				$MSG->Message = [
 					"New Mentorship session - VI portal",
 					"Dear " . $startup_owner_name . ",",
@@ -730,10 +731,70 @@ Thanks from " . env('APP_NAME');
 
 
 				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
-				$availableAt = Carbon::now()->toDateTimeString();
+				$locale = app()->getLocale() ?? 'en';
+				/// Notify Mentor
+				$session = MentorshipRequest::findOrFail($request->id);
+				$rName = User::findOrFail($session->mentor_id);
+				$rName_usr = User::findOrFail($session->user_id);
+				$user = new User();
+				$user->email = $rName->email;
+				$user->id = $rName->id;
+				$date_Request = $session->zoom_date;
+				$rFullName = $rName->name;
+				$rFullName_usr = $rName_usr->name;
+				$mentorMessage = [
+					__("messages.mentorship_session_subject", [], $locale),
+					__("messages.dear", ['name' => $rFullName], $locale),
+					$request->stat == 'Yes'
+						? __("messages.approved_mentor", ['other_party' => $rFullName_usr], $locale)
+						: __("messages.denied_message", ['other_party' => $rFullName_usr], $locale),
+					"/dashboard",
+					$request->stat == 'Yes'
+					? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $rFullName_usr])
+					: __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $rFullName_usr]),
+               ];
+				$MSG = new MentorshipSession($mentorMessage);
+				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+				$Massage = "Dear " . $rFullName . ", you have a new mentorship session with '" . $rFullName_usr . "',is Rejected Thanks from " . env('APP_NAME');
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$user->notify($MSG);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+				}
+				/// Notify User
+				$user = new User();
+				$user->email = $rName_usr->email;
+				$user->id = $rName_usr->id;
+				$userMessage = [
+                __("messages.mentorship_session_subject", [], $locale),
+                __("messages.dear", ['name' => $rFullName_usr], $locale),
+                $request->stat == 'Yes'
+                    ? __("messages.approved_message", ['other_party' => $rFullName], $locale)
+                    : __("messages.denied_message", ['other_party' => $rFullName], $locale),
+                 "/dashboard",
+				 $request->stat == 'Yes'
+				 ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $rFullName])
+					: __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $rFullName]),
+                ];
+				$MSG = new MentorshipSession($userMessage);
+				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+				$Massage = "Dear " . $rFullName_usr . ",you have a new mentorship session with '" . $rFullName . "',is Rejected Thanks from " . env('APP_NAME');
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$user->notify($MSG);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+				}
 
-
-				SendMentorshipNotification::dispatch($request->id, $request->stat);
 
 				return response()->json('success');
 			} elseif ($type == 5) {
