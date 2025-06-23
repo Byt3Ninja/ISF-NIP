@@ -1025,7 +1025,7 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage());
-			return redirect()->back()->with(['message2' => 'error_updating_report' . ': ' . $e->getMessage()]);
+			return redirect()->back()->with(['message2' => 'session_report_not_available']);
 		}
 	}
 
@@ -1084,7 +1084,7 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage());
-			return redirect()->back()->with(['message2' => 'error_updating_recordings' . ': ' . $e->getMessage()]);
+			return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
 		}
 	}
 
