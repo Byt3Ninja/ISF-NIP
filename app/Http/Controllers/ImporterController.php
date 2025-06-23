@@ -437,7 +437,6 @@ class ImporterController extends Controller
                     'product_or_service' => isset($mappings['product_or_service']) ? trim($row[$rowKeys[$mappings['product_or_service']]]) : null,
                     'targeted_market' => isset($mappings['targeted_market']) ? trim($row[$rowKeys[$mappings['targeted_market']]]) : null,
                     'est_date' => $estDate,
-                    'updated_at' => Carbon::now()
                 ];
 
                 Log::info('Processing company', [
@@ -467,7 +466,6 @@ class ImporterController extends Controller
                     'phone' => isset($mappings['phone']) && isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) . trim($row[$rowKeys[$mappings['phone']]]) : null,
                     'country_code' => isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) : null,
                     'HaveCompany' => 1,
-                    'updated_at' => Carbon::now()
                 ];
 
                 $existingUser = User::where('email', $email)->first();
