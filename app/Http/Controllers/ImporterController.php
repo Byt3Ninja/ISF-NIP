@@ -93,28 +93,31 @@ class ImporterController extends Controller
                 $startDate = null;
                 $endDate = null;
 
+                $datePattern = '/^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{4}$/';
                 if (isset($row['Program Start Date']) && !empty($row['Program Start Date'])) {
-                    try {
-                        $startDate = Carbon::createFromFormat('m/d/Y', $row['Program Start Date']);
-                        if (!$startDate) {
-                            $rowErrors[] = "Invalid program start date format (use MM/DD/YYYY)";
-                        }
-                    } catch (\Exception $e) {
-                        $rowErrors[] = "Invalid program start date format (use MM/DD/YYYY)";
-                    }
+                if (!preg_match($datePattern, $row['Program Start Date'])) {
+                    $rowErrors[] = "Invalid program start date format (must be MM/DD/YYYY with 4-digit year)";
+                } else {
+                 try {
+                    $startDate = Carbon::createFromFormat('m/d/Y', $row['Program Start Date']);
+                } catch (\Exception $e) {
+                 $rowErrors[] = "Invalid program start date format (must be MM/DD/YYYY)";
+                }
+                }
                 } else {
                     $rowErrors[] = "Missing program start date";
                 }
 
                 if (isset($row['Program End Date']) && !empty($row['Program End Date'])) {
-                    try {
-                        $endDate = Carbon::createFromFormat('m/d/Y', $row['Program End Date']);
-                        if (!$endDate) {
-                            $rowErrors[] = "Invalid program end date format (use MM/DD/YYYY)";
-                        }
-                    } catch (\Exception $e) {
-                        $rowErrors[] = "Invalid program end date format (use MM/DD/YYYY)";
-                    }
+                if (!preg_match($datePattern, $row['Program End Date'])) {
+                     $rowErrors[] = "Invalid program end date format (must be MM/DD/YYYY with 4-digit year)";
+                  } else {
+                try {
+                    $endDate = Carbon::createFromFormat('m/d/Y', $row['Program End Date']);
+                } catch (\Exception $e) {
+                    $rowErrors[] = "Invalid program end date format (must be MM/DD/YYYY)";
+                }
+                }
                 } else {
                     $rowErrors[] = "Missing program end date";
                 }
