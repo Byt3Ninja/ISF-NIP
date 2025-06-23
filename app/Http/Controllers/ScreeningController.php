@@ -324,7 +324,6 @@ class ScreeningController extends Controller
 	{
 		$approved = $by = null;
 		$company = Company::where('id', $request->company)->first();
-		$data['last_step'] = Step::findOrFail($company->step)->title;
 		if ($request->step == "") {
 			$by = Auth::id();
 		} else {
@@ -334,6 +333,12 @@ class ScreeningController extends Controller
 				$by = Auth::id();
 			}
 			$data['new_step'] = $cstep->title;
+		}
+		if (!empty($company->step)) {
+	     $lastStep = Step::find($company->step);
+	     $data['last_step'] = $lastStep ? $lastStep->title : null;
+         } else {
+			$data['last_step'] = null;
 		}
 		
 		$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
