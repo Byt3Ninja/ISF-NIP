@@ -309,7 +309,7 @@ class MentorshipTaskController extends Controller
 		$mentor = User::find($task->mentor_id);
 		$startup = User::find($task->user_id);
 
-		$message = "Task Updated: " . $task->title;
+		$message = "Task Status Updated: " . $task->title;
 		$data = [
 			'task' => $task,
 			'message' => $message,
@@ -467,6 +467,13 @@ class MentorshipTaskController extends Controller
 					'item' => $_tasks->get($status),
 				];
 			}
+			$message = "Task Updated: " . $task->title;
+			$data = [
+    			'task' => $task,
+    			'message' => $message,
+    			'action' => 'update'
+			];
+			Notification::send([$task->mentor, $task->user], new TaskNotification($data));
 
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
 				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
