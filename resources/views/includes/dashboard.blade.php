@@ -1003,9 +1003,9 @@
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
-			<div class="col-12">
+			{{--  <div class="col-12">
 				// allowed to list final screening
-			</div>
+			</div>  --}}
 			@endif
 		</div>
 		<div class="row mt-6">
