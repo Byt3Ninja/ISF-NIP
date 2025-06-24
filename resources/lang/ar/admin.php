@@ -2016,5 +2016,6 @@ return [
 	'Start Time' => 'وقت البدء',
 	'Waiting_for_approval' => 'في انتظار الموافقة',
 	'Meeting_Expired' => 'انتهت صلاحية الاجتماع',
-	'Error opening the selected form.' => 'خطأ في فتح النموذج المحدد. يرجى المحاولة مرة أخرى لاحقًا.'
+	'Error opening the selected form.' => 'خطأ في فتح النموذج المحدد. يرجى المحاولة مرة أخرى لاحقًا.',
+	'Welcome_StartUp_Registration_Please_Join_The_Program_The_First' => 'مرحبًا بك في تسجيل الشركات الناشئة! يرجى الانضمام إلى البرنامج أولاً.',
 ];

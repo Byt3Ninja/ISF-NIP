@@ -1410,7 +1410,7 @@ class HomeController extends Controller
         $data['latest_events'] = $latest_events;
         $data['workingCycles'] = $workingCycles;
         $data['setting'] = $setting;
-        $data['countCards'] = [
+        $data['countCards'] =[
             [
                 'color' => 'success',
                 'href' => '/dashboard/users#search=Manager',
@@ -1419,8 +1419,9 @@ class HomeController extends Controller
                 'permissions' => ['users.index', 'dashboard.widgets_cards_managers_view'],
                 'count' => $managers->count(),
                 'isRating' => false,
-            ],
-            [
+            ]
+        ];
+            $data['countCards'][] = [
                 'color' => 'warning',
                 'href' => '/dashboard/organizations',
                 'icon' => 'ti-businessplan',
@@ -1428,8 +1429,9 @@ class HomeController extends Controller
                 'permissions' => ['organizations.index', 'dashboard.widgets_cards_organizations_view'],
                 'count' => $organizations->count(),
                 'isRating' => false,
-            ],
-            [
+            ];
+            if(Auth::user()->company->cycle != null){
+            $data['countCards'][] = [
                 'color' => 'secondary',
                 'href' => '/dashboard/requests/all',
                 'icon' => 'ti-speakerphone',
@@ -1437,98 +1439,8 @@ class HomeController extends Controller
                 'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
                 'count' => $services_requests->count(),
                 'isRating' => false,
-            ],
-            [
-                'color' => 'success',
-                'href' => '/dashboard/inbox',
-                'icon' => 'ti-message',
-                'text' => 'New messages',
-                'permissions' => ['inbox', 'dashboard.widgets.cards.new_messages.view'],
-                'count' => $messenger->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'danger',
-                'href' => '/dashboard/mymsg',
-                'icon' => 'ti-network',
-                'text' => 'Contact us',
-                'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
-                'count' => $messages->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'danger',
-                'href' => '/dashboard/cycles',
-                'icon' => 'ti-circles',
-                'text' => 'Cycles',
-                'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
-                'count' => $cycles->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'info',
-                'href' => '/dashboard/companies',
-                'icon' => 'ti-building',
-                'text' => 'Startups',
-                'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
-                'count' => $companies->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'danger',
-                'href' => '/dashboard/show/Mentors',
-                'icon' => 'ti-school',
-                'text' => 'Mentors',
-                'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
-                'count' => $mentors->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'secondary',
-                'href' => '/dashboard/mentorship/sessions',
-                'icon' => 'ti-brand-my-oppo',
-                'text' => 'Mentorship requests',
-                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_requests_view'],
-                'count' => $mentorship_requests->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'success',
-                'href' => '/dashboard/mentorship/sessions',
-                'icon' => 'ti-calendar-event',
-                'text' => 'Mentorship requests Duration',
-                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
-                'count' => $mentorship_requests->sum('period') / 60,
-                'isRating' => false,
-            ],
-            [
-                'color' => 'primary',
-                'href' => '/dashboard/users#search=Judger',
-                'icon' => 'ti-certificate',
-                'text' => 'Judgers',
-                'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
-                'count' => $judgers->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'warning',
-                'href' => '/dashboard/training/sessions',
-                'icon' => 'ti-camera-question',
-                'text' => 'Training sessions',
-                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_view'],
-                'count' => $training_sessions->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'info',
-                'href' => '/dashboard/training/sessions',
-                'icon' => 'ti-alarm',
-                'text' => 'Training sessions Duration',
-                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
-                'count' => $training_sessions->sum('duration') / 60,
-                'isRating' => false,
-            ],
-            [
+            ];
+            $data['countCards'][] = [
                 'color' => 'success',
                 'href' => '/dashboard/directory',
                 'icon' => 'ti ti-briefcase',
@@ -1536,8 +1448,8 @@ class HomeController extends Controller
                 'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
                 'count' => $services->count(),
                 'isRating' => false,
-            ],
-            [
+            ];
+            $data['countCards'][] = [
                 'color' => 'primary',
                 'href' => '/dashboard/requests/mine',
                 'icon' => 'ti ti-speakerphone',
@@ -1545,8 +1457,8 @@ class HomeController extends Controller
                 'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
                 'count' => $my_requests->count(),
                 'isRating' => false,
-            ],
-            [
+            ];
+            $data['countCards'][] = [
                 'color' => 'secondary',
                 'href' => '/dashboard/show/Mentors',
                 'icon' => 'ti ti-school',
@@ -1554,53 +1466,8 @@ class HomeController extends Controller
                 'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
                 'count' => $my_mentors->count(),
                 'isRating' => false,
-            ],
-            [
-                'color' => 'secondary',
-                'href' => '#',
-                'icon' => 'ti ti-chalkboard',
-                'text' => 'First screening',
-                'permissions' => ['dashboard.widgets_cards_filtration_view'],
-                'count' => $filtration->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'warning',
-                'href' => '#',
-                'icon' => 'ti ti-calendar',
-                'text' => 'Final screening',
-                'permissions' => ['dashboard.widgets_cards_evaluation_view'],
-                'count' => $evaluation->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'secondary',
-                'href' => '#',
-                'icon' => 'ti ti-chalkboard',
-                'text' => 'Coming sessions',
-                'permissions' => ['dashboard.widgets_cards_coming_sessions_view'],
-                'count' => $upcoming_sessions->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'warning',
-                'href' => '#',
-                'icon' => 'ti ti-calendar',
-                'text' => 'Cycles',
-                'permissions' => ['dashboard_cards.my_programs'],
-                'count' => $my_cycles->count(),
-                'isRating' => false,
-            ],
-            [
-                'color' => 'info',
-                'href' => '#',
-                'icon' => 'ti ti-server',
-                'text' => 'Company Attendance Rate',
-                'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
-                'count' => $attends_rate,
-                'isRating' => false,
-            ],
-            [
+            ];
+            $data['countCards'][] = [
                 'color' => 'danger',
                 'href' => '#',
                 'icon' => 'ti ti-star',
@@ -1608,8 +1475,147 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_cards_rate_view'],
                 'count' => $my_rating,
                 'isRating' => true, // Only this card has the isRating key
-            ],
-            [
+            ];
+        }
+           $data['countCards'][] = [
+                'color' => 'success',
+                'href' => '/dashboard/inbox',
+                'icon' => 'ti-message',
+                'text' => 'New messages',
+                'permissions' => ['inbox', 'dashboard.widgets.cards.new_messages.view'],
+                'count' => $messenger->count(),
+                'isRating' => false,
+           ];
+            $data['countCards'][] = [
+                'color' => 'danger',
+                'href' => '/dashboard/mymsg',
+                'icon' => 'ti-network',
+                'text' => 'Contact us',
+                'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
+                'count' => $messages->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'danger',
+                'href' => '/dashboard/cycles',
+                'icon' => 'ti-circles',
+                'text' => 'Cycles',
+                'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
+                'count' => $cycles->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'info',
+                'href' => '/dashboard/companies',
+                'icon' => 'ti-building',
+                'text' => 'Startups',
+                'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+                'count' => $companies->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'danger',
+                'href' => '/dashboard/show/Mentors',
+                'icon' => 'ti-school',
+                'text' => 'Mentors',
+                'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
+                'count' => $mentors->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'secondary',
+                'href' => '/dashboard/mentorship/sessions',
+                'icon' => 'ti-brand-my-oppo',
+                'text' => 'Mentorship requests',
+                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_requests_view'],
+                'count' => $mentorship_requests->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'success',
+                'href' => '/dashboard/mentorship/sessions',
+                'icon' => 'ti-calendar-event',
+                'text' => 'Mentorship requests Duration',
+                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
+                'count' => $mentorship_requests->sum('period') / 60,
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'primary',
+                'href' => '/dashboard/users#search=Judger',
+                'icon' => 'ti-certificate',
+                'text' => 'Judgers',
+                'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
+                'count' => $judgers->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'warning',
+                'href' => '/dashboard/training/sessions',
+                'icon' => 'ti-camera-question',
+                'text' => 'Training sessions',
+                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_view'],
+                'count' => $training_sessions->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'info',
+                'href' => '/dashboard/training/sessions',
+                'icon' => 'ti-alarm',
+                'text' => 'Training sessions Duration',
+                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
+                'count' => $training_sessions->sum('duration') / 60,
+                'isRating' => false,
+            ];
+            
+            
+            $data['countCards'][] = [
+                'color' => 'secondary',
+                'href' => '#',
+                'icon' => 'ti ti-chalkboard',
+                'text' => 'First screening',
+                'permissions' => ['dashboard.widgets_cards_filtration_view'],
+                'count' => $filtration->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'warning',
+                'href' => '#',
+                'icon' => 'ti ti-calendar',
+                'text' => 'Final screening',
+                'permissions' => ['dashboard.widgets_cards_evaluation_view'],
+                'count' => $evaluation->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'secondary',
+                'href' => '#',
+                'icon' => 'ti ti-chalkboard',
+                'text' => 'Coming sessions',
+                'permissions' => ['dashboard.widgets_cards_coming_sessions_view'],
+                'count' => $upcoming_sessions->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'warning',
+                'href' => '#',
+                'icon' => 'ti ti-calendar',
+                'text' => 'Cycles',
+                'permissions' => ['dashboard_cards.my_programs'],
+                'count' => $my_cycles->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'info',
+                'href' => '#',
+                'icon' => 'ti ti-server',
+                'text' => 'Company Attendance Rate',
+                'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
+                'count' => $attends_rate,
+                'isRating' => false,
+            ];
+            
+            $data['countCards'][] = [
                 'color' => 'warning',
                 'href' => '#',
                 'icon' => 'ti ti-select',
@@ -1617,8 +1623,8 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_cards_sessions_without_tasks_view'],
                 'count' => $sessionWithoutTasks->count(),
                 'isRating' => false,
-            ],
-            [
+            ];
+            $data['countCards'][] = [
                 'color' => 'success',
                 'href' => '#',
                 'icon' => 'ti ti-check',
@@ -1626,8 +1632,8 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_cards_completed_tasks_view'],
                 'count' => $completedTasks->count(),
                 'isRating' => false,
-            ],
-            [
+            ];
+            $data['countCards'][] = [
                 'color' => 'info',
                 'href' => '#',
                 'icon' => 'ti ti-archive',
@@ -1635,8 +1641,8 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_cards_non_completed_tasks_view'],
                 'count' => $nonCompletedTasks->count(),
                 'isRating' => false,
-            ],
-        ];
+            ];
+       
 
         // start of graphs queries ----
         $country_data_q = "SELECT
