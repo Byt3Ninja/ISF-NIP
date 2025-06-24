@@ -72,29 +72,34 @@
                                     </span>
                                   @endif
                                 </td>
-                                @if($session->zoom_date > now())
-                                @if ($session->approved == 'Yes')
-                                  <td class="text-success py-1">
-                                    @if ($session->join_url)
-                                      <a href="{{ $session->join_url }}" target="_blank">
+                                @php
+															$now = date('Y-m-d H:i');
+															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+															@endphp
+                              <td class=" py-1">
+                              @if ($session->approved == 'Yes')
+                                @if($now >= $start_time )
+                                @if($now <= $end_time)
+                                <span class="warning">
+                                      <a href="{{ $session?->join_url }}" target="_blank">
                                         <button title="Join meeting" type="button"
                                           class="btn btn-icon rounded-circle btn-label-primary">
-                                          <i class="ti ti-brand-zoom"></i></button></a>
-                                    @endif
-                                  @elseif($session->approved == 'No')
-                                  <td class="text-danger py-1">
-                                    {{ __('No') }}
+                                          <i class="ti ti-brand-zoom"></i></button>
+                                      </a>
+                                      </span>
                                   @else
-                                  <td class="text-warning py-1">
-                                    {!! '<span class="warning">' . __('Waiting') . '</span>' !!}
+                                     <span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+                                  @endif
+                                  @else 
+                                     <span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
+                                  @endif
+                                  @elseif($session->approved == 'No')
+                                    {{ __('admin.No') }}
+                                  @else
+                                    {!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
                                 @endif
-                                  </td>
-                                @else
-                                <td class="text-danger py-1">
-                                    {{ __('admin.expired') }}
-                                  </td>
-                                @endif
-                                
+                              </td>
                                 {{--                                                                <td class="text-center"> --}}
                                 {{--                                                                    <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info"> --}}
                                 {{--                                                                        <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a> --}}

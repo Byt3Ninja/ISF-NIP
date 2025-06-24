@@ -1966,4 +1966,6 @@ return [
 	'mentor_not_available_in_this_time' => 'Mentor not available in this time',
 	'End Time' => 'End Time',
 	'Start Time' => 'Start Time',
+	'Waiting_for_approval' => 'Waiting for approval',
+	'Meeting_Expired' => 'Meeting Expired',
 ];
