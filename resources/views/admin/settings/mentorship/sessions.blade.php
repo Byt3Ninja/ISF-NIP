@@ -412,8 +412,8 @@
     "order": [],
     "columnDefs": [
       {
-        "orderable": true,
-        "targets": 7
+        "orderable": false,
+        "targets": [0, 1, 2, 3, 4, 5, 6, 7]
       }
     ],
     @if ($l == 'ar')
