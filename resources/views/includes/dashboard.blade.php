@@ -68,8 +68,18 @@
 			@endif
 		</div>
 
-
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company->cycle == null)
+				<div class="col-md-12">
+					<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
+						{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+			@endif
+			@endif
 		<div class="row g-6">
+			
 			<!-- Count cards -->
 			@foreach( $countCards as $card )
 			@if( array_intersect($card['permissions'], $permissions) == $card['permissions'] )
@@ -118,6 +128,8 @@
 		</div>
 		<div class="row mt-6">
 			@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company->cycle != null)
 			<div class="col-sm-6 col-12 mb-6">
 				<div class="card">
 					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -159,7 +171,11 @@
 				</div>
 			</div>
 			@endif
+			@endif
+			@endif
 			@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company->cycle != null)
 			<div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
 				<div class="card">
 					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -216,7 +232,11 @@
 				</div>
 			</div>
 			@endif
+			@endif
+			@endif
 			@if( array_intersect(['dashboard.widgets_tables_latest_events_view'], $permissions) )
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company->cycle != null)
 			<div class="col-12">
 				<section>
 					<div class="row">
@@ -262,6 +282,8 @@
 					</div>
 				</section>
 			</div>
+			@endif
+			@endif
 			@endif
 			@if( array_intersect(['dashboard.widgets_tables_current_enrolled_program_view'], $permissions) )
 			<div class="col-12">
@@ -1008,6 +1030,7 @@
 			</div>  --}}
 			@endif
 		</div>
+		
 		<div class="row mt-6">
 			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
 			@if( $notrated_mens )

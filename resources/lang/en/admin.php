@@ -1969,4 +1969,5 @@ return [
 	'Waiting_for_approval' => 'Waiting for approval',
 	'Meeting_Expired' => 'Meeting Expired',
 	'Error opening the selected form.' => 'Error opening the selected form. Please try again later.',
+	'Welcome_StartUp_Registration_Please_Join_The_Program_The_First' => 'Welcome to the Startup Registration! Please join the program first.',
 ];
