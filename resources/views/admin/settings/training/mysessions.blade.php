@@ -200,9 +200,24 @@
                 </div>
               </div>
 
+              <div class="row border-bottom" id="time-info" style="display: none;">
+                <div class="col-md-6">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-clock me-2"></i>{{ __('admin.Start Time') }}</div>
+                    <div id="session-start-time"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-clock me-2"></i>{{ __('admin.End Time') }}</div>
+                    <div id="session-end-time"></div>
+                  </div>
+                </div>
+              </div>
+
               <div class="py-3 border-bottom" id="location-info">
                 <div class="info-label" id="text-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
-                <div id="session-location"></div>
+                <a id="session-location" href="#" target="_blank" class="text-primary text-decoration-none line-clamp-2"></a>
                 <div id="session-address" class="text-muted"></div>
               </div>
 
@@ -447,6 +462,8 @@
     const $sessionDate = $('#session-date');
     const $sessionStartDate = $('#session-start-date');
     const $sessionEndDate = $('#session-end-date');
+    const $sessionStartTime = $('#session-start-time');
+    const $sessionEndTime = $('#session-end-time');
     const $sessionDuration = $('#session-duration');
     const $zoomId = $('#zoom-id');
 
@@ -454,11 +471,14 @@
     $title.text('Training Details'); // Default title
     $dsc.empty();
     $location.empty();
+    $location.attr('href', '#'); // Reset location link
     $address.empty();
     $trainerName.empty();
     $trainerEmailLink.empty();
     $trainerEmailLink.attr('href', '#'); // Reset link
     $datetime.empty();
+    $sessionStartTime.empty();
+    $sessionEndTime.empty();
     $sessionDuration.empty();
     $zoomId.empty();
     $('#join-link').attr('href', '#'); // Reset link
@@ -474,6 +494,14 @@
         // dataType: 'json', // Explicitly expect JSON if your backend always sends it
         success: function(response) {
           console.log(response);
+            
+            // Reset all visibility states
+            $('#text-label').show();
+            $('#location-info').show();
+            $('#join-info').show();
+            $('#zoom-info').show();
+            $('#time-info').hide();
+            
             // 1. Modal Title
             if (response.title) {
               $title.text(response.title);
@@ -499,11 +527,38 @@
 
             // 4. Location
             if (response.type == 'offline') {
-              $location.text(response.training_location || '');
-              $address.text(response.training_Address || '');
-            }else{
-               $('#text-label').hide();
-               $('#location-info').hide();
+              const locationText = response.training_location || response.location || '';
+              const addressText = response.training_Address || '';
+              
+              // Check if locationText is already a map link
+              const isMapLink = locationText.includes('google.com/maps') || locationText.includes('maps.google');
+              
+              // Set location text and make it clickable
+              if (isMapLink) {
+                // If locationText is already a map link, use it directly
+                $location.text(locationText);
+                $location.attr('href', locationText);
+                $address.text(addressText);
+           
+              } else if (addressText) {
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`;
+                $location.text(locationText);
+                $location.attr('href', mapUrl);
+                $address.text(addressText);
+              } else if (locationText) {
+                // Fallback to location name if address is not available
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationText)}`;
+                $location.text(locationText);
+                $location.attr('href', mapUrl);
+                $('#map-link-btn').attr('href', mapUrl);
+                $('#session-location-link').show();
+              } else {
+                $location.text('');
+                $location.attr('href', '#');
+              }
+            } else{
+              $('#text-label').hide();
+              $('#location-info').hide();
             }
 
             // 5. Trainer Details
@@ -519,18 +574,28 @@
            }
 
 
-            // 6. Date
+            // 6. Date and Time
             if (response.date && (response.type === 'sessions' || response.type === 'offline')) {
               $('#date-only-col').show();
               $('#start-date-col').hide();
               $('#end-date-col').hide();
               $sessionDate.text(response.date);
+              
+              // Show time information for sessions and offline training
+              if (response.starttime || response.endtime) {
+                $('#time-info').show();
+                $sessionStartTime.text(response.starttime || '-');
+                $sessionEndTime.text(response.endtime || '-');
+              } else {
+                $('#time-info').hide();
+              }
             } else {
               $('#date-only-col').hide();
               $('#start-date-col').show();
               $('#end-date-col').show();
+              $('#time-info').hide();
               
-              if (response.datetime) {
+              if (response.datetime1) {
                 $sessionStartDate.text(response.datetime1);
               }
               if (response.enddatetime) {

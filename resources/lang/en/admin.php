@@ -1964,4 +1964,6 @@ return [
 	'Auto-mapping completed' => 'Auto-mapping completed',
 	'Course Name' => 'Course Name',
 	'mentor_not_available_in_this_time' => 'Mentor not available in this time',
+	'End Time' => 'End Time',
+	'Start Time' => 'Start Time',
 ];
