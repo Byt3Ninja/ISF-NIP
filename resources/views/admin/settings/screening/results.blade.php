@@ -365,7 +365,12 @@
                           <tr>
                             <th style="width: 20%">Company</th>
                             <th style="width: 20%">User/Title</th>
-                            <th>Score</th>
+                            <th>
+                              <div class="row">
+                                <div class="col-md-3">Judgers</div>
+                                <div class="col-md-9">Score</div>
+                              </div>
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
