@@ -24,7 +24,6 @@ class TemplateEmail extends Notification
     public function __construct(array $Message = [])
     {
         $this->Message = $Message;
-        dd($this->Message);
     }
 
     /**
@@ -72,7 +71,7 @@ class TemplateEmail extends Notification
             'message' => $this->Message,
         ]);
         return [
-            'message' => $this->Message,
+            'message' => $this->Message[4],
         ];
     }
 }

@@ -191,14 +191,15 @@ class ScreeningController extends Controller
 						$user->email = $rname->email;
 						$user->id = $rname->id;
 						$rfullname = $rname->first_name_en . " " . $rname->last_name_en;
-						$MSG = new TemplateEmail;
-						$MSG->Message = [
-							"New judging - VI portal",
-							"Dear " . $rfullname . ",",
-							"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
-							" to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
-							"/dashboard"
-						];
+						$message = [
+                   		 "New judging - VI portal", 
+                    	 "Dear " . $rfullname . ",", 
+                   		 "Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " 
+                     	 . $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
+                     	 "/dashboard", 
+                    	 "You have a New Judging Request." 
+                 		];
+               			$MSG = new TemplateEmail($message);
 						broadcast(new JudgeAssigned(
     						$rname->id,
     						"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period is from " . $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ".",
