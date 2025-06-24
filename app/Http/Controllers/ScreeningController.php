@@ -180,7 +180,6 @@ class ScreeningController extends Controller
 					Step::where('id', $request->step)->update(['list' => json_encode($list)]);
 				}
 
-
 				// Notify users via Mail if notify is enabled
 				if( $request->notify )
 				{
@@ -311,14 +310,88 @@ class ScreeningController extends Controller
 		$companies = Company::where('cycle', $getStep->cycle_id)->get();
 		$uniqueCycleIds = $companies->pluck('cycle')->unique();
 		$_steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-		$judges = User::join('screenings', 'user_id', 'users.id')->where('step_id', $id)->get();
+		// $judges = User::join('screenings', 'user_id', 'users.id')->where('step_id', $id)->get();
+		$l = app()->getLocale();
+		$getUsers = Screening::where('step_id', $id)->with(['user'])->get();
+
+		$judges = $getUsers->map(function($item) use ( $l ) {
+			$user = $item->user;
+			$judger = new stdClass;
+			$judger->id = $user->id;
+			$judger->name = $user->{'first_name_' . $l} . ' ' . $user->{'last_name_' . $l};
+			$judger->phone = $user->phone;
+			$judger->email = $user->email;
+			$judger->image_url = $user->image_url;
+			return $judger;
+		})->unique('id')->values();
+
+		$judges = $judges->map(function( $item ) use ( $getUsers ) {
+			$startups = $getUsers->where('user_id', $item->id)->map(function( $i ) {
+				return $i->users;
+			})->flatten()->unique()->filter(function( $i ) {
+				return !is_null($i);
+			})->values();
+			$item->startups = $startups;
+			return $item;
+		});
+
+		if( $cstep->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+
 		$form = null;
 		if ($cstep) {
 			$form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
 		}
 		// dd( $form);
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
-		return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs'));
+
+		$evaluation = ScreeningEvaluation::getEvaluationData( $cstep->id );
+		$results = ScreeningEvaluationResults::where('evaluation_id', $evaluation->id )->get();
+		foreach( $judges as $index => $judge )
+		{
+			$judges[$index]->companies = [];
+			foreach( $judge->startups as $company_id )
+			{
+				$_company = new stdClass;
+				$_company->id = $company_id;
+				$_results = $results->where('company_id', $company_id)->where('user_id', $judge->id)->values();
+				if( $_results->count() > 0 )
+				{
+					$_company->status = $_results->where('status', 0)->count() > 0 ? 'Draft' : 'Published';
+				}
+				else
+				{
+					$_company->status = 'Not Evaluated';
+				}
+				$_company->results = $_results;
+				$judges[$index]->companies[] = $_company;
+			}
+		}
+		foreach( $evaluation->categories as $criteria )	
+		{
+			$subCriteria = $criteria->subCriteria;
+			foreach( $judges as $judges_key => $judge )
+			{
+				foreach( $judge->companies as $companies_key => $company )
+				{
+					foreach( $company->results as $results_key => $result )
+					{
+						if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
+						if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
+						$getResult = $subCriteria->where('id', $result->criteria_id)->first();
+						if( !empty( $getResult ) )
+						{
+							$weight = $getResult->weight;
+							$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
+							$result->weighted_score = $weighted_score;
+						}
+						$company->results[$results_key] = $result;
+					}
+					$judge->companies[$companies_key] = $company;
+				}
+			}
+			$judges[$judges_key] = $judge;
+		}
+		return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', 'companies', 'evaluation', 'results'));
 	}
 
 	public function changestep(Request $request)
