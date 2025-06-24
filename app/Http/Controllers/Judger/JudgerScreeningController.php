@@ -195,8 +195,9 @@ class JudgerScreeningController extends Controller
                     else
                     {
                         $final_comment = $request->final_comment;
-                        $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id );
+                        $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id, $company->id );
                         $myComment->value = $final_comment;
+                        $myComment->company_id = $company->id;
                         $myComment->save();
                         foreach( $request->evaluation as $element )
                         {

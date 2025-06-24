@@ -93,7 +93,7 @@ class ScreeningEvaluation extends Model
 		return $evaluationForm;
 	}
 
-	public static function getMyFinalComment( $evaluation_id, $user_id )
+	public static function getMyFinalComment( $evaluation_id, $user_id, $company_id )
 	{
 		$finalCommentField = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation_id)->first();
 		if( empty( $finalCommentField ) )
@@ -101,14 +101,16 @@ class ScreeningEvaluation extends Model
 			$finalCommentField = new ScreeningEvaluationCustomFields;
 			$finalCommentField->name = 'final_comment';
 			$finalCommentField->evaluation_id = $evaluation_id;
+			$finalCommentField->company_id = $company_id;
 			$finalCommentField->save();
 		}
-		$myComment = ScreeningEvaluationFieldsValues::where('custom_field_id', $finalCommentField->id)->where('user_id', $user_id)->first();
+		$myComment = ScreeningEvaluationFieldsValues::where('custom_field_id', $finalCommentField->id)->where('user_id', $user_id)->where('company_id', $company_id)->first();
 		if( empty( $myComment ) )
 		{
 			$myComment = new ScreeningEvaluationFieldsValues;
 			$myComment->custom_field_id = $finalCommentField->id;
 			$myComment->user_id = $user_id;
+			$myComment->company_id = $company_id;
 			$myComment->save();
 		}
 
