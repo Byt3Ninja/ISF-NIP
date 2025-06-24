@@ -2016,4 +2016,5 @@ return [
 	'Start Time' => 'وقت البدء',
 	'Waiting_for_approval' => 'في انتظار الموافقة',
 	'Meeting_Expired' => 'انتهت صلاحية الاجتماع',
+	'Error opening the selected form.' => 'خطأ في فتح النموذج المحدد. يرجى المحاولة مرة أخرى لاحقًا.'
 ];
