@@ -75,8 +75,8 @@ class JudgerScreeningController extends Controller
         $companies = $companies->map(function( $company ) use ( $myResponses ) {
             $step_id = $company->step->id;
             $status = 'not-started';
-            if( $myResponses->where('step_id', $step_id)->count() > 0 ) { $status = 'in-progress'; }
-            if( $myResponses->where('step_id', $step_id)->where('status', true)->count() > 0 ) { $status = 'completed'; }
+            if( $myResponses->where('step_id', $step_id)->where('company_id', $company->id)->count() > 0 ) { $status = 'in-progress'; }
+            if( $myResponses->where('step_id', $step_id)->where('company_id', $company->id)->where('status', true)->count() > 0 ) { $status = 'completed'; }
             $company->status = $status;
             $company->icon = $status == 'in-progress' ? 'ti ti-file-text' : ($status == 'completed' ? 'ti ti-circle-check' : 'ti ti-gavel');
             return $company;
