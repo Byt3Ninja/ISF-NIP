@@ -5467,7 +5467,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "judger"
                 ]
             },
             {
