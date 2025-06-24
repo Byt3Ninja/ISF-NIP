@@ -408,9 +408,9 @@
                     <h6 class="mb-0 text-secondary fw-semibold">{{ $criteria->name }}</h6>
                     <div class="d-flex justify-content-between align-items-center mt-1">
                       <span class="fs-5 fw-bold mb-0 text-dark">
-                        {{ $criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) }} / {{ $criteria->subCriteria->count() * 5 }}
+                        {{ number_format( ($criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) / ($criteria->subCriteria->count() * 5)) * 100, 2) }}
                       </span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
+                      <span class="fs-5 fw-bold text-primary mb-0">%</span>
                     </div>
                   </div>
                 </div>
