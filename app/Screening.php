@@ -20,4 +20,8 @@ class Screening extends Model
         return $this->morphMany(CalenderSync::class, 'calenderable');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
