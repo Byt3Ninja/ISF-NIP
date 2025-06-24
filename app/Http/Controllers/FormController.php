@@ -191,7 +191,7 @@ $data = $forms->map(function ($form) use ($l, &$C) {
                   'label' => $item->FD_question,
                   'value' => $item->FD_answer,
               ];
-          })/*->groupBy('user_id')*/->values();
+          })->groupBy('user_id')->values();
       
           return $submission;
       })->values()->all(); // remove collection keys (numeric indexing)
