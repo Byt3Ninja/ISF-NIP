@@ -9,15 +9,20 @@ class SetUserTimezone
 {
     public function handle($request, Closure $next)
     {
+        $defaultTimezone = 'Africa/Cairo';
+
         if (Auth::check()) {
-            // لو تريد ضبط التوقيت بناءً على المستخدم
-            date_default_timezone_set(Auth::user()->timezone ?? 'Africa/Cairo'); 
-            // dd(Auth::user()->timezone); // الآن يمكنك استخدامه
+            $userTimezone = Auth::user()->timezone;
+
+            if (in_array($userTimezone, timezone_identifiers_list())) {
+                date_default_timezone_set($userTimezone);
+            } else {
+                date_default_timezone_set($defaultTimezone);
+            }
         } else {
-            date_default_timezone_set('Africa/Cairo'); // ثابت لكل النظام
+            date_default_timezone_set($defaultTimezone);
         }
 
         return $next($request);
     }
 }
-
