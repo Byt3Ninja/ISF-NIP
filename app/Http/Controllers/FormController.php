@@ -184,12 +184,14 @@ $data = $forms->map(function ($form) use ($l, &$C) {
           $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
       
           // answers
-          $submission->answers = $group->map(function ($item) {
+          $submission->answers = $group->map(function ($item) use ($l) {
               return (object)[
+                  'user_id' => $item->FD_user_id,
+                  'name' => $item->{'user_name_' . $l},
                   'label' => $item->FD_question,
                   'value' => $item->FD_answer,
               ];
-          })->values();
+          })/*->groupBy('user_id')*/->values();
       
           return $submission;
       })->values()->all(); // remove collection keys (numeric indexing)
