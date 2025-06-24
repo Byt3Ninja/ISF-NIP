@@ -486,14 +486,14 @@ class ScreeningController extends Controller
 		$request->validate([
 			'action' => "required|in:{$status}",
 			'stepId' => 'required|integer|exists:steps,id',
-			'criteria' => 'required|array',
+			'criteria' => 'required_if:action,publish|array',
 			'criteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
-			'criteria.*.name' => 'required|string|max:255',
-			'criteria.*.weight' => 'required|numeric|between:0,1',
-			'criteria.*.subCriteria' => 'required|array|min:1',
+			'criteria.*.name' => 'required_if:action,publish|string|max:255',
+			'criteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
+			'criteria.*.subCriteria' => 'required_if:action,publish|array|min:1',
 			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
-			'criteria.*.subCriteria.*.name' => 'required|string|max:255',
-			'criteria.*.subCriteria.*.weight' => 'required|numeric|between:0,1',
+			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|string|max:255',
+			'criteria.*.subCriteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
 		]);
 
 		$id = $request->stepId;
