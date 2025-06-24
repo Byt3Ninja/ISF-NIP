@@ -30,7 +30,7 @@ const translations = {
 };
 
 // Generate time options for select dropdowns
-  function generateTimeOptions(fromTime = null) {
+  function generateTimeOptions(fromTime = null, isFromSelect = false) {
     let options = '';
     let startHour = 0;
     let startMinute = 0;
@@ -52,6 +52,11 @@ const translations = {
       const minuteStart = (hour === startHour) ? startMinute : 0;
       
       for (let minute = minuteStart; minute < 60; minute += 30) {
+        // Skip 23:30 (11:30 PM) for "from" select only as it doesn't have a valid "to" time
+        if (isFromSelect && hour === 23 && minute === 30) {
+          continue;
+        }
+
         const hour12 = hour % 12 === 0 ? 12 : hour % 12;
         const period = hour < 12 ? 'AM' : 'PM';
 
@@ -203,7 +208,7 @@ $(document).ready(function () {
                     <div class="col-md-6">
                       <select class="form-select w-100" id="${dayName}-from" type="time" name="periods[${dayName}][from][]" required data-placeholder="">
                         <option value="">${__('From')}</option>
-                        ${generateTimeOptions()}
+                        ${generateTimeOptions(null, true)}
                       </select>
                     </div>
                     <div class="col-md-6">
@@ -357,7 +362,7 @@ function mentorSchedule(type, id, stat) {
                       <div class="col-md-6">
                         <select class="form-select w-100" id="${fromSelectId}" type="time" name="periods[${day}][from][]" data-placeholder="${__('From')}">
                           <option value="">${__('From')}</option>
-                          ${timeOptions}
+                          ${generateTimeOptions(null, true)}
                         </select>
                       </div>
                       <div class="col-md-6">
