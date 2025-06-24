@@ -2009,9 +2009,11 @@ return [
 	'Total Evaluations' => 'إجمالي التقييمات',
 	'No evaluators found' => 'لا توجد محكمين',
 	'company_name' => 'اسم الشركة',
-	'Auto-mapping completed'=> 'تم تخصيص الأوتوماتيكي',
+	'Auto-mapping completed' => 'تم تخصيص الأوتوماتيكي',
 	'Course Name' => 'اسم الدورة',
 	'mentor_not_available_in_this_time' => 'المرشد غير متاح في هذا الوقت',
 	'End Time' => 'وقت الانتهاء',
 	'Start Time' => 'وقت البدء',
+	'Waiting_for_approval' => 'في انتظار الموافقة',
+	'Meeting_Expired' => 'انتهت صلاحية الاجتماع',
 ];
