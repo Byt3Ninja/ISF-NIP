@@ -71,41 +71,37 @@ class ScreeningController extends Controller
 		}
 		$judgers_count = 0;
 		$cList = collect(json_decode($cstep->list, true) ?? []);
-		if (in_array($cstep->data, ['onetoall', 'grouptoall'])) {
-			$judgers_count = $cList->count();
-		} else {
+		if( in_array( $cstep->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
+		else
+		{
 			$judgers_count = $cList->flatten()->unique()->count();
 		}
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
-		$judgers_list = collect(json_decode($cstep->list))->map(function ($user) {
-			if (is_array($user)) {
-				$user = array_map('intval', $user);
-			} else {
-				$user = intval($user);
-			}
+		$judgers_list = collect( json_decode($cstep->list) )->map(function($user) {
+			if( is_array( $user ) ) { $user = array_map('intval', $user); } else { $user = intval( $user ); }
 			return $user;
 		});
 
 		$screenings = Screening::where('step_id', $cstep->id)->get();
-		foreach ($judgers_list as $panel_id => $judgers_ids) {
-			$users_list = $screenings->where('panel', $panel_id)->map(function ($screening) {
-				if (is_array($screening->users)) {
-					return $screening->users;
-				} else {
-					return collect(json_decode($screening->users, true) ?? []);
-				}
+		foreach( $judgers_list as $panel_id => $judgers_ids )
+		{
+			$users_list = $screenings->where('panel', $panel_id)->map(function($screening) {
+				if( is_array( $screening->users ) ) { return $screening->users; }
+				else { return collect(json_decode($screening->users, true) ?? []); }
 			})->flatten()->unique()->values()->all();
 
-			$judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $users_list];
+			$judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $users_list ];
 		}
 		$check = ScreeningEvaluation::where('step_id', $id)->first();
-		if (empty($check)) {
+		if( empty( $check ) )
+		{
 			$evaluation = new ScreeningEvaluation();
 			$evaluation->step_id = $id;
 			$evaluation->save();
 		}
-		$evaluationForm = ScreeningEvaluation::getEvaluationData($id);
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		$companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get();
 		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
@@ -115,27 +111,20 @@ class ScreeningController extends Controller
 		$judgesInput = $request->input('judges', []);
 
 		// Decode judges input if it's a JSON string
-		if (is_string($judgesInput)) {
-			$judgesInput = json_decode($judgesInput, true) ?? [];
-		}
+		if( is_string( $judgesInput ) ) { $judgesInput = json_decode($judgesInput, true) ?? []; }
 
 		$judges = Arr::flatten($judgesInput);
-		$judges = array_values(array_map('intval', array_unique($judges)));
+		$judges = array_values( array_map('intval', array_unique($judges)) );
 
-		if (empty($judges)) {
-			return Redirect::back()->with('message2', __('admin.Please_Choose_Judges'));
-		}
+		if( empty( $judges ) ) { return Redirect::back()->with('message2', __('admin.Please_Choose_Judges')); }
 
-		if ($request->step) {
+		if( $request->step )
+		{
 			$type = Step::where('id', $request->step)->pluck('data')->first();
 			$notifylist = User::whereIn('id', $judges)->get();
 
-			$judgesInput = collect($judgesInput)->map(function ($panel) {
-				if (is_array($panel)) {
-					$panel = array_values(array_map('intval', array_unique($panel)));
-				} else {
-					$panel = intval($panel);
-				}
+			$judgesInput = collect($judgesInput)->map(function($panel) {
+				if( is_array( $panel ) ) { $panel = array_values( array_map('intval', array_unique($panel)) ); } else { $panel = intval($panel); }
 				return $panel;
 			})->toArray();
 
@@ -146,17 +135,21 @@ class ScreeningController extends Controller
 			Screening::where('step_id', $request->step)->delete();
 			Formdata::where('form_id', $request->fid)->update(['step_id' => $request->step, 'screening' => '{}', 'comments' => '{}']);
 
-			if ($list) {
-				if ($type === 'grouptogroup') {
-					$users = collect($request->users)->map(function ($user) {
-						$user = array_values(array_map('intval', array_unique($user)));
+			if( $list )
+			{
+				if ($type === 'grouptogroup')
+				{
+					$users = collect( $request->users )->map(function($user) {
+						$user = array_values( array_map('intval', array_unique($user)) );
 						return $user;
 					})->toArray();
 
 					$_users = [];
 					$_list = [];
-					foreach ($users as $panel_id => $user) {
-						if (count($user) && array_key_exists($panel_id, $list)) {
+					foreach ($users as $panel_id => $user)
+					{
+						if( count( $user ) && array_key_exists( $panel_id, $list ) )
+						{
 							$_users[$panel_id] = $user;
 							$_list[$panel_id] = $list[$panel_id];
 						}
@@ -167,42 +160,44 @@ class ScreeningController extends Controller
 					$index = 1;
 					$toCreate = [];
 					$updatedList = [];
-					foreach ($list as $panel_id => $panel) {
-						foreach ((array) $panel as $user) {
+					foreach( $list as $panel_id => $panel )
+					{
+						foreach( (array) $panel as $user )
+						{
 							$users_list = $users[$panel_id] ?? [];
 							$oneUser = ['step_id' => intval($request->step), 'user_id' => intval($user), 'panel' => $index];
-							if (count($users_list)) {
-								$oneUser['users'] = json_encode($users_list);
-							}
+							if( count( $users_list ) ) { $oneUser['users'] = json_encode( $users_list ); }
 							$toCreate[] = $oneUser;
 						}
 						$updatedList[$index] = $panel;
 						$index++;
 					}
-					Screening::insert($toCreate);
+					Screening::insert( $toCreate );
 					Step::where('id', $request->step)->update(['list' => json_encode($updatedList)]);
-				} else {
-					foreach ((array) $judges as $user) {
-						Screening::updateOrCreate(['step_id' => $request->step, 'user_id' => $user, 'panel' => 0]);
-					}
+				}
+				else
+				{
+					foreach( (array) $judges as $user ) { Screening::updateOrCreate(['step_id' => $request->step, 'user_id' => $user, 'panel' => 0]); }
 					Step::where('id', $request->step)->update(['list' => json_encode($list)]);
 				}
 
 				// Notify users via Mail if notify is enabled
-				if ($request->notify) {
+				if( $request->notify )
+				{
 					$cstep = Step::findOrFail($request->step);
-					foreach ($notifylist as $rname) {
+					foreach( $notifylist as $rname )
+					{
 						$user = new User();
 						$user->email = $rname->email;
 						$user->id = $rname->id;
 						$rfullname = $rname->first_name_en . " " . $rname->last_name_en;
 						$message = [
-							"New judging - VI portal",
-							"Dear " . $rfullname . ",",
-							"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from "
-								. $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
-							"/dashboard",
-							"You have a New Judging Request."
+						"New judging - VI portal", 
+						"Dear " . $rfullname . ",", 
+						"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " 
+						. $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
+						"/dashboard", 
+						"You have a New Judging Request." 
 						];
 						$MSG = new TemplateEmail($message);
 						broadcast(new JudgeAssigned(
@@ -229,9 +224,7 @@ class ScreeningController extends Controller
 				}
 			}
 			return Redirect::back()->with('message', 'Saved');
-		} else {
-			return Redirect::back()->with('message2', 'error');
-		}
+		} else { return Redirect::back()->with('message2', 'error'); }
 	}
 
 	public function view($fid, $cid)
@@ -322,7 +315,7 @@ class ScreeningController extends Controller
 		$l = app()->getLocale();
 		$getUsers = Screening::where('step_id', $id)->with(['user'])->get();
 
-		$judges = $getUsers->map(function ($item) use ($l) {
+		$judges = $getUsers->map(function($item) use ( $l ) {
 			$user = $item->user;
 			$judger = new stdClass;
 			$judger->id = $user->id;
@@ -333,21 +326,17 @@ class ScreeningController extends Controller
 			return $judger;
 		})->unique('id')->values();
 
-		$judges = $judges->map(function ($item) use ($getUsers) {
-			$startups = $getUsers->where('user_id', $item->id)->map(function ($i) {
+		$judges = $judges->map(function( $item ) use ( $getUsers ) {
+			$startups = $getUsers->where('user_id', $item->id)->map(function( $i ) {
 				return $i->users;
-			})->flatten()->unique()->filter(function ($i) {
+			})->flatten()->unique()->filter(function( $i ) {
 				return !is_null($i);
 			})->values();
 			$item->startups = $startups;
 			return $item;
 		});
 
-		if ($cstep->data != 'grouptogroup') {
-			foreach ($judges as $index => $judge) {
-				$judges[$index]->startups = $companies->pluck('id');
-			}
-		}
+		if( $cstep->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
 		$form = null;
 		if ($cstep) {
@@ -356,38 +345,44 @@ class ScreeningController extends Controller
 		// dd( $form);
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
-		$evaluation = ScreeningEvaluation::getEvaluationData($cstep->id);
-		$results = ScreeningEvaluationResults::where('evaluation_id', $evaluation->id)->get();
-		foreach ($judges as $index => $judge) {
+		$evaluation = ScreeningEvaluation::getEvaluationData( $cstep->id );
+		$results = ScreeningEvaluationResults::where('evaluation_id', $evaluation->id )->get();
+		foreach( $judges as $index => $judge )
+		{
 			$judges[$index]->companies = [];
-			foreach ($judge->startups as $company_id) {
+			foreach( $judge->startups as $company_id )
+			{
 				$_company = new stdClass;
 				$_company->id = $company_id;
 				$_results = $results->where('company_id', $company_id)->where('user_id', $judge->id)->values();
-				if ($_results->count() > 0) {
+				if( $_results->count() > 0 )
+				{
 					$_company->status = $_results->where('status', 0)->count() > 0 ? 'Draft' : 'Published';
-				} else {
+				}
+				else
+				{
 					$_company->status = 'Not Evaluated';
 				}
 				$_company->results = $_results;
 				$judges[$index]->companies[] = $_company;
 			}
 		}
-		foreach ($evaluation->categories as $criteria) {
+		foreach( $evaluation->categories as $criteria )	
+		{
 			$subCriteria = $criteria->subCriteria;
-			foreach ($judges as $judges_key => $judge) {
-				foreach ($judge->companies as $companies_key => $company) {
-					foreach ($company->results as $results_key => $result) {
-						if (!isset($result->weighted_score)) {
-							$result->weighted_score = 0;
-						}
-						if (!isset($result->parent_criteria)) {
-							$result->parent_criteria = $result->criteria->parent_id;
-						}
+			foreach( $judges as $judges_key => $judge )
+			{
+				foreach( $judge->companies as $companies_key => $company )
+				{
+					foreach( $company->results as $results_key => $result )
+					{
+						if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
+						if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
 						$getResult = $subCriteria->where('id', $result->criteria_id)->first();
-						if (!empty($getResult)) {
+						if( !empty( $getResult ) )
+						{
 							$weight = $getResult->weight;
-							$weighted_score = (intval($result->score) / 5) * $weight;
+							$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
 							$result->weighted_score = $weighted_score;
 						}
 						$company->results[$results_key] = $result;
@@ -414,16 +409,15 @@ class ScreeningController extends Controller
 			}
 			$data['new_step'] = $cstep->title;
 		}
-		if (!empty($company->step)) {
+		$data['last_step'] = null;
+		if( !empty( $company->step ) )
+		{
 			$lastStep = Step::find($company->step);
 			$data['last_step'] = $lastStep ? $lastStep->title : null;
-		} else {
-			$data['last_step'] = null;
 		}
-		if ($request->step == "0") {
-			$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
-		}
-		if ($request->step != "0") {
+		if( $request->step == "0" ) { $update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]); }
+		if( $request->step != "0" )
+		{
 			$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
 			/// notify Company Owner via Mail
 			$company_owner = $company->user;
@@ -441,9 +435,10 @@ class ScreeningController extends Controller
 			$recipients = User::role("Registered")->where('email', $company_owner->email)->get();
 
 			// Notify all recipients
-			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+			if( !in_array(env('APP_ENV', 'local'), ['local']) )
+			{
 				try {
-					foreach ($recipients as $recipient) {
+					foreach( $recipients as $recipient ) {
 						$recipient->notify(new ChangeCycle($data));
 					}
 				} catch (\Throwable $th) {
@@ -478,15 +473,15 @@ class ScreeningController extends Controller
 
 	public function save_evaluation_draft(Request $request)
 	{
-		return self::storeEvaluationCriteria($request, 'draft');
+		return self::storeEvaluationCriteria( $request, 'draft' );
 	}
 
 	public function publish_evaluation(Request $request)
 	{
-		return self::storeEvaluationCriteria($request, 'publish');
+		return self::storeEvaluationCriteria( $request, 'publish' );
 	}
 
-	private function storeEvaluationCriteria($request, $status)
+	private function storeEvaluationCriteria( $request, $status )
 	{
 		$request->validate([
 			'action' => "required|in:{$status}",
@@ -503,16 +498,18 @@ class ScreeningController extends Controller
 
 		$id = $request->stepId;
 		$evaluation = ScreeningEvaluation::where('step_id', $id)->first();
-		if (!$evaluation) {
+		if( !$evaluation )
+		{
 			$evaluation = new ScreeningEvaluation;
 			$evaluation->step_id = $id;
 			$evaluation->save();
+			
 		}
-		$evaluationForm = ScreeningEvaluation::getEvaluationData($id);
-		$current_status = strtolower($evaluationForm->status);
-		if ($current_status == 'published') {
-			return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200);
-		} else {
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+		$current_status = strtolower( $evaluationForm->status );
+		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
+		else
+		{
 			$toCreate = ['criteria' => [], 'subCriteria' => []];
 			$toUpdate = ['criteria' => [], 'subCriteria' => []];
 			$toRemove = ['criteria' => [], 'subCriteria' => []];
@@ -523,16 +520,21 @@ class ScreeningController extends Controller
 			$allSeenCriteriaIds = [];
 			$allSeenSubCriteriaIds = [];
 			// Compare request criteria
-			foreach ($request->criteria as $reqCriterion) {
+			foreach ($request->criteria as $reqCriterion)
+			{
 				$reqId = $reqCriterion['id'];
-				if (!$reqId) {
+				if (!$reqId)
+				{
 					// New main criterion to be created
 					$toCreate['criteria'][] = $reqCriterion;
-				} else {
+				}
+				else
+				{
 					$allSeenCriteriaIds[] = $reqId;
 					$savedCriterion = $savedCriteriaById[$reqId] ?? null;
 
-					if ($savedCriterion) {
+					if( $savedCriterion )
+					{
 						// Check for updates in name or weight
 						if (
 							$savedCriterion->name !== $reqCriterion['name'] ||
@@ -540,10 +542,10 @@ class ScreeningController extends Controller
 						) {
 							$toUpdate['criteria'][] = $reqCriterion;
 						}
-
-						// --- SUBCRITERIA HANDLING ---
+						// --- SUB CRITERIA HANDLING ---
 						$savedSubById = collect($savedCriterion->subCriteria)->keyBy('id');
-						foreach ($reqCriterion['subCriteria'] as $reqSub) {
+						foreach ($reqCriterion['subCriteria'] as $reqSub)
+						{
 							$subId = $reqSub['id'];
 							if (!$subId) {
 								$toCreate['subCriteria'][] = $reqSub + ['parent_id' => $reqId];
@@ -570,20 +572,22 @@ class ScreeningController extends Controller
 					}
 				}
 			}
-
+			
 			// Detect removed criteria
 			foreach ($savedCriteriaById as $savedCriterionId => $savedCriterion) {
 				if (!in_array($savedCriterionId, $allSeenCriteriaIds)) {
 					$toRemove['criteria'][] = $savedCriterion;
 				}
 			}
-			foreach ($toCreate['criteria'] as $value) {
+			foreach( $toCreate['criteria'] as $value )
+			{
 				$criteria = new ScreeningEvaluationCriteria;
 				$criteria->title = $value['name'];
 				$criteria->weight = $value['weight'] * 100;
 				$criteria->evaluation_id = $evaluation->id;
 				$criteria->save();
-				foreach ($value['subCriteria'] as $sub) {
+				foreach( $value['subCriteria'] as $sub )
+				{
 					$subCriteria = new ScreeningEvaluationCriteria;
 					$subCriteria->title = $sub['name'];
 					$subCriteria->weight = $sub['weight'] * 100;
@@ -592,7 +596,8 @@ class ScreeningController extends Controller
 					$subCriteria->save();
 				}
 			}
-			foreach ($toCreate['subCriteria'] as $sub) {
+			foreach( $toCreate['subCriteria'] as $sub )
+			{
 				$subCriteria = new ScreeningEvaluationCriteria;
 				$subCriteria->title = $sub['name'];
 				$subCriteria->weight = $sub['weight'] * 100;
@@ -600,39 +605,40 @@ class ScreeningController extends Controller
 				$subCriteria->evaluation_id = null;
 				$subCriteria->save();
 			}
-			foreach ($toUpdate['criteria'] as $value) {
-				$criteria = ScreeningEvaluationCriteria::find($value['id']);
+			foreach( $toUpdate['criteria'] as $value )
+			{
+				$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
 				$criteria->title = $value['name'];
 				$criteria->weight = $value['weight'] * 100;
 				$criteria->save();
 			}
-			foreach ($toUpdate['subCriteria'] as $sub) {
-				$subCriteria = ScreeningEvaluationCriteria::find($sub['id']);
+			foreach( $toUpdate['subCriteria'] as $sub )
+			{
+				$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
 				$subCriteria->title = $sub['name'];
 				$subCriteria->weight = $sub['weight'] * 100;
 				$subCriteria->save();
 			}
 
-			foreach ($toRemove['subCriteria'] as $sub) {
-				$subCriteria = ScreeningEvaluationCriteria::find($sub->id);
-				if ($subCriteria) {
-					$subCriteria->delete();
-				}
+			foreach( $toRemove['subCriteria'] as $sub )
+			{
+				$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
+				if( $subCriteria ) { $subCriteria->delete(); }
 			}
 
-			foreach ($toRemove['criteria'] as $value) {
-				$criteria = ScreeningEvaluationCriteria::find($value->id);
-				if ($criteria) {
-					$criteria->delete();
-				}
+			foreach( $toRemove['criteria'] as $value )
+			{
+				$criteria = ScreeningEvaluationCriteria::find ( $value->id );
+				if( $criteria ) { $criteria->delete(); }
 			}
 
-			if ($status == 'publish') {
+			if( $status == 'publish' )
+			{
 				$evaluation->status = true;
 				$evaluation->save();
 			}
 
-			$evaluationForm = ScreeningEvaluation::getEvaluationData($id);
+			$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 			return response()->json([
 				'status' => true,
 				'title' => 'saved',
