@@ -392,7 +392,45 @@ class ScreeningController extends Controller
 			}
 			$judges[$judges_key] = $judge;
 		}
-		return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', 'companies', 'evaluation', 'results'));
+		// dd($companies->first()->logo_url);
+		// logo_url
+		foreach( $companies as $companies_index => $company )
+		{
+			foreach( $judges as $judges_key => $judge )
+			{
+				if( in_array( $company->id, $judge->startups->toArray() ) )
+				{
+					$judger_evaluation = collect( $judge->companies )->where('id', $company->id)->first();
+					$evaluation_status = $judger_evaluation->status;
+					$score = $judger_evaluation->results->groupBy('parent_criteria')->sum( function( $grouped ) use ( $evaluation ) {
+						$parent_id = $grouped->first()->parent_criteria;
+						$groupWeight = $evaluation->categories->where('id', $grouped->first()->parent_criteria)->first()->weight;
+						return $groupWeight * $grouped->sum('weighted_score');
+					});
+					$judger_score = round( ( $score * 100 ) );
+					foreach( $judges[$judges_key]->companies as $companies_key => $_company )
+					{
+						if( $company->id == $_company->id )
+						{
+							$judges[$judges_key]->companies[$companies_key]->score = $judger_score;
+							$judges[$judges_key]->companies[$companies_key]->status = $evaluation_status;
+						}
+					}
+
+					$_companies = collect( $judges[$judges_key]->companies );
+					$judges[$judges_key]->companies = $_companies;
+				}
+			}
+
+			$average_score = $judges->filter(function( $item ) use ( $company ) {
+				return $item->companies->where('status', 'Published')->where('id', $company->id)->first() ? true : false;
+			})->avg( function( $item ) use ( $company ) {
+				return $item->companies->where('status', 'Published')->where('id', $company->id)->first()->score;
+			});
+			$companies[$companies_index]->average_score = $average_score ?? 0;
+		}
+		$_companies = $companies;
+		return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', '_companies', 'evaluation', 'results'));
 	}
 
 	public function changestep(Request $request)
@@ -479,6 +517,11 @@ class ScreeningController extends Controller
 	public function publish_evaluation(Request $request)
 	{
 		return self::storeEvaluationCriteria( $request, 'publish' );
+	}
+
+	public function get_results(Request $request)
+	{
+		//
 	}
 
 	private function storeEvaluationCriteria( $request, $status )
