@@ -259,15 +259,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
-            broadcast(new MentorshipSessionUpdated(
-                $rName->id,
-                $rName_usr->id,
-                [
-                    'email' => $rName->email,
-                    'name' => $rName->name,
-                ],
-                $this->stat
-            ));
+            broadcast(new MentorshipSessionUpdated($mentorMessage, $userMessage));
         }
     }
 }
