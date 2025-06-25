@@ -168,7 +168,7 @@
 
                     @endphp
 
-                    <img src="{{ $imageUrl }}" alt="Logo" class="img-fluid"
+                    <img src="/{{ $imageUrl }}" alt="Logo" class="img-fluid"
                       style="max-width: 100%; max-height: 100%; object-fit: contain;" />
                     @else
                     @php $setting = \App\Settings::where('id', 1)->first(); @endphp
