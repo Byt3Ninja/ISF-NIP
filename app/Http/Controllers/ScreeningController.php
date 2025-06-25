@@ -319,11 +319,11 @@ class ScreeningController extends Controller
 		$judges = $getUsers->map(function($item) use ( $l ) {
 			$user = $item->user;
 			$judger = new stdClass;
-			$judger->id = $user->id;
-			$judger->name = $user->{'first_name_' . $l} . ' ' . $user->{'last_name_' . $l};
-			$judger->phone = $user->phone;
-			$judger->email = $user->email;
-			$judger->image_url = $user->image_url;
+			$judger->id = $user->id ?? 0;
+			$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+			$judger->phone = $user->phone ?? '';
+			$judger->email = $user->email ?? '';
+			$judger->image_url = $user->image_url ?? '';
 			return $judger;
 		})->unique('id')->values();
 
@@ -423,11 +423,13 @@ class ScreeningController extends Controller
 				}
 			}
 
-			$average_score = $judges->filter(function( $item ) use ( $company ) {
-				return $item->companies->where('status', 'Published')->where('id', $company->id)->first() ? true : false;
-			})->avg( function( $item ) use ( $company ) {
-				return $item->companies->where('status', 'Published')->where('id', $company->id)->first()->score;
+			$average_score = $judges->filter(function($item) use ($company) {
+				return collect($item->companies)->where('status', 'Published')->where('id', $company->id)->isNotEmpty();
+			})->avg(function($item) use ($company) {
+				$companyItem = collect($item->companies)->where('status', 'Published')->where('id', $company->id)->first();
+				return $companyItem ? $companyItem->score : null;
 			});
+
 			$companies[$companies_index]->average_score = $average_score ?? 0;
 		}
 		$_companies = $companies;

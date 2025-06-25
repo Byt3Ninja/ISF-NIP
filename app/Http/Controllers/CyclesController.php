@@ -569,7 +569,7 @@ class CyclesController extends Controller
         // Check STEPS
         if (!$user->company->cycle || $user->company->cycle == $c) {
             $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
-            if ($step->stype != 1) {
+            if ($step?->stype != 1) {
                 return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
             if ($step->to < now()->format('Y-m-d')) {
