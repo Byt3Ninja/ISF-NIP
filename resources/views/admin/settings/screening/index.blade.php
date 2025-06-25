@@ -345,10 +345,17 @@
                       </div>
                     </div> --}}
                   @else
-                    <div class="form-group">
+                    <div class="form-group mt-6">
                       <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
-                      <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}>
-                        {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!}
+                      <select 
+                        id="judges-select" 
+                        name="judges[]" 
+                        class="select2 form-select" 
+                        {{ $cstep->data == 'onetoall' ? '' : 'multiple="multiple"' }}
+                        data-placeholder="{{ __('cycles.Select') }}..."  
+                      >
+                        {{-- {!! $cstep->data == 'onetoall' ? '<option disabled value="">' . __('cycles.Please select one name') . '</option>' : '' !!} --}}
+                        <option value="">{{ __('cycles.Select') }}...</option>
                         @foreach ($judges as $judge)
                         <option value="{{ $judge->id }}" {{ in_array( intval( $judge->id ) , $judgersList->toArray()) ? 'selected' : '' }}>
                           {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})

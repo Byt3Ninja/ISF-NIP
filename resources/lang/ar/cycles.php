@@ -350,5 +350,6 @@ return [
     'Remove panel' => 'إزالة اللجنة',
     'Important Notice' => 'إشعار مهم',
     'Select_Currency' => 'اختر العملة',
+    'Select' => 'اختر',
   ];
 

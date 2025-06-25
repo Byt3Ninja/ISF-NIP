@@ -353,5 +353,6 @@ return [
     'Remove panel' => 'Remove panel',
     'Important Notice' => 'Important Notice',
     'Select_Currency' => 'Select Currency',
+    'Select' => 'Select',
 ];
 
