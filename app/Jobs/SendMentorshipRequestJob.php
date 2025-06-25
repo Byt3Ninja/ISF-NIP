@@ -177,8 +177,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             $message = [
                 "New Mentorship session - VI portal",
                 "Dear " . $rFullName_usr . ",",
-                "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $th	
-Company Logois->date . ", Check your account to join the session ",
+                "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $this->date . ", Check your account to join the session ",
                 "/dashboard",
                 'Kindly note you have a new mentorship session with ' . $rFullName . ', Session will start: ' . $this->date,
             ];
@@ -260,7 +259,15 @@ Company Logois->date . ", Check your account to join the session ",
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
-            broadcast(new MentorshipSessionUpdated($mentorMessage, $userMessage));
+            broadcast(new MentorshipSessionUpdated(
+                $rName->id,
+                $rName_usr->id,
+                [
+                    'email' => $rName->email,
+                    'name' => $rName->name,
+                ],
+                $this->stat
+            ));
         }
     }
 }
