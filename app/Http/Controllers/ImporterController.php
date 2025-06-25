@@ -450,7 +450,6 @@ class ImporterController extends Controller
 
                 $company = Company::updateOrCreate(
                     [
-                        'cycle' => $cycleId,
                         'name_en' => $nameEn
                     ],
                     $companyData

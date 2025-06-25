@@ -14,20 +14,16 @@ class MentorshipSessionUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $mentorId;
-    public $userId;
-    public $Message;
-    public $status;
+    public $mentorMessage;
+    public $userMessage;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(int $mentorId, int $userId, array $Message, string $status)
+    public function __construct($mentorMessage, $userMessage)
     {
-        $this->mentorId = $mentorId;
-        $this->userId = $userId;
-        $this->Message = $Message;
-        $this->status = $status;
+        $this->mentorMessage = $mentorMessage;
+        $this->userMessage = $userMessage;
     }
 
     /**
@@ -49,9 +45,11 @@ class MentorshipSessionUpdated implements ShouldBroadcast
      */
     public function broadcastWith()
     {
-        return [
-            'message' => $this->Message['email'],
-            'status' => $this->status,
-        ];
+         return [
+          'message' => [
+            'mentor' => $this->mentorMessage,
+            'user' => $this->userMessage,
+          ],
+       ];
     }
 }
