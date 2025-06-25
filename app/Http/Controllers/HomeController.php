@@ -1431,8 +1431,7 @@ class HomeController extends Controller
                 'isRating' => false,
             ];
             if(Auth::user()->hasRole('Registered')){
-            $cycles = Auth::user()->company->cycle;
-            if($cycles != null){
+            if(Auth::user()->company?->cycle != null){
 
             $data['countCards'][] = [
                 'color' => 'secondary',
