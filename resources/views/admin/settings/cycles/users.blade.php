@@ -121,7 +121,8 @@
                   <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                   <div class="d-flex align-items-center gap-4">
                     <div class="media align-items-center col-md-3">
-                      <select class="form-select select2 ChangeAllBox">
+                      <select class="form-select select2 ChangeAllBox" data-placeholder="{{ __('cycles.Select Step') }}">
+                        <option value="" selected disabled>{{ __('cycles.Select Step') }}</option>
                         <option value="0">{{ __('cycles.Disapprove') }}</option>
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}">{{ $step->title }}</option>
