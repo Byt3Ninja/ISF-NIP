@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Input;
 use App\ScreeningEvaluationCustomFields;
 use App\ScreeningEvaluationFieldsValues;
 use Illuminate\Support\Facades\Redirect;
+use App\Jobs\SendChangeCycleNotificationJob;
 
 class ScreeningController extends Controller
 {
@@ -436,16 +437,18 @@ class ScreeningController extends Controller
 	public function changestep(Request $request)
 	{
 		$approved = $by = null;
+		$data = [];
 		$company = Company::where('id', $request->company)->first();
 		if ($request->step == "0") {
 			$by = Auth::id();
+			$data['new_step'] = 'Disapproved';
 		} else {
 			$cstep = Step::findOrFail($request->step);
 			if ($cstep->arr > 1) {
 				$approved = 1;
 				$by = Auth::id();
+				$data['new_step'] = $cstep->title;
 			}
-			$data['new_step'] = $cstep->title;
 		}
 		$data['last_step'] = null;
 		if( !empty( $company->step ) )
@@ -453,37 +456,38 @@ class ScreeningController extends Controller
 			$lastStep = Step::find($company->step);
 			$data['last_step'] = $lastStep ? $lastStep->title : null;
 		}
+		
 		if( $request->step == "0" ) { $update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]); }
-		if( $request->step != "0" )
-		{
-			$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
+		if( $request->step != "0" ) {$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]); }
+
+		
 			/// notify Company Owner via Mail
-			$company_owner = $company->user;
-			$data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
-			$data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
-			$data['company_name_ar'] = $company_owner->company->name_ar;
-			$data['company_name_en'] = $company_owner->company->name_en;
-			$data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
-			$data['organization_name_en'] = $cstep->cycle->organization->name_en;
-			$data['emailCompany'] = $company_owner->email;
-
-			// Broadcast Event //
-			broadcast(new ChangeStep($data));
-
-			$recipients = User::role("Registered")->where('email', $company_owner->email)->get();
-
-			// Notify all recipients
-			if( !in_array(env('APP_ENV', 'local'), ['local']) )
-			{
-				try {
-					foreach( $recipients as $recipient ) {
-						$recipient->notify(new ChangeCycle($data));
-					}
-				} catch (\Throwable $th) {
-					// throw $th;
-				}
-			}
-		}
+			SendChangeCycleNotificationJob::dispatch($request->company, $request->step, $data['last_step'], $data['new_step']);
+			
+			// $company_owner = $company->user;
+			// $data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
+			// $data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
+			// $data['company_name_ar'] = $company_owner->company->name_ar;
+			// $data['company_name_en'] = $company_owner->company->name_en;
+			// $data['organization_name_ar'] = $cstep->cycle->organization->name_ar ?? null;
+			// $data['organization_name_en'] = $cstep->cycle->organization->name_en ?? null;
+			// $data['emailCompany'] = $company_owner->email;
+			// 	if( $request->step != "0" ){$data['status'] = 'in';}else{ $data['status'] = 'out'; }
+			// // Broadcast Event //
+			// broadcast(new ChangeStep($data));
+		
+			// $recipients = User::role("Registered")->where('email', $company_owner->email)->get();
+			// // Notify all recipients
+			// if( !in_array(env('APP_ENV', 'local'), ['local']) ){
+			// 	try {
+			// 		foreach( $recipients as $recipient ) {
+			// 			$recipient->notify(new ChangeCycle($data));
+			// 		}
+			// 	} catch (\Throwable $th) {
+			// 		// throw $th;
+			// 	}
+			// }
+		
 		/// End of mail send
 		if ($update) {
 			return response()->json(['state' => 'success'], 200);
