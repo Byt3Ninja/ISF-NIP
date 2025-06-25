@@ -177,7 +177,8 @@ class SendMentorshipRequestJob implements ShouldQueue
             $message = [
                 "New Mentorship session - VI portal",
                 "Dear " . $rFullName_usr . ",",
-                "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $this->date . ", Check your account to join the session ",
+                "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $th	
+Company Logois->date . ", Check your account to join the session ",
                 "/dashboard",
                 'Kindly note you have a new mentorship session with ' . $rFullName . ', Session will start: ' . $this->date,
             ];
