@@ -1979,4 +1979,5 @@ return [
 	'Text' => 'Text',
 	'Loading submission data' => 'Loading submission data',
 	'The Answers' => 'Answers',
+	'No evaluations found' => 'No evaluations found',
 ];
