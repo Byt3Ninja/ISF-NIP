@@ -2018,4 +2018,13 @@ return [
 	'Meeting_Expired' => 'انتهت صلاحية الاجتماع',
 	'Error opening the selected form.' => 'خطأ في فتح النموذج المحدد. يرجى المحاولة مرة أخرى لاحقًا.',
 	'Welcome_StartUp_Registration_Please_Join_The_Program_The_First' => 'مرحبًا بك في تسجيل الشركات الناشئة! يرجى الانضمام إلى البرنامج أولاً.',
+	'No answer provided' => 'لم يتم تقديم إجابة',
+	'No Answers Found' => 'لم يتم العثور على إجابات',
+	'No answers have been submitted for this form yet' => 'لم يتم تقديم أي إجابات لهذا النموذج بعد',
+	'No File' => 'لا يوجد ملف',
+	'No file was submitted for this question' => 'لم يتم تقديم أي ملف لهذا السؤال',
+	'Click to download' => 'انقر للتنزيل',
+	'Text' => 'نص',
+	'Loading submission data' => 'جارٍ تحميل بيانات التقديم',
+	'The Answers' => 'إجابات',
 ];

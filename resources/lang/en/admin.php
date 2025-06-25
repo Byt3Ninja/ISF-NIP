@@ -1970,4 +1970,13 @@ return [
 	'Meeting_Expired' => 'Meeting Expired',
 	'Error opening the selected form.' => 'Error opening the selected form. Please try again later.',
 	'Welcome_StartUp_Registration_Please_Join_The_Program_The_First' => 'Welcome to the Startup Registration! Please join the program first.',
+	'No answer provided' => 'No answer provided',
+	'No Answers Found' => 'No Answers Found',
+	'No answers have been submitted for this form yet' => 'No answers have been submitted for this form yet',
+	'No File' => 'No File',
+	'No file was submitted for this question' => 'No file was submitted for this question',
+	'Click to download' => 'Click to download',
+	'Text' => 'Text',
+	'Loading submission data' => 'Loading submission data',
+	'The Answers' => 'Answers',
 ];
