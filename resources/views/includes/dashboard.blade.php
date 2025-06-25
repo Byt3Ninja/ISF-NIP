@@ -69,7 +69,7 @@
 		</div>
 
 			@if( $_user->hasRole('Registered') )
-			@if($_user->company->cycle == null)
+			@if($_user->company?->cycle == null)
 				<div class="col-md-12">
 					<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
 						{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
@@ -129,7 +129,7 @@
 		<div class="row mt-6">
 			@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
-			@if($_user->company->cycle != null)
+			@if($_user->company?->cycle != null)
 			<div class="col-sm-6 col-12 mb-6">
 				<div class="card">
 					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -175,7 +175,7 @@
 			@endif
 			@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
-			@if($_user->company->cycle != null)
+			@if($_user->company?->cycle != null)
 			<div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
 				<div class="card">
 					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -236,7 +236,7 @@
 			@endif
 			@if( array_intersect(['dashboard.widgets_tables_latest_events_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
-			@if($_user->company->cycle != null)
+			@if($_user->company?->cycle != null)
 			<div class="col-12">
 				<section>
 					<div class="row">
