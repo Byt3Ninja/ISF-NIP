@@ -84,7 +84,7 @@
                     <button class="btn btn-primary btn-icon rounded-circle" id="searchBot">
                       <i class="ti ti-filter"></i>
                     </button>
-                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions'">
+                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions{{ request()->show ? '?show=' . request()->show : '' }}'">
                       <i class="ti ti-reload"></i> 
                     </button>
                   </div>
@@ -108,7 +108,7 @@
                       @foreach ($sessions as $session)
                         <tr>
                           <td>
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center w-px-150">
                               <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
                                 <img 
                                   onerror="this.src='/images/logo-placeholder.png'"
