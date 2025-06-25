@@ -1430,7 +1430,57 @@ class HomeController extends Controller
                 'count' => $organizations->count(),
                 'isRating' => false,
             ];
-            if(Auth::user()->company->cycle != null){
+            if(Auth::user()->hasRole('Registered')){
+            $cycles = Auth::user()->company->cycle;
+            if($cycles != null){
+
+            $data['countCards'][] = [
+                'color' => 'secondary',
+                'href' => '/dashboard/requests/all',
+                'icon' => 'ti-speakerphone',
+                'text' => 'Services Requests',
+                'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
+                'count' => $services_requests->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'success',
+                'href' => '/dashboard/directory',
+                'icon' => 'ti ti-briefcase',
+                'text' => 'Services',
+                'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
+                'count' => $services->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'primary',
+                'href' => '/dashboard/requests/mine',
+                'icon' => 'ti ti-speakerphone',
+                'text' => 'My Requests',
+                'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
+                'count' => $my_requests->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'secondary',
+                'href' => '/dashboard/show/Mentors',
+                'icon' => 'ti ti-school',
+                'text' => 'Mentors',
+                'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
+                'count' => $my_mentors->count(),
+                'isRating' => false,
+            ];
+            $data['countCards'][] = [
+                'color' => 'danger',
+                'href' => '#',
+                'icon' => 'ti ti-star',
+                'text' => 'Rate',
+                'permissions' => ['dashboard.widgets_cards_rate_view'],
+                'count' => $my_rating,
+                'isRating' => true, // Only this card has the isRating key
+            ];
+        }
+        }else{
             $data['countCards'][] = [
                 'color' => 'secondary',
                 'href' => '/dashboard/requests/all',
