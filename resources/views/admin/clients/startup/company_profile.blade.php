@@ -399,11 +399,13 @@
                     <span class="text-muted">
                       {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
                     </span>
+                    @if($_user->hasAnyRole('Registered'))
                     <a role="button"
                       onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                       {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
+                    @endif
                   </div>
                 </div>
               </div>
@@ -415,11 +417,13 @@
                     <span class="text-muted">
                       {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
                     </span>
+                    @if($_user->hasAnyRole('Registered'))
                     <a role="button"
                       onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                       {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
+                    @endif
                   </div>
                 </div>
               </div>
@@ -476,11 +480,13 @@
                   <span class="text-muted">
                     {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
                   </span>
+                  @if($_user->hasAnyRole('Registered'))
                   <a role="button"
                     onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
                     class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                     {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                   </a>
+                  @endif
                 </div>
               </div>
             </div>
