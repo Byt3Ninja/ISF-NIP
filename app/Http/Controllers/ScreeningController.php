@@ -567,7 +567,7 @@ class ScreeningController extends Controller
 					$output->id = $item->id;
 					$output->name = $item->name;
 					$output->weight = $item->weight;
-					$output->score = $details->sum('value');
+					$output->score = round( $details->sum('value') * 100 ) / 100;
 					$output->value = ( round( ( $output->score * $output->weight ) * 100 ) / 100 );
 					$output->details = $details;
 					return $output;
@@ -582,7 +582,9 @@ class ScreeningController extends Controller
 			})->first();
 			$output->evaluation = $companies;
 			return $output;
-		});
+		})->filter(function( $item ) {
+			return !empty( $item->evaluation );
+		})->values();
 		$return = [
 			'total' => ( ( round( $_criteria->sum('value') * 100 ) ) / 100),
 			'criteria' => $_criteria,
