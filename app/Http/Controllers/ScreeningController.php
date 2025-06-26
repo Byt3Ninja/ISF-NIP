@@ -287,6 +287,7 @@ class ScreeningController extends Controller
 
 	public function results($id = 0)
 	{
+		$l = app()->getLocale();
 		$organization_id = auth()->user()->organization_id;
 
 		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -308,130 +309,19 @@ class ScreeningController extends Controller
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		}
-		$getStep = Step::find($id);
-		$companies = Company::where('cycle', $getStep->cycle_id)->get();
-		$uniqueCycleIds = $companies->pluck('cycle')->unique();
-		$_steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-		// $judges = User::join('screenings', 'user_id', 'users.id')->where('step_id', $id)->get();
-		$l = app()->getLocale();
-		$getUsers = Screening::where('step_id', $id)->with(['user'])->get();
-
-		$judges = $getUsers->map(function($item) use ( $l ) {
-			$user = $item->user;
-			$judger = new stdClass;
-			$judger->id = $user->id ?? 0;
-			$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
-			$judger->phone = $user->phone ?? '';
-			$judger->email = $user->email ?? '';
-			$judger->image_url = $user->image_url ?? '';
-			return $judger;
-		})->unique('id')->values();
-
-		$judges = $judges->map(function( $item ) use ( $getUsers ) {
-			$startups = $getUsers->where('user_id', $item->id)->map(function( $i ) {
-				return $i->users;
-			})->flatten()->unique()->filter(function( $i ) {
-				return !is_null($i);
-			})->values();
-			$item->startups = $startups;
-			return $item;
-		});
-
-		if( $cstep->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
-
+		$metadata = ScreeningEvaluationResults::metadata( $id );
+		$companies = $metadata['companies'];
+		$_steps = $metadata['_steps'];
+		$judges = $metadata['judges'];
+		$evaluation = $metadata['evaluation'];
+		$results = $metadata['results'];
+		$_companies = $metadata['_companies'];
 		$form = null;
 		if ($cstep) {
 			$form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
 		}
-		// dd( $form);
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
-		$evaluation = ScreeningEvaluation::getEvaluationData( $cstep->id );
-		$results = ScreeningEvaluationResults::where('evaluation_id', $evaluation->id )->get();
-		foreach( $judges as $index => $judge )
-		{
-			$judges[$index]->companies = [];
-			foreach( $judge->startups as $company_id )
-			{
-				$_company = new stdClass;
-				$_company->id = $company_id;
-				$_results = $results->where('company_id', $company_id)->where('user_id', $judge->id)->values();
-				if( $_results->count() > 0 )
-				{
-					$_company->status = $_results->where('status', 0)->count() > 0 ? 'Draft' : 'Published';
-				}
-				else
-				{
-					$_company->status = 'Not Evaluated';
-				}
-				$_company->results = $_results;
-				$judges[$index]->companies[] = $_company;
-			}
-		}
-		foreach( $evaluation->categories as $criteria )	
-		{
-			$subCriteria = $criteria->subCriteria;
-			foreach( $judges as $judges_key => $judge )
-			{
-				foreach( $judge->companies as $companies_key => $company )
-				{
-					foreach( $company->results as $results_key => $result )
-					{
-						if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
-						if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
-						$getResult = $subCriteria->where('id', $result->criteria_id)->first();
-						if( !empty( $getResult ) )
-						{
-							$weight = $getResult->weight;
-							$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
-							$result->weighted_score = $weighted_score;
-						}
-						$company->results[$results_key] = $result;
-					}
-					$judge->companies[$companies_key] = $company;
-				}
-			}
-			$judges[$judges_key] = $judge;
-		}
-		// dd($companies->first()->logo_url);
-		// logo_url
-		foreach( $companies as $companies_index => $company )
-		{
-			foreach( $judges as $judges_key => $judge )
-			{
-				if( in_array( $company->id, $judge->startups->toArray() ) )
-				{
-					$judger_evaluation = collect( $judge->companies )->where('id', $company->id)->first();
-					$evaluation_status = $judger_evaluation->status;
-					$score = $judger_evaluation->results->groupBy('parent_criteria')->sum( function( $grouped ) use ( $evaluation ) {
-						$parent_id = $grouped->first()->parent_criteria;
-						$groupWeight = $evaluation->categories->where('id', $grouped->first()->parent_criteria)->first()->weight;
-						return $groupWeight * $grouped->sum('weighted_score');
-					});
-					$judger_score = round( ( $score * 100 ) );
-					foreach( $judges[$judges_key]->companies as $companies_key => $_company )
-					{
-						if( $company->id == $_company->id )
-						{
-							$judges[$judges_key]->companies[$companies_key]->score = $judger_score;
-							$judges[$judges_key]->companies[$companies_key]->status = $evaluation_status;
-						}
-					}
-
-					$_companies = collect( $judges[$judges_key]->companies );
-					$judges[$judges_key]->companies = $_companies;
-				}
-			}
-
-			$average_score = $judges->filter(function($item) use ($company) {
-				return collect($item->companies)->where('status', 'Published')->where('id', $company->id)->isNotEmpty();
-			})->avg(function($item) use ($company) {
-				$companyItem = collect($item->companies)->where('status', 'Published')->where('id', $company->id)->first();
-				return $companyItem ? $companyItem->score : null;
-			});
-
-			$companies[$companies_index]->average_score = $average_score ?? 0;
-		}
 		$_companies = $companies;
 		return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', '_companies', 'evaluation', 'results'));
 	}
@@ -527,7 +417,178 @@ class ScreeningController extends Controller
 
 	public function get_results(Request $request)
 	{
-		//
+		$request->validate([
+			'step' => 'required|integer|exists:steps,id',
+			'company' => 'required|integer|exists:companies,id',
+		]);
+		$l = app()->getLocale();
+		$id = $request->step;
+		$company = intval( $request->company );
+		$metadata = ScreeningEvaluationResults::metadata( $id );
+		$evaluationForm = $metadata['evaluation'];
+		$results = $metadata['results']->where('company_id', $company)->values();
+		$judges = $metadata['judges']->map(function( $item ) use ( $company ) {
+			$companies = $item->companies->where('id', $company)->values();
+			$item->companies = $companies;
+			return $item;
+		});
+		$criteria = $evaluationForm->categories;
+		$criteria = $criteria->map(function( $item ) use ( $results ) {
+			$subs = $item->subCriteria;
+			$subs = $subs->map(function( $sub ) use ( $results ) {
+				$weight = $sub->weight;
+				$scoped_results = $results->where('criteria_id', $sub->id)->values()->map(function( $oneResult ) use ( $weight ) {
+					$output = new stdClass;
+					$output->id = $oneResult->id;
+					$output->judger_id = $oneResult->user_id;
+					$output->judger = new stdClass;
+					$output->judger->id = $oneResult->user_id;
+					$output->judger->name = $oneResult->user->name;
+					$output->given_score = intval( $oneResult->score );
+					$output->max = 5;
+					$score = ( $oneResult->score / $output->max );
+					$output->score = $score * 100;
+					$output->comment = $oneResult->comment;
+					$output->status = $oneResult->status == true ? 'Published' : 'Draft';
+					$output->weight = $weight;
+					$output->weighted_score = ( $score * $weight ) * 100;
+					return $output;
+				});
+				$sub->results = $scoped_results;
+				$sub->total = $sub->results->sum('given_score');
+				$sub->max = $sub->results->sum('max');
+				$sub->count = $sub->results->count();
+				$sub->average = $sub->total / $sub->max;
+				$sub->weighted_total = ( round( $sub->average * 100 ) / 100 ) * $sub->weight;
+				return $sub;
+			});
+			$item->weight = $item->weight;
+			$item->total = $subs->sum('total');
+			$item->max = $subs->sum('max');
+			$item->weighted_total = round( $subs->sum('weighted_total') * 100 ) / 100;
+			$item->value = ( round( $item->weighted_total * 100 ) / 100 ) * $item->weight;
+			$item->subCriteria = $subs;
+			return $item;
+		});
+		$_criteria = $criteria->map(function( $item ) {
+			$output = new stdClass;
+			$output->id = $item->id;
+			$output->name = $item->name;
+			$output->weight = $item->weight;
+			$output->score = ( round( $output->weight * 100 ) / 100 );
+			$output->value = round( $output->score * $output->score * 100 ) / 100;
+			$output->details = $item->subCriteria->map(function( $sub ) {
+				$output = new stdClass;
+				$output->id = $sub->id;
+				$output->name = $sub->name;
+				$output->weight = $sub->weight;
+				$output->total = $sub->total;
+				$output->max = $sub->max;
+				$output->count = $sub->count;
+				$output->average = $sub->average;
+				$output->value = round( $sub->weighted_total * 100 ) / 100;
+				$output->details = $sub->results->map(function( $result ) {
+					$output = new stdClass;
+					$output->judger = $result->judger;
+					$output->given_score = $result->given_score;
+					$output->max = $result->max;
+					$output->score = $result->score / 100;
+					$output->comment = $result->comment;
+					$output->status = $result->status;
+					$output->weight = $result->weight;
+					$output->value = $result->weighted_score / 100;
+					return $output;
+				});
+				return $output;
+			});
+			return $output;
+		});
+
+		$customFields = collect(DB::select("SELECT
+				cfv.id AS id,
+				cf.name AS field,
+				cfv.value AS value,
+				cfv.user_id AS judger_id,
+				u.first_name_en AS judger_first_name_en,
+				u.last_name_en AS judger_last_name_en,
+				u.first_name_ar AS judger_first_name_ar,
+				u.last_name_ar AS judger_last_name_ar
+			FROM
+				screening_evaluation_fields_values cfv
+			LEFT JOIN
+				screening_evaluation_custom_fields cf ON cf.id = cfv.custom_field_id
+			LEFT JOIN
+				users u ON u.id = cfv.user_id
+			WHERE
+				cfv.company_id = ?
+				AND cf.evaluation_id = ?
+		", [
+			$company,
+			$evaluationForm->id
+		]))->map(function( $item ) use ( $l ) {
+			$output = new stdClass;
+			$output->id = $item->id;
+			$output->field = $item->field;
+      		$output->value = $item->value;
+			$output->judger_id = $item->judger_id;
+	  		$output->name = trim( str_replace(['   ', '  '], ' ', $item->{'judger_first_name_' . $l} . ' ' . $item->{'judger_last_name_' . $l}) );
+      		return $output;
+		});
+		$judges = $judges->map(function( $item ) use ( $customFields, $criteria ) {
+			$judger_id = $item->id;
+			$output = new stdClass;
+			$output->id = $item->id;
+			$output->name = $item->name;
+			$output->phone = $item->phone;
+			$output->email = $item->email;
+			$output->image_url = $item->image_url;
+			$companies = $item->companies->map(function( $company ) use ( $customFields, $judger_id, $criteria ) {
+				$comment = $customFields->where('judger_id', $judger_id)->where('field', 'final_comment')->first();
+				$company->comment = !empty( $comment ) ? $comment->value : '';
+				$details = $criteria->map(function( $item ) use ( $judger_id ) {
+					$details = $item->subCriteria->filter(function( $sub ) use ( $judger_id ) {
+						$results = $sub->results->where('judger_id', $judger_id)->values()->first();
+						return !empty( $results );
+					})->values()->map(function( $sub ) use ( $judger_id ) {
+						$results = $sub->results->where('judger_id', $judger_id)->values()->first();
+						$output = new stdClass;
+						$output->id = $sub->id;
+  						$output->name = $sub->name;
+  						$output->weight = $sub->weight;
+						$output->score = $results->given_score;
+						$output->max = $results->max;
+						$output->comment = $results->comment;
+						$output->status = $results->status;
+						$output->value = ( $results->given_score / $results->max ) * $sub->weight;
+						return $output;
+					});
+
+					$output = new stdClass;
+					$output->id = $item->id;
+					$output->name = $item->name;
+					$output->weight = $item->weight;
+					$output->score = $details->sum('value');
+					$output->value = ( round( ( $output->score * $output->weight ) * 100 ) / 100 );
+					$output->details = $details;
+					return $output;
+				});
+				$output = new stdClass;
+				$output->id = $company->id;
+				$output->status = $company->status;
+				$output->value = ( round( $details->sum('value') * 100 ) / 100 );
+				$output->comment = $company->comment;
+				$output->details = $details;
+				return $output;
+			})->first();
+			$output->evaluation = $companies;
+			return $output;
+		});
+		$return = [
+			'total' => ( ( round( $_criteria->sum('value') * 100 ) ) / 100),
+			'criteria' => $_criteria,
+			'judges' => $judges
+		];
+		return $return;
 	}
 
 	private function storeEvaluationCriteria( $request, $status )

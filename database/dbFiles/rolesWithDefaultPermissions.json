@@ -4176,6 +4176,16 @@
                 ]
             },
             {
+                "name": "screening.evaluation_results",
+                "description": "View Screening Evaluation Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
                 "name": "screening.evaluation_save_draft",
                 "description": "Save Screening Evaluation AS Draft",
                 "guard_name": "web",
