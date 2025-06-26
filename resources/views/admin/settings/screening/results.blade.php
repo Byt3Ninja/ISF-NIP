@@ -170,6 +170,7 @@
                     </dl>
                   </div>
 
+                  @if( false )
                   <div class="card border-light">
                   </div>
                   <div class="table-responsive">
@@ -357,88 +358,96 @@
                         @endforeach
                       </tbody>
                     </table>
-
-                    <hr class="hr my-10" />
-                    <div class="table-responsive">
-                      <table class="table table-hover table-bordered">
-                        <thead>
+                  </div>
+                  @endif
+                  <hr class="hr my-10" />
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                      <thead>
+                        <tr>
+                          <th style="width: 15%">Company</th>
+                          <th style="width: 15%">User/Title</th>
+                          <th style="width: 10%">Average Score</th>
+                          <th>
+                            <div class="row">
+                              <div class="col-md-3">Judgers</div>
+                              <div class="col-md-9">Score</div>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach( $_companies as $company )
                           <tr>
-                            <th style="width: 15%">Company</th>
-                            <th style="width: 15%">User/Title</th>
-                            <th style="width: 10%">Average Score</th>
-                            <th>
-                              <div class="row">
-                                <div class="col-md-3">Judgers</div>
-                                <div class="col-md-9">Score</div>
+                            <td>
+                              <a class="media-left d-inline-flex mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
+                                <div class="avatar">
+                                  <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/app-assets/images/logo_placeholder.png';" height="40" width="40">
+                                </div>
+                                <span class="mx-3 my-2">{{ $company->name }}</span>
+                              </a>
+                              <div>
+                                <button class="show-company-evaluation btn btn-xs btn-secondary mt-2 rounded-3" data-company="{{ $company->id }}" data-step="{{ $cstep->id }}">
+                                  <i class="fas fa-fw fa-sm fa-eye me-1"></i> Show Company Score
+                                </button>
                               </div>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach( $_companies as $company )
-                            <tr>
-                              <td>
-                                <a class="media-left d-inline-flex mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                  <div class="avatar">
-                                    <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/app-assets/images/logo_placeholder.png';" height="40" width="40">
-                                  </div>
-                                  <span class="mx-3 my-2">{{ $company->name }}</span>
+                              <div class="d-flex align-items-center">
+                                <select id="cstep" class="select form-control exportcurrentstep" onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
+                                  <option value="0">{{ __('cycles.Disapprove') }}</option>
+                                    @foreach( $_steps->where('cycle_id', $company->cycle)->sortBy('arr')->values() as $step )
+                                      <option value="{{ $step->id }}" {{ $step->id == $company->step ? 'selected' : '' }}> {{ $step->title }}</option>
+                                    @endforeach
+                                </select>
+                              </div>
+                            </td>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
+                                  <img src="{{ $company->user->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
                                 </a>
-                                <div>
-                                  <button class="show-company-evaluation btn btn-xs btn-secondary mt-2 rounded-3" data-company="{{ $company->id }}" data-step="{{ $cstep->id }}">
-                                    <i class="fas fa-fw fa-sm fa-eye me-1"></i> Show Company Score
-                                  </button>
-                                </div>
-                              </td>
-                              <td>
-                                <div class="d-flex align-items-center">
-                                  <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
-                                    <img src="{{ $company->user->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                  </a>
-                                  <a href="/dashboard/users/{{ $company->user->id }}/edit">
-                                    <div class="media-body">
-                                      <h6 class="media-heading mb-0">{{ $company->user->name }} </h6>
-                                      <span class="font-small-2">{{ $company->user->title }}</span>
+                                <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                                  <div class="media-body">
+                                    <h6 class="media-heading mb-0">{{ $company->user->name }} </h6>
+                                    <span class="font-small-2">{{ $company->user->title }}</span>
+                                  </div>
+                                </a>
+                              </div>
+                            </td>
+                            <td>
+                              {{ $company->average_score . '%' }}
+                            </td>
+                            <td>
+                              @foreach( $judges as $judge )
+                                @php( $scoped_company = collect( $judge->companies )->where('id', $company->id)->first() )
+                                @if( in_array( $company->id, $judge->startups->toArray() ) )
+                                  <div class="row my-3">
+                                    <div class="col-md-3">
+                                      @if( $scoped_company->status == 'Published' )
+                                      <i title="Published" class="fas fa-fw fa-sm fa-check-circle text-success mx-1"></i>
+                                      @elseif( $scoped_company->status == 'Draft' )
+                                      <i title="Draft" class="fas fa-fw fa-sm fa-exclamation-triangle text-warning mx-1"></i>
+                                      @elseif( $scoped_company->status == 'Not Evaluated' )
+                                      <i title="Not Evaluated" class="fas fa-fw fa-sm fa-times-circle text-danger mx-1"></i>
+                                      @endif
+                                      {{ $judge->name }}
                                     </div>
-                                  </a>
-                                </div>
-                              </td>
-                              <td>
-                                {{ $company->average_score . '%' }}
-                              </td>
-                              <td>
-                                @foreach( $judges as $judge )
-                                  @php( $scoped_company = collect( $judge->companies )->where('id', $company->id)->first() )
-                                  @if( in_array( $company->id, $judge->startups->toArray() ) )
-                                    <div class="row my-3">
-                                      <div class="col-md-3">
-                                        @if( $scoped_company->status == 'Published' )
-                                        <i title="Published" class="fas fa-fw fa-sm fa-check-circle text-success mx-1"></i>
-                                        @elseif( $scoped_company->status == 'Draft' )
-                                        <i title="Draft" class="fas fa-fw fa-sm fa-exclamation-triangle text-warning mx-1"></i>
-                                        @elseif( $scoped_company->status == 'Not Evaluated' )
-                                        <i title="Not Evaluated" class="fas fa-fw fa-sm fa-times-circle text-danger mx-1"></i>
-                                        @endif
-                                        {{ $judge->name }}
-                                      </div>
-                                      <div class="col-md-9">
-                                        @if( $evaluation->status !== 'Published' )
-                                          Evaluation not yet published
-                                        @else
-                                          <div class="progress" role="progressbar" aria-label="Judger score" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: auto;">
-                                            <div class="progress-bar {{ $scoped_company->score >= 75 ? 'bg-success' : ($scoped_company->score >= 50 ? 'bg-info' : (  $scoped_company->score >= 25 ? 'bg-warning' : 'bg-danger' ) ) }}" style="width: {{ $scoped_company->score }}%">{{ $scoped_company->score }}%</div>
-                                          </div>
-                                        @endif
-                                      </div>
+                                    <div class="col-md-9">
+                                      @if( $evaluation->status !== 'Published' )
+                                        Evaluation not yet published
+                                      @else
+                                        <div class="progress" role="progressbar" aria-label="Judger score" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: auto;">
+                                          <div class="progress-bar {{ $scoped_company->score >= 75 ? 'bg-success' : ($scoped_company->score >= 50 ? 'bg-info' : (  $scoped_company->score >= 25 ? 'bg-warning' : 'bg-danger' ) ) }}" style="width: {{ $scoped_company->score }}%">{{ $scoped_company->score }}%</div>
+                                        </div>
+                                      @endif
                                     </div>
-                                  @endif
-                                @endforeach
-                              </td>
-                            </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
+                                  </div>
+                                @endif
+                              @endforeach
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
