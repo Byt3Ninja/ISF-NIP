@@ -716,6 +716,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
                     "registered"
                 ]
             },
@@ -725,7 +726,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -734,7 +736,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -744,6 +747,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
                     "registered"
                 ]
             },
@@ -753,7 +757,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -762,7 +767,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -771,7 +777,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -780,7 +787,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             }
         ]
