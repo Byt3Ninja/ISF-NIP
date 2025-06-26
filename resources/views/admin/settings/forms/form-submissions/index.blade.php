@@ -127,6 +127,54 @@ const translations = {
 
 const t = translations[lang] || translations.en;
 
+// Function to format submitted by users
+function formatSubmittedBy(users, maxVisible = 3) {
+  if (!users || users.trim() === '') return '';
+  
+  const userList = users.split(',').map(user => user.trim()).filter(user => user.length > 0);
+  
+  if (userList.length === 0) return '';
+  
+  if (userList.length <= maxVisible) {
+    return userList.map((user, index) => 
+      `<span class="badge ${index === 0 ? 'bg-label-primary' : 'bg-light text-dark'} me-1 mb-1">${user}</span>`
+    ).join('');
+  }
+  
+  const visibleUsers = userList.slice(0, maxVisible);
+  const hiddenUsers = userList.slice(maxVisible);
+  
+  let html = visibleUsers.map((user, index) => 
+    `<span class="badge ${index === 0 ? 'bg-label-primary' : 'bg-light text-dark'} me-1 mb-1">${user}</span>`
+  ).join('');
+  
+  html += `<span class="badge bg-secondary me-1 mb-1">+${hiddenUsers.length}</span>`;
+  html += `<button class="btn btn-link p-0 text-decoration-underline" style="font-size: 0.75rem;" onclick="showAllUsers(this, '${users.replace(/'/g, "\\'")}')">Show All</button>`;
+  
+  return `<div class="d-flex flex-wrap align-items-center" style="width: 250px; max-height: 80px; overflow-y: auto;">${html}</div>`;
+}
+
+// Function to show all users in a modal or expanded view
+function showAllUsers(button, allUsers) {
+  const userList = allUsers.split(',').map(user => user.trim()).filter(user => user.length > 0);
+  
+  const modalContent = userList.map((user, index) => 
+    `<span class="badge ${index === 0 ? 'bg-label-primary' : 'bg-light text-dark'} me-2 mb-2">${user}</span>`
+  ).join('');
+  
+  Swal.fire({
+    title: t.submittedBy || 'Submitted By',
+    html: `<div class="d-flex flex-wrap justify-content-center">${modalContent}</div>`,
+    icon: 'info',
+    confirmButtonText: t.ok || 'OK',
+    customClass: {
+      confirmButton: 'btn btn-primary'
+    },
+    buttonsStyling: false,
+    width: '600px'
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function (e) {
   // Your existing code...
 
@@ -137,6 +185,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
   
     if (dt_basic_table.length) {
       const data = {!! json_encode($data) !!};
+
+      console.log('data', data)
 
       dt_basic = dt_basic_table.DataTable({
         data: data,
@@ -151,6 +201,16 @@ document.addEventListener('DOMContentLoaded', function (e) {
           { data: null, title: t.actions, orderable: false, searchable: false }
         ],
         columnDefs: [
+          {
+            // Submitted By column formatting
+            targets: 1,
+            render: function (data, type, full, meta) {
+              if (type === 'display') {
+                return formatSubmittedBy(data);
+              }
+              return data;
+            }
+          },
           {
             // Actions
             targets: 7,
@@ -279,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         Swal.fire({
           title: t.deleteRecord,
           text: t.deleteConfirmation,
-          icon: 'warning',
+          icon: 'info',
           showCancelButton: true,
           confirmButtonText: t.delete,
           cancelButtonText: t.cancel,

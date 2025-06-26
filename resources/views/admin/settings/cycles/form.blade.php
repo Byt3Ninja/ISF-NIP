@@ -120,7 +120,7 @@
                                             
                                             <div class="d-flex justify-content-end mt-4">
                                                 <button type="submit" class="btn btn-primary">
-                                                    {{ __('admin.Update') }}
+                                                    {{ __('admin.submit') }}
                                                 </button>
                                             </div>
                                         </form>
