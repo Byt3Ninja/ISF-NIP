@@ -237,6 +237,12 @@ class CyclesController extends Controller
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
+            if ($request->hasFile('img_url')) {
+                    $image = $request->file('img_url');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('programs/'), $imageName);
+                    $cycle->img_url = 'programs/' . $imageName;
+                }
 
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
@@ -485,7 +491,14 @@ class CyclesController extends Controller
                     $originalName = $request->file('delegation_pdf')->getClientOriginalName();
                     $cycle->delegation_file = $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
                 }
+                if ($request->hasFile('img_url')) {
+                    $image = $request->file('img_url');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
 
+                    $image->move(public_path('programs/'), $imageName);
+                    $cycle->img_url = 'programs/' . $imageName;
+                    
+                }
                 $cycle->save();
 
                 if (auth()->user()->hasRole('OrganizationManager')) {
