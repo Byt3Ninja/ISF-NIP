@@ -2130,6 +2130,64 @@ class HomeController extends Controller
             ORDER BY
                 zoom_date ASC
         ";
+        $getNotEvaluatedCompanies = collect(DB::select("SELECT
+                results.id AS result_id,
+                results.evaluation_id,
+                eval.step_id AS step_id,
+                results.company_id AS company_id,
+                results.status,
+                results.comment
+            FROM
+                screening_evaluation_results as results
+            LEFT JOIN
+                screening_evaluation as eval ON eval.id = results.evaluation_id
+            WHERE
+                results.user_id = ?
+        ", [
+            $user->id
+        ]));
+        $established_evaluations_q = "SELECT
+                eval.id,
+                eval.step_id,
+                eval.status
+            FROM
+                screening_evaluation as eval
+            WHERE
+                eval.id > 0
+        ";
+        $established_evaluations_inputs = [];
+        $steps_ids = $filtration->pluck('id')->unique()->toArray();
+        if( count( $steps_ids ) > 0 )
+        {
+            $steps_idsPlaceholders = implode(',', array_fill(0, count($steps_ids), '?'));
+            $established_evaluations_q .= " AND eval.step_id IN ($steps_idsPlaceholders)";
+            $established_evaluations_inputs = $steps_ids;
+        }
+        $established_evaluations = collect(DB::select($established_evaluations_q, $established_evaluations_inputs));
+        $filtration = $filtration->map(function ( $step ) use ( $getNotEvaluatedCompanies, $established_evaluations ) {
+            $is_established = $established_evaluations->where('step_id', $step->id)->first();
+            $companies = $step->companies->map(function( $company ) use ( $getNotEvaluatedCompanies, $is_established, $step ) {
+                $evaluation_status = '';
+                if( empty( $is_established ) || is_null( $is_established ) ) { $evaluation_status = 'not_started'; }
+                else
+                {
+                    if( $is_established->status == 0 ) { $evaluation_status = 'not_started'; }
+                    else
+                    {
+                        $responds = $getNotEvaluatedCompanies->where('company_id', $company->id)->where('step_id', $step->id)->values();
+                        if( $responds->count() > 0 )
+                        {
+                            $havePending = $responds->where('status', 0)->count();
+                            $evaluation_status = $havePending > 0 ? 'in_progress' : 'evaluated';
+                        } else { $evaluation_status = 'not_evaluated'; }
+                    }
+                }
+                $company->evaluation_status = $evaluation_status;
+                return $company;
+            });
+            $step->companies = $companies;
+            return $step;
+        });
         $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
         $data['notrated_mens'] = $notRated_men;

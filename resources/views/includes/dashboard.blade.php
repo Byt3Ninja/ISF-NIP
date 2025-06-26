@@ -974,7 +974,7 @@
 														<tr>
 														  <th>{{ __('dashboard.Company') }}</th>
 														  <th>{{ __('dashboard.User/Title') }}</th>
-														  {{--  <th>{{ __('dashboard.Screening completed') }}</th>  --}}
+														  <th>{{ __('dashboard.Screening completed') }}</th>
 														  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
 														</tr>
 													  </thead>
@@ -1001,6 +1001,25 @@
 																-
 																@endif
 																</div>
+															</td>
+															<td>
+																@if( $company->evaluation_status == 'not_started' )
+																<span class="badge bg-label-warning">
+																	<i class="ti ti-clock me-2"></i> Not started
+																</span>
+																@elseif( $company->evaluation_status == 'in_progress' )
+																<span class="badge bg-label-info">
+																	<i class="ti ti-clock-bolt me-2"></i> In progress
+																</span>
+																@elseif( $company->evaluation_status == 'evaluated' )
+																<span class="badge bg-label-success">
+																	<i class="ti ti-circle-check me-2"></i> Completed
+																</span>
+																@elseif( $company->evaluation_status == 'not_evaluated' )
+																<span class="badge bg-label-danger">
+																	<i class="ti ti-exclamation-circle me-2"></i> Not Evaluated
+																</span>
+																@endif
 															</td>
 														</tr>
 														@endforeach
