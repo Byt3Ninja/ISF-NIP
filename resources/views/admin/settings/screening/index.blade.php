@@ -15,7 +15,6 @@
 <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 <link rel="stylesheet" href="/path/to/select2.min.css">
 <style>
-  .remove-panel-btn { cursor: pointer; }
   /* Custom fade animation for tab content */
   @keyframes fadeIn {
     from {
@@ -33,13 +32,6 @@
   }
   .tab-content.active {
     display: block;
-  }
-  /* Input validation feedback */
-  .is-invalid {
-    border-color: #dc3545 !important;
-  }
-  .is-valid {
-    border-color: #28a745 !important;
   }
 </style>
 @stop
@@ -302,9 +294,9 @@
               <strong>{{ __('cycles.Important Notice') }}:</strong><br>
               <span dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
                 @if($l == 'ar')
-                  يرجى الملاحظة أنه عند حفظ معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل الحفظ.
+                  يرجى الملاحظة أنه عند نشر معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل النشر.
                 @else
-                  Please note that once you save the criteria for companies applying to join the program, you will not be able to modify them later. Please review the criteria carefully before saving.
+                  Please note that once you publish the criteria for companies applying to join the program, you will not be able to modify them later. Please review the criteria carefully before publishing.
                 @endif
               </span>
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -1115,7 +1107,7 @@
       let panel = lastTrData + 1;
       let html = `<tr data-panel="${panel}">
         <td>
-          <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+          <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
           {{ __('cycles.Panel list') }} ${panel}
         </td>
         <td>
