@@ -82,6 +82,7 @@ Route::get('/2otp', function () {
 })->middleware(['auth', '2fa']);
 
 Route::get('/db-migrate', 'IndexController@dbMigrate');
+Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('invitations.set_password_view_form');
