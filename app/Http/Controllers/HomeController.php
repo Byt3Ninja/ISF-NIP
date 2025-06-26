@@ -209,6 +209,9 @@ class HomeController extends Controller
                     sr.deleted_at IS NULL
                     AND sr.approved IS NULL
             ";
+            if($user->hasRole('Registered')){
+                $services_requests_q .= " AND sr.user_id = " . $user->id;
+            }
             if ($has_org) {
                 $services_requests_q .= " AND s.organization_id = " . $user->organization_id;
             }
