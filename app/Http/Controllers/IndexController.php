@@ -80,7 +80,7 @@ class IndexController extends Controller
             {
                 try {
                     Artisan::call('db:seed', [
-                        '--class' => 'DefaultRolesPermissionSeeder',
+                        '--class' => 'defaultRolesPermissionSeeder',
                         '--force' => true,
                     ]);
                     $output = Artisan::output();
