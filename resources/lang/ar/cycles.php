@@ -351,5 +351,18 @@ return [
     'Important Notice' => 'إشعار مهم',
     'Select_Currency' => 'اختر العملة',
     'Select' => 'اختر',
+    
+    // New validation and input restriction translations
+    'Only letters and spaces allowed' => 'يُسمح بالحروف والمسافات فقط',
+    'Draft saved successfully!' => 'تم حفظ المسودة بنجاح!',
+    'Error saving draft. Please try again.' => 'خطأ في حفظ المسودة. يرجى المحاولة مرة أخرى.',
+    'Model published successfully!' => 'تم نشر النموذج بنجاح!',
+    'Error publishing model. Please try again.' => 'خطأ في نشر النموذج. يرجى المحاولة مرة أخرى.',
+    'Please fix all validation errors before publishing.' => 'يرجى إصلاح جميع أخطاء التحقق قبل النشر.',
+    'Category name is required' => 'اسم الفئة مطلوب',
+    'Category with weight must have sub-criteria' => 'الفئة التي لها وزن يجب أن تحتوي على معايير فرعية',
+    'Sub-criterion name is required' => 'اسم المعيار الفرعي مطلوب',
+    'Warning: Sub-criterion weights exceed 100%' => 'تحذير: أوزان المعايير الفرعية تتجاوز 100%',
+    'Model structure is valid and ready for publishing.' => 'هيكل النموذج صحيح وجاهز للنشر.',
   ];
 

@@ -192,7 +192,7 @@
                       <div class="d-flex align-items-center mx-2">
                         <div style="display: flex; align-items: center;">
                           <button
-                            class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                            class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center me-3" 
                             style="border-radius: 17px; width: 40px; height: 40px;"
                             type="submit">
                               <i class="ti ti-filter text-white ti-24px"></i>
@@ -255,7 +255,7 @@
                             <option value="80" {{ request('result_id') == 80 ? 'selected' : '' }}>80</option>
                             <option value="90" {{ request('result_id') == 90 ? 'selected' : '' }}>90</option>
                           </select>
-                          <select name="result2_id" class="form-control">
+                          <select name="result2_id" class="form-control mx-3">
                             <option value="==" {{ request('result2_id') == '=' ? 'selected' : '' }}>{{ __('admin.equal_to') }}</option>
                             <option value=">=" {{ request('result2_id') == '>=' ? 'selected' : '' }}>{{ __('admin.more_than_or_equal_to') }}</option>
                             <option value="<=" {{ request('result2_id') == '<=' ? 'selected' : '' }}>{{ __('admin.less_than_or_equal_to') }}</option>

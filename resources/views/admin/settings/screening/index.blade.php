@@ -16,121 +16,30 @@
 <link rel="stylesheet" href="/path/to/select2.min.css">
 <style>
   .remove-panel-btn { cursor: pointer; }
-  /* Tabs Content */
-  .tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .tab-content.active {
-    display: block;
-  }
-
-  /* Form Elements */
-  #category-input {
-    margin-inline-end: 1rem;
-  }
-
-  textarea.form-control {
-    resize: vertical;
-    min-height: 80px;
-  }
-
-  /* Evaluation Model Editor Styles */
-  #model-editor {
-    margin-top: 1.5rem;
-  }
-
-  .category-editor {
-    background: var(--card-bg);
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
-  .category-header {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .category-header h3 {
-    margin: 0;
-    flex-grow: 1;
-  }
-
-  .sub-criteria-list {
-    margin-top: 1rem;
-    padding-left: 1rem;
-    border-left: 2px solid var(--bs-primary);
-  }
-
-  .sub-criterion-editor {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
-  .sub-criterion-editor:last-child {
-    border-bottom: none;
-  }
-
-  .sub-criterion-editor .form-label {
-    display: none;
-  }
-
-  .sub-criterion-editor input[type="text"] {
-    flex-grow: 1;
-  }
-
-  .sub-criterion-editor input[type="number"] {
-    width: 80px;
-    text-align: center;
-  }
-
-  .weight-input {
-    width: 80px !important;
-    text-align: center;
-  }
-
-  .category-actions {
-    margin-top: 1rem;
-    display: flex;
-    justify-content: flex-end;
-  }
-
+  /* Custom fade animation for tab content */
   @keyframes fadeIn {
     from {
       opacity: 0;
       transform: translateY(10px);
     }
-
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-
-  @media (max-width: 768px) {
-    .sub-criterion-editor {
-      flex-wrap: wrap;
-    }
-
-    .sub-criterion-editor input[type="number"] {
-      width: 100%;
-    }
-
-    .weight-input {
-      width: 100% !important;
-    }
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .tab-content.active {
+    display: block;
+  }
+  /* Input validation feedback */
+  .is-invalid {
+    border-color: #dc3545 !important;
+  }
+  .is-valid {
+    border-color: #28a745 !important;
   }
 </style>
 @stop
@@ -270,7 +179,7 @@
                           @foreach( $judgers_list as $key => $list )
                             <tr data-panel="{{ $key }}">
                               <td>
-                                <i title="Remove panel" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+                                <i title="Remove panel" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
                                 {{ __('admin.Panel_list') }} {{ $key }}
                               </td>
                               <td>
@@ -388,20 +297,18 @@
           
           <!-- Screamer Warning -->
           @if( $_user->ableTo('screening.evaluation_publish', $permissions) )
-          <div></div>
-          @else
-          <div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-left: 4px solid #ff9f43;">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>{{ __('cycles.Important Notice') }}:</strong><br>
-            <span dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
-              @if($l == 'ar')
-                يرجى الملاحظة أنه عند حفظ معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل الحفظ.
-              @else
-                Please note that once you save the criteria for companies applying to join the program, you will not be able to modify them later. Please review the criteria carefully before saving.
-              @endif
-            </span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
+            <div class="alert alert-info alert-dismissible fade show border border-info" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>{{ __('cycles.Important Notice') }}:</strong><br>
+              <span dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
+                @if($l == 'ar')
+                  يرجى الملاحظة أنه عند حفظ معايير الشركات المقدمة للانضمام إلى البرنامج، لن تتمكن من تعديلها لاحقًا. تأكد من مراجعة المعايير بعناية قبل الحفظ.
+                @else
+                  Please note that once you save the criteria for companies applying to join the program, you will not be able to modify them later. Please review the criteria carefully before saving.
+                @endif
+              </span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
           @endif
           
           <div>
@@ -425,7 +332,7 @@
             </div>
             <div id="model-validation-summary" style="display: none;"></div>
           </div>
-          <div id="model-editor"></div>
+          <div id="model-editor" class="mt-4"></div>
           @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
           <button id="add-category-btn" class="btn btn-label-primary">
             <i class="fas fa-plus me-2"></i> {{ __('cycles.AddNewCriteria') }}
@@ -491,7 +398,7 @@
           <div class="form-group mb-3">
             <label class="form-label fs-5">{{ __('cycles.Description') }}: </label>
             <textarea name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control">{{ $cstep->description }}</textarea>
+              class="form-control" style="min-height: 80px; resize: vertical;">{{ $cstep->description }}</textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -791,20 +698,20 @@
 
         evaluationModelData.categories.forEach((category, categoryIndex) => {
           const categoryDiv = document.createElement('div');
-          categoryDiv.className = 'category-editor';
+          categoryDiv.className = 'card shadow-sm border mb-4';
           categoryDiv.setAttribute('data-category-id', category.id);
 
-          let subCriteriaHTML = '<div class="sub-criteria-list">';
+          let subCriteriaHTML = '<div class="mt-3 ps-3 border-start border-primary border-3">';
           category.subCriteria.forEach((sub, subIndex) => {
             subCriteriaHTML += `
-              <div class="sub-criterion-editor" data-subcriterion-id="${sub.id}">
-                <input type="text" class="form-control subcriterion-name" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-                <div class="input-group w-px-150">
-                  <input type="number" class="form-control subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-                  <span class="input-group-text bg-label-secondary">%</span>
+              <div class="d-flex gap-3 align-items-center py-3 border-bottom" data-subcriterion-id="${sub.id}">
+                <input type="text" class="form-control subcriterion-name flex-grow-1" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" pattern="[A-Za-z\\s\\u0600-\\u06FF]*" title="{{ __('cycles.Only letters and spaces allowed') }}">
+                <div class="input-group" style="width: 150px;">
+                  <input type="number" class="form-control text-center subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="0.1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+                  <span class="input-group-text bg-light">%</span>
                 </div>
                 @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
-                <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="{{ __('cycles.Delete Sub Criteria') }}">
+                <button class="btn btn-outline-danger btn-sm delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="{{ __('cycles.Delete Sub Criteria') }}">
                   <i class="fas fa-trash-alt"></i>
                 </button>
                 @endif
@@ -814,31 +721,33 @@
           subCriteriaHTML += '</div>';
 
           categoryDiv.innerHTML = `
-            <div class="category-header">
-              <div class="w-100 d-flex justify-content-between align-items-center">
-                <input id="category-input" type="text" class="form-control category-name" placeholder="{{ __('cycles.Category Name') }}" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
-                <div class="d-flex align-items-center">
-                  <div class="input-group w-px-150">
-                    <input type="number" class="form-control category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
-                    <span class="input-group-text bg-label-secondary">%</span>
+            <div class="card-body">
+              <div class="d-flex flex-nowrap justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <div class="w-100 d-flex justify-content-between align-items-center">
+                  <input type="text" class="form-control category-name me-3 fw-bold fs-5" placeholder="{{ __('cycles.Category Name') }}" value="${category.name}" data-category-index="${categoryIndex}" pattern="[A-Za-z\\s\\u0600-\\u06FF]*" title="{{ __('cycles.Only letters and spaces allowed') }}">
+                  <div class="d-flex align-items-center">
+                    <div class="input-group" style="width: 150px;">
+                      <input type="number" class="form-control text-center category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="0.1" data-category-index="${categoryIndex}" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+                      <span class="input-group-text bg-light">%</span>
+                    </div>
+                    @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
+                    <button class="btn btn-outline-danger btn-sm delete-category-btn text-nowrap ms-3" data-category-index="${categoryIndex}" title="{{ __('cycles.Delete Criteria') }}">
+                      <i class="fas fa-trash-alt me-2"></i> {{ __('cycles.Delete Criteria') }}
+                    </button>
+                    @endif
                   </div>
-                  @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
-                  <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="{{ __('cycles.Delete Criteria') }}">
-                    <i class="fas fa-trash-alt me-2"></i> {{ __('cycles.Delete Criteria') }}
-                  </button>
-                  @endif
                 </div>
               </div>
+              <div class="validation-message category-validation" style="display: none;"></div>
+              ${subCriteriaHTML}
+              @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
+              <div class="mt-3 d-flex justify-content-end">
+                <button class="btn btn-outline-secondary btn-sm add-subcriterion-btn" data-category-index="${categoryIndex}">
+                  <i class="fas fa-plus me-2"></i> {{ __('cycles.Add Sub-criteria') }}
+                </button>
+              </div>
+              @endif
             </div>
-            <div class="validation-message category-validation" style="display: none;"></div>
-            ${subCriteriaHTML}
-            @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
-            <div class="category-actions">
-              <button class="btn btn-label-secondary btn-sm add-subcriterion-btn" data-category-index="${categoryIndex}">
-                <i class="fas fa-plus me-2"></i> {{ __('cycles.Add Sub-criteria') }}
-              </button>
-            </div>
-            @endif
           `;
           modelEditorContainer.appendChild(categoryDiv);
         });
@@ -881,6 +790,61 @@
         document.querySelectorAll('.category-name, .category-weight, .subcriterion-name, .subcriterion-weight').forEach(input => {
           input.addEventListener('input', handleInputChange);
           input.addEventListener('change', () => validateModel(false));
+          
+          // Add specific input validation
+          if (input.classList.contains('category-name') || input.classList.contains('subcriterion-name')) {
+            // Text fields - only letters, spaces, and Arabic characters
+            input.addEventListener('keypress', function(e) {
+              const regex = /^[A-Za-z\s\u0600-\u06FF]*$/;
+              if (!regex.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                e.preventDefault();
+              }
+            });
+            
+            input.addEventListener('paste', function(e) {
+              e.preventDefault();
+              const paste = (e.clipboardData || window.clipboardData).getData('text');
+              const regex = /^[A-Za-z\s\u0600-\u06FF]*$/;
+              if (regex.test(paste)) {
+                this.value = paste;
+                handleInputChange({ target: this });
+              }
+            });
+          }
+          
+          if (input.classList.contains('category-weight') || input.classList.contains('subcriterion-weight')) {
+            // Number fields - only numbers and decimal point
+            input.addEventListener('keypress', function(e) {
+              const regex = /^[0-9.]$/;
+              if (!regex.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
+                e.preventDefault();
+              }
+              
+              // Prevent multiple decimal points
+              if (e.key === '.' && this.value.includes('.')) {
+                e.preventDefault();
+              }
+              
+              // Prevent values over 100
+              const newValue = this.value + e.key;
+              if (parseFloat(newValue) > 100) {
+                e.preventDefault();
+              }
+            });
+            
+            input.addEventListener('blur', function() {
+              // Ensure value doesn't exceed 100
+              if (parseFloat(this.value) > 100) {
+                this.value = 100;
+                handleInputChange({ target: this });
+              }
+              // Ensure value is not negative
+              if (parseFloat(this.value) < 0) {
+                this.value = 0;
+                handleInputChange({ target: this });
+              }
+            });
+          }
         });
       }
 
@@ -964,7 +928,7 @@
       @if( $status == 'draft' )
         @if( $_user->ableTo('screening.evaluation_publish') )
         function handleSaveModel() {
-          if (validateModel(true)) {
+          if (validateModel(true, true)) {  // Use strict validation for publishing
             $.ajaxSetup({
               headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -982,70 +946,96 @@
                 console.log(response);
                 if (response.status) {
                   evaluationModelData.categories = response.data;
-                  showAlert(modelValidationSummary, '{{ __('cycles.Model saved successfully!') }}', 'success', 3000);
+                  showAlert(modelValidationSummary, '{{ __('cycles.Model published successfully!') }}', 'success', 3000);
+                  // Refresh page to update status
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 2000);
                 } else {
                   showAlert(modelValidationSummary, response.message, 'danger');
                 }
               },
               error: function(error) {
-                console.error("Error saving model:", error);
-                showAlert(modelValidationSummary, '{{ __('cycles.Error saving model. Please try again.') }}', 'danger');
+                console.error("Error publishing model:", error);
+                showAlert(modelValidationSummary, '{{ __('cycles.Error publishing model. Please try again.') }}', 'danger');
               }
             });
           } else {
-            alert("{{ __('cycles.Please fix the validation errors before saving.') }}");
+            alert("{{ __('cycles.Please fix all validation errors before publishing.') }}");
           }
         }
         @endif
 
         @if( $_user->ableTo('screening.evaluation_save_draft') )
         function handleDraftModel() {
-          if (validateModel(true)) {
-            $.ajaxSetup({
-              headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          // Save draft without validation - allow incomplete forms
+          $.ajaxSetup({
+            headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+          });
+          $.ajax({
+            type: "POST",
+            url: "{{ route('screening.evaluation_save_draft') }}",
+            data: {
+              "action": "draft",
+              "criteria": evaluationModelData.categories,
+              "stepId": {{ $cstep->id }},
+            },
+            success: function(response) {
+              console.log(response);
+              if (response.status) {
+                evaluationModelData.categories = response.data;
+                showAlert(modelValidationSummary, '{{ __('cycles.Draft saved successfully!') }}', 'success', 3000);
+              } else {
+                showAlert(modelValidationSummary, response.message, 'danger');
               }
-            });
-            $.ajax({
-              type: "POST",
-              url: "{{ route('screening.evaluation_save_draft') }}",
-              data: {
-                "action": "draft",
-                "criteria": evaluationModelData.categories,
-                "stepId": {{ $cstep->id }},
-              },
-              success: function(response) {
-                console.log(response);
-                if (response.status) {
-                  evaluationModelData.categories = response.data;
-                  showAlert(modelValidationSummary, '{{ __('cycles.Model saved successfully!') }}', 'success', 3000);
-                } else {
-                  showAlert(modelValidationSummary, response.message, 'danger');
-                }
-              },
-              error: function(error) {
-                console.error("Error saving model:", error);
-                showAlert(modelValidationSummary, '{{ __('cycles.Error saving model. Please try again.') }}', 'danger');
-              }
-            });
-          } else {
-            alert("{{ __('cycles.Please fix the validation errors before saving.') }}");
-          }
+            },
+            error: function(error) {
+              console.error("Error saving draft:", error);
+              showAlert(modelValidationSummary, '{{ __('cycles.Error saving draft. Please try again.') }}', 'danger');
+            }
+          });
         }
         @endif
       @endif
 
-      function validateModel(showGlobalSummary) {
+      function validateModel(showGlobalSummary, isPublishing = false) {
         let isValid = true;
         let totalCategoryWeight = 0;
         let globalErrorMessages = [];
 
         evaluationModelData.categories.forEach((category, categoryIndex) => {
-          const categoryElement = modelEditorContainer.querySelector(`.category-editor[data-category-id="${category.id}"]`);
+          const categoryElement = modelEditorContainer.querySelector(`.card[data-category-id="${category.id}"]`);
           const categoryValidationDiv = categoryElement ? categoryElement.querySelector('.category-validation') : null;
           let categoryErrorMessage = '';
 
           totalCategoryWeight += category.weight;
+
+          // Only apply strict validation when publishing
+          if (isPublishing) {
+            // Check if category name is empty
+            if (!category.name || category.name.trim() === '') {
+              isValid = false;
+              categoryErrorMessage = `{{ __('cycles.Category name is required') }}`;
+              globalErrorMessages.push(`{{ __('cycles.Category') }} ${categoryIndex + 1}: ${categoryErrorMessage}`);
+            }
+            
+            // Check if category has weight but no sub-criteria
+            if (category.weight > 0 && category.subCriteria.length === 0) {
+              isValid = false;
+              categoryErrorMessage = `{{ __('cycles.Category with weight must have sub-criteria') }}`;
+              globalErrorMessages.push(`{{ __('cycles.Category') }} "${category.name}": ${categoryErrorMessage}`);
+            }
+            
+            // Check sub-criteria names
+            category.subCriteria.forEach((sub, subIndex) => {
+              if (!sub.name || sub.name.trim() === '') {
+                isValid = false;
+                globalErrorMessages.push(`{{ __('cycles.Category') }} "${category.name}", {{ __('cycles.Sub-criterion') }} ${subIndex + 1}: {{ __('cycles.Sub-criterion name is required') }}`);
+              }
+            });
+          }
 
           let totalSubCriterionWeight = 0;
           if (category.subCriteria.length > 0) {
@@ -1053,12 +1043,16 @@
               totalSubCriterionWeight += sub.weight;
             });
 
-            if (Math.abs(totalSubCriterionWeight - 1.0) > 0.001) {
+            // Only enforce weight validation when publishing
+            if (isPublishing && Math.abs(totalSubCriterionWeight - 1.0) > 0.001) {
               isValid = false;
               categoryErrorMessage = `{{ __('cycles.Sub-criterion weights must sum to 100%') }} ({{ __('cycles.currently') }} ${(totalSubCriterionWeight * 100).toFixed(1)}%).`;
               globalErrorMessages.push(`{{ __('cycles.Category') }} "${category.name}": ${categoryErrorMessage}`);
+            } else if (!isPublishing && totalSubCriterionWeight > 1.0) {
+              // Just show warning for drafts when over 100%
+              categoryErrorMessage = `{{ __('cycles.Warning: Sub-criterion weights exceed 100%') }} ({{ __('cycles.currently') }} ${(totalSubCriterionWeight * 100).toFixed(1)}%).`;
             }
-          } else if (category.weight > 0) {
+          } else if (category.weight > 0 && !isPublishing) {
             categoryErrorMessage = `{{ __('cycles.Warning: Category has weight but no sub-criteria. It won\'t contribute to score.') }}`;
           }
 
@@ -1073,7 +1067,8 @@
           }
         });
 
-        if (Math.abs(totalCategoryWeight - 1.0) > 0.001) {
+        // Only enforce total weight validation when publishing
+        if (isPublishing && Math.abs(totalCategoryWeight - 1.0) > 0.001) {
           isValid = false;
           globalErrorMessages.push(`{{ __('cycles.Total category weights must sum to 100%') }} ({{ __('cycles.currently') }} ${(totalCategoryWeight * 100).toFixed(1)}%).`);
         }
@@ -1082,7 +1077,8 @@
           if (!isValid) {
             showAlert(modelValidationSummary, '<strong>{{ __('cycles.Validation Errors:') }}</strong><br>' + globalErrorMessages.join('<br>'), 'danger');
           } else {
-            showAlert(modelValidationSummary, '{{ __('cycles.Model structure is valid.') }}', 'success', 3000);
+            const message = isPublishing ? '{{ __('cycles.Model structure is valid and ready for publishing.') }}' : '{{ __('cycles.Model structure is valid.') }}';
+            showAlert(modelValidationSummary, message, 'success', 3000);
           }
         } else {
           if (!modelValidationSummary.classList.contains('alert-danger') && !modelValidationSummary.classList.contains('alert-success')) {
