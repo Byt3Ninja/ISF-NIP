@@ -511,6 +511,23 @@
       exportSuccess: "{{ __('cycles.export_willsuccess') }}",
       exportNotSuccess: "{{ __('cycles.export_Notsuccess') }}",
     };
+    $(document).on('click', '.show-company-evaluation', function(e) {
+      e.preventDefault();
+      const company = parseInt( $(this).data('company') );
+      const step = parseInt( $(this).data('step') );
+      $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+      $.ajax({
+        type: 'POST',
+        url: '/dashboard/screening/evaluation/results',
+        data: {
+          company: company,
+          step: step,
+        },
+        success: function(response) {
+          console.log( response );
+        }, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
+      });
+    });
   </script>
 
   <script>
