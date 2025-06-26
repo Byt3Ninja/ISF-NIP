@@ -71,6 +71,7 @@
                           @php
                             $cycles = \App\Cycle::get();
                           @endphp
+                          <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
                           @foreach ($cycles as $cycle)
                             <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
                               {{ $cycle->title }}
@@ -530,7 +531,7 @@
         const formattedEndDate = formatDate(endDate);
         url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
       }
-      if (CycleId) {
+      if (CycleId && CycleId !== 'all') {
         url += `&cycle_id=${CycleId}`;
       }
 
