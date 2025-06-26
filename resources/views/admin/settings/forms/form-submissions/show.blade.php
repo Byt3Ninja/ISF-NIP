@@ -55,7 +55,7 @@
 @section('pagescripts')
 <script>
   let submissionData = {!! json_encode($data[0]) !!};
-  console.log(submissionData);
+  // console.log(submissionData);
   document.addEventListener('DOMContentLoaded', function() {
     const submissionData = {!! json_encode($data[0]) !!};
 
@@ -134,30 +134,32 @@
             startupAnswers.forEach((ans, ansIndex) => {
               let html = '';
               const questionNumber = ansIndex + 1;
+
+              // console.log('ans', ans);
               
-              if (ans.file_url && ans.file_name) {
+              if (ans?.value?.file_url && ans?.value?.file_name) {
                 // File field using Bootstrap alert and list group
                 let iconClass = 'ti ti-file';
                 let alertClass = 'alert-secondary';
                 let badgeClass = 'bg-secondary';
                 let fileType = 'File';
                 
-                if (ans.file_name.match(/\.(pdf)$/i)) {
+                if (ans?.value?.file_name.match(/\.(pdf)$/i)) {
                   iconClass = 'ti ti-file-type-pdf';
                   alertClass = 'alert-danger';
                   badgeClass = 'bg-danger';
                   fileType = 'PDF';
-                } else if (ans.file_name.match(/\.(xlsx|xls|csv)$/i)) {
+                } else if (ans?.value?.file_name.match(/\.(xlsx|xls|csv)$/i)) {
                   iconClass = 'ti ti-file-spreadsheet';
                   alertClass = 'alert-success';
                   badgeClass = 'bg-success';
                   fileType = 'Excel';
-                } else if (ans.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                } else if (ans?.value?.file_name.match(/\.(jpg|jpeg|png|gif)$/i)) {
                   iconClass = 'ti ti-photo';
                   alertClass = 'alert-info';
                   badgeClass = 'bg-info';
                   fileType = 'Image';
-                } else if (ans.file_name.match(/\.(doc|docx)$/i)) {
+                } else if (ans?.value?.file_name.match(/\.(doc|docx)$/i)) {
                   iconClass = 'ti ti-file-text';
                   alertClass = 'alert-primary';
                   badgeClass = 'bg-primary';
@@ -171,14 +173,14 @@
                       <span class="badge ${badgeClass}">${fileType}</span>
                     </div>
                     <div class="alert ${alertClass} mb-0">
-                      <a href="${ans.file_url}" target="_blank" class="text-decoration-none d-flex align-items-center">
+                        <a href="${ans?.value?.file_url}" download="${ans?.value?.file_name}" target="_blank" rel="noopener noreferrer" class="text-decoration-none d-flex align-items-center">
                         <i class="${iconClass} me-3 fs-4"></i>
                         <div class="flex-grow-1">
-                          <div class="fw-semibold">${ans.file_name}</div>
-                          <small class="text-muted">{{ __('admin.Click to download') }}</small>
+                          <div class="fw-semibold">${ans?.value?.file_name}</div>
+                          <small class="text-muted">{{ __('admin.Click to view') }}</small>
                         </div>
-                        <i class="ti ti-download ms-2"></i>
-                      </a>
+                        <i class="ti ti-eye ms-2"></i>
+                        </a>
                     </div>
                   </div>
                 `;

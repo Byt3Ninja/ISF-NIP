@@ -2027,5 +2027,7 @@ return [
 	'Text' => 'نص',
 	'Loading submission data' => 'جارٍ تحميل بيانات التقديم',
 	'The Answers' => 'إجابات',
-	'No evaluations found' => 'لا توجد تقييمات'
+	'No evaluations found' => 'لا توجد تقييمات',
+	'Click to view' => 'انقر لعرض',
+	'View File' => 'عرض الملف',
 ];

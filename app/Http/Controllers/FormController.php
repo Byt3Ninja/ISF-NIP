@@ -188,12 +188,26 @@ class FormController extends Controller
       
           // answers
           $submission->answers = $group->map(function ($item) use ($l) {
-              return (object)[
-                  'user_id' => $item->FD_user_id,
-                  'name' => $item->{'user_name_' . $l},
-                  'label' => $item->FD_question,
-                  'value' => $item->FD_answer,
+            $value = $item->FD_answer;
+            
+            // Check if the value is a file path
+            if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
+              // Extract filename from path
+              $filename = basename($value);
+              $value = [
+                'type' => 'file',
+                'path' => $value,
+                'file_name' => $filename,
+                'file_url' => asset($value) // Generate accessible URL
               ];
+            }
+            
+            return (object)[
+              'user_id' => $item->FD_user_id,
+              'name' => $item->{'user_name_' . $l},
+              'label' => $item->FD_question,
+              'value' => $value,
+            ];
           })->groupBy('user_id')->values();
 
           return $submission;

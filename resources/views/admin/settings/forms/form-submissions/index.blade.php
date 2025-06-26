@@ -150,8 +150,8 @@ function formatSubmittedBy(users, maxVisible = 3) {
   
   html += `<span class="badge bg-secondary me-1 mb-1">+${hiddenUsers.length}</span>`;
   html += `<button class="btn btn-link p-0 text-decoration-underline" style="font-size: 0.75rem;" onclick="showAllUsers(this, '${users.replace(/'/g, "\\'")}')">Show All</button>`;
-  
-  return `<div class="d-flex flex-wrap align-items-center" style="width: 250px; max-height: 80px; overflow-y: auto;">${html}</div>`;
+
+  return `<div class="d-flex flex-wrap align-items-center" style="width: 200px; max-height: 80px; overflow-y: auto;">${html}</div>`;
 }
 
 // Function to show all users in a modal or expanded view

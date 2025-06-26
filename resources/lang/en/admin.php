@@ -1980,4 +1980,6 @@ return [
 	'Loading submission data' => 'Loading submission data',
 	'The Answers' => 'Answers',
 	'No evaluations found' => 'No evaluations found',
+	'Click to view' => 'Click to view',
+	'View File' => 'View File',
 ];

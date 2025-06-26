@@ -85,15 +85,17 @@
                                                             @if($options->label)
                                                                 <label class="form-label">{{ $options->label }}</label>
                                                             @endif
-                                                            <div class="d-flex align-items-center">
+                                                            <div class="d-flex flex-column align-items-center">
                                                                 <input type="file" 
                                                                        class="form-control @error($field_name) is-invalid @enderror" 
                                                                        id="{{ $id_for }}" 
                                                                        name="{{ $field_name }}"
                                                                        accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
                                                                 @if($answer)
-                                                                    <div class="ms-3">
-                                                                        <span class="badge bg-success">Current: {{ $answer }}</span>
+                                                                    <div class="mt-4">
+                                                                        <a href="/dashboard/uploads/files/{{ $answer }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
+                                                                        </a>
                                                                     </div>
                                                                 @endif
                                                             </div>
@@ -143,6 +145,7 @@
 @section('pagescripts')
     {{-- <script src="/js/jquery.datetimepicker.full.min.js"></script> --}}
     <script>
+        console.log('step', {!! json_encode($step) !!});
         // Initialize date pickers
         $('.datepicker').flatpickr({
             dateFormat: 'Y-m-d'
