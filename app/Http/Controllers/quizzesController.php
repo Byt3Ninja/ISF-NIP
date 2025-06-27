@@ -36,7 +36,21 @@ class quizzesController extends Controller
 		$organization_id = $user->organization_id;
 
 		$quizzes_q = "SELECT 
-		q.*,
+		q.id AS quiz_id,
+		q.title AS quiz_title,
+		q.organization_id AS quiz_organization_id,
+		q.training_id AS quiz_training_id,
+		q.description AS quiz_description,
+		q.start AS quiz_start,
+		q.end AS quiz_end,
+		q.time_limit AS quiz_time_limit,
+		q.attempts AS quiz_attempts,
+		q.retry_after AS quiz_retry_after,
+		q.passing_criteria AS quiz_passing_criteria,
+		q.shuffle AS quiz_shuffle,
+		q.status AS quiz_status,
+		q.created_at AS quiz_created_at,
+		q.updated_at AS quiz_updated_at,
 		o.id AS org_id,
 		o.name_ar AS org_name_ar,
 		o.name_en AS org_name_en, 
@@ -72,21 +86,21 @@ class quizzesController extends Controller
 
 		$quizzes = $quizzes->map(function ($quiz) {
 			$quiz_obj = new stdClass();
-			$quiz_obj->id = $quiz->id;
-			$quiz_obj->title = $quiz->title;
-			$quiz_obj->organization_id = $quiz->org_id;
-			$quiz_obj->training_id = $quiz->training_id;
-			$quiz_obj->description = $quiz->description;
-			$quiz_obj->start = $quiz->start;
-			$quiz_obj->end = $quiz->end;
-			$quiz_obj->time_limit = $quiz->time_limit;
-			$quiz_obj->attempts = $quiz->attempts;
-			$quiz_obj->retry_after = $quiz->retry_after;
-			$quiz_obj->passing_criteria = $quiz->passing_criteria;
-			$quiz_obj->shuffle = $quiz->shuffle;
-			$quiz_obj->status = $quiz->status;
-			$quiz_obj->created_at = $quiz->created_at;
-			$quiz_obj->updated_at = $quiz->updated_at;
+			$quiz_obj->id = $quiz->quiz_id;
+			$quiz_obj->title = $quiz->quiz_title;
+			$quiz_obj->organization_id = $quiz->quiz_organization_id;
+			$quiz_obj->training_id = $quiz->quiz_training_id;
+			$quiz_obj->description = $quiz->quiz_description;
+			$quiz_obj->start = $quiz->quiz_start;
+			$quiz_obj->end = $quiz->quiz_end;
+			$quiz_obj->time_limit = $quiz->quiz_time_limit;
+			$quiz_obj->attempts = $quiz->quiz_attempts;
+			$quiz_obj->retry_after = $quiz->quiz_retry_after;
+			$quiz_obj->passing_criteria = $quiz->quiz_passing_criteria;
+			$quiz_obj->shuffle = $quiz->quiz_shuffle;
+			$quiz_obj->status = $quiz->quiz_status;
+			$quiz_obj->created_at = $quiz->quiz_created_at;
+			$quiz_obj->updated_at = $quiz->quiz_updated_at;
 
 			$quiz_obj->organization = new stdClass();
 			$quiz_obj->organization->id = $quiz->org_id;
@@ -108,7 +122,8 @@ class quizzesController extends Controller
 			$quiz_obj->cycle->cycle_title = $quiz->cycle_title;
 			return $quiz_obj;
 		});
-
+		$quizzes = $quizzes->unique('id')->values();
+		
 		return view('admin.quizzes.index', compact('quizzes'));
 	}
 
