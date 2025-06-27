@@ -824,6 +824,7 @@
     [
       'title' => 'Confirm Save',
       'message' => 'Confirm_Save_Screening',
+      'onConfirm' => 'saveScreening()',
     ]
   )
 <!--/ Warning Modal -->
@@ -1318,6 +1319,13 @@
             }
           });
         }
+      }
+    </script>
+
+    <script>
+      function saveScreening() {
+        // Go back
+        window.history.back();
       }
     </script>
 

@@ -12,10 +12,17 @@
         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
           {{ __('admin.Cancel') }}
         </button>
-        <button type="button" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" onclick="{{ isset($onConfirm) && $onConfirm ? $onConfirm : 'confirmAction()' }}">
           {{ isset($confirmText) && $confirmText ? __('admin.'.$confirmText) : __('admin.Confirm') }}
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  function confirmAction() {
+    // Default action if no specific onConfirm function is provided
+    window.history.back();
+  }
+</script>
