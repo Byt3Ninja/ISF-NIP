@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 @php
-  $status = strtolower($evaluationForm->status);
-  if( $cstep->data == 'grouptogroup' )
+  $status = strtolower($evaluationForm?->status);
+  if( optional($cstep)->data == 'grouptogroup' )
   {
     //
   }
   else
   {
-    $judgersList = collect( json_decode($cstep->list) ?? [] );
+    $judgersList = collect( json_decode(optional($cstep)->list) ?? [] );
     $judgersList = $judgersList->map(function($judger) { return intval($judger); });
   }
 @endphp
@@ -481,7 +481,7 @@
     function openusers(panel) {
       $('#pid').val(panel);
       $('#cpanel').text(panel);
-      let theurl = "/dashboard/screening/get/{{ $form->id ?? 0 }}/{{ $cstep->id ?? 0 }}/" + panel;
+      let theurl = "/dashboard/screening/get/{{ optional($form)->id ?? 0 }}/{{ optional($cstep)->id ?? 0 }}/" + panel;
       $.ajax({
         type: "GET",
         url: theurl,
@@ -532,7 +532,7 @@
       function updateJudgesInput() {
         let allJudges = [];
 
-        @if ($cstep->data == 'grouptogroup')
+        @if (optional($cstep)->data == 'grouptogroup')
           // Collect judges from all panel selects
           $('select[class*="panel"]').each(function() {
             const selectedValues = $(this).val() || [];
@@ -556,7 +556,7 @@
       updateJudgesInput();
 
       // Update on change for all judge selects
-      @if ($cstep->data == 'grouptogroup')
+      @if (optional($cstep)->data == 'grouptogroup')
         $(document).on('change', 'select[class*="panel"]', updateJudgesInput);
       @else
         $('#judges-select').on('change', updateJudgesInput);

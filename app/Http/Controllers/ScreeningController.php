@@ -71,8 +71,8 @@ class ScreeningController extends Controller
 			$form = collect([]);
 		}
 		$judgers_count = 0;
-		$cList = collect(json_decode($cstep->list, true) ?? []);
-		if( in_array( $cstep->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
+		$cList = collect(json_decode($cstep?->list, true) ?? []);
+		if( in_array( $cstep?->data, ['onetoall', 'grouptoall']) ) { $judgers_count = $cList->count(); }
 		else
 		{
 			$judgers_count = $cList->flatten()->unique()->count();
@@ -80,12 +80,15 @@ class ScreeningController extends Controller
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
-		$judgers_list = collect( json_decode($cstep->list) )->map(function($user) {
+		$judgers_list = collect( json_decode($cstep?->list) )->map(function($user) {
 			if( is_array( $user ) ) { $user = array_map('intval', $user); } else { $user = intval( $user ); }
 			return $user;
 		});
-
+if ($cstep) {
 		$screenings = Screening::where('step_id', $cstep->id)->get();
+} else {
+	$screenings = [];
+}
 		foreach( $judgers_list as $panel_id => $judgers_ids )
 		{
 			$users_list = $screenings->where('panel', $panel_id)->map(function($screening) {
@@ -103,7 +106,16 @@ class ScreeningController extends Controller
 			$evaluation->save();
 		}
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+		if($cstep){
 		$companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get();
+		}else{
+			$companies = [];
+		}
+		if($cstep){
+			$cstep = $cstep;
+		}else{
+			$cstep = [];
+		}
 		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
@@ -196,14 +208,14 @@ class ScreeningController extends Controller
 						"New judging - VI portal", 
 						"Dear " . $rfullname . ",", 
 						"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " 
-						. $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.",
+						. $cstep?->from->format('d-m-Y') . " to " . $cstep?->to->format('d-m-Y') . ", Check your account for more details.",
 						"/dashboard", 
 						"You have a New Judging Request." 
 						];
 						$MSG = new TemplateEmail($message);
 						broadcast(new JudgeAssigned(
 							$rname->id,
-							"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period is from " . $cstep->from->format('d-m-Y') . " to " . $cstep->to->format('d-m-Y') . ".",
+							"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period is from " . $cstep?->from->format('d-m-Y') . " to " . $cstep?->to->format('d-m-Y') . ".",
 							"/dashboard"
 						));
 						if (!in_array(env('APP_ENV', 'local'), ['local'])) {
@@ -215,8 +227,8 @@ class ScreeningController extends Controller
 
 							$phoneNumber = $rname->country_code_w_a . $rname->whatsapp;
 							$Massage = "Dear " . $rfullname . ",\n";
-							$Massage .= "we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') . "\n";
-							$Massage .= " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details, \n";
+							$Massage .= "we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep?->from->format('d-m-Y') . "\n";
+							$Massage .= " to " . $cstep?->to->format('d-m-Y') . ", Check your account for more details, \n";
 							$Massage .= "Thanks from " . env('APP_NAME');
 							$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 							Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
@@ -339,7 +351,7 @@ class ScreeningController extends Controller
 			if ($cstep->arr > 1) {
 				$approved = 1;
 				$by = Auth::id();
-				$data['new_step'] = $cstep->title;
+				$data['new_step'] = $cstep?->title;
 			}
 		}
 		$data['last_step'] = null;

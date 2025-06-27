@@ -57,7 +57,7 @@ class SendTrainingNotificationJob implements ShouldQueue
         }
 
         $org_name = optional($step->cycle)->organization->{'name_' . $this->lang} ?? 'Unknown Organization';
-
+        Log::info("SendTrainingNotificationJob: org_name: " . $org_name);
         if ($this->type == 'offline') {
             // Notify Trainer
             if ($this->trainer_email) {
