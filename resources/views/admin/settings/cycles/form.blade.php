@@ -145,7 +145,8 @@
 @section('pagescripts')
     {{-- <script src="/js/jquery.datetimepicker.full.min.js"></script> --}}
     <script>
-        console.log('step', {!! json_encode($step) !!});
+        // console.log('step', {!! json_encode($step) !!});
+        
         // Initialize date pickers
         $('.datepicker').flatpickr({
             dateFormat: 'Y-m-d'

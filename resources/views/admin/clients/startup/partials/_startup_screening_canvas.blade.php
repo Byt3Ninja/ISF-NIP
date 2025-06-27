@@ -132,7 +132,7 @@
         <div class="d-flex align-items-center gap-3">
           @if( !is_null( $evaluationForm ) && !empty( $evaluationForm ) && $evaluationForm->isPublished == true )
           <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
-            <i class="ti ti-check me-2"></i> Published
+            <i class="ti ti-check me-2"></i> {{ __('admin.Published') }}
           </button>
           @else
           @if( $_user->ableTo('screening.evaluate_publish', $permissions) )
@@ -279,94 +279,6 @@
                                 </div>
                               </div>
                             </div>
-
-                            <script>
-                              document.addEventListener('DOMContentLoaded', function() {
-                                // Handle dropdown selection for sub-criteria
-                                const subcriteriaSelects = document.querySelectorAll('.subcriteria-select');
-                                subcriteriaSelects.forEach(select => {
-                                  select.addEventListener('change', function() {
-                                    const target = this.value;
-                                    const tabElement = document.querySelector(target);
-                                    const tabLink = document.querySelector(`[data-bs-target="${target}"]`);
-                                    
-                                    if (tabElement && tabLink) {
-                                      // Deactivate all tabs
-                                      const allTabs = document.querySelectorAll(`.subcriteria-tabs .nav-link[data-bs-target^="#tab${select.dataset.criteriaKey}_"]`);
-                                      allTabs.forEach(tab => {
-                                        tab.classList.remove('active');
-                                        tab.setAttribute('aria-selected', 'false');
-                                      });
-                                      
-                                      // Deactivate all panes
-                                      const allPanes = document.querySelectorAll(`.tab-pane[id^="tab${select.dataset.criteriaKey}_"]`);
-                                      allPanes.forEach(pane => {
-                                        pane.classList.remove('show', 'active');
-                                      });
-                                      
-                                      // Activate the selected tab
-                                      tabLink.classList.add('active');
-                                      tabLink.setAttribute('aria-selected', 'true');
-                                      
-                                      // Activate the selected pane
-                                      tabElement.classList.add('show', 'active');
-                                    }
-                                  });
-                                });
-                                
-                                // Auto-switch to dropdown mode when there are more than 4 sub-criteria
-                                document.querySelectorAll('.subcriteria-container').forEach(container => {
-                                  const tabs = container.querySelectorAll('.nav-item');
-                                  if (tabs.length > 4) {
-                                    // Add class for many criteria to apply specific styles
-                                    container.classList.add('many-criteria');
-                                    
-                                    const dropdownContainer = container.querySelector('.subcriteria-dropdown');
-                                    const tabsContainer = container.querySelector('.subcriteria-tabs');
-                                    
-                                    // On mobile, show the dropdown (handled by CSS)
-                                    
-                                    // On desktop, make tabs scrollable
-                                    if (window.innerWidth > 992) {
-                                      // Add visual indicator if there are more tabs to scroll
-                                      const tabsNav = container.querySelector('.nav-tabs');
-                                      if (tabsNav) {
-                                        tabsNav.addEventListener('scroll', function() {
-                                          checkScrollIndicators(tabsNav);
-                                        });
-                                        
-                                        // Initial check
-                                        setTimeout(() => checkScrollIndicators(tabsNav), 100);
-                                      }
-                                    }
-                                  }
-                                });
-                                
-                                // Helper function to check if scroll indicators are needed
-                                function checkScrollIndicators(element) {
-                                  const isScrollable = element.scrollWidth > element.clientWidth;
-                                  const isScrolledToEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
-                                  const isScrolledToStart = element.scrollLeft <= 10;
-                                  
-                                  element.classList.toggle('has-more-right', isScrollable && !isScrolledToEnd);
-                                  element.classList.toggle('has-more-left', isScrollable && !isScrolledToStart);
-                                }
-                                
-                                // Sync tab changes with dropdown
-                                document.querySelectorAll('.subcriteria-tabs .nav-link').forEach(tab => {
-                                  tab.addEventListener('shown.bs.tab', function(event) {
-                                    const targetId = event.target.dataset.bsTarget;
-                                    const criteriaKey = targetId.split('_')[0].replace('#tab', '');
-                                    const dropdown = document.getElementById('subcriteria-select-' + criteriaKey);
-                                    
-                                    if (dropdown) {
-                                      dropdown.value = targetId;
-                                    }
-                                  });
-                                });
-                              });
-                            </script>
-
 
                             <div class="col-12 d-flex justify-content-between mt-12">
                               <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : '' }}>

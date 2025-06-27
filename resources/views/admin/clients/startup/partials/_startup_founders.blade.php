@@ -56,6 +56,20 @@
     const founderPrevBtn2 = document.querySelector('#founder-prev-2');
     const founderNextBtn2 = document.querySelector('#founder-next-2');
 
+    // Only proceed if there are founders
+    if (founderCols2.length === 0) {
+      return;
+    }
+
+    // Only set up pagination if navigation buttons exist (more than 2 founders)
+    if (!founderPrevBtn2 || !founderNextBtn2) {
+      // Show all founders when there are 2 or fewer
+      founderCols2.forEach((col) => {
+        col.style.display = 'block';
+      });
+      return;
+    }
+
     let currentIndex2 = 0;
     const itemsPerPage2 = 2;
 
@@ -64,23 +78,32 @@
         col.style.display = (index >= currentIndex2 && index < currentIndex2 + itemsPerPage2) ? 'block' : 'none';
       });
 
-      founderPrevBtn2.classList.toggle('d-none', currentIndex2 === 0);
-      founderNextBtn2.classList.toggle('d-none', currentIndex2 + itemsPerPage2 >= founderCols2.length);
+      if (founderPrevBtn2) {
+        founderPrevBtn2.classList.toggle('d-none', currentIndex2 === 0);
+      }
+      if (founderNextBtn2) {
+        founderNextBtn2.classList.toggle('d-none', currentIndex2 + itemsPerPage2 >= founderCols2.length);
+      }
     }
 
-    founderPrevBtn2.addEventListener('click', () => {
-      if (currentIndex2 > 0) {
-        currentIndex2 -= itemsPerPage2;
-        updateVisibility2();
-      }
-    });
+    // Add event listeners with additional null checks
+    if (founderPrevBtn2) {
+      founderPrevBtn2.addEventListener('click', () => {
+        if (currentIndex2 > 0) {
+          currentIndex2 -= itemsPerPage2;
+          updateVisibility2();
+        }
+      });
+    }
 
-    founderNextBtn2.addEventListener('click', () => {
-      if (currentIndex2 + itemsPerPage2 < founderCols2.length) {
-        currentIndex2 += itemsPerPage2;
-        updateVisibility2();
-      }
-    });
+    if (founderNextBtn2) {
+      founderNextBtn2.addEventListener('click', () => {
+        if (currentIndex2 + itemsPerPage2 < founderCols2.length) {
+          currentIndex2 += itemsPerPage2;
+          updateVisibility2();
+        }
+      });
+    }
 
     updateVisibility2();
   });

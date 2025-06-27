@@ -2030,4 +2030,7 @@ return [
 	'No evaluations found' => 'لا توجد تقييمات',
 	'Click to view' => 'انقر لعرض',
 	'View File' => 'عرض الملف',
+	'Evaluation saved successfully' => 'تم حفظ التقييم بنجاح',
+	'Select Sub-Criteria' => 'اختر المعايير الفرعية',
+	'No comment provided' => 'لم يتم تقديم تعليق',
 ];

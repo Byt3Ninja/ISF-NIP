@@ -1982,4 +1982,7 @@ return [
 	'No evaluations found' => 'No evaluations found',
 	'Click to view' => 'Click to view',
 	'View File' => 'View File',
+	'Evaluation saved successfully' => 'Evaluation saved successfully',
+	'Select Sub-Criteria' => 'Select Sub-Criteria',
+	'No comment provided' => 'No comment provided',
 ];
