@@ -189,10 +189,10 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date',
                 'end' => 'required|date',
-                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'delegation_pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
 
 
@@ -444,10 +444,10 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
-                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'delegation_pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
             DB::transaction(function () use ($request) {
                 $private = null;
