@@ -45,8 +45,16 @@ class ScreeningEvaluationResults extends Model
 	public static function metadata( $step_id, $company_id = null )
 	{
 		$getStep = Step::find( $step_id );
+		if($getStep){
 		$companies = Company::where('cycle', $getStep->cycle_id)->get();
+		}else{
+			$companies = [];
+		}
+		if($getStep){
 		$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
+		}else{
+			$_steps = [];
+		}
 		$l = app()->getLocale();
 		$getUsers = Screening::where('step_id', $step_id)->with(['user'])->get();
 
@@ -71,9 +79,17 @@ class ScreeningEvaluationResults extends Model
 			return $item;
 		});
 
-		if( $getStep->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
-		$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
-		$results = self::where('evaluation_id', $evaluation->id )->get();
+		if( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+		if($getStep){	
+			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
+		}else{
+			$evaluation = [];
+		}
+if($getStep){
+		$results = self::where('evaluation_id', $evaluation?->id )->get();
+}else{
+		$results = [];
+}
 		foreach( $judges as $index => $judge )
 		{
 			$judges[$index]->companies = [];
@@ -94,6 +110,7 @@ class ScreeningEvaluationResults extends Model
 				$judges[$index]->companies[] = $_company;
 			}
 		}
+		if($getStep){
 		foreach( $evaluation->categories as $criteria )	
 		{
 			$subCriteria = $criteria->subCriteria;
@@ -119,7 +136,7 @@ class ScreeningEvaluationResults extends Model
 			}
 			$judges[$judges_key] = $judge;
 		}
-
+	}
 		$_companies = $companies;
 		foreach( $_companies as $companies_index => $company )
 		{
