@@ -166,11 +166,11 @@
                             </div>
                           </div>
                         @endforeach
-
                       </dd>
                     </dl>
                   </div>
 
+                  @if( false )
                   <div class="card border-light">
                   </div>
                   <div class="table-responsive">
@@ -192,89 +192,83 @@
                     <form method="GET" action="/dashboard/screening/results/{{ request('id') }}">
                       <div class="d-flex align-items-center mx-2">
                         <div style="display: flex; align-items: center;">
-                        <button
-                          class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
-                          style="border-radius: 17px; width: 40px; height: 40px;"
-                           type="submit"
-                        >
-                          <i class="ti ti-filter text-white ti-24px"></i>
-                        </button>
-                      </div>
-                      <!-- Search Bar -->
+                          <button
+                            class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center me-3" 
+                            style="border-radius: 17px; width: 40px; height: 40px;"
+                            type="submit">
+                              <i class="ti ti-filter text-white ti-24px"></i>
+                          </button>
+                        </div>
+                        <!-- Search Bar -->
                       
-                      <div class="position-relative me-3 d-none d-md-flex">
-                        <select name="startup_id" class="form-control">
-                          <option value="0">All</option>
-                          @php
-                         $companies2 = \App\Company::whereIn('step', $clist)->get();
-                          @endphp
-                          @foreach ($companies2 as $company2)
-                          <option value="{{ $company2->id }}" {{ $company2->id == request('startup_id') ? 'selected' : '' }}>{{ $company2->{'name_'.$l} }}</option>
-                          @endforeach
-                        </select>
+                        <div class="position-relative me-3 d-none d-md-flex">
+                          <select name="startup_id" class="form-control">
+                            <option value="0">All</option>
+                            @php
+                              $companies2 = \App\Company::whereIn('step', $clist)->get();
+                            @endphp
+                            @foreach ($companies2 as $company2)
+                            <option value="{{ $company2->id }}" {{ $company2->id == request('startup_id') ? 'selected' : '' }}>{{ $company2->{'name_'.$l} }}</option>
+                            @endforeach
+                          </select>
+                        </div>
+
+                        <div class="position-relative me-3 d-none d-md-flex">
+                          <select name="judge_id" class="form-control">
+                            <option value="0">All</option>
+                            @php
+                              $uniqueJudges = collect();
+                              $companyIds = $companies->pluck('id');
+                              $allScreeningData = \App\Formdata::whereIn('company_id', $companyIds)
+                                    ->where('form_id', $form?->id)
+                                    ->pluck('screening');
+                              $allJudgeIds = [];
+                              foreach ($allScreeningData as $screeningList) {
+                                if ($screeningList) { 
+                                  $allJudgeIds = array_merge($allJudgeIds, array_keys($screeningList));
+                                }
+                              }
+                              $uniqueJudgeIds = array_unique($allJudgeIds);
+                              $uniqueJudges = \App\User::whereIn('id', $uniqueJudgeIds)->get();
+                            @endphp
+                            {{-- @foreach($companies as $company)        --}}
+                              {{-- @php
+                            $judges = \App\User::whereIn('id', $company->judges($company->id, $form->id))->get();
+                            $uniqueJudges = $uniqueJudges->merge($judges)->unique('id');
+                            @endphp --}}
+                            @foreach ($uniqueJudges as $judge)
+                              <option value="{{ $judge->id }}" {{ $judge->id == request('judge_id') ? 'selected' : '' }}>{{ $judge->{'first_name_'.$l} }} {{ $judge->{'last_name_'.$l} }}</option>
+                            @endforeach
+                            {{-- @endforeach --}}
+                          </select>
+                        </div>
+
+                        <div class="position-relative me-3 d-none d-md-flex">
+                          <select name="result_id" class="form-control">
+                            <option value="0" {{ request('result_id') == 0 ? 'selected' : '' }}>0</option>
+                            <option value="10" {{ request('result_id') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="20" {{ request('result_id') == 20 ? 'selected' : '' }}>20</option>
+                            <option value="30" {{ request('result_id') == 30 ? 'selected' : '' }}>30</option>
+                            <option value="40" {{ request('result_id') == 40 ? 'selected' : '' }}>40</option>
+                            <option value="50" {{ request('result_id') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="60" {{ request('result_id') == 60 ? 'selected' : '' }}>60</option>
+                            <option value="70" {{ request('result_id') == 70 ? 'selected' : '' }}>70</option>
+                            <option value="80" {{ request('result_id') == 80 ? 'selected' : '' }}>80</option>
+                            <option value="90" {{ request('result_id') == 90 ? 'selected' : '' }}>90</option>
+                          </select>
+                          <select name="result2_id" class="form-control mx-3">
+                            <option value="==" {{ request('result2_id') == '=' ? 'selected' : '' }}>{{ __('admin.equal_to') }}</option>
+                            <option value=">=" {{ request('result2_id') == '>=' ? 'selected' : '' }}>{{ __('admin.more_than_or_equal_to') }}</option>
+                            <option value="<=" {{ request('result2_id') == '<=' ? 'selected' : '' }}>{{ __('admin.less_than_or_equal_to') }}</option>
+                            <option value=">" {{ request('result2_id') == '>' ? 'selected' : '' }}>{{ __('admin.more_than') }}</option>
+                            <option value="<" {{ request('result2_id') == '<' ? 'selected' : '' }}>{{ __('admin.less_than') }}</option>
+                          </select>
+                        </div>
                       </div>
-                      
-                      
-                          
-                      <div class="position-relative me-3 d-none d-md-flex">
-                        <select name="judge_id" class="form-control">
-                          <option value="0">All</option>
-                          @php
-                          $uniqueJudges = collect();
-                          $companyIds = $companies->pluck('id');
-    $allScreeningData = \App\Formdata::whereIn('company_id', $companyIds)
-                                ->where('form_id', $form?->id)
-                                ->pluck('screening');
-    $allJudgeIds = [];
-    foreach ($allScreeningData as $screeningList) {
-        if ($screeningList) { 
-            $allJudgeIds = array_merge($allJudgeIds, array_keys($screeningList));
-        }
-    }
-    $uniqueJudgeIds = array_unique($allJudgeIds);
-    $uniqueJudges = \App\User::whereIn('id', $uniqueJudgeIds)
-                        ->get();
-                          @endphp
-                          {{-- @foreach($companies as $company)        --}}
-                            {{-- @php
-                          $judges = \App\User::whereIn('id', $company->judges($company->id, $form->id))->get();
-                          $uniqueJudges = $uniqueJudges->merge($judges)->unique('id');
-                          @endphp --}}
-                          @foreach ($uniqueJudges as $judge)
-                          <option value="{{ $judge->id }}" {{ $judge->id == request('judge_id') ? 'selected' : '' }}>{{ $judge->{'first_name_'.$l} }} {{ $judge->{'last_name_'.$l} }}</option>
-                          @endforeach
-                          {{-- @endforeach --}}
-                        </select>
-                      </div>
-      
-              <div class="position-relative me-3 d-none d-md-flex">
-                <select name="result_id" class="form-control">
-                  <option value="0" {{ request('result_id') == 0 ? 'selected' : '' }}>0</option>
-                  <option value="10" {{ request('result_id') == 10 ? 'selected' : '' }}>10</option>
-                  <option value="20" {{ request('result_id') == 20 ? 'selected' : '' }}>20</option>
-                  <option value="30" {{ request('result_id') == 30 ? 'selected' : '' }}>30</option>
-                  <option value="40" {{ request('result_id') == 40 ? 'selected' : '' }}>40</option>
-                  <option value="50" {{ request('result_id') == 50 ? 'selected' : '' }}>50</option>
-                  <option value="60" {{ request('result_id') == 60 ? 'selected' : '' }}>60</option>
-                  <option value="70" {{ request('result_id') == 70 ? 'selected' : '' }}>70</option>
-                  <option value="80" {{ request('result_id') == 80 ? 'selected' : '' }}>80</option>
-                  <option value="90" {{ request('result_id') == 90 ? 'selected' : '' }}>90</option>
-                </select>
-                <select name="result2_id" class="form-control">
-                  <option value="==" {{ request('result2_id') == '=' ? 'selected' : '' }}>{{ __('admin.equal_to') }}</option>
-                  <option value=">=" {{ request('result2_id') == '>=' ? 'selected' : '' }}>{{ __('admin.more_than_or_equal_to') }}</option>
-                  <option value="<=" {{ request('result2_id') == '<=' ? 'selected' : '' }}>{{ __('admin.less_than_or_equal_to') }}</option>
-                  <option value=">" {{ request('result2_id') == '>' ? 'selected' : '' }}>{{ __('admin.more_than') }}</option>
-                  <option value="<" {{ request('result2_id') == '<' ? 'selected' : '' }}>{{ __('admin.less_than') }}</option>
-                </select>
-              </div>
-      
-                    </div>
                     </form>
                     <hr>
 
                     <table id="result-list-datatable" class="table mb-0">
-                      
                       <thead class="bg-label-secondary">
                         <tr>
                           <th><input type="checkbox" class="checkAll"></th>
@@ -365,6 +359,96 @@
                       </tbody>
                     </table>
                   </div>
+                  @endif
+                  <hr class="hr my-10" />
+                  <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                      <thead>
+                        <tr>
+                          <th style="width: 15%">Company</th>
+                          <th style="width: 15%">User/Title</th>
+                          <th style="width: 10%">Average Score</th>
+                          <th>
+                            <div class="row">
+                              <div class="col-md-3">Judgers</div>
+                              <div class="col-md-9">Score</div>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach( $_companies as $company )
+                          <tr>
+                            <td>
+                              <a class="media-left d-inline-flex mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
+                                <div class="avatar">
+                                  <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/app-assets/images/logo_placeholder.png';" height="40" width="40">
+                                </div>
+                                <span class="mx-3 my-2">{{ $company->name }}</span>
+                              </a>
+                              <div>
+                                <button class="show-company-evaluation btn btn-xs btn-secondary mt-2 rounded-3" data-company="{{ $company->id }}" data-step="{{ $cstep->id }}">
+                                  <i class="fas fa-fw fa-sm fa-eye me-1"></i> Show Company Score
+                                </button>
+                              </div>
+                              <div class="d-flex align-items-center">
+                                <select id="cstep" class="select form-control exportcurrentstep" onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
+                                  <option value="0">{{ __('cycles.Disapprove') }}</option>
+                                    @foreach( $_steps->where('cycle_id', $company->cycle)->sortBy('arr')->values() as $step )
+                                      <option value="{{ $step->id }}" {{ $step->id == $company->step ? 'selected' : '' }}> {{ $step->title }}</option>
+                                    @endforeach
+                                </select>
+                              </div>
+                            </td>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
+                                  <img src="{{ $company->user->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                </a>
+                                <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                                  <div class="media-body">
+                                    <h6 class="media-heading mb-0">{{ $company->user->name }} </h6>
+                                    <span class="font-small-2">{{ $company->user->title }}</span>
+                                  </div>
+                                </a>
+                              </div>
+                            </td>
+                            <td>
+                              {{ $company->average_score . '%' }}
+                            </td>
+                            <td>
+                              @foreach( $judges as $judge )
+                                @php( $scoped_company = collect( $judge->companies )->where('id', $company->id)->first() )
+                                @if( in_array( $company->id, $judge->startups->toArray() ) )
+                                  <div class="row my-3">
+                                    <div class="col-md-3">
+                                      @if( $scoped_company->status == 'Published' )
+                                      <i title="Published" class="fas fa-fw fa-sm fa-check-circle text-success mx-1"></i>
+                                      @elseif( $scoped_company->status == 'Draft' )
+                                      <i title="Draft" class="fas fa-fw fa-sm fa-exclamation-triangle text-warning mx-1"></i>
+                                      @elseif( $scoped_company->status == 'Not Evaluated' )
+                                      <i title="Not Evaluated" class="fas fa-fw fa-sm fa-times-circle text-danger mx-1"></i>
+                                      @endif
+                                      {{ $judge->name }}
+                                    </div>
+                                    <div class="col-md-9">
+                                      @if( $evaluation->status !== 'Published' )
+                                        Evaluation not yet published
+                                      @else
+                                        <div class="progress" role="progressbar" aria-label="Judger score" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: auto;">
+                                          <div class="progress-bar {{ $scoped_company->score >= 75 ? 'bg-success' : ($scoped_company->score >= 50 ? 'bg-info' : (  $scoped_company->score >= 25 ? 'bg-warning' : 'bg-danger' ) ) }}" style="width: {{ $scoped_company->score }}%">{{ $scoped_company->score }}%</div>
+                                        </div>
+                                      @endif
+                                    </div>
+                                  </div>
+                                @endif
+                              @endforeach
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -436,6 +520,23 @@
       exportSuccess: "{{ __('cycles.export_willsuccess') }}",
       exportNotSuccess: "{{ __('cycles.export_Notsuccess') }}",
     };
+    $(document).on('click', '.show-company-evaluation', function(e) {
+      e.preventDefault();
+      const company = parseInt( $(this).data('company') );
+      const step = parseInt( $(this).data('step') );
+      $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+      $.ajax({
+        type: 'POST',
+        url: '/dashboard/screening/evaluation/results',
+        data: {
+          company: company,
+          step: step,
+        },
+        success: function(response) {
+          console.log( response );
+        }, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
+      });
+    });
   </script>
 
   <script>

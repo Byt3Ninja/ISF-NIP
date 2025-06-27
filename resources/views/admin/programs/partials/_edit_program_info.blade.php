@@ -6,8 +6,10 @@
         <label for="upload" class="cursor-pointer">
           <div class="d-flex align-items-center justify-content-center border shadow-sm rounded bg-label-light"
             style="width: 100px; height: 100px;">
-            <img id="uploadImage" src="" alt="{{ __('admin.Preview') }}" class="img-fluid rounded" style="max-width: 100%; max-height: 100%; display: none;">
+            <img id="uploadImage" src="/{{ $ccycle?->img_url }}" alt="{{ __('admin.Preview') }}" class="img-fluid rounded" style="max-width: 100%; max-height: 100%;">
+            @if(empty($ccycle->img_url))
             <i class="ti ti-camera fs-4 text-muted" id="uploadIcon"></i>
+            @endif
           </div>
         </label>
         <input hidden type="file" name="img_url" class="program-image-input" id="upload"
@@ -60,7 +62,7 @@
         oninput="this.value = this.value.trimStart()" required>
     </div>
     <div class="col-12 mb-4">
-      <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to') }}:</label>
+      <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
       <input type="text" name="date_range" id="date-range-picker" class="form-control" />
     </div>
     {{-- <div class="row">

@@ -71,6 +71,7 @@
                           @php
                             $cycles = \App\Cycle::get();
                           @endphp
+                          <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
                           @foreach ($cycles as $cycle)
                             <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
                               {{ $cycle->title }}
@@ -84,7 +85,7 @@
                     <button class="btn btn-primary btn-icon rounded-circle" id="searchBot">
                       <i class="ti ti-filter"></i>
                     </button>
-                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions'">
+                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions{{ request()->show ? '?show=' . request()->show : '' }}'">
                       <i class="ti ti-reload"></i> 
                     </button>
                   </div>
@@ -108,7 +109,7 @@
                       @foreach ($sessions as $session)
                         <tr>
                           <td>
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center w-px-150">
                               <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
                                 <img 
                                   onerror="this.src='/images/logo-placeholder.png'"
@@ -200,7 +201,7 @@
                                 </a>
                               @endif
                               @if ($session->fileurl)
-                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="btn btn-sm btn-primary" title="Download attached">
+                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
                                   <i class="ti ti-download"></i>
                                 </a>
                               @endif
@@ -237,7 +238,7 @@
         @if ($session->reports->count() > 0)
         <div class="d-flex justify-content-between align-items-center mt-3">
           <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', $session->id) }}" class="btn btn-info">
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
             {{ __('admin.update_reports') }}
           </a>
         </div>
@@ -321,7 +322,7 @@
         <!-- No Recordings: Display Update Button -->
         <div class="d-flex justify-content-between align-items-center mt-4">
           <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording', $session->id) }}" class="btn btn-warning">
+          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
             {{ __('admin.update_recordings') }}
           </a>
         </div>
@@ -402,46 +403,46 @@
 @section('pagescripts')
   <script>
     $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
-        "columnDefs": [
-
-          {
-            "orderable": true,
-            "targets": 7
-          }, // تفعيل الفرز للعمود الأول فقط
-        ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
+    $('#userstable').DataTable().destroy();
+    $('#userstable').DataTable({
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [],
+    "columnDefs": [
+      {
+        "orderable": false,
+        "targets": [0, 1, 2, 3, 4, 5, 6, 7]
+      }
+    ],
+    @if ($l == 'ar')
+      "language": {
+        "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+        "sLoadingRecords": "جارٍ التحميل...",
+        "sProcessing": "جارٍ التحميل...",
+        "sLengthMenu": "أظهر _MENU_ مدخلات",
+        "sZeroRecords": "لم يعثر على أية سجلات",
+        "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+        "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+        "sInfoPostFix": "",
+        "sSearch": "ابحث:",
+        "sUrl": "",
+        "oPaginate": {
+          "sFirst": "الأول",
+          "sPrevious": "السابق",
+          "sNext": "التالي",
+          "sLast": "الأخير"
+        },
+        "oAria": {
+          "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+          "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+        }
+      }
+    @endif
+    });
     });
   </script>
   <script>
@@ -530,7 +531,7 @@
         const formattedEndDate = formatDate(endDate);
         url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
       }
-      if (CycleId) {
+      if (CycleId && CycleId !== 'all') {
         url += `&cycle_id=${CycleId}`;
       }
 

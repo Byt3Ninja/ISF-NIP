@@ -94,26 +94,29 @@ class FormController extends Controller
       LEFT JOIN organizations as O ON O.id = CYC.organization_id
       WHERE FD.deleted_at IS NULL";
       if($user->organization_id != null){
-        $forms .= " AND CYC.organization_id = ? ";
-        $forms = DB::select($forms, [$user->organization_id]);
+      $forms .= " AND CYC.organization_id = ? ";
+      $forms = DB::select($forms, [$user->organization_id]);
       }else{
-        $forms = DB::select($forms);
+      $forms = DB::select($forms);
       }
-     $forms = collect($forms)->unique('FD_step_id')->values();
+     $forms = collect($forms);
 
-$C = 1;
-$data = $forms->map(function ($form) use ($l, &$C) {
+  $C = 1;
+  $grouped = $forms->groupBy('FD_step_id');
+
+  $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
+    $first = $group->first();
     $item = new stdClass;
     $item->submission_id = $C++;
-    $item->step_id = $form->FD_step_id;
-    $item->startup_name = $form->{'C_name_' . $l};
-    $item->submitted_by = $form->{'user_name_' . $l};
-    $item->step_name = $form->S_title;
-    $item->program_name = $form->CYC_title;
-    $item->organization_name = $form->O_name_en;
-    $item->created_at = $form->FD_created_at;
+    $item->step_id = $stepId;
+    $item->startup_name = $first->{'C_name_' . $l};
+    $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
+    $item->step_name = $first->S_title;
+    $item->program_name = $first->CYC_title;
+    $item->organization_name = $first->O_name_en;
+    $item->created_at = $first->FD_created_at;
     return $item;
-});
+  })->values()->all();
       return view('admin.settings.forms.form-submissions.index', compact('data'));
     }
   
@@ -184,13 +187,29 @@ $data = $forms->map(function ($form) use ($l, &$C) {
           $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
       
           // answers
-          $submission->answers = $group->map(function ($item) {
-              return (object)[
-                  'label' => $item->FD_question,
-                  'value' => $item->FD_answer,
+          $submission->answers = $group->map(function ($item) use ($l) {
+            $value = $item->FD_answer;
+            
+            // Check if the value is a file path
+            if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
+              // Extract filename from path
+              $filename = basename($value);
+              $value = [
+                'type' => 'file',
+                'path' => $value,
+                'file_name' => $filename,
+                'file_url' => asset($value) // Generate accessible URL
               ];
-          })->values();
-      
+            }
+            
+            return (object)[
+              'user_id' => $item->FD_user_id,
+              'name' => $item->{'user_name_' . $l},
+              'label' => $item->FD_question,
+              'value' => $value,
+            ];
+          })->groupBy('user_id')->values();
+
           return $submission;
       })->values()->all(); // remove collection keys (numeric indexing)
       

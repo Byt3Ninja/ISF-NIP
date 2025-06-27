@@ -68,8 +68,18 @@
 			@endif
 		</div>
 
-
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company?->cycle == null)
+				<div class="col-md-12">
+					<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
+						{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+			@endif
+			@endif
 		<div class="row g-6">
+			
 			<!-- Count cards -->
 			@foreach( $countCards as $card )
 			@if( array_intersect($card['permissions'], $permissions) == $card['permissions'] )
@@ -118,6 +128,8 @@
 		</div>
 		<div class="row mt-6">
 			@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company?->cycle != null)
 			<div class="col-sm-6 col-12 mb-6">
 				<div class="card">
 					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -159,7 +171,11 @@
 				</div>
 			</div>
 			@endif
+			@endif
+			@endif
 			@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company?->cycle != null)
 			<div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
 				<div class="card">
 					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -216,7 +232,11 @@
 				</div>
 			</div>
 			@endif
+			@endif
+			@endif
 			@if( array_intersect(['dashboard.widgets_tables_latest_events_view'], $permissions) )
+			@if( $_user->hasRole('Registered') )
+			@if($_user->company?->cycle != null)
 			<div class="col-12">
 				<section>
 					<div class="row">
@@ -262,6 +282,8 @@
 					</div>
 				</section>
 			</div>
+			@endif
+			@endif
 			@endif
 			@if( array_intersect(['dashboard.widgets_tables_current_enrolled_program_view'], $permissions) )
 			<div class="col-12">
@@ -328,7 +350,7 @@
 												<td>
 													@if( $step->stype == 1 )
 													@if( $step->status == 'Started' )
-													<a href="/dashboard/show-form/{{ $step->data }}" class="btn btn-label-primary"
+													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
 														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
 													@endif
 													@endif
@@ -602,7 +624,7 @@
 												@foreach($nextSessions as $session)
 												<tr>
 													<td>
-														<div class="d-flex align-items-center">
+														<div class="d-flex align-items-center gap-2">
 															<a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
 																<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
 																	height="40" width="40">
@@ -868,22 +890,25 @@
 																@if( $_user->ableTo('users.edit', $permissions) )
 															</a>@endif
 														</td>
-														<td> {{ $session->zoom_date }} ({{ $session->period }}M) </td>
+														<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
 														<td> {{ $session->admin_comment ?? '...' }} </td>
 														<td>
 															@php
-															date_default_timezone_set('Africa/Cairo');
 															$now = date('Y-m-d H:i');
 															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
 															@endphp
-															@if ($now >= $start_time && $now <= $end_time)
+															@if ($now >= $start_time)
+															@if($now <= $end_time)
 															<a href="{{ $session->start_url }}" target="_blank">
 																<button title="Start Meeting" type="button" data-value="{{ $session->id }}"
 																	type="button" class="btn btn-label-primary rounded">
 																	<i class="ti ti-user"></i>
 																</button>
 															</a>
+															@else
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+															@endif
 															@else
 															<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
 															@endif
@@ -906,7 +931,125 @@
 				</div>
 			</div>
 			@endif
+
+			@if( array_intersect(['dashboard.widgets_tables_my_judging_list_view'], $permissions) )
+			<div class="col-12">
+				<div class="card mt-10">
+					<section>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="card">
+									<div class="card-header border-bottom mb-4">
+										<h5 class="card-title align-items-center">
+											<i class="ti ti-calendar-stats ti-24px"></i>
+											<span class="mx-2">{{ __('dashboard.Your Judging List') }}</span>
+										</h5>
+									</div>
+									<div class="card-body">
+										@if( $initial_screening_steps->count() > 0)
+										@foreach( $initial_screening_steps as $step )
+										<div class="mt-6">
+											<div class="card-header bg-label-light p-3 mb-2">
+												<h5 class="mb-0">
+													<i class="ti ti-bell ti-24px"></i>
+													<span class="mx-2">
+													  {{ $step->title }} - ({{ $step->cycle->title }})
+													  - {{ __('dashboard.start from') }} {{ $step->from }}
+													  {{ __('dashboard.to') }} {{ $step->to }}
+													</span>
+												  </h5>
+											</div>
+											<div class="card-body">
+												<p class="card-text">{{ $step->description }}</p>
+												<small class="text-muted">
+													{{ __('dashboard.This Cycle Start from') }}
+													{{ $step->cycle->start }}
+													{{ __('dashboard.to') }}
+													{{ $step->cycle->end }}
+												</small>
+											</div>
+											<div class="table-responsive">
+												<table class="table">
+													<thead>
+														<tr>
+														  <th>{{ __('dashboard.Company') }}</th>
+														  <th>{{ __('dashboard.User/Title') }}</th>
+														  <th>{{ __('dashboard.Screening completed') }}</th>
+														  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
+														</tr>
+													  </thead>
+													  <tbody>
+														@foreach( $step->companies as $company )
+														<tr>
+															<td>
+																<div class="d-flex align-items-center">
+																	<img src="{{ $company->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																	@if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+																	{{ $company->name }}
+																	@if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
+																</div>
+															</td>
+															<td>
+																<div class="d-flex align-items-center">
+																@if( $company->users->first() )
+																	<img src="{{ $company->users->first()->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																	<div>
+																		<h6 class="mb-0">{{ $company->users->first()->name }}</h6>
+																		<small class="text-muted">{{ $company->users->first()->title }}</small>
+																	</div>
+																@else
+																-
+																@endif
+																</div>
+															</td>
+															<td>
+																@if( $company->evaluation_status == 'not_started' )
+																<span class="badge bg-label-warning">
+																	<i class="ti ti-clock me-2"></i> Not started
+																</span>
+																@elseif( $company->evaluation_status == 'in_progress' )
+																<span class="badge bg-label-info">
+																	<i class="ti ti-clock-bolt me-2"></i> In progress
+																</span>
+																@elseif( $company->evaluation_status == 'evaluated' )
+																<span class="badge bg-label-success">
+																	<i class="ti ti-circle-check me-2"></i> Completed
+																</span>
+																@elseif( $company->evaluation_status == 'not_evaluated' )
+																<span class="badge bg-label-danger">
+																	<i class="ti ti-exclamation-circle me-2"></i> Not Evaluated
+																</span>
+																@endif
+															</td>
+														</tr>
+														@endforeach
+													  </tbody>
+												</table>
+											</div>
+										</div>
+										@endforeach
+										@else
+										<div class="d-flex flex-column justify-content-center align-items-center p-5">
+											<img src="/icons/not-found.svg" width="130" height="130" alt="No screening started yet">
+											<h6 class="text-center text-secondary mt-3">{{ __('dashboard.No screening started yet') }}</h6>
+										</div>
+										@endif
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+			@endif
+
+			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
+			{{--  <div class="col-12">
+				// allowed to list final screening
+			</div>  --}}
+			@endif
 		</div>
+		
 		<div class="row mt-6">
 			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
 			@if( $notrated_mens )
@@ -1326,9 +1469,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			  alert("Error Occurred, Try again!");
 			}
 		  });
-		});
-	
-
-      
+		});      
 </script>
 @stop

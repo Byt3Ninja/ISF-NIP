@@ -85,9 +85,9 @@ class ClientCompanyController extends Controller
             $final_comment = null;
             if( !empty( $evaluationForm ) )
             {
-                $myResponses = ScreeningEvaluationResults::where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
+                $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
-                $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id );
+                $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
                 $final_comment = $myComment->value;
                 $evaluationForm->final_comment = $final_comment;
                 $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {

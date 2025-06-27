@@ -285,9 +285,11 @@
             <div class="divider my-6 mx-auto" style="width: 80%;">
               <div class="divider-text">{{ __('auth.or') }}</div>
             </div>
-
+            <!-- Register -->@php
+            $data = request('data') ?? '2521';
+        @endphp
             <div class="d-flex justify-content-center">
-              <a href="{{ route('integrations.auth_linkedin_login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+              <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
                 <i class="fa-brands fa-linkedin-in text-white"></i> 
               </a>
               <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">

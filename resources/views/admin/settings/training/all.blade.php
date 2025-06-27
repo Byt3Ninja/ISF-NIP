@@ -31,7 +31,7 @@
                   <a class="btn btn-primary"
                     href="{{ route('trainings.create') }}">
                     <i class="ti ti-plus me-1"></i>
-                    {{ __('cycles.Add new Training') }}
+                    {{ __('admin.Add_new_Courses') }}
                   </a>
                 @endif
               </div>

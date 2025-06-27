@@ -71,6 +71,33 @@ class IndexController extends Controller
         }
     }
 
+    public function seedPermissions(Request $request)
+    {
+        if( $request->has('token') )
+        {
+            $token = $request->input('token', null);
+            if( $token == 'seedPermissions@PreForm!@NoW' )
+            {
+                try {
+                    Artisan::call('db:seed', [
+                        '--class' => 'defaultRolesPermissionSeeder',
+                        '--force' => true,
+                    ]);
+                    $output = Artisan::output();
+                    return response()->json([
+                        'status' => 'success',
+                        'output' => $output,
+                    ]);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $e->getMessage(),
+                    ], 500);
+                }
+            }
+        }
+    }
+
     public function lang($locale)
     {
         $availLocale = ['ar' => 'ar', 'en' => 'en'];

@@ -364,7 +364,7 @@ class WhatsAppSessionController extends Controller
      */
     public function terminate(string $sessionId)
     {
-        $endpoint = "/session/logout/{$sessionId}";
+        $endpoint = "/session/terminate/{$sessionId}";
 
         try {
             $response = $this->prepareHttpClient()->delete($endpoint);

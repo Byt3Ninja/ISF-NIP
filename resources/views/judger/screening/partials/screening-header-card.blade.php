@@ -10,7 +10,7 @@
 
 <div class="card card-body mb-6">
   <div class="row">
-    <div class="col-12 mb-6">
+    <div class="col-12">
       <div class="row">
         @forEach($statusData as $i => $st)
         <div class="col-6 col-md-3 mb-2 mb-md-0">
@@ -25,7 +25,8 @@
                 @endif
               </div>
               <div class="d-flex flex-column">
-                <h6 class="mb-0 text-capitalize text-secondary text-nowrap">{{ str_replace('-', ' ', $st->status) }}
+                <h6 class="mb-0 text-capitalize text-secondary text-nowrap">
+                  {{ __('admin.' . $st->status) }}
                 </h6>
                 <span class="fs-5 text-dark fw-bold">{{ $st->count }}</span>
               </div>
@@ -35,7 +36,7 @@
         @endforeach
       </div>
     </div>
-    <div class="col-12">
+    {{-- <div class="col-12">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
         <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
           <h6 class="mb-0 fw-bold">Filter</h6>
@@ -66,6 +67,6 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> --}}
   </div>
 </div>

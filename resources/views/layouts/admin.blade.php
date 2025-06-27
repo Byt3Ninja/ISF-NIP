@@ -77,8 +77,7 @@
     <script src="/vuexy/assets/js/main.js"></script>
 
     <!-- Custom JS -->
-    {{-- <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script> --}}
-    <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+    
     <!-- For Searchable Select -->
     <script src="/vuexy/assets/js/forms-selects.js"></script>
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
+use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ImporterController;
@@ -12,7 +13,9 @@ use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test', function () {});
-Route::get('default-permissions', function() { App\Permission::default_permissions(); });
+Route::get('default-permissions', function () {
+    App\Permission::default_permissions();
+});
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
@@ -61,8 +64,8 @@ Route::get('search', 'IndexController@search');
 Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
- // test middleware
- Route::get('/testting', function () {
+// test middleware
+Route::get('/testting', function () {
     $stamp = '1746024780';
     $format = 'Y-m-d';
     try {
@@ -72,13 +75,14 @@ Route::post('eventregister', 'IndexController@eventregister');
         $parser = 'date';
         $date = date($format, $stamp);
     }
-    dd( $date, $parser );
- });
- Route::get('/2otp', function () {
+    dd($date, $parser);
+});
+Route::get('/2otp', function () {
     return redirect('/dashboard');
 })->middleware(['auth', '2fa']);
 
 Route::get('/db-migrate', 'IndexController@dbMigrate');
+Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('invitations.set_password_view_form');
@@ -98,10 +102,16 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('documentation', 'DocumentationController');
 
     // Judger
-    Route::get('judger/screening','Judger\JudgerScreeningController@index');
+    Route::get('judger/screening', 'Judger\JudgerScreeningController@index');
     Route::post('judger/screening/evaluation/save_draft', 'Judger\JudgerScreeningController@save_evaluation_draft')->name('screening.evaluate_save_draft');
     Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
-   
+
+    // Hackathon Routes
+    Route::get('hackathon', [HackathonController::class, 'index']);
+    Route::get('hackathon/manage', [HackathonController::class, 'manage']);
+    Route::get('hackathon/my-team', [HackathonController::class, 'myTeam']);
+    Route::get('hackathon/details', [HackathonController::class, 'show']);
+
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
     Route::get('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.events_delete');
@@ -159,7 +169,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('settings.system_social_home_image_update');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('settings.system_social_achievements_update');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('settings.system_social_whatsapp_update');
-  
+
     Route::post('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[0-9]+')->name('whatsapp.session.start');
     Route::post('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[0-9]+')->name('whatsapp.session.status');
     Route::post('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[0-9]+')->name('whatsapp.session.qr.data');
@@ -168,7 +178,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('whatsapp/session/{sessionId}/send', 'IndexController@sendMessage')->where('sessionId', '[0-9]+')->name('whatsapp.session.send');
     Route::post('whatsapp/getWASession', 'WhatsAppSessionController@getWASessionID')->name('whatsapp.session.getsessionid');
 
-    
+
 
 
     Route::get('organizations/settings', 'SettingsController@showSettings')->name('settings.organization_manage');
@@ -209,20 +219,20 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
-    
-    Route::group(['prefix'=>'2fa'], function(){
-        Route::get('/','ClientProfileController@show2faForm');
-        Route::post('/generateSecret','ClientProfileController@generate2faSecret')->name('security.2fa_generate_secret');
-        Route::post('/enable2fa','ClientProfileController@enable2fa')->name('security.2fa_enable');
-        Route::post('/disable2fa','ClientProfileController@disable2fa')->name('security.2fa_disable');
-    
+
+    Route::group(['prefix' => '2fa'], function () {
+        Route::get('/', 'ClientProfileController@show2faForm');
+        Route::post('/generateSecret', 'ClientProfileController@generate2faSecret')->name('security.2fa_generate_secret');
+        Route::post('/enable2fa', 'ClientProfileController@enable2fa')->name('security.2fa_enable');
+        Route::post('/disable2fa', 'ClientProfileController@disable2fa')->name('security.2fa_disable');
+
         // 2fa middleware
         Route::post('/2faVerify', function () {
             return redirect('/dashboard');
         })->name('security.2fa_verify_login')->middleware('2fa');
     });
-    
-    
+
+
 
     Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('security.2fa.phone_save_session');
     Route::post('/send-code', 'ClientProfileController@sendCode')->name('security.2fa_code_send');
@@ -277,7 +287,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('company.profile_milestones_edit');
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('company.profile_milestones_delete');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
-    
+
 
 
     //like a service
@@ -348,13 +358,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('roles', 'RolesController');
     //Faqs
     Route::resource('faqs', 'FaqsController');
-    
+
     // Forms
     Route::get('forms-list', 'FormController@index')->name('forms.index');
-    
+
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
-    
+
     //BuilderForm Builder
     Route::get('show-builder/{id?}', 'FormBuilderController@showBuilder')->name('forms.builder_view');
     Route::get('show-form/{id}', 'FormBuilderController@showForm')->name('forms.render_view');
@@ -386,6 +396,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
     Route::post('screening/evaluation/save_draft', 'ScreeningController@save_evaluation_draft')->name('screening.evaluation_save_draft');
     Route::post('screening/evaluation/publish', 'ScreeningController@publish_evaluation')->name('screening.evaluation_publish');
+    Route::post('screening/evaluation/results', 'ScreeningController@get_results')->name('screening.evaluation_results');
 
     //ZOOM
     Route::get('zoom/all', 'MeetingController@showall');
@@ -434,9 +445,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/storecontent', 'TrainingController@storecontent')->name('trainings.content_store');
     Route::get('training/my', 'TrainingController@mysessions')->name('trainings.my_sessions_mine');
     Route::get('training/my/{id}', 'TrainingController@my')->name('trainings.list_mine');
-    Route::get('training/my/{id}/quiz/{quiz_id}', 'TrainingController@myQuiz')->name('quizzes.view_overview_mine');
-    Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}', 'TrainingController@myQuizResponses')->name('quizzes.view_response_mine');
-    Route::post('training/my/{id}/quiz/{quiz_id}', 'TrainingController@doQuiz')->name('quizzes.take_start');
+    Route::get('training/my/{id}/quiz/{quiz_id}', 'quizzesController@myQuiz')->name('quizzes.view_overview_mine');
+    Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}', 'quizzesController@myQuizResponses')->name('quizzes.view_response_mine');
+    Route::post('training/my/{id}/quiz/{quiz_id}', 'quizzesController@doQuiz')->name('quizzes.take_start');
     Route::get('training/EditTR/{id}', 'TrainingController@editTR')->name('trainings.records_edit');
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
 
@@ -451,12 +462,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/export-Tresult', 'TrainingController@exportTresult')->name('trainings.results_export');
     Route::post('trainings/change/Tresult', 'TrainingController@changAllTL')->name('trainings.tl_update_all');
     Route::get('training/create', 'TrainingController@create')->name('trainings.create');
-    Route::get('training/{id?}/surveys', 'TrainingController@list_surveys')->name('trainings.surveys_list');
-    Route::get('training/{id?}/surveys/create', 'TrainingController@create_survey')->name('trainings.surveys_create');
-    Route::post('training/{id?}/surveys/store', 'TrainingController@store_survey')->name('trainings.surveys_store');
-    Route::get('training/{id?}/surveys/{survey?}/edit', 'TrainingController@edit_survey')->name('trainings.surveys_edit');
-    Route::patch('training/{id?}/surveys/{survey?}/update', 'TrainingController@update_survey')->name('trainings.surveys_update');
-    Route::delete('training/{id?}/surveys/{survey?}/destroy', 'TrainingController@destroy_survey')->name('trainings.surveys_delete');
+    Route::get('training/{id?}/surveys', 'surveysController@list_surveys')->name('trainings.surveys_list');
+    Route::get('training/{id?}/surveys/create', 'surveysController@create_survey')->name('trainings.surveys_create');
+    Route::post('training/{id?}/surveys/store', 'surveysController@store_survey')->name('trainings.surveys_store');
+    Route::get('training/{id?}/surveys/{survey?}/edit', 'surveysController@edit_survey')->name('trainings.surveys_edit');
+    Route::patch('training/{id?}/surveys/{survey?}/update', 'surveysController@update_survey')->name('trainings.surveys_update');
+    Route::delete('training/{id?}/surveys/{survey?}/destroy', 'surveysController@destroy_survey')->name('trainings.surveys_delete');
     Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('trainings.reports_session');
     Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('trainings.reports_recording');
     Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('trainings.reports_attendance');
@@ -503,7 +514,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers')->name('screening.users_view_details');
     Route::post('final/delsession/{id}', 'FinalscreeningController@delsession')->name('screening.sessions_delete');
     Route::get('/send-whatsapp', 'CyclesController@testSend')->name('whatsapp.send');
-   
+
     //Program List
     Route::resource('programlist', 'ProgramController');
     Route::post('programlist/create', 'ProgramController@edit')->name('programs.create');
@@ -512,7 +523,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
     Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
-    
+
     /* Start of Currencies Routes */
     Route::patch('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.rates_update_all');
     Route::resource('currencies', 'CurrencyController')->except(['show']);
@@ -523,14 +534,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorships.sessions_list_detailed');
         Route::get('meetingRedirect/{mentorship_request_id}', 'MentorshipController@meetingRedirect')->name('integrations.meeting_redirect');
         Route::resource('mentorshipTasks', 'MentorshipTaskController');
-        Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask');
-        Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask');
-        Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
-        Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
-        Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
+        Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask')->name('mentorshipTasks.add_task');
+        Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask')->name('mentorshipTasks.move_task');
+        Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask')->name('mentorshipTasks.edit_task');
+        Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask')->name('mentorshipTasks.remove_task');
+        Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment')->name('mentorshipTasks.post_comment');
         Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.display');
-        Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach');
-        Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach');
+        Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach')->name('mentorshipTasks.upload_attachments');
+        Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach')->name('mentorshipTasks.delete_attachments');
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorship_tasks.comment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorship_tasks.update_special');
@@ -578,13 +589,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('projects/{project}/unlink-program/{cycle}', 'ProjectController@unlinkProgram')->name('projects.programs_unlink');
     Route::post('/projects/{project}/add-team-members', 'ProjectController@addTeamMembers')->name('projects.team_add_member');
     Route::delete('/projects/{project}/remove-team-member/{teamMember}', 'ProjectController@removeTeamMember')->name('projects.team_remove_member');
-    Route::resource('projects', 'ProjectController');    
+    Route::resource('projects', 'ProjectController');
     /* End of Projectss Routes */
 
     Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate_view_form');
     Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate_execute');
 
-    
+
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {
@@ -618,7 +629,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
             return response()->json(['success' => true, 'message' => 'Notification marked as read']);
         }
     });
-
 });
 
 

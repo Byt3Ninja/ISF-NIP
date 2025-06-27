@@ -165,6 +165,7 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
+                                                    @if($status== 'in')
                                                     <p style="margin: 0;">Dear {{$owner_name_en}},</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name_en }}, has successfully transitioned from the {{ $last_step }} to the {{ $new_step }}.This advancement reflects your hard work and commitment to growth.</p>
@@ -175,6 +176,15 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
                                                     <p style="margin: 0;">{{ $organization_name_en }}</p>
+                                                    @else
+                                                    <p style="margin: 0;">Dear {{$owner_name_en}},</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name_en }}, has successfully transitioned from the {{ $last_step }} to the {{ $new_step }}.</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">Please log in to your dashboard on our virtual incubator platform to  choose a new Program.</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">Best regards,</p>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -183,6 +193,7 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
+                                                    @if($status== 'in')
                                                     <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name_ar }}، قد انتقل بنجاح من {{ $last_step }} إلى  {{ $new_step }}. يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
@@ -192,6 +203,16 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">تهانينا على بلوغ هذه الخطوة الهامة! نحن نتطلع إلى رؤية المزيد من تقدمكم ونجاحكم.</p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
                                                     <p style="margin: 0;">{{ $organization_name_ar }}</p>
+                                                    @else
+                                                     <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name_ar }}، قد انتقل بنجاح من {{ $last_step }} إلى  {{ $new_step }}</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">الرجاء تسجيل الدخول إلى لوحة التحكم الخاصة بك على منصتنا للحاضنات الافتراضية للاشتراك ببرنامج جديد.</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">أطيب التحيات،</p>
+                                                    <p style="margin: 0;">{{ $organization_name_ar }}</p>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

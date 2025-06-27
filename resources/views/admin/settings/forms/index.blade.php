@@ -90,6 +90,7 @@
         </table>
       </div>
     </div>
+   
     <!-- Modal to add new record -->
     <div class="offcanvas offcanvas-end" id="add-new-record">
       <div class="offcanvas-header border-bottom">
@@ -111,8 +112,14 @@
             <select id="organization_id" name="organization_id" class="form-select select2 dt-org-select" data-placeholder="{{ __('admin.Select Organization') }}" data-required="true" required="true">
               <option value="" selected disabled>{{ __('admin.Select Organization') }}</option>
               @php
-              $organizations = App\Organization::all();
+              
+              if(auth()->user()->hasAnyRole(['organizationManager'])) {
+                $organizations = App\Organization::where('id',auth()->user()->organization_id)->get();
+              }else{
+                $organizations = App\Organization::all();
+              }
               @endphp
+              
               @foreach ($organizations as $organization)
               <option value="{{ $organization->id }}">{{ $organization->name }}</option>
               @endforeach
@@ -153,7 +160,11 @@
             <select id="organization_id" name="organization_id" class="form-select select2 dt-org-select" data-placeholder="{{ __('admin.Select Organization') }}" data-required="true" required="true">
               <option value="" selected disabled>{{ __('admin.Select Organization') }}</option>
               @php
-              $organizations = App\Organization::all();
+               if(auth()->user()->hasAnyRole(['organizationManager'])) {
+                $organizations = App\Organization::where('id',auth()->user()->organization_id)->get();
+              }else{
+                $organizations = App\Organization::all();
+              }
               @endphp
               @foreach ($organizations as $organization)
               <option value="{{ $organization->id }}" data-value="{{ $organization->name }}">{{ $organization->name }}</option>

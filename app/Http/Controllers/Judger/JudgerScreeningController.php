@@ -75,8 +75,8 @@ class JudgerScreeningController extends Controller
         $companies = $companies->map(function( $company ) use ( $myResponses ) {
             $step_id = $company->step->id;
             $status = 'not-started';
-            if( $myResponses->where('step_id', $step_id)->count() > 0 ) { $status = 'in-progress'; }
-            if( $myResponses->where('step_id', $step_id)->where('status', true)->count() > 0 ) { $status = 'completed'; }
+            if( $myResponses->where('step_id', $step_id)->where('company_id', $company->id)->count() > 0 ) { $status = 'in-progress'; }
+            if( $myResponses->where('step_id', $step_id)->where('company_id', $company->id)->where('status', true)->count() > 0 ) { $status = 'completed'; }
             $company->status = $status;
             $company->icon = $status == 'in-progress' ? 'ti ti-file-text' : ($status == 'completed' ? 'ti ti-circle-check' : 'ti ti-gavel');
             return $company;
@@ -154,10 +154,10 @@ class JudgerScreeningController extends Controller
 
         $statusCounts = $companies->groupBy('status')->map->count();
         $statusData = [
-            (object) ['status' => 'startups', 'count' => $companies->count()],
-            (object) ['status' => 'not-started', 'count' => $statusCounts['not-started'] ?? 0],
-            (object) ['status' => 'in-progress', 'count' => $statusCounts['in-progress'] ?? 0],
-            (object) ['status' => 'completed', 'count' => $statusCounts['completed'] ?? 0],
+            (object) ['status' => 'Startups', 'count' => $companies->count()],
+            (object) ['status' => 'NotStarted', 'count' => $statusCounts['not-started'] ?? 0],
+            (object) ['status' => 'In_Progress', 'count' => $statusCounts['in-progress'] ?? 0],
+            (object) ['status' => 'Completed', 'count' => $statusCounts['completed'] ?? 0],
         ];
         $statuses = ['not-started', 'in-progress', 'completed'];
 
@@ -189,14 +189,15 @@ class JudgerScreeningController extends Controller
                 if( $evaluationForm->status == 'Published' )
                 {
                     $toCreate = [];
-                    $myResponses = ScreeningEvaluationResults::where('evaluation_id', $evaluation_id)->where('user_id', $user_id)->get();
+                    $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluation_id)->where('user_id', $user_id)->get();
                     $have_published = $myResponses->where('status', true);
                     if( $have_published->count() > 0 ) { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'You have already published an evaluation form'], 200); }
                     else
                     {
                         $final_comment = $request->final_comment;
-                        $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id );
+                        $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id, $company->id );
                         $myComment->value = $final_comment;
+                        $myComment->company_id = $company->id;
                         $myComment->save();
                         foreach( $request->evaluation as $element )
                         {
@@ -207,6 +208,7 @@ class JudgerScreeningController extends Controller
                                     'evaluation_id' => $evaluation_id,
                                     'criteria_id' => $element['id'],
                                     'user_id' => $user_id,
+                                    'company_id' => $company->id,
                                     'score' => $element['score'],
                                     'comment' => $element['comment'],
                                     'status' => $type == 'publish' ? true : false

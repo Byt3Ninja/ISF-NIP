@@ -548,8 +548,7 @@
 
           <div class="row mb-4" id="date-only">
             <div class="col-12">
-              <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to')
-                }}:</label>
+              <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
               <input type="hidden" name="start" id="start" />
               <input type="hidden" name="end" id="end" />
               <input type="text" name="date_range" id="date-range-picker" class="form-control" />
@@ -658,8 +657,7 @@
             </div>
             <div class="row mb-4" id="date-only">
               <div class="col-12">
-                <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to')
-                  }}:</label>
+                <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
                 <input type="hidden" name="start" id="start" />
                 <input type="hidden" name="end" id="end" />
                 <input type="text" name="date_range" id="date-range-picker" class="form-control date-range-picker" />

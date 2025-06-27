@@ -80,8 +80,6 @@
 
 {{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css"> --}}
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-<link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
-<link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css">
 
 @yield('vendorstyle')
 <!-- END: Vendor CSS-->

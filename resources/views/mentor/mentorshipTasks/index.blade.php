@@ -581,6 +581,33 @@
 	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 	<script>
+		// Custom SweetAlert2 helper functions
+		const showError = (message) => {
+			return Swal.fire({
+				icon: 'error',
+				title: message,
+				confirmButtonText: '{{ __('admin.OK') }}',
+				customClass: {
+					confirmButton: 'btn btn-primary'
+				},
+				buttonsStyling: false
+			});
+		};
+
+		const showSuccess = (message) => {
+			return Swal.fire({
+				icon: 'success',
+				html: message,
+				showCancelButton: false,
+				showConfirmButton: true,
+				confirmButtonText: "{{ __('admin.OK') }}",
+				customClass: {
+					confirmButton: 'btn btn-primary',
+				},
+				buttonsStyling: false
+			});
+		};
+
 		// Handle attachments upload
 		function handleFileUpload(event) {
 			const files = event.target.files;
@@ -623,7 +650,7 @@
 					if (response.status) {
 						renderFiles(response.task.files, mode);
 					} else {
-						alertify.error(response.message);
+						showError(response.message);
 					}
 				},
 				error: function(error) {
@@ -700,7 +727,7 @@
 								const attachmentCount = document.getElementById('attachmentCount');
 								attachmentCount.textContent = document.getElementById('fileList').children.length;
 							} else {
-								alertify.error(response.message);
+								showError(response.message);
 							}
 						},
 						error: function(error) {
@@ -901,7 +928,7 @@
 							$('#viewTaskModal').modal('show');
 						},
 						error: function(error) {
-							alertify.error('Unexpected error occurred.');
+							showError('Unexpected error occurred.');
 						}
 					});
 				},
@@ -943,7 +970,7 @@
 							}
 							else
 							{
-								alertify.error(response.message);
+								showError(response.message);
 							}
 							reloadKanban();
 						},
@@ -951,8 +978,8 @@
 							reloadKanban();
 							if( error.status == 422 )
 							{
-								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
-							} else { alertify.error('Unexpected error occurred.'); }
+								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+							} else { showError('Unexpected error occurred.'); }
 						}
 					});
 				}
@@ -1116,7 +1143,7 @@
 								fileList.appendChild(fileDiv);
 							});
 							attachmentCount.textContent = response.task.files.length;
-						} else { alertify.error( response.message ); }
+						} else { showError( response.message ); }
 					},
 					error: function(error) {
 						console.error('Error uploading files:', error);
@@ -1205,7 +1232,7 @@
 								ele.remove();
 								const attachmentCount = document.getElementById('attachmentCount');
 								attachmentCount.textContent = document.getElementById('fileList').children.length;
-							} else { alertify.error( response.message ); }
+							} else { showError( response.message ); }
 						},
 						error: function(error) {
 							console.error('Error deleting file:', error);
@@ -1398,7 +1425,7 @@
 					$('#editTaskModal').modal('show');
 				},
 				error: function(error) {
-					alertify.error('Unexpected error occurred.');
+					showError('Unexpected error occurred.');
 				}
 			});
 		});
@@ -1432,12 +1459,12 @@
 							timer: 4500
 						});
 						reloadKanban();
-					} else { alertify.error( response.message ); }
+					} else { showError( response.message ); }
 				},
 				error: function(error) {
 					if( error.status == 422 )
 					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 					}
 				}
 			});
@@ -1487,12 +1514,12 @@
 							`;
 							commentList.appendChild(commentDiv);
 							commentInput.value = '';
-						} else { alertify.error( response.message ); }
+						} else { showError( response.message ); }
 					},
 					error: function(error) {
 						if( error.status == 422 )
 						{
-							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 						}
 					}
 				});
@@ -1547,13 +1574,13 @@
 							timer: 4500
 						});
 						reloadKanban();
-					} else { alertify.error( response.message ); }
+					} else { showError( response.message ); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
 					if( error.status == 422 )
 					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 					}
 				}
 			});
@@ -1608,13 +1635,13 @@
 							timer: 4500
 						});
 						reloadKanban();
-					} else { alertify.error( response.message ); }
+					} else { showError( response.message ); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
 					if( error.status == 422 )
 					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 					}
 				}
 			});

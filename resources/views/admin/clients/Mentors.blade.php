@@ -477,7 +477,7 @@
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 <script src="/vuexy/assets/js/forms-pickers.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
-	<script src="/vuexy/assets/js/mentorship-session.js"></script>
+<script src="/vuexy/assets/js/mentorship-session.js"></script>
 
 
 <script>

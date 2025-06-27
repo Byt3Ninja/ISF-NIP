@@ -24,9 +24,11 @@
         class="form-select" 
         placeholder="{{ __('cycles.Currency_Type') }}"
       >
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
+        <option value="USD">{{ __('admin.USD') }}</option>
+        <option value="EUR">{{ __('admin.EUR') }}</option>
+        <option value="GBP">{{ __('admin.GBP') }}</option>
+        <option value="SAR">{{ __('admin.SAR') }}</option>
+        <option value="EGP">{{ __('admin.EGP') }}</option>
       </select>
     </div>
   </div>

@@ -168,7 +168,7 @@
 
                     @endphp
 
-                    <img src="{{ $imageUrl }}" alt="Logo" class="img-fluid"
+                    <img src="/{{ $imageUrl }}" alt="Logo" class="img-fluid"
                       style="max-width: 100%; max-height: 100%; object-fit: contain;" />
                     @else
                     @php $setting = \App\Settings::where('id', 1)->first(); @endphp
@@ -308,7 +308,7 @@
                     <div class="d-flex w-100 gap-2">
                       <i class="ti ti-user-circle text-primary ti-24px"></i>
                       <div class="d-flex flex-column">
-                        <span class="fs-6 fw-bold mb-2">{{ __('admin.Responsible') }}</span>
+                        <span class="fs-6 fw-bold mb-2">{{ __('admin.Mentors') }}</span>
 
                         <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 90%">
                           @foreach ($mentors as $mentor)

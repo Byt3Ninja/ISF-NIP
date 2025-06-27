@@ -312,8 +312,8 @@ return [
     'Mentorship Sessions' => 'Mentorship Sessions',
     'Select Judges' => 'Select Judges',
     'Select Startup' => 'Select Startup',
-    'Time From' => 'الوقت من',
-    'Time To' => 'الوقت إلى',
+    'Time From' => 'Time From',
+    'Time To' => 'Time To',
     'Auto_Approve_Mentorship_Requests' => 'Auto-approve Mentorship Requests',
     'Enable_Auto_Approval' => 'Enable Auto-Approval',
     'Auto_Approve_Helper_Text' => 'If enabled, mentorship requests will be automatically approved based on mentor availability.',
@@ -351,5 +351,21 @@ return [
     'Model structure is valid.' => 'Model structure is valid.',
     'Panel list' => 'Panel list',
     'Remove panel' => 'Remove panel',
+    'Important Notice' => 'Important Notice',
+    'Select_Currency' => 'Select Currency',
+    'Select' => 'Select',
+    
+    // New validation and input restriction translations
+    'Only letters and spaces allowed' => 'Only letters and spaces allowed',
+    'Draft saved successfully!' => 'Draft saved successfully!',
+    'Error saving draft. Please try again.' => 'Error saving draft. Please try again.',
+    'Model published successfully!' => 'Model published successfully!',
+    'Error publishing model. Please try again.' => 'Error publishing model. Please try again.',
+    'Please fix all validation errors before publishing.' => 'Please fix all validation errors before publishing.',
+    'Category name is required' => 'Category name is required',
+    'Category with weight must have sub-criteria' => 'Category with weight must have sub-criteria',
+    'Sub-criterion name is required' => 'Sub-criterion name is required',
+    'Warning: Sub-criterion weights exceed 100%' => 'Warning: Sub-criterion weights exceed 100%',
+    'Model structure is valid and ready for publishing.' => 'Model structure is valid and ready for publishing.',
 ];
 

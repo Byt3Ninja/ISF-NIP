@@ -27,7 +27,7 @@ class TaskNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail','database'];
     }
 
     /**
@@ -52,8 +52,8 @@ class TaskNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'task_id' => $this->data['task']->id,
-            'title' => $this->data['task']->title,
+            // 'task_id' => $this->data['task']->id,
+            // 'title' => $this->data['task']->title,
             'message' => $this->data['message'],
         ];
     }

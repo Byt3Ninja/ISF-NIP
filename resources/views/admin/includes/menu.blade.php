@@ -736,7 +736,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </ul>
       </li>
 
-      @if (!$_user->hasAnyRole('organizationManager|Mentor|Judger'))
+      @if (!$_user->hasAnyRole('Mentor|Judger'))
         <li
           class="{{ Request::is('*services*', '', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
