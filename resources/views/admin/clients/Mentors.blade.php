@@ -145,11 +145,6 @@
         <div class="row">
           <!-- Mentors List -->
           @foreach ($mentors as $key => $mentor)
-          @php
-          $getcount = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->get();
-          $m_count = count($getcount);
-          $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
-          @endphp
           <!-- Mentor Card -->
           <div class="col-md-4 radius-15 mb-3">
             <div class="border radius-15" style="background-image: url('{{ $mentor->image_url }}'); 
@@ -202,7 +197,7 @@
                 <div class="bg-white custom-shadow px-2 py-1 border" style="border-radius: 15px;">
                   <div class="d-flex flex-column justify-content-center align-items-center">
                     <small class="text-info fw-bold">{{ __('cycles.ProgramCount') }}</small>
-                    <span class="text-black fw-bold fs-6">{{ $m_count }}</span>
+                    <span class="text-black fw-bold fs-6">{{ $mentor->mentorCycles->count() }}</span>
                   </div>
                 </div>
                 @php
@@ -239,12 +234,14 @@
               </div>
               @endif
               <!-- / Mentor Bio -->
-              @if ($getid->user ?? 0)
               <div class="row px-4 mt-auto">
-                @if(auth()->user()->company && auth()->user()->company->cycle != 0 &&
-                auth()->user()->hasRole('Registered'))
+                @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
+                @php
+                  $startup = auth()->user();
+                  $getCycle = $startup->company->cycledata;
+                @endphp
                 <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
-                  onclick="request({{$mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})"
+                  onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
                   title="Add new request">
                   {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                 </button>
@@ -252,20 +249,23 @@
 
                 <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
                 @endif
-                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') &&
-                !auth()->user()->hasRole('Admin'))
+                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin'))
+                @php
+                $startup = auth()->user();
+                $getCycle = $startup->company->cycledata;
+                @endphp
                 <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow" data-bs-toggle="modal"
                   data-bs-target="#SendRequest" title="Add new request" onclick="request({{ $mentor->id }},
-                    {{ optional($getid->user)->{'first_name_' . $l} }} 
-                    {{ optional($getid->user)->{'last_name_' . $l} }},
-                     {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})">
+                    {{ optional($startup)->first_nam }} 
+                    {{ optional($startup)->last_name }},
+                    {{ $getCycle->organization_id }},
+                    {{ $getCycle->id }})">
                   {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                 </button>
                 @endif
 
 
               </div>
-              @endif
             </div>
           </div>
           <!-- Mentor Card -->
