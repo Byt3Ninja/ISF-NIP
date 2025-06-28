@@ -122,7 +122,7 @@
                         </div>
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
-                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_en">{{ __('admin.Organization Manager English Name') }}</label>
+                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_en">{{ __('admin.Organization Manager English First Name') }}</label>
                             <input name="first_name_en" type="text" class="form-control" id="first_name_en"
                               value="{{ $user->first_name_en ?? '' }}" placeholder="{{ __('admin.First Name') }}" required
                               autocomplete="first_name_en" autofocus />
@@ -138,7 +138,7 @@
                         </div>
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
-                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_ar">{{ __('admin.Organization Manager Arabic Name') }}</label>
+                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_ar">{{ __('admin.Organization Manager Arabic First Name') }}</label>
                             <input value="{{ $user->first_name_ar ?? '' }}" name="first_name_ar" type="text"
                               class="form-control" id="first_name_ar" placeholder="{{ __('admin.First Name') }}"
                               required autocomplete="first_name_ar" autofocus />
