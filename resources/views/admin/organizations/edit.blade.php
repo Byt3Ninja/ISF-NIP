@@ -75,7 +75,7 @@
 													<label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
 														style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
 														<img 
-															src="{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
+															src="/{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
 															onerror="this.src='/images/logo-placeholder.png'"
 															alt="Organization Logo" 
 															class="rounded img-fluid border shadow-sm"
