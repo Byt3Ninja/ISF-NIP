@@ -99,7 +99,7 @@
                           </td>
                         <td class="text-center">
                         @foreach($survey->questions as $question)
-                              @foreach($question->tags_array as $tag)
+                              @foreach($question->tags as $tag)
                                  <span class="badge bg-primary me-1">{{ $tag }}</span>
                               @endforeach
                         @endforeach
