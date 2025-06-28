@@ -93,25 +93,25 @@
 										</div>
 										<div class="col-12">
 											<div class="mb-3">
-												<label for="first_name_en" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager English Name') }}</label>
+												<label for="first_name_en" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager English First Name') }}</label>
 												<input name="first_name_en" type="text" class="form-control" id="first_name_en" value="{{ old('first_name_en') }}" placeholder="{{ __('admin.First Name') }}" required>
 											</div>
 										</div>
 										<div class="col-12">
 											<div class="mb-3">
-												<label for="last_name_en" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager English Name') }}</label>
+												<label for="last_name_en" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager English Last Name') }}</label>
 												<input name="last_name_en" type="text" class="form-control" id="last_name_en" value="{{ old('last_name_en') }}" placeholder="{{ __('admin.Last Name') }}" required>
 											</div>
 										</div>
 										<div class="col-12">
 											<div class="mb-3">
-												<label for="first_name_ar" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager Arabic Name') }}</label>
+												<label for="first_name_ar" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager Arabic First Name') }}</label>
 												<input name="first_name_ar" type="text" class="form-control" id="first_name_ar" value="{{ old('first_name_ar') }}" placeholder="{{ __('admin.First Name') }}" required>
 											</div>
 										</div>
 										<div class="col-12">
 											<div class="mb-3">
-												<label for="last_name_ar" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager Arabic Name') }}</label>
+												<label for="last_name_ar" class="form-label fw-semibold fs-6 mb-1">{{ __('admin.Organization Manager Arabic Last Name') }}</label>
 												<input name="last_name_ar" type="text" class="form-control" id="last_name_ar" value="{{ old('last_name_ar') }}" placeholder="{{ __('admin.Last Name') }}" required>
 											</div>
 										</div>
