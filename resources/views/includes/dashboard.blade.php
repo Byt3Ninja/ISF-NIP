@@ -894,23 +894,22 @@
 														<td> {{ $session->admin_comment ?? '...' }} </td>
 														<td>
 															@php
-															$now = date('Y-m-d H:i');
-															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+																$now = date('Y-m-d H:i');
+																$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+																$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
 															@endphp
-															@if ($now >= $start_time)
-															@if($now <= $end_time)
-															<a href="{{ $session->start_url }}" target="_blank">
-																<button title="Start Meeting" type="button" data-value="{{ $session->id }}"
-																	type="button" class="btn btn-label-primary rounded">
-																	<i class="ti ti-user"></i>
-																</button>
-															</a>
+															@if( $now >= $start_time )
+																@if( $now <= $end_time )
+																<a href="{{ $session->start_url }}" target="_blank">
+																	<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+																		<i class="ti ti-link"></i> Join Meeting
+																	</button>
+																</a>
+																@else
+																	<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+																@endif
 															@else
-																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
-															@endif
-															@else
-															<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+																<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
 															@endif
 														</td>
 													</tr>
