@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateClientProfileRequest;
-use App\Http\Requests\UpdateClientProfilePasswordRequest;
-use App\User;
-use App\Role as Roles;
-use App\Organization;
-use App\Company;
-use Storage;
-use \Spatie\Permission\Models\Role as Role;
-use Intervention\Image\ImageManagerStatic as Image;
-use Hash;
 use DB;
-use Auth;
 use Log;
-use Exception;
+use Auth;
+use Hash;
 use Session;
+use Storage;
+use App\User;
+use Exception;
+use App\Company;
+use App\Organization;
+use App\Role as Roles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrganizationCreatedMail;
+use \Spatie\Permission\Models\Role as Role;
+use App\Http\Requests\UpdateClientProfileRequest;
+use Intervention\Image\ImageManagerStatic as Image;
+use App\Http\Requests\UpdateClientProfilePasswordRequest;
 
 class organizationsController extends Controller
 {
@@ -94,15 +96,19 @@ class organizationsController extends Controller
 			$organization->img_url =$img_url;
 		}
 		//update
-		
-
 		$organization->save();
+
+		$password = $request->password;
 
 		$user->organization_id = $organization->id;
 		$user->password = Hash::make($request->password);
 		$user->email_verified_at = date('Y-m-d H:i:s');
 		$user->HaveCompany = 0;
 		$user->save();
+
+
+		Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $password));
+
 		return redirect()->route('organizations.index')->with(['msg' => 'StoredSuccessfully']);
 	}
 
