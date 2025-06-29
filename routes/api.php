@@ -24,4 +24,6 @@ Route::get('uploads/companies/{path}', [RegistrationController::class, 'showImag
 Route::get('company', [RegistrationController::class, 'getCompany']);
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
 
