@@ -69,7 +69,12 @@
                       <div class="col-12 col-md-6 col-lg-4">
                         <select class="form-select select2" id="cycle_id">
                           @php
+                          $user = auth()->user();
+                          if($user->hasAnyRole(['organizationManager'])) {
+                            $cycles = \App\Cycle::where('organization_id', $user->organization_id)->get();
+                          }else{
                             $cycles = \App\Cycle::get();
+                          }
                           @endphp
                           <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
                           @foreach ($cycles as $cycle)
