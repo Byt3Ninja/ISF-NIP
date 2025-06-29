@@ -2009,4 +2009,5 @@ return [
 	'StarRating' => 'Star Rating',
 	'enterAnswer' => 'Enter your answer here',
 	'NewQuestionsSelected' => 'New questions selected',
+	'AlreadyAddedQuestionsAreHighlighted' => 'Already added questions are highlighted'
 ];
