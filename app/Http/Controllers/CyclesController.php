@@ -630,6 +630,7 @@ class CyclesController extends Controller
     public function saveForm(Request $request)
     {
 
+       
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
@@ -647,7 +648,7 @@ class CyclesController extends Controller
                 return [
                     'field_' . $id => implode("|", $rules)
                 ];
-            } else {
+            }else {
                 return ['field_' . $id => 'nullable'];
             }
         });
@@ -670,6 +671,11 @@ class CyclesController extends Controller
 
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
+
+            //ahmed we need to store the image or file here
+                // $image = $request->file('field_' . $id);
+                // $imageName = time() . '.' . $image->getClientOriginalExtension();
+                // $image->move(public_path('formsubmissions/'), $imageName);
 
             // update cycle & step
             Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
