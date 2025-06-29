@@ -305,6 +305,20 @@ class quizzesController extends Controller
 		}
 	}
 
+	public function delete_questions($id, Request $request)
+	{
+		$quiz = Quizzes::find($id);
+		if (empty($quiz)) {
+			return back()->with(['error' => 'quizNotFound']);
+		}
+		$question_ids = $request->input('question_ids', []);
+		if (empty($question_ids)) {
+			return redirect()->route('quizzes.questions_manage', ['quiz' => $id])->with(['error' => 'noQuestionsSelected']);
+		}
+		$quiz->questions()->detach($question_ids);
+		return redirect()->route('quizzes.questions_manage', ['quiz' => $id])->with('success', 'DeletedSuccessfully');
+	}
+
 	public function my()
 	{
 		$user = auth()->user();
