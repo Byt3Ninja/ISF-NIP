@@ -495,7 +495,6 @@
                                       src="{{ $company->logo_url }}"
                                       alt="Company Logo"
                                       class="rounded-3 shadow-sm"
-                                      onerror="this.onerror=null;this.src='/app-assets/images/logo_placeholder.png';"
                                       height="50"
                                       width="50"
                                     />
@@ -551,7 +550,6 @@
                                 <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
                                   <img
                                     src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
-                                    onerror="this.onerror=null;this.src='/icons/account.svg';"
                                     alt="img"
                                     class="rounded-circle me-3 shadow-sm"
                                     height="40"
@@ -1083,8 +1081,7 @@
                 <div class="col-md-4">
                   <div class="card border shadow-sm h-100">
                     <div class="card-body text-center py-4">
-                      <img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle mb-3" width="60" height="60" 
-                           onerror="this.src='/icons/account.svg';">
+                      <img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle mb-3" width="60" height="60">
                       <h6 class="fw-semibold mb-2">${judge.name}</h6>
                       <div class="badge bg-${statusClass} bg-opacity-10 text-${statusClass} mb-3 px-3 py-2">
                         <i class="ti ti-${statusIcon} me-1"></i>
@@ -1147,8 +1144,7 @@
                             <div class="d-flex align-items-center justify-content-between mb-3">
                               <div class="d-flex align-items-center">
                                 <img src="${data.judges.find(j => j.id === judgeDetail.judger.id)?.image_url || '/icons/account.svg'}" 
-                                     alt="${judgeDetail.judger.name}" class="rounded-circle me-3" width="32" height="32"
-                                     onerror="this.src='/icons/account.svg';">
+                                     alt="${judgeDetail.judger.name}" class="rounded-circle me-3" width="32" height="32">
                                 <div>
                                   <div class="fw-medium text-dark">${judgeDetail.judger.name}</div>
                                   <span class="badge bg-${statusClass} bg-opacity-10 text-${statusClass} small mt-1">${judgeDetail.status}</span>
@@ -1200,8 +1196,7 @@
                     <button class="accordion-button ${index === 0 ? '' : 'collapsed'} py-4" type="button" data-bs-toggle="collapse" 
                             data-bs-target="#collapse${judge.id}" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="collapse${judge.id}">
                       <div class="d-flex align-items-center w-100">
-                        <img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle me-4" width="40" height="40"
-                             onerror="this.src='/icons/account.svg';">
+                        <img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle me-4" width="40" height="40">
                         <div class="flex-grow-1">
                           <div class="fw-bold text-dark">${judge.name}</div>
                           <div class="small text-muted mt-1">${judge.email}</div>

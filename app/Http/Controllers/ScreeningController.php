@@ -487,8 +487,6 @@ if ($cstep) {
 			$output->id = $item->id;
 			$output->name = $item->name;
 			$output->weight = $item->weight;
-			$output->score = ( round( $output->weight * 100 ) / 100 );
-			$output->value = round( $output->score * $output->score * 100 ) / 100;
 			$output->details = $item->subCriteria->map(function( $sub ) {
 				$output = new stdClass;
 				$output->id = $sub->id;
@@ -513,6 +511,8 @@ if ($cstep) {
 				});
 				return $output;
 			});
+			$output->score = ( round( $output->details->sum('value') * 100 ) / 100 );
+			$output->value = round( $output->score * $output->weight * 100 ) / 100;
 			return $output;
 		});
 
