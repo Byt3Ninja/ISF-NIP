@@ -259,7 +259,7 @@
                   <option value="">{{ __('admin.AllTypes') }}</option>
                   <option value="mcq">{{ __('admin.type_mcq') }}</option>
                   <option value="tfq">{{ __('admin.type_tfq') }}</option>
-                  <option value="text">{{ __('admin.TextQuestion') }}</option>
+                  {{-- <option value="text">{{ __('admin.TextQuestion') }}</option> --}}
                 </select>
               </div>
             </div>
