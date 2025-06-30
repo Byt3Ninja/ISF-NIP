@@ -202,7 +202,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                 style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:30px;line-height:150%;text-align:center;mso-line-height-alt:45px;">
                                                     <p style="margin: 0; word-break: break-word;"><span
-                                                                style="word-break: break-word; color: #000000;"><strong>New Judger invitation</strong></span>
+                                                                style="word-break: break-word; color: #000000;"><strong>New Organization invitation</strong></span>
                                                     </p>
                                                 </div>
                                             </td>
