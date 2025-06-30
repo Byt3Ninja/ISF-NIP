@@ -672,10 +672,11 @@ class CyclesController extends Controller
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
-            //ahmed we need to store the image or file here
-                // $image = $request->file('field_' . $id);
-                // $imageName = time() . '.' . $image->getClientOriginalExtension();
-                // $image->move(public_path('formsubmissions/'), $imageName);
+          if ($request->hasFile($field_name)) {
+           $file = $request->file($field_name);
+           $originalName = $file->getClientOriginalName();
+           $file->storeAs('formsubmissions', $originalName, 'public_uploads');
+        } 
 
             // update cycle & step
             Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
