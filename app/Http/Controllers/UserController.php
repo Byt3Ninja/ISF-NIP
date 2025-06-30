@@ -106,23 +106,25 @@ class UserController extends Controller
 					// throw $th;
 				}
 			}
+		}else{
+
+			// إرسال الإيميل الترحيبي
+			$data = [
+				'name' => $name,
+				'email' => $result->email,
+				'password' => $result->password,
+				'role' => '',
+			];
+			// إرسال الإشعار
+			// if( !in_array(env('APP_ENV', 'local'), ['local']) )
+			// {
+			try {
+				$result->notify(new WelcomeJudgerNotification($data));
+			} catch (\Throwable $th) {
+				throw $th;
+			}
+			// }
 		}
-		// إرسال الإيميل الترحيبي
-		$data = [
-			'name' => $name,
-			'email' => $result->email,
-			'password' => $result->password,
-			'role' => '',
-		];
-		// إرسال الإشعار
-		// if( !in_array(env('APP_ENV', 'local'), ['local']) )
-		// {
-		try {
-			$result->notify(new WelcomeJudgerNotification($data));
-		} catch (\Throwable $th) {
-			throw $th;
-		}
-		// }
 
 
 		if ($result) {
