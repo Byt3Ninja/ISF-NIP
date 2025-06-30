@@ -43,7 +43,7 @@ class ClientCompanyController extends Controller
     }
     public function show($id)
     {
-        try {
+        // try {
             $user = auth()->user();
             $user_id = $user->id;
             $company = Company::with('state')
@@ -103,11 +103,12 @@ class ClientCompanyController extends Controller
                 $evaluationForm->isPublished = $isResponsesPublished;
             }
             return view('admin/clients/startup/company_profile', compact('company', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
-        } catch (Exception $e) {
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-        }
+        // }
+        // catch (Exception $e) {
+        //     //log what happend
+        //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+        //     abort(500);
+        // }
     }
     /**
      * Show the form for editing/Createing the specified resource.
