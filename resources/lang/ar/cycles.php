@@ -411,6 +411,13 @@ return [
     'Individual Judge Evaluations' => 'تقييمات المحكمين الفردية',
     'Overall Comment' => 'التعليقات العامة',
     'This judge has not evaluated this company yet.' => 'لم يقم هذا المحكم بتقييم هذه الشركة بعد.',
-    'Based on all judge evaluations' => 'استنادًا إلى جميع تقييمات المحكمين'
+    'Based on all judge evaluations' => 'استنادًا إلى جميع تقييمات المحكمين',
+    'Judge' => 'محكم',
+    'Manage screening settings' => 'إدارة إعدادات المراجعة',
+    'Edit cycle' => 'تعديل البرنامج',
+    'View registered users' => 'عرض المستخدمين المسجلين',
+    'Active filters' => 'الفلاتر النشطة',
+    'Status' => 'الحالة',
+    'Score' => 'الدرجة',
   ];
 

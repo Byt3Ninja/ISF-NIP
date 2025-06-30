@@ -415,5 +415,12 @@ return [
     'Overall Comment' => 'Overall Comment',
     'This judge has not evaluated this company yet.' => 'This judge has not evaluated this company yet.',
     'Based on all judge evaluations' => 'Based on all judge evaluations',
+    'Judge' => 'Judge',
+    'Manage screening settings' => 'Manage screening settings',
+    'Edit cycle' => 'Edit program',
+    'View registered users' => 'View registered users',
+    'Active filters' => 'Active filters',
+    'Status' => 'Status',
+    'Score' => 'Score',
 ];
 
