@@ -2057,5 +2057,8 @@ return [
 	'StarRating' => 'تقييم النجوم',
 	'enterAnswer' => 'أدخل الإجابة',
 	'NewQuestionsSelected' => 'تم اختيار أسئلة جديدة',
-	'AlreadyAddedQuestionsAreHighlighted' => 'تم تمييز الأسئلة المضافة بالفعل'
+	'AlreadyAddedQuestionsAreHighlighted' => 'تم تمييز الأسئلة المضافة بالفعل',
+	'High Rate' => 'تقييم عالي',
+	'Low Rate' => 'تقييم منخفض',
+	'No mentors match your filters' => 'لا يوجد مرشدين يطابقون مرشحاتك',
 ];
