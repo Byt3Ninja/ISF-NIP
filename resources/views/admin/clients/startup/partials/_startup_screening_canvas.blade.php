@@ -155,6 +155,13 @@
         <div class="col-12">
           <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">
+              <button class="nav-link" id="pills-form-data-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-form-data" type="button" role="tab" aria-controls="pills-form-data"
+                aria-selected="false">
+                {{ __('admin.Company Data')}}
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
               <button class="nav-link active" id="pills-screening-criteria-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-screening-criteria" type="button" role="tab" aria-controls="pills-screening-criteria"
                 aria-selected="true">
@@ -177,6 +184,25 @@
             </li>
           </ul>
           <div class="tab-content shadow-none p-2" id="pills-tabContent">
+            <div class="tab-pane fade" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
+              <div class="row mb-6">
+                  <div class="col-12">
+                    <h5 class="mb-0">{{ __('admin.Company Data')}}</h5>
+                  </div>
+                  <div class="col-12 my-6">
+                    <table class="table table-bordered table-hover">
+                      <tbody>
+                        @foreach( $formData as $dataEntry )
+                        <tr>
+                          <td> {{ $dataEntry->question }} </td>
+                          <td> {{ $dataEntry->answer }} </td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
+            </div>
             <div class="tab-pane fade show active" id="pills-screening-criteria" role="tabpanel"
               aria-labelledby="pills-screening-criteria-tab">
               <!-- Content for Screening Criteria -->

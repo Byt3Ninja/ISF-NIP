@@ -2015,4 +2015,5 @@ return [
 	'No mentors match your filters' => 'No mentors match your filters',
 	'Vendor Info' => 'Vendor Info',
 	'All_Trainings' => 'All Trainings',
+	'Company Data' => 'Company Data',
 ];
