@@ -101,7 +101,6 @@ class ScreeningEvaluation extends Model
 			$finalCommentField = new ScreeningEvaluationCustomFields;
 			$finalCommentField->name = 'final_comment';
 			$finalCommentField->evaluation_id = $evaluation_id;
-			$finalCommentField->company_id = $company_id;
 			$finalCommentField->save();
 		}
 		$myComment = ScreeningEvaluationFieldsValues::where('custom_field_id', $finalCommentField->id)->where('user_id', $user_id)->where('company_id', $company_id)->first();
