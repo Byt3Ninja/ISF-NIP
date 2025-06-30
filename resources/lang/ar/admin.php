@@ -2061,4 +2061,6 @@ return [
 	'High Rate' => 'تقييم عالي',
 	'Low Rate' => 'تقييم منخفض',
 	'No mentors match your filters' => 'لا يوجد مرشدين يطابقون مرشحاتك',
+	'Vendor Info' => 'معلومات البائع',
+	'All_Trainings' => 'جميع التدريبات',
 ];

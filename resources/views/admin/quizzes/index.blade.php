@@ -1,17 +1,25 @@
 @extends('layouts.admin')
-@section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
+
 @section('title', __('admin.quizzes') )
 @section('subTitle', __('admin.quizzes List'))
+
 @section('content')
 	<!-- BEGIN: Content-->
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-overlay"></div>
-			<div class="content-header">
+			<div class="content-header d-flex justify-content-between align-items-center mb-3">
         <h4 class="content-title">{{__('admin.quizzes')}}</h4>
+				@if($_user->ableToAny(['quizzes.create', 'quizzes.store'], $permissions))
+				<div class="row pb-1">
+					<div class="col-12 d-flex justify-content-end">
+						<a href="{{ route('quizzes.create') }}" class="btn btn-block btn-primary"> 
+							<i class="ti ti-plus me-1"></i> {{ __('admin.Add New')}}
+						</a>
+					</div>
+				</div>
+				@endif
 			</div>
+
 			<div class="content-header row">
 				@if( session()->has('success') )
 					<div class="col-md-12">
@@ -37,15 +45,6 @@
 						<div class="card">
 							<div class="card-content">
 								<div class="card-body">
-									@if($_user->ableToAny(['quizzes.create', 'quizzes.store'], $permissions))
-									<div class="row pb-1">
-										<div class="col-12 d-flex justify-content-end">
-											<a href="{{ route('quizzes.create') }}" class="btn btn-block btn-primary"> 
-												<i class="ti ti-plus me-1"></i> {{ __('admin.Add New')}}
-											</a>
-										</div>
-									</div>
-									@endif
 									<!-- datatable start -->
 									<div class="table-responsive">
 										<br>
@@ -219,13 +218,18 @@
 	<!-- END: Content-->
 @stop
 @section('scripts')
-	<script src="/app-assets/js/scripts/pages/page-organizations.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-	<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-	<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
+	{{-- <script src="/app-assets/js/scripts/pages/page-organizations.js"></script> --}}
 
 	<script type="text/javascript">
+		// Initialize DataTable with newest to oldest ordering
+		$(document).ready(function() {
+			$('#organizations-list-datatable').DataTable({
+				"order": [[ 0, "desc" ]], // Order by first column (ID/index) descending to show newest first
+				"pageLength": 25,
+				"responsive": true
+			});
+		});
+
 		$(document).on("click", "#deleteAction", function (e) {
 			e.preventDefault();
 			var url = $(this).data('url');

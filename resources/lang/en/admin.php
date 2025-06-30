@@ -2013,4 +2013,6 @@ return [
 	'High Rate' => 'High Rate',
 	'Low Rate' => 'Low Rate',
 	'No mentors match your filters' => 'No mentors match your filters',
+	'Vendor Info' => 'Vendor Info',
+	'All_Trainings' => 'All Trainings',
 ];
