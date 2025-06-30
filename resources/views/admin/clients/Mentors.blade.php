@@ -103,7 +103,7 @@
                   </select>
                 </div>
                 <div class="col-12 col-md-4 mb-3 mb-sm-0">
-                  <select id="expertiseFilter" class="form-select select2" multiple="multiple" data-placeholder="{{ __('admin.SelectExpertises') }}"
+                  <select id="expertiseFilter" class="form-select select2" multiple="multiple" data-placeholder="{{ __('admin.Select Expertise') }}"
                     style="max-height: 40px; overflow: auto;"
                   >
                     @php
@@ -435,17 +435,17 @@
             <div class="form-group mb-4">
               <div class="d-flex flex-column">
                 <label for="selectExpertises" class="form-label fs-6 fw-bold">
-                  {{ __('admin.SelectExpertises') }}
+                  {{ __('admin.Select Expertise') }}
                 </label>
                 <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
               </div>
               <div class="row">
                 <div class="col-12">
                   <select name="expertises[]" class="form-select select2" multiple="multiple" id="selectExpertises"
-                    data-placeholder="{{ __('admin.SelectExpertises') }}"
-                    placeholder="{{ __('admin.SelectExpertises') }}"
+                    data-placeholder="{{ __('admin.Select Expertise') }}"
+                    placeholder="{{ __('admin.Select Expertise') }}"
                   >
-                    <option value="">{{ __('admin.SelectExpertises') }}</option>
+                    <option value="">{{ __('admin.Select Expertise') }}</option>
                     @foreach ($expertises as $expertise_group)
                     <optgroup label="{{ $expertise_group->title }}">
                       @foreach ($expertise_group->children as $expertise)
