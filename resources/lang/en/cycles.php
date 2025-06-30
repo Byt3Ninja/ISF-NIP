@@ -382,6 +382,7 @@ return [
     'Total Evaluations' => 'Total Evaluations',
     'Completion Rate' => 'Completion Rate',
     'Active Cycle' => 'Active Cycle',
+    'Companies' => 'Companies',
     'Judges' => 'Judges',
     'Available' => 'Available',
     'Not Evaluated' => 'Not Evaluated',

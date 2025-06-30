@@ -171,7 +171,7 @@
                             </div>
                             <div class="d-flex align-items-center text-muted">
                               <i class="ti ti-building me-2 text-success"></i>
-                              <small class="fw-medium">{{ $companies->count() }} {{ __('cycles.Companies') }}</small>
+                              <small class="fw-medium">{{ $_companies->count() }} {{ __('cycles.Companies') }}</small>
                             </div>
                             <div class="d-flex align-items-center text-muted">
                               <i class="ti ti-users me-2 text-info"></i>
@@ -197,13 +197,14 @@
                         <div class="stats-grid">
                           <div class="stat-item d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-white border-opacity-25">
                             <span class="stat-label opacity-90">{{ __('cycles.Total Evaluations') }}</span>
-                            <span class="stat-value fw-bold">{{ $companies->count() * $judges->count() }}</span>
+                            {{-- <span class="stat-value fw-bold">{{ $_companies->count() * $judges->count() }}</span> --}}
+                            <span class="stat-value fw-bold">{{ $_companies->count() }}</span>
                           </div>
 
                           <div class="stat-item d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-white border-opacity-25">
                             <span class="stat-label opacity-90">{{ __('cycles.Completion Rate') }}</span>
                             <span class="stat-value fw-bold">
-                              {{ $companies->count() > 0 ? round(($companies->where('status', 'Published')->count() / $companies->count()) * 100) : 0 }} %
+                              {{ $_companies->count() > 0 ? round(($_companies->where('status', 'Published')->count() / $_companies->count()) * 100) : 0 }} %
                             </span>
                           </div>
 
@@ -260,7 +261,7 @@
             </div>
           @endif
 
-          @if ($companies->count() == 0)
+          @if ($_companies->count() == 0)
             <input type="hidden" class="stepsExcel" value="0" />
           @else
             <input type="hidden" class="stepsExcel" value="{{ request()->route('id') }}" />
@@ -422,7 +423,7 @@
                         }
                         
                         // Create searchable category string
-                        $categories = json_decode($company->business_categories, true);
+                        $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
                         $categoryString = is_array($categories) ? implode(' ', $categories) : $company->business_categories;
                         $categoryString = str_replace(['/', ','], ' ', $categoryString);
                         
@@ -506,7 +507,7 @@
                                   </a>
                                   <small class="text-muted line-clamp-1">
                                     @php
-                                      $categories = json_decode($company->business_categories, true);
+                                      $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
                                       $categoryList = is_array($categories) ? implode(', ', $categories) : $company->business_categories;
                                       $categoryList = str_replace('/', ', ', $categoryList);
                                     @endphp
