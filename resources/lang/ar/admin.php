@@ -2063,4 +2063,5 @@ return [
 	'No mentors match your filters' => 'لا يوجد مرشدين يطابقون مرشحاتك',
 	'Vendor Info' => 'معلومات البائع',
 	'All_Trainings' => 'جميع التدريبات',
+	'Company Data' => 'بيانات الشركة',
 ];
