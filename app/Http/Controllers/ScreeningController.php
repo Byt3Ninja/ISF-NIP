@@ -470,7 +470,7 @@ if ($cstep) {
 				$sub->total = $sub->results->sum('given_score');
 				$sub->max = $sub->results->sum('max');
 				$sub->count = $sub->results->count();
-				$sub->average = $sub->total / $sub->max;
+				$sub->average = $sub->max > 0 ? ( $sub->total / $sub->max ) : 0;
 				$sub->weighted_total = ( round( $sub->average * 100 ) / 100 ) * $sub->weight;
 				return $sub;
 			});
