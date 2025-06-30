@@ -368,7 +368,7 @@ class MentorsController extends Controller
 			if ($autoApprove == 1) {
 				$approved = 'Yes';
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																					
-				$dateFormat = new \DateTime($request->date);
+				$dateFormat = new \DateTime($datefrom);
 				
 				MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
