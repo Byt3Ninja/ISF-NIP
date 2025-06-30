@@ -81,7 +81,7 @@
                           <h4 class="page-title mb-1 fw-bold text-dark d-flex align-items-center">
                             {{ __('cycles.Screening results') }}
                           </h4>
-                          <p class="page-subtitle mb-0 text-muted line-clamp-1 fs-5" style="max-width: 600px;">
+                          <p class="page-subtitle mb-0 text-muted line-clamp-1 fs-6" style="max-width: 600px;">
                             {{ __('cycles.Manage and review evaluation results for') }} {{ $cstep->title }}
                           </p>
                         </div>
@@ -929,6 +929,7 @@
             'not-evaluated': '{{ __('cycles.Not Evaluated') }}',
             'mixed': '{{ __('cycles.Mixed Status') }}'
           };
+          
           activeFilters.push(`{{ __('cycles.Status') }}: ${statusLabels[currentFilters.status]}`);
         }
 
