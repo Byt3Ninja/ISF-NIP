@@ -674,10 +674,14 @@ class CyclesController extends Controller
 
           if ($request->hasFile($field_name)) {
            $file = $request->file($field_name);
-           $originalName = $file->getClientOriginalName();
-           $file->storeAs('formsubmissions', $originalName, 'public_uploads');
-        } 
+        //    $originalName = $file->getClientOriginalName();
+        //    $file->storeAs('formsubmissions', $originalName, 'public_uploads');
+        //    $request->{$field_name} = 'formsubmissions/' . $originalName;
+         $imageName = time() . '.' . $file->getClientOriginalExtension();
+             $file->move(public_path('formsubmissions/'), $imageName);
+			 $request->{$field_name} = 'formsubmissions/' . $imageName;
 
+        }
             // update cycle & step
             Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
 
