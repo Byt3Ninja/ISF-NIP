@@ -5186,8 +5186,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "mentor"
+                    "admin"
                 ]
             },
             {
@@ -5196,8 +5195,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "mentor"
+                    "admin"
                 ]
             }
         ]
@@ -5355,6 +5353,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "registered",
                     "organizationmanager"
                 ]
@@ -5431,6 +5430,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "registered",
                     "organizationmanager"
                 ]
@@ -5442,6 +5442,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "registered",
                     "organizationmanager"
                 ]
@@ -5517,6 +5518,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -5527,6 +5529,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -5537,6 +5540,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -5547,6 +5551,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -6198,7 +6203,6 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -6227,7 +6231,6 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "mentor",
                     "registered"
                 ]
             },
