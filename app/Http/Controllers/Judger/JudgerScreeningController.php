@@ -20,36 +20,37 @@ class JudgerScreeningController extends Controller
         $user_id = $user->id;
 
         $screenedStepIds = DB::table('screenings')
-        ->whereNull('deleted_at')
-        ->where('user_id', $user_id)
-        ->pluck('step_id')
-        ->toArray();
+            ->whereNull('deleted_at')
+            ->where('user_id', $user_id)
+            ->pluck('step_id')
+            ->toArray();
 
-        if (empty($screenedStepIds)) {
-            $companies = collect();
-        } else {
-        $placeholders = implode(',', array_fill(0, count($screenedStepIds), '?'));
-        $companies_q = "SELECT
-            cm.id AS `company_id`,
-            cm.name_en AS `company_name_en`,
-            cm.name_ar AS `company_name_ar`,
-            c.id AS `program_id`,
-            c.title AS `program_title`,
-            s.id AS `step_id`,
-            s.title AS `step_title`,
-            s.stype AS `step_type`
-        FROM
-            companies cm
-        LEFT JOIN
-            cycles c ON cm.cycle = c.id
-        LEFT JOIN
-            steps s ON s.id = cm.step
-        WHERE
-            cm.deleted_at IS NULL
-            AND s.id IN ($placeholders)";
-    
-    $companies = collect(DB::select($companies_q, $screenedStepIds));
-}
+        if( empty( $screenedStepIds ) ) { $companies = collect(); }
+        else
+        {
+            $placeholders = implode(',', array_fill(0, count($screenedStepIds), '?'));
+            $companies_q = "SELECT
+                    cm.id AS `company_id`,
+                    cm.name_en AS `company_name_en`,
+                    cm.name_ar AS `company_name_ar`,
+                    c.id AS `program_id`,
+                    c.title AS `program_title`,
+                    s.id AS `step_id`,
+                    s.title AS `step_title`,
+                    s.stype AS `step_type`
+                FROM
+                    companies cm
+                LEFT JOIN
+                    cycles c ON cm.cycle = c.id
+                LEFT JOIN
+                    steps s ON s.id = cm.step
+                WHERE
+                    cm.deleted_at IS NULL
+                    AND s.id IN ($placeholders)
+            ";
+
+            $companies = collect(DB::select($companies_q, $screenedStepIds));
+        }
 
         $l = app()->getLocale();
         $companies = $companies->map(function( $c ) use ( $l ) {
@@ -66,15 +67,11 @@ class JudgerScreeningController extends Controller
             return $company;
         });
 
-       $steps_ids = $companies->map(function ($c) {
-            return $c->step->id;
-        })->toArray();
+        $steps_ids = $companies->map( function( $c ) { return $c->step->id; } )->toArray();
 
         $evaluations = collect();
-        if (!empty($steps_ids)) {
-            $evaluations = ScreeningEvaluation::getEvaluationData($steps_ids);
-        }
-      $evaluation_ids = $evaluations->pluck('step_id', 'id')->toArray();
+        if( !empty( $steps_ids ) ) { $evaluations = ScreeningEvaluation::getEvaluationData( $steps_ids ); }
+        $evaluation_ids = $evaluations->pluck('step_id', 'id')->toArray();
 
         $myResponses = ScreeningEvaluationResults::whereIn('evaluation_id', array_keys( $evaluation_ids ))->where('user_id', $user_id)->get();
         $myResponses = $myResponses->map( function( $response ) use ( $evaluation_ids ) {
