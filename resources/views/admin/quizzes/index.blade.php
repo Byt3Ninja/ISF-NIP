@@ -67,8 +67,12 @@
 											<select name="org_id" class="form-control">
 											  <option value="0">{{ __('admin.All_Organizations') }}</option>
 											  @php
+											  $user = Auth::user();
+											  if($user->hasRole('organizationManager')){
+											  $organizations = App\Organization::where('id', $user->organization_id)->get();
+											  }else{
 											  $organizations = App\Organization::all();
-											  
+											  }
 											  @endphp
 											  @foreach ($organizations as $organization) 
 											  <option value="{{$organization->id}}" {{ $organization->id == request('org_id') ? 'selected' : '' }}> {{ $organization->{'name_' . $l} }}</option>
@@ -100,11 +104,22 @@
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="Program_id" class="form-control">
 											  <option value="0">{{ __('admin.All_Programs') }}</option>
+											  
 											  @php
+											  
+											  if($user->hasRole('admin')){
 											  if(!empty(request('org_id'))){
 											  	$cycles = App\Cycle::where('organization_id',request('org_id'))->get();
 											  }else{
 												$cycles = App\Cycle::all();
+											  }
+											}else{
+												
+												if(!empty(request('org_id'))){
+											  	$cycles = App\Cycle::where('organization_id',$user->organization_id)->get();
+											  }else{
+												$cycles = App\Cycle::all();
+											  }
 											  }
 											  @endphp
 											  @foreach ($cycles as $cycle)

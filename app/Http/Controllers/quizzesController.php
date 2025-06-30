@@ -80,6 +80,10 @@ class quizzesController extends Controller
 			$quizzes_q .= "AND c.id = ? ";
 			$bindings[] = $request->Program_id;
 		}
+		if($user->hasRole('organizationManager')){
+			$quizzes_q .= "AND o.id = ? ";
+			$bindings[] = $organization_id;
+		}
 
 		$quizzes_q = DB::select($quizzes_q, $bindings ?? []);
 		$quizzes = collect($quizzes_q);
@@ -269,14 +273,15 @@ class quizzesController extends Controller
 			$quiz = $quiz->where('organization_id', $user->organization_id);
 		}
 		$quiz = $quiz->find($id);
-
+		
 		if (empty($quiz)) {
 			return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']);
 		} else {
-
 			$questions = QuestionsBank::where('group', 'quiz')->with(['category']);
 			if (isset($user->organization_id) && !empty($user->organization_id)) {
-				$questions = $questions->where('organization_id', $quiz->organization_id);
+				$questions = $questions->whereHas('organizations', function ($query) use ($user) {
+					$query->where('organization_id', $user->organization_id);
+				});
 			}
 			$questions = $questions->get();
 			$tags = array_unique(array_reduce($questions->pluck('tags')->toArray(), 'array_merge', []));
