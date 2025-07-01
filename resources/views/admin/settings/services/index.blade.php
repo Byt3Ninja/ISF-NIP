@@ -171,6 +171,21 @@
     </div>
   </div>
 </div>
+
+<!-- Modal for all organizations -->
+<div class="modal fade" id="orgsModal" tabindex="-1" aria-labelledby="orgsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orgsModalLabel">{{ __('admin.Organization') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="orgsModalBody">
+        <!-- Organizations will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('scripts')
@@ -276,23 +291,6 @@
       });
     });
 </script>
-@stop
-
-<!-- Modal for all organizations -->
-<div class="modal fade" id="orgsModal" tabindex="-1" aria-labelledby="orgsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="orgsModalLabel">{{ __('admin.Organization') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="orgsModalBody">
-        <!-- Organizations will be loaded here -->
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
   $(document).on('click', '.orgs-modal-trigger', function() {
     var orgs = $(this).data('orgs');
@@ -308,3 +306,4 @@
     modal.show();
   });
 </script>
+@stop
