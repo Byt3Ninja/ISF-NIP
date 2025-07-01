@@ -677,7 +677,7 @@ class CyclesController extends Controller
         //    $originalName = $file->getClientOriginalName();
         //    $file->storeAs('formsubmissions', $originalName, 'public_uploads');
         //    $request->{$field_name} = 'formsubmissions/' . $originalName;
-         $imageName = time() . '.' . $file->getClientOriginalExtension();
+         $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
              $file->move(public_path('formsubmissions/'), $imageName);
 			 $request->{$field_name} = 'formsubmissions/' . $imageName;
 
