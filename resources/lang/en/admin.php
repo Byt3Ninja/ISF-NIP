@@ -422,7 +422,7 @@ return [
 	'Review company inputs and screening' => 'Review Startup inputs and screening',
 	'Added by' => 'Added by',
 	'Add your comments' => 'Add your comments',
-	'submit' => 'submit',
+	'submit' => 'Submit',
 	'Back' => 'Back',
 	'No Fields' => 'No Fields',
 	'ErrorNoPermissions' => 'Error, You do not have permissions to access this contents',
