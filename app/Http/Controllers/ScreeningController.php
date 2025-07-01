@@ -84,11 +84,10 @@ class ScreeningController extends Controller
 			if( is_array( $user ) ) { $user = array_map('intval', $user); } else { $user = intval( $user ); }
 			return $user;
 		});
-if ($cstep) {
-		$screenings = Screening::where('step_id', $cstep->id)->get();
-} else {
-	$screenings = [];
-}
+	
+		$screenings = collect([]);
+		if( $cstep ) { $screenings = Screening::where('step_id', $cstep->id)->get(); }
+
 		foreach( $judgers_list as $panel_id => $judgers_ids )
 		{
 			$users_list = $screenings->where('panel', $panel_id)->map(function($screening) {
