@@ -4032,6 +4032,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "organizationmanager"
                 ]
             },
@@ -5269,6 +5270,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "judger"
                 ]
             },
@@ -5279,6 +5281,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "judger"
                 ]
             },
@@ -5289,6 +5292,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "judger"
                 ]
             }
