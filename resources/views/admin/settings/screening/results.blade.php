@@ -200,13 +200,19 @@
                             {{-- <span class="stat-value fw-bold">{{ $_companies->count() * $judges->count() }}</span> --}}
                             <span class="stat-value fw-bold">{{ $_companies->count() }}</span>
                           </div>
-
+                          
                           <div class="stat-item d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-white border-opacity-25">
+                            <span class="stat-label opacity-90">{{ __('cycles.Judges') }}</span>
+                            {{-- <span class="stat-value fw-bold">{{ $_companies->count() * $judges->count() }}</span> --}}
+                            <span class="stat-value fw-bold">{{ $judges->count() }}</span>
+                          </div>
+
+                          {{-- <div class="stat-item d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-white border-opacity-25">
                             <span class="stat-label opacity-90">{{ __('cycles.Completion Rate') }}</span>
                             <span class="stat-value fw-bold">
                               {{ $_companies->count() > 0 ? round(($_companies->where('status', 'Published')->count() / $_companies->count()) * 100) : 0 }} %
                             </span>
-                          </div>
+                          </div> --}}
 
                           <div class="stat-item d-flex align-items-center justify-content-between">
                             <span class="stat-label opacity-90">{{ __('cycles.Active Cycle') }}</span>
