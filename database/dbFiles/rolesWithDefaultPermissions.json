@@ -2282,7 +2282,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2291,7 +2292,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2300,7 +2302,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2309,7 +2312,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2318,7 +2322,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2327,7 +2332,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2336,7 +2342,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             }
         ]
@@ -2351,7 +2358,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2360,7 +2368,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2369,7 +2378,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2378,7 +2388,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2387,7 +2398,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2396,7 +2408,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2405,7 +2418,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             }
         ]
@@ -3590,7 +3604,8 @@
                     "admin",
                     "mentor",
                     "judger",
-                    "registered"
+                    "registered",
+                    "organizationmanager"
                 ]
             },
             {
@@ -3600,7 +3615,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered"
+                    "registered",
+                    "organizationmanager"
                 ]
             },
             {
