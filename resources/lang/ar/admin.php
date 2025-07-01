@@ -2064,4 +2064,5 @@ return [
 	'Vendor Info' => 'معلومات البائع',
 	'All_Trainings' => 'جميع التدريبات',
 	'Company Data' => 'بيانات الشركة',
+	'No Organizations' => 'لا توجد منظمات',
 ];

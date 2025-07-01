@@ -1288,6 +1288,8 @@ return [
 	'Unselect_All' => 'Unselect All',
 	'Search_Permissions' => 'Search Permissions',
 	'roleType' => 'Role Type',
+	'roleAll' => 'All Roles',
+	'roleUser' => 'User',
 	'roleAdmin' => 'Admin',
 	'roleEditor' => 'Editor',
 	'roleCoordinator' => 'Coordinator',
@@ -2016,4 +2018,5 @@ return [
 	'Vendor Info' => 'Vendor Info',
 	'All_Trainings' => 'All Trainings',
 	'Company Data' => 'Company Data',
+	'No Organizations' => 'No Organizations',
 ];

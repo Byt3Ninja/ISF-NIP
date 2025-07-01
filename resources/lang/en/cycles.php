@@ -199,7 +199,7 @@ return [
     'Created At' => 'Created At',
     'Services requests' => 'Services requests',
     'Show new requests' => 'Show new requests',
-    'SenderName' => 'SenderName',
+    'SenderName' => 'Sender Name',
     'Comments' => 'Comments',
     'No Received Requests' => 'No Received Requests',
     'Show old records' => 'Show old records',
