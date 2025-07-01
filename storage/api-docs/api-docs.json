@@ -106,6 +106,137 @@
                 }
             }
         },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name_en",
+                                    "last_name_en",
+                                    "gender",
+                                    "phone",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "first_name_en": {
+                                        "type": "string",
+                                        "example": "Ahmed"
+                                    },
+                                    "last_name_en": {
+                                        "type": "string",
+                                        "example": "Mohamed"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "Mentor"
+                                    },
+                                    "title_en": {
+                                        "type": "string",
+                                        "example": "Senior Engineer"
+                                    },
+                                    "userbio": {
+                                        "type": "string",
+                                        "example": "Experienced mentor in tech industry."
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "example": "https://linkedin.com/in/example"
+                                    },
+                                    "expertise": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registeration Successfully"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "long-jwt-token-here"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Mentor"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Role not found or validation error"
+                    }
+                }
+            }
+        },
         "/api/dashboard": {
             "get": {
                 "tags": [
