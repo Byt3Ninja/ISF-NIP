@@ -3711,6 +3711,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3721,6 +3722,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3741,6 +3743,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3751,6 +3754,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3761,6 +3765,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3781,6 +3786,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3791,6 +3797,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3801,6 +3808,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3811,6 +3819,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3821,6 +3830,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3831,6 +3841,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3841,6 +3852,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3851,6 +3863,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3861,6 +3874,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3871,6 +3885,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3881,6 +3896,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             }
@@ -5323,6 +5339,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "organizationmanager"
                 ]
             },
@@ -5355,6 +5372,7 @@
                     "admin",
                     "mentor",
                     "registered",
+                    "judger",
                     "organizationmanager"
                 ]
             },
@@ -5497,6 +5515,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "organizationmanager"
                 ]
             },
