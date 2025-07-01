@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 /// Excel
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-require '../vendor/autoload.php';
+// require '../vendor/autoload.php';
 
 class ExcelController extends Controller
 {

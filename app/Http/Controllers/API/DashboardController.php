@@ -9,7 +9,49 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Get(
+ *     path="/api/dashboard",
+ *     summary="Get mentor dashboard data",
+ *     tags={"Dashboard"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Dashboard data returned successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="coming_sessions_count", type="integer", example=2),
+ *             @OA\Property(
+ *                 property="current_schedule",
+ *                 type="array",
+ *                 @OA\Items(
+ *                     @OA\Property(property="days", type="array", @OA\Items(type="string"), example={"Monday", "Wednesday"}),
+ *                     @OA\Property(property="tfrom", type="string", example="09:00"),
+ *                     @OA\Property(property="tto", type="string", example="17:00"),
+ *                     @OA\Property(property="notes", type="string", example="Available for mentoring")
+ *                 )
+ *             ),
+ *             @OA\Property(
+ *                 property="next_sessions",
+ *                 type="array",
+ *                 @OA\Items(
+ *                     @OA\Property(property="company_logo", type="string", example="https://example.com/logo.png"),
+ *                     @OA\Property(property="company", type="string", example="TechCorp"),
+ *                     @OA\Property(property="user", type="string", example="John Doe"),
+ *                     @OA\Property(property="date", type="string", example="2025-07-01 14:00"),
+ *                     @OA\Property(property="admin_notes", type="string", example="Important session"),
+ *                     @OA\Property(property="meeting_link", type="string", example="https://zoom.us/j/123456789")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated"
+ *     )
+ * )
+ */
 class DashboardController extends Controller
 {
     public function index(Request $request)
