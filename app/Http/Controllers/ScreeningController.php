@@ -709,50 +709,68 @@ class ScreeningController extends Controller
 				$criteria->weight = $value['weight'] * 100;
 				$criteria->evaluation_id = $evaluation->id;
 				$criteria->save();
-				foreach( $value['subCriteria'] as $sub )
+				if( array_key_exists('subCriteria', $value) )
+				{
+					foreach( $value['subCriteria'] as $sub )
+					{
+						$subCriteria = new ScreeningEvaluationCriteria;
+						$subCriteria->title = $sub['name'];
+						$subCriteria->weight = $sub['weight'] * 100;
+						$subCriteria->parent_id = $criteria->id;
+						$subCriteria->evaluation_id = null;
+						$subCriteria->save();
+					}
+				}
+			}
+			if( array_key_exists('subCriteria', $toCreate) )
+			{
+				foreach( $toCreate['subCriteria'] as $sub )
 				{
 					$subCriteria = new ScreeningEvaluationCriteria;
 					$subCriteria->title = $sub['name'];
 					$subCriteria->weight = $sub['weight'] * 100;
-					$subCriteria->parent_id = $criteria->id;
+					$subCriteria->parent_id = $sub['parent_id'];
 					$subCriteria->evaluation_id = null;
 					$subCriteria->save();
 				}
 			}
-			foreach( $toCreate['subCriteria'] as $sub )
+			if( array_key_exists('criteria', $toUpdate) )
 			{
-				$subCriteria = new ScreeningEvaluationCriteria;
-				$subCriteria->title = $sub['name'];
-				$subCriteria->weight = $sub['weight'] * 100;
-				$subCriteria->parent_id = $sub['parent_id'];
-				$subCriteria->evaluation_id = null;
-				$subCriteria->save();
+				foreach( $toUpdate['criteria'] as $value )
+				{
+					$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
+					$criteria->title = $value['name'];
+					$criteria->weight = $value['weight'] * 100;
+					$criteria->save();
+				}
 			}
-			foreach( $toUpdate['criteria'] as $value )
+			if( array_key_exists('subCriteria', $toUpdate) )
 			{
-				$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
-				$criteria->title = $value['name'];
-				$criteria->weight = $value['weight'] * 100;
-				$criteria->save();
-			}
-			foreach( $toUpdate['subCriteria'] as $sub )
-			{
-				$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
-				$subCriteria->title = $sub['name'];
-				$subCriteria->weight = $sub['weight'] * 100;
-				$subCriteria->save();
+				foreach( $toUpdate['subCriteria'] as $sub )
+				{
+					$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
+					$subCriteria->title = $sub['name'];
+					$subCriteria->weight = $sub['weight'] * 100;
+					$subCriteria->save();
+				}
 			}
 
-			foreach( $toRemove['subCriteria'] as $sub )
+			if( array_key_exists('subCriteria', $toRemove) )
 			{
-				$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
-				if( $subCriteria ) { $subCriteria->delete(); }
+				foreach( $toRemove['subCriteria'] as $sub )
+				{
+					$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
+					if( $subCriteria ) { $subCriteria->delete(); }
+				}
 			}
 
-			foreach( $toRemove['criteria'] as $value )
+			if( array_key_exists('criteria', $toRemove) )
 			{
-				$criteria = ScreeningEvaluationCriteria::find ( $value->id );
-				if( $criteria ) { $criteria->delete(); }
+				foreach( $toRemove['criteria'] as $value )
+				{
+					$criteria = ScreeningEvaluationCriteria::find ( $value->id );
+					if( $criteria ) { $criteria->delete(); }
+				}
 			}
 
 			if( $status == 'publish' )
