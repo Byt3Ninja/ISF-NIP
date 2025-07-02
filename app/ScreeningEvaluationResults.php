@@ -44,17 +44,19 @@ class ScreeningEvaluationResults extends Model
 
 	public static function metadata( $step_id, $company_id = null )
 	{
+		$_steps = collect([]);
+		$companies = collect([]);
+		$evaluation = collect([]);
+		$results = collect([]);
 		$getStep = Step::find( $step_id );
-		if($getStep){
-		$companies = Company::where('cycle', $getStep->cycle_id)->get();
-		}else{
-			$companies = [];
+		if( $getStep )
+		{
+			$companies = Company::where('cycle', $getStep->cycle_id)->get();
+			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
+			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
+			$results = self::where('evaluation_id', $evaluation?->id )->get();
 		}
-		if($getStep){
-		$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
-		}else{
-			$_steps = [];
-		}
+
 		$l = app()->getLocale();
 		$getUsers = Screening::where('step_id', $step_id)->with(['user'])->get();
 
@@ -80,16 +82,7 @@ class ScreeningEvaluationResults extends Model
 		});
 
 		if( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
-		if($getStep){	
-			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
-		}else{
-			$evaluation = [];
-		}
-if($getStep){
-		$results = self::where('evaluation_id', $evaluation?->id )->get();
-}else{
-		$results = [];
-}
+
 		foreach( $judges as $index => $judge )
 		{
 			$judges[$index]->companies = [];
@@ -110,33 +103,34 @@ if($getStep){
 				$judges[$index]->companies[] = $_company;
 			}
 		}
-		if($getStep){
-		foreach( $evaluation->categories as $criteria )	
+		if( $getStep )
 		{
-			$subCriteria = $criteria->subCriteria;
-			foreach( $judges as $judges_key => $judge )
+			foreach( $evaluation->categories as $criteria )	
 			{
-				foreach( $judge->companies as $companies_key => $company )
+				$subCriteria = $criteria->subCriteria;
+				foreach( $judges as $judges_key => $judge )
 				{
-					foreach( $company->results as $results_key => $result )
+					foreach( $judge->companies as $companies_key => $company )
 					{
-						if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
-						if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
-						$getResult = $subCriteria->where('id', $result->criteria_id)->first();
-						if( !empty( $getResult ) )
+						foreach( $company->results as $results_key => $result )
 						{
-							$weight = $getResult->weight;
-							$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
-							$result->weighted_score = $weighted_score;
+							if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
+							if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
+							$getResult = $subCriteria->where('id', $result->criteria_id)->first();
+							if( !empty( $getResult ) )
+							{
+								$weight = $getResult->weight;
+								$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
+								$result->weighted_score = $weighted_score;
+							}
+							$company->results[$results_key] = $result;
 						}
-						$company->results[$results_key] = $result;
+						$judge->companies[$companies_key] = $company;
 					}
-					$judge->companies[$companies_key] = $company;
+					$judges[$judges_key] = $judge;
 				}
 			}
-			$judges[$judges_key] = $judge;
 		}
-	}
 		$_companies = $companies;
 		foreach( $_companies as $companies_index => $company )
 		{
@@ -152,7 +146,7 @@ if($getStep){
 						return $groupWeight * $grouped->sum('weighted_score');
 					});
 					$judger_score = round( ( $score * 100 ) );
-					foreach( $judges[$judges_key]->companies as $companies_key => $_company )
+					foreach( $judge->companies as $companies_key => $_company )
 					{
 						if( $company->id == $_company->id )
 						{
@@ -161,8 +155,8 @@ if($getStep){
 						}
 					}
 
-					$_companies = collect( $judges[$judges_key]->companies );
-					$judges[$judges_key]->companies = $_companies;
+					$judger_companies = collect( $judges[$judges_key]->companies );
+					$judges[$judges_key]->companies = $judger_companies;
 				}
 			}
 
