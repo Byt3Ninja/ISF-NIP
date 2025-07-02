@@ -159,21 +159,15 @@
                     @if (!is_null($cycle->organization))
                     @php
                     $imageUrl = $cycle->organization->image_url;
-
-                    // استخراج المسار من الرابط
                     $imagePath = parse_url($imageUrl, PHP_URL_PATH);
-
-                    // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                     $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
-
                     @endphp
-
-                    <img src="/{{ $imageUrl }}" alt="Logo" class="img-fluid"
+                    <img src="/{{ $imageUrl ?? '/images/background/logo.png' }}" alt="Logo" class="img-fluid"
                       style="max-width: 100%; max-height: 100%; object-fit: contain;" />
                     @else
                     @php $setting = \App\Settings::where('id', 1)->first(); @endphp
                     @if (!empty($setting->Logo))
-                    <img src="/images/logo/{{ $setting->Logo }}" alt="Logo" class="img-fluid"
+                    <img src="/images/background/logo.png" alt="Logo" class="img-fluid"
                       style="max-width: 100%; max-height: 100%; object-fit: contain;">
                     @else
                     <img src="/images/background/logo.png" alt="Logo" class="img-fluid"
