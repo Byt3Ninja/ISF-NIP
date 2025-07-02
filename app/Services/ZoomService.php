@@ -78,19 +78,19 @@ class ZoomService implements OnlineMeetingServiceInterface
 
          
         if (Schema::hasTable('settings')) {
-            $org = $user->organization; 
-            if (!empty($org)) {
-                $ZOOM_CLIENT_ID = $org->zoom_client_id;
-                $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
-                $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
-            }else{
+            // $org = $user->organization; 
+            // if (!empty($org)) {
+            //     $ZOOM_CLIENT_ID = $org->zoom_client_id;
+            //     $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
+            //     $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
+            // }else{
                 $setting = Settings::where('id', 1)->first();
                 if ($setting) {
                     $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
                     $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
                     $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
                 }
-             }
+            //  }
         }
             
 
