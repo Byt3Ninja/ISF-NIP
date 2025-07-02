@@ -8,7 +8,7 @@
     @if (!is_null($cycle->organization))
        @php
           $imageUrl = $cycle->organization->image_url;
-
+          if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) { $imageUrl = asset( $imageUrl ); }
           $imagePath = parse_url($imageUrl, PHP_URL_PATH);
 
           $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
