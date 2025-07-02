@@ -22,8 +22,8 @@ class RegisterUserRequest extends FormRequest
     public function rules(): array
     {
          $rules = [
-            'first_name_en' => ['required', 'string', 'max:255'],
-            'last_name_en'  => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name'  => ['required', 'string', 'max:255'],
             'gender'        => ['required'],
             'phone'         => ['required', 'unique:users,phone'],
             'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],

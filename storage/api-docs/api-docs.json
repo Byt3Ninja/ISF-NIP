@@ -71,11 +71,11 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "first_name": {
+                                                "firstName": {
                                                     "type": "string",
                                                     "example": "Ahmed"
                                                 },
-                                                "last_name": {
+                                                "lastName": {
                                                     "type": "string",
                                                     "example": "Mohamed"
                                                 },
@@ -87,7 +87,7 @@
                                                     "type": "string",
                                                     "example": "+201234567890"
                                                 },
-                                                "img_url": {
+                                                "imgUrl": {
                                                     "type": "string",
                                                     "example": "https://example.com/image.jpg"
                                                 }
@@ -128,11 +128,11 @@
                                     "role"
                                 ],
                                 "properties": {
-                                    "first_name_en": {
+                                    "firstName": {
                                         "type": "string",
                                         "example": "Ahmed"
                                     },
-                                    "last_name_en": {
+                                    "lastName": {
                                         "type": "string",
                                         "example": "Mohamed"
                                     },

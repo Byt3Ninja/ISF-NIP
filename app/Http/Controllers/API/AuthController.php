@@ -38,11 +38,11 @@ use Illuminate\Validation\ValidationException;
  *                 property="data",
  *                 type="object",
  *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="first_name", type="string", example="Ahmed"),
- *                 @OA\Property(property="last_name", type="string", example="Mohamed"),
+ *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
  *                 @OA\Property(property="email", type="string", example="user@example.com"),
  *                 @OA\Property(property="phone", type="string", example="+201234567890"),
- *                 @OA\Property(property="img_url", type="string", example="https://example.com/image.jpg")
+ *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg")
  *             )
  *         )
  *     ),
@@ -80,11 +80,11 @@ class AuthController extends Controller
             'token'   => $token,
             'data'    => [
                 'id'             => $user->id,
-                'first_name'     => $user->first_name_en,
-                'last_name'      => $user->last_name_en,
+                'firstName'     => $user->first_name_en,
+                'lastName'      => $user->last_name_en,
                 'email'          => $user->email,
                 'phone'          => $user->country_code . $user->phone,
-                'img_url'        => $user->img_url,
+                'imgUrl'        => $user->img_url,
             ],
         ]);
     }
@@ -101,8 +101,8 @@ class AuthController extends Controller
  *                 "first_name_en","last_name_en","gender",
  *                 "phone","email","password","role"
  *             },
- *             @OA\Property(property="first_name_en", type="string", example="Ahmed"),
- *             @OA\Property(property="last_name_en", type="string", example="Mohamed"),
+ *             @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *             @OA\Property(property="lastName", type="string", example="Mohamed"),
  *             @OA\Property(property="gender", type="string", example="male"),
  *             @OA\Property(property="phone", type="string", example="123456789"),
  *             @OA\Property(property="email", type="string", example="user@example.com"),
@@ -149,10 +149,10 @@ class AuthController extends Controller
     $settings = Settings::find(1);
 
     $userData = [
-        'firstName' => $data['first_name_en'],
-        'lastName'  => $data['last_name_en'],
-        'first_name_ar' => $data['first_name_en'],
-        'last_name_ar'  => $data['last_name_en'],
+        'first_name_en' => $data['first_name'],
+        'last_name_en'  => $data['last_name'],
+        'first_name_ar' => $data['first_name'],
+        'last_name_ar'  => $data['last_name'],
         'gender'        => $data['gender'],
         'phone'         => $data['phone'],
         'email'         => $data['email'],
