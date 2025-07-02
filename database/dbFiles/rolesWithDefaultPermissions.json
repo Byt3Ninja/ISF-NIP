@@ -2562,6 +2562,16 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "quizzes.questions_delete",
+                "description": "Delete Quiz Questions Assignment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
