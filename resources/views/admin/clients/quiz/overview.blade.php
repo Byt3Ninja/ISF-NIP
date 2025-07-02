@@ -9,9 +9,9 @@
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
 
-		<div class="row mb-3">
+		<div class="row mb-6">
 			<div class="col-12 col-md-8">
-				<h4 class="fw-bold">{{ $training->title }}</h4>
+				<h4 class="fw-bold mb-2">{{ $training->title }}</h4>
 				<p class="card-text text-muted line-clamp-2 text-truncate">{{ $training->dsc }}</p>
 			</div>
 		</div>
@@ -76,13 +76,13 @@
 									</span>
 								</div>
 								<div class="p-2">
-									<i class="ti text-primary ti-calendar"></i>
+									<i class="ti text-primary ti-calendar me-1"></i>
 									<span class="text-dark fw-semibold">
 										{{ __('admin.Start at') }}: {{ $quiz->start->format('jS M. Y h:i A') }}
 									</span>
 								</div>
 								<div class="p-2">
-									<i class="ti text-primary ti-calendar-event"></i>
+									<i class="ti text-primary ti-calendar-event me-1"></i>
 									<span class="text-dark fw-semibold">
 										{{ __('admin.End at') }}: {{ $quiz->end->format('jS M. Y h:i A') }}
 									</span>
@@ -90,7 +90,7 @@
 							</div>
 							<div class="col-md-6">
 								<div class="p-2">
-									<i class="ti text-primary ti-clock"></i>
+									<i class="ti text-primary ti-clock me-1"></i>
 									<span class="text-dark fw-semibold">
 										{{ __('admin.TimeLimit') }}: 
 										{{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' .
@@ -99,20 +99,20 @@
 									</span>
 								</div>
 								<div class="p-2">
-									<i class="ti text-primary ti-refresh"></i>
+									<i class="ti text-primary ti-refresh me-1"></i>
 									<span class="text-dark fw-semibold">{{ __('admin.quizAttempts') }}: {{ $quiz->attempts }}</span>
 								</div>
 								<div class="p-2">
-									<i class="ti text-primary ti-chart-pie"></i>
-									<span class="text-dark fw-semibold">{{ __('admin.Progress') }}: {{ $quiz->passing_criteria }}%</span>
+									<i class="ti text-primary ti-chart-pie me-1"></i>
+									<span class="text-dark fw-semibold">{{ __('admin.passingCriteria') }}: {{ $quiz->passing_criteria }}%</span>
 								</div>
 							</div>
 						</div>
 
-						<div class="progress">
+						{{-- <div class="progress">
 							<div class="progress-bar bg-primary" role="progressbar" style="width: {{ $quiz->passing_criteria }}%" aria-valuenow="{{ $quiz->passing_criteria }}"
 								aria-valuemin="0" aria-valuemax="100"></div>
-						</div>
+						</div> --}}
 
 						@if($available || !is_null($active_now))
 							<form 
