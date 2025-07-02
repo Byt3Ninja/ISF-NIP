@@ -77,7 +77,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         $ZOOM_ACCOUNT_ID = '';
 
          
-        if (Schema::hasTable('settings')) {
+        // if (Schema::hasTable('settings')) {
             // $org = $user->organization; 
             // if (!empty($org)) {
             //     $ZOOM_CLIENT_ID = $org->zoom_client_id;
@@ -91,7 +91,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                     $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
                 }
             //  }
-        }
+        // }
             
 
         if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
