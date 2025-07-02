@@ -571,12 +571,13 @@
         }
       });
     }
-
-    const startDate = '{{ $cstep->from->format('Y-m-d') }}'
-    const endDate = '{{ $cstep->to->format('Y-m-d') }}'
-
-    const stepStartDate = startDate ? moment(startDate) : moment();
-    const stepEndDate = endDate ? moment(endDate) : moment();
+  @if($cstep)
+  const startDate = '{{ $cstep->from->format('Y-m-d') }}'
+  const endDate = '{{ $cstep->to->format('Y-m-d') }}'
+  
+  const stepStartDate = startDate ? moment(startDate) : moment();
+  const stepEndDate = endDate ? moment(endDate) : moment();
+  @endif
 
     function DoChange(set) {
       switch (set) {
