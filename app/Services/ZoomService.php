@@ -195,7 +195,7 @@ class ZoomService implements OnlineMeetingServiceInterface
 
 
         $path = 'users/me/meetings';
-        $url = $this->retrieveZoomUrl();
+        $url = 'https://api.zoom.us/v2/';
 
         $payload = [
             'topic'      => $data['topic'],
@@ -220,7 +220,6 @@ class ZoomService implements OnlineMeetingServiceInterface
                 'headers' => $this->headers,
                 'json'    => $payload, // Use 'json' for Guzzle to auto-encode and set Content-Type
             ]);
-
             if ($response->getStatusCode() === 201) {
                 $responseData = json_decode($response->getBody()->getContents(), true);
                 return [
@@ -231,6 +230,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                         'join_url'  => $responseData['join_url'],
                     ],
                 ];
+
             } else {
                 Log::error('ZoomService::createMeeting - Unexpected status code.', [
                     'status' => $response->getStatusCode(),
