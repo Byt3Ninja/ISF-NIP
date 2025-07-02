@@ -23,10 +23,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::match(['post', 'get'], 'register-company', [RegistrationController::class, 'register']);
 Route::get('uploads/companies/{path}', [RegistrationController::class, 'showImage'])->where('path', '.*');
 Route::get('company', [RegistrationController::class, 'getCompany']);
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::get('/dashboard',[DashboardController::class, 'index'])->middleware('auth:sanctum');
+Route::middleware('cross-origin')->group(function () {
+    
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    
+    Route::get('/dashboard',[DashboardController::class, 'index'])->middleware('auth:sanctum');
+});
 
 
