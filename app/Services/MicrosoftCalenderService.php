@@ -17,7 +17,7 @@ class MicrosoftCalenderService
     protected $graph;
     public function __construct()
     {
-        if (Schema::hasTable('settings')) {
+        try{
             $Setting = Settings::where('id', 1)->first();
 
             if ($Setting) {
@@ -40,6 +40,8 @@ class MicrosoftCalenderService
             ]);
             $this->client = new Client();
             $this->graph = new Graph();
+        }catch(\Exception $e){
+            Log::error('MicrosoftCalenderService::__construct: ' . $e->getMessage());
         }
     }
     public function getAuthUrl()

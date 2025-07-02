@@ -148,12 +148,14 @@ class ZoomService implements OnlineMeetingServiceInterface
         }
 
         $defaultUrl = 'https://api.zoom.us/v2/';
-        if (Schema::hasTable('settings')) {
+        try{
             $setting = Settings::where('id', 1)->first();
             if ($setting && !empty($setting->ZOOM_API_URL)) {
                 $this->zoomApiUrl = rtrim($setting->ZOOM_API_URL, '/') . '/'; // Ensure trailing slash
                 return $this->zoomApiUrl;
             }
+        }catch (\Exception $e) {
+            Log::error('ZoomService->retrieveZoomUrl: ' . $e->getMessage());
         }
         $this->zoomApiUrl = $defaultUrl;
         return $this->zoomApiUrl;
@@ -182,7 +184,7 @@ class ZoomService implements OnlineMeetingServiceInterface
 
         $timeZone = 'Africa/Cairo'; // Default
         if ($user) { // $user should be available if ensureCredentialsInitialized passed
-            if (Schema::hasTable('settings')) {
+            try{
                  $org = $user->organization;
                 if ($org && $org->time_zone) {
                     $timeZone = $org->time_zone;
@@ -192,6 +194,8 @@ class ZoomService implements OnlineMeetingServiceInterface
                     $timeZone = $setting->timezone;
                 }
                 }  
+            }catch (\Exception $e) {
+                Log::error('ZoomService->createMeeting: ' . $e->getMessage());
             }
         }
 
@@ -265,16 +269,21 @@ class ZoomService implements OnlineMeetingServiceInterface
 
         $timeZone = 'Africa/Cairo'; // Default, same logic as createMeeting for dynamic timezone
          if ($user) {
-            if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
-                $setting = Settings::where('id', 1)->first();
-                if ($setting && $setting->timezone) {
-                    $timeZone = $setting->timezone;
+            try{
+                if ($user->hasRole('Admin')) {
+
+                    $setting = Settings::where('id', 1)->first();
+                    if ($setting && $setting->timezone) {
+                        $timeZone = $setting->timezone;
+                    }
+                } elseif ($user->hasRole('organizationManager')) {
+                    $org = $user->organization;
+                    if ($org && $org->time_zone) {
+                        $timeZone = $org->time_zone;
+                    }
                 }
-            } elseif ($user->hasRole('organizationManager')) {
-                $org = $user->organization;
-                if ($org && $org->time_zone) {
-                    $timeZone = $org->time_zone;
-                }
+            }catch (\Exception $e) {
+                Log::error('ZoomService->updateMeeting: ' . $e->getMessage());
             }
         }
 
