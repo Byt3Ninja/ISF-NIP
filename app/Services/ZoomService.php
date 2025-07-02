@@ -84,7 +84,7 @@ class ZoomService implements OnlineMeetingServiceInterface
             //     $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
             //     $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
             // }else{
-                $setting = Settings::where('id', 1)->first();
+                $setting = Settings::where('id', '1')->first();
                 if ($setting) {
                     $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
                     $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
@@ -101,7 +101,8 @@ class ZoomService implements OnlineMeetingServiceInterface
             'data' => [
                 'ZOOM_CLIENT_ID' => $ZOOM_CLIENT_ID,
                 'ZOOM_CLIENT_SECRET' => $ZOOM_CLIENT_SECRET,
-                'ZOOM_ACCOUNT_ID' => $ZOOM_ACCOUNT_ID
+                'ZOOM_ACCOUNT_ID' => $ZOOM_ACCOUNT_ID,
+                'setting' => $setting,
             ]
         ];
     }
