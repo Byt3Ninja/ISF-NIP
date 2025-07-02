@@ -13,6 +13,7 @@ use App\UserOauthToken;
 use Google_Service_Calendar_Event;
 use Illuminate\Support\Facades\Schema;
 use Google\Service\Calendar as Google_Service_Calendar;
+use Illuminate\Support\Facades\Log;
 
 class GoogleCalendarService
 {
@@ -22,7 +23,7 @@ class GoogleCalendarService
 
     public function __construct()
     {
-        if (Schema::hasTable('settings')) {
+        try{
             $Setting = Settings::where('id', 1)->first();
 
             if ($Setting) {
@@ -46,6 +47,8 @@ class GoogleCalendarService
             $this->client->addScope('openid');
             $this->client->setAccessType('offline');
             $this->client->setPrompt('consent');
+        }catch(\Exception $e){
+            Log::error('GoogleCalendarService::__construct: ' . $e->getMessage());
         }
     }
 

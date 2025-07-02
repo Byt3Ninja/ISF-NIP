@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Settings; // تأكد من استخدام المسار الصحيح للموديل
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use App\Settings; // تأكد من استخدام المسار الصحيح للموديل
 
 class BroadcastConfigService
 {
     public static function getPusherConfig()
     {
-        if (Schema::hasTable('settings')) {
+        try{
             $settings = Settings::where('id', 1)->first();
 
             if (!$settings) {
@@ -38,6 +39,8 @@ class BroadcastConfigService
 
                 ];
             }
+        }catch(\Exception $e){
+            Log::error('BroadcastConfigService: Error retrieving settings.', ['error' => $e->getMessage()]);
         }
         // إعادة القيم المأخوذة من السجل
         return [

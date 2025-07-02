@@ -121,7 +121,7 @@ class TeamsService implements OnlineMeetingServiceInterface
         ];
     }
 
-    if (Schema::hasTable('settings')) {
+    try{
         $org = $user->organization;
 
         if ($org) {
@@ -137,6 +137,8 @@ class TeamsService implements OnlineMeetingServiceInterface
                 $MICROSOFT_CLIENT_SECRET_VALUE = $setting->MICROSOFT_CLIENT_SECRET_VALUE;
             }
         }
+    }catch(\Exception $e){
+        Log::error('TeamsService: Error retrieving Microsoft credentials for user.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
     }
 
     if (empty($MICROSOFT_TENANT_ID) || empty($MICROSOFT_CLIENT_ID) || empty($MICROSOFT_CLIENT_SECRET_VALUE)) {
@@ -191,7 +193,7 @@ class TeamsService implements OnlineMeetingServiceInterface
     {
         $user = Auth::user();
 
-        if (Schema::hasTable('settings')) {
+        try{
             $org = $user->organization;
     
             if ($org) {
@@ -205,7 +207,9 @@ class TeamsService implements OnlineMeetingServiceInterface
               }
             }
             
-        } 
+        }catch(\Exception $e){
+            Log::error('TeamsService: Error retrieving Microsoft credentials for user.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
     
         $meeting = [
             'subject' => $data['topic'],
