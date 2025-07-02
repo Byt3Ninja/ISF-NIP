@@ -195,7 +195,7 @@ return [
     'Arabic Name' => 'Arabic Name',
     'Price' => 'Price',
     'Created At' => 'Created At',
-    'Services requests' => 'Services requests',
+    'Services requests' => 'Services Requests',
     'Show new requests' => 'Show new requests',
     'SenderName' => 'SenderName',
     'Comments' => 'Comments',

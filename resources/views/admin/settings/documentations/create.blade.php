@@ -66,9 +66,9 @@
                               <div class="form-group">
                                 <label class="form-label" for="arr">{{ __('admin.arrange') }}:</label>
                                 @php($max = \App\Documentation::max('arr'))
-                                <input id="arr" type="text" name="arr"
+                                <input id="arr" type="number" name="arr"
                                   placeholder="{{ __('admin.arrange') }}" class="select form-control"
-                                  value="{{ old('arr') ?? $max + 1 }}">
+                                  value="{{ old('arr') ?? $max + 1 }}" required>
                               </div>
                               <br>
                             </div>

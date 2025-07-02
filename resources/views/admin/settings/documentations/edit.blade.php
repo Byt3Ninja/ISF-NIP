@@ -69,8 +69,8 @@
                           <div class="col-md-6 col-6">
                             <div class="form-group">
                               <label class="form-label" for="arr">{{ __('admin.arrange') }}:</label>
-                              <input id="arr" type="text" name="arr" class="select form-control"
-                                value="{{ $documentation->arr }}">
+                              <input id="arr" type="number" name="arr" class="select form-control"
+                                value="{{ $documentation->arr }}" required>
                             </div>
                             <br>
                           </div>
