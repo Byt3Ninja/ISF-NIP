@@ -82,5 +82,16 @@ class AppServiceProvider extends ServiceProvider
             // 'broadcasting.connections.pusher.options.MICROSOFT_APP_EMAIL' => $pusherConfig['MICROSOFT_APP_EMAIL'],
             // 'broadcasting.connections.pusher.options.MICROSOFT_REDIRECT_URI' => $pusherConfig['MICROSOFT_REDIRECT_URI'],
         ]);
+
+
+        if( request()->is('api/*') )
+        {
+            $lang = 'en';
+            if( request()->headers->has('lang') )
+			{
+                $lang = ( in_array( strtolower( request()->header('lang') ), ['ar', 'en'] ) ) ? strtolower( request()->header('lang') ) : 'en';
+				app()->setLocale( $lang );
+			}
+        }
     }
 }
