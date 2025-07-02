@@ -321,7 +321,7 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-
+		$this->meetingService = OnlineMeetingFactory::create();
 		$datefrom = $request->date . ' ' . $request->timeFrom;
 		$dateto = $request->date . ' ' . $request->timeTo;
 		if ($request->period == '') {
@@ -359,7 +359,7 @@ class MentorsController extends Controller
 			$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
 			$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
-			dd($onlineMeeting);
+			
 			if (!$onlineMeeting['success']) {
 				return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
 			}
