@@ -77,34 +77,31 @@ class ZoomService implements OnlineMeetingServiceInterface
         $ZOOM_ACCOUNT_ID = '';
 
          
-        // if (Schema::hasTable('settings')) {
-            // $org = $user->organization; 
-            // if (!empty($org)) {
-            //     $ZOOM_CLIENT_ID = $org->zoom_client_id;
-            //     $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
-            //     $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
-            // }else{
+        try {
+            $org = $user->organization; 
+            if (!empty($org)) {
+                $ZOOM_CLIENT_ID = $org->zoom_client_id;
+                $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
+                $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
+            }else{
                 $setting = Settings::where('id', 1)->first();
                 if ($setting) {
                     $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
                     $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
                     $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
                 }
-            //  }
-        // }
+             }
+        } catch (\Exception $e) {
+            Log::error('ZoomService: Error retrieving Zoom credentials for user.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
             
 
         if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
             Log::error('ZoomService: Zoom API credentials not configured for user.', ['user_id' => $user->id]);
             return [
             'status' => false,
-            'data' => [
-                'ZOOM_CLIENT_ID' => $ZOOM_CLIENT_ID,
-                'ZOOM_CLIENT_SECRET' => $ZOOM_CLIENT_SECRET,
-                'ZOOM_ACCOUNT_ID' => $ZOOM_ACCOUNT_ID,
-                
-            ]
-        ];
+            'data' =>  __('admin.zoom_credentials_not_configured'),   
+            ];
     }
 
         try {
