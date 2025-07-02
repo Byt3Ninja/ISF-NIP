@@ -97,10 +97,14 @@ class ZoomService implements OnlineMeetingServiceInterface
         if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
             Log::error('ZoomService: Zoom API credentials not configured for user.', ['user_id' => $user->id]);
             return [
-                'status' => false,
-                'data' => __('admin.zoom_credentials_not_configured') // رسالة خطأ أكثر تحديدًا
-            ];
-        }
+            'status' => false,
+            'data' => [
+                'ZOOM_CLIENT_ID' => $ZOOM_CLIENT_ID,
+                'ZOOM_CLIENT_SECRET' => $ZOOM_CLIENT_SECRET,
+                'ZOOM_ACCOUNT_ID' => $ZOOM_ACCOUNT_ID
+            ]
+        ];
+    }
 
         try {
             $client = new Client([ // Guzzle client for token generation
