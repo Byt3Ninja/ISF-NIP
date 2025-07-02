@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Schedule;
 use Carbon\Carbon;
-use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -99,19 +97,19 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($session) {
                 return [
-                    'company_logo' => $session->company_logo,
+                    'companyLogo' => $session->company_logo,
                     'company' => $session->company,
                     'user' => trim($session->first_name_en . ' ' . $session->last_name_en),
                     'date' => Carbon::parse($session->date)->format('Y-m-d H:i'),
-                    'admin_notes' => $session->admin_notes,
-                    'meeting_link' => $session->meeting_link,
+                    'adminNotes' => $session->admin_notes,
+                    'meetingLink' => $session->meeting_link,
                 ];
             });
 
         return response()->json([
-            'coming_sessions_count' => $comingSessionsCount,
-            'current_schedule' => $schedules,
-            'next_sessions' => $nextSessions,
+            'comingSessionsCount' => $comingSessionsCount,
+            'currentSchedule' => $schedules,
+            'nextSessions' => $nextSessions,
         ]);
     }
 }

@@ -149,8 +149,8 @@ class AuthController extends Controller
     $settings = Settings::find(1);
 
     $userData = [
-        'first_name_en' => $data['first_name_en'],
-        'last_name_en'  => $data['last_name_en'],
+        'firstName' => $data['first_name_en'],
+        'lastName'  => $data['last_name_en'],
         'first_name_ar' => $data['first_name_en'],
         'last_name_ar'  => $data['last_name_en'],
         'gender'        => $data['gender'],
@@ -207,8 +207,8 @@ class AuthController extends Controller
         'message' => 'Registeration Successfully',
         'token' => $token,
         'data' => [
-            'first_name' => $user->first_name_en,
-            'last_name'  => $user->last_name_en,
+            'firstName' => $user->first_name_en,
+            'lastName'  => $user->last_name_en,
             'email'      => $user->email,
             'phone'      => $user->phone,
             'role'       => $data['role'],
