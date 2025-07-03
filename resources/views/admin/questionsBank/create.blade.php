@@ -130,7 +130,9 @@
 														<select class="form-control form-select select2" name="question_group" id="question_group" required>
 															<option value="quiz" {{ !empty(old('question_group')) && old('question_group') == 'quiz' ? 'selected' : '' }}> {{ __('admin.question_type_quiz') }} </option>
 															<option value="survey" {{ !empty(old('question_group')) && old('question_group') == 'survey' ? 'selected' : '' }}> {{ __('admin.question_type_survey') }}</option>
+															@if($_user->ableTo('Assessment.Questions.Manage', $permissions))
 															<option value="assessment" {{ !empty(old('question_group')) && old('question_group') == 'assessment' ? 'selected' : '' }}> {{ __('admin.question_type_assessment') }}</option>
+															@endif
 														</select>
 													</fieldset>
 												</div>

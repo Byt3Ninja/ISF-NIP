@@ -1850,6 +1850,15 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "Assessment.Questions.Manage",
+                "description": "Create & Edit Questions Assessment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
             }
         ]
     },
