@@ -11,12 +11,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\VerifyEmailQueued;
-
+use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
     // use Auditable;
-    use Notifiable;
-    use HasRoles;
+    use Notifiable ,HasRoles,HasApiTokens;
     // use SoftDeletes;
     public static $module = 'Users';
 

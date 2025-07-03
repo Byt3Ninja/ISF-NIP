@@ -1,0 +1,348 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "My Laravel API",
+        "description": "This is the API documentation for the Laravel project.",
+        "contact": {
+            "email": "support@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login a user and return an access token",
+                "operationId": "e6a8060af6c01547411c4c8cd9abcdc1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login Successfully"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "long-jwt-token-here"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+201234567890"
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/image.jpg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name_en",
+                                    "last_name_en",
+                                    "gender",
+                                    "phone",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "Ahmed"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Mohamed"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "Mentor"
+                                    },
+                                    "title_en": {
+                                        "type": "string",
+                                        "example": "Senior Engineer"
+                                    },
+                                    "userbio": {
+                                        "type": "string",
+                                        "example": "Experienced mentor in tech industry."
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "example": "https://linkedin.com/in/example"
+                                    },
+                                    "expertise": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registeration Successfully"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "long-jwt-token-here"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Mentor"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Role not found or validation error"
+                    }
+                }
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get mentor dashboard data",
+                "operationId": "ed4235c7e3cd435fdad1da90707874d1",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "coming_sessions_count": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "current_schedule": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "days": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": [
+                                                            "Monday",
+                                                            "Wednesday"
+                                                        ]
+                                                    },
+                                                    "tfrom": {
+                                                        "type": "string",
+                                                        "example": "09:00"
+                                                    },
+                                                    "tto": {
+                                                        "type": "string",
+                                                        "example": "17:00"
+                                                    },
+                                                    "notes": {
+                                                        "type": "string",
+                                                        "example": "Available for mentoring"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "next_sessions": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "company_logo": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/logo.png"
+                                                    },
+                                                    "company": {
+                                                        "type": "string",
+                                                        "example": "TechCorp"
+                                                    },
+                                                    "user": {
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "date": {
+                                                        "type": "string",
+                                                        "example": "2025-07-01 14:00"
+                                                    },
+                                                    "admin_notes": {
+                                                        "type": "string",
+                                                        "example": "Important session"
+                                                    },
+                                                    "meeting_link": {
+                                                        "type": "string",
+                                                        "example": "https://zoom.us/j/123456789"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard"
+        }
+    ]
+}

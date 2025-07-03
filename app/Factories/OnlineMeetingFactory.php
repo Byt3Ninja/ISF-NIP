@@ -16,12 +16,15 @@ class OnlineMeetingFactory
         $user = Auth::user();
         if ($user && $user->organization) {
             $platform = $user->organization->meeting_platform ?? 'zoom';
-        }
-
-        if (!$platform) {
+        }else{
             $setting = Settings::find(1);
             $platform = $setting?->Meeting ?? 'zoom';
         }
+
+        // if (!$platform) {
+        //     $setting = Settings::find(1);
+        //     $platform = $setting?->Meeting ?? 'zoom';
+        // }
 
         $platform = strtolower($platform);
 

@@ -15,6 +15,7 @@ use App\MentorshipTaskComment;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendTaskNotificationJob;
 use App\Notifications\TaskNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
@@ -195,25 +196,26 @@ class MentorshipTaskController extends Controller
 				'action' => 'add'
 			];
 
-			try {
-				Notification::send([$mentor, $startup], new TaskNotification($data));
-			} catch (\Throwable $th) {
-				//throw $th;
-			}
+			SendTaskNotificationJob::dispatch($mentor, $startup, $task, $data);
+			// try {
+			// 	Notification::send([$mentor, $startup], new TaskNotification($data));
+			// } catch (\Throwable $th) {
+			// 	//throw $th;
+			// }
 			
-			if ($task->user->country_code_w_a && $task->user->whatsapp) {
-				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
-				$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . ", the mentor " . $task->mentor->name . " has created a new Task ( " . $task->title ." )";
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-			}
+			// if ($task->user->country_code_w_a && $task->user->whatsapp) {
+			// 	$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+			// 	$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . ", the mentor " . $task->mentor->name . " has created a new Task ( " . $task->title ." )";
+			// 	$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+			// 	Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			// }
 			
-			if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
-				$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
-				$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . ", the startup " . $task->user->name . " has created a new Task ( " . $task->title ." )";
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
-			}
+			// if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
+			// 	$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
+			// 	$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . ", the startup " . $task->user->name . " has created a new Task ( " . $task->title ." )";
+			// 	$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+			// 	\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			// }
 
 
 			$task_id = $task->id;

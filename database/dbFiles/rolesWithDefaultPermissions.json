@@ -1850,6 +1850,15 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "Assessment.Questions.Manage",
+                "description": "Create & Edit Questions Assessment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
             }
         ]
     },
@@ -2282,7 +2291,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2291,7 +2301,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2300,7 +2311,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2309,7 +2321,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2318,7 +2331,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2327,7 +2341,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2336,7 +2351,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             }
         ]
@@ -2351,7 +2367,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2360,7 +2377,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2369,7 +2387,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2378,7 +2397,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2387,7 +2407,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2396,7 +2417,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -2405,7 +2427,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             }
         ]
@@ -2546,6 +2569,16 @@
                 "default_for": [
                     "admin",
                     "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.questions_delete",
+                "description": "Delete Quiz Questions Assignment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
                     "organizationmanager"
                 ]
             }
@@ -3590,7 +3623,8 @@
                     "admin",
                     "mentor",
                     "judger",
-                    "registered"
+                    "registered",
+                    "organizationmanager"
                 ]
             },
             {
@@ -3600,7 +3634,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered"
+                    "registered",
+                    "organizationmanager"
                 ]
             },
             {
@@ -3711,6 +3746,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3721,6 +3757,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3741,6 +3778,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3751,6 +3789,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3761,6 +3800,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3771,6 +3811,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3781,6 +3822,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3791,6 +3833,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3801,6 +3844,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3811,6 +3855,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3821,6 +3866,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3831,6 +3877,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3841,6 +3888,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3851,6 +3899,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3861,6 +3910,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3871,6 +3921,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             },
@@ -3881,6 +3932,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "registered"
                 ]
             }
@@ -4016,6 +4068,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "organizationmanager"
                 ]
             },
@@ -4180,7 +4233,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4200,7 +4254,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "judger"
+                    "organizationmanager"
                 ]
             },
             {
@@ -4209,7 +4263,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4218,7 +4273,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4227,7 +4283,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4236,7 +4293,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4245,7 +4303,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4254,7 +4313,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -4263,7 +4323,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -5186,8 +5247,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "mentor"
+                    "admin"
                 ]
             },
             {
@@ -5196,8 +5256,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "mentor"
+                    "admin"
                 ]
             }
         ]
@@ -5255,6 +5314,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "judger"
                 ]
             },
@@ -5265,6 +5325,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "judger"
                 ]
             },
@@ -5275,6 +5336,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "registered",
                     "judger"
                 ]
             }
@@ -5325,6 +5387,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "organizationmanager"
                 ]
             },
@@ -5355,7 +5418,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "registered",
+                    "judger",
                     "organizationmanager"
                 ]
             },
@@ -5431,6 +5496,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "registered",
                     "organizationmanager"
                 ]
@@ -5442,6 +5508,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "registered",
                     "organizationmanager"
                 ]
@@ -5496,6 +5563,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "judger",
                     "organizationmanager"
                 ]
             },
@@ -5517,6 +5585,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -5527,6 +5596,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -5537,6 +5607,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -5547,6 +5618,7 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "mentor",
                     "organizationmanager"
                 ]
             },
@@ -6198,7 +6270,6 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -6227,7 +6298,6 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "mentor",
                     "registered"
                 ]
             },

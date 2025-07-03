@@ -7,14 +7,12 @@
     <!-- BEGIN: Content-->
     <div class="content-wrapper">
         <div class="container-xxl flex-grow-1 container-p-y">
-            <div class="content-overlay"></div>
-            
             <div class="content-body">
                 <section id="basic-input">
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header">
+                                <div class="card-header border-bottom pb-3 mb-6">
                                     <h4 class="card-title">{{$step->title}}</h4>
                                     <p class="card-text">{{$step->description}}</p>
                                 </div>
@@ -47,8 +45,9 @@
                                                 <div class="mb-3">
                                                     @switch($field->field_type)
                                                         @case("select")
+                                                        <div class="form-group mb-6">
                                                             @if($options->label)
-                                                                <label for="{{ $id_for }}" class="form-label">{{ $options->label }}</label>
+                                                                <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
                                                             @endif
                                                             <select class="form-select @error($field_name) is-invalid @enderror" 
                                                                     id="{{ $id_for }}" 
@@ -66,11 +65,13 @@
                                                             @error($field_name)
                                                                 <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
                                                             @enderror
+                                                        </div>
                                                         @break
                                                         
                                                         @case("textarea")
+                                                        <div class="form-group mb-6">
                                                             @if($options->label)
-                                                                <label for="{{ $id_for }}" class="form-label">{{ $options->label }}</label>
+                                                                <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
                                                             @endif
                                                             <textarea class="form-control @error($field_name) is-invalid @enderror" 
                                                                       id="{{ $id_for }}" 
@@ -79,13 +80,15 @@
                                                             @error($field_name)
                                                                 <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
                                                             @enderror
+                                                        </div>
                                                         @break
                                                         
                                                         @case("file")
+                                                        <div class="form-group mb-6">
                                                             @if($options->label)
-                                                                <label class="form-label">{{ $options->label }}</label>
+                                                                <label class="form-label fw-bold">{{ $options->label }}</label>
                                                             @endif
-                                                            <div class="d-flex flex-column align-items-center">
+                                                            <div class="d-flex flex-column">
                                                                 <input type="file" 
                                                                        class="form-control @error($field_name) is-invalid @enderror" 
                                                                        id="{{ $id_for }}" 
@@ -93,7 +96,7 @@
                                                                        accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
                                                                 @if($answer)
                                                                     <div class="mt-4">
-                                                                        <a href="/dashboard/uploads/files/{{ $answer }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                        <a href="/{{ $answer }} " target="_blank" class="btn btn-sm btn-outline-primary">
                                                                             <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
                                                                         </a>
                                                                     </div>
@@ -102,20 +105,23 @@
                                                             @error($field_name)
                                                                 <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
                                                             @enderror
+                                                        </div>
                                                         @break
                                                         
                                                         @default
-                                                            @if($options->label)
-                                                                <label for="{{$id_for}}" class="form-label">{{ $options->label }}</label>
-                                                            @endif
-                                                            <input type="{{$options->type=="date"?"text":$options->type}}" 
-                                                                   class="form-control {{ $options->type == "date"? "datepicker" : "" }} @error($field_name) is-invalid @enderror" 
-                                                                   id="{{$id_for}}" 
-                                                                   name="{{ $field_name }}" 
-                                                                   value="{{ old($field_name) }}{{$answer}}" />
-                                                            @error($field_name)
-                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
-                                                            @enderror
+                                                            <div class="form-group mb-6">
+                                                                @if($options->label)
+                                                                    <label for="{{$id_for}}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                                @endif
+                                                                <input type="{{$options->type=="date"?"text":$options->type}}" 
+                                                                       class="form-control {{ $options->type == "date"? "datepicker" : "" }} @error($field_name) is-invalid @enderror" 
+                                                                       id="{{$id_for}}" 
+                                                                       name="{{ $field_name }}" 
+                                                                       value="{{ old($field_name) }}{{$answer}}" />
+                                                                @error($field_name)
+                                                                    <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                                @enderror
+                                                            </div>
                                                     @endswitch
                                                 </div>
                                             @endforeach

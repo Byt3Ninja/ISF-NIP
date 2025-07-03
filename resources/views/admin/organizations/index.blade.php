@@ -148,8 +148,8 @@
                   <div class="card mt-3 d-flex justify-content-center align-items-center position-relative"
                     style="height: 150px; width: 100%;">
                     <img 
-                      src="{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
-                      onerror="this.src='/images/logo-placeholder.png'" alt="Organization Image" 
+                      src="/{{ $organization->image_url ?? '/images/background/logo.png' }}"
+                      onerror="this.src='/images/background/logo.png'" alt="Organization Image" 
                       class="rounded img-fluid"
                       style="height: 120px; min-width: 200px; object-fit: cover;" 
                     />

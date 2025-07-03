@@ -321,7 +321,7 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-
+		$this->meetingService = OnlineMeetingFactory::create();
 		$datefrom = $request->date . ' ' . $request->timeFrom;
 		$dateto = $request->date . ' ' . $request->timeTo;
 		if ($request->period == '') {
@@ -368,7 +368,7 @@ class MentorsController extends Controller
 			if ($autoApprove == 1) {
 				$approved = 'Yes';
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																					
-				$dateFormat = new \DateTime($request->date);
+				$dateFormat = new \DateTime($datefrom);
 				
 				MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,

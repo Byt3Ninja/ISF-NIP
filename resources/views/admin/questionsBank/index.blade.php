@@ -105,7 +105,7 @@
 																@elseif( $question->difficulty == 'medium' )
 																<span class="badge bg-label-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
 																@elseif( $question->difficulty == 'hard' )
-																<span class="badge ba-label-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
+																<span class="badge bg-label-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
 																@endif
 															@else
 																-

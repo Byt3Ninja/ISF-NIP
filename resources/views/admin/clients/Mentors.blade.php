@@ -8,14 +8,8 @@
 <link rel="stylesheet" type="text/css"
   href="/app-assets/css{{ $l == 'ar' ? '-rtl' : '' }}/pages/dashboard-ecommerce.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<!-- Only keep datepicker for the commented modal functionality -->
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <style>
   .radius-15 {
     border-radius: 15px;
@@ -31,31 +25,6 @@
     -webkit-line-clamp: 4;
     overflow: hidden;
     text-oveflow: ellipsis;
-  }
-
-  .mentors-list-container {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .mentor-card {
-    width: 370px;
-  }
-
-  @media screen and (max-width: 768px) {
-    .mentors-list-container {
-      min-width: 100%;
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      gap: 10px;
-    }
-
-    .mentor-card {
-      min-width: 370px;
-    }
   }
 </style>
 @stop
@@ -90,66 +59,87 @@
       <!-- / Alert -->
 
       <!-- Header -->
-      <h4 class="fw-bold text-primary">{{ __('dashboard.Mentors') }}</h4>
+      {{-- <h4 class="fw-bold text-primary">{{ __('dashboard.Mentors') }}</h4> --}}
+
       <div class="card" style="border-radius: 20px;">
-        <div class="p-3 p-md-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <!-- Mentors Count -->
-            <div class="d-flex bg-label-warning p-2 justify-content-center align-items-center radius-15 shadow">
-              <div class="bg-white d-flex justify-content-center align-items-center radius-15"
-                style="width: 40px; height: 40px; shadow">
-                <i class="ti ti-users ti-24px"></i>
-              </div>
-              <div class="mx-4" style="height: 50px;">
-                <p class="text-black fw-medium fs-5" style="margin-bottom: -3px;">
-                  {{ __('dashboard.Mentors') }}
-                </p>
-                <span class="fs-5">
-                  <!-- Total Mentors Count -->
-                  {{ count($mentors) }}
-                </span>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-2 w-auto mb-3 mb-sm-0">
+              <div class="d-flex bg-label-warning p-2 justify-content-center align-items-center radius-15 shadow">
+                <div class="bg-white d-flex justify-content-center align-items-center radius-15"
+                  style="width: 40px; height: 40px; shadow">
+                  <i class="ti ti-users ti-24px"></i>
+                </div>
+                <div class="mx-4" style="height: 50px;">
+                  <p class="text-black fw-medium fs-5" style="margin-bottom: -3px;">
+                    {{ __('dashboard.Mentors') }}
+                  </p>
+                  <span class="fs-5">
+                    <!-- Total Mentors Count -->
+                    {{ count($mentors) }}
+                  </span>
+                </div>
               </div>
             </div>
-            <!-- / Mentors Count -->
-            <button class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
-              <i class="ti ti-filter me-2"></i>
-              <span class="fw-semibold">{{ __('admin.Filter') }}</span>
-            </button>
-          </div>
-          <!-- Search Bar (Mobile) -->
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="position-relative me-3 mt-4 d-block d-md-none w-100">
-              <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
-                <i class="ti ti-search text-primary ti-24px"></i>
+
+            <div id="filterWrapper" class="col-12 col-md-10 d-flex justify-content-sm-end align-items-center ms-sm-auto">
+              <div class="row w-100 d-flex align-items-center ms-sm-10">
+                <div class="col-12 col-md-4 mb-3 mb-sm-0">
+                  <div class="position-relative">
+                    <div class="position-absolute top-50 translate-middle-y" style="left: 1rem;">
+                      <i class="ti ti-search text-muted ti-sm"></i>
+                    </div>
+                    <input type="text" id="searchMentors" class="form-control px-10" placeholder="{{ __('admin.Search') }} {{ __('dashboard.Mentors') }}" />
+                  </div>
+                </div>
+                <div class="col-12 col-md-2 mb-3 mb-sm-0">
+                  <select id="rateFilter" class="form-select">
+                    <option value="" selected>{{ __('admin.Rate') }}</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-4 mb-3 mb-sm-0">
+                  <select id="expertiseFilter" class="form-select select2" multiple="multiple" data-placeholder="{{ __('admin.Select Expertise') }}"
+                    style="max-height: 40px; overflow: auto;"
+                  >
+                    @php
+                    $expertises = App\Expertise::where('parent_id', null)->get();
+                    @endphp
+                    @foreach ($expertises as $expertise_group)
+                      <optgroup label="{{ $expertise_group->title }}">
+                        @foreach ($expertise_group->children as $expertise)
+                          <option value="{{ $expertise->title }}">{{ $expertise->title }}</option>
+                        @endforeach
+                      </optgroup>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-12 col-md-1">
+                  <div class="form-check form-switch d-flex align-items-center mt-2">
+                    <input class="form-check-input me-2" type="checkbox" id="linkedinFilter">
+                    <label class="form-check-label fw-bold text-nowrap" for="linkedinFilter">
+                      {{ __('admin.linkedin') }}
+                    </label>
+                  </div>
+                </div>
               </div>
-              <input
-                class="form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2 w-100"
-                id="search-table" placeholder="Search" />
             </div>
           </div>
-          <!-- / Search Bar (Mobile) -->
-          <!-- Sorting (Mobile) -->
-          <div class="d-flex align-items-center mt-2">
-            <div id="sortContainerMobile" class="d-flex d-md-none align-items-center mt-2" style="gap: 3px;">
-              <!-- Sort Content Here -->
-            </div>
-          </div>
-          <!-- Sorting (Mobile) -->
         </div>
       </div>
       <!-- / Header -->
 
       <!-- Mentors -->
-      <section class="mb-10 mt-4">
-        <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">{{ __('admin.Mentors') }}</h5>
-        <div class="row">
+      <section class="mb-10 mt-8">
+        {{-- <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">{{ __('admin.Mentors') }}</h5> --}}
+        <div class="row" id="mentorsContainer">
           <!-- Mentors List -->
+          @if(count($mentors) > 0)
           @foreach ($mentors as $key => $mentor)
-          @php
-          $getcount = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->get();
-          $m_count = count($getcount);
-          $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
-          @endphp
           <!-- Mentor Card -->
           <div class="col-md-4 radius-15 mb-3">
             <div class="border radius-15" style="background-image: url('{{ $mentor->image_url }}'); 
@@ -169,11 +159,11 @@
                 <a title="Linkedin URL" target="_blank" href="{{ $mentor->bio->linkedin }}">
                   <img src="/icons/linkedin.svg" width="30" height="30" />
                 </a>
-                @else
+                {{-- @else
                 <!-- Please Change this SVG To color #eee -->
                 <a title="Linkedin URL" target="_blank" href="#">
                   <img src="/icons/linkedin.svg" width="30" height="30" />
-                </a>
+                </a> --}}
                 @endif
               </div>
               <!-- Mentor Experience -->
@@ -202,7 +192,7 @@
                 <div class="bg-white custom-shadow px-2 py-1 border" style="border-radius: 15px;">
                   <div class="d-flex flex-column justify-content-center align-items-center">
                     <small class="text-info fw-bold">{{ __('cycles.ProgramCount') }}</small>
-                    <span class="text-black fw-bold fs-6">{{ $m_count }}</span>
+                    <span class="text-black fw-bold fs-6">{{ $mentor->mentorCycles->count() }}</span>
                   </div>
                 </div>
                 @php
@@ -239,12 +229,14 @@
               </div>
               @endif
               <!-- / Mentor Bio -->
-              @if ($getid->user ?? 0)
               <div class="row px-4 mt-auto">
-                @if(auth()->user()->company && auth()->user()->company->cycle != 0 &&
-                auth()->user()->hasRole('Registered'))
+                @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
+                @php
+                  $startup = auth()->user();
+                  $getCycle = $startup->company->cycledata;
+                @endphp
                 <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
-                  onclick="request({{$mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})"
+                  onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
                   title="Add new request">
                   {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                 </button>
@@ -252,26 +244,53 @@
 
                 <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
                 @endif
-                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') &&
-                !auth()->user()->hasRole('Admin'))
+                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin'))
+                @php
+                $startup = auth()->user();
+                $getCycle = $startup->company->cycledata;
+                @endphp
                 <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow" data-bs-toggle="modal"
                   data-bs-target="#SendRequest" title="Add new request" onclick="request({{ $mentor->id }},
-                    {{ optional($getid->user)->{'first_name_' . $l} }} 
-                    {{ optional($getid->user)->{'last_name_' . $l} }},
-                     {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})">
+                    {{ optional($startup)->first_nam }} 
+                    {{ optional($startup)->last_name }},
+                    {{ $getCycle->organization_id }},
+                    {{ $getCycle->id }})">
                   {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                 </button>
                 @endif
 
 
               </div>
-              @endif
             </div>
           </div>
           <!-- Mentor Card -->
 
           @endforeach
+          @else
+          <!-- No Mentors Result -->
+          <div class="col-12" id="noMentorsResult">
+            @include('includes.no-result', ['message' => __('admin.No Mentors Found')])
+          </div>
+          @endif
           <!-- / Mentors List -->
+
+          <!-- No Filter Results (initially hidden) -->
+          <div class="col-12" id="noFilterResult" style="display: none;">
+            <div class="card card-body shadow-none h-100 d-flex justify-content-center align-items-center">
+              <div class="d-flex flex-column">
+                <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+                <h6 class="text-center text-secondary">
+                  {{ __('admin.No mentors match your filters') }}
+                </h6>
+                <div class="text-center">
+                  <button type="button" class="btn btn-light" id="resetFiltersBtn">
+                    <i class="ti ti-reload me-2"></i>
+                    <span class="mx-1">{{ __('admin.Reset') }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <!-- / Mentors -->
@@ -349,6 +368,7 @@
 </div> --}}
 <!--/ Edit SP Modal -->
 
+{{-- 
 <!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -371,7 +391,7 @@
                   id="search-table" placeholder="{{ __('admin.Search') }}" name="search"
                   value="{{ request('search') }}" />
               </div>
-              <div @if (request('rateSearch') == '') @endif class="RateSelect">
+              <div class="RateSelect">
                 <select name="rateSearch"
                   class="form-control custom-shadow search border rounded bg-transparent text-primary px-10 py-2">
                   <option value="" {{ request('rateSearch') == '' ? 'selected' : '' }}>{{ __('admin.empty') }}</option>
@@ -389,7 +409,6 @@
             <div id="sortContainer" class="d-flex align-items-center mb-6">
               <div class="row d-flex align-items-center me-4" style="gap: 10px;">
                 <div class="col-md-3 d-flex flex-nowrap align-items-center">
-                  {{-- <span class="fw-bold mx-1 text-black" style="font-size:13px;">{{ __('admin.Rate') }}</span> --}}
                   <div class="btn btn-sm btn-label-primary rounded-pill"
                     style="height:25px; min-width:95px; font-size:13px;">
                     <i class="ti ti-star me-2 text-warning"></i>
@@ -399,7 +418,6 @@
               </div>
               <div class="row d-flex align-items-center" style="gap: 10px;">
                 <div class="col-md-3 d-flex flex-nowrap align-items-center">
-                  {{-- <span class="fw-bold mx-1 text-black" style="font-size:13px;">{{ __('admin.LinkedIn') }}</span> --}}
                   <div class="btn btn-sm btn-label-primary rounded-pill"
                     style="height:25px; min-width:95px; font-size:13px;">
                     <i class="ti-24px ti ti-brand-linkedin me-2 text-info"></i>
@@ -417,17 +435,17 @@
             <div class="form-group mb-4">
               <div class="d-flex flex-column">
                 <label for="selectExpertises" class="form-label fs-6 fw-bold">
-                  {{ __('admin.SelectExpertises') }}
+                  {{ __('admin.Select Expertise') }}
                 </label>
                 <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
               </div>
               <div class="row">
                 <div class="col-12">
                   <select name="expertises[]" class="form-select select2" multiple="multiple" id="selectExpertises"
-                    data-placeholder="{{ __('admin.SelectExpertises') }}"
-                    placeholder="{{ __('admin.SelectExpertises') }}"
+                    data-placeholder="{{ __('admin.Select Expertise') }}"
+                    placeholder="{{ __('admin.Select Expertise') }}"
                   >
-                    <option value="">{{ __('admin.SelectExpertises') }}</option>
+                    <option value="">{{ __('admin.Select Expertise') }}</option>
                     @foreach ($expertises as $expertise_group)
                     <optgroup label="{{ $expertise_group->title }}">
                       @foreach ($expertise_group->children as $expertise)
@@ -452,35 +470,153 @@
   </div>
 </div>
 <!-- / Filter Modal -->
+--}}
 @stop
 
 @section('scripts')
-<!-- Vendors JS -->
-<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-{{-- <script src="/vuexy/src/js/scripts/extensions/ext-component-ratings.js"></script> --}}
 @stop
 
 @section('pagescripts')
 <!-- Page JS -->
-<script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-<script src="/vuexy/assets/js/forms-pickers.js"></script>
-<script src="/vuexy/assets/js/forms-selects.js"></script>
 <script src="/vuexy/assets/js/mentorship-session.js"></script>
 
-
 <script>
+  // Client-side filtering functionality
+  $(document).ready(function() {
+    // Filter functionality
+    function filterMentors() {
+      const searchTerm = $('#searchMentors').val().toLowerCase();
+      const rateFilter = $('#rateFilter').val();
+      const linkedinFilter = $('#linkedinFilter').is(':checked');
+      const expertiseFilter = $('#expertiseFilter').val(); // This will be an array for multiple selections
+
+      $('.col-md-4.radius-15.mb-3').each(function() {
+        const mentorCard = $(this);
+        let showCard = true;
+
+        // Search filter
+        if (searchTerm) {
+          const mentorName = mentorCard.find('.text-black.fw-bold.fs-6').text().toLowerCase();
+          const mentorTitle = mentorCard.find('.text-secondary').text().toLowerCase();
+          const mentorBio = mentorCard.find('.line-clamp-4').text().toLowerCase();
+          
+          if (!mentorName.includes(searchTerm) && 
+              !mentorTitle.includes(searchTerm) && 
+              !mentorBio.includes(searchTerm)) {
+            showCard = false;
+          }
+        }
+
+        // Rate filter
+        if (rateFilter && showCard) {
+          const ratingText = mentorCard.find('span[style*="color: orange"]').text().trim();
+          const rating = parseFloat(ratingText) || 0;
+          const selectedRating = parseInt(rateFilter);
+          
+          // Filter by exact rating (rounded to nearest integer)
+          if (Math.round(rating) !== selectedRating) {
+            showCard = false;
+          }
+        }
+
+        // LinkedIn filter
+        if (linkedinFilter && showCard) {
+          const hasLinkedIn = mentorCard.find('a[title="Linkedin URL"]').attr('href');
+          if (!hasLinkedIn) {
+            showCard = false;
+          }
+        }
+
+        // Expertise filter
+        if (expertiseFilter && showCard) {
+          const selectedExpertises = $('#expertiseFilter').val() || [];
+          if (selectedExpertises.length > 0) {
+            let hasAnyExpertise = false;
+            mentorCard.find('.btn-outline-warning').each(function() {
+              const mentorExpertise = $(this).text().toLowerCase().trim();
+              selectedExpertises.forEach(function(selectedExp) {
+                if (mentorExpertise.includes(selectedExp.toLowerCase())) {
+                  hasAnyExpertise = true;
+                  return false; // break inner loop
+                }
+              });
+              if (hasAnyExpertise) return false; // break outer loop
+            });
+            if (!hasAnyExpertise) {
+              showCard = false;
+            }
+          }
+        }
+
+        // Show/hide card
+        if (showCard) {
+          mentorCard.show();
+        } else {
+          mentorCard.hide();
+        }
+      });
+
+      // Update mentors count and handle no-result sections
+      const visibleCount = $('.col-md-4.radius-15.mb-3:visible').length;
+      $('.fs-5').last().text(visibleCount);
+      
+      // Handle no-result sections
+      const hasAnyFilters = searchTerm || rateFilter || linkedinFilter || (expertiseFilter && expertiseFilter.length > 0);
+      
+      if (visibleCount === 0) {
+        if (hasAnyFilters) {
+          // Show no filter results message
+          $('#noFilterResult').show();
+          $('#noMentorsResult').hide();
+        } else {
+          // Show no mentors message (this should already be handled by the blade condition)
+          $('#noFilterResult').hide();
+          $('#noMentorsResult').show();
+        }
+      } else {
+        // Hide both no-result sections when mentors are visible
+        $('#noFilterResult').hide();
+        $('#noMentorsResult').hide();
+      }
+    }
+
+    // Event listeners
+    $('#searchMentors').on('input', filterMentors);
+    $('#rateFilter').on('change', filterMentors);
+    $('#linkedinFilter').on('change', filterMentors);
+    $('#expertiseFilter').on('change', filterMentors);
+
+    // Reset filters
+    $('#resetFilters').on('click', function() {
+      $('#searchMentors').val('');
+      $('#rateFilter').val('');
+      $('#linkedinFilter').prop('checked', false);
+      $('#expertiseFilter').val(null).trigger('change'); // Clear select2 multiple selection
+      filterMentors();
+    });
+
+    // Reset filters button in no-result section
+    $('#resetFiltersBtn').on('click', function() {
+      $('#searchMentors').val('');
+      $('#rateFilter').val('').trigger('change'); // Clear select2 single selection
+      $('#linkedinFilter').prop('checked', false);
+      $('#expertiseFilter').val(null).trigger('change'); // Clear select2 multiple selection
+      filterMentors();
+    });
+
+    // Initialize
+    filterMentors();
+    
+    // Initially hide no-result sections if there are mentors
+    @if(count($mentors) > 0)
+      $('#noMentorsResult').hide();
+      $('#noFilterResult').hide();
+    @endif
+  });
+
+  // Remove old filter button functionality
+  /*
   const sortContainer = document.getElementById('sortContainer');
     const sortContainerMobile = document.getElementById('sortContainerMobile');
     const filterButton = document.getElementById('filterButton');
@@ -570,6 +706,7 @@
         sortContainerMobile.innerHTML = ''; // Clear the container
       }
     });
+  */
 </script>
 
 <script>
@@ -692,18 +829,9 @@
 </script>
 <script>
   $(document).ready(function() {
-    $('.RateShowOrNot').click(function() {
-      if ($(this).is(':checked')) {
-        $('.RateSelect').show();
-        $('.Search').hide();
-        $('.ExpertiesInput').hide();
-      } else {
-        $('.RateSelect').hide();
-        $('.Search').show();
-        $('.ExpertiesInput').hide();
-      }
-    });
-  }); 
+    // Old RateShowOrNot functionality removed as it's replaced by inline filtering
+    
+    // Keep existing mentor modification functions 
   function modify(type, id, stat) {
       $.ajaxSetup({
         headers: {

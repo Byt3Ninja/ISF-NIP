@@ -8,6 +8,7 @@ use App\FundingRound;
 use App\Organization;
 use App\ScreeningEvaluation;
 use App\ScreeningEvaluationResults;
+use App\Step;
 use App\Sector;
 use App\Team_member;
 use Illuminate\Http\Request;
@@ -43,14 +44,12 @@ class ClientCompanyController extends Controller
     }
     public function show($id)
     {
-        try {
+        // try {
             $user = auth()->user();
             $user_id = $user->id;
-            $company = Company::with('state')
-                ->with('city')
-                ->with('user')
-                ->with('stage')
-                ->findorfail($id);
+            $company = Company::with('state')->with(['city', 'user', 'stage'])->find($id);
+            if( empty( $company ) ) { return abort(404); }
+
             if (!empty($company->Sustainable_development)) {
                 $sustainableDevelopment = json_decode($company->Sustainable_development, true);
 
@@ -83,8 +82,12 @@ class ClientCompanyController extends Controller
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
             $isResponsesPublished = false;
             $final_comment = null;
+            $formData = collect([]);
             if( !empty( $evaluationForm ) )
             {
+                $current_step = $company->stepdata;
+                $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first();
+                $formData = $form->formData;
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
@@ -102,12 +105,12 @@ class ClientCompanyController extends Controller
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
-        } catch (Exception $e) {
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-        }
+            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+        // } catch (Exception $e) {
+        //     //log what happend
+        //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+        //     abort(500);
+        // }
     }
     /**
      * Show the form for editing/Createing the specified resource.

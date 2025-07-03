@@ -121,8 +121,7 @@
 											<button
 											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
 											  style="border-radius: 17px; width: 40px; height: 40px;"
-											   type="submit"
-											>
+											   type="submit" >
 											  <i class="ti ti-filter text-white ti-24px"></i>
 											</button>
 										  </div>
@@ -131,7 +130,12 @@
                         <select name="org_id" class="form-control">
                           <option value="0">{{ __('admin.All') }}</option>
                           @php
+                          $user = Auth::user();
+                          if($user->hasRole('organizationManager')){
+                          $organizations = App\Organization::where('id', $user->organization_id)->get();
+                        }else{
                           $organizations = App\Organization::all();
+                        }
                           @endphp
                           @foreach ($organizations as $organization) 
                           <option value="{{$organization->id}}" {{ $organization->id == request('org_id') ? 'selected' : '' }}> {{ $organization->{'name_' . $l} }}</option>

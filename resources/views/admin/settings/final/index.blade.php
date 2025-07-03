@@ -255,7 +255,7 @@
                                   @if (!$company->fsession($cstep->id))
                                     {{ __('cycles.Add Judges first') }}
                                   @elseif($company->fsession($cstep->id)->join_url)
-                                    <button type="button" onclick="edit({{ $company->id }})"
+                                    <button type="button" onclick="edit({{ $company->id }}, '{{ $company->fsession($cstep->id)->datetime }}', '{{ $company->fsession($cstep->id)->duration }}')"
                                       class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                                       data-bs-target="#ModifyRequest">
                                       <i class="ti ti-edit text-info"></i>
@@ -273,7 +273,7 @@
                                         <i class="ti ti-user"></i></button></a>
                                   @else
                                     @if ($company->fsession($cstep->id)->join_url)
-                                      <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }})"
+                                      <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }}, '{{ $company->fsession($cstep->id)->datetime }}', '{{ $company->fsession($cstep->id)->duration }}')"
                                         class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                                         data-bs-target="#ModifyRequest">
                                         <i class="ti ti-edit text-info"></i>
@@ -571,12 +571,13 @@
         }
       });
     }
-
-    const startDate = '{{ $cstep->from->format('Y-m-d') }}'
-    const endDate = '{{ $cstep->to->format('Y-m-d') }}'
-
-    const stepStartDate = startDate ? moment(startDate) : moment();
-    const stepEndDate = endDate ? moment(endDate) : moment();
+  @if($cstep)
+  const startDate = '{{ $cstep->from->format('Y-m-d') }}'
+  const endDate = '{{ $cstep->to->format('Y-m-d') }}'
+  
+  const stepStartDate = startDate ? moment(startDate) : moment();
+  const stepEndDate = endDate ? moment(endDate) : moment();
+  @endif
 
     function DoChange(set) {
       switch (set) {
@@ -644,12 +645,11 @@
       $('#addzoom').modal('show');
     }
 
-    function edit(company) {
+    function edit(company, date_zoom = '', Period = '')
+    {
       // alert(company);
       $('.cid').val(company);
       $('#ModifyRequest').modal('show');
-      let date_zoom = '{{ $company->fsession($cstep->id)->datetime }}';
-      let Period = '{{ $company->fsession($cstep->id)->duration }}';
       $('#sdate').val(date_zoom);
       $('#editNeededZoomDateTime').val(date_zoom);
       $('#period').val(Period);

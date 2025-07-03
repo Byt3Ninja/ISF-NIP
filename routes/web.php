@@ -483,6 +483,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('quizzes', 'quizzesController')->except(['show']);
     Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions_manage');
     Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.questions_update');
+    Route::post('quizzes/{quiz}/questions/delete', 'quizzesController@delete_questions')->name('quizzes.questions_delete');
     Route::get('quizzes/my', 'quizzesController@my')->name('quizzes.dashboard_view');
 
     Route::resource('surveys', 'surveysController')->except(['show']);

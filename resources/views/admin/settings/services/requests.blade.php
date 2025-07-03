@@ -8,7 +8,7 @@
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="d-flex justify-content-between align-items-center mb-6">
+      <div class="d-flex justify-content-between align-items-center mb-6 mt-3">
         <h3 class="mb-0 fw-bold">{{ __('cycles.Services requests') }}</h3>
         @if (count($received) > 0 && $countold)
           <a href="/dashboard/requests/old" class="btn btn-primary">
@@ -82,10 +82,16 @@
                     <td>{{ $n + 1 }}</td>
                     <td>
                       @if (!empty($rec->user->company))
-                        <div class="d-flex align-items-center gap-1">
-                          <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
-                            <img src="/191014/{{ $rec->user->img_url ?? '../images/placeholder.jpg' }}" alt="avatar"
-                              class="rounded-circle" height="40" width="40">
+                        <div class="d-flex align-items-center gap-2">
+                          <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                            <img 
+                              src="/191014/{{ $rec->user->img_url ?? '/images/logo-placeholder.png' }}" 
+                              alt="avatar"
+                              class="rounded-circle border shadow-sm" 
+                              height="40" 
+                              width="40"
+                              onerror="this.onerror=null;this.src='/images/logo-placeholder.png';"  
+                            />
                           </a>
                           <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
                             <div class="media-body">

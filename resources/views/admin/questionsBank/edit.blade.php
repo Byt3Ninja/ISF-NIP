@@ -124,7 +124,9 @@
 													<select class="select2 form-select" name="question_group" id="question_group" required>
 														<option value="quiz" {{ $question->group == 'quiz' ? 'selected' : '' }}>{{ __('admin.question_type_quiz') }}</option>
 														<option value="survey" {{ $question->group == 'survey' ? 'selected' : '' }}>{{ __('admin.question_type_survey') }}</option>
+														@if($_user->ableTo('Assessment.Questions.Manage', $permissions))
 														<option value="assessment" {{ $question->group == 'assessment' ? 'selected' : '' }}>{{ __('admin.question_type_assessment') }}</option>
+														@endif
 													</select>
 												</div>
 											</div>

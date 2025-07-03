@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\RegistrationController;
 
 /*
@@ -20,3 +23,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::match(['post', 'get'], 'register-company', [RegistrationController::class, 'register']);
 Route::get('uploads/companies/{path}', [RegistrationController::class, 'showImage'])->where('path', '.*');
 Route::get('company', [RegistrationController::class, 'getCompany']);
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::get('/dashboard',[DashboardController::class, 'index'])->middleware('auth:sanctum');

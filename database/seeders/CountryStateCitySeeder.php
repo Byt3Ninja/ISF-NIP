@@ -19,7 +19,7 @@ class CountryStateCitySeeder extends Seeder
         $json = File::get(base_path('database/dbFiles/countries_states_cities.json'));
         $data = json_decode($json);
 
-        $iso3Codes = ['EGY', 'SAU', 'ARE', 'KWT', 'QAT', 'BHR', 'NGA', 'TCD', 'SDN', 'LBY', 'ZMB', 'TGO', 'NER', 'ZWE', 'MLI', 'TUN'];
+        $iso3Codes = ['EGY', 'SAU', 'ARE', 'QAT', 'BHR'];
 
         $counties = array_filter($data, function ($q) use ($iso3Codes) {
             return in_array($q->iso3, $iso3Codes);

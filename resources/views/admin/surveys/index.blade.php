@@ -83,7 +83,7 @@
                         <th>#</th>
                         <th>{{__('admin.surveyTitle')}}</th>
                         <th class="text-center">{{__('admin.Organization')}}</th>
-                        <th class="text-center">{{ __('admin.Tags') }}</th>
+                        {{-- <th class="text-center">{{ __('admin.Tags') }}</th> --}}
                         <th style="width: 100px;" class="text-center">{{__('admin.Actions')}}</th>
                       </tr>
                     </thead>
@@ -97,13 +97,13 @@
                                     {{ $survey->organization->{'name_' . $l} }}
                                 </a>
                           </td>
-                        <td class="text-center">
+                        {{-- <td class="text-center">
                         @foreach($survey->questions as $question)
-                              @foreach($question->tags_array as $tag)
+                              @foreach($question->tags as $tag)
                                  <span class="badge bg-primary me-1">{{ $tag }}</span>
                               @endforeach
                         @endforeach
-                      </td>
+                      </td> --}}
             <td class="text-center">
               <div class="btn-group w-100">
                 <button class="btn btn-sm border-none" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

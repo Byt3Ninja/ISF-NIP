@@ -68,8 +68,8 @@
                       <option value="0">{{ __('cycles.Select Company') }}</option>
                       @foreach ($companies as $company)
                         <option value="{{ $company->id }}" {{ $c ? ($company->id == $c->id ? 'selected' : '') : '' }}>
-                          {{ $company->{'name_' . $l} }} ({{ __('cycles.Added By') }}
-                          {{ $company->user->{'first_name_' . $l} }} {{ $company->user->{'last_name_' . $l} }})</option>
+                          {{ $company?->{'name_' . $l} }} ({{ __('cycles.Added By') }}
+                          {{ $company?->user?->{'first_name_' . $l} }} {{ $company?->user?->{'last_name_' . $l} }})</option>
                       @endforeach
                     </select>
                   </fieldset>

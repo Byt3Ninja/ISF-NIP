@@ -189,10 +189,10 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date',
                 'end' => 'required|date',
-                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'delegation_pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
 
 
@@ -234,6 +234,7 @@ class CyclesController extends Controller
             if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
                 $originalName = $request->file('delegation_pdf')->getClientOriginalName();
                 $cycle->delegation_file =  $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+               
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
@@ -444,10 +445,10 @@ class CyclesController extends Controller
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
-                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:5120',
-                'delegation_pdf' => 'nullable|file|mimes:pdf|max:5120',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
             DB::transaction(function () use ($request) {
                 $private = null;
@@ -630,6 +631,7 @@ class CyclesController extends Controller
     public function saveForm(Request $request)
     {
 
+       
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
@@ -647,7 +649,7 @@ class CyclesController extends Controller
                 return [
                     'field_' . $id => implode("|", $rules)
                 ];
-            } else {
+            }else {
                 return ['field_' . $id => 'nullable'];
             }
         });
@@ -671,6 +673,16 @@ class CyclesController extends Controller
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
+          if ($request->hasFile($field_name)) {
+           $file = $request->file($field_name);
+        //    $originalName = $file->getClientOriginalName();
+        //    $file->storeAs('formsubmissions', $originalName, 'public_uploads');
+        //    $request->{$field_name} = 'formsubmissions/' . $originalName;
+         $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+             $file->move(public_path('formsubmissions/'), $imageName);
+			 $request->{$field_name} = 'formsubmissions/' . $imageName;
+
+        }
             // update cycle & step
             Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
 
@@ -713,9 +725,9 @@ class CyclesController extends Controller
 
             $phoneNumber = $user->country_code_w_a . $user->whatsapp;
             $Massage = "Dear " . $user->name . ",
-Congratulations! You have successfully joined the" . $data['cycle'] . ", 
-We are excited to have you on board and look forward to supporting your journey.
-Thanks from " . env('APP_NAME');
+            Congratulations! You have successfully joined the" . $data['cycle'] . ", 
+            We are excited to have you on board and look forward to supporting your journey.
+            Thanks from " . env('APP_NAME');
             $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
             Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
         }

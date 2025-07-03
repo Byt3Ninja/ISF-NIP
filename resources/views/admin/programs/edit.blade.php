@@ -250,6 +250,7 @@
                                         id="delegation_option"
                                         onchange="toggleFormGroup(this)"
                                         {{ $ccycle && $ccycle->delegation_file ? 'checked' : '' }}
+                                        value="yes"
                                     />
                                     <label class="form-check-label" for="delegation_option">
                                         {{ __('cycles.Delegation_Option') }}

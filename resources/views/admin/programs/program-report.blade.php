@@ -925,9 +925,9 @@
                         </td>
                       </tr>
                     @empty
-                      <tr>
+                      {{--  <tr>
                         <td colspan="5" class="text-center">{{ __('admin.No evaluations found') }}</td>
-                      </tr>
+                      </tr>  --}}
                     @endforelse
                     </tbody>
                 </table>
