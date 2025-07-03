@@ -143,10 +143,10 @@ class AuthController extends Controller
         $settings = Settings::find(1);
 
         $userData = [
-            'first_name_en' => $data['first_name'],
-            'last_name_en'  => $data['last_name'],
-            'first_name_ar' => $data['first_name'],
-            'last_name_ar'  => $data['last_name'],
+            'first_name_en' => $data['firstName'],
+            'last_name_en'  => $data['lastName'],
+            'first_name_ar' => $data['firstName'],
+            'last_name_ar'  => $data['lastName'],
             'gender'        => $data['gender'],
             'phone'         => $data['phone'],
             'email'         => $data['email'],
