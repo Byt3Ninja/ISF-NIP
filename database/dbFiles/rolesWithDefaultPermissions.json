@@ -180,6 +180,24 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "queue.jobs",
+                "description": "Show Queue Jobs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "queue.run.once",
+                "description": "Run Queue Jobs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
             }
         ]
     },
