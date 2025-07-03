@@ -16,6 +16,7 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
+        \Fruitcake\Cors\HandleCors::class,
         \App\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
@@ -44,7 +45,6 @@ class Kernel extends HttpKernel
             'throttle:60,1',
             'bindings',
             'locale:en,ar',
-            'cross-origin',
         ],
     ];
 
@@ -67,7 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'locale' => \App\Http\Middleware\LocaleMiddleware::class,
         '2fa' => \App\Http\Middleware\LoginSecurityMiddleware::class,
-        'cross-origin' => \Fruitcake\Cors\HandleCors::class,
     ];
 
     /**
