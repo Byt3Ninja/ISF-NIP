@@ -525,7 +525,15 @@ class quizzesController extends Controller
 				}
 
 				$organization_id = $cycleData->organization_id;
-				$quiz = Quizzes::where('status', 'published')->where('training_id', $id)->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->findOrFail($quizId);
+				
+				$quiz = Quizzes::where('status', 'published')->where('training_id', $id)
+				->where('organization_id', $organization_id)
+				->where('id', $quizId)
+				->with(['training', 'myAttempts', 'questions'])
+				->first();
+				if(empty($quiz)){
+					return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
+				}
 				$questions = $quiz->questions;
 				$tags = $questions->flatMap(function ($question) {
 					return $question->tags;
