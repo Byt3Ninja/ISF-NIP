@@ -382,6 +382,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('change/cyc', 'CyclesController@changAll');
     Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
+    Route::get('/queue-jobs', 'QueueJobController@index')->name('queue.jobs');
+    Route::get('/run-queue-once', 'QueueJobController@runOnce')->name('queue.run.once');
+
     //Screening
     Route::get('screening', 'ScreeningController@index');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');

@@ -947,6 +947,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               </a>
             </li>
           @endif
+          <li class="{{ Request::is('*queue-jobs') ? 'active' : '' }} menu-item">
+              <a href="{{ route('queue.jobs') }}" class="menu-link">
+                <i class="menu-livicon" data-icon="globe"></i>
+                <div>{{ __('admin.QueueJobs') }}</div>
+              </a>
+            </li>
         </ul>
       </li>
     @endif

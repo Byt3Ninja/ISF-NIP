@@ -2069,4 +2069,11 @@ return [
 	'total_evaluation_weight_be_100' => 'مجموع الوزن يجب ان يكون 100%',
 	'category_weight_not_exceed_100' => 'الوزن الخاص بـ :category يجب ان يكون اقل من 100%',
 	'category_weight_be_100' => 'الوزن الخاص بـ :category يجب ان يكون 100%',
+	'all_Jobs' => 'جميع الوظائف',
+	'TryCount' => 'عدد المحاولات',
+	'Data' => 'البيانات',
+	'Job' => 'وظيفة',
+	'QueueJobs' => 'قائمة الوظائف',
+	'RunQueueOnce' => 'تنفيذ القائمة مرة واحدة',
+	
 ];
