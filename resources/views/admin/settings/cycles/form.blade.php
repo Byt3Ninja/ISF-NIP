@@ -96,7 +96,7 @@
                                                                        accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
                                                                 @if($answer)
                                                                     <div class="mt-4">
-                                                                        <a href="{{ Storage::disk('public_uploads')->url('formsubmissions/' . $answer) }}}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                        <a href="/{{ $answer }} " target="_blank" class="btn btn-sm btn-outline-primary">
                                                                             <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
                                                                         </a>
                                                                     </div>
