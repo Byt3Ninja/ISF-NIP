@@ -39,6 +39,7 @@
         name="delegation_option" 
         id="delegation_option"
         onchange="toggleFormGroup(this)"
+        value="yes"
       />
       <label class="form-check-label" for="delegation_option">
       {{ __('cycles.Delegation_Option') }}

@@ -234,6 +234,7 @@ class CyclesController extends Controller
             if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
                 $originalName = $request->file('delegation_pdf')->getClientOriginalName();
                 $cycle->delegation_file =  $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+               
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
@@ -724,9 +725,9 @@ class CyclesController extends Controller
 
             $phoneNumber = $user->country_code_w_a . $user->whatsapp;
             $Massage = "Dear " . $user->name . ",
-Congratulations! You have successfully joined the" . $data['cycle'] . ", 
-We are excited to have you on board and look forward to supporting your journey.
-Thanks from " . env('APP_NAME');
+            Congratulations! You have successfully joined the" . $data['cycle'] . ", 
+            We are excited to have you on board and look forward to supporting your journey.
+            Thanks from " . env('APP_NAME');
             $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
             Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
         }
