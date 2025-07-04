@@ -2023,4 +2023,11 @@ return [
 	'total_evaluation_weight_be_100' => 'Total weight must be 100%',
 	'category_weight_not_exceed_100' => ':category weight must not exceed 100%',
 	'category_weight_be_100' => ':category weight must be 100%',
+	'all_Jobs' => 'All Jobs',
+	'TryCount' => 'Count of Try',
+	'Data'=> 'Data',
+	'Job' => 'Job',
+	'QueueJobs' => 'Queue Jobs',
+	'RunQueueOnce' => 'Run Queue Once',
+
 ];
