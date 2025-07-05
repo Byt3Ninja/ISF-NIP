@@ -185,7 +185,7 @@ class CyclesController extends Controller
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => 'required|string|max:250',
+                'title' => 'required|string|max:250|unique:cycles,title,' . $id,
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date',
                 'end' => 'required|date',
