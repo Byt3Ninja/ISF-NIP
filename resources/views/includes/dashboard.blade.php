@@ -327,7 +327,7 @@
 												<td>
 													@if( $step->stype == 1 )
 													@if( $step->status == 'Completed' || $step->status == 'انتهت' )
-													@if( $company->approved && $_user->ableTo('cycles.list_mine', $permissions) )
+													@if( $company->approved && $_user->ableTo('cycles.list', $permissions) )
 													<a href="/dashboard/cycles/{{ $step->fLink }}"> {{ $step->title }} </a>
 													@else
 													{{ $step->title }}
