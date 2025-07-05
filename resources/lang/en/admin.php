@@ -1081,7 +1081,7 @@ return [
 	'Stage_stored_successfully' => 'Stage Added Successfully',
 	'Add new Weights' => 'Add new Weights',
 	'Weight' => 'Weight',
-	'all Weights' => 'all Weights',
+	'all Weights' => 'All Weights',
 	'UpdatedSuccessfully' => 'Updated Successfully',
 	'AlreadyHaveAssessment' => 'Already Have Assessment',
 	'YouHaveNotCompany' => 'You Have Not Startup',
@@ -2033,5 +2033,5 @@ return [
 	'Go to Steps' => 'Go to Steps',
 	'No_Programs_Message' => 'You have no programs yet, you have to create a new program',
 	'Cycle_title_already_exist' => 'Program title already exist',
-
+	'Weight Details' => 'Weight Details',
 ];
