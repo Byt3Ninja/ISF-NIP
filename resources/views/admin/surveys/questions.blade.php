@@ -542,8 +542,16 @@
           const questionType = row.dataset.questionType || '';
 
           const matchesSearch = questionText.includes(searchTerm);
-          const matchesType = !selectedType || questionType ===
-            selectedType;
+          let matchesType = false;
+          
+          if (!selectedType) {
+            matchesType = true;
+          } else if (selectedType === 'text') {
+            // For text questions, match both 'text' and 'answers' types
+            matchesType = questionType === 'text' || questionType === 'answers' || questionType === '' || questionType === null;
+          } else {
+            matchesType = questionType === selectedType;
+          }
 
           if (matchesSearch && matchesType) {
             row.style.display = '';

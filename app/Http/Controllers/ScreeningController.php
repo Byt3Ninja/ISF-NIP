@@ -611,34 +611,37 @@ class ScreeningController extends Controller
 			'stepId' => 'required|integer|exists:steps,id',
 			'criteria' => 'required_if:action,publish|array',
 			'criteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
-			'criteria.*.name' => 'required_if:action,publish|string|max:255',
+			'criteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
 			'criteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
 			'criteria.*.subCriteria' => 'required_if:action,publish|array|min:1',
 			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
-			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|string|max:255',
+			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
 			'criteria.*.subCriteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
 		]);
 
 		$id = $request->stepId;
 		$criteria = collect( $request->criteria );
-		if( $criteria->sum('weight') != 1 )
+		if( $status == 'publish' )
 		{
-			if( $criteria->sum('weight') > 1 ) { return response()->json(['status' => false, 'message' => __('admin.total_evaluation_weight_not_exceed_100')], 200); }
-			else { return response()->json(['status' => false, 'message' => __('admin.total_evaluation_weight_be_100')], 200); }
-		}
-		else
-		{
-			foreach( $criteria as $criteriaItem )
+			if( $criteria->sum('weight') != 1 )
 			{
-				if( array_key_exists('subCriteria', $criteriaItem) )
+				if( $criteria->sum('weight') > 1 ) { return response()->json(['status' => false, 'message' => __('admin.total_evaluation_weight_not_exceed_100')], 200); }
+				else { return response()->json(['status' => false, 'message' => __('admin.total_evaluation_weight_be_100')], 200); }
+			}
+			else
+			{
+				foreach( $criteria as $criteriaItem )
 				{
-					$subCriteria = collect( $criteriaItem['subCriteria'] );
-					$total = $subCriteria->sum('weight');
-					if( $total != 1 )
+					if( array_key_exists('subCriteria', $criteriaItem) )
 					{
-						$name = $criteriaItem['name'];
-						if( $criteria->sum('weight') > 1 ) { return response()->json(['status' => false, 'message' => __('admin.category_weight_not_exceed_100', ['category' => $name])], 200); }
-						else { return response()->json(['status' => false, 'message' => __('admin.category_weight_be_100', ['category' => $name])], 200); }
+						$subCriteria = collect( $criteriaItem['subCriteria'] );
+						$total = $subCriteria->sum('weight');
+						if( $total != 1 )
+						{
+							$name = $criteriaItem['name'];
+							if( $criteria->sum('weight') > 1 ) { return response()->json(['status' => false, 'message' => __('admin.category_weight_not_exceed_100', ['category' => $name])], 200); }
+							else { return response()->json(['status' => false, 'message' => __('admin.category_weight_be_100', ['category' => $name])], 200); }
+						}
 					}
 				}
 			}

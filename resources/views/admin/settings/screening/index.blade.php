@@ -697,7 +697,7 @@
           category.subCriteria.forEach((sub, subIndex) => {
             subCriteriaHTML += `
               <div class="d-flex gap-3 align-items-center py-3 border-bottom" data-subcriterion-id="${sub.id}">
-                <input type="text" class="form-control subcriterion-name flex-grow-1" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" pattern="[A-Za-z\\s\\u0600-\\u06FF]*" title="{{ __('cycles.Only letters and spaces allowed') }}">
+                <input type="text" class="form-control subcriterion-name flex-grow-1" placeholder="{{ __('cycles.Sub Criteria Name') }}" value="${sub.name || ''}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" pattern="[A-Za-z\\s\\u0600-\\u06FF]*" title="{{ __('cycles.Only letters and spaces allowed') }}">
                 <div class="input-group" style="width: 150px;">
                   <input type="number" class="form-control text-center subcriterion-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${sub.weight * 100}" min="0" max="100" step="0.1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
                   <span class="input-group-text bg-light">%</span>
@@ -716,7 +716,7 @@
             <div class="card-body">
               <div class="d-flex flex-nowrap justify-content-between align-items-center border-bottom pb-3 mb-3">
                 <div class="w-100 d-flex justify-content-between align-items-center">
-                  <input type="text" class="form-control category-name me-3 fw-bold fs-5" placeholder="{{ __('cycles.Category Name') }}" value="${category.name}" data-category-index="${categoryIndex}" pattern="[A-Za-z\\s\\u0600-\\u06FF]*" title="{{ __('cycles.Only letters and spaces allowed') }}">
+                  <input type="text" class="form-control category-name me-3 fw-bold fs-5" placeholder="{{ __('cycles.Category Name') }}" value="${category.name || ''}" data-category-index="${categoryIndex}" pattern="[A-Za-z\\s\\u0600-\\u06FF]*" title="{{ __('cycles.Only letters and spaces allowed') }}">
                   <div class="d-flex align-items-center">
                     <div class="input-group" style="width: 150px;">
                       <input type="number" class="form-control text-center category-weight" placeholder="{{ __('cycles.Weight (%)') }}" value="${category.weight * 100}" min="0" max="100" step="0.1" data-category-index="${categoryIndex}" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
