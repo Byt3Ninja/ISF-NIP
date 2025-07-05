@@ -2029,5 +2029,7 @@ return [
 	'Job' => 'Job',
 	'QueueJobs' => 'Queue Jobs',
 	'RunQueueOnce' => 'Run Queue Once',
-
+	'No_Session_Message' => 'You have no sessions yet, you should have steps in your program to create sessions.',
+	'Go to Steps' => 'Go to Steps',
+	'No_Programs_Message' => 'You have no programs yet, you have to create a new program',
 ];

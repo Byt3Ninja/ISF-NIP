@@ -226,13 +226,22 @@
       </section>
       <!-- // Sortable lists section end -->
       @else
-      <div class="card">
-        <div class="card-header border-bottom">
-          <h4 class="card-title">{{ __('cycles.Error') }}</h4>
-        </div>
-        <div class="card-body">
-          {{ __('cycles.No records ... Add cycle first') }}: <button class="btn btn-light-primary"
-            onclick="DoChange(2)">{{ __('cycles.Add new') }}</button>
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-body h-100 d-flex justify-content-center align-items-center">
+            <div class="d-flex flex-column align-items-center">
+              <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+              <h6 class="text-center text-secondary w-75">
+                {{ __('admin.No_Programs_Message') }}
+              </h6>
+              <div class="text-center">
+                <button onclick="DoChange(2)" class="btn btn-primary">
+                  <i class="ti ti-plus ms-2"></i>
+                  <span class="mx-1">{{ __('admin.Add_New') }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
