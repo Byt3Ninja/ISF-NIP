@@ -1086,7 +1086,7 @@ return [
 	'Stage_stored_successfully' => 'تم اضافة المرحلة',
 	'Add new Weights' => 'اضافة وزن جديدة',
 	'Weight' => 'الوزن',
-	'all Weights' => 'جميع الوزن',
+	'all Weights' => 'جميع الاوزان',
 	'UpdatedSuccessfully' => 'تم التعديل بنجاح',
 	'Add new Assessment' => 'اضافة تقييم جديد',
 	'all Assessments' => 'جميع التقييمات',
@@ -2079,5 +2079,5 @@ return [
 	'Go to Steps' => 'اذهب إلى المراحل',
 	'No_Programs_Message' => 'لا توجد لديك برامج حتى الآن، يجب أن تنشئ برنامجًا جديدًا.',
 	'Cycle_title_already_exist' => 'اسم الدورة موجود بالفعل',
-	
+	'Weight Details' => 'تفاصيل الوزن',
 ];

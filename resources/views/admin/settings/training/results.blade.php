@@ -255,20 +255,24 @@
       </div>
     </section>
     @else
-    <section class="row">
-      <div class="col-xl-12 col-md-12 col-sm-12">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title danger">{{ __('cycles.Error') }}</h4>
-          </div>
-          <hr style="margin:-10px 0 5px 0;">
-          <div class="card-body">
-            {{ __('cycles.No training courses into cycles') }}, <a href="/dashboard/cycles">
-              {{ __('cycles.Back to Manage cycles') }}</a>.
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-body h-100 d-flex justify-content-center align-items-center">
+          <div class="d-flex flex-column align-items-center">
+            <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+            <h6 class="text-center text-secondary w-75">
+              {{ __('admin.No_Session_Message') }}
+            </h6>
+            <div class="text-center">
+              <a href="/dashboard/cycles" class="btn btn-primary">
+                <span class="mx-1">{{ __('admin.Go to Steps') }}</span>
+                <i class="ti ti-arrow-{{$l == 'en' ? 'right' : 'left'}} ms-2"></i>
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
     @endif
   </div>
 </div>
