@@ -1,0 +1,2808 @@
+[
+    {
+        "name_ar": "\u200f\u0627\u0644\u0628\u062d\u0631\u064a\u0646",
+        "name_en": "Bahrain",
+        "iso3": "BHR",
+        "phone_code": "973",
+        "states": [
+            {
+                "name_ar": "\u0639\u0627\u0635\u0645\u0629",
+                "name_en": "Capital",
+                "cities": [
+                    {
+                        "name_ar": "\u062c\u064a\u062f \u1e29af\u015f",
+                        "name_en": "Jidd \u1e28af\u015f"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0646\u0627\u0645\u0627",
+                        "name_en": "Manama"
+                    },
+                    {
+                        "name_ar": "\u0633\u064a\u062a\u0631\u0627",
+                        "name_en": "Sitrah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u0631\u0643\u0632\u064a",
+                "name_en": "Central",
+                "cities": [
+                    {
+                        "name_ar": "Mad\u012bnat \u1e29amad",
+                        "name_en": "Mad\u012bnat \u1e28amad"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u062d\u0627\u0631\u0642",
+                "name_en": "Muharraq",
+                "cities": [
+                    {
+                        "name_ar": "\u0622\u0646\u062f",
+                        "name_en": "Al \u1e28add"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u062d\u0627\u0631\u0642",
+                        "name_en": "Al Muharraq"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0634\u0645\u0627\u0644\u064a",
+                "name_en": "Northern",
+                "cities": []
+            },
+            {
+                "name_ar": "\u0627\u0644\u062c\u0646\u0648\u0628",
+                "name_en": "Southern",
+                "cities": [
+                    {
+                        "name_ar": "ar rif\u0101 \u2018",
+                        "name_en": "Ar Rif\u0101\u2018"
+                    },
+                    {
+                        "name_ar": "\u062f\u0627\u0631 \u0643\u0648\u0644\u0627\u064a\u0628",
+                        "name_en": "D\u0101r Kulayb"
+                    },
+                    {
+                        "name_ar": "Mad\u012bnat \u2018s\u00e1",
+                        "name_en": "Mad\u012bnat \u2018\u012as\u00e1"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name_ar": "\u0645\u0635\u0631\u200e",
+        "name_en": "Egypt",
+        "iso3": "EGY",
+        "phone_code": "20",
+        "states": [
+            {
+                "name_ar": "\u0627\u0644\u0625\u0633\u0643\u0646\u062f\u0631\u064a\u0629",
+                "name_en": "Alexandria",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0642\u064a\u0631",
+                        "name_en": "Abu Qir"
+                    },
+                    {
+                        "name_ar": "\u0623\u062c\u0627\u0645\u064a",
+                        "name_en": "Agami"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0625\u0633\u0643\u0646\u062f\u0631\u064a\u0629",
+                        "name_en": "Alexandria"
+                    },
+                    {
+                        "name_ar": "AR-RAML",
+                        "name_en": "Ar-Raml"
+                    },
+                    {
+                        "name_ar": "\u0628\u0648\u0631\u063a \u0627\u0644\u0639\u0631\u0628",
+                        "name_en": "Borg El Arab"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0646\u062a\u0627\u0632\u0627",
+                        "name_en": "Montaza"
+                    },
+                    {
+                        "name_ar": "\u062c\u062f\u064a\u062f \u0628\u0648\u0631\u063a \u0627\u0644\u0639\u0631\u0628",
+                        "name_en": "New Borg El Arab"
+                    },
+                    {
+                        "name_ar": "\u0633\u064a\u062f\u064a \u0628\u064a\u0634\u0631",
+                        "name_en": "Sidi Bishr"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0623\u0633\u0648\u0627\u0646",
+                "name_en": "Aswan",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0633\u064a\u0645\u0628\u0644",
+                        "name_en": "Abu Simbel"
+                    },
+                    {
+                        "name_ar": "\u0623\u0633\u0648\u0627\u0646",
+                        "name_en": "Aswan"
+                    },
+                    {
+                        "name_ar": "IDF\u016b",
+                        "name_en": "Idf\u016b"
+                    },
+                    {
+                        "name_ar": "\u0643\u0648\u0645 \u0623\u0648\u0645\u0628\u0648",
+                        "name_en": "Kawm Umb\u016b"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0622\u0633\u064a\u0648\u062a",
+                "name_en": "Asyut",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0646\u064a\u0628",
+                        "name_en": "Abn\u016bb"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u062a\u064a\u062c",
+                        "name_en": "Ab\u016b T\u012bj"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u062f\u0631",
+                        "name_en": "Al Bad\u0101r\u012b"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0639\u062f\u0629",
+                        "name_en": "Al Q\u016b\u015f\u012byah"
+                    },
+                    {
+                        "name_ar": "asy\u016b\u0163",
+                        "name_en": "Asy\u016b\u0163"
+                    },
+                    {
+                        "name_ar": "Dayr\u016b\u0163",
+                        "name_en": "Dayr\u016b\u0163"
+                    },
+                    {
+                        "name_ar": "Manfal\u016b\u0163",
+                        "name_en": "Manfal\u016b\u0163"
+                    }
+                ]
+            },
+            {
+                "name_ar": "Beheira",
+                "name_en": "Beheira",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0622\u0644 \u0645\u0645\u0631",
+                        "name_en": "Ab\u016b al Ma\u0163\u0101m\u012br"
+                    },
+                    {
+                        "name_ar": "\u0625\u0639\u0644\u0627\u0646 Dilinj\u0101t",
+                        "name_en": "Ad Dilinj\u0101t"
+                    },
+                    {
+                        "name_ar": "Damanh\u016br",
+                        "name_en": "Damanh\u016br"
+                    },
+                    {
+                        "name_ar": "\u1e29awsh \u012bs\u00e1",
+                        "name_en": "\u1e28awsh \u2018\u012as\u00e1"
+                    },
+                    {
+                        "name_ar": "idk\u016b",
+                        "name_en": "Idk\u016b"
+                    },
+                    {
+                        "name_ar": "Kafr Ad Daww\u0101r",
+                        "name_en": "Kafr ad Daww\u0101r"
+                    },
+                    {
+                        "name_ar": "kawm \u1e29am\u0101dah",
+                        "name_en": "Kawm \u1e28am\u0101dah"
+                    },
+                    {
+                        "name_ar": "\u0631\u0648\u0632\u064a\u062a\u0627",
+                        "name_en": "Rosetta"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0628\u0646\u064a \u0633\u0648\u064a\u0641",
+                "name_en": "Beni Suef",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0641\u0627\u0634\u0646",
+                        "name_en": "Al Fashn"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0646 \u0633\u0648\u064a\u0641",
+                        "name_en": "Ban\u012b Suwayf"
+                    },
+                    {
+                        "name_ar": "\u0634\u062c\u064a\u0631\u0629",
+                        "name_en": "B\u016bsh"
+                    },
+                    {
+                        "name_ar": "Sumus\u0163\u0101 \u0643\u0645\u0627 sul\u0163\u0101n\u012b",
+                        "name_en": "Sumus\u0163\u0101 as Sul\u0163\u0101n\u012b"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0642\u0627\u0647\u0631\u0629",
+                "name_en": "Cairo",
+                "cities": [
+                    {
+                        "name_ar": "\u0628\u062f\u0631",
+                        "name_en": "Badr"
+                    },
+                    {
+                        "name_ar": "bulq",
+                        "name_en": "Bulaq"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0647\u0631\u0629",
+                        "name_en": "Cairo"
+                    },
+                    {
+                        "name_ar": "\u0625\u0644 \u0645\u0627\u062a\u0627\u0631\u064a\u0627",
+                        "name_en": "El Mataria"
+                    },
+                    {
+                        "name_ar": "fustat",
+                        "name_en": "Fustat"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u062f\u0627\u064a\u0643 el kobba",
+                        "name_en": "Hadayek El Kobba"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0631\u0646\u0648\u0628\u0648\u0644\u064a\u0633",
+                        "name_en": "Heliopolis"
+                    },
+                    {
+                        "name_ar": "\u0647\u064a\u0644\u0648\u0627\u0646",
+                        "name_en": "Helwan"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u062f\u064a",
+                        "name_en": "Maadi"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0633\u062a\u0648\u0631\u0648\u062f",
+                        "name_en": "Musturud"
+                    },
+                    {
+                        "name_ar": "\u0631\u0623\u0633 \u0627\u0644\u0645\u0627\u0644 \u0627\u0644\u0625\u062f\u0627\u0631\u064a \u0627\u0644\u062c\u062f\u064a\u062f \u0644\u0645\u0635\u0631",
+                        "name_en": "New Administrative Capital of Egypt"
+                    },
+                    {
+                        "name_ar": "\u0634\u0648\u0628\u0631\u0627",
+                        "name_en": "Shubra"
+                    },
+                    {
+                        "name_ar": "\u062a\u0648\u0631\u0627",
+                        "name_en": "Tura"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062f\u0627\u0643\u0627\u0647\u0644\u064a\u0627",
+                "name_en": "Dakahlia",
+                "cities": [
+                    {
+                        "name_ar": "\u2018Izbat \u0622\u0644 \u0628\u0648\u0631\u062c",
+                        "name_en": "\u2018Izbat al Burj"
+                    },
+                    {
+                        "name_ar": "\u0623\u062c\u0627\u062c",
+                        "name_en": "Aj\u0101"
+                    },
+                    {
+                        "name_ar": "\u062c\u0627\u0645\u0644\u064a\u0647",
+                        "name_en": "Al Jamm\u0101l\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0627\u0646\u0634\u064a\u0631\u0647",
+                        "name_en": "Al Man\u015f\u016brah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0646\u0632\u0627\u0644\u0627",
+                        "name_en": "Al Manzalah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0639\u0627\u0631\u0649",
+                        "name_en": "Al Ma\u0163ar\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0644\u0643\u0633",
+                        "name_en": "Bilq\u0101s"
+                    },
+                    {
+                        "name_ar": "\u062f\u064a\u0643\u0631\u0646\u064a\u0633",
+                        "name_en": "Dikirnis"
+                    },
+                    {
+                        "name_ar": "minyat \u0648 na\u015fr",
+                        "name_en": "Minyat an Na\u015fr"
+                    },
+                    {
+                        "name_ar": "\u0634\u064a\u0631\u0628\u064a\u0646",
+                        "name_en": "Shirb\u012bn"
+                    },
+                    {
+                        "name_ar": "\u0163alkh\u0101",
+                        "name_en": "\u0162alkh\u0101"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062f\u0627\u0645\u064a\u064a\u062a\u0627",
+                "name_en": "Damietta",
+                "cities": [
+                    {
+                        "name_ar": "AZ Zarq\u0101",
+                        "name_en": "Az Zarq\u0101"
+                    },
+                    {
+                        "name_ar": "\u062f\u0627\u0645\u064a\u064a\u062a\u0627",
+                        "name_en": "Damietta"
+                    },
+                    {
+                        "name_ar": "F\u0101rask\u016br",
+                        "name_en": "F\u0101rask\u016br"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0641\u0627\u064a\u0648\u0645",
+                "name_en": "Faiyum",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0641\u0627\u064a\u0645",
+                        "name_en": "Al Fayy\u016bm"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0648\u0633\u064a\u0647",
+                        "name_en": "Al W\u0101si\u0163ah"
+                    },
+                    {
+                        "name_ar": "Ibshaw\u0101y",
+                        "name_en": "Ibshaw\u0101y"
+                    },
+                    {
+                        "name_ar": "\u0623\u0646\u0627",
+                        "name_en": "I\u0163s\u0101"
+                    },
+                    {
+                        "name_ar": "\u0163amiyah",
+                        "name_en": "\u0162\u0101miyah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u063a\u0627\u0631\u0628\u064a\u0627",
+                "name_en": "Gharbia",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0639\u0644\u0645 \u0627\u0644\u0644\u0647 \u0643\u0648\u0628\u0631\u0627",
+                        "name_en": "Al Ma\u1e29allah al Kubr\u00e1"
+                    },
+                    {
+                        "name_ar": "basy\u016bn",
+                        "name_en": "Basy\u016bn"
+                    },
+                    {
+                        "name_ar": "Kafr AZ Zayy\u0101t",
+                        "name_en": "Kafr az Zayy\u0101t"
+                    },
+                    {
+                        "name_ar": "Qu\u0163\u016br",
+                        "name_en": "Qu\u0163\u016br"
+                    },
+                    {
+                        "name_ar": "\u0633\u0627\u0645\u0627\u0646\u062f",
+                        "name_en": "Samann\u016bd"
+                    },
+                    {
+                        "name_ar": "\u062a\u0627\u0646\u062f\u0627",
+                        "name_en": "Tanda"
+                    },
+                    {
+                        "name_ar": "Zefta",
+                        "name_en": "Zefta"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062c\u064a\u0632\u0627",
+                "name_en": "Giza",
+                "cities": [
+                    {
+                        "name_ar": "\u0622\u0644 ayy\u0101\u0163",
+                        "name_en": "Al \u2018Ayy\u0101\u0163"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0627\u0648\u064a",
+                        "name_en": "Al Baw\u012b\u0163\u012b"
+                    },
+                    {
+                        "name_ar": "\u1e29aw\u0101mid\u012byah",
+                        "name_en": "Al \u1e28aw\u0101mid\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0639\u0627\u0634\u0641",
+                        "name_en": "A\u015f \u015eaff"
+                    },
+                    {
+                        "name_ar": "ows\u012bm",
+                        "name_en": "Aws\u012bm"
+                    },
+                    {
+                        "name_ar": "\u062c\u064a\u0632\u0627",
+                        "name_en": "Giza"
+                    },
+                    {
+                        "name_ar": "Mad\u012bnat sittah ukt\u016bbar",
+                        "name_en": "Mad\u012bnat Sittah Ukt\u016bbar"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0625\u0633\u0645\u0627\u0639\u0644\u0629",
+                "name_en": "Ismailia",
+                "cities": [
+                    {
+                        "name_ar": "\u0625\u0633\u0645\u0627\u0639\u0644\u0629",
+                        "name_en": "Ismailia"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0643\u0641\u0631 \u0627\u0644\u0634\u064a\u062e",
+                "name_en": "Kafr el-Sheikh",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0639\u0645\u064a\u0644",
+                        "name_en": "Al \u1e28\u0101m\u016bl"
+                    },
+                    {
+                        "name_ar": "Dis\u016bq",
+                        "name_en": "Dis\u016bq"
+                    },
+                    {
+                        "name_ar": "Fuwwah",
+                        "name_en": "Fuwwah"
+                    },
+                    {
+                        "name_ar": "Kafr \u0622\u0634 \u0634\u0627\u064a\u062e",
+                        "name_en": "Kafr ash Shaykh"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0631\u0643\u0627\u0632 \u062f\u064a\u0633\u0643",
+                        "name_en": "Markaz Dis\u016bq"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0646\u0634\u0627 \u2018\u0639\u0644\u064a \u0622\u063a\u0627",
+                        "name_en": "Munsh\u0101t \u2018Al\u012b \u0100gh\u0101"
+                    },
+                    {
+                        "name_ar": "S\u012bd\u012b S\u0101lim",
+                        "name_en": "S\u012bd\u012b S\u0101lim"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0643\u0645\u0648\u0631",
+                "name_en": "Luxor",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0643\u0645\u0648\u0631",
+                        "name_en": "Luxor"
+                    },
+                    {
+                        "name_ar": "Markaz al uq\u015fur",
+                        "name_en": "Markaz al Uq\u015fur"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u0627\u062a\u0648\u0631\u0647",
+                "name_en": "Matrouh",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0639\u0627\u0645\u064a\u0646",
+                        "name_en": "Al \u2018Alamayn"
+                    },
+                    {
+                        "name_ar": "\u0645\u064a\u0631\u0633\u0627 \u0645\u0627\u062a\u0631\u0648\u0647",
+                        "name_en": "Mersa Matruh"
+                    },
+                    {
+                        "name_ar": "\u0648\u0627\u062d\u0629 \u0633\u064a\u0648\u0627",
+                        "name_en": "Siwa Oasis"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u064a\u0646\u0627",
+                "name_en": "Minya",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u064a \u0642\u0631\u0628\u0634",
+                        "name_en": "Ab\u016b Qurq\u0101\u015f"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u064a\u0646\u064a\u0627",
+                        "name_en": "Al Miny\u0101"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0646 \u0645\u0627\u0632\u0627\u0631",
+                        "name_en": "Ban\u012b Maz\u0101r"
+                    },
+                    {
+                        "name_ar": "\u062f\u0627\u064a\u0631 \u0645\u0627\u0648\u0632",
+                        "name_en": "Dayr Maw\u0101s"
+                    },
+                    {
+                        "name_ar": "\u0645\u0644\u0627\u0648\u064a",
+                        "name_en": "Mallaw\u012b"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u062c\u064a",
+                        "name_en": "Ma\u0163\u0101y"
+                    },
+                    {
+                        "name_ar": "Sam\u0101l\u016b\u0163",
+                        "name_en": "Sam\u0101l\u016b\u0163"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u0648\u0646\u0648\u0641\u064a\u0627",
+                "name_en": "Monufia",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u062c\u0631",
+                        "name_en": "Al B\u0101j\u016br"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0648\u0647\u0627\u062f\u0627",
+                        "name_en": "Ash Shuhad\u0101\u2019"
+                    },
+                    {
+                        "name_ar": "\u0623\u0634\u0645\u064a\u0646",
+                        "name_en": "Ashm\u016bn"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0646\u0641",
+                        "name_en": "Mun\u016bf"
+                    },
+                    {
+                        "name_ar": "Quwaysin\u0101",
+                        "name_en": "Quwaysin\u0101"
+                    },
+                    {
+                        "name_ar": "\u0634\u064a\u0628\u064a\u0646 \u0622\u0644 \u0643\u0648\u0645",
+                        "name_en": "Shib\u012bn al Kawm"
+                    },
+                    {
+                        "name_ar": "\u062a\u0627\u0644\u0627",
+                        "name_en": "Tal\u0101"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0648\u0627\u062f\u064a \u062c\u062f\u064a\u062f",
+                "name_en": "New Valley",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0631\u064a\u0641",
+                        "name_en": "Al Kh\u0101rijah"
+                    },
+                    {
+                        "name_ar": "Qa\u015fr \u0622\u0644 \u0641\u0627\u0631\u0641\u064a\u0631\u0627",
+                        "name_en": "Qa\u015fr al Far\u0101firah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0634\u0645\u0627\u0644 \u0633\u064a\u0646\u0627\u0621",
+                "name_en": "North Sinai",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0631\u064a\u0634",
+                        "name_en": "Arish"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0642\u0627\u0644 \u0628\u0648\u0631\u062a",
+                "name_en": "Port Said",
+                "cities": [
+                    {
+                        "name_ar": "\u0642\u0627\u0644 \u0628\u0648\u0631\u062a",
+                        "name_en": "Port Said"
+                    }
+                ]
+            },
+            {
+                "name_ar": "Qalyubia",
+                "name_en": "Qalyubia",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0646\u062e\u0627",
+                        "name_en": "Al Kh\u0101nkah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0646\u0639\u0629 \u0627\u0644\u062e\u0627\u064a\u0631\u064a\u0647",
+                        "name_en": "Al Qan\u0101\u0163ir al Khayr\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0646\u0647\u0627",
+                        "name_en": "Banh\u0101"
+                    },
+                    {
+                        "name_ar": "Qaly\u016bb",
+                        "name_en": "Qaly\u016bb"
+                    },
+                    {
+                        "name_ar": "\u0634\u064a\u0628\u064a\u0646 \u0627\u0644\u0642\u0646\u0639\u0629",
+                        "name_en": "Shib\u012bn al Qan\u0101\u1e6dir"
+                    },
+                    {
+                        "name_ar": "\u062a\u0648\u062e",
+                        "name_en": "Toukh"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062a\u0634\u064a\u0646\u0627",
+                "name_en": "Qena",
+                "cities": [
+                    {
+                        "name_ar": "dishn\u0101",
+                        "name_en": "Dishn\u0101"
+                    },
+                    {
+                        "name_ar": "\u0641\u0627\u0631\u0634\u0648",
+                        "name_en": "Farsh\u016b\u0163"
+                    },
+                    {
+                        "name_ar": "isn\u0101",
+                        "name_en": "Isn\u0101"
+                    },
+                    {
+                        "name_ar": "\u0643\u0648\u0633\u0627",
+                        "name_en": "Kousa"
+                    },
+                    {
+                        "name_ar": "\u0646\u062c\u0627",
+                        "name_en": "Naja' \u1e24amm\u0101d\u012b"
+                    },
+                    {
+                        "name_ar": "\u062a\u0634\u064a\u0646\u0627",
+                        "name_en": "Qin\u0101"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0628\u062d\u0631 \u0627\u0644\u0623\u062d\u0645\u0631",
+                "name_en": "Red Sea",
+                "cities": [
+                    {
+                        "name_ar": "qu\u015fayr",
+                        "name_en": "Al Qu\u015fayr"
+                    },
+                    {
+                        "name_ar": "\u0625\u0644 \u063a\u0648\u0646\u0627",
+                        "name_en": "El Gouna"
+                    },
+                    {
+                        "name_ar": "\u0647\u0648\u0631\u063a\u0627\u062f\u0627",
+                        "name_en": "Hurghada"
+                    },
+                    {
+                        "name_ar": "\u062e\u0644\u064a\u062c \u0645\u0627\u0643\u0627\u062f\u064a",
+                        "name_en": "Makadi Bay"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0631\u0633\u0627 \u0639\u0644\u0627\u0645",
+                        "name_en": "Marsa Alam"
+                    },
+                    {
+                        "name_ar": "\u0631\u0627\u0633 \u063a\u0627\u0631\u064a\u0628",
+                        "name_en": "Ras Gharib"
+                    },
+                    {
+                        "name_ar": "Safaga",
+                        "name_en": "Safaga"
+                    }
+                ]
+            },
+            {
+                "name_ar": "Sharqia",
+                "name_en": "Sharqia",
+                "cities": [
+                    {
+                        "name_ar": "10 \u0645\u0646 \u0631\u0645\u0636\u0627\u0646",
+                        "name_en": "10th of Ramadan"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0631\u064a\u0646",
+                        "name_en": "Al Qurein"
+                    },
+                    {
+                        "name_ar": "awlad saqr",
+                        "name_en": "Awlad Saqr"
+                    },
+                    {
+                        "name_ar": "bilbeis",
+                        "name_en": "Bilbeis"
+                    },
+                    {
+                        "name_ar": "DIYARB NEGM",
+                        "name_en": "Diyarb Negm"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062d\u0633\u064a\u0646",
+                        "name_en": "El Husseiniya"
+                    },
+                    {
+                        "name_ar": "\u0623\u0631\u0628\u0639\u0629",
+                        "name_en": "Faqous"
+                    },
+                    {
+                        "name_ar": "Hihya",
+                        "name_en": "Hihya"
+                    },
+                    {
+                        "name_ar": "Kafr Saqr",
+                        "name_en": "Kafr Saqr"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0631\u0643\u0627\u0632 \u0623\u0628\u0648",
+                        "name_en": "Markaz Ab\u016b \u1e28amm\u0101d"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0634\u062a\u0648\u0644 \u0633\u0648\u0643",
+                        "name_en": "Mashtoul El Souk"
+                    },
+                    {
+                        "name_ar": "\u0645\u064a\u0646\u0627 \u0627\u0644\u0642\u0627\u0639\u062f\u0629",
+                        "name_en": "Minya El Qamh"
+                    },
+                    {
+                        "name_ar": "\u0646\u064a\u0648 \u0633\u0627\u0644\u0641\u064a\u0627",
+                        "name_en": "New Salhia"
+                    },
+                    {
+                        "name_ar": "\u0632\u0627\u062c\u0627\u0632\u064a\u062c",
+                        "name_en": "Zagazig"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0633\u0648\u0647\u0627\u062c",
+                "name_en": "Sohag",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u062e\u0645",
+                        "name_en": "Akhm\u012bm"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0627\u0644\u064a\u0627\u0646",
+                        "name_en": "Al Balyan\u0101"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0627\u0646\u0634\u0627",
+                        "name_en": "Al Mansh\u0101h"
+                    },
+                    {
+                        "name_ar": "\u062c\u064a\u0631\u062c\u0627",
+                        "name_en": "Jirj\u0101"
+                    },
+                    {
+                        "name_ar": "\u064a\u0648\u0647\u0627\u064a\u0647",
+                        "name_en": "Juhaynah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0631\u0643\u0627\u0632 \u062c\u064a\u0631\u062c\u0627",
+                        "name_en": "Markaz Jirj\u0101"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0631\u0643\u0627\u0632 \u0633\u064a\u0647\u0627\u062c",
+                        "name_en": "Markaz S\u016bh\u0101j"
+                    },
+                    {
+                        "name_ar": "\u0633\u0648\u0647\u0627\u062c",
+                        "name_en": "Sohag"
+                    },
+                    {
+                        "name_ar": "\u0163ah\u0163\u0101",
+                        "name_en": "\u0162ah\u0163\u0101"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062c\u0646\u0648\u0628 \u0633\u064a\u0646\u0627\u0621",
+                "name_en": "South Sinai",
+                "cities": [
+                    {
+                        "name_ar": "\u062f\u0647\u0627\u0628",
+                        "name_en": "Dahab"
+                    },
+                    {
+                        "name_ar": "TOR",
+                        "name_en": "El-Tor"
+                    },
+                    {
+                        "name_ar": "Nuwaybi\u2018a",
+                        "name_en": "Nuwaybi\u2018a"
+                    },
+                    {
+                        "name_ar": "\u0633\u0627\u0646\u062a \u0643\u0627\u062b\u0631\u064a\u0646",
+                        "name_en": "Saint Catherine"
+                    },
+                    {
+                        "name_ar": "\u0634\u0627\u0631\u0645 \u0627\u0644\u0634\u064a\u062e",
+                        "name_en": "Sharm el-Sheikh"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0633\u0648\u064a\u0633",
+                "name_en": "Suez",
+                "cities": [
+                    {
+                        "name_ar": "\u0639\u064a\u0646 \u0633\u0648\u062e\u0646\u0627",
+                        "name_en": "Ain Sukhna"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0633\u0648\u064a\u0633",
+                        "name_en": "Suez"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name_ar": "\u0642\u0637\u0631",
+        "name_en": "Qatar",
+        "iso3": "QAT",
+        "phone_code": "974",
+        "states": [
+            {
+                "name_ar": "\u062f\u0627\u064a\u064a\u0646",
+                "name_en": "Al Daayen",
+                "cities": []
+            },
+            {
+                "name_ar": "\u0627\u0644\u062e\u0648\u0631",
+                "name_en": "Al Khor",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0648\u064a\u0631\u064a\u0647",
+                        "name_en": "Al Ghuwayr\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0648\u0627\u0631",
+                        "name_en": "Al Khawr"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0628\u0644\u062f\u064a\u0629 \u0627\u0644\u0631\u0627\u064a\u0627\u0646",
+                "name_en": "Al Rayyan Municipality",
+                "cities": [
+                    {
+                        "name_ar": "Ar Rayy\u0101n",
+                        "name_en": "Ar Rayy\u0101n"
+                    },
+                    {
+                        "name_ar": "\u0623\u0645 \u0628\u0627\u0628",
+                        "name_en": "Umm B\u0101b"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0648\u0627\u0643\u0631\u0627",
+                "name_en": "Al Wakrah",
+                "cities": [
+                    {
+                        "name_ar": "\u0648\u0627\u0643\u0631\u0627",
+                        "name_en": "Al Wakrah"
+                    },
+                    {
+                        "name_ar": "\u0648\u0648\u0643\u0627\u064a\u0631",
+                        "name_en": "Al Wukayr"
+                    },
+                    {
+                        "name_ar": "Musay\u2018\u012bd",
+                        "name_en": "Musay\u2018\u012bd"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0634\u0627\u0647\u0627\u0646\u064a\u0629",
+                "name_en": "Al-Shahaniya",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0627\u0645\u0627\u064a\u0627",
+                        "name_en": "Al Jumayl\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f sh\u012b\u1e29an\u012byah",
+                        "name_en": "Ash Sh\u012b\u1e29\u0101n\u012byah"
+                    },
+                    {
+                        "name_ar": "\u062f\u0648\u062e\u0627\u0646",
+                        "name_en": "Dukh\u0101n"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u062f\u0648\u062d\u0629",
+                "name_en": "Doha",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u062f\u0648\u062d\u0629",
+                        "name_en": "Doha"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u064a\u0646\u0627\u062a \u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0627\u0645\u0627\u0644",
+                "name_en": "Madinat ash Shamal",
+                "cities": [
+                    {
+                        "name_ar": "ar raways",
+                        "name_en": "Ar Ruways"
+                    },
+                    {
+                        "name_ar": "Fuwayri\u0163",
+                        "name_en": "Fuwayri\u0163"
+                    },
+                    {
+                        "name_ar": "Mad\u012bnat Ash Sham\u0101l",
+                        "name_en": "Mad\u012bnat ash Sham\u0101l"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0628\u0644\u062f\u064a\u0629 \u0623\u0645 \u0633\u0627\u0644\u0627\u0644",
+                "name_en": "Umm Salal Municipality",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0645 \u0634\u0627\u0644\u0627\u0644 \u0645\u062d\u0645\u062f",
+                        "name_en": "Umm \u015eal\u0101l Mu\u1e29ammad"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name_ar": "\u0627\u0644\u0645\u0645\u0644\u0643\u0629 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0629",
+        "name_en": "Saudi Arabia",
+        "iso3": "SAU",
+        "phone_code": "966",
+        "states": [
+            {
+                "name_ar": "\u0639\u0633\u064a\u0631",
+                "name_en": "'Asir",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0647\u0627",
+                        "name_en": "Abha"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u064a\u0631\u064a\u062f\u0627",
+                        "name_en": "Al Maj\u0101ridah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0639\u062f\u0629",
+                        "name_en": "Al Qahab"
+                    },
+                    {
+                        "name_ar": "\u062e\u0627\u0645\u064a\u0633 \u0645\u0648\u0634\u064a\u062a",
+                        "name_en": "Khamis Mushait"
+                    },
+                    {
+                        "name_ar": "ma`riyah",
+                        "name_en": "Ma`riyah"
+                    },
+                    {
+                        "name_ar": "mifa",
+                        "name_en": "Mifa"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0646\u0627\u064a\u0632\u064a\u0631",
+                        "name_en": "Munayzir"
+                    },
+                    {
+                        "name_ar": "Tab\u0101lah",
+                        "name_en": "Tab\u0101lah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0628\u0647\u0647",
+                "name_en": "Al Bahah",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0647\u0647",
+                        "name_en": "Al Bahah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u064a\u0646\u062a\u0627\u0643",
+                        "name_en": "Al Mindak"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062d\u0627\u062c",
+                        "name_en": "Hajrah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0641\u0643",
+                "name_en": "Al Jawf",
+                "cities": [
+                    {
+                        "name_ar": "Isawiyah",
+                        "name_en": "Al Isawiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u062f\u064a\u062b\u0627",
+                        "name_en": "Al-Haditha"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u0644\u0627\u062a \u0639\u0645\u0627\u0631",
+                        "name_en": "Halat Ammar"
+                    },
+                    {
+                        "name_ar": "\u0642\u064a\u0631\u0627\u064a\u0627",
+                        "name_en": "Qurayyat"
+                    },
+                    {
+                        "name_ar": "\u0633\u0627\u0643\u0627\u0643\u0627",
+                        "name_en": "Sakakah"
+                    },
+                    {
+                        "name_ar": "\u015fuwayr",
+                        "name_en": "\u015euwayr"
+                    },
+                    {
+                        "name_ar": "\u062a\u0627\u0628\u0627\u0631\u062c\u0627\u0644",
+                        "name_en": "Tabarjal"
+                    },
+                    {
+                        "name_ar": "\u0163ubarjal",
+                        "name_en": "\u0162ubarjal"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0645\u0646\u0648\u0631\u0629",
+                "name_en": "Al Madinah",
+                "cities": [
+                    {
+                        "name_ar": "`ajmiyah",
+                        "name_en": "`Ajmiyah"
+                    },
+                    {
+                        "name_ar": "\"\u0639\u0644\u064a\u0627\"",
+                        "name_en": "`Alya'"
+                    },
+                    {
+                        "name_ar": "`Ushash",
+                        "name_en": "`Ushash"
+                    },
+                    {
+                        "name_ar": "`sthayrah",
+                        "name_en": "`Ushayrah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u064a \u0634\u0627\u064a\u0646\u0627",
+                        "name_en": "Ab\u016b Shay\u0163\u0101nah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u064a\u0627\u0631 \u0639\u0644\u064a",
+                        "name_en": "Abyar 'Ali"
+                    },
+                    {
+                        "name_ar": "\u0625\u0639\u0644\u0627\u0646 dulu`",
+                        "name_en": "Ad Dulu`"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0623\u0648\u0627\u0644\u064a",
+                        "name_en": "Al `Awali"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0648\u0644",
+                        "name_en": "Al `Uqul"
+                    },
+                    {
+                        "name_ar": "\u0623\u062e\u0627\u0644",
+                        "name_en": "Al Akhal"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0631\u062f\u064a\u0647",
+                        "name_en": "Al Bardiyah"
+                    },
+                    {
+                        "name_ar": "Al Biqa '",
+                        "name_en": "Al Biqa'"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0633\u062a\u0627\u0646",
+                        "name_en": "Al Bustan"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0641\u0642\u064a\u0631\u0629",
+                        "name_en": "Al Faqirah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0641\u0648\u0631\u064a\u0634",
+                        "name_en": "Al Furaysh"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0628\u0631\u064a\u0629",
+                        "name_en": "Al Jabriyah"
+                    },
+                    {
+                        "name_ar": "\u062c\u064a\u0633\u0627",
+                        "name_en": "Al Jissah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0627\u0631\u0645\u0627",
+                        "name_en": "Al Kharma'"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0644\u062c\u0627\u0646",
+                        "name_en": "Al Malbanah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0641\u0631\u064a\u062a",
+                        "name_en": "Al Mufrihat"
+                    },
+                    {
+                        "name_ar": "al multasa",
+                        "name_en": "Al Multasa"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0648\u0633\u064a\u062c\u062f",
+                        "name_en": "Al Musayjid"
+                    },
+                    {
+                        "name_ar": "\u0648\u062f\u0627\u064a",
+                        "name_en": "Al Wuday"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0641\u0631",
+                        "name_en": "Al-Jafr"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0623\u0648\u0644\u0627",
+                        "name_en": "Al-Ula"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 Sadayir",
+                        "name_en": "As Sadayir"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 Safra",
+                        "name_en": "As Safra'"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0633\u0648\u0645\u0631\u064a\u0627",
+                        "name_en": "As Sumariyah"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 suwayriqiyah",
+                        "name_en": "As Suwayriqiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0648\u0641\u064a\u0647",
+                        "name_en": "Ash Shufayyah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0633\u064a\u0631\u0627",
+                        "name_en": "Asira"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0643",
+                        "name_en": "Baq`a'"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0631\u062a\u064a\u0647",
+                        "name_en": "Bartiyah"
+                    },
+                    {
+                        "name_ar": "Bi'r \u0622\u0644 \u0645\u0627\u0634\u064a",
+                        "name_en": "Bi'r al Mashi"
+                    },
+                    {
+                        "name_ar": "\u0628\u064a\u0631\u0643\u0627",
+                        "name_en": "Birkah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0639\u064a\u062f",
+                        "name_en": "Far`"
+                    },
+                    {
+                        "name_ar": "\u0641\u064a\u062c\u064a",
+                        "name_en": "Fiji"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u0631\u062b\u064a\u0627",
+                        "name_en": "Harthiyah"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u064a\u0644\u0627\u062a \u0631\u0627\u062f\u064a\u0648 \u0627\u0644\u0628\u0647\u0627\u0645\u0627",
+                        "name_en": "Haylat Radi al Baham"
+                    },
+                    {
+                        "name_ar": "\u062d\u062b\u064a\u0629",
+                        "name_en": "Husayniyah"
+                    },
+                    {
+                        "name_ar": "\u062c\u0627\u062f\u064a\u062f\u0627",
+                        "name_en": "Jadidah"
+                    },
+                    {
+                        "name_ar": "\u062e\u0627\u064a\u0641 \u0641\u0627\u0636\u0644",
+                        "name_en": "Khayf Fadil"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u062f\u0633\u0648\u0633",
+                        "name_en": "Madsus"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0647\u0627\u062a\u0627\u062a \u0627\u0644\u062d\u0641\u0647",
+                        "name_en": "Mahattat al Hafah"
+                    },
+                    {
+                        "name_ar": "\u0642\u0635\u0631\u0647",
+                        "name_en": "Maqrah"
+                    },
+                    {
+                        "name_ar": "Maqshush",
+                        "name_en": "Maqshush"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0633\u0627\u0647\u064a\u0644\u064a",
+                        "name_en": "Masahili"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0627\u0631\u0627",
+                        "name_en": "Mawarah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0645\u0646\u0648\u0631\u0629",
+                        "name_en": "Medina"
+                    },
+                    {
+                        "name_ar": "\u0645\u064a\u0644\u0647\u0627\u0647",
+                        "name_en": "Milhah"
+                    },
+                    {
+                        "name_ar": "Nujayl",
+                        "name_en": "Nujayl"
+                    },
+                    {
+                        "name_ar": "\u0642\u0627\u0628\u0627",
+                        "name_en": "Qaba'"
+                    },
+                    {
+                        "name_ar": "\u0631\u0627\u064a\u0633",
+                        "name_en": "Rayyis"
+                    },
+                    {
+                        "name_ar": "\u0634\u0627",
+                        "name_en": "Sha`tha'"
+                    },
+                    {
+                        "name_ar": "\u0633\u064a\u062f\u064a \u062d\u0645\u0632\u0629",
+                        "name_en": "Sidi Hamzah"
+                    },
+                    {
+                        "name_ar": "SUQ Suwayq",
+                        "name_en": "Suq Suwayq"
+                    },
+                    {
+                        "name_ar": "Suqubiya",
+                        "name_en": "Suqubiya"
+                    },
+                    {
+                        "name_ar": "\u0633\u0648\u0627\u062f\u0627",
+                        "name_en": "Suwadah"
+                    },
+                    {
+                        "name_ar": "\u0648\u0627\u0633\u064a\u062a",
+                        "name_en": "Wasitah"
+                    },
+                    {
+                        "name_ar": "\u064a\u0627\u0646\u0628\u0648",
+                        "name_en": "Yanbu"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0642\u0627\u0633\u0645",
+                "name_en": "Al-Qassim",
+                "cities": [
+                    {
+                        "name_ar": "adh dhibiyah",
+                        "name_en": "Adh Dhibiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0648\u0643\u064a\u0631\u064a\u0647",
+                        "name_en": "Al Bukayr\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0641\u0648\u0648\u064a\u0644\u064a\u0643",
+                        "name_en": "Al Fuwayliq"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u064a\u062b\u0646\u0627\u0628",
+                        "name_en": "Al Mithnab"
+                    },
+                    {
+                        "name_ar": "\u062b\u064a\u0628\u064a\u0627",
+                        "name_en": "Al Thybiyah"
+                    },
+                    {
+                        "name_ar": "ar \u0631\u0627\u0633",
+                        "name_en": "Ar Rass"
+                    },
+                    {
+                        "name_ar": "\u0628\u0648\u0631\u062f\u0629",
+                        "name_en": "Buraidah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0648\u0631\u0627\u064a\u062f\u0627",
+                        "name_en": "Buraydah"
+                    },
+                    {
+                        "name_ar": "dukhnah",
+                        "name_en": "Dukhnah"
+                    },
+                    {
+                        "name_ar": "qiba",
+                        "name_en": "Qiba"
+                    },
+                    {
+                        "name_ar": "\u062a\u0627\u0646\u0648\u0645\u0627",
+                        "name_en": "Tan\u016bmah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0623\u0631\u0628\u0639\u0627\u0621 \u0623\u0644\u0646\u0643\u064a\u0644",
+                        "name_en": "Wed Alnkil"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0645\u0642\u0627\u0637\u0639\u0629 \u0627\u0644\u0634\u0631\u0642\u064a\u0629",
+                "name_en": "Eastern Province",
+                "cities": [
+                    {
+                        "name_ar": "ABQAIQ",
+                        "name_en": "Abqaiq"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0639\u062c\u0645\u0629",
+                        "name_en": "Al Awj\u0101m"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0631\u0627\u0644\u064a\u0647",
+                        "name_en": "Al Ba\u0163\u0163\u0101l\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u0641\u0648\u0641",
+                        "name_en": "Al Huf\u016bf"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0641\u0631",
+                        "name_en": "Al Jafr"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0648\u0644",
+                        "name_en": "Al Jubayl"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0644\u0641",
+                        "name_en": "Al Khafj\u012b"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0631\u0643\u0627\u0632",
+                        "name_en": "Al Markaz"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0648\u0628\u0631\u0627\u0632",
+                        "name_en": "Al Mubarraz"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0648\u0646\u0632\u064a\u0644\u0627",
+                        "name_en": "Al Munayzilah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u064a\u0631\u064a\u0641\u064a",
+                        "name_en": "Al Mu\u0163ayrif\u012b"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0631\u0629",
+                        "name_en": "Al Q\u0101rah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0639\u062f\u0629",
+                        "name_en": "Al Qa\u0163\u012bf"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u064a\u0631\u0627\u064a\u0646",
+                        "name_en": "Al Qurayn"
+                    },
+                    {
+                        "name_ar": "\u0623\u0648\u0644\u0627\u0621",
+                        "name_en": "Al Ubaylah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0639\u0648\u0627\u0645\u064a\u0647",
+                        "name_en": "Al-Awamiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0639\u062c\u0627\u0645",
+                        "name_en": "Al-Awjam"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0648\u0628\u0631\u0627\u0632",
+                        "name_en": "Al-Mubarraz"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 saff\u0101n\u012byah",
+                        "name_en": "As Saff\u0101n\u012byah"
+                    },
+                    {
+                        "name_ar": "a \u0163araf",
+                        "name_en": "A\u0163 \u0162araf"
+                    },
+                    {
+                        "name_ar": "\u0641\u064a T\u016bb\u012b",
+                        "name_en": "At T\u016bb\u012b"
+                    },
+                    {
+                        "name_ar": "\u062f\u0627\u0645\u0627\u0645",
+                        "name_en": "Dammam"
+                    },
+                    {
+                        "name_ar": "\u0638\u0647\u0631\u0627\u0646",
+                        "name_en": "Dhahran"
+                    },
+                    {
+                        "name_ar": "\u064a\u0634\u064a\u062f",
+                        "name_en": "Ha'il "
+                    },
+                    {
+                        "name_ar": "\u062d\u0641\u0631 \u0628\u0627\u062a\u064a\u0646",
+                        "name_en": "Hafar Al-Batin"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u0631\u0627\u062f",
+                        "name_en": "Haradh"
+                    },
+                    {
+                        "name_ar": "\u062c\u0648\u0644\u0627\u064a\u064a\u0644\u0627",
+                        "name_en": "Julayjilah"
+                    },
+                    {
+                        "name_ar": "\u062e\u0648\u0628\u0627\u0631",
+                        "name_en": "Khobar"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0644\u064a\u062e\u0627",
+                        "name_en": "Mulayjah"
+                    },
+                    {
+                        "name_ar": "\u0646\u0627\u0631\u064a\u0627",
+                        "name_en": "Nariyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u064a\u0633\u0648\u0645\u0627",
+                        "name_en": "Qaisumah"
+                    },
+                    {
+                        "name_ar": "ra\u1e29\u012bmah",
+                        "name_en": "Ra\u1e29\u012bmah"
+                    },
+                    {
+                        "name_ar": "\u015fafw\u00e1",
+                        "name_en": "\u015eafw\u00e1"
+                    },
+                    {
+                        "name_ar": "\u0633\u0647\u0649",
+                        "name_en": "Sayh\u0101t"
+                    },
+                    {
+                        "name_ar": "\u062a\u0627\u0631",
+                        "name_en": "T\u0101r\u016bt"
+                    },
+                    {
+                        "name_ar": "udhailiyah",
+                        "name_en": "Udhailiyah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0645 \u0643\u0645\u0627 \u0633\u0647\u064a\u0643",
+                        "name_en": "Umm as S\u0101hik"
+                    },
+                    {
+                        "name_ar": "uqair",
+                        "name_en": "Uqair"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u064a\u0634\u064a\u062f",
+                "name_en": "Ha'il",
+                "cities": [
+                    {
+                        "name_ar": "\u062c\u0628\u0629",
+                        "name_en": "Jubbah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0627\u0642",
+                        "name_en": "Mawqaq"
+                    },
+                    {
+                        "name_ar": "\u0642\u0641\u0627\u0631",
+                        "name_en": "Qufar"
+                    },
+                    {
+                        "name_ar": "\u0633\u064a\u0645\u064a\u0631\u0627",
+                        "name_en": "Simira"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062c\u064a\u0632\u0627\u0646",
+                "name_en": "Jizan",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0623\u0631\u064a\u0634",
+                        "name_en": "Ab\u016b \u2018Ar\u012bsh"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0631\u0627\u062f\u0648\u0641",
+                        "name_en": "Abu Radif"
+                    },
+                    {
+                        "name_ar": "AD DARB",
+                        "name_en": "Ad Darb"
+                    },
+                    {
+                        "name_ar": "AD Dur`iyah",
+                        "name_en": "Ad Dur`iyah"
+                    },
+                    {
+                        "name_ar": "adh dhagharir",
+                        "name_en": "Adh Dhagharir"
+                    },
+                    {
+                        "name_ar": "\u0623\u0648\u0644\u0627\u064a\u064a\u0646",
+                        "name_en": "Al `Ulayin"
+                    },
+                    {
+                        "name_ar": "al `usaylah",
+                        "name_en": "Al `Usaylah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u062f\u0648\u064a",
+                        "name_en": "Al Badawi"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0647\u0627\u062f\u0631\u0648\u0631",
+                        "name_en": "Al Hadrur"
+                    },
+                    {
+                        "name_ar": "\u062d\u0646\u0627\u0634\u0647",
+                        "name_en": "Al Hanashah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u0627\u0631\u0627\u0646\u064a",
+                        "name_en": "Al Harani"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u0633\u0627\u0645\u0627",
+                        "name_en": "Al Hasamah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u062c\u0641\u0631",
+                        "name_en": "Al Hijfar"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0627\u062f\u064a",
+                        "name_en": "Al Jadi"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0631\u0627\u062f",
+                        "name_en": "Al Jar\u0101d\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0627\u0648\u064a\u0629",
+                        "name_en": "Al Jawah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u064a\u0631\u0628\u0629",
+                        "name_en": "Al Jirbah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0643\u0627\u0631\u0628\u0648\u0633",
+                        "name_en": "Al Karbus"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0643\u0648\u0627\u0647\u064a\u0644\u0647",
+                        "name_en": "Al Kawahilah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0627\u062f\u0631\u0627 \u062c\u064a\u0632\u0627\u0646",
+                        "name_en": "Al Khadra' Jizan"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0637\u0627\u0628\u0627 \u062c\u064a\u0632\u0627\u0646",
+                        "name_en": "Al Kharabah Jizan"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0631\u0627\u062f\u064a\u0629",
+                        "name_en": "Al Kharadilah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0637\u064a\u0629",
+                        "name_en": "Al Khashabiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0628\u0629",
+                        "name_en": "Al Khubah"
+                    },
+                    {
+                        "name_ar": "\u0643\u064a\u0631\u0632",
+                        "name_en": "Al Kirs"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0644\u0642\u064a\u0629",
+                        "name_en": "Al Luqiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0639\u0627\u064a\u064a\u0646",
+                        "name_en": "Al Ma`ayin"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0627\u0627\u064a\u0627",
+                        "name_en": "Al Madaya"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0627\u0644\u064a",
+                        "name_en": "Al Mali"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0627\u064a\u0627",
+                        "name_en": "Al Mayasam"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0639\u062f\u0629",
+                        "name_en": "Al Qa'im"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0648\u064a",
+                        "name_en": "Al Quful"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0631\u0628",
+                        "name_en": "Al Qurayb"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0648\u0629",
+                        "name_en": "Al Quwah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0648\u0633\u064a\u0644\u064a",
+                        "name_en": "Al Wasili"
+                    },
+                    {
+                        "name_ar": "\u0646\u062c\u0645\u064a\u0627",
+                        "name_en": "An Najamiyah"
+                    },
+                    {
+                        "name_ar": "Ar Rukubah",
+                        "name_en": "Ar Rukubah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0648\u0643\u0627\u064a\u0643",
+                        "name_en": "Ash Shuqayq"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u062e\u0634\u0627\u062a \u064a\u0627\u0645\u0627\u0646\u064a",
+                        "name_en": "Bakhshat Yamani"
+                    },
+                    {
+                        "name_ar": "\u0641\u0627\u0631\u0627\u0633\u0627\u0646",
+                        "name_en": "Faras\u0101n"
+                    },
+                    {
+                        "name_ar": "\u063a\u0627\u0648\u064a\u0629",
+                        "name_en": "Ghawiyah"
+                    },
+                    {
+                        "name_ar": "\u062d\u0627\u064a\u0627",
+                        "name_en": "Hamayyah"
+                    },
+                    {
+                        "name_ar": "\u062d\u0645\u062f\u0629",
+                        "name_en": "Hamdah"
+                    },
+                    {
+                        "name_ar": "\u062c\u064a\u0632\u0627\u0646",
+                        "name_en": "Jizan"
+                    },
+                    {
+                        "name_ar": "\u062c\u0648\u0647\u0627 \u0627\u0644\u0633\u0639\u0648\u062f\u064a\u0629",
+                        "name_en": "Juha Saudi Arabia"
+                    },
+                    {
+                        "name_ar": "\u0643\u0627\u0648\u0644\u0648\u0644",
+                        "name_en": "Ka`lul"
+                    },
+                    {
+                        "name_ar": "\u062e\u0628\u0629 \u0633\u0639\u064a\u062f",
+                        "name_en": "Khabath Sa`id"
+                    },
+                    {
+                        "name_ar": "\u062e\u0644\u0641\u0647",
+                        "name_en": "Khalfah"
+                    },
+                    {
+                        "name_ar": "\u062e\u064a\u0637\u064a\u0628 \u0627\u0644\u0633\u0639\u0648\u062f\u064a",
+                        "name_en": "Khatib Saudi Arabia"
+                    },
+                    {
+                        "name_ar": "Khumsiyah",
+                        "name_en": "Khumsiyah"
+                    },
+                    {
+                        "name_ar": "\u062e\u0648\u0634\u0627\u064a\u0645",
+                        "name_en": "Khushaym"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0647\u0627\u062a\u0647",
+                        "name_en": "Mahatah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0644\u063a\u0648\u0643\u062a\u0627",
+                        "name_en": "Malgocta"
+                    },
+                    {
+                        "name_ar": "\u0645\u064a\u0633\u0644\u064a\u0647",
+                        "name_en": "Misl\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062d\u0636\u0631\u064a\u0629",
+                        "name_en": "Mizhirah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0643\u0627\u0645\u0628\u0627\u0644",
+                        "name_en": "Mukambal"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0646\u062f\u0627\u0627\u0643",
+                        "name_en": "Mundaraq"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0627\u0633\u0627\u0645",
+                        "name_en": "Muwassam"
+                    },
+                    {
+                        "name_ar": "Qitabir",
+                        "name_en": "Qitabir"
+                    },
+                    {
+                        "name_ar": "Quwayda '",
+                        "name_en": "Quwayda'"
+                    },
+                    {
+                        "name_ar": "\u0631\u0627\u0647\u0648\u0627\u0646",
+                        "name_en": "Rahwan"
+                    },
+                    {
+                        "name_ar": "\u0631\u0648\u062e\u0627\u0647",
+                        "name_en": "Rawkhah"
+                    },
+                    {
+                        "name_ar": "\u015faby\u0101",
+                        "name_en": "\u015eaby\u0101"
+                    },
+                    {
+                        "name_ar": "\u0635\u062f\u064a\u0644\u064a\u0629",
+                        "name_en": "Sadiliyah"
+                    },
+                    {
+                        "name_ar": "\u0633\u0644\u0627\u0645\u0647",
+                        "name_en": "Salamah"
+                    },
+                    {
+                        "name_ar": "\u015f\u0101mitah",
+                        "name_en": "\u015e\u0101mitah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0645\u0643\u0629",
+                "name_en": "Makkah",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0623\u0648\u0631\u0648\u0627\u0647",
+                        "name_en": "Abu `Urwah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0647\u064a\u0633\u0627\u0646\u064a",
+                        "name_en": "Abu Hisani"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0642\u064a\u0631\u0641\u0647",
+                        "name_en": "Abu Qirfah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0628\u0648 \u0634\u0648\u064a\u0628",
+                        "name_en": "Abu Shu`ayb"
+                    },
+                    {
+                        "name_ar": "\u0625\u0639\u0644\u0627\u0646 \u062f\u0627\u0628\u0627\u0647",
+                        "name_en": "Ad Dabbah"
+                    },
+                    {
+                        "name_ar": "\u062f\u0627\u0647",
+                        "name_en": "Ad Dawh"
+                    },
+                    {
+                        "name_ar": "\u0645",
+                        "name_en": "Ad Dur"
+                    },
+                    {
+                        "name_ar": "\u0622\u0631",
+                        "name_en": "Al \u0100b\u0101r"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644",
+                        "name_en": "Al Adl"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0623\u0634\u0631\u0641",
+                        "name_en": "Al Ashraf"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u062f\u0627\u062f",
+                        "name_en": "Al Balad"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0627\u0631\u0627\u0628\u064a\u0631",
+                        "name_en": "Al Barabir"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0628\u064a\u0627\u0631",
+                        "name_en": "Al Bi'ar"
+                    },
+                    {
+                        "name_ar": "\u0628\u064a\u0631\u0643",
+                        "name_en": "Al Birk"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0628\u0631\u0627\u064a\u062e\u0627",
+                        "name_en": "Al Buraykah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0641\u0648\u0627\u0631\u0627",
+                        "name_en": "Al Fawwarah"
+                    },
+                    {
+                        "name_ar": "\u0641\u0627\u064a\u062f\u0627",
+                        "name_en": "Al Faydah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0641\u0627\u0632",
+                        "name_en": "Al Fazz"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u063a\u0627\u0631\u064a\u062b",
+                        "name_en": "Al Gharith"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0633\u0627\u0644\u0627",
+                        "name_en": "Al Ghassalah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u063a\u0648\u0644\u0627",
+                        "name_en": "Al Ghulah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u0627",
+                        "name_en": "Al Had\u0101"
+                    },
+                    {
+                        "name_ar": "\u0623\u0644\u0627\u0642\u0627\u0647",
+                        "name_en": "Al Halaqah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062d\u0645\u064a\u0645\u0629",
+                        "name_en": "Al Hamimah"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u0631\u0627 \u0645\u0643\u0629",
+                        "name_en": "Al Harra' Makkah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0647\u064a\u0646\u064a\u0647",
+                        "name_en": "Al Hawiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u064a\u0633\u0643\u0627\u0646",
+                        "name_en": "Al Iskan"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0627\u062f\u0627",
+                        "name_en": "Al Jadidah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0627\u0645\u064a\u0647",
+                        "name_en": "Al Jami`ah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u062c\u064a\u062f",
+                        "name_en": "Al Jid`"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0648\u0627\u0631\u0627\u0646\u0627",
+                        "name_en": "Al Ju`ranah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0648\u0645",
+                        "name_en": "Al Jum\u016bm"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0627\u062f\u0631\u0627 \u0645\u0643\u0629",
+                        "name_en": "Al Khadra' Makkah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0627\u0644\u0627\u0633",
+                        "name_en": "Al Khalas"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0645\u0648\u0645",
+                        "name_en": "Al Khamrah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0627\u064a\u062f\u0627\u0631",
+                        "name_en": "Al Khaydar"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u064a\u0641",
+                        "name_en": "Al Khayf"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0648\u0644\u0627\u0633\u0627\u0647",
+                        "name_en": "Al Khulasah"
+                    },
+                    {
+                        "name_ar": "al Kidwah",
+                        "name_en": "Al Kidwah"
+                    },
+                    {
+                        "name_ar": "\u0643\u0648\u0631\u0629",
+                        "name_en": "Al Kura`"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0631\u0627\u0634",
+                        "name_en": "Al Ma`rash"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u064a\u0643 \u0645\u0643\u0629",
+                        "name_en": "Al Madiq Makkah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u062c\u0647\u0627\u0644",
+                        "name_en": "Al Maghal"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u062d\u062c\u0631",
+                        "name_en": "Al Mahjar"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0631\u0641",
+                        "name_en": "Al Maqrah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0632\u0631\u0647",
+                        "name_en": "Al Masarrah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0627\u0633\u0641\u0627\u0644\u0627",
+                        "name_en": "Al Masfalah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0627\u0634\u0627\u064a\u062e",
+                        "name_en": "Al Mashayikh"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0645\u0627\u062b\u0646\u0627",
+                        "name_en": "Al Mathnah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0648\u0628\u0627\u0631\u0643",
+                        "name_en": "Al Mubarak"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0648\u062f\u0648\u0631\u0629",
+                        "name_en": "Al Mudawwarah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0648\u0644\u0627\u064a\u0647\u0627",
+                        "name_en": "Al Mulayha'"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0646\u062f\u0627\u0633\u0627",
+                        "name_en": "Al Mundassah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u0643\u0627\u064a\u062a\u064a",
+                        "name_en": "Al Muqayti`"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0635\u0631",
+                        "name_en": "Al Muqr"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0645\u064a\u0648\u0627\u064a",
+                        "name_en": "Al Muwayh"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u062f\u064a\u0645\u0647",
+                        "name_en": "Al Qadimah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0627\u0631\u0631\u0629",
+                        "name_en": "Al Qararah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0631\u0629",
+                        "name_en": "Al Qaryat"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0628\u0628\u064a\u0629",
+                        "name_en": "Al Qawba`iyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u064a\u0631\u0634\u0627\u0646",
+                        "name_en": "Al Qirshan"
+                    },
+                    {
+                        "name_ar": "qustubah",
+                        "name_en": "Al Qu`tubah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0641\u0627\u064a\u0641",
+                        "name_en": "Al Qufayf"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0642\u0634\u0627\u0634\u064a",
+                        "name_en": "Al Qushashiyah"
+                    },
+                    {
+                        "name_ar": "\u0623\u0644\u0643\u064a\u062f\u064a\u0631",
+                        "name_en": "Al Ukhaydir"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644",
+                        "name_en": "Al Waht"
+                    },
+                    {
+                        "name_ar": "ar rabwah \u0643\u0645\u0627 sufla",
+                        "name_en": "Ar Rabwah as Sufla"
+                    },
+                    {
+                        "name_ar": "ar \u0631\u0641\u0647",
+                        "name_en": "Ar Rafah"
+                    },
+                    {
+                        "name_ar": "Ar Rawdah Ash Shamaliyah",
+                        "name_en": "Ar Rawdah ash Shamaliyah"
+                    },
+                    {
+                        "name_ar": "Ar Rudaymah",
+                        "name_en": "Ar Rudaymah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0631\u064a\u0627",
+                        "name_en": "Arya`"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0635\u062f\u0631",
+                        "name_en": "As Sadr"
+                    },
+                    {
+                        "name_ar": "\u0645\u062b\u0644 \u0633\u0627\u0645 \u0622\u0634 \u0634\u0627\u0645\u0627\u0644\u064a",
+                        "name_en": "As Samd ash Shamali"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0633\u064a\u0644 \u0622\u0644 \u0643\u0628\u064a\u0631",
+                        "name_en": "As Sayl al Kabir"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 Sayl \u0645\u062b\u0644 Saghir",
+                        "name_en": "As Sayl as Saghir"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0633\u0641\u064a\u0627\u0646\u064a",
+                        "name_en": "As Sifyani"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 sudayrah makkah",
+                        "name_en": "As Sudayrah Makkah"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0633\u0648\u0627\u062f\u0627",
+                        "name_en": "As Suwadah"
+                    },
+                    {
+                        "name_ar": "\u0631\u0645\u0627\u062f \u0634\u0627\u0641\u064a\u0627",
+                        "name_en": "Ash Shaf\u0101"
+                    },
+                    {
+                        "name_ar": "\u0622\u0634 \u0634\u0627\u062c\u0648\u0627\u0647",
+                        "name_en": "Ash Shajwah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0627\u0645\u064a\u0647",
+                        "name_en": "Ash Shamiyah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0627\u0631\u0627\u064a",
+                        "name_en": "Ash Shara'i`"
+                    },
+                    {
+                        "name_ar": "\u0631\u0645\u0627\u062f \u0634\u0627\u064a\u0628\u064a",
+                        "name_en": "Ash Shaybi"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u064a",
+                        "name_en": "Ash Shi`b"
+                    },
+                    {
+                        "name_ar": "\u0631\u0645\u0627\u062f \u0634\u064a\u0634\u0647",
+                        "name_en": "Ash Shishah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0648\u0645\u064a\u0633\u064a",
+                        "name_en": "Ash Shumaysi"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0648\u0627\u064a\u0628\u064a\u062a",
+                        "name_en": "Ash Shuwaybit"
+                    },
+                    {
+                        "name_ar": "\u0641\u064a \u062a\u0627\u0646",
+                        "name_en": "At Tan`im"
+                    },
+                    {
+                        "name_ar": "\u0641\u064a \u0637\u0631\u0641\u0627",
+                        "name_en": "At Tarfa'"
+                    },
+                    {
+                        "name_ar": "\u0641\u064a Turqi",
+                        "name_en": "At Turqi"
+                    },
+                    {
+                        "name_ar": "AZ ZAYMAH",
+                        "name_en": "Az Zaymah"
+                    },
+                    {
+                        "name_ar": "AZ Zilal",
+                        "name_en": "Az Zilal"
+                    },
+                    {
+                        "name_ar": "\u0623\u0648\u064a\u0632 \u0632\u063a\u0628\u0629",
+                        "name_en": "Az Zughbah"
+                    },
+                    {
+                        "name_ar": "AZ Zurra`",
+                        "name_en": "Az Zurra`"
+                    },
+                    {
+                        "name_ar": "AZ Zuwayb",
+                        "name_en": "Az Zuwayb"
+                    },
+                    {
+                        "name_ar": "\u0628\u062d\u0631\u0627\u062a \u0627\u0644\u0642\u062f\u064a\u0645\u0647",
+                        "name_en": "Bahrat al Qadimah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0647\u0648\u064a\u0644",
+                        "name_en": "Bahwil"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0631\u0627\u0646\u0627",
+                        "name_en": "Baranah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0631\u0632\u0627",
+                        "name_en": "Barzah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0627\u0634\u0645",
+                        "name_en": "Bashm"
+                    },
+                    {
+                        "name_ar": "\u0628\u0648\u0631\u0627\u064a\u062e\u0627",
+                        "name_en": "Buraykah"
+                    },
+                    {
+                        "name_ar": "\u0628\u0648\u0631\u0627\u064a\u0645\u0627\u0646",
+                        "name_en": "Burayman"
+                    },
+                    {
+                        "name_ar": "\u0645\u062f\u064a\u0646\u0629 \u0647\u0631\u0627\u0646",
+                        "name_en": "CITY GHRAN"
+                    },
+                    {
+                        "name_ar": "dabyah",
+                        "name_en": "Dabyah"
+                    },
+                    {
+                        "name_ar": "\u062f\u0647\u0627\u0628\u0627\u0646",
+                        "name_en": "Dahaban"
+                    },
+                    {
+                        "name_ar": "dughaybjah",
+                        "name_en": "Dughaybjah"
+                    },
+                    {
+                        "name_ar": "\u0641\u0627\u064a\u062f",
+                        "name_en": "Fayd"
+                    },
+                    {
+                        "name_ar": "\u0647\u0631\u0627\u0646",
+                        "name_en": "Ghran"
+                    },
+                    {
+                        "name_ar": "\u062d\u062f\u0627",
+                        "name_en": "Hadda'"
+                    },
+                    {
+                        "name_ar": "\u062d\u0628\u0627\u062a \u0627\u0644\u0631\u0645\u0627\u062f \u0634\u0627\u0645",
+                        "name_en": "Haddat ash Sham"
+                    },
+                    {
+                        "name_ar": "\u062d\u0636\u0627\u0646\u0629",
+                        "name_en": "Hadhah"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u062c\u0648\u0631",
+                        "name_en": "Hajur"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062d\u0644\u0627\u0645",
+                        "name_en": "Halamah"
+                    },
+                    {
+                        "name_ar": "\u062d\u0633\u064a\u0646",
+                        "name_en": "Husnah"
+                    },
+                    {
+                        "name_ar": "\u062c\u0627\u0631\u0648\u0627\u0644",
+                        "name_en": "Jarwal"
+                    },
+                    {
+                        "name_ar": "\u062c\u062f\u0629",
+                        "name_en": "Jeddah"
+                    },
+                    {
+                        "name_ar": "\u062c\u0648\u0644\u0627\u064a\u064a\u0644",
+                        "name_en": "Julayyil"
+                    },
+                    {
+                        "name_ar": "\u062e\u0648\u0645\u0627",
+                        "name_en": "Khumrah"
+                    },
+                    {
+                        "name_ar": "\u0643\u0648\u0644\u062e",
+                        "name_en": "Kulakh"
+                    },
+                    {
+                        "name_ar": "\u0645\u062f\u0631\u0627\u0643\u0627",
+                        "name_en": "Madrakah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0641\u0631\u0629",
+                        "name_en": "Mafruq"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0644\u0627\u0643\u0627\u0646",
+                        "name_en": "Malakan"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0634\u0627\u062c\u064a",
+                        "name_en": "Mashajji"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0633\u064a\u0647\u0627\u062a \u0645\u0647\u062f \u0627\u0644\u0647\u064a\u0644",
+                        "name_en": "Masihat Mahd al Hayl"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0633\u0643\u0627\u0631",
+                        "name_en": "Maskar"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u062a\u064a\u0647",
+                        "name_en": "Matiyah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0643\u0629",
+                        "name_en": "Mecca"
+                    },
+                    {
+                        "name_ar": "\u0645\u064a\u0646\u0627",
+                        "name_en": "Mina"
+                    },
+                    {
+                        "name_ar": "Murshidiyah",
+                        "name_en": "Murshidiyah"
+                    },
+                    {
+                        "name_ar": "\u0645\u0634\u0631\u064a\u0641",
+                        "name_en": "Mushrif"
+                    },
+                    {
+                        "name_ar": "\u0646\u0648\u063a\u0627\u064a\u0634\u064a\u0647",
+                        "name_en": "Nughayshiyah"
+                    },
+                    {
+                        "name_ar": "Nuzlat al faqin",
+                        "name_en": "Nuzlat al Faqin"
+                    },
+                    {
+                        "name_ar": "\u062a\u0634\u064a\u0627",
+                        "name_en": "Qiya"
+                    },
+                    {
+                        "name_ar": "Quwayzah",
+                        "name_en": "Quwayzah"
+                    },
+                    {
+                        "name_ar": "\u0631\u0628\u064a\u0644\u064a",
+                        "name_en": "R\u0101bigh"
+                    },
+                    {
+                        "name_ar": "\u0631\u0627\u0628\u0648\u0647 \u0647\u0631\u0627\u0646",
+                        "name_en": "Rabwah Ghran"
+                    },
+                    {
+                        "name_ar": "\u0631\u0642\u0629",
+                        "name_en": "Raqiyah"
+                    },
+                    {
+                        "name_ar": "\u0633\u0628\u0648\u0647\u0627\u0647",
+                        "name_en": "Sabuhah"
+                    },
+                    {
+                        "name_ar": "\u0634\u064a \u0623\u0645\u064a\u0631",
+                        "name_en": "Shi`b `amir"
+                    },
+                    {
+                        "name_ar": "\u0634\u064a\u0631\u0629",
+                        "name_en": "Shira`ayn"
+                    },
+                    {
+                        "name_ar": "\u0633\u0648\u0644\u0627\u064a\u0645",
+                        "name_en": "Sulaym"
+                    },
+                    {
+                        "name_ar": "\u0633\u0648\u0645\u0627\u064a\u0645\u0627",
+                        "name_en": "Sumaymah"
+                    },
+                    {
+                        "name_ar": "\u0633\u0648\u0648\u064a\u0632",
+                        "name_en": "Suways"
+                    },
+                    {
+                        "name_ar": "\u062a\u0627\u064a\u0641",
+                        "name_en": "Ta'if"
+                    },
+                    {
+                        "name_ar": "\u062b\u0627\u0631\u0648\u0627",
+                        "name_en": "Tharwah"
+                    },
+                    {
+                        "name_ar": "\u062b\u0648\u0627\u0644",
+                        "name_en": "Thuwal"
+                    },
+                    {
+                        "name_ar": "\u062a\u0648\u0631\u0627\u0628\u0627",
+                        "name_en": "Turabah"
+                    },
+                    {
+                        "name_ar": "USFAN",
+                        "name_en": "Usfan"
+                    },
+                    {
+                        "name_ar": "\u0648\u0627\u062f\u064a \u0622\u0644 \u062c\u0644\u064a\u0644",
+                        "name_en": "Wadi al Jalil"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0646\u062c\u0631\u0627\u0646",
+                "name_en": "Najran",
+                "cities": [
+                    {
+                        "name_ar": "\u0646\u062c\u0631\u0629",
+                        "name_en": "Najr\u0101n"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u062d\u062f\u0648\u062f \u0627\u0644\u0634\u0645\u0627\u0644\u064a\u0629",
+                "name_en": "Northern Borders",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0631\u0627\u0631",
+                        "name_en": "Arar"
+                    },
+                    {
+                        "name_ar": "\u0646\u064a\u0633\u0627\u0628",
+                        "name_en": "Nisab"
+                    },
+                    {
+                        "name_ar": "\u062a\u0648\u0631\u0627\u064a\u0641",
+                        "name_en": "Turaif"
+                    },
+                    {
+                        "name_ar": "\u0623\u0645 \u0631\u0627\u062f\u0627\u0645\u0627",
+                        "name_en": "Umm Radamah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0631\u064a\u0627\u0636",
+                "name_en": "Riyadh",
+                "cities": [
+                    {
+                        "name_ar": "\u062f\u0627\u062f\u064a\u0645\u064a",
+                        "name_en": "Ad Daw\u0101dim\u012b"
+                    },
+                    {
+                        "name_ar": "\u0625\u0639\u0644\u0627\u0646 \u062f\u064a\u0644\u0627\u0645",
+                        "name_en": "Ad Dilam"
+                    },
+                    {
+                        "name_ar": "AFIF",
+                        "name_en": "Afif"
+                    },
+                    {
+                        "name_ar": "\u0639\u064a\u0646 \u0623\u0644\u0628\u0627\u0631\u0627",
+                        "name_en": "Ain AlBaraha"
+                    },
+                    {
+                        "name_ar": "\u0622\u0631\u0648\u064a\u0647",
+                        "name_en": "Al Ar\u0163\u0101w\u012byah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0628\u064a\u0631",
+                        "name_en": "Al Bir"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0634\u0639\u0631",
+                        "name_en": "Al Hair"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0648\u0631\u064a\u0641\u0647",
+                        "name_en": "Al Jurayfah"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062e\u0627\u0631\u062c",
+                        "name_en": "Al Kharj"
+                    },
+                    {
+                        "name_ar": "AR \u0631\u0627\u064a\u0646",
+                        "name_en": "Ar Rayn"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0627\u0644\u0633\u0644\u0627\u0645\u064a\u0647",
+                        "name_en": "As Salamiyah"
+                    },
+                    {
+                        "name_ar": "\u0643\u0645\u0627 \u0633\u0648\u0644\u0627\u064a\u064a\u0644",
+                        "name_en": "As Sulayyil"
+                    },
+                    {
+                        "name_ar": "Az zulf\u012b",
+                        "name_en": "Az Zulf\u012b"
+                    },
+                    {
+                        "name_ar": "\u062f\u0648\u0627\u062f\u064a",
+                        "name_en": "Dawadmi"
+                    },
+                    {
+                        "name_ar": "\u062f\u0631\u064a\u0647",
+                        "name_en": "Diriyah"
+                    },
+                    {
+                        "name_ar": "\u0647\u0627\u062f\u0648\u0647",
+                        "name_en": "Harmah"
+                    },
+                    {
+                        "name_ar": "\u062c\u0627\u0644\u0627\u062c\u064a\u0644",
+                        "name_en": "Jalajil"
+                    },
+                    {
+                        "name_ar": "\u0644\u064a\u0644\u0649",
+                        "name_en": "Layla"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0646\u0641\u0648\u0647\u0627",
+                        "name_en": "Manfuha"
+                    },
+                    {
+                        "name_ar": "\u0645\u0631\u0627",
+                        "name_en": "Mar\u0101t"
+                    },
+                    {
+                        "name_ar": "\u0646\u062c\u0627\u0646",
+                        "name_en": "Najan"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0631\u064a\u0627\u0636",
+                        "name_en": "Riyadh"
+                    },
+                    {
+                        "name_ar": "\u0633\u0627\u062c\u064a\u0631",
+                        "name_en": "S\u0101jir"
+                    },
+                    {
+                        "name_ar": "Shokhaib \u064d",
+                        "name_en": "shokhaib\u064d"
+                    },
+                    {
+                        "name_ar": "Tumayr",
+                        "name_en": "Tumayr"
+                    }
+                ]
+            },
+            {
+                "name_ar": "Tabuk",
+                "name_en": "Tabuk",
+                "cities": [
+                    {
+                        "name_ar": "\u0627\u0644\u062c\u0627\u0647\u0647",
+                        "name_en": "Al Wajh"
+                    },
+                    {
+                        "name_ar": "\u062f\u0648\u0628\u0627",
+                        "name_en": "Duba"
+                    },
+                    {
+                        "name_ar": "Tabuk",
+                        "name_en": "Tabuk"
+                    },
+                    {
+                        "name_ar": "\u0623\u0645 \u0644\u0627\u062c\u062c",
+                        "name_en": "Umm Lajj"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name_ar": "\u062f\u0648\u0644\u0629 \u0627\u0644\u0625\u0645\u0627\u0631\u0627\u062a \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \u0627\u0644\u0645\u062a\u062d\u062f\u0629",
+        "name_en": "United Arab Emirates",
+        "iso3": "ARE",
+        "phone_code": "971",
+        "states": [
+            {
+                "name_ar": "\u0623\u0628\u0648 \u0638\u0628\u064a \u0627\u0644\u0625\u0645\u0627\u0631\u0629",
+                "name_en": "Abu Dhabi Emirate",
+                "cities": [
+                    {
+                        "name_ar": "\u062c\u0632\u064a\u0631\u0629 \u0623\u0628\u0648 \u0638\u0628\u064a \u0648\u0627\u0644\u062c\u0632\u0631 \u0627\u0644\u062f\u0627\u062e\u0644\u064a\u0629",
+                        "name_en": "Abu Dhabi Island and Internal Islands City"
+                    },
+                    {
+                        "name_ar": "\u0628\u0644\u062f\u064a\u0629 \u0623\u0628\u0648 \u0638\u0628\u064a",
+                        "name_en": "Abu Dhabi Municipality"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0622\u0646 \u0633\u064a\u062a\u064a",
+                        "name_en": "Al Ain City"
+                    },
+                    {
+                        "name_ar": "\u0628\u0644\u062f\u064a\u0629 \u0627\u0644\u0639\u064a\u0646",
+                        "name_en": "Al Ain Municipality"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062f\u0639\u0641\u0631\u0627",
+                        "name_en": "Al Dhafra"
+                    },
+                    {
+                        "name_ar": "\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0634\u0627\u0645\u0647\u0647",
+                        "name_en": "Al Shamkhah City"
+                    },
+                    {
+                        "name_ar": "\u0628\u0646\u064a \u064a\u0627\u0633 \u0633\u064a\u062a\u064a",
+                        "name_en": "Bani Yas City"
+                    },
+                    {
+                        "name_ar": "\u062e\u0644\u064a\u0641\u0629 \u0645\u062f\u064a\u0646\u0629",
+                        "name_en": "Khalifah A City"
+                    },
+                    {
+                        "name_ar": "\u0645\u0648\u0633\u0627\u0641\u0647",
+                        "name_en": "Musaffah"
+                    },
+                    {
+                        "name_ar": "muzayri \u2018",
+                        "name_en": "Muzayri\u2018"
+                    },
+                    {
+                        "name_ar": "\u0631\u0648\u0648\u064a\u0633",
+                        "name_en": "Ruwais"
+                    },
+                    {
+                        "name_ar": "\u0645\u062f\u064a\u0646\u0629 \u0632\u0627\u064a\u062f",
+                        "name_en": "Zayed City"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0639\u062c\u0645\u0627\u0646 \u0627\u0644\u0625\u0645\u0627\u0631\u0629",
+                "name_en": "Ajman Emirate",
+                "cities": [
+                    {
+                        "name_ar": "\u0639\u062c\u0645\u0627\u0646",
+                        "name_en": "Ajman"
+                    },
+                    {
+                        "name_ar": "\u0639\u062c\u0645\u0627\u0646 \u0633\u064a\u062a\u064a",
+                        "name_en": "Ajman City"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u0646\u0627\u0645\u0627",
+                        "name_en": "Manama"
+                    },
+                    {
+                        "name_ar": "masfout",
+                        "name_en": "Masfout"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u062f\u0628\u064a",
+                "name_en": "Dubai",
+                "cities": [
+                    {
+                        "name_ar": "\u062f\u0628\u064a",
+                        "name_en": "Dubai"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0641\u062c\u064a\u0631\u0629",
+                "name_en": "Fujairah",
+                "cities": [
+                    {
+                        "name_ar": "\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0641\u062c\u064a\u0631\u0629",
+                        "name_en": "Al Fujairah City"
+                    },
+                    {
+                        "name_ar": "\u0628\u0644\u062f\u064a\u0629 \u0627\u0644\u0641\u062c\u064a\u0631\u0629",
+                        "name_en": "Al Fujairah Municipality"
+                    },
+                    {
+                        "name_ar": "\u0628\u0644\u062f\u064a\u0629 \u062f\u064a\u0628\u0627 \u0641\u0648\u062c\u064a\u0631\u0627",
+                        "name_en": "Dibba Al Fujairah Municipality"
+                    },
+                    {
+                        "name_ar": "\u062f\u064a\u0628\u0627 \u0627\u0644\u0641\u0642\u064a\u0631\u0629",
+                        "name_en": "Dibba Al-Fujairah"
+                    },
+                    {
+                        "name_ar": "\u062f\u064a\u0628\u0627",
+                        "name_en": "Dibba Al-Hisn"
+                    },
+                    {
+                        "name_ar": "\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0634\u0639\u0627\u0628 \u0627\u0644\u0645\u0631\u062c\u0627\u0646\u064a\u0629 \u0627\u0644\u0641\u062c\u064a\u0631\u0629",
+                        "name_en": "Reef Al Fujairah City"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0631\u0623\u0633 \u0627\u0644\u062e\u0645\u064a\u0631",
+                "name_en": "Ras al-Khaimah",
+                "cities": [
+                    {
+                        "name_ar": "\u0631\u0627\u0633 \u0627\u0644\u062e\u0627\u064a\u0627\u0647",
+                        "name_en": "Ras Al Khaimah"
+                    },
+                    {
+                        "name_ar": "\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0631\u0645\u0627",
+                        "name_en": "Ras Al Khaimah City"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0627\u0644\u0625\u0645\u0627\u0631\u0629 \u0627\u0644\u0634\u0627\u0631\u0642\u0629",
+                "name_en": "Sharjah Emirate",
+                "cities": [
+                    {
+                        "name_ar": "ADH Dhayd",
+                        "name_en": "Adh Dhayd"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0628\u0627\u062a\u0627\u064a\u0647",
+                        "name_en": "Al Batayih"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u062d\u0645\u0631\u064a\u0629",
+                        "name_en": "Al Hamriyah"
+                    },
+                    {
+                        "name_ar": "\u0622\u0644 \u0633\u064a\u062f\u062a\u064a",
+                        "name_en": "Al Madam"
+                    },
+                    {
+                        "name_ar": "\u062f\u0647\u0627\u064a\u062f",
+                        "name_en": "Dhaid"
+                    },
+                    {
+                        "name_ar": "\u062f\u064a\u0628\u0627 \u0622\u0644 \u0647\u064a\u0633",
+                        "name_en": "Dibba Al Hesn"
+                    },
+                    {
+                        "name_ar": "\u0643\u0627\u0644\u0628\u0627",
+                        "name_en": "Kalba"
+                    },
+                    {
+                        "name_ar": "\u062e\u0648\u0631 \u0641\u0627\u0643\u0627\u0646",
+                        "name_en": "Khawr Fakk\u0101n"
+                    },
+                    {
+                        "name_ar": "\u062e\u0648\u0631 \u0641\u0627\u0643\u0627\u0646",
+                        "name_en": "Khor Fakkan"
+                    },
+                    {
+                        "name_ar": "\u0645\u0627\u064a\u0644\u0647\u0647",
+                        "name_en": "Milehah"
+                    },
+                    {
+                        "name_ar": "Murba\u1e29",
+                        "name_en": "Murba\u1e29"
+                    },
+                    {
+                        "name_ar": "\u0627\u0644\u0634\u0627\u0631\u0642\u0629",
+                        "name_en": "Sharjah"
+                    }
+                ]
+            },
+            {
+                "name_ar": "\u0623\u0645 Quwain",
+                "name_en": "Umm al-Quwain",
+                "cities": [
+                    {
+                        "name_ar": "\u0623\u0645 \u0627\u0644\u0642\u0648\u064a",
+                        "name_en": "Umm AL Quwain"
+                    },
+                    {
+                        "name_ar": "\u0623\u0645 \u0645\u062f\u064a\u0646\u0629 \u0643\u0648\u064a\u0646",
+                        "name_en": "Umm Al Quwain City"
+                    }
+                ]
+            }
+        ]
+    }
+]
