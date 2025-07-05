@@ -152,6 +152,7 @@ $(document).ready(function() {
     'lengthChange': false,
     'paging': true,
     'bInfo': false,
+    'order': [[0, 'desc']],
     'columnDefs': [{
       "orderable": false,
       "targets": [3]
