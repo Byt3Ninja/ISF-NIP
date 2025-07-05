@@ -437,8 +437,7 @@ class CyclesController extends Controller
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
-
-
+ 
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
@@ -450,6 +449,12 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
+
+            $existTitle = Cycle::where('organization_id', $request->organization_id2)->where('title', $request->title)->first();
+                if ($existTitle) {
+                    return redirect()->back()->with('message2', 'Cycle_title_already_exist');
+                }
+
             DB::transaction(function () use ($request) {
                 $private = null;
                 if ($request->private) {
