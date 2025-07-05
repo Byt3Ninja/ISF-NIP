@@ -10,6 +10,7 @@
 
 @php
   $id = request()->route('id');
+  $ccycle = \App\Cycle::find(0);
   $tabs = [
     ['id' => 'program_info', 'label' => 'Program Info', 'active' => true],
     ['id' => 'program_guideline', 'label' => 'Program Guideline', 'active' => false],
@@ -98,7 +99,7 @@
               role="tabpanel"
               aria-labelledby="pills-{{ $tab['id'] }}-tab"
             >
-              @include('admin.programs.partials._edit_' . $tab['id'], ['mode' => 'edit'])
+              @include('admin.programs.partials._edit_' . $tab['id'], ['mode' => 'edit', 'ccycle' => $ccycle])
             </div>
           @endforeach
         </div>            
@@ -125,7 +126,6 @@
 @stop
 
 @section('pagescripts')
-  @php($ccycle = \App\Cycle::find(0))
   <script>
     // Set Language
     const lang = '{{ $l }}';
