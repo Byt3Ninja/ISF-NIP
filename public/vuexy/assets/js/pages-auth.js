@@ -142,10 +142,10 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].first_name_en.notEmpty
           },
-          regexp: {
-            regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
-            message: translations[lang].first_name_en.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
+          //   message: translations[lang].first_name_en.stringOnly
+          // }
         }
       },
       last_name_en: {
@@ -153,10 +153,10 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].last_name_en.notEmpty
           },
-          regexp: {
-            regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
-            message: translations[lang].last_name_en.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
+          //   message: translations[lang].last_name_en.stringOnly
+          // }
         }
       },
       phone: {
