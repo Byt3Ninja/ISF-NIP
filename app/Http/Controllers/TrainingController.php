@@ -538,7 +538,7 @@ class TrainingController extends Controller
 			if ($csession) {
 				$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
 			}
-			$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
+			$steps11 = Step::where('id', $csession?->step_id)->orderBy('arr')->get();
 			foreach ($steps11 as $steps1) {
 				$companies = Company::where('cycle', $steps1->cycle_id)->get();
 			}
