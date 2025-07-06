@@ -282,18 +282,18 @@
           },
           bio_ar: {
             validators: {
-              regexp: {
-                regexp: /^[\u0600-\u06FF\s,|-]*$/i,
-                message: translations['{{ $l }}'].bio_ar.arOnly
-            }
+            //   regexp: {
+            //     regexp: /^[\u0600-\u06FF\s,|-]*$/i,
+            //     message: translations['{{ $l }}'].bio_ar.arOnly
+            // }
           },
         },
           bio_en: {
             validators: {
-              regexp: {
-                regexp: /^[a-zA-Z\s,|-]*$/i,
-                message: translations['{{ $l }}'].bio_en.enOnly
-              }
+              // regexp: {
+              //   regexp: /^[a-zA-Z\s,|-]*$/i,
+              //   message: translations['{{ $l }}'].bio_en.enOnly
+              // }
             }
           },
           entrepreneurial_experience_brief: {
