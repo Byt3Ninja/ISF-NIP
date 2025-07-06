@@ -17,6 +17,7 @@ use App\QuestionCategories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 
 class quizzesController extends Controller
 {
@@ -422,6 +423,9 @@ class quizzesController extends Controller
 					}
 				}
 				$questions = $quiz->questions;
+				if (empty($questions) || $questions->count() == 0) {
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => 'This quiz has no questions. Please contact administrator.', 'class' => 'danger']);
+				}
 				if ($quiz->shuffle) {
 					$questions = $questions->shuffle();
 				}
@@ -467,7 +471,9 @@ class quizzesController extends Controller
 							'status' => false,
 						];
 					}
-					QuizResponses::insert($responses);
+					if (count($responses) > 0) {
+						QuizResponses::insert($responses);
+					}
 					$responses = QuizResponses::where('quiz_id', $quiz->id)->where('user_id', $user->id)->where('result_id', $result->id)->get();
 				}
 				$time_limit = $result->started_at->copy()->addMinutes($quiz->time_limit);
@@ -478,17 +484,31 @@ class quizzesController extends Controller
 					if (empty($response)) {
 						$answers = QuizResponses::where('quiz_id', $quizId)->where('user_id', $user->id)->where('result_id', $result->id)->get();
 						$score = $answers->where('status', true)->count();
-						$result->score = round(floatval($score / $answers->count()), 2) * 100;
+						$totalAnswers = $answers->count();
+						if ($totalAnswers > 0) {
+							$result->score = round(floatval($score / $totalAnswers), 2) * 100;
+						} else {
+							$result->score = 0;
+						}
 						$result->status = true;
 						$result->ended_at = now()->format('Y-m-d H:i:s');
 						$result->save();
 						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
 					}
 					$question = $response->question;
+					if (empty($question)) {
+						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizQuestionNotFound'), 'class' => 'danger']);
+					}
 
 					$diff = now()->diff($time_limit);
 					$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
-					return view('admin/clients/quiz/taking', compact('quiz', 'training', 'questions', 'question', 'response', 'time_remaining'));
+					
+					// Calculate progress data
+					$total_questions = $questions->count();
+					$answered_questions = $responses->whereNotNull('response')->count();
+					$current_question = $answered_questions + 1;
+					
+					return view('admin/clients/quiz/taking', compact('quiz', 'training', 'questions', 'question', 'response', 'time_remaining', 'total_questions', 'answered_questions', 'current_question'));
 				} else {
 					$result->status = true;
 					$result->ended_at = $time_limit->format('Y-m-d H:i:s');
@@ -499,7 +519,8 @@ class quizzesController extends Controller
 				return abort(401);
 			}
 		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@doQuiz: ' . $e->getMessage());
+			Log::error('Error in quizzesController@doQuiz: ' . $e->getMessage());
+			return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizStartError'), 'class' => 'danger']);
 		}
 	}
 	public function myQuiz($id, $quizId, Request $request)
@@ -598,7 +619,7 @@ class quizzesController extends Controller
 				return abort(401);
 			}
 		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@myQuiz: ' . $e->getMessage());
+			Log::error('Error in quizzesController@myQuiz: ' . $e->getMessage());
 		}
 	}
 
@@ -638,7 +659,7 @@ class quizzesController extends Controller
 				return abort(401);
 			}
 		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@myQuizResponses: ' . $e->getMessage());
+			Log::error('Error in quizzesController@myQuizResponses: ' . $e->getMessage());
 		}
 	}
 }
