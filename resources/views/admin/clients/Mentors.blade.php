@@ -110,9 +110,9 @@
                     $expertises = App\Expertise::where('parent_id', null)->get();
                     @endphp
                     @foreach ($expertises as $expertise_group)
-                      <optgroup label="{{ $expertise_group->title }}">
+                      <optgroup label="{{ $l == 'ar' ? $expertise_group->title_ar : $expertise_group->title }}">
                         @foreach ($expertise_group->children as $expertise)
-                          <option value="{{ $expertise->title }}">{{ $expertise->title }}</option>
+                          <option value="{{ $expertise->title }}">{{ $l == 'ar' ? $expertise->title_ar : $expertise->title }}</option>
                         @endforeach
                       </optgroup>
                     @endforeach

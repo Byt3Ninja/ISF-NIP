@@ -18,7 +18,14 @@ class ExpertiseSeeder extends Seeder
         $data = json_decode($json,true);
 
         foreach ($data as $value){
-            Expertise::create($value);
+           Expertise::updateOrCreate(
+                ['id' => $value['id']],
+                [
+                    'title' => $value['title'],
+                    'title_ar' => $value['title_ar'] ?? null,
+                    'parent_id' => $value['parent_id']
+                ]
+            );
         }
     }
 }
