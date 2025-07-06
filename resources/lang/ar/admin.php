@@ -2080,4 +2080,8 @@ return [
 	'No_Programs_Message' => 'لا توجد لديك برامج حتى الآن، يجب أن تنشئ برنامجًا جديدًا.',
 	'Cycle_title_already_exist' => 'اسم الدورة موجود بالفعل',
 	'Weight Details' => 'تفاصيل الوزن',
+	'quizQuestionNotFound' => 'لم يتم العثور على سؤال الاختبار. يرجى الاتصال بالمسؤول.',
+	'quizStartError' => 'حدث خطأ أثناء بدء الاختبار. يرجى المحاولة مرة أخرى.',
+	'Select your answer and click Next to continue' => 'حدد إجابتك وانقر على التالي للمتابعة',
+	'Time Remaining' => 'الوقت المتبقي', 
 ];
