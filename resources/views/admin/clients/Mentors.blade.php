@@ -179,7 +179,7 @@
                   @endphp
                   @if ($mentor->mentorExpertises->isNotEmpty())
                   @foreach ($expertises as $expert)
-                  <span class="btn btn-xs btn-outline-warning rounded-pill">{{ $expert->title }}</span>
+                  <span class="btn btn-xs btn-outline-warning rounded-pill"> {{ $l === 'ar' ? $expert->title_ar : $expert->title }}</span>
                   @endforeach
                   @else
                   <span class="btn btn-xs btn-outline-warning rounded-pill">{{ __('cycles.NA') }}</span>
