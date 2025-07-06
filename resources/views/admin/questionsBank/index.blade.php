@@ -5,10 +5,10 @@
 @section('content')
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-header row mt-2 mb-4">
+			<div class="content-header row my-2">
 				<div class="row mb-4">
 					<div class="col-md-6">
-						<h4 class="card-title fw-bold">{{__('admin.Questions Bank List')}}</h4>
+						<h4 class="mb-0 fw-bold">{{__('admin.Questions Bank List')}}</h4>
 					</div>
 					<div class="col-md-6">
 						<a 
