@@ -90,6 +90,10 @@
                                                 "imgUrl": {
                                                     "type": "string",
                                                     "example": "https://example.com/image.jpg"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "user"
                                                 }
                                             },
                                             "type": "object"

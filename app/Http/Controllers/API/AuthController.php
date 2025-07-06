@@ -44,7 +44,8 @@ class AuthController extends Controller
      *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
      *                 @OA\Property(property="email", type="string", example="user@example.com"),
      *                 @OA\Property(property="phone", type="string", example="+201234567890"),
-     *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg")
+     *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg"),
+     *  *              @OA\Property(property="role", type="string", example="user")
      *             )
      *         )
      *     ),
@@ -80,6 +81,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'phone' => $user->country_code . $user->phone,
                 'imgUrl' => $user->img_url,
+                'role'   => $user->getRoleNames()->first(),
             ],
         ]);
     }
