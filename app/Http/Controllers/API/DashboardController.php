@@ -41,7 +41,11 @@ use OpenApi\Annotations as OA;
  *                     @OA\Property(property="admin_notes", type="string", example="Important session"),
  *                     @OA\Property(property="meeting_link", type="string", example="https://zoom.us/j/123456789")
  *                 )
- *             )
+ *             ),
+ *             @OA\Property(property="completedTasks", type="integer", example=5),
+ *             @OA\Property(property="nonCompletedTasks", type="integer", example=2),
+ *             @OA\Property(property="sessionWithoutTasks", type="integer", example=3),
+ *             @OA\Property(property="startupAttendanceRate", type="string", example="85%")
  *         )
  *     ),
  *     @OA\Response(
@@ -106,10 +110,42 @@ class DashboardController extends Controller
                 ];
             });
 
+        $tasks = DB::table('mentorship_requests as mr')
+            ->leftJoin('mentorship_tasks as mt', 'mt.mentorship_request_id', '=', 'mr.id')
+            ->whereNull('mr.deleted_at')
+            ->where('mr.mentor_id', $mentorId)
+            ->select(
+                'mr.id as request_id',
+                'mt.id as task_id',
+                'mt.title as task_title',
+                'mt.status as task_status'
+            )
+            ->get();
+
+        $sessionWithoutTasks = $tasks->whereNull('task_id')->values()->count();
+        $completedTasks = $tasks->where('task_status', 'completed')->values()->count();
+        $nonCompletedTasks = $tasks->where('task_status', 'pending')->values()->count();
+
+        $completedSessions = DB::table('mentorship_requests')
+        ->where('mentor_id', $mentorId)
+        ->whereNull('deleted_at')
+        ->whereNotNull('start_url')
+        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->select('done')
+        ->get();
+
+      $total = $completedSessions->count();
+      $attended = $completedSessions->sum('done');
+      $attendsRate = $total > 0 ? round(($attended / $total) * 100, 2) . '%' : '0%';
+
         return response()->json([
             'comingSessionsCount' => $comingSessionsCount,
             'currentSchedule' => $schedules,
             'nextSessions' => $nextSessions,
+            'completedTasks' => $completedTasks,
+            'nonCompletedTasks' => $nonCompletedTasks,
+            'sessionWithoutTasks' => $sessionWithoutTasks,
+            'startupAttendanceRate' => $attendsRate,
         ]);
     }
 }

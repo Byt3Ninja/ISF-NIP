@@ -211,4 +211,49 @@ class AuthController extends Controller
             ]
         ],201);
     }
+ /**
+ * @OA\Post(
+ *     path="/api/logout",
+ *     summary="Logout the authenticated user",
+ *     tags={"Authentication"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successfully logged out",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Logged out successfully")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated"
+ *     ),
+ *     @OA\Parameter(
+ *         name="Authorization",
+ *         in="header",
+ *         required=true,
+ *         description="Bearer token",
+ *         @OA\Schema(type="string", example="Bearer eyJ0eXAiOiJKV1QiLCJh...")
+ *     )
+ * )
+ */
+     public function logout(Request $request)
+    {
+       $user = $request->user();
+
+       if (!$user || !$user->currentAccessToken()) {
+        return response()->json([
+            'status' => false,
+            'message' => __('api.unauthenticated')
+         ], 401);
+       }
+
+      $user->currentAccessToken()->delete();
+
+      return response()->json([
+        'status' => true,
+        'message' => __('api.logged_out')
+     ]);
+    }
 }

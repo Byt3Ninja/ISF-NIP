@@ -5,4 +5,6 @@ return [
 	'incorrect_credentials' => 'البيانات المقدمة غير صحيحة',
 	'role_not_found' => 'الصلاحية غير موجودة',
 	'registered_successfully' => 'تم التسجيل بنجاح',
+	'logged_out' => 'تم تسجيل الخروج بنجاح',
+	'unauthenticated' => 'غير مصرح لك',
 ];
