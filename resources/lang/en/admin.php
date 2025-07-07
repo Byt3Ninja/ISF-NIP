@@ -2034,4 +2034,8 @@ return [
 	'No_Programs_Message' => 'You have no programs yet, you have to create a new program',
 	'Cycle_title_already_exist' => 'Program title already exist',
 	'Weight Details' => 'Weight Details',
+	'quizQuestionNotFound' => 'Quiz question not found. Please contact administrator.',
+	'quizStartError' => 'An error occurred while starting the quiz. Please try again.',
+	'Select your answer and click Next to continue' => 'Select your answer and click Next to continue',
+	'Time Remaining' => 'Time Remaining',
 ];

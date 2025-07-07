@@ -10,11 +10,6 @@
 @section('index_url', route('questions-bank.index') )
 @section('subTitle', __('admin.Edit Question'))
 
-@section('vendorstyle')
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-@stop
-
 @section('style')
 	<style>
 		.content-body {
@@ -299,15 +294,7 @@
 <!-- END: Content-->
 @stop
 
-@section('scripts')
-	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-@stop
-
 @section('pagescripts')
-	{{-- <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script> --}}
-	<script src="/vuexy/assets/js/forms-selects.js"></script>
-
 	<script>
 		$(document).ready(function() {
 			handleGroupChange();
