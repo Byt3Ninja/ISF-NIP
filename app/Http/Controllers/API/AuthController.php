@@ -74,7 +74,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth-login')->plainTextToken;
         $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
 
-        return response()->json(['status'  => true, 'message' => __('api.login_success'), 'token'   => $token, 'data' => [
+        return response()->json(['success'  => true, 'message' => __('api.login_success'), 'token'   => $token, 'data' => [
                 'id' => $user->id,
                 'firstName' => $user->{'first_name_' . $l},
                 'lastName' => $user->{'last_name_' . $l},
@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'imgUrl' => $user->img_url,
                 'role'   => $user->getRoleNames()->first(),
             ],
-        ]);
+        ],200);
     }
 
     /**
@@ -153,8 +153,8 @@ class AuthController extends Controller
             'phone'         => $data['phone'],
             'email'         => $data['email'],
             'password'      => Hash::make($data['password']),
-            'title_en'      => $data['title_en'] ?? null,
-            'title_ar'      => $data['title_en'] ?? null,
+            'title_en'      => $data['title'] ?? null,
+            'title_ar'      => $data['title'] ?? null,
         ];
 
         if ($settings && $settings->VFEmail != 1) {
@@ -199,7 +199,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth-register')->plainTextToken;
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => __('api.registered_successfully'),
             'token' => $token,
             'data' => [
@@ -252,8 +252,8 @@ class AuthController extends Controller
       $user->currentAccessToken()->delete();
 
       return response()->json([
-        'status' => true,
+        'success' => true,
         'message' => __('api.logged_out')
-     ]);
+     ],200);
     }
 }

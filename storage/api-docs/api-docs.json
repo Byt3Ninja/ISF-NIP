@@ -463,6 +463,175 @@
                     }
                 }
             }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get authenticated user profile",
+                "description": "Returns profile data of the authenticated user including mentorship statistics and sessions if the user has role Mentor or Registered.",
+                "operationId": "getMe",
+                "responses": {
+                    "200": {
+                        "description": "User info returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "example": "https://example.com/uploads/user.png"
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "gender": {
+                                                    "type": "string",
+                                                    "example": "Male"
+                                                },
+                                                "countryCode": {
+                                                    "type": "string",
+                                                    "example": "+20"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "countryCodeWA": {
+                                                    "type": "string",
+                                                    "example": "+20"
+                                                },
+                                                "whatsapp": {
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "whatsappVerified": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "zipCode": {
+                                                    "type": "integer",
+                                                    "example": 12345
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "Cairo, Egypt"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Software Engineer"
+                                                },
+                                                "country": {
+                                                    "type": "string",
+                                                    "example": "Egypt"
+                                                },
+                                                "state": {
+                                                    "type": "string",
+                                                    "example": "Cairo"
+                                                },
+                                                "city": {
+                                                    "type": "string",
+                                                    "example": "Nasr City"
+                                                },
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "en"
+                                                },
+                                                "haveCompany": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "timeZone": {
+                                                    "type": "string",
+                                                    "example": "Africa/Cairo"
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "EGP"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Mentor"
+                                                },
+                                                "mentorshipTotalRequests": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "mentorshipTotalHours": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.5
+                                                },
+                                                "mentorshipAverageRating": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.2
+                                                },
+                                                "mentorshipSessions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "fullName": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/uploads/john.png"
+                                                            },
+                                                            "company": {
+                                                                "type": "string",
+                                                                "example": "TechCorp"
+                                                            },
+                                                            "companyLogo": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/uploads/logo.png"
+                                                            },
+                                                            "done": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "taskTitle": {
+                                                                "type": "string",
+                                                                "example": "Pitch Deck Review"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
@@ -477,6 +646,10 @@
         {
             "name": "Expertises",
             "description": "Expertises"
+        },
+        {
+            "name": "User",
+            "description": "User"
         }
     ]
 }

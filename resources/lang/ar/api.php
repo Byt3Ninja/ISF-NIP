@@ -7,4 +7,5 @@ return [
 	'registered_successfully' => 'تم التسجيل بنجاح',
 	'logged_out' => 'تم تسجيل الخروج بنجاح',
 	'unauthenticated' => 'غير مصرح لك',
+	'title_required' => 'العنوان مطلوب للمرشدين',
 ];

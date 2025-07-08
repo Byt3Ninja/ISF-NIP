@@ -139,6 +139,7 @@ class DashboardController extends Controller
       $attendsRate = $total > 0 ? round(($attended / $total) * 100, 2) . '%' : '0%';
 
         return response()->json([
+            'success' => true,
             'comingSessionsCount' => $comingSessionsCount,
             'currentSchedule' => $schedules,
             'nextSessions' => $nextSessions,
