@@ -321,96 +321,95 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-		$this->meetingService = OnlineMeetingFactory::create();
-		$datefrom = $request->date . ' ' . $request->timeFrom;
-		$dateto = $request->date . ' ' . $request->timeTo;
-		if ($request->period == '') {
-			$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
-		} else {
-			$period = $request->period;
-		}
-		$dayName = Carbon::parse($request->date)->format('l');
 
-		$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ?  AND tfrom <= ? AND tto >= ?";
-		$schedules = DB::select($schedules_q, [
-			$request->mentorid,
-			'%' . $dayName . '%',
-			$request->timeFrom,
-			$request->timeTo
-		]);
-		if ($schedules == null) {
-			return back()->with(['error' => 'mentor_not_available_in_this_time']);
-		}
-		if ($request->mentorid) {
-			if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
-				return back()->with(['error' => 'cannot_schedule_past_meeting']);
-			}
-			$fileName = '';
-			if ($request->hasFile('file_url')) {
-				$fileName = $request->file('file_url');
-				$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
-			}
+		
+		if ($request->has('selected_dates')) {
+			$errors = [];
+			$successCount = 0;
 
-			$cycle = Cycle::find($request->cycle_id);
-			$autoApprove = $cycle->auto_approve_mentorship_requests;
+			foreach ($request->selected_dates as $index => $dateItem) {
+				$date = $dateItem['date'];
+				$time_from = $dateItem['time_from'];
+				$time_to = $dateItem['time_to'];
 
-			$approved = null;
-			$userid = Auth::id();
-			$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
-			$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
-			$onlineMeeting = $this->meetingService->createMeeting($data);
-			if (!$onlineMeeting['success']) {
-				return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
-			}
-			$meetingId = $onlineMeeting['data']['id'];
-			$startUrl = $onlineMeeting['data']['start_url'];
-			$joinUrl = $onlineMeeting['data']['join_url'];
-			if ($autoApprove == 1) {
-				$approved = 'Yes';
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																					
-				$dateFormat = new \DateTime($datefrom);
-				
+				$this->meetingService = OnlineMeetingFactory::create();
+				$datefrom = $date . ' ' . $time_from;
+				$dateto = $date . ' ' . $time_to;
+
+				$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+				$dayName = Carbon::parse($date)->format('l');
+
+				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+				$schedules = DB::select($schedules_q, [
+					$request->mentorid,
+					'%' . $dayName . '%',
+					$time_from,
+					$time_to
+				]);
+
+				if ($schedules == null) {
+					$errors[] = "Mentor not available on $date from $time_from to $time_to";
+					continue;
+				}
+
+				if (Carbon::parse($date)->toDateString() < now()->toDateString()) {
+					$errors[] = "Cannot schedule meeting in the past: $date";
+					continue;
+				}
+
+				$fileName = '';
+				if ($request->hasFile('file_url')) {
+					$fileName = $request->file('file_url')->store(Auth::id(), ['disk' => 'PrivateDisk']);
+				}
+
+				$cycle = Cycle::find($request->cycle_id);
+				$autoApprove = $cycle->auto_approve_mentorship_requests;
+				$approved = $autoApprove == 1 ? 'Yes' : null;
+
+				$userid = Auth::id();
+				$topic = "Online mentorship meeting (M{$request->mentorid}-U{$userid})";
+				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
+				$onlineMeeting = $this->meetingService->createMeeting($data);
+
+				if (!$onlineMeeting['success']) {
+					$errors[] = "Zoom meeting failed on $date";
+					continue;
+				}
+
+				$meetingId = $onlineMeeting['data']['id'];
+				$startUrl = $onlineMeeting['data']['start_url'];
+				$joinUrl = $onlineMeeting['data']['join_url'];
+
 				MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
 					'user_id' => $userid,
 					'comment' => $request->notes,
-					'approved' => 'Yes',
-					'start_url' => $startUrl,
-					'join_url' => $joinUrl,
-					'zoom_id' => $meetingId,
-					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
-					'period' => $period,
-					'organization_id' => $request->organization_id,
-					'cycle_id' => $request->cycle_id,
-					'fileurl' => $fileName,
-				]);
-
-				$mentor = User::find($request->mentorid);
-			} else {
-				MentorshipRequest::create([
-					'mentor_id' => $request->mentorid,
-					'user_id' => Auth::id(),
-					'comment' => $request->notes,
+					'approved' => $approved,
 					'start_url' => $startUrl,
 					'join_url' => $joinUrl,
 					'zoom_id' => $meetingId,
 					'zoom_date' => $datefrom,
 					'period' => $period,
-					'fileurl' => $fileName,
 					'organization_id' => $request->organization_id,
 					'cycle_id' => $request->cycle_id,
-					'approved' => $approved,
+					'fileurl' => $fileName,
 				]);
-			}
-			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
-				// 
+
+				$successCount++;
+
+				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+					SendMentorshipRequestJob::dispatch($request->mentorid, $date, $request->period, $userid, null, null, 'addwait');
+				}
 			}
 
-			return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);
-		} else {
-			return back()->with(['msg' => "Error, can't add request", 'class' => 'danger']);
-		}
+			// الرد النهائي بعد انتهاء اللوب
+			if ($successCount > 0) {
+				return back()->with(['msg' => "Request_successfully_added_Startup", 'class' => 'success']);
+			} else {
+				return back()->with(['msg' => "Error, can't add request", 'class' => 'danger', 'errors' => $errors]);
+			}
+	}
+		return back()->with(['msg' => "Error, can't add request", 'class' => 'danger']);
 	}
 
 	public function add(Request $request)
