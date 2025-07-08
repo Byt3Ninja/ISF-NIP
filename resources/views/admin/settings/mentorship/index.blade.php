@@ -115,8 +115,17 @@
                         }}
                         @endif
                       </span>
-                      <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor" class="mentor_radio"
-                        onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
+                      <input
+                        type="radio"
+                        value="{{ $mentor->user_id }}"
+                        id="mentor{{ $mentor->user_id }}"
+                        data-name="{{ $thementor }}"
+                        data-rating="{{ $mentor->mrating() }}"
+                        data-id="{{ $mentor->user_id }}"
+                        name="mentor"
+                        class="mentor_radio"
+                        onclick="mentor({{ $mentor->user_id }}, '{{ $thementor }}', '{{ $mentor->mrating() }}')"
+                      />
                     </div>
                   </div>
                 </label>
@@ -244,6 +253,7 @@
                   </td>
                   <td>
                     <button
+                      {{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
                       onclick="add({{ $company->user->id }},{{ $company->cycledata->organization_id }},{{ $company->cycle }})"
                       type="button" class="btn btn-label-primary btn-icon rounded-circle">
                       <i class="ti ti-plus"></i>
@@ -260,71 +270,8 @@
   </div>
 </div>
 <!-- END: Content-->
-<div class="modal fade" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <form id="sessionForm" method="post" action="/dashboard/mentorship/add" enctype="multipart/form-data"
-        autocomplete="off">
-        <div class="modal-header">
-          <h4 class="modal-title">
-            {{ __('cycles.Add new mentorship session') }} <span id="rname"></span>
-          </h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          @csrf
-          <input type="hidden" name="mentorid" value="0" id="mentorid">
-          <input type="hidden" name="userid" value="0" id="userid">
-          <input type="hidden" name="organization_id" id="addOrganizationID">
-          <input type="hidden" name="cycle_id" id="addCycleID">
+@include('admin.clients.startup.partials._mutiple_session_modal')
 
-          <div class="form-group mb-4" id="showdates">
-            <label class="form-label fs-6 fw-bold">{{ __('cycles.Date/Time') }}:</label>
-            <p id="selectSubtitle">{{ __('admin.SelectDateTime') }}.</p>
-            <!-- input is mandatory -->
-            <div class="input-group mb-2">
-              <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}" class="form-control"
-                id="flatpickr-date-time"
-                required 
-              />
-            </div>
-            <span class="fw-semibold text-danger" id="dateError"></span>
-            {{-- <input type="hidden" class="date form-control" name="date" id="constrained" --}} {{--
-              data-inline="true" data-multiple="true" data-open-on="today" data-time="true"> --}}
-
-            {{-- <input class='date width-200 form-control' type="text" id="date" name="date" value="" required> --}}
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label fs-6 fw-bold">{{ __('cycles.Meeting period') }}:</label>
-            <div class="input-group">
-              <select name="period" class="select form-control">
-                <option value="30">30 {{ __('cycles.Minutes') }}</option>
-                <option value="60" selected>1 {{ __('cycles.Hour') }}</option>
-                <option value="120">2 {{ __('cycles.Hour') }}</option>
-                <option value="180">3 {{ __('cycles.Hour') }}</option>
-                <option value="240">4 {{ __('cycles.Hour') }}</option>
-                <option value="300">5 {{ __('cycles.Hour') }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label fs-6 fw-bold">{{ __('cycles.Add a session note') }}:</label>
-            <div class="input-group">
-              <textarea class="form-control" id="notes" name='notes' rows="4"
-                placeholder="{{ __('cycles.Write your note here') }}."></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary ml-1" id="submitBtn">
-            <span class="me-2">{{ __('cycles.Submit') }}</span>
-            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loadingSpinner"></span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 @stop
 
 @section('scripts')
@@ -352,7 +299,8 @@
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/forms-selects.js"></script>
+{{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
+<script src="/vuexy/assets/js/mentorship-mutiple-session.js"></script>
 @php
   $addedSession = session()->has('add');
   $notAddedSession = session()->has('notAdd');
@@ -463,12 +411,19 @@
 
     function add(id, organization_id, cycle_id) {
       let mentor = $('input[name="mentor"]:checked').val();
+
+      
       if (mentor) {
-        $('#userid').val(id);
-        $('#mentorid').val(mentor);
-        $('#addOrganizationID').val(organization_id);
-        $('#addCycleID').val(cycle_id);
-        $('#SendRequest').modal('show');
+        let mentorName = $('input[name="mentor"]:checked').data('name');
+        let mentorRating = $('input[name="mentor"]:checked').data('rating');
+        let mentorId = $('input[name="mentor"]:checked').data('id');
+        // const userId = $('#userid').val(id);
+        // // $('#mentorid').val(mentor);
+        // const orgId = $('#addOrganizationID').val(organization_id);
+        // const cycleId = $('#addCycleID').val(cycle_id);
+        
+        // $('#SendRequest').modal('show');
+        request(mentorId, mentorName, organization_id, cycle_id)
       } else {
         alert("{{ __('cycles.Please select mentor first, and try again') }}!");
       }

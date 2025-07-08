@@ -158,4 +158,7 @@ return [
     'No Category' => 'لا توجد فئة',
     'No Organization' => 'لا توجد منظمة',
     'cannot_schedule_past_meeting' => 'لا يمكنك إضافة موعد في الماضي',
+    'Click to select multiple dates for your sessions' => 'اضغط لتحديد مواعيد متعددة لجلساتك',
+    'Select multiple dates' => 'حدد مواعيد متعددة',
+    'Hide schedule' => 'إخفاء المواعيد',
 ];
