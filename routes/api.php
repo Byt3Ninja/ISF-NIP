@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\RegistrationController;
@@ -30,3 +31,5 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/dashboard',[DashboardController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/expertises',[ExpertiseController::class, 'index']);
+Route::get('/me', [ProfileController::class, 'me'])->middleware('auth:sanctum');
+

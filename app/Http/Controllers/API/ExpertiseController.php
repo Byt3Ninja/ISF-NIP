@@ -47,9 +47,9 @@ class ExpertiseController extends Controller
         ->get();
 
      return response()->json([
-        'status' => true,
+        'success' => true,
         'data' => $expertises,
-     ]);
+     ],200);
      
     }
 

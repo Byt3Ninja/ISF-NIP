@@ -7,4 +7,5 @@ return [
 	'registered_successfully' => 'Registration Successfully',
 	'logged_out' => 'Logged out Successfully',
 	'unauthenticated' => 'Unauthenticated',
+	'title_required' => 'Title is required For Mentors',
 ];
