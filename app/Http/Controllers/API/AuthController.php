@@ -70,6 +70,10 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->status !== 'active') {
+         return response()->json(['success'  => false,'message' => __('api.inactive_user')], 403);
+        }
+
         $l = app()->getLocale();
         $token = $user->createToken('auth-login')->plainTextToken;
         $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
