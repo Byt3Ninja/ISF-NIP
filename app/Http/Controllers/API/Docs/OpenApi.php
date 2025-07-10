@@ -6,9 +6,9 @@ use OpenApi\Annotations as OA;
 
 /**
  * @OA\Info(
- *     title="My Laravel API",
+ *     title="Growthlabs API",
  *     version="1.0.0",
- *     description="This is the API documentation for the Laravel project.",
+ *     description="This is the API documentation for Growthlabs",
  *     @OA\Contact(
  *         email="support@example.com"
  *     )
