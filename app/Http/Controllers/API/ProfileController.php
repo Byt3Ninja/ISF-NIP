@@ -18,66 +18,91 @@ use Intervention\Image\ImageManagerStatic as Image;
 
 class ProfileController extends Controller
 {
-   /**
-     * @OA\Get(
-     *     path="/api/me",
-     *     summary="Get authenticated user profile",
-     *     description="Returns profile data of the authenticated user including mentorship statistics and sessions if the user has role Mentor or Registered.",
-     *     operationId="getMe",
-     *     tags={"User"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="User info returned successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="imgUrl", type="string", format="url", example="https://example.com/uploads/user.png"),
-     *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
-     *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
-     *                 @OA\Property(property="gender", type="string", example="Male"),
-     *                 @OA\Property(property="countryCode", type="string", example="+20"),
-     *                 @OA\Property(property="phone", type="string", example="0123456789"),
-     *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
-     *                 @OA\Property(property="whatsapp", type="string", example="0123456789"),
-     *                 @OA\Property(property="whatsappVerified", type="integer", example=1),
-     *                 @OA\Property(property="email", type="string", example="user@example.com"),
-     *                 @OA\Property(property="zipCode", type="integer", example=12345),
-     *                 @OA\Property(property="address", type="string", example="Cairo, Egypt"),
-     *                 @OA\Property(property="title", type="string", example="Software Engineer"),
-     *                 @OA\Property(property="country", type="string", example="Egypt"),
-     *                 @OA\Property(property="state", type="string", example="Cairo"),
-     *                 @OA\Property(property="city", type="string", example="Nasr City"),
-     *                 @OA\Property(property="language", type="string", example="en"),
-     *                 @OA\Property(property="haveCompany", type="boolean", example=true),
-     *                 @OA\Property(property="timeZone", type="string", example="Africa/Cairo"),
-     *                 @OA\Property(property="currency", type="string", example="EGP"),
-     *                 @OA\Property(property="role", type="string", example="Mentor"),
-     *
-     *                 @OA\Property(property="mentorshipTotalRequests", type="integer", example=5),
-     *                 @OA\Property(property="mentorshipTotalHours", type="number", format="float", example=4.5),
-     *                 @OA\Property(property="mentorshipAverageRating", type="number", format="float", example=4.2),
-     *
-     *                 @OA\Property(
-     *                     property="mentorshipSessions",
-     *                     type="array",
-     *                     @OA\Items(
-     *                         type="object",
-     *                         @OA\Property(property="fullName", type="string", example="John Doe"),
-     *                         @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/john.png"),
-     *                         @OA\Property(property="company", type="string", example="TechCorp"),
-     *                         @OA\Property(property="companyLogo", type="string", example="https://example.com/uploads/logo.png"),
-     *                         @OA\Property(property="done", type="boolean", example=false),
-     *                         @OA\Property(property="taskTitle", type="string", example="Pitch Deck Review")
-     *                     )
-     *                 )
-     *             )
-     *         )
-     *     )
-     * )
-     */
+ /**
+ * @OA\Get(
+ *     path="/api/me",
+ *     summary="Get authenticated user profile",
+ *     description="Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
+ *     operationId="getMe",
+ *     tags={"User"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="User info returned successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="object",
+ *                 @OA\Property(property="imgUrl", type="string", format="url", example="https://example.com/uploads/user.png"),
+ *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
+ *                 @OA\Property(property="gender", type="string", example="Male"),
+ *                 @OA\Property(property="countryCode", type="string", example="+20"),
+ *                 @OA\Property(property="phone", type="string", example="0123456789"),
+ *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
+ *                 @OA\Property(property="whatsapp", type="string", example="0123456789"),
+ *                 @OA\Property(property="whatsappVerified", type="integer", example=1),
+ *                 @OA\Property(property="email", type="string", example="user@example.com"),
+ *                 @OA\Property(property="zipCode", type="integer", example=12345),
+ *                 @OA\Property(property="address", type="string", example="Cairo, Egypt"),
+ *                 @OA\Property(property="title", type="string", example="Software Engineer"),
+ *                 @OA\Property(property="country", type="string", example="Egypt"),
+ *                 @OA\Property(property="state", type="string", example="Cairo"),
+ *                 @OA\Property(property="city", type="string", example="Nasr City"),
+ *                 @OA\Property(property="language", type="string", example="en"),
+ *                 @OA\Property(property="haveCompany", type="boolean", example=true),
+ *                 @OA\Property(property="timeZone", type="string", example="Africa/Cairo"),
+ *                 @OA\Property(property="currency", type="string", example="EGP"),
+ *                 @OA\Property(property="role", type="string", example="Mentor"),
+ *
+ *                 @OA\Property(property="mentorshipTotalRequests", type="integer", example=5),
+ *                 @OA\Property(property="mentorshipTotalHours", type="number", format="float", example=4.5),
+ *                 @OA\Property(property="mentorshipAverageRating", type="number", format="float", example=4.2),
+ *
+ *                 @OA\Property(
+ *                     property="mentorshipSessions",
+ *                     type="array",
+ *                     @OA\Items(
+ *                         type="object",
+ *                         @OA\Property(property="fullName", type="string", example="John Doe"),
+ *                         @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/john.png"),
+ *                         @OA\Property(property="company", type="string", example="TechCorp"),
+ *                         @OA\Property(property="companyLogo", type="string", example="https://example.com/uploads/logo.png"),
+ *                         @OA\Property(property="done", type="boolean", example=false),
+ *                         @OA\Property(property="taskTitle", type="string", example="Pitch Deck Review")
+ *                     )
+ *                 ),
+ *
+ *                 @OA\Property(
+ *                     property="mentorBio",
+ *                     type="object",
+ *                     @OA\Property(property="bio", type="string", example="Experienced software engineer with 10+ years..."),
+ *                     @OA\Property(property="specialization", type="string", example="FinTech, SaaS"),
+ *                     @OA\Property(property="linkedin", type="string", example="https://linkedin.com/in/example"),
+ *                     @OA\Property(property="entrepreneurialExperience", type="boolean", example=true),
+ *                     @OA\Property(property="entrepreneurialExperience_brief", type="string", example="Founded and exited 2 startups in e-commerce"),
+ *                     @OA\Property(property="profilePrivacy", type="boolean", example=true),
+ *                     @OA\Property(
+ *                         property="mentorshipApproach",
+ *                         type="array",
+ *                         @OA\Items(type="string", example="Video Calls")
+ *                     ),
+ *                     @OA\Property(
+ *                         property="expertises",
+ *                         type="array",
+ *                         @OA\Items(
+ *                             type="object",
+ *                             @OA\Property(property="id", type="integer", example=2),
+ *                             @OA\Property(property="title", type="string", example="Business Development")
+ *                         )
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     )
+ * )
+ */
      public function me(Request $request)
     {
         $user = Auth::user();
@@ -170,10 +195,10 @@ class ProfileController extends Controller
             'bio'                             => $locale === 'ar' ? $bio->bio_ar : $bio->bio_en,
             'specialization'                 => $locale === 'ar' ? $bio->specialization_ar : $bio->specialization_en,
             'linkedin'                       => $bio->linkedin,
-            'entrepreneurial_experience'     => (bool) $bio->entrepreneurial_experience,
-            'entrepreneurial_experience_brief' => $bio->entrepreneurial_experience_brief,
-            'profile_privacy'                => (bool) $bio->profile_privacy,
-            'mentorship_approach'            => json_decode($bio->mentorship_approach, true) ?? [],
+            'entrepreneurialExperience'     => (bool) $bio->entrepreneurial_experience,
+            'entrepreneurialExperience_brief' => $bio->entrepreneurial_experience_brief,
+            'profilePrivacy'                => (bool) $bio->profile_privacy,
+            'mentorshipApproach'            => json_decode($bio->mentorship_approach, true) ?? [],
         ];
     }
 
@@ -418,14 +443,14 @@ public function updateBio(Request $request)
         'bio'                            => 'nullable|string|max:255',
         'specialization'                => 'nullable|string|max:250',
         'linkedin'                      => 'nullable|url|max:250',
-        'entrepreneurial_experience'    => 'nullable|boolean',
-        'entrepreneurial_experience_brief' => 'nullable|string',
-        'profile_privacy'               => 'nullable|boolean',
+        'entrepreneurialExperience'    => 'nullable|boolean',
+        'entrepreneurialExperienceBrief' => 'nullable|string',
+        'profilePrivacy'               => 'nullable|boolean',
         'expertise_ids'                 => 'nullable|array',
         'expertise_ids.*'               => 'exists:expertises,id',
     ]);
 
-    $approachInput = $request->input('mentorship_approach');
+    $approachInput = $request->input('mentorshipApproach');
     $allowedApproaches = ['E-mail', 'Phone Calls', 'Video Calls', 'In-Person Meetings'];
 
     $mentorshipApproach = [];
@@ -450,9 +475,9 @@ public function updateBio(Request $request)
             'specialization_ar'              => $validated['specialization'] ?? null,
             'specialization_en'              => $validated['specialization'] ?? null,
             'linkedin'                       => $validated['linkedin'] ?? null,
-            'entrepreneurial_experience'     => $validated['entrepreneurial_experience'] ?? 0,
-            'entrepreneurial_experience_brief' => $validated['entrepreneurial_experience_brief'] ?? '',
-            'profile_privacy'                => $validated['profile_privacy'] ?? 1,
+            'entrepreneurial_experience'     => $validated['entrepreneurialExperience'] ?? 0,
+            'entrepreneurial_experience_brief' => $validated['entrepreneurialExperienceBrief'] ?? '',
+            'profile_privacy'                => $validated['profilePrivacy'] ?? 1,
             'mentorship_approach'            => json_encode($mentorshipApproach),
         ]
     );
