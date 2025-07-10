@@ -570,7 +570,7 @@
                     "User"
                 ],
                 "summary": "Get authenticated user profile",
-                "description": "Returns profile data of the authenticated user including mentorship statistics and sessions if the user has role Mentor or Registered.",
+                "description": "Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
                 "operationId": "getMe",
                 "responses": {
                     "200": {
@@ -715,6 +715,58 @@
                                                         },
                                                         "type": "object"
                                                     }
+                                                },
+                                                "mentorBio": {
+                                                    "properties": {
+                                                        "bio": {
+                                                            "type": "string",
+                                                            "example": "Experienced software engineer with 10+ years..."
+                                                        },
+                                                        "specialization": {
+                                                            "type": "string",
+                                                            "example": "FinTech, SaaS"
+                                                        },
+                                                        "linkedin": {
+                                                            "type": "string",
+                                                            "example": "https://linkedin.com/in/example"
+                                                        },
+                                                        "entrepreneurialExperience": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "entrepreneurialExperience_brief": {
+                                                            "type": "string",
+                                                            "example": "Founded and exited 2 startups in e-commerce"
+                                                        },
+                                                        "profilePrivacy": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "mentorshipApproach": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "Video Calls"
+                                                            }
+                                                        },
+                                                        "expertises": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    },
+                                                                    "title": {
+                                                                        "type": "string",
+                                                                        "example": "Business Development"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"
