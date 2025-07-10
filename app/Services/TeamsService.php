@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\User;
 use App\Settings;
 use GuzzleHttp\Client;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use League\OAuth2\Client\Provider\GenericProvider;
 
@@ -15,13 +17,21 @@ class TeamsService implements OnlineMeetingServiceInterface
 {
     protected $client;
     protected $graph;
+    protected $accessToken = null;
 
     public function __construct()
-    {
-        $this->client = new Client();
-        $this->graph = new Graph();
-        $this->graph->setAccessToken($this->getAccessToken());
+{
+    $this->client = new Client();
+    $this->graph = new Graph();
+   
+
+    $accessToken = $this->getAccessToken();
+    $this->accessToken = $accessToken;
+    if ($accessToken['status']) {
+        $this->graph->setAccessToken($accessToken['data']);
     }
+
+}
 
     // public function redirect($mentorship_id)
     // {
@@ -96,44 +106,84 @@ class TeamsService implements OnlineMeetingServiceInterface
      * Generate Microsoft Access Token.
      */
     protected function getAccessToken()
+ {
+    $user = auth()->user();
+
+    $MICROSOFT_TENANT_ID = '';
+    $MICROSOFT_CLIENT_ID = '';
+    $MICROSOFT_CLIENT_SECRET_VALUE = '';
+
+    if( !Auth::check() )
     {
-        if (Schema::hasTable('settings')) {
-            $Setting = Settings::where('id', 1)->first();
-
-            if ($Setting) {
-                $MICROSOFT_TENANT_ID = $Setting->MICROSOFT_TENANT_ID;
-                $MICROSOFT_CLIENT_ID = $Setting->MICROSOFT_CLIENT_ID;
-                $MICROSOFT_CLIENT_SECRET_VALUE = $Setting->MICROSOFT_CLIENT_SECRET_VALUE;
-            } else {
-                $MICROSOFT_TENANT_ID = '';
-                $MICROSOFT_CLIENT_ID = '';
-                $MICROSOFT_CLIENT_SECRET_VALUE = '';
-            }
-
-            $response = $this->client->post('https://login.microsoftonline.com/' . $MICROSOFT_TENANT_ID . '/oauth2/v2.0/token', [
-                'form_params' => [
-                    'client_id' => $MICROSOFT_CLIENT_ID,
-                    'client_secret' => $MICROSOFT_CLIENT_SECRET_VALUE,
-                    'scope' => 'https://graph.microsoft.com/.default',
-                    'grant_type' => 'client_credentials',
-                ],
-            ]);
-
-            $body = json_decode($response->getBody(), true);
-            return $body['access_token'];
-        }
+        return [
+            'status' => false, 
+            'data' => __('admin.teams_error')
+        ];
     }
+
+    try{
+        $org = $user->organization;
+
+        if ($org) {
+            $MICROSOFT_TENANT_ID = $org->microsoft_tenant_id;
+            $MICROSOFT_CLIENT_ID = $org->microsoft_client_id;
+            $MICROSOFT_CLIENT_SECRET_VALUE = $org->microsoft_client_secret_value;
+        }
+        else{
+            $setting = Settings::where('id', 1)->first();
+            if ($setting) {
+                $MICROSOFT_TENANT_ID = $setting->MICROSOFT_TENANT_ID;
+                $MICROSOFT_CLIENT_ID = $setting->MICROSOFT_CLIENT_ID;
+                $MICROSOFT_CLIENT_SECRET_VALUE = $setting->MICROSOFT_CLIENT_SECRET_VALUE;
+            }
+        }
+    }catch(\Exception $e){
+        Log::error('TeamsService: Error retrieving Microsoft credentials for user.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+    }
+
+    if (empty($MICROSOFT_TENANT_ID) || empty($MICROSOFT_CLIENT_ID) || empty($MICROSOFT_CLIENT_SECRET_VALUE)) {
+        return [
+            'status' => false, 
+            'data' => __('admin.teams_error')
+        ];
+    }
+
+    if ($MICROSOFT_TENANT_ID && $MICROSOFT_CLIENT_ID && $MICROSOFT_CLIENT_SECRET_VALUE) {
+        $response = $this->client->post('https://login.microsoftonline.com/' . $MICROSOFT_TENANT_ID . '/oauth2/v2.0/token', [
+            'form_params' => [
+                'client_id' => $MICROSOFT_CLIENT_ID,
+                'client_secret' => $MICROSOFT_CLIENT_SECRET_VALUE,
+                'scope' => 'https://graph.microsoft.com/.default',
+                'grant_type' => 'client_credentials',
+            ],
+        ]);
+
+        $body = json_decode($response->getBody(), true);
+        return [
+            'status' => true, 
+            'data' => $body['access_token']
+        ];
+    }
+
+}
+    
 
     /**
      * Get User By Email.
      */
     public function getUserIdByEmail($email)
     {
+        if(!$this->accessToken['status']){
+           return  $this->accessToken;
+        }
         $user = $this->graph->createRequest("GET", "/users?\$filter=mail eq '{$email}'")
             ->setReturnType(Model\User::class)
             ->execute();
 
-        return $user[0]->getId(); // Get the user ID
+        return [
+            'status' => true,
+            'data' => $user[0]->getId()
+        ]; // Get the user ID
     }
 
     /**
@@ -141,8 +191,26 @@ class TeamsService implements OnlineMeetingServiceInterface
      */
     public function createMeeting($data)
     {
-        $Setting = Settings::where('id', 1)->first();
-        $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
+        $user = Auth::user();
+
+        try{
+            $org = $user->organization;
+    
+            if ($org) {
+                $userId = $this->getUserIdByEmail($org->microsoft_app_email);
+            }
+            else{
+            $setting = Settings::where('id', 1)->first();
+
+              if ($setting) {
+                $userId = $this->getUserIdByEmail($setting->MICROSOFT_APP_EMAIL);
+              }
+            }
+            
+        }catch(\Exception $e){
+            Log::error('TeamsService: Error retrieving Microsoft credentials for user.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
+    
         $meeting = [
             'subject' => $data['topic'],
             'startDateTime' => $this->toZoomTimeFormat($data['start_time']),
@@ -154,6 +222,14 @@ class TeamsService implements OnlineMeetingServiceInterface
 
         ];
 
+
+        if (!$this->accessToken['status'] || !$userId['status']) {
+            return [ 
+                'success' => false,
+                'data' => $this->accessToken['data'],
+            ];
+        }
+        $userId = $userId['data'];
 
         $response = $this->graph->createRequest('POST', "/users/{$userId}/onlineMeetings")
             ->attachBody($meeting)

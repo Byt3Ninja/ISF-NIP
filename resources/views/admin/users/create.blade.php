@@ -87,7 +87,8 @@
                                 <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
                                 @foreach ($roles as $role)
                                 <option value="{{ $role->id }}" {{ old('role') == $role->name ? 'selected' : '' }}>
-                                  {{ __('admin.' . $role->name) }}</option>
+                                  {{ __('admin.' . $role->name) }}
+                                </option>
                                 @endforeach
                               </select>
                             </div>

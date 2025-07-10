@@ -1,7 +1,7 @@
 @php
   $formAction = $_user->hasAnyRole('Admin|organizationManager')
-    ? route('update_my_company', $client->company->id)
-    : route('update_my_company');
+    ? route('company.profile_update_mine', $client->company->id)
+    : route('company.profile_update_mine');
 @endphp
 
 <div class="row">
@@ -420,16 +420,22 @@
     var cardElement = $(this).closest('.file-card');
 
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: 'لن تتمكن من استعادة هذا الملف!',
-      icon: 'warning',
+     	title: "{{__('admin.SureDelete')}}",
+      text: "{{__('admin.Recover')}}",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'نعم، احذف الملف!',
-      cancelButtonText: 'إلغاء'
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+          confirmButton: 'btn btn-danger me-2',
+          cancelButton: 'btn btn-label-secondary',
+      },
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: '{{ route("delete.document") }}',
+          url: '{{ route("company.profile_documents_delete") }}',
           type: 'POST',
           data: {
               _token: '{{ csrf_token() }}',

@@ -22,7 +22,8 @@ class MessengerController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::user()->id;
+        $user = auth()->user();
+        $userId = $user->id;
         $messages = $this->messenger_query(null, $request);
         //  dd( $messages );
         
@@ -60,14 +61,11 @@ class MessengerController extends Controller
                 $message->replies = $groupedReplies[$message->id] ?? collect();
                 return $message;
             });
-            
 
-        // Count all messages
-        $receivedMessagesCount = Messenger::where('receiver', $userId)
-            // ->where('read', 0)
-            ->count();
-
-
+            // Count all messages
+            $receivedMessagesCount = Messenger::where('receiver', $userId)
+                // ->where('read', 0)
+                ->count();
 
         // Fetch sent messages
         // $sentMessages = Messenger::where('messenger.sender', $userId)
@@ -89,24 +87,30 @@ class MessengerController extends Controller
 
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
-        if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
+        if( $user->hasAnyRole('Admin|OrganizationManager'))
+        {
             $cycles = Cycle::select('id', 'title')->get();
             $users = Company::get();
             $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
             $organizations = Organization::all();
-        } elseif (Auth::user()->hasRole('Mentor')) {
+        }
+        elseif( $user->hasRole('Mentor'))
+        {
             $cycles = CyclesMentors::where('user_id', $userId)->get(['cycle_id'])->toArray();
             $users = Company::whereIn('cycle', array_values($cycles))->get();
-        } elseif (Auth::user()->company) {
-            if (Auth::user()->company->approved) {
-                $users = Company::where('cycle', Auth::user()->company->cycle)
-                    ->where('id', '!=', Auth::user()->company->id)
-                    ->whereHas('user', function ($query) {
-                        $query->role('Registered');
+        }
+        elseif( $user->company )
+        {
+            if( $user->company->approved )
+            {
+                $users = Company::where('cycle', $user->company->cycle)
+                    ->where('id', '!=', $user->company->id)
+                    ->whereHas('user', function ( $query ) {
+                        $query->hasRole('registered');
                     })->get();
 
                 $mentors = User::join('cycles_mentors', 'users.id', 'user_id')
-                    ->where('cycle_id', Auth::user()->company->cycle)
+                    ->where('cycle_id', $user->company->cycle)
                     ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);
             }
         }
@@ -128,50 +132,50 @@ class MessengerController extends Controller
         //         'message_drafts.sender'
         //     ]);
 
-    //     $trashedMessages = DB::table('messenger')
-    // ->whereNotNull('deleted_at')
-    // ->where(function($query) {
-    //     $query->where('sender', Auth::id())
-    //           ->orWhere('receiver', Auth::id());
-    // })
-    // ->get();
+        //     $trashedMessages = DB::table('messenger')
+        // ->whereNotNull('deleted_at')
+        // ->where(function($query) {
+        //     $query->where('sender', Auth::id())
+        //           ->orWhere('receiver', Auth::id());
+        // })
+        // ->get();
 
-    $trashedMessages = DB::table('messenger')
-    ->whereNotNull('messenger.deleted_at')
-    ->where(function($query) {
-        $query->where('sender', Auth::id())
-              ->orWhere('receiver', Auth::id());
-    })
-    ->join('users', function($join) {
-        $join->on('users.id', '=', DB::raw("
-            CASE
-                WHEN messenger.sender = " . Auth::id() . " THEN messenger.receiver
-                ELSE messenger.sender
-            END
-        "));
-    })
-    ->orderBy('messenger.created_at', 'DESC')
-    ->select(
-        'messenger.*',
-        'users.first_name_en',
-        'users.last_name_en',
-        'users.first_name_ar',
-        'users.last_name_ar'
-    )
-    ->get()
-    ->map(function ($item) {
-        return (array) $item; // ← نحوله إلى مصفوفة
-    });
+        $trashedMessages = DB::table('messenger')
+        ->whereNotNull('messenger.deleted_at')
+        ->where(function($query) {
+            $query->where('sender', Auth::id())
+                ->orWhere('receiver', Auth::id());
+        })
+        ->join('users', function($join) {
+            $join->on('users.id', '=', DB::raw("
+                CASE
+                    WHEN messenger.sender = " . Auth::id() . " THEN messenger.receiver
+                    ELSE messenger.sender
+                END
+            "));
+        })
+        ->orderBy('messenger.created_at', 'DESC')
+        ->select(
+            'messenger.*',
+            'users.first_name_en',
+            'users.last_name_en',
+            'users.first_name_ar',
+            'users.last_name_ar'
+        )
+        ->get()
+        ->map(function ($item) {
+            return (array) $item; // ← نحوله إلى مصفوفة
+        });
 
-    // $starred = DB::table('messenger')
-    // ->where('starred', 1)
-    // ->where(function($query) {
-    //     $query->where('sender', Auth::id())
-    //           ->orWhere('receiver', Auth::id());
-    // })
-    // ->get();
+        // $starred = DB::table('messenger')
+        // ->where('starred', 1)
+        // ->where(function($query) {
+        //     $query->where('sender', Auth::id())
+        //           ->orWhere('receiver', Auth::id());
+        // })
+        // ->get();
 
-    $starred = Messenger::where(function($query) use ($userId) {
+        $starred = Messenger::where(function($query) use ($userId) {
                 $query->where('sender', $userId)
                     ->orWhere('receiver', $userId);
                     })->where('starred', 1)
@@ -553,7 +557,7 @@ class MessengerController extends Controller
     }
     public function savemessage(Request $request)
     {
-        
+       
         $cuser = Auth::user();
         // if ($request->draftsNumber > 0) {
         //     DB::table('message_drafts')->where('drafts', $request->draftsNumber)->delete();
@@ -604,7 +608,7 @@ class MessengerController extends Controller
             if (!$request->mentors || !is_array($request->mentors)) {
                 return redirect('/dashboard')->with(['msg' => 'MessageError: No mentors selected', 'class' => 'danger']);
             }
-
+            
             foreach ($request->mentors as $rec) {
                 $rname = User::find($rec);
 
@@ -690,23 +694,102 @@ class MessengerController extends Controller
                 }
             }
         } else {
-           
+            
             try {
-                $new = new Messages();
-                $name = $cuser->first_name_en . ' ' . $cuser->last_name_en;
-                $new->name = $name;
-                $new->internal_id = $cuser->id;
-                $new->phone = $cuser->phone;
-                $new->email = $cuser->email;
-                $new->subject = $request->input('subject');
-                $new->message = $request->input('message');
-                $new->userip = $request->getClientIp();
-                $new->save();
-                event(new WebMessage('mymsg', $name));
-            } catch (\Exception $e) {
-                Log::error('Error: ' . $e->getMessage());
-                return redirect('/dashboard')->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
+                if(Auth::user()->hasRole('Registered')){
+                    $cycle = Auth::user()->company->cycle;
+
+                // جلب organization_id من الجدول
+                $org_id = DB::table('cycles')->where('id', $cycle)->value('organization_id');
+
+                // استخدامه للبحث عن المستخدمين
+                $org = Organization::where('id', $org_id)->first();
+                $orgUsers = User::where('id', $org->user_id)->get();
+                foreach ($orgUsers as $user) {
+                 
+                        $new = new Messenger();
+                        $new->sender = $cuser->id;
+                        $new->receiver = $user->id;
+                        $new->subject = $request->input('subject');
+                        $new->message = $request->input('message');
+                        $new->save();
+
+                        $rfullname = $user->first_name_en . " " . $user->last_name_en;
+                        $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+                        $MSG = new TemplateEmail;
+                        $MSG->Message = [
+                            "New message received - VI portal",
+                            "Dear " . $rfullname . ",",
+                            "You have a new message from " . $sfullname . ", Needs your review.",
+                            "/dashboard/inbox"
+                        ];
+
+                        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                            try {
+                                $user->notify($MSG);
+                            } catch (\Throwable $th) {
+                                Log::error('Notification Error: ' . $th->getMessage());
+                            }
+                        }
+                   
+                }
+
+                // $new = new Messages();
+                // $name = $cuser->first_name_en . ' ' . $cuser->last_name_en;
+                // $new->name = $name;
+                // $new->internal_id = $cuser->id;
+                // $new->phone = $cuser->phone;
+                // $new->email = $cuser->email;
+                // $new->subject = $request->input('subject');
+                // $new->message = $request->input('message');
+                // $new->userip = $request->getClientIp();
+                // $new->save();
+
+            }elseif (Auth::user()->hasRole('organizationmanager')) {
+
+                
+                $orgUsers = User::role('Admin')->get();
+                foreach ($orgUsers as $user) {
+                 
+                        $new = new Messenger();
+                        $new->sender = $cuser->id;
+                        $new->receiver = $user->id;
+                        $new->subject = $request->input('subject');
+                        $new->message = $request->input('message');
+                        $new->save();
+
+                        $rfullname = $user->first_name_en . " " . $user->last_name_en;
+                        $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+                        $MSG = new TemplateEmail;
+                        $MSG->Message = [
+                            "New message received - VI portal",
+                            "Dear " . $rfullname . ",",
+                            "You have a new message from " . $sfullname . ", Needs your review.",
+                            "/dashboard/inbox"
+                        ];
+
+                        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                            try {
+                                $user->notify($MSG);
+                            } catch (\Throwable $th) {
+                                Log::error('Notification Error: ' . $th->getMessage());
+                            }
+                        }
+                   
+                }
+
+
+
+
+
+
             }
+
+
+                } catch (\Exception $e) {
+                    Log::error(' Error: ' . $e->getMessage());
+                    return redirect('/dashboard')->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
+                }
         }
 
         return redirect('/dashboard/messages')->with(['msg' => 'MessageSentSuccessfully', 'class' => 'success']);
@@ -918,7 +1001,7 @@ class MessengerController extends Controller
 
     public function sendReplyMessage(Request $request)
     {
-       
+        $l = app()->getLocale();
 
         $request->validate([
             'message_subject' => 'nullable|string|max:255',
@@ -932,13 +1015,86 @@ class MessengerController extends Controller
             'message' => $request->message_message,
             'receiver' => $request->message_receiver,
             'sender' => auth()->id(),
+            'sender_name' => auth()->user()->first_name_.$l. ' ' . auth()->user()->last_name_.$l,
             'reply_id' => $request->message_id,
         ]);
+        $reply_id = $message->id;
 
     // جلب الرسالة مع الرسالة الأصلية اللي بيرد عليها
-    $replyWithSender = Messenger::with('reply')->find($message->id);
+    $replyWithSender1 = Messenger::with('reply')->find($message->id);
+    $replyWithSender2 = DB::table('messenger as m')
+    ->leftJoin('users as u', 'm.sender', '=', 'u.id')
+    ->leftJoin('users as ur', 'm.receiver', '=', 'ur.id')
+    ->leftJoin('messenger as reply', 'reply.sender', '=', 'ur.id')
+    ->leftJoin('users as urs', 'reply.sender', '=', 'urs.id')
+    ->where('m.id', $request->message_id)
+    ->get([
+        'm.id',
+        'm.subject',
+        'm.message as message',
+        'm.created_at',
+        'm.updated_at',
+        'm.deleted_at',
+        'm.sender as sender',
+        'm.receiver as receiver',
+        'm.reply_id',
+        'm.read',
+        'm.reported',
+        'm.starred',
+        'm.messgeId',
+
+        // reply fields
+        'reply.id as reply_id',
+        'reply.subject as reply_subject',
+        'reply.message as reply_message',
+        'reply.created_at as reply_created_at',
+        'reply.updated_at as reply_updated_at',
+        'reply.deleted_at as reply_deleted_at',
+        'reply.sender as reply_sender',
+        'reply.receiver as reply_receiver',
+        'reply.read as reply_read',
+        'reply.updated_at as reply_updated_at',
+        'reply.reported as reply_reported',
+        'reply.starred as reply_starred',
+        'reply.messgeId as reply_messgeId',
+        'reply.reply_id as reply_reply_id',
+        'urs.first_name_en as reply_first_name_en',
+        'urs.last_name_en as reply_last_name_en',
+        'urs.first_name_ar as reply_first_name_ar',
+        'urs.last_name_ar as reply_last_name_ar',
+        'urs.img_url as reply_img_url',]);
+
+        $messages = $replyWithSender2->groupBy('id')->map(function ($groupedMessage) use ($l, $reply_id) {
+            $msg = $groupedMessage->first();
+            $message = new stdClass;
+            $message->id = $msg->id;
+            $message->reply_id = $msg->reply_id;
+            $message->sender = $msg->sender;
+            $message->receiver = $msg->receiver;
+            $message->subject = $msg->subject;
+            $message->message = $msg->message;
+            $message->read = $msg->read;
+            $message->starred = $msg->starred;
+            $message->created_at = $msg->created_at;
+            $message->reply = $groupedMessage->filter(fn($reply) => !is_null($reply->reply_id))->map(function ($_reply) use ($l, $reply_id) {
+                $reply = new stdClass;
+                $reply->id = $_reply->reply_id;
+                $reply->subject = $_reply->reply_subject;
+                $reply->message = $_reply->reply_message;
+                $reply->receiver = $_reply->reply_receiver;
+                $reply->reply_updated_at = $_reply->reply_updated_at;
+                $reply->created_at = $_reply->reply_created_at;
+                $reply->sender = $_reply->reply_sender;
+                $reply->sender_name = $_reply->{"reply_first_name_".$l} . ' ' . $_reply->{"reply_last_name_".$l};
+                return $reply;
+            })->where('id', $reply_id)->values()->first();
+            return $message;
+        })->values();
+        
+        
+        $message = collect($messages)->first();
     
-        return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
+        return response()->json(['message' => 'Message sent successfully', 'messages' => $message]);
     }
 
 
@@ -1073,7 +1229,8 @@ class MessengerController extends Controller
 
         switch ($type) {
             case 'inbox':
-                $query .= " m.receiver = $userId AND m.deleted_at IS NULL AND m.reply_id IS NULL";
+                $query .= "( (m.receiver = $userId AND m.reply_id IS NULL) OR (reply.receiver = $userId) ) AND m.deleted_at IS NULL";
+                // $query .= " m.receiver = $userId AND m.deleted_at IS NULL AND m.reply_id IS NULL";
                 break;
             case 'sent':
                 $query .= "  m.sender = $userId AND m.deleted_at IS NULL";

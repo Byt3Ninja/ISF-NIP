@@ -256,7 +256,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                    // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                    $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
               @endphp
-                  <img src="{{ $imageUrl }}" class="w-100 h-100 border radius-15"
+                  <img src="/{{ $imageUrl }}" class="w-100 h-100 border radius-15"
                     style="object-fit: contain;" alt="Program Image" />
                   @else
                   <img src="/images/background/logo.png" class="w-100 h-100 border radius-15"
@@ -283,15 +283,17 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <h5 class="mb-0">{{ $cycle->organization['name_' . $l] }}</h5>
                   
                   @if(!empty($cycle->private))
-                        <a 
+                        {{-- <a 
                           href="cycles/view/{{ $cycle->private }}"
                           class="btn btn-transparent"
                           target="_blank"
                           id="private-link"
-                        >
+                        > --}}
+                        <div class="btn btn-transparent" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
                         {{__('cycles.Private Link')}}
                           <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                        </a>
+                        </div>
+                        {{-- </a> --}}
                         @endif
                 </div>
                 <div class="row border radius-15 py-3 mb-3">
@@ -316,12 +318,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex flex-column">
                       <div class="d-flex align-items-center mb-2">
                         <i class="ti ti-user-circle text-primary ti-24px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Responsible')}}</span>
+                        <h6 class="mb-0">{{__('admin.Mentors')}}</span>
                       </div>
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
                         <a class="btn btn-sm btn-outline-primary rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
+                          href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -356,11 +358,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-secondary">
                           <i class="ti ti-calendar ti-20px text-info"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($cycle->start, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-secondary">
                           <i class="ti ti-calendar ti-20px text-danger"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($cycle->end, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -401,14 +403,15 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                             </button>
                           </li> -->
                           <li>
-                            <button 
+                            <a 
                               id="editButton" 
                               class="dropdown-item ccycle text-dark" 
-                              onclick="onEditProgramClick({{ $cycle->id }})"
+                              {{-- onclick="onEditProgramClick({{ $cycle->id }})" --}}
+                              href="/dashboard/programlist/edit/{{ $cycle->id }}"
                             >
                               <i class="ti ti-edit me-2 text-info"></i>
                               {{ __('cycles.Edit_Program') }}
-                            </button>
+                            </a>
                           </li>
                           <li>
                             @if( $_user->ableTo('delete_user', $permissions) )
@@ -549,11 +552,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -718,7 +721,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($scoped_judges as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $judge->id)}}">
+                          href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -754,11 +757,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -993,7 +996,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
                         <a class="btn btn-outline-info rounded-pill" style="height: 40px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
+                          href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="30" height="30" class="rounded-circle" />
@@ -1026,11 +1029,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1188,11 +1191,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1369,7 +1372,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($judgesDetails as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $judge->id)}}">
+                          href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -1399,11 +1402,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1480,7 +1483,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 class="form-control" required>
               </div>
               <div class="col-12 mb-4">
-                <label for="step-range-picker" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+                <label for="step-range-picker" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
                 <input type="hidden" name="fromDate" id="mfromDate">
                 <input type="hidden" name="toDate" id="mtoDate">
                 <input type="text" id="step-range-picker" class="form-control" name="date_range" />
@@ -1954,7 +1957,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
   </div> --}}
 <!-- / Final Screening Step Modal -->
 
-  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
+  {{-- @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit']) --}}
 @stop
 
 @section('scripts')
@@ -1973,9 +1976,19 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find($cycle->id))
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
 
   <script>
+    function copyToClipboard(text) {
+  // إنشاء عنصر مؤقت
+  const tempInput = document.createElement("input");
+  tempInput.value = text;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+  alert("{{ __('admin.Copied') }}");
+}
     // Set Language
     const lang = '{{ $l }}';
 
@@ -1989,8 +2002,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     //   }
     // });
 
-    const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
-    const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
+    // const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
+    // const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
   
     // const editFpTo = flatpickr(editValidalidTo, {
     //   monthSelectorType: 'static',
@@ -2005,128 +2018,130 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     // });
 
     // Handle Append File
-    const appendFile = (mode, file, conainerId) => {
-      console.log('file', file)
-      if (file) {
-        const fileName = file.split('/').pop();
-        const content = (`
-          <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
-            <div class="d-flex align-items-center gap-2">
-              <i class="ti ti-file fs-4 text-warning"></i>
-              <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
-            </div> 
-            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
-              <i class="ti ti-download fs-5"></i>
-            </a>
-          </div>`
-        );
-        $(`#${mode}-program-modal ${conainerId}`).append(content);
-      }
-    };
+    // const appendFile = (mode, file, conainerId) => {
+    //   console.log('file', file)
+    //   if (file) {
+    //     const fileName = file.split('/').pop();
+    //     const content = (`
+    //       <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
+    //         <div class="d-flex align-items-center gap-2">
+    //           <i class="ti ti-file fs-4 text-warning"></i>
+    //           <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
+    //         </div> 
+    //         <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
+    //           <i class="ti ti-download fs-5"></i>
+    //         </a>
+    //       </div>`
+    //     );
+    //     $(`#${mode}-program-modal ${conainerId}`).append(content);
+    //   }
+    // };
 
     // Initialize Quill Editor
-    const editorConfig = { theme: 'snow' };
-    const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
-    const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
-    const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
+    // const editorConfig = { theme: 'snow' };
+    // const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
+    // const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
+    // const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
 
     // Clear Editor
-    editGuidelineEditor.root.innerHTML = '';
-    editFinancialEditor.root.innerHTML = '';
-    editLegalEditor.root.innerHTML = '';
+    // editGuidelineEditor.root.innerHTML = '';
+    // editFinancialEditor.root.innerHTML = '';
+    // editLegalEditor.root.innerHTML = '';
 
     // Handle Editor Change
-    const handleEditorChange = (editor, input) => {
-      editor.on('text-change', function() {
-        $(input).val(editor.root.innerHTML);
-      });
-    };
+    // const handleEditorChange = (editor, input) => {
+    //   editor.on('text-change', function() {
+    //     $(input).val(editor.root.innerHTML);
+    //   });
+    // };
 
-    handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
-    handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
-    handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
+    // handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
+    // handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
+    // handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
 
     // Handle Edit Program
-    const onEditProgramClick = (cycleId) => {
-      if(cycleId){
-        $('#edit-program-modal').modal('show');
+    // const onEditProgramClick = (cycleId) => {
+    //   if(cycleId){
+    //     $('#edit-program-modal').modal('show');
       
-        $.ajaxSetup({
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
-        });
+    //     $.ajaxSetup({
+    //       headers: {
+    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //       }
+    //     });
 
-        $.ajax({
-          type: "POST",
-          url: "/dashboard/cycles/modify",
-          data: {"cycleid": cycleId },
-          success: function(response) {
-            console.log(response); 
+    //     $.ajax({
+    //       type: "POST",
+    //       url: "/dashboard/cycles/modify",
+    //       data: {"cycleid": cycleId },
+    //       success: function(response) {
+    //         console.log(response); 
 
-            $('#edit-program-modal #date-range-picker').daterangepicker({
-              opens: isRtl ? 'left' : 'right',
-              drops: 'up',
-              startDate: response?.start ? moment(response?.start) : '',
-              endDate: response?.end ? moment(response?.end) : '',
-            }).on('apply.daterangepicker', function(ev, picker) {
-              $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
-              $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
-            });
+    //         $('#edit-program-modal #date-range-picker').daterangepicker({
+    //           opens: isRtl ? 'left' : 'right',
+    //           drops: 'up',
+    //           startDate: response?.start ? moment(response?.start) : '',
+    //           endDate: response?.end ? moment(response?.end) : '',
+    //         }).on('apply.daterangepicker', function(ev, picker) {
+    //           $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
+    //           $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
+    //         });
 
-            $('#edit-program-modal #title').val(response.title ?? '');
-            $('#edit-program-modal #description').val(response.description ?? '');
-            $('#edit-program-modal #cycleid').val(cycleId); 
-            $('#edit-program-modal #type').val(1);
-            // $('#edit-program-modal #start').val(response.start ?? '');
-            // $('#edit-program-modal #end').val(response.end ?? '');
-            $('#edit-program-modal #organization').val(response.organization_id ?? '');
-            $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
-            if (response.private) {
-              $('#edit-program-modal #private').prop('checked', true);
-              $('#cyclelink').html('{{ __('cycles.Join URL') }}');
-              $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
-            }
+    //         $('#edit-program-modal #title').val(response.title ?? '');
+    //         $('#edit-program-modal #description').val(response.description ?? '');
+    //         $('#edit-program-modal #cycleid').val(cycleId); 
+    //         $('#edit-program-modal #type').val(1);
+    //         // $('#edit-program-modal #start').val(response.start ?? '');
+    //         // $('#edit-program-modal #end').val(response.end ?? '');
+    //         $('#edit-program-modal #organization').val(response.organization_id ?? '');
+    //         $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+    //         $('#edit-program-modal #auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1 ? true : false);
 
-            if (editGuidelineEditor) {
-              editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
-            }
+    //         if (response.private) {
+    //           $('#edit-program-modal #private').prop('checked', true);
+    //           $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+    //           $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+    //         }
 
-            $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
+    //         if (editGuidelineEditor) {
+    //           editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
+    //         }
 
-            if (editFinancialEditor) {
-              editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
-            }
-            $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
-            $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
-            $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+    //         $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
 
-            if (editLegalEditor) {
-              editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
-            }
-            $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
-            const guidelineFile = response?.program_guideline_file;
-            const financialFile = response.financial_guideline_file;
-            const legalFile = response?.legal_guideline_file;
-            const delegationFile = response.delegation_file;
+    //         if (editFinancialEditor) {
+    //           editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
+    //         }
+    //         $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
+    //         $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
+    //         $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+
+    //         if (editLegalEditor) {
+    //           editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
+    //         }
+    //         $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
+    //         const guidelineFile = response?.program_guideline_file;
+    //         const financialFile = response.financial_guideline_file;
+    //         const legalFile = response?.legal_guideline_file;
+    //         const delegationFile = response.delegation_file;
             
-            appendFile('edit', guidelineFile, '#guideline-file-container');
-            appendFile('edit', financialFile, '#financial-file-container');
-            appendFile('edit', legalFile, '#legal-file-container');
+    //         appendFile('edit', guidelineFile, '#guideline-file-container');
+    //         appendFile('edit', financialFile, '#financial-file-container');
+    //         appendFile('edit', legalFile, '#legal-file-container');
 
-            if (delegationFile) {
-              appendFile('edit', delegationFile, '#delegation-file-container');
-              $('#edit-program-modal delegation_option').prop('checked', true);
-            }
-          },
-          error: function(error) {
-            console.log(error);
-            resetValues();
-            alert("Error Occurred, Try again!");
-          }
-        });
-      }
-    }; 
+    //         if (delegationFile) {
+    //           appendFile('edit', delegationFile, '#delegation-file-container');
+    //           $('#edit-program-modal delegation_option').prop('checked', true);
+    //         }
+    //       },
+    //       error: function(error) {
+    //         console.log(error);
+    //         resetValues();
+    //         alert("Error Occurred, Try again!");
+    //       }
+    //     });
+    //   }
+    // }; 
   
     // Initialize Quill editors
     const quillEditors = document.querySelectorAll('#text-editor');

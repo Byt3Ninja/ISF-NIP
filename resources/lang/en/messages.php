@@ -55,4 +55,11 @@ return [
     'Save as draft' => 'Save as draft',
     'Message is required' => 'Message is required',
     'Subject is required' => 'Subject is required',
+    'dear' => 'Dear',
+    'mentorship_session_subject' => 'New Mentorship Session - VI Portal',
+    'approved_message' => 'We would like to inform you that your request for a guidance session has been approved by the program manager. Thank you for being so interested.',
+    'denied_message' => 'We would like to inform you that your request for a guidance session has been denied by the program manager. Thank you for your interest, and we wish you success in your endeavors.',
+    'mentorship_session_action' => 'Mentorship Session with :name has been :action',
+    'Approved' => 'Approved',
+    'Rejected' => 'Rejected',
 ];

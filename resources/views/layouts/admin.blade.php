@@ -61,11 +61,14 @@
     <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+
+    <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
     <!-- endbuild -->
 
     <!-- Vendors JS -->
     <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+
     <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
     @yield('scripts')
     <!-- End Vendor JS-->
@@ -74,8 +77,7 @@
     <script src="/vuexy/assets/js/main.js"></script>
 
     <!-- Custom JS -->
-    <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
-    <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+    
     <!-- For Searchable Select -->
     <script src="/vuexy/assets/js/forms-selects.js"></script>
 
@@ -99,9 +101,6 @@
 
               window.addEventListener("chatwoot:ready", function () {
                 @if (auth()->check())
-                  console.log(
-                    "{{ auth()->user()->country_code . auth()->user()->phone ?? '' }}"
-                  );
                   window.$chatwoot.setUser("{{ auth()->user()->id }}", {
                     email: "{{ auth()->user()->email }}",
                     name: "{{ auth()->user()->name }}",
@@ -118,14 +117,14 @@
       @endif
     @endauth
 
-    @if (auth()->user()->hasRole('Registered'))
+   @if (auth()->user()->hasAnyrole('Registered','Mentor'))
       <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
       <script>
         const pusherConfig = @json(getPusherConfig());
         // console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
-        Pusher.logToConsole = true;
+        // Pusher.logToConsole = true;
 
         const pusher = new Pusher(pusherAppKey, {
           cluster: pusherCluster,
@@ -156,8 +155,8 @@
             if (data && data.message) {
               // console.log("data.message", data.message);
               const notifContainer = document.querySelector(
-                "#notification-count-container"
-              );
+                ".position-relative .ti-bell"
+              )?.parentElement;
 
               if (notifContainer) {
                 let count = 1; // Default count
@@ -168,24 +167,14 @@
                 );
                 if (existingBadge) {
                   // Extract the current count
-                  const countSpan = existingBadge.querySelector("span");
-                  if (countSpan) {
-                    count = parseInt(countSpan.textContent, 10) + 1;
-                  }
+                  count = parseInt(existingBadge.textContent, 10) + 1;
                   existingBadge.remove(); // Remove old badge
                 }
 
                 // Insert new badge with updated count
                 notifContainer.insertAdjacentHTML(
                   "beforeend",
-                  `
-                  <span
-                    class="badge rounded-pill bg-danger badge-notifications border"
-                    style="width: 20px; height: 20px; left: 15px;"
-                  >
-                    <span>${count}</span>
-                  </span>
-                `
+                  `<span class="badge badge-notifications bg-danger w-px-20 h-px-20 rounded-circle d-flex justify-content-center align-items-center">${count}</span>`
                 );
 
                 let lang = document.documentElement.lang;
@@ -213,6 +202,26 @@
           const eventData = JSON.parse(event.data);
           // console.log("Message:", eventData.message);
         });
+
+       const mentorshipChannel = pusher.subscribe("request-mentorship");
+       mentorshipChannel.bind("RequestMentorship", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
+     const startupChannel = pusher.subscribe("startup-joining");
+       startupChannel.bind("StartupJoining", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
+    const judgerChannel = pusher.subscribe("judges");
+       judgerChannel.bind("JudgeAssigned", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
+
+     const mentorStartupChannel = pusher.subscribe("mentorship-session");
+       judgerChannel.bind("MentorshipSessionUpdated", function (event) {
+        const eventData = JSON.parse(event.data);
+    });
 
         // Listen for Pusher internal events for debugging
         pusher.connection.bind("state_change", function (states) {

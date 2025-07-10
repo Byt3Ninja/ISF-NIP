@@ -27,7 +27,7 @@ class WelcomeJudgerNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail','database'];
     }
 
     /** 
@@ -53,9 +53,16 @@ class WelcomeJudgerNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        return [
-            'message' => 'مرحبًا بك في منصتنا كـ Judger!',
-            'user_id' => $notifiable->id,
-        ];
+        if ($this->data['role'] === 'Judger') {
+            return [
+                'message' => 'مرحبًا بك في منصتنا كـ Judger!',
+                'user_id' => $notifiable->id,
+            ];
+        }else {
+            return [
+                'message' => 'مرحبًا بك في منصتنا!',
+                'user_id' => $notifiable->id,
+            ];
+        }
     }
 }

@@ -106,7 +106,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                 <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
                 <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
                 <a 
-                  href="{{ route('make_new_assessment_to_user') }}"
+                  href="{{ route('assessments.assign') }}"
                   class="btn btn-lg btn-primary">
                   {{ __('admin.Make_a_new_assessment') }}
                 </a>
@@ -410,8 +410,14 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
             icon: 'success',
             title: 'Success',
             text: '{{ __('admin.Assessment_completed_successfully') }}',
-            showConfirmButton: false,
-            timer: 1500
+           	showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonText: "{{ __('admin.OK') }}",
+            customClass: {
+                confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+            timer: 2000,
           });
 
           localStorage.setItem('activeCategoryTab', 0);

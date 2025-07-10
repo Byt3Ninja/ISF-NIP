@@ -40,7 +40,7 @@
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                             ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
-                            {{ $step->from->format('d-m-Y') }})
+                            {{ $step->from->format('d-m-Y') ?? '-' }})
                             - {{ optional(optional($step->cycle)->organization)->name }}
                           </option>
                         @endforeach
@@ -68,8 +68,8 @@
                       <option value="0">{{ __('cycles.Select Company') }}</option>
                       @foreach ($companies as $company)
                         <option value="{{ $company->id }}" {{ $c ? ($company->id == $c->id ? 'selected' : '') : '' }}>
-                          {{ $company->{'name_' . $l} }} ({{ __('cycles.Added By') }}
-                          {{ $company->user->{'first_name_' . $l} }} {{ $company->user->{'last_name_' . $l} }})</option>
+                          {{ $company?->{'name_' . $l} }} ({{ __('cycles.Added By') }}
+                          {{ $company?->user?->{'first_name_' . $l} }} {{ $company?->user?->{'last_name_' . $l} }})</option>
                       @endforeach
                     </select>
                   </fieldset>
@@ -97,8 +97,8 @@
               <div class="card">
                 <div class="card-header">
                   <h4 class="card-title secondary">{{ $cstep->title }} <small class="text-muted">
-                      {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }}
-                      {{ $cstep->to->format('d-m-Y') }}</small>
+                      {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                      {{ $cstep->to->format('d-m-Y') ?? '-' }}</small>
                     {{ __('cycles.for') }} :
                     <a href="/dashboard/companyProfile/{{ $c->id }}">
                       <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40"

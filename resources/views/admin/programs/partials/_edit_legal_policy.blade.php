@@ -17,12 +17,12 @@
     <label for="legal_policy_pdf" class="form-label fs-6 fw-semibold">
       {{ __('cycles.Attach_Document') }} ({{__('cycles.PDF_Only')}})
     </label>
-    <div class="d-flex justify-content-end align-items-center border rounded p-4">
+    <div class="mb-3">
       <input 
         type="file" 
         name="legal_policy_pdf" 
         id="legal_policy_pdf" 
-        class="form-control-file" 
+        class="form-control" 
         accept="application/pdf" 
       />
       <input type="hidden" name="type" id="type">
@@ -39,6 +39,7 @@
         name="delegation_option" 
         id="delegation_option"
         onchange="toggleFormGroup(this)"
+        value="yes"
       />
       <label class="form-check-label" for="delegation_option">
       {{ __('cycles.Delegation_Option') }}

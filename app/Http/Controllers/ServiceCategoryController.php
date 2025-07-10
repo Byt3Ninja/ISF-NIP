@@ -93,7 +93,7 @@ class ServiceCategoryController extends Controller
 	public function update(UpdateServiceCategoryRequest $request, ServiceCategory $serviceCategory)
 	{
 		$result = $serviceCategory->update($request->all());
-		if( $result ) { return redirect()->route('serviceCategories.index')->with( ['msg' => 'aStoredSuccessfully'] ); }
+		if( $result ) { return redirect()->route('serviceCategories.index')->with( ['msg' => 'StoredSuccessfully'] ); }
 		else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
 	}
 

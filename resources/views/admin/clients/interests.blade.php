@@ -55,7 +55,7 @@
                                                         <td>{{$interest->{'comp_'.$l} }}</td>
                                                         <td>{!!$ti?str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$ti):''!!}
                                                         </td>
-                                                        <td><a href="{{route('company_profile', $interest->company_id)}}"  class="btn btn-sm badge-circle-light-primary" > {{__('admin.View Profile')}}</a></td>
+                                                        <td><a href="{{route('company.profile_view', $interest->company_id)}}"  class="btn btn-sm badge-circle-light-primary" > {{__('admin.View Profile')}}</a></td>
                                                     </tr>
 												@endforeach
 

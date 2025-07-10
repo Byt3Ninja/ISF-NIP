@@ -11,12 +11,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\VerifyEmailQueued;
-
+use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
     // use Auditable;
-    use Notifiable;
-    use HasRoles;
+    use Notifiable ,HasRoles,HasApiTokens;
     // use SoftDeletes;
     public static $module = 'Users';
 
@@ -169,6 +168,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mentorshipRequests()
     {
         return $this->hasMany(MentorshipRequest::class, 'mentor_id');
+    }
+
+      public function scores()
+    {
+        return $this->hasMany(UserScore::class,'user_id');
     }
 
 	public function roles() { return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id'); }

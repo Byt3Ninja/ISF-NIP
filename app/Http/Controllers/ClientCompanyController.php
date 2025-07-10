@@ -6,6 +6,9 @@ use App\Country;
 use App\Events\WebMessage;
 use App\FundingRound;
 use App\Organization;
+use App\ScreeningEvaluation;
+use App\ScreeningEvaluationResults;
+use App\Step;
 use App\Sector;
 use App\Team_member;
 use Illuminate\Http\Request;
@@ -23,7 +26,7 @@ use App\Settings;
 use App\Stage;
 use App\SustainableIcon;
 use \Illuminate\Validation\ValidationException;
-use URL, File, DB, Exception, Session, Storage;
+use URL, File, DB, Exception, Session, Storage, stdClass;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -41,12 +44,12 @@ class ClientCompanyController extends Controller
     }
     public function show($id)
     {
-        try {
-            $company = Company::with('state')
-                ->with('city')
-                ->with('user')
-                ->with('stage')
-                ->findorfail($id);
+        // try {
+            $user = auth()->user();
+            $user_id = $user->id;
+            $company = Company::with('state')->with(['city', 'user', 'stage'])->find($id);
+            if( empty( $company ) ) { return abort(404); }
+
             if (!empty($company->Sustainable_development)) {
                 $sustainableDevelopment = json_decode($company->Sustainable_development, true);
 
@@ -75,16 +78,39 @@ class ClientCompanyController extends Controller
             $pathToFile = storage_path($company->pitch_deck);
             // تحقق من وجود الملف
             $fileExists = file_exists($pathToFile);
-
-
-
-
-            return view('admin/clients/startup/company_profile', compact('company', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
-        } catch (Exception $e) {
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-        }
+            $company_current_step = $company->step;
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
+            $isResponsesPublished = false;
+            $final_comment = null;
+            $formData = collect([]);
+            if( !empty( $evaluationForm ) )
+            {
+                $current_step = $company->stepdata;
+                $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first();
+                $formData = $form->formData;
+                $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
+                $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
+                $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
+                $final_comment = $myComment->value;
+                $evaluationForm->final_comment = $final_comment;
+                $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {
+                    $category->subCriteria->map(function ( $subCategory ) use ( $myResponses ) {
+                        $checkResponse = $myResponses->where('criteria_id', $subCategory->id)->first();
+                        $subCategory->result = new stdClass;
+                        $subCategory->result->score = $checkResponse?->score;
+                        $subCategory->result->comment = $checkResponse?->comment;
+                        return $subCategory;
+                    });
+                    return $category;
+                });
+                $evaluationForm->isPublished = $isResponsesPublished;
+            }
+            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+        // } catch (Exception $e) {
+        //     //log what happend
+        //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+        //     abort(500);
+        // }
     }
     /**
      * Show the form for editing/Createing the specified resource.
@@ -106,7 +132,7 @@ class ClientCompanyController extends Controller
                     ->find(Auth::id());
                    
                     if (empty($client)) {
-                    return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
                 
                 $countries = Country::all();
@@ -192,7 +218,7 @@ class ClientCompanyController extends Controller
                     ->first();
 
                 if (empty($client)) {
-                    return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
                 $countries = Country::all();
                 $states = State::all();
@@ -746,7 +772,7 @@ class ClientCompanyController extends Controller
 
             if( $result ) {
                 if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
-                return redirect()->route('my_company', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             } else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
@@ -1103,7 +1129,7 @@ class ClientCompanyController extends Controller
         $teamMember->delete();
 
         // استجابة بعد الحفظ
-        return redirect()->route('my_company', $companyId)->with(['msg' => 'DeletedSuccessfully', 'class' => 'success']);
+        return redirect()->route('company.profile_view_mine', $companyId)->with(['msg' => 'DeletedSuccessfully', 'class' => 'success']);
     }
 
 
@@ -1302,7 +1328,7 @@ class ClientCompanyController extends Controller
         $Milestone->delete();
 
         // استجابة بعد الحفظ
-        return redirect()->route('my_company', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+        return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
 
 

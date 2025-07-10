@@ -123,7 +123,7 @@
             media_live_embeds: true,
             relative_urls : false,
             remove_script_host : false,
-            images_upload_url: "{{ route('training.upload', ['_token' => csrf_token() ])}}",
+            images_upload_url: "{{ route('trainings.files_upload', ['_token' => csrf_token() ])}}",
             file_picker_types: 'image',
             convert_urls : true,
             file_picker_callback: function(cb, value, meta) {

@@ -48,7 +48,7 @@ class TrainerEmail extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => 'New Training invitation',
         ];
     }
 }

@@ -17,7 +17,7 @@
         @endif
 
         @if ($data['user']->google2fa_secret == null)
-          <form class="form-horizontal" method="POST" action="{{ route('2fa.generate2faSecret') }}">
+          <form class="form-horizontal" method="POST" action="{{ route('security.2fa_generate_secret') }}">
             {{ csrf_field() }}
             <div class="form-group">
               <button type="submit" class="btn btn-primary">
@@ -31,7 +31,7 @@
           <img src="{{ $data['google2fa_url'] }}" alt="">
           <br /><br />
           2. {{ __('admin.Enter_the_pin_from_Google_Authenticator_app') }}<br /><br />
-          <form class="form-horizontal" method="POST" action="{{ route('2fa.enable2fa') }}">
+          <form class="form-horizontal" method="POST" action="{{ route('security.2fa_enable') }}">
             {{ csrf_field() }}
             <div class="form-group{{ $errors->has('verify-code') ? ' has-error' : '' }}">
               <label for="secret" class="control-label">{{ __('admin.Authenticator_Code') }}</label>
@@ -53,7 +53,7 @@
             {{ __('admin.on_your_account') }}.
           </div>
           <p>{{ __('admin.If_you_are_looking_to_disable_Two_Factor_Authentication') }}</p>
-          <form class="form-horizontal" method="POST" action="{{ route('2fa.disable2fa') }}">
+          <form class="form-horizontal" method="POST" action="{{ route('security.2fa_disable') }}">
             {{ csrf_field() }}
             <div class="form-group{{ $errors->has('current-password') ? ' has-error' : '' }}">
               <label for="change-password" class="control-label">{{ __('admin.Current_Password') }}</label>

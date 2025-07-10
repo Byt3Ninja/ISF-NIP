@@ -95,7 +95,7 @@
                                                             @endrole
                                                         </td>
                                                         @role('Admin')
-                                                        <td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $survey_scope->organization->id . '/edit') }}"> {{ $survey_scope->organization->{'name_'.$l} }}</a></td>
+                                                        <td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $survey_scope->organization?->id . '/edit') }}"> {{ $survey_scope->organization?->{'name_'.$l} }}</a></td>
 														@endrole
                                                         <td class="text-center">
 															@if( $survey_scope->trigger_by_session )
@@ -120,7 +120,7 @@
 														<td class="text-center">
 															
 																
-																	<a href="{{ route('surveys.results', ['survey' => $survey->id]) }}?target=mentorship" target="_blank" class="btn btn-xs btn-outline-info"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
+																	<a href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target=mentorship" target="_blank" class="btn btn-xs btn-outline-info"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
 																
 															
 														</td>
@@ -196,11 +196,15 @@
 				title: "{{__('admin.SureDelete')}}",
 				text: "{{__('admin.Recover')}}",
 				icon: "warning",
-				buttonsStyling: true,
 				showCancelButton: true,
-				confirmButtonClass: "btn-danger",
-				confirmButtonText: "{{__('admin.DYes')}}",
-				cancelButtonText: "{{__('admin.No')}}!",
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+					confirmButton: 'btn btn-danger me-2',
+					cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			})
 			.then((result) => {
 				if (result.value)
@@ -211,7 +215,14 @@
 							Swal.fire({
 								icon: 'success',
 								title: "{{ __('admin.Deleted') }}!",
-								html: "{{ __('admin.FileDeleted') }}.",
+								html: "{{ __('admin.DeletedSuccessfully') }}.",
+								showCancelButton: false,
+								showConfirmButton: true,
+								confirmButtonText: "{{ __('admin.OK') }}",
+								customClass: {
+									confirmButton: 'btn btn-primary',
+								},
+								buttonsStyling: false,
 							});
 							location.reload();
 						}

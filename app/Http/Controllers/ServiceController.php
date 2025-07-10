@@ -101,7 +101,7 @@ class ServiceController extends Controller
     }
 	
     if ($service) {
-        return redirect()->route('services.index')->with(['msg' => 'StoredSuccessfully']);
+        return redirect()->route('services.index')->with(['msg' => 'ServiceAdded']);
     } else {
         return back()->withInput()->with(['msg' => 'FailedStore']);
     }
@@ -175,7 +175,7 @@ class ServiceController extends Controller
     }
 
     if ($updated) {
-        return redirect()->route('services.index')->with(['msg' => 'UpdatedSuccessfully']);
+        return redirect()->route('services.index')->with(['msg' => 'ServiceUpdated']);
     } else {
         return back()->withInput()->with(['msg' => 'FailedUpdate']);
     }
@@ -214,7 +214,7 @@ class ServiceController extends Controller
 		}
 
 
-		$received = $received->get();
+		$received = $received->orderBy('created_at', 'desc')->get();
 		
 		return view('admin.settings.services.requests', compact('received','countold') );
 	}

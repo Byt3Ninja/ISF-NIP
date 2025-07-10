@@ -288,7 +288,7 @@
               </div>
               <form 
                 method="post" 
-                action="{{route('update_account_password')}}" 
+                action="{{route('user.profile_update_password')}}" 
                 enctype="multipart/form-data"
               >
                 {!! csrf_field() !!}
@@ -413,7 +413,7 @@
       var selected = '';
 
       $.ajax({
-        url: "{{ route('get_states_by_country') }}",
+        url: "{{ route('utils.locations_list_states_by_country') }}",
         data: {
           country_id: country_id
         },

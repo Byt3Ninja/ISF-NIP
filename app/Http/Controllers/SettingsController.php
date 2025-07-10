@@ -226,7 +226,7 @@ class SettingsController extends Controller
 					->orwhereDate('timerdate',   '<=', $request->end);
 			})->get(['id', 'title_en AS title', 'timerdate AS start',DB::raw('"#607d8b" AS color, "e" AS calendarId')]);
 
-			if (Auth::user()->can('calendar.edit'))
+			if (Auth::user()->can('calendar.events_edit'))
 			{
 				$public = Calendar::whereNull('isPrivate')->where(function($query) use($request) {
 					$query->orwhereDate('start', '>=', $request->start)
@@ -263,7 +263,7 @@ class SettingsController extends Controller
 
 	public function editcal($id)
 	{
-		if (Auth::user()->can('calendar.edit')) { $cal = Calendar::findOrFail($id); }
+		if (Auth::user()->can('calendar.events_edit')) { $cal = Calendar::findOrFail($id); }
 		else { $cal = Calendar::where('user_id',Auth::user()->id)->findOrFail($id); }
 		return view('admin.calendaredit', compact( 'cal'));
 	}
@@ -271,7 +271,7 @@ class SettingsController extends Controller
 	public function updatecal(Request $request, $id)
 	{
 		$private = 1;
-		if (Auth::user()->can('calendar.edit')) { $private = $request->isPrivate ? 1: null; }
+		if (Auth::user()->can('calendar.events_edit')) { $private = $request->isPrivate ? 1: null; }
 		Calendar::find($id)->update([
 			'title' => $request->title,
 			'start' => $request->start,
@@ -282,17 +282,17 @@ class SettingsController extends Controller
 			'isPrivate' => $private,
 			'user_id' => Auth::user()->id,
 		]);
-		return redirect()->route('calendar');
+		return redirect()->route('calendar.events_list');
 	}
 
 	public function delcal($id)
 	{
-		if (Auth::user()->can('calendar.edit'))
+		if (Auth::user()->can('calendar.events_edit'))
 		{
 			Calendar::find($id)->delete(); } else {
 			Calendar::where('user_id',Auth::user()->id)->find($id)->delete();
 		}
-		return redirect()->route('calendar');
+		return redirect()->route('calendar.events_list');
 	}
 
 	public function ajax(Request $request)
@@ -557,6 +557,10 @@ class SettingsController extends Controller
 		$GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
 		$GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
 
+		$GOOGLE_CALENDAR_CLIENT_ID = $request->input('GOOGLE_CALENDAR_CLIENT_ID');
+		$GOOGLE_CALENDAR_CLIENT_SECRET = $request->input('GOOGLE_CALENDAR_CLIENT_SECRET');
+		$GOOGLE_CALENDAR_REDIRECT = $request->input('GOOGLE_CALENDAR_REDIRECT');
+
 		$LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
 		$LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
 		$LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
@@ -568,6 +572,10 @@ class SettingsController extends Controller
 		$updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
 		$updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
 		$updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+
+		$updateSittings->GOOGLE_CALENDAR_CLIENT_ID = $GOOGLE_CALENDAR_CLIENT_ID;
+		$updateSittings->GOOGLE_CALENDAR_CLIENT_SECRET = $GOOGLE_CALENDAR_CLIENT_SECRET;
+		$updateSittings->GOOGLE_CALENDAR_REDIRECT = $GOOGLE_CALENDAR_REDIRECT;
 
 		$updateSittings->LINKEDIN_CLIENT_ID = $LINKEDIN_CLIENT_ID;
 		$updateSittings->LINKEDIN_CLIENT_SECRET = $LINKEDIN_CLIENT_SECRET;
@@ -770,18 +778,18 @@ class SettingsController extends Controller
 
     public function update_settingsWhatsapp(Request $request)
     {
-      
+    
         $id = $request->input('id');
         $whatsApp_URL_callback = $request->input('whatsApp_URL_callback');
-        $whatsApp_INSTANCE_ID = $request->input('whatsApp_INSTANCE_ID');
-        $whatsApp_ACCESS_TOKEN = $request->input('whatsApp_ACCESS_TOKEN');
+        $whatsapp_api_key = $request->input('whatsapp_api_key');
+        // $whatsApp_ACCESS_TOKEN = $request->input('whatsApp_ACCESS_TOKEN');
 
 
         $updateSittings = Settings::where('id', $id)->first();
 
         $updateSittings->whatsApp_URL_callback = $whatsApp_URL_callback;
-        $updateSittings->whatsApp_INSTANCE_ID = $whatsApp_INSTANCE_ID;
-        $updateSittings->whatsApp_ACCESS_TOKEN = $whatsApp_ACCESS_TOKEN;
+        $updateSittings->whatsapp_api_key = $whatsapp_api_key;
+        // $updateSittings->whatsApp_ACCESS_TOKEN = $whatsApp_ACCESS_TOKEN;
         $updateSittings->save();
 
 
@@ -933,7 +941,7 @@ class SettingsController extends Controller
 		if ($invitation) {
 			$invitation->expires_at = now()->addDays(2);
 			$invitation->save();
-			Mail::to($request->email)->send(new UserInvitation($invitation));
+			Mail::to($request->email)->queue(new UserInvitation($invitation));
 			return back()->with('message', 'InvitationSent');
 		}
 
@@ -947,7 +955,7 @@ class SettingsController extends Controller
 				$invitation->save();
 
 				// Send invitation email
-				Mail::to($request->email)->send(new UserInvitation($invitation));
+				Mail::to($request->email)->queue(new UserInvitation($invitation));
 
 				return back()->with('message', 'InvitationSent');
 	}
@@ -1008,7 +1016,7 @@ class SettingsController extends Controller
 			'status' => 'accepted',
 		]);
 
-		return redirect()->route('dashboard')->with('message', __('admin.accountCreated'));
+		return redirect()->route('core.dashboard_view')->with('message', __('admin.accountCreated'));
 	}
 
 	public function resendInvitation($invitationId)
@@ -1028,7 +1036,7 @@ class SettingsController extends Controller
 		$invitation->expires_at = now()->addDays(2);
 		$invitation->save();
 
-		Mail::to($invitation->email)->send(new UserInvitation($invitation));
+		Mail::to($invitation->email)->queue(new UserInvitation($invitation));
 
 		return back()->with('message', 'InvitationResent');
 	}

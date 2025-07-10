@@ -2,7 +2,7 @@
   <form 
     id="account-info-form" 
     method="post" 
-    action="{{ route('update_my_profile') }}" 
+    action="{{ route('user.profile_update_basic') }}" 
     enctype="multipart/form-data"
   >
     {!! csrf_field() !!}
@@ -213,7 +213,7 @@
         <div class="mb-4 col-md-6">
           <label for="country_id" class="form-label fs-6 fw-bold">{{ __('admin.Country') }}</label>
           <select id="country_id" name="country_id" class="select2 form-select" required>
-            <option value="">{{ __('admin.Country') }}</option>
+            <option value="" disabled>{{ __('admin.Country') }}</option>
             @foreach ($countries as $country)
             <option value="{{ $country->id }}" {{ $country->id == $client->country_id ? 'selected' : '' }}>
               {{ $country->emoji . ' ' . $country->{'name_' . $l} }}
@@ -224,7 +224,7 @@
         <div class="mb-4 col-md-6">
           <label for="state_id" class="form-label fs-6 fw-bold">{{ __('admin.State') }}</label>
           <select class="select2 form-select" required id="state_id" name="state_id">
-            <option value="">{{ __('admin.State') }}</option>
+            <option value="" disabled>{{ __('admin.State') }}</option>
             @php $name = 'name_'.$l; @endphp
             @if ($client->state_id)
             <option value="{{ $client->state_id }}" selected>{{ $client->state->{'name_' . $l} }}</option>

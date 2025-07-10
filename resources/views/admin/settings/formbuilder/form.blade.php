@@ -32,7 +32,7 @@ $title=App\BuilderForm::findOrFail($id);
                     <hr>
                     <div class="card-body">
                         @if(count($fields) > 0)
-                            <form action="{{ route('submit.form') }}" method="post">
+                            <form action="{{ route('forms.submissions_create') }}" method="post">
                                 @csrf
                                 <input type="hidden" name="builder_form_id" value="{{ $id }}" />
                                 <input type="hidden" name="field_ids" value="{{ $field_ids }}" />

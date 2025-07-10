@@ -65,7 +65,7 @@
 										</div>
 									</div>
 									@endif
-									<form method="post" action="{{ route('training.update_survey', ['id' => $scope->cycle_id, 'survey' => $scope->id]) }}">
+									<form method="post" action="{{ route('trainings.surveys_update', ['id' => $scope->cycle_id, 'survey' => $scope->id]) }}">
 										{!! csrf_field() !!}
 										<input name="_method" type="hidden" value="PATCH" />
 										<div class="row">
@@ -101,7 +101,7 @@
 											<div class="col-12 d-flex justify-content-end">
 												<input type="hidden" name="organization_id" value="{{ $scope->organization_id }}">
 												<button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
-												<a href="{{ route('training.surveys', ['id' => $scope->cycle_id]) }}" class="btn btn-secondary mb-1 mx-2">{{__('admin.Cancel')}}</a>
+												<a href="{{ route('trainings.surveys_list', ['id' => $scope->cycle_id]) }}" class="btn btn-secondary mb-1 mx-2">{{__('admin.Cancel')}}</a>
 											</div>
 										</div>
 									</form>

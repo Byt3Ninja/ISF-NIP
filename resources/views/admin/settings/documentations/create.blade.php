@@ -66,9 +66,9 @@
                               <div class="form-group">
                                 <label class="form-label" for="arr">{{ __('admin.arrange') }}:</label>
                                 @php($max = \App\Documentation::max('arr'))
-                                <input id="arr" type="text" name="arr"
+                                <input id="arr" type="number" name="arr"
                                   placeholder="{{ __('admin.arrange') }}" class="select form-control"
-                                  value="{{ old('arr') ?? $max + 1 }}">
+                                  value="{{ old('arr') ?? $max + 1 }}" required>
                               </div>
                               <br>
                             </div>
@@ -153,7 +153,7 @@
         content_style: 'body { font-family:Times New Roman,Arial,sans-serif; font-size:14px }',
         image_title: true,
         automatic_uploads: true,
-        images_upload_url: "{{ route('training.upload', ['_token' => csrf_token()]) }}",
+        images_upload_url: "{{ route('trainings.files_upload', ['_token' => csrf_token()]) }}",
         file_picker_types: 'image',
         relative_urls: false,
         remove_script_host: true,

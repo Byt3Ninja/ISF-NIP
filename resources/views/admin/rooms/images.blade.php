@@ -87,7 +87,7 @@
                                                                                             <div class="col-md-3">
                                                                                                 <img class="round" src="/191014/{{$roomImage->img_url}}"
                                                                                                      height="150" width="100%"/>
-                                                                                               <a style="display:block;text-align: center;margin-top: 10px;" href="{{route('deleteImages', ['id' => $roomImage->id])}}">Delete</a>
+                                                                                               <a style="display:block;text-align: center;margin-top: 10px;" href="{{route('rooms.images_delete', ['id' => $roomImage->id])}}">Delete</a>
                                                                                             </div>
                                                                                         @endforeach
                                                                                     </div>

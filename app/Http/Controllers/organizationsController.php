@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateClientProfileRequest;
-use App\Http\Requests\UpdateClientProfilePasswordRequest;
-use App\User;
-use App\Role as Roles;
-use App\Organization;
-use App\Company;
-use Storage;
-use \Spatie\Permission\Models\Role as Role;
-use Intervention\Image\ImageManagerStatic as Image;
-use Hash;
 use DB;
-use Auth;
 use Log;
-use Exception;
+use Auth;
+use Hash;
 use Session;
+use Storage;
+use App\User;
+use Exception;
+use App\Company;
+use App\Organization;
+use App\Role as Roles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrganizationCreatedMail;
+use \Spatie\Permission\Models\Role as Role;
+use App\Http\Requests\UpdateClientProfileRequest;
+use Intervention\Image\ImageManagerStatic as Image;
+use App\Http\Requests\UpdateClientProfilePasswordRequest;
 
 class organizationsController extends Controller
 {
@@ -83,21 +85,30 @@ class organizationsController extends Controller
 		$organization->color = $request->color;
 
 		//store the image
-		if ($request->input('img_url') != null) {
-			$img_url = $request->input('img_url');
-		} else {
+
+		if ($request->hasFile('img_url')) {
+            $image = $request->file('img_url');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+             $image->move(public_path('organizations/'), $imageName);
+			 $organization->img_url = 'organizations/' . $imageName;
+        }else {
 			$img_url = '/images/background/logo.png';
+			$organization->img_url =$img_url;
 		}
 		//update
-		$organization->img_url = $img_url;
-
 		$organization->save();
+
+		$password = $request->password;
 
 		$user->organization_id = $organization->id;
 		$user->password = Hash::make($request->password);
 		$user->email_verified_at = date('Y-m-d H:i:s');
 		$user->HaveCompany = 0;
 		$user->save();
+
+
+		Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $password));
+
 		return redirect()->route('organizations.index')->with(['msg' => 'StoredSuccessfully']);
 	}
 
@@ -147,24 +158,32 @@ class organizationsController extends Controller
 
 
 		//store the image
-		if ($request->file('img_url') != false) {
-			$img_file = $request->file('img_url'); // الملف المرفوع
-			// الحصول على اسم الصورة الأصلي أو اسم جديد حسب الحاجة
-			$counter = 1;
-			$imageName = str_replace('.' . $img_file->getClientOriginalExtension(), '', $img_file->getClientOriginalName()) . '-' . $counter++ . '.' . $img_file->getClientOriginalExtension();
-			$imageName = strtolower(str_replace(' ', '-', $imageName));
-			// تخزين الصورة في المجلد المحدد في إعدادات التخزين 'UsersLFMPublic'
-			Storage::disk('UsersLFMPublic')->put($imageName, file_get_contents($img_file));
+		if ($request->hasFile('img_url')) {
+            $image = $request->file('img_url');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
 
-			// الحصول على رابط الصورة المخزنة
-			$imagePath = Storage::disk('UsersLFMPublic')->url($imageName);
-		} else {
-			$imagePath = $organization->img_url;
-		}
+             $image->move(public_path('organizations/'), $imageName);
+             $organization->img_url = 'organizations/' . $imageName;
+        }
+
+		// if ($request->file('img_url') != false) {
+		// 	$img_file = $request->file('img_url'); // الملف المرفوع
+		// 	// الحصول على اسم الصورة الأصلي أو اسم جديد حسب الحاجة
+		// 	$counter = 1;
+		// 	$imageName = str_replace('.' . $img_file->getClientOriginalExtension(), '', $img_file->getClientOriginalName()) . '-' . $counter++ . '.' . $img_file->getClientOriginalExtension();
+		// 	$imageName = strtolower(str_replace(' ', '-', $imageName));
+		// 	// تخزين الصورة في المجلد المحدد في إعدادات التخزين 'UsersLFMPublic'
+		// 	Storage::disk('UsersLFMPublic')->put($imageName, file_get_contents($img_file));
+
+		// 	// الحصول على رابط الصورة المخزنة
+		// 	$imagePath = Storage::disk('UsersLFMPublic')->url($imageName);
+		// } else {
+		// 	$imagePath = $organization->img_url;
+		// }
 
 
 		//update
-		$organization->img_url = $imagePath;
+		$organization->img_url = 'organizations/' . $imageName;
 
 		$organization->save();
 		$user = $organization->user;
@@ -199,7 +218,7 @@ class organizationsController extends Controller
 			$result = $user->where('id', $user->id)
 				->update(['password' => $password]);
 			if ($result)
-				return redirect()->route('my_profile')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
 			else
 				return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
 		} catch (Exception $e) {

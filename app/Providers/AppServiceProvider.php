@@ -65,6 +65,10 @@ class AppServiceProvider extends ServiceProvider
             'services.google.client_secret' => $pusherConfig['GOOGLE_CLIENT_SECRET'],
             'services.google.redirect' => $pusherConfig['GOOGLE_REDIRECT'],
 
+            'services.google_calendar.client_id' => $pusherConfig['GOOGLE_CALENDAR_CLIENT_ID'],
+            'services.google_calendar.client_secret' => $pusherConfig['GOOGLE_CALENDAR_CLIENT_SECRET'],
+            'services.google_calendar.redirect' => $pusherConfig['GOOGLE_CALENDAR_REDIRECT'],
+
             'services.linkedin.client_id' => $pusherConfig['LINKEDIN_CLIENT_ID'],
             'services.linkedin.client_secret' => $pusherConfig['LINKEDIN_CLIENT_SECRET'],
             'services.linkedin.redirect' => $pusherConfig['LINKEDIN_REDIRECT_URI'],
@@ -78,5 +82,16 @@ class AppServiceProvider extends ServiceProvider
             // 'broadcasting.connections.pusher.options.MICROSOFT_APP_EMAIL' => $pusherConfig['MICROSOFT_APP_EMAIL'],
             // 'broadcasting.connections.pusher.options.MICROSOFT_REDIRECT_URI' => $pusherConfig['MICROSOFT_REDIRECT_URI'],
         ]);
+
+
+        if( request()->is('api/*') )
+        {
+            $lang = 'en';
+            if( request()->headers->has('lang') )
+			{
+                $lang = ( in_array( strtolower( request()->header('lang') ), ['ar', 'en'] ) ) ? strtolower( request()->header('lang') ) : 'en';
+				app()->setLocale( $lang );
+			}
+        }
     }
 }

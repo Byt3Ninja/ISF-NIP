@@ -1,10 +1,5 @@
 @extends('layouts.admin')
 
-@section('vendorstyle')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-@stop
-
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
@@ -74,8 +69,14 @@
                       <div class="col-12 col-md-6 col-lg-4">
                         <select class="form-select select2" id="cycle_id">
                           @php
+                          $user = auth()->user();
+                          if($user->hasAnyRole(['organizationManager'])) {
+                            $cycles = \App\Cycle::where('organization_id', $user->organization_id)->get();
+                          }else{
                             $cycles = \App\Cycle::get();
+                          }
                           @endphp
+                          <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
                           @foreach ($cycles as $cycle)
                             <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
                               {{ $cycle->title }}
@@ -89,7 +90,7 @@
                     <button class="btn btn-primary btn-icon rounded-circle" id="searchBot">
                       <i class="ti ti-filter"></i>
                     </button>
-                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions'">
+                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions{{ request()->show ? '?show=' . request()->show : '' }}'">
                       <i class="ti ti-reload"></i> 
                     </button>
                   </div>
@@ -113,14 +114,14 @@
                       @foreach ($sessions as $session)
                         <tr>
                           <td>
-                            <div class="d-flex align-items-center">
-                              <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                            <div class="d-flex align-items-center w-px-150">
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
                                 <img 
                                   onerror="this.src='/images/logo-placeholder.png'"
-                                  src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
+                                  src="{{ $session->user->company->logo_url ?? '' }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
                               </a>
-                              <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                                {{ $session->user->company->{'name_' . $l} }}
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
+                                {{ $session->user->company->{'name_' . $l} ?? '' }}
                               </a>
                             </div>
                           </td>
@@ -144,9 +145,9 @@
                               @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
                                 onerror="this.src='/icons/account.svg'"
-                                src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                                 @endif
-                              {{ $session->mentor->name }}
+                              {{ $session->mentor->name ?? '' }}
                             </div>
                           </td>
                           <td>
@@ -156,9 +157,22 @@
                             <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
                           </td>
                           <td>
-                            <span class="badge bg-label-{{ $session->approved ? 'success' : 'warning' }}">
-                              {{ $session->approved ? __('Yes') : __('Waiting') }}
-                            </span>
+                              @if( $session->approved )
+                              @if( $session->approved == 'Yes' )
+                              <span class="badge bg-label-success" >
+                              {{ __('admin.Yes') }}
+                              </span>
+                              @else
+                              <span class="badge bg-label-danger" >
+                              {{ __('admin.No') }}
+                              </span>
+                              @endif
+                              @else
+                              <span class="badge bg-label-warning" >
+                              {{ __('admin.Waiting') }}
+                              </span>
+                              @endif
+                            
                           </td>
                           <td>
                             <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
@@ -170,9 +184,11 @@
                               <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-info" onclick="edit({{ $session->id }})" title="Edit">
                                 <i class="ti ti-edit"></i>
                               </button>
+                              @if( $session->datetime >= now() )
                               <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="deleteme({{ $session->id }})" title="Delete">
                                 <i class="ti ti-trash"></i>
                               </button>
+                              @endif
                               @if (!$session->approved)
                                 <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
                                   <i class="ti ti-check"></i>
@@ -190,16 +206,140 @@
                                 </a>
                               @endif
                               @if ($session->fileurl)
-                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="btn btn-sm btn-primary" title="Download attached">
+                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
                                   <i class="ti ti-download"></i>
                                 </a>
                               @endif
+                              <button title="View Report" type="button" data-bs-toggle="modal" data-bs-target="#reportModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle waves-effect">
+                                 <i class="ti ti-file-text"></i>
+                              </button>
                             </div>
                           </td>
                         </tr>
                       @endforeach
                     </tbody>
                   </table>
+                  @foreach ($sessions as $session)
+<!-- Modal for Session Reports and Recordings -->
+<div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Total Meeting Duration -->
+        <div class="mb-3">
+          <strong>{{ __('admin.total_meeting_duration') }}:</strong>
+          {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
+        </div>
+        <!-- Total Number of Participants -->
+        <div class="mb-3">
+          <strong>{{ __('admin.total_number_of_participants') }}:</strong>
+          {{ $session->reports->count() }}
+        </div>
+
+        <!-- Session Reports Section -->
+        @if ($session->reports->count() > 0)
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <h5>{{ __('admin.session_reports') }}</h5>
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
+            {{ __('admin.update_reports') }}
+          </a>
+        </div>
+        <table class="table table-bordered mt-2">
+          <thead>
+            <tr>
+              <th class="text-center">#</th>
+              <th class="text-center">{{ __('admin.participant_name') }}</th>
+              <th class="text-center">{{ __('admin.participant_email') }}</th>
+              <th class="text-center">{{ __('admin.join_time') }}</th>
+              <th class="text-center">{{ __('admin.leave_time') }}</th>
+              <th class="text-center">{{ __('admin.attendance_duration') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($session->reports as $key => $report)
+            <tr>
+              <td class="text-center">{{ $key + 1 }}</td>
+              <td class="text-center">{{ $report->participant_name }}</td>
+              <td class="text-center">{{ $report->participant_email }}</td>
+              <td class="text-center">{{ $report->participant_join_date }}</td>
+              <td class="text-center">{{ $report->participant_end_date }}</td>
+              <td class="text-center">{{ round($report->attendance_duration / 60, 2) }} {{ __('admin.minutes') }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @else
+        <!-- No Reports: Display Update Button -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <h5>{{ __('admin.session_reports') }}</h5>
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
+            {{ __('admin.update_reports') }}
+          </a>
+        </div>
+        @endif
+
+        <!-- Session Recordings Section -->
+        @if ($session->recordings->count() > 0)
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <h5>{{ __('admin.session_recordings') }}</h5>
+          <a href="{{ route('trainings.reports_recording', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
+            {{ __('admin.update_recordings') }}
+          </a>
+        </div>
+        <div class="mt-2">
+          <strong>{{ __('admin.recording_passcode') }}:</strong>
+          <span>{{ $session->recordings->first()->passcode ?? __('admin.not_available') }}</span>
+        </div>
+        <table class="table table-bordered mt-2">
+          <thead>
+            <tr>
+              <th class="text-center">#</th>
+              <th class="text-center">{{ __('admin.recording_type') }}</th>
+              <th class="text-center">{{ __('admin.recording_time') }}</th>
+              <th class="text-center">{{ __('admin.view_recording') }}</th>
+              <th class="text-center">{{ __('admin.download_recording') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($session->recordings as $key => $recording)
+            <tr>
+              <td class="text-center">{{ $key + 1 }}</td>
+              <td class="text-center">{{ $recording->recording_type }}</td>
+              <td class="text-center">{{ $recording->recording_time }}</td>
+              <td class="text-center">
+                <a href="{{ $recording->recording_view_url }}" target="_blank" class="btn btn-primary">
+                  {{ __('admin.View') }}
+                </a>
+              </td>
+              <td class="text-center">
+                <a href="{{ $recording->recording_download_url }}" target="_blank" class="btn btn-success">
+                  {{ __('admin.Download') }}
+                </a>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @else
+        <!-- No Recordings: Display Update Button -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <h5>{{ __('admin.session_recordings') }}</h5>
+          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
+            {{ __('admin.update_recordings') }}
+          </a>
+        </div>
+        @endif
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endforeach
                 </div>
               </div>
             </div>
@@ -250,13 +390,13 @@
             </div>
           </div>
           <div class="modal-footer">
-            <div class="btn btn-label-secondary ml-1">
-              <i class="ti ti-check d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
+            <div class="btn btn-label-secondary ml-1" data-bs-dismiss="modal" aria-label="Close">
+              {{-- <i class="ti ti-check"></i> --}}
+              <span class="">{{ __('cycles.Close') }}</span>
             </div>
             <button type="submit" class="btn btn-primary ml-1">
-              <i class="ti ti-check d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+              {{-- <i class="ti ti-check"></i> --}}
+              <span class="">{{ __('cycles.Submit') }}</span>
             </button>
           </div>
         </form>
@@ -265,61 +405,65 @@
   </div>
 @stop
 
-@section('scripts')
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-@stop
-
 @section('pagescripts')
   <script>
     $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
-        "columnDefs": [
-
-          {
-            "orderable": true,
-            "targets": 7
-          }, // تفعيل الفرز للعمود الأول فقط
-        ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
+    $('#userstable').DataTable().destroy();
+    $('#userstable').DataTable({
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [],
+    "columnDefs": [
+      {
+        "orderable": false,
+        "targets": [0, 1, 2, 3, 4, 5, 6, 7]
+      }
+    ],
+    @if ($l == 'ar')
+      "language": {
+        "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+        "sLoadingRecords": "جارٍ التحميل...",
+        "sProcessing": "جارٍ التحميل...",
+        "sLengthMenu": "أظهر _MENU_ مدخلات",
+        "sZeroRecords": "لم يعثر على أية سجلات",
+        "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+        "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+        "sInfoPostFix": "",
+        "sSearch": "ابحث:",
+        "sUrl": "",
+        "oPaginate": {
+          "sFirst": "الأول",
+          "sPrevious": "السابق",
+          "sNext": "التالي",
+          "sLast": "الأخير"
+        },
+        "oAria": {
+          "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+          "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+        }
+      }
+    @endif
+    });
     });
   </script>
   <script>
-    // $('.date').datetimepicker({
-    //   timepicker: true,
-    //   format: 'Y-m-d H:i'
+    // $('#sdate').flatpickr({
+    //   enableTime: true,
+    //   dateFormat: "Y-m-d h:i K",
+    //   minDate: "today",
+    //   time_24hr: false,
+    //   allowInput: true,
+    //   onClose: function(selectedDates, dateStr, instance) {
+    //     // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+    //     if (selectedDates.length > 0) {
+    //       const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+    //       instance.setDate(formattedDate, true, "Y-m-d h:i K");
+    //     }
+    //   }
     // });
 
     $('.datewithouttime').flatpickr({
@@ -343,7 +487,22 @@
           $('#sid').val(id);
           $('#mentorid').val(response.mentor_id);
           $('#userid').val(response.user_id);
-          $('#sdate').val(response.zoom_date);
+          // $('#sdate').val(response.zoom_date);
+          $('#sdate').flatpickr({
+            enableTime: true,
+            dateFormat: "Y-m-d h:i K",
+            // minDate: "today",
+            time_24hr: false,
+            allowInput: true,
+            defaultDate: response.zoom_date ? response.zoom_date : '',
+            onClose: function(selectedDates, dateStr, instance) {
+              // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+              if (selectedDates.length > 0) {
+                const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+                instance.setDate(formattedDate, true, "Y-m-d h:i K");
+              }
+            }
+          });
           $('#period').val(response.period);
           $('#notes').val(response.notes);
           $('#ModifyRequest').modal('show');
@@ -377,7 +536,7 @@
         const formattedEndDate = formatDate(endDate);
         url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
       }
-      if (CycleId) {
+      if (CycleId && CycleId !== 'all') {
         url += `&cycle_id=${CycleId}`;
       }
 
@@ -470,7 +629,11 @@
     }
 
     function approve(id, stat) {
-      alert('{{ __('admin.sending_request') }}')
+      if(stat == 'Yes'){
+      alert('{{ __('admin.Accepting_request') }}')
+      }else{
+        alert('{{ __('admin.Rejecting_request') }}')
+      }
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

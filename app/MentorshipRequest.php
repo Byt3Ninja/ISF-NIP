@@ -13,22 +13,22 @@ class MentorshipRequest extends Model
     public function getCodeAttribute(){
         return "M-".$this->mentor->id.'-'.$this->user->id.'-'.$this->id;
     }
-    public function getZoomDateAttribute()
-    {
-        return date('Y-m-d h:i a',strtotime($this->attributes['zoom_date']));
-    }
-    public function getZoomDateOrgAttribute()
-    {
-        return date('Y-m-d H:i',strtotime($this->attributes['zoom_date']));
-    }
-    public function getEndZoomDateAttribute()
-    {
-        return date("Y-m-d h:i a", strtotime('+'.$this->attributes['period'].' minutes', strtotime($this->attributes['zoom_date'])));
-    }
-    public function getEndZoomDateOrgAttribute()
-    {
-        return date("Y-m-d H:i", strtotime('+'.$this->attributes['period'].' minutes', strtotime($this->attributes['zoom_date'])));
-    }
+    // public function getZoomDateAttribute()
+    // {
+    //     return date('Y-m-d h:i a',strtotime($this->attributes['zoom_date']));
+    // }
+    // public function getZoomDateOrgAttribute()
+    // {
+    //     return date('Y-m-d H:i',strtotime($this->attributes['zoom_date']));
+    // }
+    // public function getEndZoomDateAttribute()
+    // {
+    //     return date("Y-m-d h:i a", strtotime('+'.$this->attributes['period'].' minutes', strtotime($this->attributes['zoom_date'])));
+    // }
+    // public function getEndZoomDateOrgAttribute()
+    // {
+    //     return date("Y-m-d H:i", strtotime('+'.$this->attributes['period'].' minutes', strtotime($this->attributes['zoom_date'])));
+    // }
     public function user(){
         return $this->belongsTo(User::class,'user_id','id');
     }
@@ -50,5 +50,20 @@ class MentorshipRequest extends Model
     }
     public function orgnization(){
         return $this->belongsTo(Organization::class, 'organization_id','id');
+    }
+
+    public function tasks()
+ {
+    return $this->hasMany(MentorshipTask::class, 'mentorship_request_id');
+ }
+
+    public function reports()
+    {
+        return $this->hasMany(SessionReport::class, 'mentorship_request_id', 'id');
+    }
+
+    public function recordings()
+    {
+        return $this->hasMany(SessionRecording::class, 'mentorship_request_id', 'id');
     }
 }

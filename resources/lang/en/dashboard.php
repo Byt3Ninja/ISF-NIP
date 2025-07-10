@@ -29,6 +29,7 @@ return [
     'My Requests' => 'My Requests',
     'Mentors' => 'Mentors',
     'MentorsSession' => 'Mentors Sessions',
+    'UpcomingMentorsSession' => 'Upcoming Mentors Sessions',
     'No Cycles started yet' => 'No Programs started yet',
     'Your next mentorship session with' => 'Your next mentorship session with',
     'will start' => 'will start',
@@ -156,4 +157,8 @@ return [
     'No category' => 'No category',
     'No Category' => 'No Category',
     'No Organization' => 'No Organization',
+    'cannot_schedule_past_meeting' => 'You cannot schedule a Meeting in the Past',
+    'Click to select multiple dates for your sessions' => 'Click to select multiple dates for your sessions',
+    'Select multiple dates' => 'Select multiple dates',
+    'Hide schedule' => 'Hide schedule',
 ];

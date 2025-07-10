@@ -27,7 +27,7 @@ class MentorshipRequestNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail','database'];
     }
 
     /**
@@ -51,5 +51,13 @@ class MentorshipRequestNotification extends Notification
             'message' => __('admin.mentorship_request_subject', ['startup' => $this->data['company_name']]),
             'user_id' => $notifiable->id,
         ];
+    }
+
+     public function toDatabase(object $notifiable): array
+    {
+       return [
+        'message' => ($this->data['company_name'] ?? 'N/A') . 
+                     ' has sent you a mentorship request. They are eager to learn from your expertise and guidance.',
+         ]; 
     }
 }

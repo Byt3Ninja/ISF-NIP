@@ -75,7 +75,7 @@
 													<label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
 														style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
 														<img 
-															src="{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
+															src="/{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
 															onerror="this.src='/images/logo-placeholder.png'"
 															alt="Organization Logo" 
 															class="rounded img-fluid border shadow-sm"
@@ -122,24 +122,24 @@
                         </div>
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
-                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_en">{{ __('admin.Organization Manager English Name') }}</label>
+                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_en">{{ __('admin.Organization Manager English First Name') }}</label>
                             <input name="first_name_en" type="text" class="form-control" id="first_name_en"
-                              value="{{ $user->first_name_en }}" placeholder="{{ __('admin.First Name') }}" required
+                              value="{{ $user->first_name_en ?? '' }}" placeholder="{{ __('admin.First Name') }}" required
                               autocomplete="first_name_en" autofocus />
                           </fieldset>
                         </div>
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
                             <label class="form-label fw-semibold fs-6 mb-1" for="last_name_en">{{ __('admin.Organization Manager English Last Name') }}</label>
-                            <input value="{{ $user->last_name_en }}" name="last_name_en" type="text"
+                            <input value="{{ $user->last_name_en ?? '' }}" name="last_name_en" type="text"
                               class="form-control" id="last_name_en" placeholder="{{ __('admin.Last Name') }}"
                               required autocomplete="last_name_en" />
                           </fieldset>
                         </div>
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
-                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_ar">{{ __('admin.Organization Manager Arabic Name') }}</label>
-                            <input value="{{ $user->first_name_ar }}" name="first_name_ar" type="text"
+                            <label class="form-label fw-semibold fs-6 mb-1" for="first_name_ar">{{ __('admin.Organization Manager Arabic First Name') }}</label>
+                            <input value="{{ $user->first_name_ar ?? '' }}" name="first_name_ar" type="text"
                               class="form-control" id="first_name_ar" placeholder="{{ __('admin.First Name') }}"
                               required autocomplete="first_name_ar" autofocus />
                           </fieldset>
@@ -147,7 +147,7 @@
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
                             <label class="form-label fw-semibold fs-6 mb-1" for="last_name_ar">{{ __('admin.Organization Manager Arabic Last Name') }}</label>
-                            <input value="{{ $user->last_name_ar }}" name="last_name_ar" type="text"
+                            <input value="{{ $user->last_name_ar ?? '' }}" name="last_name_ar" type="text"
                               class="form-control" id="last_name_ar" placeholder="{{ __('admin.Last Name') }}"
                               required autocomplete="last_name_ar" />
                           </fieldset>
@@ -159,7 +159,7 @@
                                 <fieldset>
                                   <div class="radio">
                                     <input type="radio" name="gender" value="Male" id="g1"
-                                      {{ $user->gender == 'Male' ? 'checked=""' : '' }}>
+                                      {{ optional($user)->gender == 'Male' ? 'checked=""' : '' }}>
                                     <label class="form-label fw-semibold fs-6 mb-1" for="g1">{{ __('Male') }}</label>
                                   </div>
                                 </fieldset>
@@ -168,7 +168,7 @@
                                 <fieldset>
                                   <div class="radio">
                                     <input type="radio" name="gender" value="Female" id="g2"
-                                      {{ $user->gender == 'Female' ? 'checked=""' : '' }}>
+                                      {{ optional($user)->gender == 'Female' ? 'checked=""' : '' }}>
                                     <label class="form-label fw-semibold fs-6 mb-1" for="g2">{{ __('Female') }}</label>
                                   </div>
                                 </fieldset>
@@ -179,7 +179,7 @@
                         <div class="col-md-12 mb-4">
                           <fieldset class="form-group">
                             <label class="form-label fw-semibold fs-6 mb-1" class="text-bold-600" for="exampleInputEmail1">{{ __('admin.Email') }}</label>
-                            <input value="{{ $user->email }}" name="email" type="email" class="form-control"
+                            <input value="{{ $user->email ?? '' }}" name="email" type="email" class="form-control"
                               id="email" placeholder="{{ __('admin.Email') }}" required autocomplete="email">
                           </fieldset>
                         </div>
@@ -187,7 +187,7 @@
                           <fieldset class="form-group">
                             <label class="form-label fw-semibold fs-6 mb-1" class="text-bold-600" for="phone">{{ __('admin.Phone') }}</label>
                             <input type="text" class="form-control" id="phone"
-                              placeholder="{{ __('admin.Phone') }}" value="{{ $user->phone }}" name="phone"
+                              placeholder="{{ __('admin.Phone') }}" value="{{ $user->phone ?? '' }}" name="phone"
                               required autocomplete="new-phone">
                           </fieldset>
                         </div>

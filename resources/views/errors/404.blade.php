@@ -74,7 +74,7 @@
         <h1 class="mb-2 mx-2" style="line-height: 6rem; font-size: 6rem">404</h1>
         <h4 class="mb-2 mx-2">{{ __('Page Not Found') }} ⚠️</h4>
         <p class="mb-6 mx-2">{{ __("we couldn't find the page you are looking for") }}</p>
-        <a href="/" class="btn btn-primary mb-10">{{ __('BACK TO HOME') }}</a>
+        <a href="/dashboard" class="btn btn-primary mb-10">{{ __('BACK TO HOME') }}</a>
         <div class="mt-4">
           <img 
             src="/vuexy/assets/img/illustrations/page-misc-error.png"

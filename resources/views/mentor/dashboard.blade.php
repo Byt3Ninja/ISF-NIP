@@ -350,7 +350,7 @@
         <!-- / Latest Survey -->
         @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
           @if( $_user->hasRole('Mentor') )
-          @if( $_user->ableToAll(['surveys.taking', 'surveys.submit'], $permissions) )
+          @if( $_user->ableToAll(['surveys.take', 'surveys.submit'], $permissions) )
           <div class="col-sm-6 col-12 mb-6" style="max-height: 355px; overflow-y: auto; border-radius: 1rem;">
             <div class="card">
               <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -409,7 +409,7 @@
                     </div>
                     <div class="col-3 text-end">
                       <a 
-                        href="{{ route('surveys.taking', ['id' => $survey->id]) }}" 
+                        href="{{ route('surveys.take', ['id' => $survey->id]) }}" 
                         class="btn btn-sm btn-label-primary"
                       >
                         {{ __('dashboard.startSurvey') }}
@@ -503,38 +503,33 @@
 @endphp
 
 @foreach ($groupedSchedules as $day => $schedules)
-    @php
-        $times = ''; // تخزين الأوقات المجمعة
-        foreach ($schedules as $schedule) {
-            $times .= __('dashboard.from') . ' ' . substr($schedule->tfrom, 0, 5) . ' ' . __('dashboard.to') . ' ' . substr($schedule->tto, 0, 5) . ' | ';
-        }
-        $times = rtrim($times, ' | '); // إزالة الفاصل الأخير
-    @endphp
-    <tr class="text-{{ $schedules->first()->active ? 'primary' : 'danger' }}">
-        <td>{{ $loop->iteration }}</td>
-        <td>{{ __('admin.Weekly') }} ({{ __('admin.'.$day) }})</td>
-        <td>{{ $times }}</td>
-        <td>{{ $schedules->first()->notes ? $schedules->first()->notes : '...' }}</td>
-        <td>
-            <div class="dropdown">
-                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                    <i class="ti ti-dots-vertical"></i>
-                </button>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
-                        <i class="ti ti-pencil me-2"></i> {{ __('admin.Edit') }}
+    @foreach ($schedules as $schedule)
+        <tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
+            <td>{{ $loop->parent->iteration }}.{{ $loop->iteration }}</td>
+            <td>{{ __('admin.Weekly') }} ({{ __('admin.'.$day) }})</td>
+            <td>{{ __('dashboard.from') . ' ' . substr($schedule->tfrom, 0, 5) . ' ' . __('dashboard.to') . ' ' . substr($schedule->tto, 0, 5) }}</td>
+            <td>{{ $schedule->notes ? $schedule->notes : '...' }}</td>
+            <td>
+                <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="ti ti-dots-vertical"></i>
                     </button>
-                    <button class="dropdown-item" onclick="modify(2, {{ $schedules->first()->id }}, {{ $schedules->first()->active }})"
-                        type="button">
-                        <i class="ti ti-{{ $schedules->first()->active ? 'eye' : 'eye-off' }} me-2"></i>
-                        {{ $schedules->first()->active ? __('admin.Deactivate') : __('admin.Activate') }}
-                    </button>
-                    <button onclick="modify(3,{{ $schedules->first()->id }},0)" type="button" class="dropdown-item"><i
-                            class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
+                            <i class="ti ti-pencil me-2"></i> {{ __('admin.Edit') }}
+                        </button>
+                        <button class="dropdown-item" onclick="modify(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
+                            <i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
+                            {{ $schedule->active ? __('admin.Deactivate') : __('admin.Activate') }}
+                        </button>
+                        <button onclick="modify(3,{{ $schedule->id }},0)" type="button" class="dropdown-item">
+                            <i class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </td>
-    </tr>
+            </td>
+        </tr>
+    @endforeach
 @endforeach
               </tbody>
             </table>
@@ -829,14 +824,20 @@
           } else if (type === 2) {
             location.reload();
             } else if (type === 3) {
-            Swal.fire({
-              title: 'Deleted!',
-              text: 'The schedule has been deleted successfully.',
-              icon: 'success',
-              confirmButtonText: 'OK'
+              Swal.fire({
+                icon: 'success',
+                title: "{{ __('admin.Deleted') }}!",
+                html: "{{ __('admin.DeletedSuccessfully') }}.",
+                showCancelButton: false,
+                showConfirmButton: true,
+                confirmButtonText: "{{ __('admin.OK') }}",
+                customClass: {
+                  confirmButton: 'btn btn-primary',
+                },
+                buttonsStyling: false,
             }).then((result) => {
               if (result.isConfirmed) {
-              location.reload();
+                location.reload();
               }
             });
           }

@@ -99,9 +99,14 @@ document.getElementById('generate-swot').addEventListener('click', function () {
            
             Swal.fire({
                 title: "{{ __('admin.Success!') }}",
-                text: "{{ __('admin.swot_generated') }}",
-                icon: "success",
-                confirmButtonText: "OK"
+                html: "{{ __('admin.swot_generated') }}",
+                showCancelButton: false,
+                showConfirmButton: true,
+                confirmButtonText: "{{ __('admin.OK') }}",
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                },
+                buttonsStyling: false,
             }).then(() => {
                 location.reload();
             });

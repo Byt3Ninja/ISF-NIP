@@ -15,6 +15,7 @@ use App\MentorshipTaskComment;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendTaskNotificationJob;
 use App\Notifications\TaskNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
@@ -46,8 +47,8 @@ class MentorshipTaskController extends Controller
 			abort(404);
 		} else {
 			$lang = app()->getLocale();
-			$condition = "mentorship_tasks.mentorship_request_id = $request->mentorship_id ";
-			$tasks = $this->handleTask($lang, $condition, 'list');
+			$condition = "mentorship_tasks.mentorship_request_id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $request->mentorship_id, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
@@ -73,14 +74,47 @@ class MentorshipTaskController extends Controller
 				];
 			}
 
+			$startup = "SELECT MT.id,
+			MT.mentor_id as MT_mentor_id,
+			MT.user_id as MT_user_id,
+			MT.mentorship_request_id as MT_mentorship_request_id,
+			MT.company_id as MT_company_id,
+			C.name_en as C_name_en,
+			C.logo as C_logo,
+			C.step as C_step,
+			C.cycle as C_cycle,
+			U.id as U_id,
+			Cy.title as CY_title,
+			Cy.id as CY_id,
+			S.title as S_title,
+			S.id as S_id,
+			MR.zoom_date as MR_zoom_date
+			FROM 
+			mentorship_tasks as MT
+			LEFT JOIN companies as C ON C.id = MT.company_id
+			LEFT JOIN users as U ON U.id = MT.user_id
+			LEFT JOIN mentorship_requests as MR ON MR.id = MT.mentorship_request_id
+			LEFT JOIN steps as S ON S.id = C.step
+			LEFT JOIN cycles as Cy ON Cy.id = C.cycle
+			WHERE MT.mentorship_request_id = ? ";
+			$startup = DB::select($startup, [$request->mentorship_id]);
+			$startup = collect($startup)->first();
+			$data = [];
+			$data['id'] = $startup->id ?? '';
+			$data['company_name'] = $startup->C_name_en ?? '';
+			$data['start_up_logo'] = $startup->C_logo ?? '';
+			$data['program_name'] = $startup->CY_title ?? '';
+			$data['step_name'] = $startup->S_title ?? '';
+			$data['mentor_session_id'] = $startup->MT_mentorship_request_id ?? '';
+			$data['mentor_zoom_date'] = $startup->MR_zoom_date ?? '';
+
+			
 
 
 
 
 
-
-
-			return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels'));
+			return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels', 'data'));
 		}
 	}
 
@@ -162,25 +196,26 @@ class MentorshipTaskController extends Controller
 				'action' => 'add'
 			];
 
-			try {
-				Notification::send([$mentor, $startup], new TaskNotification($data));
-			} catch (\Throwable $th) {
-				//throw $th;
-			}
+			SendTaskNotificationJob::dispatch($mentor, $startup, $task, $data);
+			// try {
+			// 	Notification::send([$mentor, $startup], new TaskNotification($data));
+			// } catch (\Throwable $th) {
+			// 	//throw $th;
+			// }
 			
-			if ($task->user->country_code_w_a && $task->user->whatsapp) {
-				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
-				$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . ", the mentor " . $task->mentor->name . " has created a new Task ( " . $task->title ." )";
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-			}
+			// if ($task->user->country_code_w_a && $task->user->whatsapp) {
+			// 	$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+			// 	$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . ", the mentor " . $task->mentor->name . " has created a new Task ( " . $task->title ." )";
+			// 	$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+			// 	Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			// }
 			
-			if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
-				$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
-				$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . ", the startup " . $task->user->name . " has created a new Task ( " . $task->title ." )";
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
-			}
+			// if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
+			// 	$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
+			// 	$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . ", the startup " . $task->user->name . " has created a new Task ( " . $task->title ." )";
+			// 	$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+			// 	\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			// }
 
 
 			$task_id = $task->id;
@@ -192,8 +227,8 @@ class MentorshipTaskController extends Controller
 			}
 			$task->labels()->sync($allowedLabels);
 
-			$condition = "mentorship_tasks.mentorship_request_id = $id ";
-			$tasks = $this->handleTask($lang, $condition, 'list');
+			$condition = "mentorship_tasks.mentorship_request_id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $id, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
 			$_tasks = $tasks->groupBy('status');
@@ -276,7 +311,7 @@ class MentorshipTaskController extends Controller
 		$mentor = User::find($task->mentor_id);
 		$startup = User::find($task->user_id);
 
-		$message = "Task Updated: " . $task->title;
+		$message = "Task Status Updated: " . $task->title;
 		$data = [
 			'task' => $task,
 			'message' => $message,
@@ -298,8 +333,8 @@ class MentorshipTaskController extends Controller
 					\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 
-		$condition = "mentorship_tasks.mentorship_request_id = $task->mentorship_request_id ";
-		$tasks = $this->handleTask($lang, $condition, 'list');
+		$condition = "mentorship_tasks.mentorship_request_id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $task->mentorship_request_id, 'list');
 		$tasks = $tasks->sortBy('row_no')->values();
 		$available_statuses = ['pending', 'progress', 'review', 'completed'];
 		$_tasks = $tasks->groupBy('status');
@@ -416,8 +451,8 @@ class MentorshipTaskController extends Controller
 			$task->labels()->sync($allowedLabels);
 			MentorshipTaskLog::insert($logsToAdd);
 
-			$condition = "mentorship_tasks.mentorship_request_id = $id ";
-			$tasks = $this->handleTask($lang, $condition, 'list');
+			$condition = "mentorship_tasks.mentorship_request_id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $id, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
 			$_tasks = $tasks->groupBy('status');
@@ -434,6 +469,13 @@ class MentorshipTaskController extends Controller
 					'item' => $_tasks->get($status),
 				];
 			}
+			$message = "Task Updated: " . $task->title;
+			$data = [
+    			'task' => $task,
+    			'message' => $message,
+    			'action' => 'update'
+			];
+			Notification::send([$task->mentor, $task->user], new TaskNotification($data));
 
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
 				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
@@ -482,8 +524,8 @@ class MentorshipTaskController extends Controller
 			return response()->json($output, 422);
 		}
 		$task->delete();
-		$condition = "mentorship_tasks.mentorship_request_id = $id ";
-		$tasks = $this->handleTask($lang, $condition, 'list');
+		$condition = "mentorship_tasks.mentorship_request_id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $id, 'list');
 		$tasks = $tasks->sortBy('row_no')->values();
 		$available_statuses = ['pending', 'progress', 'review', 'completed'];
 		$_tasks = $tasks->groupBy('status');
@@ -617,8 +659,8 @@ class MentorshipTaskController extends Controller
 			}
 			MentorshipTaskFile::insert($filesToAdd);
 			$lang = app()->getLocale();
-			$condition = "mentorship_tasks.id = $card ";
-			$tasks = $this->handleTask($lang, $condition, 'show');
+			$condition = "mentorship_tasks.id = ? ";
+			$tasks = $this->handleTask($lang, $condition, $card, 'show');
 			$task = $tasks->first();
 			return response()->json([
 				'status' => true,
@@ -734,9 +776,9 @@ class MentorshipTaskController extends Controller
 	public function display(string $id)
 	{
 		$lang = app()->getLocale();
-		$condition = "mentorship_tasks.id = $id ";
+		$condition = "mentorship_tasks.id = ? ";
 		$instance = Storage::disk('mentorship_tasks');
-		$tasks = $this->handleTask($lang, $condition, 'show');
+		$tasks = $this->handleTask($lang, $condition, $id, 'show');
 		if ($tasks == '404') {
 			abort(404);
 		} else {
@@ -759,8 +801,8 @@ class MentorshipTaskController extends Controller
 	public function show(string $id)
 	{
 		$lang = app()->getLocale();
-		$condition = "mentorship_tasks.id = $id ";
-		$tasks = $this->handleTask($lang, $condition, 'show');
+		$condition = "mentorship_tasks.id = ? ";
+		$tasks = $this->handleTask($lang, $condition, $id, 'show');
 		if ($tasks == '404') {
 			abort(404);
 		} else {
@@ -936,7 +978,7 @@ class MentorshipTaskController extends Controller
 		return URL::to("/191014/$image");
 	}
 
-	private function handleTask($lang, $condition, $type)
+	private function handleTask($lang, $condition = null, $data = null, $type)
 	{
 		$query = "SELECT
 				mentorship_tasks.id AS id,
@@ -1014,9 +1056,8 @@ class MentorshipTaskController extends Controller
 				users user ON logs.user_id = user.id
 			WHERE
 				$condition
-				AND mentorship_tasks.parent_id IS null
-		";
-		$tasks = DB::select($query);
+				AND mentorship_tasks.parent_id IS null";
+		$tasks = DB::select($query, [$data]);
 		if (empty($tasks) && $type == 'show') {
 			return '404';
 		} else {
@@ -1034,7 +1075,9 @@ class MentorshipTaskController extends Controller
 			});
 			$users = collect([]);
 			if (count($ids_to_search)) {
-				$users = collect(DB::select("SELECT id, CONCAT(TRIM(COALESCE(first_name_$lang, '')), ' ', TRIM(COALESCE(last_name_$lang, ''))) AS name, img_url FROM users WHERE id IN (" . implode(",", $ids_to_search) . ")"))->map(function ($user) {
+				$placeholders = implode(',', array_fill(0, count($ids_to_search), '?'));
+				$sql = "SELECT id, CONCAT(TRIM(COALESCE(first_name_$lang, '')), ' ', TRIM(COALESCE(last_name_$lang, ''))) AS name, img_url FROM users WHERE id IN ($placeholders)";
+				$users = collect(DB::select($sql, $ids_to_search))->map(function ($user) {
 					$user->img_url = $this->getImage($user->img_url);
 					return $user;
 				});
@@ -1192,9 +1235,9 @@ class MentorshipTaskController extends Controller
 			LEFT JOIN
 				labels l ON l.company_id = c.id
 			WHERE
-				mr.id = $id
+				mr.id = ?
 		";
-		$sessions = collect(DB::select($sessions));
+		$sessions = collect(DB::select($sessions, [$id]));
 		$sessions = $sessions->groupBy('id')->map(function ($groupedSession) {
 			$session = $groupedSession->first();
 			return [

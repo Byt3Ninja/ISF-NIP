@@ -1,0 +1,25 @@
+<?php
+
+return [
+	'login_success' => 'Login Successfully',
+	'incorrect_credentials' => 'The provided credentials are incorrect.',
+	'role_not_found' => 'Role not found',
+	'registered_successfully' => 'Registration Successfully',
+	'logged_out' => 'Logged out Successfully',
+	'unauthenticated' => 'Unauthenticated',
+	'title_required' => 'Title is required For Mentors',
+	'forbidden' => 'Access forbidden',
+	'user_not_found' => 'User not found',
+	'user_created' => 'User Created Successfully',
+	'failed_to_create_user' => 'Failed to Create User',
+	'invalid_role' => 'Invalid Role',
+	'user_updated' => 'User Updated Successfully',
+	'failed_to_update_user' => 'Failed to Update User',
+	'cannot_deactivate_self' => 'You cannot deactivate your Account',
+	'user_deactivated' => 'User Deactivated Successfully',
+	'ProfileUpdated' => 'Profile Updated Successfully',
+	'passwordIncorrect' => 'The current password is incorrect',
+	'Passwordupdated' => 'Password Updated Successfully',
+	'MentorBioUpdated' => 'Mentor Bio Updated Successfully',
+	'inactive_user' => 'Your account is Inactive Contact Support.',
+];

@@ -91,7 +91,7 @@
 													<th>{{ __('admin.End') }}</th>
 													<th>{{ __('admin.user') }}</th>
 													<th>{{ __('admin.Created at') }}</th>
-													@if( $_user->ableToAny(['assessments.show', 'question-assessment_admin', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
+													@if( $_user->ableToAny(['assessments.show', 'question-assessments.questions_manage', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
 												</tr>
 											</thead>
 											<tbody>
@@ -102,15 +102,15 @@
 														<td>{{$assessment->start_date }}</td>
 														<td>{{$assessment->end_date }}</td>
 														<td>
-															<a href="{{ route('company_profile', $assessment->user->company->id) }}">
+															<a href="{{ route('company.profile_view', $assessment->user->company->id) }}">
 																{{ $assessment->user->company->{'name_'.app()->getLocale()} }}
 															</a>
 														</td>
 														<td>{{$assessment->created_at}}</td>
-														@if( $_user->ableToAny(['assessments.show', 'question-assessment_admin', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )
+														@if( $_user->ableToAny(['assessments.show', 'question-assessments.questions_manage', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )
 														<td>
 															@if( $_user->ableTo('assessments.show', $permissions) )<a href="{{ route('assessments.show', $assessment->id) }}"><div class="btn btn-info" >{{ __('admin.Show') }}</div></a>@endif
-															@if( $_user->ableTo('question-assessment_admin', $permissions) )<a href="{{ route('question-assessment_admin', $assessment->id) }}"><div class="btn btn-primary" >{{ __('admin.Assessment') }}</div></a>@endif
+															@if( $_user->ableTo('question-assessments.questions_manage', $permissions) )<a href="{{ route('question-assessments.questions_manage', $assessment->id) }}"><div class="btn btn-primary" >{{ __('admin.Assessment') }}</div></a>@endif
 															@if( $_user->ableToAny(['assessments.edit', 'assessments.update'], $permissions) )<div class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#EditAssessment{{ $assessment->id }}">{{__('admin.Edit')}}</div>@endif
 															@if( $_user->ableTo('assessments.destroy', $permissions) )
 															<form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST" style="display: inline-block;">
@@ -303,7 +303,7 @@
 				var category_id = $(this).val();
 				var $state = $('.subcategory_id');
 				$.ajax({
-					url: "{{ route('get_subcategory_by_category') }}",
+					url: "{{ route('subcategories.list_by_category') }}",
 					method: "GET",
 					data: {
 						category_id: category_id

@@ -3,9 +3,10 @@ $user = auth()->user();
 $notifications = collect();
 $all = 0;
 
-if ($user && $user->hasRole('Registered')) {
-    $notifications = $user->unreadNotifications()->latest()->take(5)->get();
-    $all = $notifications->count();
+if($user)
+{
+  $notifications = $user->unreadNotifications()->latest()->get();
+  $all = $notifications->count();
 }
 @endphp
 
@@ -16,49 +17,48 @@ if ($user && $user->hasRole('Registered')) {
     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
-      {{-- @if ($all > 0) --}}
-      <div id="notification-count-container">
-
-      </div>
-      {{-- @endif --}}
+      @if ($all > 0)
+      <span class="badge badge-notifications bg-danger w-px-20 h-px-20 rounded-circle d-flex justify-content-center align-items-center">{{ $all }}</span>
+      @endif
     </span>
   </a>
 
   <!-- Notification Dropdown -->
   <ul class="dropdown-menu dropdown-menu-end p-0">
-    {{-- @if ($all > 0) --}}
+    @if ($all > 0)
       <li class="dropdown-menu-header border-bottom">
         <div class="dropdown-header d-flex align-items-center py-3">
-          <h6 class="mb-0 me-auto" style="text-transform:capitalize;">Notification</h6>
+          <h6 class="mb-0 me-auto" style="text-transform:capitalize;">{{ __('admin.Notification') }}</h6>
           <div class="d-flex align-items-center h6 mb-0">
-            <span class="badge bg-label-primary me-2" id="new-count">0 {{ $l == 'en' ? 'New': 'جديد' }}</span>
+            <span class="badge bg-label-primary me-2" id="new-count">{{ $all }} {{ $l == 'en' ? 'New': 'جديد' }}</span>
 
-            <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all"
-              data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i
-                class="ti ti-mail-opened text-heading"></i></a>
+           <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all"
+              data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.mark_all_as_read') }}"
+              onclick="markAllAsRead()">
+            <i class="ti ti-mail-opened text-heading"></i>
+            </a>
           </div>
         </div>
       </li>
-    {{-- @endif --}}
+    @endif
 
     <!-- Notification List -->
     <li class="dropdown-notifications-list scrollable-container">
       <ul id="notification-list" class="list-group list-group-flush">
-        {{-- @role('Registered')
         @if ($notifications->isEmpty())
           <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
-            <span class="text-muted">No new notifications</span>
+            <span class="text-muted">{{ __('admin.NoNotifications') }}</span>
           </li>
         @else
           @foreach ($notifications as $notification)
-            <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                <h6 class="media-heading">{{ $notification->data['message'] ?? 'New Notification' }}</h6>
+            <li class="list-group-item list-group-item-action dropdown-notifications-item" onclick="markAsRead('{{ $notification->id }}')">
+                <h6 class="media-heading">{{ $notification->data['message'] ?? '-' }}</h6>
+                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
             </li>
           @endforeach
         @endif
-        @endrole --}}
 
-        @if ($messages)
+        {{-- @if ($messages)
           <li class="list-group-item list-group-item-action dropdown-notifications-item">
             <a href="/dashboard/inbox">
               <h6 class="media-heading">
@@ -67,7 +67,7 @@ if ($user && $user->hasRole('Registered')) {
               </h6>
             </a>
           </li>
-        @endif
+        @endif --}}
         
         {{-- @role('Registered')
          @if ($notifications)
@@ -77,7 +77,7 @@ if ($user && $user->hasRole('Registered')) {
          @endif
         @endrole --}}
 
-        @hasanyrole('Admin|Manager')
+        @hasanyrole('Admin|organizationManager')
           @if ($msgs)
             <li class="list-group-item list-group-item-action dropdown-notifications-item">
               <a class="d-flex justify-content-between" href="/dashboard/mymsg">
@@ -130,5 +130,98 @@ if ($user && $user->hasRole('Registered')) {
 </li>
 <!--/ Notification -->
 
+<script>
+let currentPage = 1;
+
+function markAllAsRead() {
+    fetch('/dashboard/notifications/mark-all-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('new-count').textContent = `0 ${document.getElementById('new-count').textContent.includes('New') ? 'New' : 'جديد'}`;
+            const badge = document.querySelector('.badge-notifications');
+            if (badge) badge.style.display = 'none';
+            document.querySelectorAll('.dropdown-notifications-item:not(:has(a[href="/dashboard/inbox"])):not(:has(a[href="/dashboard/mymsg"]))').forEach(item => item.remove());
+            document.getElementById('notification-list').innerHTML = `
+                <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
+                    <span class="text-muted">{{ __('admin.NoNotifications') }}</span>
+                </li>
+                ${document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/inbox"])') ? document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/inbox"])').outerHTML : ''}
+                ${document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/mymsg"])') ? document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/mymsg"])').outerHTML : ''}`;
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAsRead(notificationId) {
+    fetch(`/dashboard/notifications/mark-read/${notificationId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = document.querySelector(`[onclick="markAsRead('${notificationId}')"]`);
+            if (notificationItem) notificationItem.remove();
+            const countElement = document.getElementById('new-count');
+            let count = parseInt(countElement.textContent) - 1;
+            countElement.textContent = `${count} ${countElement.textContent.includes('New') ? 'New' : 'جديد'}`;
+            const badge = document.querySelector('.badge-notifications');
+            if (count === 0 && badge) badge.style.display = 'none';
+            if (!document.querySelector('.dropdown-notifications-item:not([class*="text-center"]):not(:has(a[href="/dashboard/inbox"])):not(:has(a[href="/dashboard/mymsg"]))')) {
+                document.getElementById('notification-list').innerHTML = `
+                    <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
+                        <span class="text-muted">{{ __('admin.NoNotifications') }}</span>
+                    </li>
+                    ${document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/inbox"])') ? document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/inbox"])').outerHTML : ''}
+                    ${document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/mymsg"])') ? document.querySelector('.dropdown-notifications-item:has(a[href="/dashboard/mymsg"])').outerHTML : ''}`;
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function loadMoreNotifications() {
+    currentPage++;
+    fetch(`/dashboard/notifications?page=${currentPage}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const notificationList = document.getElementById('notification-list');
+        const loadMoreButton = document.getElementById('load-more');
+        
+        if (data.notifications.length > 0) {
+            data.notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item list-group-item-action dropdown-notifications-item';
+                li.setAttribute('onclick', `markAsRead('${notification.id}')`);
+                li.innerHTML = `
+                    <h6 class="media-heading">${notification.data.message || '-'}</h6>
+                    <small class="text-muted">${notification.created_at_diff}</small>`;
+                notificationList.insertBefore(li, loadMoreButton);
+            });
+        }
+        
+        if (!data.has_more) {
+            loadMoreButton.remove();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
 
 

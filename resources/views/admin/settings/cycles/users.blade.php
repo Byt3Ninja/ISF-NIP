@@ -71,7 +71,7 @@
                           @foreach ($cycles as $cycle)
                             <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>
                               {{ $cycle->title }}
-                              ({{ __('cycles.Start') }} {{ $cycle->start->format('d-m-Y') }})
+                              ({{ __('cycles.Start') }} {{ $cycle->start->format('d-m-Y') ?? '-' }})
                               -
                               {{ optional($cycle->organization)->name }} </option>
                           @endforeach
@@ -121,7 +121,8 @@
                   <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                   <div class="d-flex align-items-center gap-4">
                     <div class="media align-items-center col-md-3">
-                      <select class="form-select select2 ChangeAllBox">
+                      <select class="form-select select2 ChangeAllBox" data-placeholder="{{ __('cycles.Select Step') }}">
+                        <option value="" selected disabled>{{ __('cycles.Select Step') }}</option>
                         <option value="0">{{ __('cycles.Disapprove') }}</option>
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}">{{ $step->title }}</option>
@@ -151,13 +152,13 @@
                           <td>
                             <div class="d-flex align-items-center gap-1">
                               <input type="checkbox" class="chboxcyclesReg" do="{{ $company->id }}"
-                                userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
+                                userid="{{ $company->user->id ?? '' }}" value="1" name="chboxcyclesReg[]">
                             </div>
                           </td>
                           <td>
                             <div class="d-flex align-items-center">
                               <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
+                                <img src="{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">
@@ -169,24 +170,24 @@
                           </td>
                           <td>
                             <div class="d-flex align-items-center">
-                              <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
+                              <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
                                 <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
-                              <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                              <a href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
                                 <div class="media-body">
-                                  <h6 class="media-heading mb-0">{{ $company->user->{'first_name_' . $l} }}
-                                    {{ $company->user->{'last_name_' . $l} }}</h6>
-                                  <span class="font-small-2">{{ $company->user->{'title_' . $l} }}</span>
+                                  <h6 class="media-heading mb-0">{{ $company->user->{'first_name_' . $l} ?? ''  }}
+                                    {{ $company->user->{'last_name_' . $l} ?? ''  }}</h6>
+                                  <span class="font-small-2">{{ $company->user->{'title_' . $l} ?? ''  }}</span>
                                 </div>
                               </a>
                             </div>
                           </td>
                           <td>
-                            {{ $company->user->phone }}
+                            {{ $company->user->phone ?? ''  }}
                           </td>
                           <td>
-                            {{ $company->user->email }}
+                            {{ $company->user->email ?? ''  }}
                           </td>
                           <td>
                             <div class="d-flex align-items-center gap-1">
@@ -236,7 +237,7 @@
                 class="form-control" required>
             </div>
             <div class="col-12 mb-4">
-              <label for="bs-rangepicker-basic" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+              <label for="bs-rangepicker-basic" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
               <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
             </div>
             {{-- <div class="form-group mb-4">
@@ -287,7 +288,7 @@
             <i class="ti ti-x ti-16px"></i>
           </button>
         </div>
-        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users', $id) }}">
+        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users_manage', $id) }}">
           <div class="card">
             <div class="card-body">
               <div class="form-group mb-4">
@@ -586,7 +587,7 @@
           },
           success: function(response) {
             // alert(response.ddddd);
-            // console.log(response);
+            console.log(response);
             location.href = '/dashboard/cycles/{{ $id }}/registered';
           },
           error: function(error) {

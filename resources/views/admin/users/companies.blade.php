@@ -93,81 +93,83 @@
                   </div>
                 </div>
               </div>
-              <div class="col-12 col-lg-8">
-                <form method="GET" action="{{ route('users.companies') }}" class="row h-100 align-items-center">
-                  <div class="col-2">
-                    <div class="d-flex align-items-center justify-content-end gap-3">
-                      @if(request()->query())
-                        <button class="btn bg-label-secondary p-3 justify-content-center align-items-center"
-                          style="border-radius: 17px; width: 40px; height: 40px;" type="button"
-                          onclick="window.location.href='/dashboard/companies'"
-                        >
-                          <i class="ti ti-reload ti-sm"></i>
-                        </button>
-                      @endif
-                      <button class="btn bg-primary p-3 justify-content-center align-items-center"
-                        style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
-                        <i class="ti ti-filter text-white ti-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="col-3">
-                    <div class="SearchSector">
-                      @php
-                        $sectors = App\Sector::whereNull('parent_id')->get();
-                      @endphp
-                      <select id="selectsector" class="form-select select2 sector" name="sector" data-placeholder="{{ __('admin.Sector') }}">
-                        <option value="" selected>{{ __('admin.Sector') }}
-                        </option>
-                        @foreach ($sectors as $sector_group)
-                          <optgroup label="{{ $sector_group->name }}">
+                <div class="col-12 col-lg-8">
+                <form method="GET" action="{{ route('users.view_companies') }}" class="row h-100 align-items-center" id="search-form">
+                <div class="col-12 col-lg-2">
+                 <div class="d-flex align-items-center justify-content-end gap-3">
+                 @if(request()->query())
+                    <button class="btn bg-label-secondary p-3 justify-content-center align-items-center"
+                        style="border-radius: 17px; width: 40px; height: 40px;" type="button"
+                        onclick="window.location.href='/dashboard/companies'">
+                        <i class="ti ti-reload ti-sm"></i>
+                    </button>
+                @endif
+                <button class="btn bg-primary p-3 justify-content-center align-items-center"
+                    style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
+                    <i class="ti ti-filter text-white ti-sm"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-12 col-lg-10 d-flex flex-wrap align-items-center gap-2">
+            <div class="SearchSector flex-grow-1">
+                @php
+                    $sectors = App\Sector::whereNull('parent_id')->get();
+                @endphp
+                <select id="selectsector" class="form-select select2 sector" name="sector" data-placeholder="{{ __('admin.Sector') }}">
+                    <option value="" selected>{{ __('admin.Sector') }}</option>
+                    @foreach ($sectors as $sector_group)
+                        <optgroup label="{{ $sector_group->name }}">
                             @foreach ($sector_group->children as $sector)
-                              <option value="{{ $sector->name_en }} "
-                                {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}
-                              </option>
+                                <option value="{{ $sector->name_en }}"
+                                    {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}</option>
                             @endforeach
-                          </optgroup>
-                        @endforeach
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="SearchStage">
-                      <select class="form-select select2 stage" name="stage" data-placeholder="{{ __('admin.stage') }}">
-                        <option value="">{{ __('admin.stage') }}</option>
-                        @php
-                          $stages = App\Stage::all();
-                        @endphp
-                        @foreach ($stages as $stage)
-                          <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
+                        </optgroup>
+                    @endforeach
+                </select>
+            </div>
+            <div class="SearchStage flex-grow-1">
+                <select class="form-select select2 stage" name="stage" data-placeholder="{{ __('admin.stage') }}">
+                    <option value="">{{ __('admin.stage') }}</option>
+                    @php
+                        $stages = App\Stage::all();
+                    @endphp
+                    @foreach ($stages as $stage)
+                        <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
                             {{ $stage->{'name_' . $l} ?? '' }}
-                          </option>
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            @role('Admin')
+                <div class="SearchOrg flex-grow-1">
+                    @php
+                        $orgs = App\Organization::all();
+                    @endphp
+                    <select class="form-select select2" name="orgnization" data-placeholder="{{ __('admin.Organizations') }}">
+                        <option value="" selected>{{ __('admin.Organizations') }}</option>
+                        @foreach ($orgs as $org)
+                            <option value="{{ $org->id }}"
+                                {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}</option>
                         @endforeach
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-3">
-                    @role('Admin')
-                      <div class="SearchOrg">
-                        @php
-                          $orgs = App\Organization::all();
-                          $orgrequest = App\Organization::where('id', request('orgnization'))->get();
-                        @endphp
-
-                        <select class="form-select select2 sector" name="orgnization" data-placeholder="{{ __('admin.Organizations') }}">
-                          <option value="" selected>{{ __('admin.Organizations') }}
-                          </option>
-                          @foreach ($orgs as $org)
-                            <option value="{{ $org->id }} "
-                              {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
-                    @endrole
-                  </div>
-                </form>
-              </div>
+                    </select>
+                </div>
+            @endrole
+            <div class="position-relative flex-grow-1">
+                <div class="position-absolute top-50 translate-middle-y end-0 mx-3 search-icon">
+                    <i class="ti ti-search text-muted"></i>
+                </div>
+                <input
+                    id="search-input"
+                    class="form-control search border rounded bg-transparent"
+                    style="width: 250px;"
+                    placeholder="{{ __('admin.Search') }}"
+                    name="search"
+                    value="{{ request('search') }}"
+                />
+            </div>
+        </div>
+    </form>
+</div>
             </div>
           </div>
         </div>
@@ -178,7 +180,7 @@
             <h5 class="mb-0">
               {{ $l == 'en' ? 'Companies List' : 'قائمة الشركات' }}
             </h5>
-            <div class="position-relative">
+            {{-- <div class="position-relative">
               <div class="position-absolute top-50 translate-middle-y end-0 mx-3 search-icon">
                 <i class="ti ti-search text-muted"></i>
               </div>
@@ -191,7 +193,7 @@
                 name="search"
                 value="{{ request('search') }}" 
               />
-            </div>
+            </div> --}}
           </div>
           <div class="row">
             @if (count($companies) == 0)
@@ -201,57 +203,59 @@
             @foreach ($companies as $company)
               <!-- Company Card -->
               <div class="col-md-4">
-                <div class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container" style="height: 400px;"
+                <div class="bg-white d-flex flex-column flex-fill justify-content-between border shadow-sm p-4 mb-3 radius-15 card-container" style="min-height: 420px;"
                   {{-- onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'" --}}>
                   @php
                     $client = App\User::where('company_id', $company->id)->first();
                   @endphp
-                  <div class="w-100 d-flex justify-content-between align-items-center">
-                    <a style="width: 80%" href="/dashboard/companyProfile/{{ $company->id }}">
-                      <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">{{ $company->{'name_' . $l} }}
-                      </h5>
-                    </a>
-                    <div class="d-flex algin-items-center gap-3">
-                      @if ($company->facebook)
-                        <a class="d-flex align-items-center"
-                          href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
-                          target='_blank'>
-                          <i class="fa-brands fa-facebook-f fs-4 text-primary"></i>
-                        </a>
-                      @endif
-                      @if ($company->linkedin)
-                        <a class="d-flex align-items-center"
-                          href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
-                          target='_blank'>
-                          <img src="/icons/linkedin.svg" width="22" height="22" />
-                        </a>
-                      @endif
-                      @if ($company->country_code_w_a && $company->whatsapp)
-                        <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}"
-                          target="_blank" class="d-flex align-items-center">
-                          <i class="fa-brands fa-whatsapp fs-4 text-success"></i>
-                        </a>
-                      @endif
+                  <div class="w-100">
+                    <div class="w-100 d-flex justify-content-between align-items-center">
+                      <a style="width: 80%" href="/dashboard/companyProfile/{{ $company->id }}">
+                        <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">{{ $company->{'name_' . $l} }}
+                        </h5>
+                      </a>
+                      <div class="d-flex algin-items-center gap-3">
+                        @if ($company->facebook)
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
+                            target='_blank'>
+                            <i class="fa-brands fa-facebook-f fs-4 text-primary"></i>
+                          </a>
+                        @endif
+                        @if ($company->linkedin)
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
+                            target='_blank'>
+                            <img src="/icons/linkedin.svg" width="22" height="22" />
+                          </a>
+                        @endif
+                        @if ($company->country_code_w_a && $company->whatsapp)
+                          <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}"
+                            target="_blank" class="d-flex align-items-center">
+                            <i class="fa-brands fa-whatsapp fs-4 text-success"></i>
+                          </a>
+                        @endif
+                      </div>
+                      {{-- <span class="text-muted text-sm fw-semibold">
+                        {{ $l == 'en' ? 'Startup' : 'الشركة' }}
+  
+                        <a href="{{ route('users.edit', ['user' => $client->id]) }}"
+                          class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"><i
+                            class="ti ti-user-circle"></i></a>
+                      </span> --}}
+                      {{-- <a href="/dashboard/companyProfile/{{ $company->id }}"
+                        class="bg-white px-2 py-1 radius-15 custom-shadow border text-info">
+                        <i class="ti ti-world me-2 fs-5"></i>
+                        <span class="text-xs fw-bold">
+                          {{ $l == 'en' ? 'More Info' : 'المزيد' }}
+                        </span>
+                      </a> --}}
                     </div>
-                    {{-- <span class="text-muted text-sm fw-semibold">
-                      {{ $l == 'en' ? 'Startup' : 'الشركة' }}
-
-                      <a href="{{ route('users.edit', ['user' => $client->id]) }}"
-                        class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"><i
-                          class="ti ti-user-circle"></i></a>
-                    </span> --}}
-                    {{-- <a href="/dashboard/companyProfile/{{ $company->id }}"
-                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info">
-                      <i class="ti ti-world me-2 fs-5"></i>
-                      <span class="text-xs fw-bold">
-                        {{ $l == 'en' ? 'More Info' : 'المزيد' }}
-                      </span>
-                    </a> --}}
-                  </div>
-                  <div class="mt-2 border custom-shadow radius-15 text-center p-4 w-100">
-                    <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
-                      onerror="this.src='/images/logo-placeholder.png'" class="rounded"
-                      style="height: 120px; width: 100%; object-fit: contain;" alt="logo" />
+                    <div class="mt-2 border custom-shadow radius-15 text-center p-4 w-100">
+                      <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
+                        onerror="this.src='/images/logo-placeholder.png'" class="rounded"
+                        style="height: 120px; width: 100%; object-fit: contain;" alt="logo" />
+                    </div>
                   </div>
                   <div class="w-100 d-flex align-items-center justify-content-between mt-2">
                     <h6 class="fw-semibold mt-2 text-capitalize line-clamp-1" style="width: 45%;">
@@ -395,7 +399,7 @@
                                   <img src="{{ $founder->image ? $founder->image : '/icons/account.svg' }}"
                                     onerror="this.src='/icons/account.svg'" class="rounded-circle" width="24"
                                     height="24" />
-                                  <div class="text-xs">
+                                  <div class="text-xs text-nowrap">
                                     {{ $founder->Name }}
                                   </div>
                                 </div>
@@ -484,7 +488,7 @@
                           <td>
                             <div class="d-flex align-items-center">
                               <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
+                                <img src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">
@@ -528,11 +532,30 @@
   <script>
     $('#search-input').on('keyup', function() {
       var value = $(this).val().toLowerCase();
-      $('.card-container').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      $('.card-container').each(function() {
+        var companyName = $(this).find('h5').text().toLowerCase();
+        $(this).toggle(companyName.indexOf(value) > -1);
       });
     });
   </script>
+  <script>
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    $('#search-input').on('keyup', debounce(function() {
+      $('#search-form').submit();
+    }, 500));
+  </script>
+  
   <script type="text/javascript">
     $(document).ready(function() {
       $('.table').DataTable({
@@ -564,6 +587,6 @@
       });
     });
   </script>
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+  {{-- <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
+  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script> --}}
 @stop

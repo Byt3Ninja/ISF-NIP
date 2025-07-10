@@ -1,7 +1,5 @@
 @extends('layouts.admin')
-@section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
+
 @section('title', __('admin.Questions Categories') )
 @section('subTitle', __('admin.Questions Categories` List'))
 @section('content')
@@ -30,9 +28,9 @@
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
 					<div class="row mb-4">
-						<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
+						<div class="col-12 d-flex align-items-center justify-content-end">
 							<a href="{{ route('question-categories.create') }}" class="btn btn-primary">
-                <i class="ti ti-plus me-3"></i>
+                <i class="ti ti-plus me-2"></i>
                 {{ __('admin.Add New')}} 
               </a>
 						</div>
@@ -46,7 +44,7 @@
 								<div class="card-body">
 									<!-- datatable start -->
 									<div class="table-responsive">
-										<table id="organizations-list-datatable" class="table">
+										<table id="categoriesTable" class="table datatables-ajax">
 											<thead>
 											<tr class="table-light">
 												<th>#</th>
@@ -58,14 +56,29 @@
 											</thead>
 											<tbody>
 												@foreach( $categories as $category )
-												<tr>
-													<td><a href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}">{{ $category->id }}</a></td>
-													<td>{{ $category->title }}</td>
-													<td><a href="{{ route('organizations.edit', ['organization' => $category->organization->id]) }}"> {{ $category->organization->{'name_'.$l} }}</a></td>
-													<td> {{ $category->questions->count() }} </td>
-													<td class="text-right">
-														<a href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}" class="btn btn-primary btn-sm"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>
-														<button id='deleteAction' data-id='{{ $category->id }}' data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" class="btn btn-danger btn-sm"> <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }}</button>
+												<tr id="row_{{ $category->id }}">
+													<td class="text-center">
+														<a href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}">{{ $category->id }}</a></td>
+													<td class="text-center">
+														{{ $category->title }}</td>
+													<td class="text-center">
+														<a href="{{ route('organizations.edit', ['organization' => $category->organization->id]) }}"> {{ $category->organization->{'name_'.$l} }}</a></td>
+													<td class="text-center">
+														 {{ $category->questions->count() }} </td>
+													<td class="text-center">
+														<a 
+															href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}" 
+															class="btn btn-label-primary btn-sm"
+														>
+															<i class="ti ti-edit ti-xs me-2"></i> {{ __('admin.Edit') }}</a>
+														<button 
+															id='deleteAction' 
+															data-id='{{ $category->id }}' 
+															data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" 
+															class="btn btn-label-danger btn-sm"
+														> 
+															<i class="ti ti-trash ti-sm me-2"></i> {{ __('admin.Delete') }}
+														</button>
 													</td>
 												</tr>
 												@endforeach
@@ -81,43 +94,98 @@
 		</div>
 	</div>
 @stop
-@section('scripts')
-	<script src="/app-assets/js/scripts/pages/page-organizations.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-	<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-	<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
 
+@section('scripts')
 	<script type="text/javascript">
-		$(document).on("click", "#deleteAction", function (e) {
-			var url = $(this).data('url');
-			var token = '{{ csrf_token() }}';
-			Swal.fire({
-				title: "{{__('admin.SureDelete')}}",
-				text: "{{__('admin.Recover')}}",
-				icon: "warning",
-				buttonsStyling: true,
-				showCancelButton: true,
-				confirmButtonClass: "btn-danger",
-				confirmButtonText: "{{__('admin.DYes')}}",
-				cancelButtonText: "{{__('admin.No')}}!",
-			})
-			.then((result) => {
-				if (result.value)
-				{
-					$.post(url, {'_method': 'DELETE' , '_token': token},
-						function(response)
-						{
+		$(document).ready(function() {
+			// Initialize DataTable
+			$('#categoriesTable').DataTable({
+				responsive: true,
+				pageLength: 10,
+				lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
+				language: {
+					@if($l == 'ar')
+					"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+					@else
+					"search": "{{ __('admin.Search') }}:",
+					"lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
+					"info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
+					"infoEmpty": "{{ __('admin.no_entries_available') }}",
+					"infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
+					"paginate": {
+						"first": "{{ __('admin.First') }}",
+						"last": "{{ __('admin.Last') }}",
+						"next": "{{ __('admin.Next') }}",
+						"previous": "{{ __('admin.Previous') }}"
+					},
+					"emptyTable": "{{ __('admin.No_data_available_in_table') }}",
+					"zeroRecords": "{{ __('admin.No_matching_records_found') }}"
+					@endif
+				},
+				dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+				displayLength: 10,
+				lengthMenu: [10, 25, 50, 75, 100],
+				order: [[0, 'desc']],
+				columnDefs: [
+					{
+						targets: [4], // Actions column
+						orderable: false,
+						searchable: false
+					}
+				]
+			});
+
+			// Handle delete action
+			$(document).on("click", "#deleteAction", function (e) {
+				e.preventDefault();
+				var url = $(this).data('url');
+				var id = $(this).data('id');
+				var token = '{{ csrf_token() }}';
+				
+				Swal.fire({
+					title: "{{__('admin.SureDelete')}}",
+					text: "{{__('admin.Recover')}}",
+					icon: "warning",
+					showCancelButton: true,
+					confirmButtonText: "{{ __('admin.DYes') }}",
+					cancelButtonText: "{{ __('admin.No') }}",
+					reverseButtons: true,
+					customClass: {
+							confirmButton: 'btn btn-danger me-2',
+							cancelButton: 'btn btn-label-secondary',
+					},
+					buttonsStyling: false,
+				})
+				.then((result) => {
+					if (result.value) {
+						$.post(url, {'_method': 'DELETE' , '_token': token},
+							function(response) {
+								Swal.fire({
+									icon: 'success',
+									title: "{{ __('admin.Deleted') }}!",
+									html: "{{ __('admin.DeletedSuccessfully') }}.",
+									showCancelButton: false,
+									showConfirmButton: true,
+									confirmButtonText: "{{ __('admin.OK') }}",
+									customClass: {
+											confirmButton: 'btn btn-primary',
+									},
+									buttonsStyling: false,
+								});
+								// Remove the row from DataTable
+								$('#categoriesTable').DataTable().row('#row_' + id).remove().draw();
+							}
+						).fail(function(error) { 
+							console.log(error);
 							Swal.fire({
-								icon: 'success',
-								title: "{{ __('admin.Deleted') }}!",
-								html: "{{ __('admin.FileDeleted') }}.",
+								icon: 'error',
+								title: "{{ __('admin.Error') }}!",
+								text: "{{ __('admin.SomethingWentWrong') }}",
 							});
-							location.reload();
-						}
-					).fail(function(error) { console.log(error); } );
-				}
-			})
+						});
+					}
+				});
+			});
 		});
 	</script>
 @stop

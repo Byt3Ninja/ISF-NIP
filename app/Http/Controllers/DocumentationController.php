@@ -25,7 +25,15 @@ class DocumentationController extends Controller
 
     public function store(Request $request)
     {
-        $user =Auth::id();
+        $request->validate([
+            'menu_ar' => 'required|string',
+            'menu_en' => 'required|string',
+            'arr' => 'required|integer',
+            'role' => 'required|string',
+            'content_ar' => 'required|string',
+            'content_en' => 'required|string',
+        ]);
+        $user = Auth::id();
         $result = Documentation::create($request->except(['user_id']) + ['user_id' => $user]);
         if($result)
             return redirect()->route('documentation.index')->with( ['msg' => 'StoredSuccessfully'] );
@@ -49,6 +57,14 @@ class DocumentationController extends Controller
 
     public function update(Request $request, Documentation $documentation)
     {
+        $request->validate([
+            'menu_ar' => 'required|string',
+            'menu_en' => 'required|string',
+            'arr' => 'required|integer',
+            'role' => 'required|string',
+            'content_ar' => 'required|string',
+            'content_en' => 'required|string',
+        ]);
         $user =auth()->id();
         $result = $documentation->update($request->except(['user_id'])+ ['user_id'=>$user]);
         if($result)

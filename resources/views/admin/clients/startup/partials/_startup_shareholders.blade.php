@@ -52,6 +52,20 @@
     const founderPrevBtn = document.querySelector('#founder-prev');
     const founderNextBtn = document.querySelector('#founder-next');
 
+    // Only proceed if there are shareholders
+    if (founderCols.length === 0) {
+      return;
+    }
+
+    // Only set up pagination if navigation buttons exist (more than 2 shareholders)
+    if (!founderPrevBtn || !founderNextBtn) {
+      // Show all shareholders when there are 2 or fewer
+      founderCols.forEach((col) => {
+        col.style.display = 'block';
+      });
+      return;
+    }
+
     let currentIndex = 0;
     const itemsPerPage = 2; // Number of items to display at a time
 
@@ -61,25 +75,34 @@
       });
 
       // Hide prev button if at the start
-      founderPrevBtn.classList.toggle('d-none', currentIndex === 0);
+      if (founderPrevBtn) {
+        founderPrevBtn.classList.toggle('d-none', currentIndex === 0);
+      }
 
       // Hide next button if at the last set
-      founderNextBtn.classList.toggle('d-none', currentIndex + itemsPerPage >= founderCols.length);
+      if (founderNextBtn) {
+        founderNextBtn.classList.toggle('d-none', currentIndex + itemsPerPage >= founderCols.length);
+      }
     }
 
-    founderPrevBtn.addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex -= itemsPerPage;
-        updateVisibility();
-      }
-    });
+    // Add event listeners with additional null checks
+    if (founderPrevBtn) {
+      founderPrevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex -= itemsPerPage;
+          updateVisibility();
+        }
+      });
+    }
 
-    founderNextBtn.addEventListener('click', () => {
-      if (currentIndex + itemsPerPage < founderCols.length) {
-        currentIndex += itemsPerPage;
-        updateVisibility();
-      }
-    });
+    if (founderNextBtn) {
+      founderNextBtn.addEventListener('click', () => {
+        if (currentIndex + itemsPerPage < founderCols.length) {
+          currentIndex += itemsPerPage;
+          updateVisibility();
+        }
+      });
+    }
 
     updateVisibility(); // Initial check on page load
   });

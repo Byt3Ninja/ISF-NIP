@@ -24,7 +24,7 @@
                         <td class="text-center">{{ $invitation->role }}</td>
                         <td class="text-center">
                             @if($invitation->status === 'pending')
-                            <form action="{{ route('resend-invitation', $invitation->id) }}" method="POST" style="display: inline;">
+                            <form action="{{ route('organization.users_invitations_resend', $invitation->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 <button type="submit" class="btn btn-warning btn-sm" title="Resend Invitation">
                                     <i class="fas fa-redo-alt"></i>
@@ -32,7 +32,7 @@
                             </form>
                             @endif
                         
-                            <form action="{{ route('cancel-invitation', $invitation->id) }}" method="POST" style="display: inline;">
+                            <form action="{{ route('organization.users_invitations_cancel', $invitation->id) }}" method="POST" style="display: inline;">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm" title="Cancel Invitation">
                                     <i class="fas fa-trash-alt"></i>
@@ -54,7 +54,7 @@
                 <h5 class="modal-title" id="inviteUserModalLabel">{{__('admin.Invite_org_managers')}}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('invite-user') }}" method="POST">
+            <form action="{{ route('organization.users_invite') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">

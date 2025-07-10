@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 if (! function_exists('in_array_2d')) {
@@ -44,5 +45,24 @@ if (!function_exists('getPusherConfig')) {
     function getPusherConfig()
     {
         return DB::table('settings')->select('PUSHER_APP_KEY', 'PUSHER_APP_CLUSTER')->first();
+    }
+}
+if (!function_exists('FormatDate')) {
+    function FormatDate($stamp, $format)
+    {
+        try {
+            if ($stamp === null) {
+                return '';
+            }
+            if (is_numeric($stamp)) {
+                return date($format, $stamp);
+            }
+            if ($stamp instanceof \DateTimeInterface) {
+                return $stamp->format($format);
+            }
+            return date($format, strtotime($stamp));
+        } catch (\Exception $e) {
+            return '';
+        }
     }
 }

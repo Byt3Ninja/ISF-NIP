@@ -59,9 +59,10 @@
                     onchange="window.open('/dashboard/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
                   @foreach ($cycles as $cycle)
                   <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                    ({{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
-                    {{ $cycle->end->format('d-M-Y') }})
-                    - {{ optional($cycle->organization)->name }}</option>
+                    ({{ __('cycles.from') }} {{ $cycle->start ? $cycle->start->format('d-m-Y') : '-' }} {{ __('cycles.to') }}
+                    {{ $cycle->end ? $cycle->end->format('d-m-Y') : '-' }})
+                    - {{ optional($cycle->organization)->name }}
+                  </option>
                   @endforeach
                   @if (!$id)
                   <option> {{ __('cycles.No records saved') }} -
@@ -104,16 +105,27 @@
                 @foreach ($mentors as $mentor)
                 <label class="btn btn-outline-primary mentor-label" id="label-mentor{{ $mentor->user_id }}">
                   <div class="d-flex align-items-center">
-                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url }}" alt="click to view"
+                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url ?? '' }}" alt="click to view"
                       height="20" width="20" />
                     <div class="d-flex align-items-center">
                       <span class="mx-2">
+                        @if($mentor->user != null)
                         {{ $mentor->user->id }}-
                         {{ $thementor = $mentor->user->{'first_name_' . $l} . ' ' . $mentor->user->{'last_name_' . $l}
                         }}
+                        @endif
                       </span>
-                      <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor" class="mentor_radio"
-                        onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
+                      <input
+                        type="radio"
+                        value="{{ $mentor->user_id }}"
+                        id="mentor{{ $mentor->user_id }}"
+                        data-name="{{ $thementor }}"
+                        data-rating="{{ $mentor->mrating() }}"
+                        data-id="{{ $mentor->user_id }}"
+                        name="mentor"
+                        class="mentor_radio"
+                        onclick="mentor({{ $mentor->user_id }}, '{{ $thementor }}', '{{ $mentor->mrating() }}')"
+                      />
                     </div>
                   </div>
                 </label>
@@ -143,11 +155,11 @@
           </div>
           <br>
                   <!-- Filter -->
-              <form method="GET" action="{{ route('mentorship.view', $id) }}">
+              <form method="GET" action="{{ route('mentorships.requests_view', $id) }}">
                 <div class="d-flex align-items-center mx-2">
                   <div style="display: flex; align-items: center;">
                   <button
-                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center mx-3" 
                     style="border-radius: 17px; width: 40px; height: 40px;"
                      type="submit"
                   >
@@ -241,6 +253,7 @@
                   </td>
                   <td>
                     <button
+                      {{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
                       onclick="add({{ $company->user->id }},{{ $company->cycledata->organization_id }},{{ $company->cycle }})"
                       type="button" class="btn btn-label-primary btn-icon rounded-circle">
                       <i class="ti ti-plus"></i>
@@ -257,71 +270,8 @@
   </div>
 </div>
 <!-- END: Content-->
-<div class="modal fade" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <form id="sessionForm" method="post" action="/dashboard/mentorship/add" enctype="multipart/form-data"
-        autocomplete="off">
-        <div class="modal-header">
-          <h4 class="modal-title">
-            {{ __('cycles.Add new mentorship session') }} <span id="rname"></span>
-          </h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          @csrf
-          <input type="hidden" name="mentorid" value="0" id="mentorid">
-          <input type="hidden" name="userid" value="0" id="userid">
-          <input type="hidden" name="organization_id" id="addOrganizationID">
-          <input type="hidden" name="cycle_id" id="addCycleID">
+@include('admin.clients.startup.partials._mutiple_session_modal')
 
-          <div class="form-group mb-4" id="showdates">
-            <label class="form-label fs-6 fw-bold">{{ __('cycles.Date/Time') }}:</label>
-            <p id="selectSubtitle">{{ __('admin.SelectDateTime') }}.</p>
-            <!-- input is mandatory -->
-            <div class="input-group mb-2">
-              <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}" class="form-control"
-                id="flatpickr-date-time"
-                required 
-              />
-            </div>
-            <span class="fw-semibold text-danger" id="dateError"></span>
-            {{-- <input type="hidden" class="date form-control" name="date" id="constrained" --}} {{--
-              data-inline="true" data-multiple="true" data-open-on="today" data-time="true"> --}}
-
-            {{-- <input class='date width-200 form-control' type="text" id="date" name="date" value="" required> --}}
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label fs-6 fw-bold">{{ __('cycles.Meeting period') }}:</label>
-            <div class="input-group">
-              <select name="period" class="select form-control">
-                <option value="30">30 {{ __('cycles.Minutes') }}</option>
-                <option value="60" selected>1 {{ __('cycles.Hour') }}</option>
-                <option value="120">2 {{ __('cycles.Hour') }}</option>
-                <option value="180">3 {{ __('cycles.Hour') }}</option>
-                <option value="240">4 {{ __('cycles.Hour') }}</option>
-                <option value="300">5 {{ __('cycles.Hour') }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label fs-6 fw-bold">{{ __('cycles.Add a session note') }}:</label>
-            <div class="input-group">
-              <textarea class="form-control" id="notes" name='notes' rows="4"
-                placeholder="{{ __('cycles.Write your note here') }}."></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary ml-1" id="submitBtn">
-            <span class="me-2">{{ __('cycles.Submit') }}</span>
-            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loadingSpinner"></span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 @stop
 
 @section('scripts')
@@ -349,7 +299,8 @@
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/forms-selects.js"></script>
+{{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
+<script src="/vuexy/assets/js/mentorship-mutiple-session.js"></script>
 @php
   $addedSession = session()->has('add');
   $notAddedSession = session()->has('notAdd');
@@ -460,12 +411,19 @@
 
     function add(id, organization_id, cycle_id) {
       let mentor = $('input[name="mentor"]:checked').val();
+
+      
       if (mentor) {
-        $('#userid').val(id);
-        $('#mentorid').val(mentor);
-        $('#addOrganizationID').val(organization_id);
-        $('#addCycleID').val(cycle_id);
-        $('#SendRequest').modal('show');
+        let mentorName = $('input[name="mentor"]:checked').data('name');
+        let mentorRating = $('input[name="mentor"]:checked').data('rating');
+        let mentorId = $('input[name="mentor"]:checked').data('id');
+        // const userId = $('#userid').val(id);
+        // // $('#mentorid').val(mentor);
+        // const orgId = $('#addOrganizationID').val(organization_id);
+        // const cycleId = $('#addCycleID').val(cycle_id);
+        
+        // $('#SendRequest').modal('show');
+        request(mentorId, mentorName, organization_id, cycle_id)
       } else {
         alert("{{ __('cycles.Please select mentor first, and try again') }}!");
       }
@@ -536,23 +494,23 @@
       });
     }
 
-    $(document).on('click', '.mentor_radio', function() {
-    var mentor_id = $(this).val();
-    $.ajax({
-        url: '/dashboard/mentorship/getDates', // الرoutes المناسب
-        type: 'POST',
-        data: {
-          mentor_id: mentor_id,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-          console.log(response.dates);
+//     $(document).on('click', '.mentor_radio', function() {
+//     var mentor_id = $(this).val();
+//     $.ajax({
+//         url: '/dashboard/mentorship/getDates', // الرoutes المناسب
+//         type: 'POST',
+//         data: {
+//           mentor_id: mentor_id,
+//             _token: '{{ csrf_token() }}'
+//         },
+//         success: function(response) {
+//           console.log(response.dates);
             
-        },
-        error: function(xhr) {
-        console.error('Error:', xhr.responseText);
-    }
-    });
-});
+//         },
+//         error: function(xhr) {
+//         console.error('Error:', xhr.responseText);
+//     }
+//     });
+// });
 </script>
 @stop

@@ -131,13 +131,13 @@
                     </h5>
                     <div class="d-flex align-items-center gap-2">
                       <!-- Mail Icon -->
-                      @if ($organization->user->email)
+                      @if (optional($organization->user)->email)
                         <a href="mailto:{{ $organization->user->email }}" class="text-decoration-none">
                           <i class="ti ti-mail fs-4 text-primary"></i>
                         </a>
                       @endif
                       <!-- Phone Icon -->
-                      @if ($organization->user->phone)
+                      @if (optional($organization->user)->phone)
                         <a href="tel:{{ $organization->user->phone }}" class="text-decoration-none">
                           <i class="ti ti-phone fs-4 text-primary"></i>
                         </a>
@@ -148,8 +148,8 @@
                   <div class="card mt-3 d-flex justify-content-center align-items-center position-relative"
                     style="height: 150px; width: 100%;">
                     <img 
-                      src="{{ $organization->image_url ?? '/images/logo-placeholder.png' }}"
-                      onerror="this.src='/images/logo-placeholder.png'" alt="Organization Image" 
+                      src="/{{ $organization->image_url ?? '/images/background/logo.png' }}"
+                      onerror="this.src='/images/background/logo.png'" alt="Organization Image" 
                       class="rounded img-fluid"
                       style="height: 120px; min-width: 200px; object-fit: cover;" 
                     />
@@ -167,7 +167,7 @@
                       <img src="{{ $organization->user->img_url ?? '/images/placeholder.png' }}"
                         onerror="this.src='/images/user-placeholder.jpeg'" alt="Manager Image"
                         class="rounded-circle img-fluid border" style="height: 35px; width: 35px; object-fit: cover;" />
-                      <span class="ms-3">{{ $organization->user->name }}</span>
+                      <span class="ms-3">{{ $organization->user->name ?? '' }}</span>
                     </div>
                   </div>
                   <div class="d-flex justify-content-between mt-3">
@@ -253,14 +253,19 @@
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
         Swal.fire({
-            title: "{{ __('admin.SureDelete') }}",
-            text: "{{ __('admin.Recover') }}",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonClass: "btn-label-danger",
-            confirmButtonText: "{{ __('admin.DYes') }}",
-            cancelButtonText: "{{ __('admin.No') }}!",
-          })
+        	title: "{{__('admin.SureDelete')}}",
+					text: "{{__('admin.Recover')}}",
+					icon: "warning",
+					showCancelButton: true,
+					confirmButtonText: "{{ __('admin.DYes') }}",
+					cancelButtonText: "{{ __('admin.No') }}",
+					reverseButtons: true,
+					customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+					},
+					buttonsStyling: false,
+      })
           .then((result) => {
             if (result.value) {
               $.post(url, {
@@ -268,11 +273,11 @@
                   '_token': token
                 },
                 function(response) {
-                  Swal.fire({
-                    type: 'success',
-                    title: "{{ __('admin.Deleted') }}!",
-                    html: "{{ __('admin.FileDeleted') }}.",
-                  });
+                  // Swal.fire({
+                  //   type: 'success',
+                  //   title: "{{ __('admin.Deleted') }}!",
+                  //   html: "{{ __('admin.DeletedSuccessfully') }}.",
+                  // });
                   location.reload();
                 }
               ).fail(function(error) {

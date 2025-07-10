@@ -343,17 +343,28 @@
           text: "{{ __('admin.Select at least one message') }}",
           icon: "warning",
           confirmButtonText: "{{ __('admin.OK') }}"
+          showCancelButton: false,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
         });
         return;
       }
 
       Swal.fire({
-        title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
+      	title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}!",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
       })
         .then((result) => {
         if (result.value) {
@@ -556,18 +567,18 @@
             _token: '{{ csrf_token() }}'
         },
         success: function(response) {
-        // console.log('response', response)
+        console.log('response', response)
         // console.log('Messages: ',response.messages);
           $('#message-reply-text').val('');
           messageReplyEditor.setText(''); // Clear the editor
 
-          const { first_name_en, last_name_en, created_at, id, message} = response.messages || {};
+          const { sender_name, created_at, id, message} = response.messages.reply || {};
 
           $('#message-replies-container').show();
           $('#message-details-replies').prepend(`
             <li class="list-group-item gap-3 p-2 border-bottom">
               <div class="d-flex justify-content-between align-items-center mb-2 ">
-                <div class="fw-semibold fs-6">${first_name_en} ${last_name_en}</div>
+                <div class="fw-semibold fs-6">${sender_name}</div>
                 <div class="d-flex align-items-center">
                   <span class="me-2 text-muted">${moment(created_at).format('MMMM Do YYYY, h:mm A')}</span>
                   <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${id}, event)">

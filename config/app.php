@@ -162,6 +162,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -236,5 +237,6 @@ return [
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'Sentry' => Sentry\Laravel\Facade::class,
         'GeoIP' => \Torann\GeoIP\Facades\GeoIP::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 ];

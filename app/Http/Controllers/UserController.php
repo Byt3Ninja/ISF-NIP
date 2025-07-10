@@ -40,7 +40,7 @@ class UserController extends Controller
 	 */
 	public function index()
 	{
-		$users = User::with('company')->with('roles')->get();
+		$users = User::with('company')->with('roles')->orderBy('id', 'DESC')->get();
 		return view('admin/users/index', compact('users'));
 	}
 
@@ -56,21 +56,22 @@ class UserController extends Controller
 		return view('admin/users/create', compact('roles'));
 	}
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
 	public function store(StoreUserRequest $request)
 	{
-		if( $request->hasFile('img_url') )
-		{
+		if ($request->hasFile('img_url')) {
 			//store the image
 			$img_url = $request->file('img_url');
 			//get the path of the stores image
 			$img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-		} else { $img_url = ''; }
+		} else {
+			$img_url = '';
+		}
 		$inputs = $request->except(['img_url']) + ['img_url' => $img_url];
 		$inputs['password'] = Hash::make($inputs['password']);
 		$inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
@@ -88,9 +89,9 @@ class UserController extends Controller
 		Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
 
 		$result->allotRoleById($request->role);
-		$data =[];
+		$data = [];
 		$name = $result->first_name_en . ' ' . $result->last_name_en;
-		if($request->role == 'Judger'){
+		if ($request->role == 'Judger') {
 			// إرسال الإيميل الترحيبي
 			$data = [
 				'name' => $name,
@@ -98,15 +99,15 @@ class UserController extends Controller
 				'role' => 'Judger',
 			];
 			// إرسال الإشعار
-			if( !in_array(env('APP_ENV', 'local'), ['local']) )
-			{
+			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 				try {
 					$result->notify(new WelcomeJudgerNotification($data));
 				} catch (\Throwable $th) {
 					// throw $th;
 				}
 			}
-		}
+		}else{
+
 			// إرسال الإيميل الترحيبي
 			$data = [
 				'name' => $name,
@@ -117,16 +118,20 @@ class UserController extends Controller
 			// إرسال الإشعار
 			// if( !in_array(env('APP_ENV', 'local'), ['local']) )
 			// {
-				try {
-					$result->notify(new WelcomeJudgerNotification($data));
-				} catch (\Throwable $th) {
-					throw $th;
-				}
+			try {
+				$result->notify(new WelcomeJudgerNotification($data));
+			} catch (\Throwable $th) {
+				throw $th;
+			}
 			// }
-		
+		}
 
-		if( $result ) { return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']); }
-		else { return back()->withInput()->with(['msg' => 'FailedStore']); }
+
+		if ($result) {
+			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
+		} else {
+			return back()->withInput()->with(['msg' => 'FailedStore']);
+		}
 	}
 
 	/**
@@ -152,14 +157,18 @@ class UserController extends Controller
 		$countries = Country::all();
 		$json = File::get(base_path('database/dbFiles/countries.json'));
 		$_countries = json_decode($json, true);
-		$_countries = collect( $_countries )->map(function ($country) {
+		$_countries = collect($_countries)->map(function ($country) {
 			$country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
 			return $country;
 		});
-		$countries = $countries->map(function ( $country ) use ( $_countries ) {
+		$countries = $countries->map(function ($country) use ($_countries) {
 			$getCountry = $_countries->where('iso3', $country->iso3)->first();
-			$flag = null; $emoji = null;
-			if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+			$flag = null;
+			$emoji = null;
+			if (!empty($getCountry)) {
+				$flag = $getCountry['flag'];
+				$emoji = $getCountry['emoji'];
+			}
 			$country->flag = $flag;
 			$country->emoji = $emoji;
 			return $country;
@@ -176,24 +185,42 @@ class UserController extends Controller
 	 */
 	public function update(Request $request, User $user)
 	{
-		$role = R::find( $request->role );
-		if ($user->id == 1) { return back()->with(['msg' => 'FailedStore']); }
-		if( empty( $role ) ) { return back()->with(['msg' => 'Role Not Found']); }
-		if ($request->hasFile('img_url'))
-		{
+		$role = R::find($request->role);
+		if ($user->id == 1) {
+			return back()->with(['msg' => 'FailedStore']);
+		}
+		if (empty($role)) {
+			return back()->with(['msg' => 'Role Not Found']);
+		}
+		if ($request->hasFile('img_url')) {
 			//store the image
 			$img_url = $request->file('img_url');
 			//get the path of the stores image
 			$img_url = $img_url->store('users', ['disk' => 'public_uploads']);
 			//update
 			$result = $user->update($request->except(['img_url']) + ['img_url' => $img_url]);
-		} else { $result = $user->update($request->all()); }
+		} else {
+			$request->validate([
+				'first_name_en' => 'required|string|max:255',
+				'last_name_en' => 'required|string|max:255',
+				'first_name_ar' => 'required|string|max:255',
+				'last_name_ar' => 'required|string|max:255',
+				'email' => 'required|email|unique:users,email,' . $user->id,
+				'phone' => 'nullable|string|max:20',
+				'country_id' => 'nullable|exists:countries,id',
+				'HadCompany' => 'nullable|boolean',
+			]);
+			$result = $user->update($request->all());
+		}
 
 		$user->roles()->detach();
 		$user->allotRoleById($role->id);
 
-		if( $result ) { return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']); }
-		else { return back()->withInput()->with(['msg' => 'FailedStore']); }
+		if ($result) {
+			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
+		} else {
+			return back()->withInput()->with(['msg' => 'FailedStore']);
+		}
 	}
 
 	/**
@@ -205,13 +232,18 @@ class UserController extends Controller
 	 */
 	public function updatePassword(UpdateUserPasswordRequest $request)
 	{
-		if( $request->id == 1 ) { return back()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
+		if ($request->id == 1) {
+			return back()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+		}
 		$user = User::find($request->id);
 		$password = Hash::make($request->password);
 		$result = $user->where('id', $user->id)->update(['password' => $password]);
 
-		if( $result ) { return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']); }
-		else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
+		if ($result) {
+			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+		} else {
+			return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+		}
 	}
 
 	/**
@@ -222,7 +254,9 @@ class UserController extends Controller
 	 */
 	public function destroy(User $user)
 	{
-		if( $user->id == 1 ) { return response()->json(['state' => 'failed'], 500); }
+		if ($user->id == 1) {
+			return response()->json(['state' => 'failed'], 500);
+		}
 		$user->roles()->detach();
 		$user->delete();
 		$user->company()->delete();
@@ -235,13 +269,11 @@ class UserController extends Controller
 		$cycle_id = null;
 		$errorMessage = '';
 
-		if( Auth::user()->hasRole('Registered') )
-		{
-			// return redirect()->route('dashboard')->with(['error' => 'cantAccessAllCompanies']);
+		if (Auth::user()->hasRole('Registered')) {
+			// return redirect()->route('core.dashboard_view')->with(['error' => 'cantAccessAllCompanies']);
 			$organization_id = auth()->user()->organization_id;
 			$company = auth()->user()->company;
-			if( $company && $company->cycle != null )
-			{
+			if ($company && $company->cycle != null) {
 				$company_id = $company->id;
 				$cycle_id = $company->cycle;
 				// $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
@@ -296,16 +328,16 @@ class UserController extends Controller
 				$name = ($l == 'ar') ? 'name_ar' : 'name_en';
 				$query->where($name, 'like', '%' . $request->search . '%');
 			})
-			->when($request->sector, function ($query) use ($request) {
-				$query->where('sector', 'like', '%' . $request->sector . '%');
-			})
-			->when($request->stage, function ($query) use ($request) {
-				$query->where('stage', 'like', '%' . $request->stage . '%');
-			})
-			->get();
-	
+				->when($request->sector, function ($query) use ($request) {
+					$query->where('sector', 'like', '%' . $request->sector . '%');
+				})
+				->when($request->stage, function ($query) use ($request) {
+					$query->where('stage', 'like', '%' . $request->stage . '%');
+				})
+				->get();
+
 			$errorMessage = "";
-		}  else {
+		} else {
 
 			// $organization_id=auth()->user()->organization_id;
 			// $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->get();

@@ -73,6 +73,45 @@
 		<!-- Content -->
 		<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="card">
+				<!-- Startup Info Header -->
+				@if (!empty($tasks) && count($tasks) > 0)
+			<div
+				class="card-header mx-6 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom mb-4">
+				<div class="d-flex align-items-center">
+					@if (!empty($data['company_name']))
+					<div class="d-flex align-items-center">
+						<div
+							class="p-2 w-px-75 h-px-75 border shadow-sm rounded d-flex justify-content-center align-items-center me-4">
+							<img src="{{ $data['start_up_logo'] ?? '/images/logo-placeholder.png' }}"
+								alt="{{ $data['company_name'] }} Logo" class="rounded h-100 w-100 object-fit-contain overflow-hidden"
+								onerror="this.onerror=null; this.src='/images/logo-placeholder.png';">
+						</div>
+						<div>
+							<h4 class="mb-0">{{ $data['company_name'] }}</h4>
+							<small class="text-muted">{{ $data['program_name'] }}</small>
+						</div>
+					</div>
+					@endif
+				</div>
+				<div class="d-flex flex-column gap-3">
+					<div class="d-flex justify-content-between align-items-center gap-2">
+						<span class="fw-bold me-6">{{ __('admin.Current_Step') }}</span>
+						<div class="badge bg-label-primary">{{ $data['step_name'] }}</div>
+					</div>
+					<div class="d-flex justify-content-between align-items-center gap-2">
+						<span class="fw-bold me-6">{{ __('admin.Mentor_Session_Appointment') }}</span>
+						@if (!empty($data['mentor_zoom_date']))
+							<div class="badge bg-label-secondary">
+								<i class="ti ti-calendar ti-16px me-1"></i>
+								<span>{{ \Carbon\Carbon::parse($data['mentor_zoom_date'])->format('M d, Y H:i') }}</span>
+							</div>
+						@endif
+					</div>
+				</div>
+			</div>
+				@endif
+
+
 				@if (!empty($tasks) && count($tasks) > 0)
 					<div class="card-body">
 						<div class="d-flex justify-content-end w-100 border-bottom pb-3">
@@ -542,6 +581,33 @@
 	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 	<script>
+		// Custom SweetAlert2 helper functions
+		const showError = (message) => {
+			return Swal.fire({
+				icon: 'error',
+				title: message,
+				confirmButtonText: '{{ __('admin.OK') }}',
+				customClass: {
+					confirmButton: 'btn btn-primary'
+				},
+				buttonsStyling: false
+			});
+		};
+
+		const showSuccess = (message) => {
+			return Swal.fire({
+				icon: 'success',
+				html: message,
+				showCancelButton: false,
+				showConfirmButton: true,
+				confirmButtonText: "{{ __('admin.OK') }}",
+				customClass: {
+					confirmButton: 'btn btn-primary',
+				},
+				buttonsStyling: false
+			});
+		};
+
 		// Handle attachments upload
 		function handleFileUpload(event) {
 			const files = event.target.files;
@@ -584,7 +650,7 @@
 					if (response.status) {
 						renderFiles(response.task.files, mode);
 					} else {
-						alertify.error(response.message);
+						showError(response.message);
 					}
 				},
 				error: function(error) {
@@ -636,14 +702,18 @@
 		function deleteFileHandler(fileName, fileId, ele) {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
-				icon: 'warning',
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
 				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, delete it!',
-				backdrop: true
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			}).then((result) => {
 				if (result.isConfirmed) {
 					$('#viewTaskModal').modal('show');
@@ -657,7 +727,7 @@
 								const attachmentCount = document.getElementById('attachmentCount');
 								attachmentCount.textContent = document.getElementById('fileList').children.length;
 							} else {
-								alertify.error(response.message);
+								showError(response.message);
 							}
 						},
 						error: function(error) {
@@ -677,6 +747,8 @@
 	{{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
 	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
 	<script>
+		let data = @json($data);
+		console.log('startup', data);
 		var kanban;
 		var boards = @json($kanban);
 		var lang = '{{ $l }}';
@@ -856,7 +928,7 @@
 							$('#viewTaskModal').modal('show');
 						},
 						error: function(error) {
-							alertify.error('Unexpected error occurred.');
+							showError('Unexpected error occurred.');
 						}
 					});
 				},
@@ -898,7 +970,7 @@
 							}
 							else
 							{
-								alertify.error(response.message);
+								showError(response.message);
 							}
 							reloadKanban();
 						},
@@ -906,8 +978,8 @@
 							reloadKanban();
 							if( error.status == 422 )
 							{
-								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
-							} else { alertify.error('Unexpected error occurred.'); }
+								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+							} else { showError('Unexpected error occurred.'); }
 						}
 					});
 				}
@@ -1071,7 +1143,7 @@
 								fileList.appendChild(fileDiv);
 							});
 							attachmentCount.textContent = response.task.files.length;
-						} else { alertify.error( response.message ); }
+						} else { showError( response.message ); }
 					},
 					error: function(error) {
 						console.error('Error uploading files:', error);
@@ -1135,14 +1207,18 @@
 		const deleteFileHandler = (fileName, fileId, ele) => {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
-				icon: 'warning',
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
 				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, delete it!',
-				backdrop: true // Ensure SweetAlert modal overlays on any modal
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			}).then((result) => {
 				if (result.isConfirmed) {
 					$('#viewTaskModal').modal('show');
@@ -1156,7 +1232,7 @@
 								ele.remove();
 								const attachmentCount = document.getElementById('attachmentCount');
 								attachmentCount.textContent = document.getElementById('fileList').children.length;
-							} else { alertify.error( response.message ); }
+							} else { showError( response.message ); }
 						},
 						error: function(error) {
 							console.error('Error deleting file:', error);
@@ -1349,7 +1425,7 @@
 					$('#editTaskModal').modal('show');
 				},
 				error: function(error) {
-					alertify.error('Unexpected error occurred.');
+					showError('Unexpected error occurred.');
 				}
 			});
 		});
@@ -1379,15 +1455,16 @@
 							title: response.title,
 							text: response.message,
 							showConfirmButton: false,
+							showCancelButton: false,
 							timer: 4500
 						});
 						reloadKanban();
-					} else { alertify.error( response.message ); }
+					} else { showError( response.message ); }
 				},
 				error: function(error) {
 					if( error.status == 422 )
 					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 					}
 				}
 			});
@@ -1437,12 +1514,12 @@
 							`;
 							commentList.appendChild(commentDiv);
 							commentInput.value = '';
-						} else { alertify.error( response.message ); }
+						} else { showError( response.message ); }
 					},
 					error: function(error) {
 						if( error.status == 422 )
 						{
-							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 						}
 					}
 				});
@@ -1493,16 +1570,17 @@
 							title: response.title,
 							text: response.message,
 							showConfirmButton: false,
+							showCancelButton: false,
 							timer: 4500
 						});
 						reloadKanban();
-					} else { alertify.error( response.message ); }
+					} else { showError( response.message ); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
 					if( error.status == 422 )
 					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 					}
 				}
 			});
@@ -1553,16 +1631,17 @@
 							title: response.title,
 							text: response.message,
 							showConfirmButton: false,
+							showCancelButton: false,
 							timer: 4500
 						});
 						reloadKanban();
-					} else { alertify.error( response.message ); }
+					} else { showError( response.message ); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
 					if( error.status == 422 )
 					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
 					}
 				}
 			});

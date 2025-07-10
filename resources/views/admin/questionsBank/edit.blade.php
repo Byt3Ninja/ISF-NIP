@@ -10,11 +10,6 @@
 @section('index_url', route('questions-bank.index') )
 @section('subTitle', __('admin.Edit Question'))
 
-@section('vendorstyle')
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-@stop
-
 @section('style')
 	<style>
 		.content-body {
@@ -124,7 +119,9 @@
 													<select class="select2 form-select" name="question_group" id="question_group" required>
 														<option value="quiz" {{ $question->group == 'quiz' ? 'selected' : '' }}>{{ __('admin.question_type_quiz') }}</option>
 														<option value="survey" {{ $question->group == 'survey' ? 'selected' : '' }}>{{ __('admin.question_type_survey') }}</option>
+														@if($_user->ableTo('Assessment.Questions.Manage', $permissions))
 														<option value="assessment" {{ $question->group == 'assessment' ? 'selected' : '' }}>{{ __('admin.question_type_assessment') }}</option>
+														@endif
 													</select>
 												</div>
 											</div>
@@ -220,7 +217,7 @@
 														<label class="fs-6 form-label mb-2 fw-bold w-100" for="answers">{{ __('admin.answers')}}</label>
 														<button id="addNewAnswer" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new answer" style="height: 35px;"> 
 															<i class="ti ti-plus me-2"></i>
-															<span class="text-nowrap">Add Answer</span>
+															<span class="text-nowrap">{{ __('admin.Add Answer') }}</span>
 														</button>
 													</div>
 													<div class="form-group" id="quizAnswers">
@@ -297,15 +294,7 @@
 <!-- END: Content-->
 @stop
 
-@section('scripts')
-	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-@stop
-
 @section('pagescripts')
-	{{-- <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script> --}}
-	<script src="/vuexy/assets/js/forms-selects.js"></script>
-
 	<script>
 		$(document).ready(function() {
 			handleGroupChange();
@@ -355,11 +344,18 @@
 			};
 		});
 
-		alertify.defaults.transition = 'zoom';
-		alertify.defaults.theme = {
-			ok: 'btn btn-sm btn-success',
-			cancel: 'btn btn-sm btn-danger',
-			input: 'form-control'
+		// Custom SweetAlert2 helper for this application
+		const showAlert = (title, text, icon = 'info') => {
+			return Swal.fire({
+				title: title,
+				text: text,
+				icon: icon,
+				confirmButtonText: '{{ __("admin.OK") ?? "OK" }}',
+				customClass: {
+					confirmButton: 'btn btn-primary'
+				},
+				buttonsStyling: false
+			});
 		};
 		
 		var orgnizations = @json( $json_organizations );
@@ -406,7 +402,7 @@
 				{
 					if( $("input[name='quiz_answer_text[]']").length >= 5 )
 					{
-						alertify.alert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreFiveAllowed") }}');
+						showAlert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreFiveAllowed") }}', 'warning');
 						return false;
 					}
 				}
@@ -415,7 +411,7 @@
 				{
 					if( $("input[name='quiz_answer_text[]']").length >= 3 )
 					{
-						alertify.alert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreThreeAllowed") }}');
+						showAlert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreThreeAllowed") }}', 'warning');
 						return false;
 					}
 				}
@@ -423,7 +419,7 @@
 			}
 			var answer = `
 			<div class="d-flex flex-nowrap gap-4 mb-3">
-				<input placeholder="Type the text of the answer" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
+				<input placeholder="{{ __('admin.typeAnswer') }}" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
 				<input placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترح ' }}" class="form-control ` + class_control2 + `" id="quiz_answer_` + count + `_score" name="quiz_answer_score[]">
 				<select class="select2 form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
 					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
@@ -463,7 +459,7 @@ $('.ascategory_id').change(function() {
 	var category_id = $(this).val();
 	var $state = $('.subcategory_id');
 	$.ajax({
-		url: "{{ route('get_subcategory_by_category') }}",
+		url: "{{ route('subcategories.list_by_category') }}",
 		method: 'GET', // إضافة طريقة الطلب
 		data: {
 			category_id: category_id

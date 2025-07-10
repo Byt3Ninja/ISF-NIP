@@ -83,40 +83,50 @@
                         <th>#</th>
                         <th>{{__('admin.surveyTitle')}}</th>
                         <th class="text-center">{{__('admin.Organization')}}</th>
+                        {{-- <th class="text-center">{{ __('admin.Tags') }}</th> --}}
                         <th style="width: 100px;" class="text-center">{{__('admin.Actions')}}</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      @foreach( $surveys as $survey )
-                      <tr>
-                        <td><a href="{{ URL::to('dashboard/surveys/' . $survey->id . '/edit') }}">{{ $survey->id }}</a>
-                        </td>
-                        <td>{!! $survey->title !!}</td>
-                        <td class="text-center"><a
-                            href="{{ URL::to('dashboard/organizations/' . $survey->organization->id . '/edit') }}">
-                            {{ $survey->organization->{'name_'.$l} }}</a></td>
-                        <td class="text-center">
-                          <div class="btn-group w-100">
-                            <button class="btn btn-sm border-none" type="button" data-bs-toggle="dropdown"
-                              aria-haspopup="true" aria-expanded="false">
-                              <i class="ti ti-dots-vertical"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                              <a href="{{ route('surveys.questions', ['survey' => $survey->id]) }}"
-                                class="dropdown-item"> <i class="ti ti-list-check"></i>
-                                {{ __('admin.manageQuestions') }} </a>
-                              <a href="{{ route('surveys.edit', ['survey' => $survey->id]) }}" class="dropdown-item"> <i
-                                  class="ti ti-edit text-info"></i> {{ __('admin.Edit') }}</a>
-                              <a id='deleteAction' data-id='{{ $survey->id }}'
-                                data-url="{{ route('surveys.destroy', ['survey' => $survey->id]) }}"
-                                href="{{ route('surveys.destroy', ['survey' => $survey->id]) }}" class="dropdown-item">
-                                <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }} </a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      @endforeach
-                    </tbody>
+                      <tbody>
+                        @foreach($surveys as $survey)
+                        <tr>
+                          <td><a href="{{ route('surveys.edit', $survey->id) }}">{{ $survey->id }}</a></td>
+                          <td>{!! $survey->title !!}</td>
+                          <td class="text-center">
+                                <a href="{{ route('organizations.edit', $survey->organization->id) }}">
+                                    {{ $survey->organization->{'name_' . $l} }}
+                                </a>
+                          </td>
+                        {{-- <td class="text-center">
+                        @foreach($survey->questions as $question)
+                              @foreach($question->tags as $tag)
+                                 <span class="badge bg-primary me-1">{{ $tag }}</span>
+                              @endforeach
+                        @endforeach
+                      </td> --}}
+            <td class="text-center">
+              <div class="btn-group w-100">
+                <button class="btn btn-sm border-none" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="ti ti-dots-vertical"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="{{ route('surveys.questions_manage', ['survey' => $survey->id]) }}" class="dropdown-item">
+                        <i class="ti ti-list-check"></i> {{ __('admin.manageQuestions') }}
+                    </a>
+                    <a href="{{ route('surveys.edit', ['survey' => $survey->id]) }}" class="dropdown-item">
+                        <i class="ti ti-edit text-info"></i> {{ __('admin.Edit') }}
+                    </a>
+                    <a id="deleteAction" data-id="{{ $survey->id }}" data-url="{{ route('surveys.destroy', ['survey' => $survey->id]) }}"
+                       href="{{ route('surveys.destroy', ['survey' => $survey->id]) }}" class="dropdown-item">
+                        <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }}
+                    </a>
+                </div>
+            </div>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
+                        
                   </table>
                 </div>
               </div>
@@ -142,6 +152,7 @@ $(document).ready(function() {
     'lengthChange': false,
     'paging': true,
     'bInfo': false,
+    'order': [[0, 'desc']],
     'columnDefs': [{
       "orderable": false,
       "targets": [3]
@@ -177,15 +188,20 @@ $(document).on("click", "#deleteAction", function(e) {
   e.preventDefault();
   var url = $(this).data('url');
   var token = '{{ csrf_token() }}';
-  Swal.fire({
-      title: "{{__('admin.SureDelete')}}",
-      text: "{{__('admin.Recover')}}",
+ 
+    Swal.fire({
+      title: "{{ __('admin.SureDelete') }}",
+      text: "{{ __('admin.Recover') }}",
       icon: "warning",
-      buttonsStyling: true,
       showCancelButton: true,
-      confirmButtonClass: "btn-danger",
-      confirmButtonText: "{{__('admin.DYes')}}",
-      cancelButtonText: "{{__('admin.No')}}!",
+      confirmButtonText: "{{ __('admin.DYes') }}",
+      cancelButtonText: "{{ __('admin.No') }}",
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'btn btn-danger me-2',
+        cancelButton: 'btn btn-secondary'
+      },
+      buttonsStyling: false
     })
     .then((result) => {
       if (result.value) {
@@ -197,7 +213,14 @@ $(document).on("click", "#deleteAction", function(e) {
             Swal.fire({
               icon: 'success',
               title: "{{ __('admin.Deleted') }}!",
-              html: "{{ __('admin.FileDeleted') }}.",
+              html: "{{ __('admin.DeletedSuccessfully') }}.",
+              showCancelButton: false,
+              showConfirmButton: true,
+              confirmButtonText: "{{ __('admin.OK') }}",
+              customClass: {
+                  confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
             });
             location.reload();
           }

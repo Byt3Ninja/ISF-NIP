@@ -17,6 +17,12 @@ class UpdatePermissionRequest extends FormRequest
             'name' => [
                 'string',
                 'required',
+                'unique:permissions,name,' . request()->permission->id,
+            ],
+            'permission_group_id' => [
+                'nullable',
+                'sometimes',
+                'exists:permission_groups,id',
             ],
             'is_core' => [
                 'sometimes',

@@ -3,17 +3,18 @@
 
 namespace App\Http\Controllers\Calender;
 
-use App\Cycle;
-use App\Finalscreening;
-use App\Http\Controllers\Controller;
-use App\MentorshipRequest;
-use App\Screening;
-use App\Services\GoogleCalendarService;
 use App\Step;
+use App\Cycle;
+use App\Screening;
+use App\Finalscreening;
 use App\TrainingSession;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Session;
+use App\Services\GoogleCalendarService;
+use Illuminate\Support\Facades\Session;
 
 class GoogleCalendarController extends Controller
 {
@@ -26,26 +27,28 @@ class GoogleCalendarController extends Controller
 
     public function redirectToGoogle()
     {
-         dd(route('calender.callback.google'));
+        //  dd(route('integrations.calendar_google_callback'));
         return redirect($this->googleService->getAuthUrl());
     }
+
 
     public function handleGoogleCallback(Request $request)
     {
         if( $request->has('error') || !$request->has('code') )
         {
             Session::flash('error', trans('auth.auth_error', ['reason' => $request->error]));
-            return redirect( route('calendar') );
+            return redirect( route('calendar.events_list') );
         }
         else
         {
             try {
                 $code = $request->get('code');
-                $this->googleService->authenticate($code, auth()->id());
-                return redirect(route('calender.syncEvents'));
+                $user = auth()->user();
+                $this->googleService->authenticate($code, $user->id);
+                return redirect(route('integrations.calendar_google_sync'));                return redirect( route('calendar.events_list') );
             } catch (\Exception $e) {
                 Session::flash('error', trans('auth.auth_error', ['reason' => $e->getMessage()]));
-                return redirect( route('calendar') );
+                return redirect( route('calendar.events_list') );
             }
         }
     }
@@ -62,8 +65,8 @@ class GoogleCalendarController extends Controller
 
         /* if( $data ) { return redirect(route('calendar'))->with('msg','Events synced successfully!'); }
         else { return redirect(route('calendar'))->with('message2','Events synced Failed!'); } */
-
-        return redirect( route('calendar') );
+       
+        return redirect()->route('calendar.events_list')->with('success','Events synced successfully!');
     }
 
     protected function AdminCalender($user,$organization_id){
@@ -140,8 +143,8 @@ class GoogleCalendarController extends Controller
             // Fetch your project events from the database
             $eventData = [
                 'title' => __('admin.judge Sessions'),
-                'start_date_time' => $key->from->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
-                'end_date_time' => $key->to->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+                'start_date_time' => $key->from->format('Y-m-d H:i:s'), // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->to->format('Y-m-d H:i:s'), // Make sure it's in 'Y-m-d H:i:s' format
             ];
 
             $event = $this->googleService->createEvent($user, $eventData);
@@ -202,7 +205,7 @@ class GoogleCalendarController extends Controller
         return true;
     }
 
-    protected function JudgerCalender($user)
+     protected function JudgerCalender($user)
     {
         $myid=auth()->id();
         $mysteps = auth()->user()->screeningRequests()->get();
@@ -239,6 +242,10 @@ class GoogleCalendarController extends Controller
 //        }
         return true;
     }
+
+
+
+    
 
     protected function StartupCalender($user)
     {
@@ -318,8 +325,8 @@ class GoogleCalendarController extends Controller
                 // Fetch your project events from the database
                 $eventData = [
                     'title' => __('admin.judge Sessions'),
-                    'start_date_time' => $csteps->from->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
-                    'end_date_time' => $csteps->to->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+                    'start_date_time' => $csteps->from->format('Y-m-d H:i:s'), // Make sure it's in 'Y-m-d H:i:s' format
+                    'end_date_time' => $csteps->to->format('Y-m-d H:i:s'), // Make sure it's in 'Y-m-d H:i:s' format
                 ];
 
                 $event = $this->googleService->createEvent($user, $eventData);

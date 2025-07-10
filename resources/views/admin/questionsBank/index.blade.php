@@ -1,14 +1,24 @@
 @extends('layouts.admin')
-@section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
+
 @section('title', __('admin.Questions Bank') )
 @section('subTitle', __('admin.Questions Bank List'))
 @section('content')
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		<div class="content-overlay"></div>
-			<div class="content-header row">
+			<div class="content-header row my-2">
+				<div class="row mb-4">
+					<div class="col-md-6">
+						<h4 class="mb-0 fw-bold">{{__('admin.Questions Bank List')}}</h4>
+					</div>
+					<div class="col-md-6">
+						<a 
+							href="{{ route('questions-bank.create') }}"
+							class="btn btn-primary float-end">
+							<i class="ti ti-plus me-2"></i>
+							{{ __('admin.Add New')}} 
+						</a>
+					</div>
+				</div>
 				@if( session()->has('success') )
 					<div class="col-md-12">
 						<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
@@ -29,43 +39,62 @@
 
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
-					<div class="row mb-4">
-						<div class="col-12">
-							<a 
-                href="{{ route('questions-bank.create') }}"
-                class="btn btn-primary float-end">
-                <i class="ti ti-plus me-3"></i>
-                {{ __('admin.Add New')}} 
-              </a>
-						</div>
-					</div>
 					<div class="organizations-list-table">
 						<div class="card">
-							<div class="card-content">
-                <div class="card-header mb-2 border-bottom">
-                  <h4 class="card-title">{{__('admin.Questions Bank List')}}</h4>
-                </div>
-				
+							<div class="card-content">				
 								<div class="card-body">
-
-									
-									<!-- datatable start -->
-									<div class="table-responsive">
-										<div class="" style="width: 40%;">
-											<label for="filterGroup">{{ __('admin.Choose_Type') }}</label>
-											<select id="filterGroup" class="form-select Type wight-40">
-												<option value="all">{{ __('admin.All') }}</option>
-												<option value="quiz">{{ __('admin.Quiz') }}</option>
-												<option value="survey">{{ __('admin.Survey') }}</option>
-												<option value="assessment">{{ __('admin.Assessment') }}</option>
+									<!-- Filter Controls -->
+									<div class="row mb-8">
+										<div class="col-md-1">
+											<label class="form-label">{{ __('admin.Show') }}</label>
+											<select id="showEntries" class="form-select form-select-sm">
+												<option value="10">10</option>
+												<option value="25">25</option>
+												<option value="50">50</option>
+												<option value="100">100</option>
+												<option value="-1">{{ __('admin.All') }}</option>
 											</select>
 										</div>
-										<table id="organizations-list-datatable" class="table">
+										<div class="col-md-2">
+											<label class="form-label">{{ __('admin.Organization') }}</label>
+											<select id="organizationFilter" class="form-select form-select-sm">
+												<option value="">{{ __('admin.All') }}</option>
+											</select>
+										</div>
+										<div class="col-md-2">
+											<label class="form-label">{{ __('admin.questionGroup') }}</label>
+											<select id="questionGroupFilter" class="form-select form-select-sm">
+												<option value="">{{ __('admin.All') }}</option>
+											</select>
+										</div>
+										<div class="col-md-2">
+											<label class="form-label">{{ __('admin.question_Type') }}</label>
+											<select id="questionTypeFilter" class="form-select form-select-sm">
+												<option value="">{{ __('admin.All') }}</option>
+											</select>
+										</div>
+										<div class="col-md-2">
+											<label class="form-label">{{ __('admin.question_difficulty') }}</label>
+											<select id="difficultyFilter" class="form-select form-select-sm">
+												<option value="">{{ __('admin.All') }}</option>
+											</select>
+										</div>
+										<div class="col-md-3 ps-8">
+											<label class="form-label">{{ __('admin.Search') }}</label>
+											<div class="input-group input-group-sm">
+												<input type="text" id="globalSearch" class="form-control" placeholder="{{ __('admin.Search') }}...">
+											</div>
+										</div>
+									</div>
+									<!-- datatable start -->
+									<div class="table-responsive">
+										<table id="organizations-list-datatable" class="table datatables-ajax">
 											<thead>
 											<tr class="table-light">
 												<th>#</th>
 												<th>{{__('admin.question')}}</th>
 												<th class="text-center">{{__('admin.Organization')}}</th>
+												<th class="text-center">{{__('admin.questionGroup')}}</th>
 												<th class="text-center">{{__('admin.question_Type')}}</th>
 												<th class="text-center">{{__('admin.question_difficulty')}}</th>
 												<th class="text-center">{{__('admin.Actions')}}</th>
@@ -73,13 +102,28 @@
 											</thead>
 											<tbody>
 												@foreach( $questions as $question )
-													<tr data-group="{{ $question->group }}">
+													<tr id="row_{{ $question->id }}" data-group="{{ $question->group }}">
 														<td><a href="{{ URL::to('dashboard/questions-bank/' . $question->id . '/edit') }}">{{ $question->id }}</a></td>
 														<td>{{ $question->question }}</td>
 														<td>
-															<a href="{{ URL::to('dashboard/organizations/' . optional($question->organization)->id . '/edit') }}">
-																{{ optional($question->organization)->{'name_'.$l} }}
-															</a>
+															@foreach( $question->organizations as $organization )
+																<div>
+																	<a href="{{ URL::to('dashboard/organizations/' . optional($organization)->id . '/edit') }}">
+																		{{ optional($organization)->name }}
+																	</a>
+																</div>
+															@endforeach
+														</td>
+														<td class="text-center">
+															@if( $question->group == 'quiz' )
+																<span class="badge bg-label-primary rounded-pill">{{ __('admin.Quiz') }}</span>
+															@elseif( $question->group == 'survey' )
+																<span class="badge bg-label-info rounded-pill">{{ __('admin.Survey') }}</span>
+															@elseif( $question->group == 'assessment' )
+																<span class="badge bg-label-warning rounded-pill">{{ __('admin.Assessment') }}</span>
+															@else
+																<span class="badge bg-label-secondary rounded-pill">{{ ucfirst($question->group) }}</span>
+															@endif
 														</td>
 														<td class="text-center">
 															@if( $question->group == 'quiz' )
@@ -104,7 +148,7 @@
 																@elseif( $question->difficulty == 'medium' )
 																<span class="badge bg-label-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
 																@elseif( $question->difficulty == 'hard' )
-																<span class="badge ba-label-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
+																<span class="badge bg-label-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
 																@endif
 															@else
 																-
@@ -129,60 +173,236 @@
 	</div>
 @stop
 @section('scripts')
-	<script src="/app-assets/js/scripts/pages/page-organizations.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-	<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-	<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
-
 	<script type="text/javascript">
-		$(document).on("click", "#deleteAction", function (e) {
-			var url = $(this).data('url');
-			var token = '{{ csrf_token() }}';
-			Swal.fire({
-				title: "{{__('admin.SureDelete')}}",
-				text: "{{__('admin.Recover')}}",
-				icon: "warning",
-				buttonsStyling: true,
-				showCancelButton: true,
-				confirmButtonClass: "btn-danger",
-				confirmButtonText: "{{__('admin.DYes')}}",
-				cancelButtonText: "{{__('admin.No')}}!",
-			})
-			.then((result) => {
-				if (result.value)
-				{
-					$.post(url, {'_method': 'DELETE' , '_token': token},
-						function(response)
-						{
-							Swal.fire({
-								icon: 'success',
-								title: "{{ __('admin.Deleted') }}!",
-								html: "{{ __('admin.FileDeleted') }}.",
-							});
-							location.reload();
-						}
-					).fail(function(error) { console.log(error); } );
-				}
-			})
-		});
-
 		$(document).ready(function() {
-			$('.Type').change(function () {
-        var selectedGroup = $(this).val(); // القيمة المختارة من القائمة
-		
-        $('#organizations-list-datatable tbody tr').each(function () {
-            var group = $(this).data('group'); // قراءة قيمة data-group من الصف
-			
-            if (selectedGroup === 'all' || group === selectedGroup) {
-                $(this).show(); // عرض الصف
-            } else {
-                $(this).hide(); // إخفاء الصف
-            }
-        });
-    });
+			// Initialize DataTable
+			var table = $('#organizations-list-datatable').DataTable({
+				responsive: true,
+				pageLength: 10,
+				lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
+				language: {
+					@if($l == 'ar')
+					"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+					@else
+					"search": "{{ __('admin.Search') }}:",
+					"lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
+					"info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
+					"infoEmpty": "{{ __('admin.no_entries_available') }}",
+					"infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
+					"paginate": {
+						"first": "{{ __('admin.First') }}",
+						"last": "{{ __('admin.Last') }}",
+						"next": "{{ __('admin.Next') }}",
+						"previous": "{{ __('admin.Previous') }}"
+					},
+					"emptyTable": "{{ __('admin.No_data_available_in_table') }}",
+					"zeroRecords": "{{ __('admin.No_matching_records_found') }}"
+					@endif
+				},
+				dom: '<"row"<"col-sm-12"t>><"row"<"col-sm-5"i><"col-sm-7"p>>',
+				order: [[0, 'desc']],
+				columnDefs: [
+					{
+						targets: [6], // Actions column (updated from 5 to 6 due to new column)
+						orderable: false,
+						searchable: false
+					}
+				]
+			});
 
+			// Populate filter dropdowns based on current table data
+			function populateFilters() {
+				var organizationOptions = [];
+				var questionGroupOptions = [];
+				var questionTypeOptions = [];
+				var difficultyOptions = [];
+
+				// Get unique values from table
+				table.rows().every(function() {
+					var rowNode = this.node();
+					var organization = $(rowNode).find('td:eq(2)').text().trim();
+					var questionGroup = $(rowNode).find('td:eq(3)').text().trim();
+					var questionType = $(rowNode).find('td:eq(4)').text().trim();
+					var difficulty = $(rowNode).find('td:eq(5)').text().trim();
+
+					if (organization && organizationOptions.indexOf(organization) === -1) {
+						organizationOptions.push(organization);
+					}
+					if (questionGroup && questionGroupOptions.indexOf(questionGroup) === -1) {
+						questionGroupOptions.push(questionGroup);
+					}
+					if (questionType && questionTypeOptions.indexOf(questionType) === -1) {
+						questionTypeOptions.push(questionType);
+					}
+					if (difficulty && difficulty !== '-' && difficultyOptions.indexOf(difficulty) === -1) {
+						difficultyOptions.push(difficulty);
+					}
+				});
+
+				// Sort options
+				organizationOptions.sort();
+				questionGroupOptions.sort();
+				questionTypeOptions.sort();
+				difficultyOptions.sort();
+
+				// Populate dropdowns
+				var organizationSelect = $('#organizationFilter');
+				var questionGroupSelect = $('#questionGroupFilter');
+				var questionTypeSelect = $('#questionTypeFilter');
+				var difficultySelect = $('#difficultyFilter');
+
+				organizationSelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+				questionGroupSelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+				questionTypeSelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+				difficultySelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+
+				$.each(organizationOptions, function(index, value) {
+					organizationSelect.append('<option value="' + value + '">' + value + '</option>');
+				});
+
+				$.each(questionGroupOptions, function(index, value) {
+					questionGroupSelect.append('<option value="' + value + '">' + value + '</option>');
+				});
+
+				$.each(questionTypeOptions, function(index, value) {
+					questionTypeSelect.append('<option value="' + value + '">' + value + '</option>');
+				});
+
+				$.each(difficultyOptions, function(index, value) {
+					difficultySelect.append('<option value="' + value + '">' + value + '</option>');
+				});
+			}
+
+			// Initialize filters
+			populateFilters();
+
+			// Show entries change
+			$('#showEntries').on('change', function() {
+				var value = $(this).val();
+				table.page.len(value).draw();
+			});
+
+			// Filter functionality
+			$('#organizationFilter').on('change', function() {
+				var value = $(this).val();
+				table.column(2).search(value).draw();
+			});
+
+			$('#questionGroupFilter').on('change', function() {
+				var value = $(this).val();
+				table.column(3).search(value).draw();
+			});
+
+			$('#questionTypeFilter').on('change', function() {
+				var value = $(this).val();
+				table.column(4).search(value).draw();
+			});
+
+			$('#difficultyFilter').on('change', function() {
+				var value = $(this).val();
+				table.column(5).search(value).draw();
+			});
+
+			// Global search functionality
+			$('#globalSearch').on('keyup', function() {
+				table.search(this.value).draw();
+			});
+
+			// Type filter functionality
+			$('.Type').change(function () {
+				var selectedGroup = $(this).val();
+				const url = new URL(window.location.origin + window.location.pathname);
+				if (selectedGroup !== 'all') {
+					url.searchParams.set('search', selectedGroup);
+				} else {
+					url.searchParams.delete('search');
+				}
+				window.location.href = url.toString();
+			});
+
+			// Client-side filtering for immediate visual feedback
+			$('#filterGroup').on('change', function() {
+				var selectedGroup = $(this).val();
+				var table = $('#organizations-list-datatable').DataTable();
+				
+				if (selectedGroup === 'all') {
+					table.rows().show();
+				} else {
+					table.rows().every(function() {
+						var rowData = this.data();
+						var rowNode = this.node();
+						var groupValue = $(rowNode).attr('data-group');
+						
+						if (groupValue === selectedGroup) {
+							$(rowNode).show();
+						} else {
+							$(rowNode).hide();
+						}
+					});
+				}
+				table.draw();
+			});
+
+			// Handle delete action
+			$(document).on("click", "#deleteAction", function (e) {
+				e.preventDefault();
+				var url = $(this).data('url');
+				var id = $(this).data('id');
+				var token = '{{ csrf_token() }}';
+				
+				Swal.fire({
+					title: "{{__('admin.SureDelete')}}",
+					text: "{{__('admin.Recover')}}",
+					icon: "warning",
+					showCancelButton: true,
+					confirmButtonText: "{{ __('admin.DYes') }}",
+					cancelButtonText: "{{ __('admin.No') }}",
+					reverseButtons: true,
+					customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
+					},
+					buttonsStyling: false,
+				})
+				.then((result) => {
+					if (result.value) {
+						$.post(url, {'_method': 'DELETE' , '_token': token},
+							function(response) {
+								Swal.fire({
+									icon: 'success',
+									title: "{{ __('admin.Deleted') }}!",
+									html: "{{ __('admin.DeletedSuccessfully') }}.",
+									showCancelButton: false,
+									showConfirmButton: true,
+									confirmButtonText: "{{ __('admin.OK') }}",
+									customClass: {
+											confirmButton: 'btn btn-primary',
+									},
+									buttonsStyling: false,
+								});
+								// Remove the row from DataTable
+								table.row($(e.target).closest('tr')).remove().draw();
+								// Repopulate filters after row removal
+								populateFilters();
+							}
+						).fail(function(error) { 
+							console.log(error);
+							Swal.fire({
+								icon: 'error',
+								title: "{{ __('admin.Error') }}!",
+								text: "{{ __('admin.SomethingWentWrong') }}",
+								showCancelButton: false,
+								showConfirmButton: true,
+								confirmButtonText: "{{ __('admin.OK') }}",
+								customClass: {
+									confirmButton: 'btn btn-primary',
+								},
+								buttonsStyling: false,
+							});
+						});
+					}
+				});
+			});
 		});
-		
 	</script>
 @stop

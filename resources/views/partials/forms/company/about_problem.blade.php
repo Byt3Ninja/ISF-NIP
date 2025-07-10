@@ -5,10 +5,10 @@
       </div>
 
       @if($_user->hasAnyRole('Admin|organizationManager'))
-    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
+    <form method="post" action="{{ route('company.profile_update_mine', $client->company->id) }}"
       enctype="multipart/form-data">
 @else
-<form method="post" action="{{ route('update_my_company') }}"
+<form method="post" action="{{ route('company.profile_update_mine') }}"
   enctype="multipart/form-data">
 @endif
         {!! csrf_field() !!}

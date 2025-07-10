@@ -1,4 +1,4 @@
-<form class="form d-flex flex-column h-100" action="{{ route('meeting-settings') }}" method="POST" enctype="multipart/form-data"> 
+<form class="form d-flex flex-column h-100" action="{{ route('settings.organization_meeting_manage') }}" method="POST" enctype="multipart/form-data"> 
   @csrf
   @method('PUT')
   <input type="hidden" name="id" value="{{ $organization->id }}">

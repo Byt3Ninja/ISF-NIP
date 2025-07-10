@@ -68,7 +68,7 @@
                         @foreach ($cycles as $cycle)
                         <option value="{{ $cycle->id }}" data-organization="{{ $cycle->organization_id }}" {{ $cycle->id
                           == $id ? 'selected' : '' }}>{{ $cycle->title }} ({{ __('cycles.Start') }}
-                          {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }} {{ $cycle->end->format('d-m-Y') }})
+                          {{ optional($cycle->start)->format('d-m-Y') ?? '' }} {{ __('cycles.to') }} {{ optional($cycle->end)->format('d-m-Y') ?? '' }})
                           - {{ optional($cycle->organization)->name }}
                         </option>
                         @endforeach
@@ -183,33 +183,35 @@
                               <i class="ti ti-trash text-danger"></i></span>
                           </a>&nbsp;
                           @php
-                          if ($step->stype == '1') {
-                          $link = 'cycles/view/' . $step->cycle_id;
-                          $set = 'show-builder';
-                          } elseif ($step->stype == '2') {
-                          $link = $step->id . '/screening';
-                          $set = $step->id . '/screening';
-                          } elseif ($step->stype == '3') {
-                          $link = 'mentorship/sessions';
-                          $set = 'mentorship/assign/' . $step->cycle_id;
-                          } elseif ($step->stype == '4') {
-                          $link = $set = 'training/sessions/' . $step->id;
-                          } else {
-                          $link = 'final/results/' . $step->id;
-                          $set = $step->id . '/final/';
-                          }
-                          @endphp
-                          <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
+                            if ($step->stype == 1) {
+                               $link = 'show-form/' . $step->id; 
+                               $set = 'show-builder';            
+                                 } elseif ($step->stype == 2) {
+                                  $link = $step->id . '/screening';
+                                  $set = $step->id . '/screening';
+                                  } elseif ($step->stype == 3) {
+                                     $link = 'mentorship/sessions';
+                                     $set = 'mentorship/assign/' . $step->cycle_id;
+                                      } elseif ($step->stype == 4) {
+                                          $link = 'training/sessions/' . $step->id;
+                                          $set = 'training/sessions/' . $step->id;
+                                    } else {
+                                          $link = 'final/results/' . $step->id;
+                                          $set = $step->id . '/final/';
+                                      }
+                                    @endphp
+                           <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
                             <span class="btn btn-icon btn-label-warning rounded-circle">
-                              <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
+                                <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
                             </span>
-                          </a>&nbsp;
-                          <a href="/dashboard/{{ $link }}" id="{{ $step->id }}">
-                            <span class="btn btn-icon btn-label-primary rounded-circle">
-                              <i class="ti ti-eye" title="{{ __('cycles.view step results') }}">
-                              </i>
-                            </span>
-                          </a>
+                        </a>
+                        @if($step->stype == 1 && $step->form)
+                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+                          <span class="btn btn-icon btn-label-primary rounded-circle">
+                            <i class="ti ti-eye" title="{{ __('cycles.view step results') }}"></i>
+                          </span>
+                        </a>
+                      @endif
                         </div>
                       </div>
                     </li>
@@ -224,13 +226,22 @@
       </section>
       <!-- // Sortable lists section end -->
       @else
-      <div class="card">
-        <div class="card-header border-bottom">
-          <h4 class="card-title">{{ __('cycles.Error') }}</h4>
-        </div>
-        <div class="card-body">
-          {{ __('cycles.No records ... Add cycle first') }}: <button class="btn btn-light-primary"
-            onclick="DoChange(2)">{{ __('cycles.Add new') }}</button>
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-body h-100 d-flex justify-content-center align-items-center">
+            <div class="d-flex flex-column align-items-center">
+              <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+              <h6 class="text-center text-secondary w-75">
+                {{ __('admin.No_Programs_Message') }}
+              </h6>
+              <div class="text-center">
+                <button onclick="DoChange(2)" class="btn btn-primary">
+                  <i class="ti ti-plus ms-2"></i>
+                  <span class="mx-1">{{ __('admin.Add_New') }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -266,7 +277,7 @@
             id="organization_id">
           @endif
           <div class="col-12 mb-4">
-            <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input id='start' name='start' type="hidden" />
             <input id='end' name='end' type="hidden" />
             <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
@@ -321,7 +332,7 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off">
+        autocomplete="off" onsubmit="disableSubmitButton()">
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.New step data') }} - <span id="formtitle">{{
@@ -355,7 +366,7 @@
             </div>
           </div>
           <div class="col-12 mb-4">
-            <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="fromDate" name="fromDate" />
             <input type="hidden" id="toDate" name="toDate" />
             <input type="text" id="stepFormRamgePicker" class="form-control" name="date_range" required />
@@ -386,7 +397,7 @@
             {{-- <i class="ti ti-x"></i> --}}
             <span class="">{{ __('cycles.Close') }}</span>
           </button>
-          <button type="submit" value="submit" class="btn btn-primary ml-1">
+          <button type="submit" id="submitBtn" value="submit" class="btn btn-primary ml-1">
             {{-- <i class="ti ti-check d-block d-sm-none"></i> --}}
             <span class="">{{ __('cycles.Submit') }}</span>
           </button>
@@ -439,7 +450,7 @@
               required>
           </div>
           <div class="col-12 mb-4">
-            <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="mfromDate" name="fromDate" />
             <input type="hidden" id="mtoDate" name="toDate" />
             <input type="text" id="step-range-picker" class="form-control" name="date_range" required />
@@ -492,6 +503,9 @@
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
 <script>
+  function disableSubmitButton() {
+    document.getElementById("submitBtn").disabled = true;
+}
     console.log('loaded');
     const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
     // console.log('stepFormRamgePicker', stepFormRamgePicker);

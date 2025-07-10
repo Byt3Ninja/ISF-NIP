@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Settings; // تأكد من استخدام المسار الصحيح للموديل
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use App\Settings; // تأكد من استخدام المسار الصحيح للموديل
 
 class BroadcastConfigService
 {
     public static function getPusherConfig()
     {
-        if (Schema::hasTable('settings')) {
+        try{
             $settings = Settings::where('id', 1)->first();
 
             if (!$settings) {
@@ -30,10 +31,16 @@ class BroadcastConfigService
                     'LINKEDIN_CLIENT_SECRET' => '',
                     'LINKEDIN_REDIRECT_URI' => '',
 
+                    'GOOGLE_CALENDAR_CLIENT_ID' => '',
+                    'GOOGLE_CALENDAR_CLIENT_SECRET' => '',
+                    'GOOGLE_CALENDAR_REDIRECT' => '',
+
                     'locale' => 'en',
 
                 ];
             }
+        }catch(\Exception $e){
+            Log::error('BroadcastConfigService: Error retrieving settings.', ['error' => $e->getMessage()]);
         }
         // إعادة القيم المأخوذة من السجل
         return [
@@ -57,6 +64,10 @@ class BroadcastConfigService
             'MICROSOFT_CLIENT_SECRET_ID' => $settings->MICROSOFT_CLIENT_SECRET_ID ?? '',
             'MICROSOFT_APP_EMAIL' => $settings->MICROSOFT_APP_EMAIL ?? '',
             'MICROSOFT_REDIRECT_URI' => $settings->MICROSOFT_REDIRECT_URI ?? '',
+
+            'GOOGLE_CALENDAR_CLIENT_ID' => $settings->GOOGLE_CALENDAR_CLIENT_ID ?? '',
+            'GOOGLE_CALENDAR_CLIENT_SECRET' => $settings->GOOGLE_CALENDAR_CLIENT_SECRET ?? '',
+            'GOOGLE_CALENDAR_REDIRECT' => $settings->GOOGLE_CALENDAR_REDIRECT ?? '',
 
             'locale' => $settings->Default_Language ?? 'en',
 

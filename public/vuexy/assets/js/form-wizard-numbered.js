@@ -60,12 +60,19 @@ $(function () {
 
   // Vertical Wizard
   // --------------------------------------------------------------------
-  const wizardVertical = document.querySelector('.wizard-vertical'),
-    wizardVerticalBtnNextList = [].slice.call(wizardVertical.querySelectorAll('.btn-next')),
-    wizardVerticalBtnPrevList = [].slice.call(wizardVertical.querySelectorAll('.btn-prev')),
+  const wizardVertical = document.querySelector('.wizard-vertical');
+  
+  let wizardVerticalBtnNextList = [],
+      wizardVerticalBtnPrevList = [],
+      wizardVerticalBtnSubmit = null;
+  
+  if (wizardVertical) {
+    wizardVerticalBtnNextList = [].slice.call(wizardVertical.querySelectorAll('.btn-next'));
+    wizardVerticalBtnPrevList = [].slice.call(wizardVertical.querySelectorAll('.btn-prev'));
     wizardVerticalBtnSubmit = wizardVertical.querySelector('.btn-submit');
+  }
 
-  if (typeof wizardVertical !== undefined && wizardVertical !== null) {
+  if (wizardVertical !== null) {
     const verticalStepper = new Stepper(wizardVertical, {
       linear: false
     });
@@ -93,11 +100,18 @@ $(function () {
 
   // Modern Wizard
   // --------------------------------------------------------------------
-  const wizardModern = document.querySelector('.wizard-modern-example'),
-    wizardModernBtnNextList = [].slice.call(wizardModern.querySelectorAll('.btn-next')),
-    wizardModernBtnPrevList = [].slice.call(wizardModern.querySelectorAll('.btn-prev')),
+  const wizardModern = document.querySelector('.wizard-modern-example');
+  
+  let wizardModernBtnNextList = [],
+      wizardModernBtnPrevList = [],
+      wizardModernBtnSubmit = null;
+  
+  if (wizardModern) {
+    wizardModernBtnNextList = [].slice.call(wizardModern.querySelectorAll('.btn-next'));
+    wizardModernBtnPrevList = [].slice.call(wizardModern.querySelectorAll('.btn-prev'));
     wizardModernBtnSubmit = wizardModern.querySelector('.btn-submit');
-  if (typeof wizardModern !== undefined && wizardModern !== null) {
+  }
+  if (wizardModern !== null) {
     const modernStepper = new Stepper(wizardModern, {
       linear: false
     });
@@ -124,11 +138,18 @@ $(function () {
 
   // Modern Vertical Wizard
   // --------------------------------------------------------------------
-  const wizardModernVertical = document.querySelector('.wizard-modern-vertical'),
-    wizardModernVerticalBtnNextList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-next')),
-    wizardModernVerticalBtnPrevList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-prev')),
+  const wizardModernVertical = document.querySelector('.wizard-modern-vertical');
+  
+  let wizardModernVerticalBtnNextList = [],
+      wizardModernVerticalBtnPrevList = [],
+      wizardModernVerticalBtnSubmit = null;
+  
+  if (wizardModernVertical) {
+    wizardModernVerticalBtnNextList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-next'));
+    wizardModernVerticalBtnPrevList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-prev'));
     wizardModernVerticalBtnSubmit = wizardModernVertical.querySelector('.btn-submit');
-  if (typeof wizardModernVertical !== undefined && wizardModernVertical !== null) {
+  }
+  if (wizardModernVertical !== null) {
     const modernVerticalStepper = new Stepper(wizardModernVertical, {
       linear: false
     });

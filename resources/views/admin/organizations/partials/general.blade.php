@@ -1,4 +1,4 @@
-<form class="form" action= "{{ route('general-settings') }}" method="POST" enctype="multipart/form-data">
+<form class="form" action= "{{ route('settings.organization.general.manage') }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
     

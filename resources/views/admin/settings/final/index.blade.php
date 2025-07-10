@@ -54,7 +54,7 @@
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                             ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
-                            {{ $step->from->format('d-m-Y') }})
+                            {{ $step->from->format('d-m-Y') ?? '-' }})
                             - {{ optional(optional($step->cycle)->organization)->name }}
                           </option>
                         @endforeach
@@ -144,8 +144,8 @@
                     <h4>{{ $l == 'en' ? 'Startups final screening' : $cstep->title }} </h4>
                     <h5 class="card-title primary">{{ __('cycles.Select judges from the menu') }}.</h5>
                     <small class="text-muted"> {{ __('cycles.from') }}
-                      {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }}
-                      {{ $cstep->to->format('d-m-Y') }}
+                      {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                      {{ $cstep->to->format('d-m-Y') ?? '-' }}
                     </small>
                   </div>
                   <div class="card-body">
@@ -223,10 +223,12 @@
                                 <td>
                                   <div class="d-flex align-items-center gap-2">
                                     <a class="" href="/dashboard/users/{{ $company->user->id }}/edit">
+                                      @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                       <img
                                         src="{{ isset($company->user->img_url) ? asset("191014/{$company->user->img_url}") : asset('icons/account.svg') }}"
                                         onerror="this.src='/icons/account.svg'" alt="avatar" class="rounded-circle"
                                         height="40" width="40" />
+                                        @endif
                                     </a>
                                     <a href="/dashboard/users/{{ $company->user->id }}/edit">
                                       <div class="media-body">
@@ -253,7 +255,7 @@
                                   @if (!$company->fsession($cstep->id))
                                     {{ __('cycles.Add Judges first') }}
                                   @elseif($company->fsession($cstep->id)->join_url)
-                                    <button type="button" onclick="edit({{ $company->id }})"
+                                    <button type="button" onclick="edit({{ $company->id }}, '{{ $company->fsession($cstep->id)->datetime }}', '{{ $company->fsession($cstep->id)->duration }}')"
                                       class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                                       data-bs-target="#ModifyRequest">
                                       <i class="ti ti-edit text-info"></i>
@@ -271,7 +273,7 @@
                                         <i class="ti ti-user"></i></button></a>
                                   @else
                                     @if ($company->fsession($cstep->id)->join_url)
-                                      <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }})"
+                                      <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }}, '{{ $company->fsession($cstep->id)->datetime }}', '{{ $company->fsession($cstep->id)->duration }}')"
                                         class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                                         data-bs-target="#ModifyRequest">
                                         <i class="ti ti-edit text-info"></i>
@@ -328,7 +330,7 @@
               <input type="hidden" name="type" value="8">
               <br>
               <div class="col-12 mb-4">
-                <label for="step-range-picker" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+                <label for="step-range-picker" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
                 <input type="hidden" name="fromDate" id="mfromDate">
                 <input type="hidden" name="toDate" id="mtoDate">
                 <input type="text" id="step-range-picker" class="form-control" name="date_range" />
@@ -569,12 +571,13 @@
         }
       });
     }
-
-    const startDate = '{{ $cstep->from->format('Y-m-d') }}'
-    const endDate = '{{ $cstep->to->format('Y-m-d') }}'
-
-    const stepStartDate = startDate ? moment(startDate) : moment();
-    const stepEndDate = endDate ? moment(endDate) : moment();
+  @if($cstep)
+  const startDate = '{{ $cstep->from->format('Y-m-d') }}'
+  const endDate = '{{ $cstep->to->format('Y-m-d') }}'
+  
+  const stepStartDate = startDate ? moment(startDate) : moment();
+  const stepEndDate = endDate ? moment(endDate) : moment();
+  @endif
 
     function DoChange(set) {
       switch (set) {
@@ -597,12 +600,18 @@
             headers
           });
           Swal.fire({
-            title: '{{ __('cycles.sure delete step') }}',
-            text: "{{ __('admin.Recover') }}",
-            icon: 'warning',
+          	title: "{{__('admin.SureDelete')}}",
+            text: "{{__('admin.Recover')}}",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: '{{ __('admin.DYes') }}',
-            cancelButtonText: '{{ __('admin.No') }}'
+            confirmButtonText: "{{ __('admin.DYes') }}",
+            cancelButtonText: "{{ __('admin.No') }}",
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-danger me-2',
+                cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
           }).then((result) => {
             if (result.isConfirmed) {
               $.ajax({
@@ -636,23 +645,33 @@
       $('#addzoom').modal('show');
     }
 
-    function edit(company) {
+    function edit(company, date_zoom = '', Period = '')
+    {
       // alert(company);
       $('.cid').val(company);
       $('#ModifyRequest').modal('show');
+      $('#sdate').val(date_zoom);
+      $('#editNeededZoomDateTime').val(date_zoom);
+      $('#period').val(Period);
     }
 
     function deleteme(id) {
       let url = '/dashboard/final/delsession/' + id;
       let token = '{{ csrf_token() }}';
       Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
+        title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-danger me-2',
+            cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+      })
         .then((result) => {
           if (result.value) {
             $.post(url, {

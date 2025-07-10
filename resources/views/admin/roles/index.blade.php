@@ -9,15 +9,15 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-      <div class="col-9">
+    <div class="row d-flex justify-content-between align-items-center mb-4">
+      <div class="col-12 col-md-9">
         <h4 class="mb-1">{{ __('admin.Roles_List') }}</h4>
         <p class="mb-6">
           {{ __('admin.Roles_Description_1') }} <br />
           {{ __('admin.Roles_Description_2') }}
         </p>
       </div>
-      <div class="col-3 text-end pt-10">
+      <div class="col-12 col-md-3 text-start text-md-end mb-6 mb-md-0">
         @if( $_user->ableTo('permissions.index', $permissions) )
           <a href="{{ route('permissions.index') }}" class="btn btn-primary">
             <i class="ti ti-list me-1"></i>

@@ -4,11 +4,11 @@
     @if (Auth::user()->hasanyRole('Admin|organizationManager'))
       <form method="post"
         id="contact-form" 
-        action="{{ route('update_my_company', $client->company->id) }}"
+        action="{{ route('company.profile_update_mine', $client->company->id) }}"
         enctype="multipart/form-data">
       @else
         <form id="contact-form" method="post"
-          action="{{ route('update_my_company') }}"
+          action="{{ route('company.profile_update_mine') }}"
           enctype="multipart/form-data">
     @endif
     {!! csrf_field() !!}

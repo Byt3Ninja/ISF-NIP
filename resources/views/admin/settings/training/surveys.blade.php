@@ -63,7 +63,7 @@
 									@endif
 									<div class="row pb-1">
 										<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
-											<a href="{{ route('training.create_survey', ['id' => $cycle->id]) }}" class="btn btn-block btn-primary"> <i class="ti ti-plus me-1"></i> {{ __('admin.AddNewSurvey')}} </a>
+											<a href="{{ route('trainings.surveys_create', ['id' => $cycle->id]) }}" class="btn btn-block btn-primary"> <i class="ti ti-plus me-1"></i> {{ __('admin.AddNewSurvey')}} </a>
 										</div>
 									</div>
 									<div class="table-responsive surveys-list">
@@ -117,10 +117,10 @@
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
-																	<a href="{{ route('surveys.questions', ['survey' => $survey->id]) }}" target="_blank" class="dropdown-item"> <i class="ti ti-list-check"></i> {{ __('admin.manageQuestions') }} </a>
-																	<a href="{{ route('surveys.results', ['survey' => $survey->id]) }}?target=training" target="_blank" class="dropdown-item"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
-																	<a href="{{ route('training.edit_survey', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item"> <i class="ti ti-edit"></i> {{ __('admin.Edit') }}</a>
-																	<a id='deleteAction' data-id='{{ $survey_scope->id }}' data-url="{{ route('training.destroy_survey', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" href="{{ route('training.destroy_survey', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item bg-danger text-white"> <i class="ti ti-trash text-white"></i> {{ __('admin.Delete') }} </a>
+																	<a href="{{ route('surveys.questions_manage', ['survey' => $survey->id]) }}" target="_blank" class="dropdown-item"> <i class="ti ti-list-check"></i> {{ __('admin.manageQuestions') }} </a>
+																	<a href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target=training" target="_blank" class="dropdown-item"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
+																	<a href="{{ route('trainings.surveys_edit', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item"> <i class="ti ti-edit"></i> {{ __('admin.Edit') }}</a>
+																	<a id='deleteAction' data-id='{{ $survey_scope->id }}' data-url="{{ route('trainings.surveys_delete', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" href="{{ route('trainings.surveys_delete', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item bg-danger text-white"> <i class="ti ti-trash text-white"></i> {{ __('admin.Delete') }} </a>
 																</div>
 															</div>
 														</td>
@@ -193,11 +193,15 @@
 				title: "{{__('admin.SureDelete')}}",
 				text: "{{__('admin.Recover')}}",
 				icon: "warning",
-				buttonsStyling: true,
 				showCancelButton: true,
-				confirmButtonClass: "btn-danger",
-				confirmButtonText: "{{__('admin.DYes')}}",
-				cancelButtonText: "{{__('admin.No')}}!",
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
 			})
 			.then((result) => {
 				if (result.value)
@@ -208,7 +212,14 @@
 							Swal.fire({
 								icon: 'success',
 								title: "{{ __('admin.Deleted') }}!",
-								html: "{{ __('admin.FileDeleted') }}.",
+								html: "{{ __('admin.DeletedSuccessfully') }}.",
+								showCancelButton: false,
+								showConfirmButton: true,
+								confirmButtonText: "{{ __('admin.OK') }}",
+								customClass: {
+										confirmButton: 'btn btn-primary',
+								},
+								buttonsStyling: false,
 							});
 							location.reload();
 						}

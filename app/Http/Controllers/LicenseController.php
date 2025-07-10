@@ -17,13 +17,60 @@ class LicenseController extends Controller
         ->where('expires_at', '>', now())
         ->first();
 
+        if( empty( $activeLicense ) )
+        {
+            return view('admin.license.activate');
+        }
+        try {
+            $payload = [
+                'meta' => [
+                    'key' => $activeLicense->key,
+                ]
+            ];
+    
+            $response = Http::withToken(config('services.keygen.token'))
+                ->post('https://api.keygen.sh/v1/accounts/' . config('services.keygen.account') . '/licenses/actions/validate-key', $payload);
+    
+            // Check if the request failed
+            if ($response->failed()) {
+                $errorDetails = $response->json('errors');
+                $errorMessage = $errorDetails ? implode(' ', array_column($errorDetails, 'detail')) : 'Unknown error occurred.';
+                return $this->errorResult('License Failed: ' . $errorMessage);
+            }
+    
+            $valid = $response->json('meta.valid');
+            $licenseData = $response->json('data');
+    
+           if ($valid) {
+    
+            return view('admin.license.result', [
+                'message' => __('admin.licenseAlreadyActivated'),
+                'success' => true,
+                'license' => $licenseData,
+                'status' => $licenseData['attributes']['status'],
+                'expiresAt' => Carbon::parse($licenseData['attributes']['expiry']),
+                'maxMachines' => $licenseData['attributes']['maxMachines'],
+                'createdAt' => Carbon::parse($licenseData['attributes']['created']),
+            ]);
+        }
+            $statusMessage = $this->getLicenseStatusMessage($licenseData['attributes']['status']);
+            return $this->errorResult('License is not valid or has expired. ' . $statusMessage);
+    
+        } catch (\Exception $e) {
+            return $this->errorResult('License failed. Please try again. Error: ' . $e->getMessage());
+        }
+
     if ($activeLicense) {
         return view('admin.license.result', [
             'message' => __('admin.licenseAlreadyActivated') . ' ' . $activeLicense->expires_at->translatedFormat('Y-m-d H:i'),
             'success' => true,
+            'license' => $activeLicense
         ]);
+
     }
-        return view('admin.license.activate');
+
+  
+        return view('admin.license.activate' );
     }
 
     public function activate(Request $request)
@@ -48,24 +95,30 @@ class LicenseController extends Controller
             }
     
             $valid = $response->json('meta.valid');
-            $licenseStatus = $response->json('data.attributes.status');
-            $expiresAt = Carbon::parse($response->json('data.attributes.expiry'));
+            $licenseData = $response->json('data');
 
-    
-            if ($valid) {
+        if ($valid) {
             License::updateOrCreate(
-                    ['key' => $licenseKey],
-                    [
-                        'status' => $licenseStatus,
-                        'activated_at' => now(),
-                        'expires_at' => $expiresAt,
-                    ]
-                );
-    
-                return view('admin.license.result', ['message' => __('admin.licenseActivated'), 'success' => true]);
-            }
-    
-            $statusMessage = $this->getLicenseStatusMessage($licenseStatus);
+                ['key' => $licenseData['attributes']['key']],
+                [
+                    'status' => $licenseData['attributes']['status'],
+                    'activated_at' => now(),
+                    'expires_at' => Carbon::parse($licenseData['attributes']['expiry']),
+                ]
+            );
+
+           
+            return view('admin.license.result', [
+                'message' => __('admin.licenseActivated'),
+                'success' => true,
+                'license' => $licenseData,
+                'status' => $licenseData['attributes']['status'],
+                'expiresAt' => Carbon::parse($licenseData['attributes']['expiry']),
+                'maxMachines' => $licenseData['attributes']['maxMachines'],
+                'createdAt' => Carbon::parse($licenseData['attributes']['created']),
+            ]);
+        }
+            $statusMessage = $this->getLicenseStatusMessage($licenseData['attributes']['status']);
             return $this->errorResult('License is not valid or has expired. ' . $statusMessage);
     
         } catch (\Exception $e) {

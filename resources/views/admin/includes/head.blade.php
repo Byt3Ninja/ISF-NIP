@@ -67,6 +67,10 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css" />
+
 <!-- For Searchable Select -->
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
@@ -74,9 +78,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
 
-<link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
-<link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
-<link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css">
+{{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css"> --}}
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
 @yield('vendorstyle')
 <!-- END: Vendor CSS-->

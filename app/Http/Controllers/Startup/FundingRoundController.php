@@ -33,7 +33,7 @@ class FundingRoundController extends Controller
     {
         $round = auth()->user()->company->fundingRounds()->create($request->validated());
         if($round) {
-            return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+            return redirect()->route('company.profile_view_mine')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
         }
         else {
             return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
@@ -65,7 +65,7 @@ class FundingRoundController extends Controller
         $round = auth()->user()->company->fundingRounds()->findOrFail($id);
         $round->update($request->validated());
         if($round) {
-            return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+            return redirect()->route('company.profile_view_mine')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
         }
         else {
             return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);

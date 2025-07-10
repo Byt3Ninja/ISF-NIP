@@ -42,23 +42,27 @@
 
                                   <div class="d-flex align-items-center">
                                     <a class="media-left">
-                                      <img src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-3"
+                                      <img src="{{ $session->mentor?->image_url }}" alt="avatar" class="rounded-circle me-3"
                                         height="40" width="40">
                                     </a>
                                     <div class="media-body">
 
-                                      <a href="{{ route('show_mentor_profile', $session->mentor->id) }}">
+                                      <a href="{{ route('mentors.profile_view', $session->mentor->id ?? '0') }}">
 
-                                        <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor->{'first_name_' . $l} }}
-                                          {{ $session->mentor->{'last_name_' . $l} }}</h6>
-                                        <span class="font-small-2 text-nowrap">{{ $session->mentor->{'title_' . $l} }}</span>
+                                        <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor?->{'first_name_' . $l} }}
+                                          {{ $session->mentor?->{'last_name_' . $l} }}</h6>
+                                        <span class="font-small-2 text-nowrap">{{ $session->mentor?->{'title_' . $l} }}</span>
                                       </a>
                                     </div>
                                   </div>
 
                                 </td>
                                 <td>{{ $session->zoom_date }} ({{ $session->period }}M)</td>
-                                <td>{{ $session->admin_comment ?? $session->comment }}</td>
+                                <td>
+                                  <p class="line-clamp-3" style="max-width: 300px;">
+                                    {{ $session->admin_comment ?? $session->comment }}
+                                  </p>
+                                </td>
 
 
                                 <td>
@@ -68,22 +72,34 @@
                                     </span>
                                   @endif
                                 </td>
-                                @if ($session->approved == 'Yes')
-                                  <td class="text-success py-1">
-                                    @if ($session->join_url)
-                                      <a href="{{ $session->join_url }}" target="_blank">
+                                @php
+															$now = date('Y-m-d H:i');
+															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+															@endphp
+                              <td class=" py-1">
+                              @if ($session->approved == 'Yes')
+                                @if($now >= $start_time )
+                                @if($now <= $end_time)
+                                <span class="warning">
+                                      <a href="{{ $session?->join_url }}" target="_blank">
                                         <button title="Join meeting" type="button"
                                           class="btn btn-icon rounded-circle btn-label-primary">
-                                          <i class="ti ti-brand-zoom"></i></button></a>
-                                    @endif
-                                  @elseif($session->approved == 'No')
-                                  <td class="text-danger py-1">
-                                    {{ __('No') }}
+                                          <i class="ti ti-brand-zoom"></i></button>
+                                      </a>
+                                      </span>
                                   @else
-                                  <td class="text-warning py-1">
-                                    {!! '<span class="warning">' . __('Waiting') . '</span>' !!}
+                                     <span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+                                  @endif
+                                  @else 
+                                     <span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
+                                  @endif
+                                  @elseif($session->approved == 'No')
+                                    {{ __('admin.No') }}
+                                  @else
+                                    {!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
                                 @endif
-                                </td>
+                              </td>
                                 {{--                                                                <td class="text-center"> --}}
                                 {{--                                                                    <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info"> --}}
                                 {{--                                                                        <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a> --}}

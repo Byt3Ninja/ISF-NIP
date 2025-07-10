@@ -14,12 +14,13 @@ class Permissions
     private $exceptNames = [
         'filemanager*',
         'dashboard',
+        'dashboard/dashboard',
         'login*',
         'cities*',
 		'LFMGet',
-		'get_states_by_country',
-        'get_subcategory_by_category',
-		'email.confirm',
+		'utils.locations_list_states_by_country',
+        'subcategories.list_by_category',
+		'user.profile_email_confirm',
         'verification*'
     ];
 

@@ -7,23 +7,32 @@ use App\Step;
 use App\User;
 use App\Cycle;
 use App\Company;
+use App\Message;
 use App\Formdata;
 use App\FinalData;
 use App\Formfield;
+use App\Messenger;
 use App\Screening;
 use Carbon\Carbon;
 use App\BuilderForm;
+
 use App\BuilderField;
 use http\Env\Response;
-
 use App\Finalscreening;
 use App\TrainingSession;
 use Illuminate\Http\Request;
+use App\Events\StartupJoining;
 use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
+use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
@@ -32,10 +41,10 @@ class CyclesController extends Controller
 {
 
     protected $whatsAppService;
-	public function __construct(WhatsAppService $whatsAppService)
-	{
-		$this->whatsAppService = $whatsAppService;
-	}
+    public function __construct(WhatsAppService $whatsAppService)
+    {
+        $this->whatsAppService = $whatsAppService;
+    }
 
     public function exportcyclesComp(Request $request)
     {
@@ -48,7 +57,7 @@ class CyclesController extends Controller
 
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
         ExportCycleCompData::dispatch($data2);
-        
+
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
@@ -116,29 +125,29 @@ class CyclesController extends Controller
         $companies = Company::where('cycle', $id);
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-        if($request->step_id != 0){
+        if ($request->step_id != 0) {
             $companies = $companies->where('step', $request->step_id);
         }
-        if($request->country_id != 0){
+        if ($request->country_id != 0) {
             $companies = $companies->where('country_id', $request->country_id);
         }
-        if($request->sector_id != 0){
+        if ($request->sector_id != 0) {
             $companies = $companies->where('sector', $request->sector_id);
         }
-        if($request->Dstage_id != 0){
+        if ($request->Dstage_id != 0) {
             $companies = $companies->where('stage', $request->Dstage_id);
         }
-        if($request->funding_stage != 0){
+        if ($request->funding_stage != 0) {
             $companies = $companies->where('development_stage', $request->funding_stage);
         }
-        if($request->targeted_market != 0){
+        if ($request->targeted_market != 0) {
             $companies = $companies->where(function ($query) use ($request) {
                 foreach ($request->targeted_market as $market) {
                     $query->orWhereJsonContains('targeted_market', $market);
                 }
             });
         }
-        if($request->BType != 0){
+        if ($request->BType != 0) {
             $companies = $companies->where('business_type', $request->BType);
         }
 
@@ -150,11 +159,16 @@ class CyclesController extends Controller
     public function modify(Request $request)
     {
 
-        $id = $request->cycleid;
-        $type = $request->type;
-        
+        if ($request->cycleid == null && isset($request->typeedit)) {
+            $id = $request->id;
+            $type = $request->typeedit;
+        } else {
+            $id = $request->cycleid;
+            $type = $request->type;
+        }
+
         if ($request->has('date_range')) {
-            
+
             $dates = explode(' - ', $request->date_range);
             $request->merge([
                 'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
@@ -163,22 +177,25 @@ class CyclesController extends Controller
                 'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
 
             ]);
-            
         }
-       
+
         if ($type == 1) {
-            
-            
+
+
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => 'required|string|max:250',
+                'title' => 'required|string|max:250|unique:cycles,title,' . $id,
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date',
                 'end' => 'required|date',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
 
-            
+
 
             $cycle = Cycle::find($id);
 
@@ -188,27 +205,6 @@ class CyclesController extends Controller
             }
 
             // Check if file is uploaded
-            $programGuidelineFile = null;
-            if ($request->hasFile('program-guideline-pdf')) {
-                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
-            }
-
-            $financialGuidelineFile = null;
-            if ($request->hasFile('financial_policy_pdf')) {
-                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
-            }
-
-            $legalPolicyPath = null;
-            if ($request->hasFile('legal_policy_pdf')) {
-                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
-            }
-
-
-            $delegationPdfPath = null;
-            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
-            }
-
 
             $cycle->organization_id = $request->organization_id2;
             $cycle->title = $request->title;
@@ -219,16 +215,35 @@ class CyclesController extends Controller
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
 
             $cycle->program_guideline = $request->program_guideline;
-            $cycle->program_guideline_file = $programGuidelineFile;
-
+            if ($request->hasFile('program-guideline-pdf')) {
+                $originalName = $request->file('program-guideline-pdf')->getClientOriginalName();
+                $cycle->program_guideline_file = $request->file('program-guideline-pdf')->storeAs('programs', $originalName, 'public_uploads');
+            }
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
-            $cycle->financial_guideline_file = $financialGuidelineFile;
-
+            if ($request->hasFile('financial_policy_pdf')) {
+                $originalName = $request->file('financial_policy_pdf')->getClientOriginalName();
+                $cycle->financial_guideline_file = $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+            }
             $cycle->legal_guideline = $request->legal_policy;
-            $cycle->legal_guideline_file = $legalPolicyPath;
-            $cycle->delegation_file = $delegationPdfPath;
+            if ($request->hasFile('legal_policy_pdf')) {
+                $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
+                $cycle->legal_guideline_file =  $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+            }
+            if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
+                $originalName = $request->file('delegation_pdf')->getClientOriginalName();
+                $cycle->delegation_file =  $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+               
+            }
+            $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
+
+            if ($request->hasFile('img_url')) {
+                    $image = $request->file('img_url');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('programs/'), $imageName);
+                    $cycle->img_url = 'programs/' . $imageName;
+                }
 
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
@@ -422,63 +437,95 @@ class CyclesController extends Controller
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
-
-
+ 
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
-            $private = null;
-            if ($request->private) {
-                $private = sha1(now());
-            }
-            $cycle = new Cycle();
-            $cycle->organization_id = $request->organization_id2;
-            $cycle->title = $request->title;
-            $cycle->description = $request->description;
-            $cycle->start = Carbon::parse($request->start);
-            $cycle->end = Carbon::parse($request->end);
-            $cycle->private = $private;
-            $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
-            // Check if file is uploaded
-            $programGuidelineFile = null;
-            if ($request->hasFile('program-guideline-pdf')) {
-                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
-            }
 
-            $cycle->program_guideline = $request->program_guideline;
-            $cycle->program_guideline_file = $programGuidelineFile;
+            $existTitle = Cycle::where('organization_id', $request->organization_id2)->where('title', $request->title)->first();
+                if ($existTitle) {
+                    return redirect()->back()->with('message2', 'Cycle_title_already_exist');
+                }
 
-            // Check if file is uploaded
-            $financialGuidelineFile = null;
-            if ($request->hasFile('financial_policy_pdf')) {
-                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
-            }
+            DB::transaction(function () use ($request) {
+                $private = null;
+                if ($request->private) {
+                    $private = sha1(now());
+                }
+                $cycle = new Cycle();
+                $cycle->organization_id = $request->organization_id2;
+                $cycle->title = $request->title;
+                $cycle->description = $request->description;
+                $cycle->start = Carbon::parse($request->start);
+                $cycle->end = Carbon::parse($request->end);
+                $cycle->private = $private;
+                $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+                $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
+                // Check if file is uploaded
 
-            $cycle->budget_allocation = $request->budget_allocation;
-            $cycle->currency_type = $request->currency_type;
-            $cycle->financial_guideline = $request->financial_policy;
-            $cycle->financial_guideline_file = $financialGuidelineFile;
+                $cycle->program_guideline = $request->program_guideline;
+                if ($request->hasFile('program-guideline-pdf')) {
+                    $originalName = $request->file('program-guideline-pdf')->getClientOriginalName();
+                    $cycle->program_guideline_file = $request->file('program-guideline-pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
 
-            // Handle file uploads
-            $legalPolicyPath = null;
-            if ($request->hasFile('legal_policy_pdf')) {
-                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
-            }
 
-            $delegationPdfPath = null;
-            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
-                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
-            }
+                $cycle->budget_allocation = $request->budget_allocation;
+                $cycle->currency_type = $request->currency_type;
+                $cycle->financial_guideline = $request->financial_policy;
+                if ($request->hasFile('financial_policy_pdf')) {
+                    $originalName = $request->file('financial_policy_pdf')->getClientOriginalName();
+                    $cycle->financial_guideline_file =  $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
 
-            $cycle->legal_guideline = $request->legal_policy;
-            $cycle->legal_guideline_file = $legalPolicyPath;
-            $cycle->delegation_file = $delegationPdfPath;
-            $cycle->save();
-            return redirect()->back()->with('message', 'Saved');
+
+                $cycle->legal_guideline = $request->legal_policy;
+                if ($request->hasFile('legal_policy_pdf')) {
+                    $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
+                    $cycle->legal_guideline_file = $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
+
+                if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
+                    $originalName = $request->file('delegation_pdf')->getClientOriginalName();
+                    $cycle->delegation_file = $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
+                if ($request->hasFile('img_url')) {
+                    $image = $request->file('img_url');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+                    $image->move(public_path('programs/'), $imageName);
+                    $cycle->img_url = 'programs/' . $imageName;
+                    
+                }
+                $cycle->save();
+
+                if (auth()->user()->hasRole('OrganizationManager')) {
+
+                    $admin = User::role('Admin')->orderBy('id')->first();
+
+                    if ($admin) {
+
+                        Mail::to($admin->email)->queue(new ProgramCreatedNotification($cycle, $admin));
+
+                        $messenger = new Messenger();
+                        $messenger->sender = auth()->id();
+                        $messenger->receiver = $admin->id;
+                        $messenger->subject = 'New Program Created';
+                        $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
+                        $messenger->read = 0;
+                        $messenger->save();
+                    }
+                }
+            });
+            return redirect()->route('programlist.index')->with('message', 'Saved');
         } else {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
@@ -492,22 +539,10 @@ class CyclesController extends Controller
 
     function view($c, Request $request)
     {
-       
-        $cycle2 = Cycle::where('id', $c)->first();
-        if($cycle2->allow_non_company == 1){
-           
-            if(!Auth::user()->HaveCompany){
-                $user = Auth::user();
-                $result = new Company();
-                $result->name_en = $user->first_name_en." ".$user->last_name_en;
-                $result->name_ar = $user->first_name_ar." ".$user->last_name_ar;
-                $result->address_en = $user->address ?? 'Not Set';
-                $result->address_ar = $user->address ?? 'Not Set';
-                $result->save();
-                User::where('id', $user->id)->update(['company_id' => $result->id, 'HaveCompany' => 1]);
-            }
-            }
-        
+
+        // $cycle2 = Cycle::where('id', $c)->first();
+
+
         $private = Cycle::where('private', $c)->first();
 
         if ($private == null) {
@@ -516,13 +551,27 @@ class CyclesController extends Controller
         } else {
             $c = $private->id;
         }
-      $user = User::where('id', Auth::user()->id)->first();
+        if ($private->allow_non_company == 1) {
+
+            if (!Auth::user()->HaveCompany) {
+                $user = Auth::user();
+                $result = new Company();
+                $result->name_en = $user->first_name_en . " " . $user->last_name_en;
+                $result->name_ar = $user->first_name_ar . " " . $user->last_name_ar;
+                $result->address_en = $user->address ?? 'Not Set';
+                $result->address_ar = $user->address ?? 'Not Set';
+                $result->save();
+                User::where('id', $user->id)->update(['company_id' => $result->id, 'HaveCompany' => 1]);
+            }
+        }
+
+        $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
         if (!$user->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+            return redirect()->route('user.profile_Edit')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!$user->company) {
-            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+            return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
         // Check enrolled in Cycle
         if ($user->company->cycle && $user->company->cycle != $c) {
@@ -539,7 +588,7 @@ class CyclesController extends Controller
         // Check STEPS
         if (!$user->company->cycle || $user->company->cycle == $c) {
             $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
-            if ($step->stype != 1) {
+            if ($step?->stype != 1) {
                 return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
             if ($step->to < now()->format('Y-m-d')) {
@@ -587,6 +636,7 @@ class CyclesController extends Controller
     public function saveForm(Request $request)
     {
 
+       
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
@@ -604,7 +654,7 @@ class CyclesController extends Controller
                 return [
                     'field_' . $id => implode("|", $rules)
                 ];
-            } else {
+            }else {
                 return ['field_' . $id => 'nullable'];
             }
         });
@@ -628,6 +678,16 @@ class CyclesController extends Controller
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
+          if ($request->hasFile($field_name)) {
+           $file = $request->file($field_name);
+        //    $originalName = $file->getClientOriginalName();
+        //    $file->storeAs('formsubmissions', $originalName, 'public_uploads');
+        //    $request->{$field_name} = 'formsubmissions/' . $originalName;
+         $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+             $file->move(public_path('formsubmissions/'), $imageName);
+			 $request->{$field_name} = 'formsubmissions/' . $imageName;
+
+        }
             // update cycle & step
             Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
 
@@ -641,25 +701,27 @@ class CyclesController extends Controller
                 'question' => $field_options->label,
                 'answer' => $request->{$field_name},
                 'screening' => '{}',
-                'comments' => '{}'
+                'comments' => '{}',
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         }
 
-        $data =[];
+        $data = [];
         $user = Auth::user();
-		$name = $user->first_name_en . ' ' . $user->last_name_en;
-        
+        $name = $user->first_name_en . ' ' . $user->last_name_en;
+
         $data = [
             'name' => $name,
             'email' => $user->email,
             'step' => $user->company->stepdata->title,
             'cycle' => $user->company->cycledata->title,
         ];
-        
+
         // إرسال الإشعار
-        if( !in_array(env('APP_ENV', 'local'), ['local']) )
-        {
+        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
             try {
+                broadcast(new StartupJoining($data));
                 $user->notify(new StartupJoiningNotification($data));
                 log::info('Sent notification to ' . $user->email);
             } catch (\Throwable $th) {
@@ -667,15 +729,80 @@ class CyclesController extends Controller
             }
 
             $phoneNumber = $user->country_code_w_a . $user->whatsapp;
-					$Massage = "Dear " . $user->name . ",
-Congratulations! You have successfully joined the" . $data['cycle'] .", 
-We are excited to have you on board and look forward to supporting your journey.
-Thanks from " . env('APP_NAME');
-					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+            $Massage = "Dear " . $user->name . ",
+            Congratulations! You have successfully joined the" . $data['cycle'] . ", 
+            We are excited to have you on board and look forward to supporting your journey.
+            Thanks from " . env('APP_NAME');
+            $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+            Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
         }
 
-            
+
         return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
+    }
+
+    public function testSend(Request $request)
+    {
+
+        $phone = $request->query('phone');
+        $message = $request->query('message', 'رسالة تجريبية من API');
+
+        if (!$phone) {
+            return response()->json(['error' => 'يرجى إدخال رقم الهاتف'], 400);
+        }
+
+        $result = $this->sendMessage($phone, $message);
+
+        return response()->json($result);
+    }
+
+    public function sendMessage($phoneNumber, $message)
+    {
+        try {
+            $sessionId = 'ehabwhats'; // اسم الجلسة في GrowthLabs
+            $apiKey = env('WAPI_KEY'); // مفتاح API من .env
+
+            // Step 1: Get chat ID
+            $response = Http::withHeaders([
+                'x-api-key' => $apiKey
+            ])->post("https://wapi.growthlabs.app/client/getNumberId/$sessionId", [
+                'number' => $phoneNumber
+            ]);
+
+            $chatId = $response->json('result._serialized');
+
+            if (!$chatId) {
+                Log::error("Failed to get chatId for number: {$phoneNumber}");
+                return false;
+            }
+
+            // Step 2: Send message
+            $sendResponse = Http::withHeaders([
+                'x-api-key' => $apiKey
+            ])->post("https://wapi.growthlabs.app/client/sendMessage/$sessionId", [
+                'chatId' => $chatId,
+                'contentType' => 'string',
+                'content' => $message
+            ]);
+
+            return $sendResponse->json();
+        } catch (\Exception $e) {
+            Log::error('Failed to send message via GrowthLabs WhatsApp API: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
+    {
+        if ($request->hasFile($inputName)) {
+            $file = $request->file($inputName);
+            $filename  = $file->getClientOriginalName();
+            $path = $subfolder ? "$subfolder/$filename" : $filename;
+
+            Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
+
+            return $path;
+        }
+        return null;
     }
 }

@@ -1,0 +1,1768 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "My Laravel API",
+        "description": "This is the API documentation for the Laravel project.",
+        "contact": {
+            "email": "support@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login a user and return an access token",
+                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login Successfully"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "long-jwt-token-here"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+201234567890"
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/image.jpg"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "user"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name_en",
+                                    "last_name_en",
+                                    "gender",
+                                    "phone",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "Ahmed"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Mohamed"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "Mentor"
+                                    },
+                                    "title_en": {
+                                        "type": "string",
+                                        "example": "Senior Engineer"
+                                    },
+                                    "userbio": {
+                                        "type": "string",
+                                        "example": "Experienced mentor in tech industry."
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "example": "https://linkedin.com/in/example"
+                                    },
+                                    "expertise": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registeration Successfully"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "long-jwt-token-here"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Mentor"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Role not found or validation error"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout the authenticated user",
+                "operationId": "79854151e609bd20032aa5aa4d5a35c0",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer token",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Bearer eyJ0eXAiOiJKV1QiLCJh..."
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/countries": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Get list of countries",
+                "description": "Returns a list of all countries based on the current app locale (name_en or name_ar).",
+                "operationId": "getCountries",
+                "responses": {
+                    "200": {
+                        "description": "Countries retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Egypt"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/countries/{id}/states": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Get list of states for a country",
+                "description": "Returns a list of states for a given country ID based on the current app locale.",
+                "operationId": "getStates",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the country",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "States retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Cairo"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get mentor dashboard data",
+                "operationId": "ed4235c7e3cd435fdad1da90707874d1",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "coming_sessions_count": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "current_schedule": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "days": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": [
+                                                            "Monday",
+                                                            "Wednesday"
+                                                        ]
+                                                    },
+                                                    "tfrom": {
+                                                        "type": "string",
+                                                        "example": "09:00"
+                                                    },
+                                                    "tto": {
+                                                        "type": "string",
+                                                        "example": "17:00"
+                                                    },
+                                                    "notes": {
+                                                        "type": "string",
+                                                        "example": "Available for mentoring"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "next_sessions": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "company_logo": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/logo.png"
+                                                    },
+                                                    "company": {
+                                                        "type": "string",
+                                                        "example": "TechCorp"
+                                                    },
+                                                    "user": {
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "date": {
+                                                        "type": "string",
+                                                        "example": "2025-07-01 14:00"
+                                                    },
+                                                    "admin_notes": {
+                                                        "type": "string",
+                                                        "example": "Important session"
+                                                    },
+                                                    "meeting_link": {
+                                                        "type": "string",
+                                                        "example": "https://zoom.us/j/123456789"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "completedTasks": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "nonCompletedTasks": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "sessionWithoutTasks": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "startupAttendanceRate": {
+                                            "type": "string",
+                                            "example": "85%"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/expertises": {
+            "get": {
+                "tags": [
+                    "Expertises"
+                ],
+                "summary": "Get All Expertises",
+                "description": "Returns a flat list of expertises with localized titles based on the `lang` header.",
+                "operationId": "406f8e9e218800ce6acb119ae06a72a3",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "header",
+                        "description": "Language preference. Allowed values: en, ar. Defaults to en.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "en",
+                                "ar"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with localized expertises",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Product Development"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get authenticated user profile",
+                "description": "Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
+                "operationId": "getMe",
+                "responses": {
+                    "200": {
+                        "description": "User info returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "format": "url",
+                                                    "example": "https://example.com/uploads/user.png"
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Mohamed"
+                                                },
+                                                "gender": {
+                                                    "type": "string",
+                                                    "example": "Male"
+                                                },
+                                                "countryCode": {
+                                                    "type": "string",
+                                                    "example": "+20"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "countryCodeWA": {
+                                                    "type": "string",
+                                                    "example": "+20"
+                                                },
+                                                "whatsapp": {
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "whatsappVerified": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "zipCode": {
+                                                    "type": "integer",
+                                                    "example": 12345
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "Cairo, Egypt"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Software Engineer"
+                                                },
+                                                "country": {
+                                                    "type": "string",
+                                                    "example": "Egypt"
+                                                },
+                                                "state": {
+                                                    "type": "string",
+                                                    "example": "Cairo"
+                                                },
+                                                "city": {
+                                                    "type": "string",
+                                                    "example": "Nasr City"
+                                                },
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "en"
+                                                },
+                                                "haveCompany": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "timeZone": {
+                                                    "type": "string",
+                                                    "example": "Africa/Cairo"
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "EGP"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Mentor"
+                                                },
+                                                "mentorshipTotalRequests": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "mentorshipTotalHours": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.5
+                                                },
+                                                "mentorshipAverageRating": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.2
+                                                },
+                                                "mentorshipSessions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "fullName": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/uploads/john.png"
+                                                            },
+                                                            "company": {
+                                                                "type": "string",
+                                                                "example": "TechCorp"
+                                                            },
+                                                            "companyLogo": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/uploads/logo.png"
+                                                            },
+                                                            "done": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "taskTitle": {
+                                                                "type": "string",
+                                                                "example": "Pitch Deck Review"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "mentorBio": {
+                                                    "properties": {
+                                                        "bio": {
+                                                            "type": "string",
+                                                            "example": "Experienced software engineer with 10+ years..."
+                                                        },
+                                                        "specialization": {
+                                                            "type": "string",
+                                                            "example": "FinTech, SaaS"
+                                                        },
+                                                        "linkedin": {
+                                                            "type": "string",
+                                                            "example": "https://linkedin.com/in/example"
+                                                        },
+                                                        "entrepreneurialExperience": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "entrepreneurialExperience_brief": {
+                                                            "type": "string",
+                                                            "example": "Founded and exited 2 startups in e-commerce"
+                                                        },
+                                                        "profilePrivacy": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "mentorshipApproach": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string",
+                                                                "example": "Video Calls"
+                                                            }
+                                                        },
+                                                        "expertises": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    },
+                                                                    "title": {
+                                                                        "type": "string",
+                                                                        "example": "Business Development"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user profile",
+                "description": "Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
+                "operationId": "updateProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [],
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string"
+                                    },
+                                    "lastName": {
+                                        "type": "string"
+                                    },
+                                    "countryCode": {
+                                        "type": "string"
+                                    },
+                                    "country_code_w_a": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "whatsapp": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "zip_code": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "language": {
+                                        "type": "string"
+                                    },
+                                    "timezone": {
+                                        "type": "string"
+                                    },
+                                    "currency": {
+                                        "type": "string"
+                                    },
+                                    "country_id": {
+                                        "type": "integer"
+                                    },
+                                    "state_id": {
+                                        "type": "integer"
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "firstName": {
+                                                    "type": "string"
+                                                },
+                                                "lastName": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "type": "string"
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/password": {
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user password",
+                "description": "Change the authenticated user's password.",
+                "operationId": "updatePassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "example": "oldpassword123"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "newpassword456"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "newpassword456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/bio": {
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update mentor bio",
+                "description": "Update mentor bio details such as specialization, experience, and mentorship approach.",
+                "operationId": "updateBio",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "bio": {
+                                        "type": "string"
+                                    },
+                                    "specialization": {
+                                        "type": "string"
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "format": "url"
+                                    },
+                                    "entrepreneurial_experience": {
+                                        "type": "boolean"
+                                    },
+                                    "entrepreneurial_experience_brief": {
+                                        "type": "string"
+                                    },
+                                    "profile_privacy": {
+                                        "type": "boolean"
+                                    },
+                                    "mentorship_approach": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "expertise_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mentor bio updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentor bio updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/roles": {
+            "get": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Get list of available roles",
+                "description": "Returns a list of all roles. Only accessible by Admin users.",
+                "operationId": "getRoles",
+                "responses": {
+                    "200": {
+                        "description": "List of roles returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mentor"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only accessible by Admin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List users with filters (Admin and OrganizationManager only)",
+                "description": "Returns a paginated list of users, filtered by role or search query. Excludes current authenticated user.",
+                "operationId": "getUsers",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "description": "Filter users by role (e.g. Admin, User, Mentor)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name, email, or phone",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "firstName": {
+                                                        "type": "string",
+                                                        "example": "Ahmed"
+                                                    },
+                                                    "lastName": {
+                                                        "type": "string",
+                                                        "example": "Mohamed"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "ahmed@example.com"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "example": "male"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "01012345678"
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "User"
+                                                    },
+                                                    "haveCompany": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "createdAt": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-07-09T10:00:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lastPage": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "path": {
+                                                    "type": "string",
+                                                    "example": "http://api.example.com/api/users"
+                                                },
+                                                "links": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string"
+                                                        },
+                                                        "last": {
+                                                            "type": "string"
+                                                        },
+                                                        "prev": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access forbidden / غير مصرح بالدخول"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "description": "Admins can create a new user with basic profile and role. Sends a welcome email.",
+                "operationId": "9fea6f2adcb69614c521a7733358382d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "firstName",
+                                    "lastName",
+                                    "email",
+                                    "phone",
+                                    "gender",
+                                    "password",
+                                    "password_confirmation",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "Ahmed"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Ali"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "ahmed@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01012345678"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "role": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User created successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Ali"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "ahmed@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "01012345678"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admins can create users"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a specific user's information",
+                "description": "Returns the profile data of the specified user including their role",
+                "operationId": "getUserById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "firstName": {
+                                                    "type": "string"
+                                                },
+                                                "lastName": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
+                                                },
+                                                "gender": {
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/image.jpg"
+                                                },
+                                                "haveCompany": {
+                                                    "type": "boolean"
+                                                },
+                                                "createdAt": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update an existing user",
+                "description": "Admins can update a user's profile information and role.",
+                "operationId": "b166772cec9714067040e77cf14beeba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "Ahmed"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Ali"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "ahmed@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01012345678"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "role": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Ali"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "ahmed@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "01012345678"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Manager"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admins can update users"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{id}/deactivate": {
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Deactivate a user account",
+                "description": "Deactivates a user account by setting status to 'inactive'. Admins only. Cannot deactivate self or super_admin.",
+                "operationId": "deactivateUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the user to deactivate",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deactivated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User has been deactivated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (e.g. deactivating self or super_admin)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You cannot deactivate your own account."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Location",
+            "description": "Location"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard"
+        },
+        {
+            "name": "Expertises",
+            "description": "Expertises"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Role",
+            "description": "Role"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
+        }
+    ]
+}

@@ -24,7 +24,7 @@
 @section('content')
   @if (!$_user->first_name_ar)
   <div class="d-none">
-    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+    {!! redirect()->route(route: 'user.profile_view')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
   </div>
   @endif
   @php $setting = \App\Settings::where('id', 1)->first(); @endphp
@@ -40,11 +40,17 @@
     $circle_id = $_user->company->cycle ?? 0;
     $organization_id = $_user->organization_id ?? 0;
     if( $organization_id == 0 ) { $organization_id = $_user->company->cycledata->organization_id ?? 0; }
-    $s_count = \App\Service::count();
-    $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+    $s_count = \App\Service::whereHas('organizations')->count();
+    $s_r_count = \App\ServicesRequests::join('services','service_id','services.id')
+    ->where('user_id', $user_id)
+    ->count();
     $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
-    $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
-    $m_count = count($mentors);
+    $mentors = \App\User::role('Mentor');
+    $mentorIds = \App\CyclesMentors::where('cycle_id', $circle_id)
+    ->pluck('user_id')
+    ->toArray();
+    $mentors = $mentors->whereIn('id', $mentorIds);
+    $m_count = $mentors->count();
     $surveyEligible = [];
     if( $_user->company && $circle_id != 0 )
     {
@@ -128,7 +134,7 @@
         if( empty( $trainingSession->datetime ) ) { continue; }
         else
         {
-          $endAt = Carbon\carbon::parse($trainingSession->datetime)->format('Y-m-d H:i:s');
+          $endAt = FormatDate($trainingSession->datetime, 'Y-m-d H:i:s');
           if( now() > $endAt )
           {
             $surveyEligible[] = [
@@ -206,11 +212,11 @@
 		$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
     	$q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
 		})->orderBy('start')->take(5)->get();
-		$s_count = \App\Service::count();
-		$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+		// $s_count = \App\Service::count();
+	
 		$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
-		$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
-		$m_count = count($mentors);
+		// $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
+		// $m_count = count($mentors);
 		/// Next session
 		// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
 		$days = request()->query('days', 14);
@@ -310,6 +316,11 @@
         }
       }
       if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+      $attendance = \App\AttendanceTrainingOffline::where('user_id', $user_id)->where('cycle_id', $circle_id)->where('attendance', 0)->get();
+      if($attendance->count()>0){
+      
+      $deleted_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->where('responses', null)->where('triggered_on', 'training')->whereIn('triggered_at', $attendance->pluck('training_session_id'))->delete();
+      }
       $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
     }
   }
@@ -321,7 +332,7 @@
 @section('content')
   @if (!$_user->first_name_ar)
   <div class="d-none">
-    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+    {!! redirect()->route('user.profile_view')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
   </div>
   @endif
 
@@ -584,7 +595,7 @@
 
       @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
     @if( $_user->hasRole('Registered') )
-    @if( $_user->ableToAll(['surveys.taking', 'surveys.submit'], $permissions) )
+    @if( $_user->ableToAll(['surveys.take', 'surveys.submit'], $permissions) )
     <div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
       <div class="card">
         <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -626,7 +637,7 @@
                   @if( $survey->triggered_by == 'session' )
                   {{ __('dashboard.with') }} 
                     @php $mentor = $middleware->mentor; @endphp
-                    {{ $mentor->name }}
+                    {{ $mentor->name ?? '' }}
                   @elseif( $survey->triggered_by == 'due' )
                     - {{ $middleware->title }}
                   @else
@@ -645,7 +656,7 @@
                 @endif
               </div>
               <div class="col-3 text-end">
-                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{ __('dashboard.startSurvey') }}</a>
+                <a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{ __('dashboard.startSurvey') }}</a>
               </div>
             </div>
             @endforeach
@@ -713,7 +724,7 @@
                 @endif
               </div>
               <div class="col-3 text-end">
-                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+                <a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
               </div>
             </div>
             @endforeach
@@ -860,7 +871,7 @@
                     <td>
                       @if($step->stype == 1)
                       @if($step->arr == 'Completed' || $step->arr == 'انتهت')
-                        @if( $_user->company->approved && $_user->ableTo('cycles.my', $permissions) )
+                        @if( $_user->company->approved && $_user->ableTo('cycles.list_mine', $permissions) )
                           <a href="/dashboard/cycles/{{ $flink }}"> {{ $step->title }} </a>
                         @else 
                           {{ $step->title }}
@@ -874,8 +885,8 @@
                       
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span></td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') }}</td>
+                    <td>{{ FormatDate($step->from, 'Y-m-d') ?? '-' }}</td>
+                    <td>{{ FormatDate($step->to, 'Y-m-d') ?? '-' }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}
@@ -1262,7 +1273,7 @@
 
         </div>
 
-
+        @if( $ctype != 1 && $ctype != 2 )
 		<div class="card mt-10">
 		<section>
 			<div class="row">
@@ -1298,12 +1309,17 @@
 															<a class="media-left">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )<a target="_blank" href="{{route('show_mentor_profile', ($mentor->user)->id)}}">@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )
+                              @if ($mentor->user != null)
+                              <a target="_blank" href="{{route('mentors.profile_view', ($mentor->user)->id)}}">
+                              @endif
+                              
+                                @endif
 															<div class="media-body">
 																<h6 class="media-heading mb-0 text-nowrap">{{optional($mentor->user)->name }}</h6>
 																<span class="font-small-2 text-nowrap">{{optional($mentor->user)->title }}</span>
 															</div>
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a>@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )</a>@endif
 														</div>
                           
 													</td>
@@ -1330,8 +1346,8 @@
 				</div>
 			</div>
 		</section>
-	</div>
-
+	  </div>
+      @endif
 	
       @endif
       <!-- / My Mentors -->

@@ -13,7 +13,7 @@
 @section('content')
 
 @if( !Auth::user()->first_name_ar )
-	{!!redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] )!!}
+	{!!redirect()->route('user.profile_view')->with( ['msg' => 'FailedStore', 'class' => 'danger'] )!!}
 @endif
 
 @php
@@ -280,7 +280,7 @@
 													<hr style="color: {{$color}}">
 													<div class="text-{{$stat!="Started"||$s==0?'muted':'primary'}} line-ellipsis">
 														<span class="badge badge-{{$stat!="Started"||$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
-														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('d-m-Y') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m-Y')}}
+														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('d-m-Y') ?? '-' }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m-Y') ?? '-'}}
 														<br>{{$step->title}}
 													</div>
 													<div class="text-{{$stat!="Started"||$s==0?'muted':'success'}} line-ellipsis"> {{ __('dashboard.'.$stat) }} </div>
@@ -361,7 +361,7 @@
 													<p class="card-text">
 														{{$cycle->description}}
 													</p>
-													<small class="text-muted">{{__('dashboard.start from')}} {{$cycle->start->format('d-m-Y')}}</small>
+													<small class="text-muted">{{__('dashboard.start from')}} {{$cycle->start->format('d-m-Y') ?? '-'}}</small>
 													<a href="/dashboard/cycles/view/{{$cycle->id}}" class="btn btn-primary float-right">{{__('dashboard.Join')}}</a>
 												</div>
 											</div>
