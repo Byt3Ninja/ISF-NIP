@@ -1463,6 +1463,10 @@
                                                 "role": {
                                                     "type": "string"
                                                 },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/image.jpg"
+                                                },
                                                 "haveCompany": {
                                                     "type": "boolean"
                                                 },

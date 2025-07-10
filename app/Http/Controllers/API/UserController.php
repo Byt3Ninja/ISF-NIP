@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreUserApiRequest;
 use App\Http\Requests\UpdateUserApiRequest;
 use Symfony\Component\HttpFoundation\Response;
@@ -181,6 +182,7 @@ class UserController extends Controller
  *                 @OA\Property(property="gender", type="string"),
  *                 @OA\Property(property="phone", type="string"),
  *                 @OA\Property(property="role", type="string"),
+ *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg"),
  *                 @OA\Property(property="haveCompany", type="boolean"),
  *                 @OA\Property(property="createdAt", type="string", format="date-time")
  *             )
@@ -213,7 +215,8 @@ public function show($id)
                 'message' => __('api.forbidden')
             ], Response::HTTP_FORBIDDEN);
     }
-
+    
+    $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
     return response()->json([
         'success' => true,
         'data' => [
@@ -223,6 +226,7 @@ public function show($id)
             'gender' => $user->gender,
             'phone' => $user->phone,
             'role' => $user->getRoleNames()->first(),
+            'imgUrl' => $user->img_url ,
             'haveCompany' => (bool)$user->haveCompany,
             'createdAt' => $user->created_at->toDateTimeString(),
         ]
