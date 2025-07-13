@@ -43,5 +43,7 @@ Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->m
 Route::put('/profile/bio', [ProfileController::class, 'updateBio'])->middleware('auth:sanctum');
 Route::get('/countries', [CountryController::class, 'index'])->middleware('auth:sanctum');
 Route::get('countries/{id}/states', [CountryController::class, 'getStates']);
+Route::post('/profile/image', [ProfileController::class, 'uploadImage'])->middleware('auth:sanctum');
+
 
 

@@ -9,7 +9,12 @@
 @section('content')
     @php
         $tusers = App\User::count();
-        $notactive = App\User::join('model_has_roles','id','=','model_id')->where('role_id',5)->count();
+        // $notactive = App\User::join('model_has_roles','id','=','model_id')->where('role_id',5)->count();
+		$notactive = App\User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'registered')
+			->select('users.*')
+            ->count();
         $individual = App\User::whereNull('HaveCompany')->count();
 
     @endphp

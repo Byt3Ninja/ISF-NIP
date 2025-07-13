@@ -6,10 +6,12 @@ use App\User;
 use App\Settings;
 use App\UsersBio;
 use Illuminate\Http\Request;
+use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Validation\ValidationException;
@@ -201,6 +203,9 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth-register')->plainTextToken;
+          
+        // Send welcome email
+        Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
 
         return response()->json([
             'success' => true,

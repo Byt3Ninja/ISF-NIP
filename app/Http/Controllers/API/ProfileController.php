@@ -290,23 +290,7 @@ class ProfileController extends Controller
         'currency'          => 'nullable|string|max:10',
         'country_id'        => 'nullable|exists:countries,id',
         'state_id'          => 'nullable|exists:states,id',
-        'imgUrl'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
     ]);
-
-    
-    // === Image Upload ===
-    if ($request->hasFile('imgUrl')) {
-        $img = $request->file('imgUrl');
-        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
-
-        // Resize
-        Image::make(Storage::disk('public_uploads')->path($imgPath))
-            ->resize(null, 200, function ($con) {
-                $con->aspectRatio();
-            })->save();
-
-        $user->img_url = $imgPath;
-    }
 
     // === Email Change ===
     if ($request->filled('email') && $request->email !== $user->email) {
@@ -489,6 +473,35 @@ public function updateBio(Request $request)
     return response()->json([
         'success' => true,
         'message' => __('api.MentorBioUpdated'),
+    ]);
+}
+
+public function uploadImage(Request $request) 
+{
+    $user = auth()->user();
+    $validated = $request->validate([
+        'imgUrl' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    if ($request->hasFile('imgUrl')) {
+        $img = $request->file('imgUrl');
+        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
+
+        // Resize
+        Image::make(Storage::disk('public_uploads')->path($imgPath))
+            ->resize(null, 200, function ($con) {
+                $con->aspectRatio();
+            })->save();
+
+        $user->img_url = $imgPath;
+    }
+    $user->save();
+    return response()->json([
+        'success' => true,
+        'message' => __('api.ImageUpdated'),
+        'data' => [
+            'imgUrl'    => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
+        ]
     ]);
 }
 
