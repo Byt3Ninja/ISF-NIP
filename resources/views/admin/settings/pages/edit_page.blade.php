@@ -96,7 +96,16 @@
                                                                     class="select2 form-control"
                                                                     multiple="multiple" >
                                                                         @php($uids = App\User::where('PageId',$getpage->id)->pluck('id')->toArray())
-                                                                        @foreach(App\user::join('model_has_roles','id','model_id')->where('role_id',4)->get(['id','first_name_en','last_name_en']) as $user)
+                                                                        @foreach( 
+                                                                            // App\user::join('model_has_roles','id','model_id')->where('role_id',4)->get(['id','first_name_en','last_name_en']) 
+																			App\User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+																				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+																				->where('roles.default_for', 'pages')
+																				->select('users.*')
+																				->get(['id','first_name_en','last_name_en'])
+                                                                            as
+                                                                            $user
+                                                                        )
                                                                             <option value="{{$user->id}}" {{ in_array($user->id,$uids) ? 'selected':'' }} >
                                                                                {{$user->first_name_en." ".$user->last_name_en." id:".$user->id}}
                                                                             </option>

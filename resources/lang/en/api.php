@@ -22,4 +22,5 @@ return [
 	'Passwordupdated' => 'Password Updated Successfully',
 	'MentorBioUpdated' => 'Mentor Bio Updated Successfully',
 	'inactive_user' => 'Your account is Inactive Contact Support.',
+	'ImageUpdated' => 'Image Uploaded Successfully',
 ];

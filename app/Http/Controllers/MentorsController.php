@@ -86,7 +86,12 @@ class MentorsController extends Controller
 				return $q->where('organization_id', $organization_id);
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
-		$mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+		$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'mentor')
+			->select('users.*')
+			->get();
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 		$cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
@@ -321,9 +326,12 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+	
 		$user = auth()->user();
-		if($user->hasRole('admin')) {
+		if($user->hasRole('admin') || $user->hasRole('organizationManager')){
+			
 			if ($request->has('selected_dates')) {
+				
 				$errors = [];
 				$successCount = 0;
 
@@ -359,14 +367,15 @@ class MentorsController extends Controller
 
 				$fileName = '';
 				if ($request->hasFile('file_url')) {
-					$fileName = $request->file('file_url')->store(Auth::id(), ['disk' => 'PrivateDisk']);
+					$fileName = $request->file('file_url')->store($request->user_id, ['disk' => 'PrivateDisk']);
 				}
 
 				$cycle = Cycle::find($request->cycle_id);
+				
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
-				$approved = $autoApprove == 1 ? 'Yes' : null;
+				$approved = 'Yes';
 
-				$userid = Auth::id();
+				$userid = $request->user_id;
 				$topic = "Online mentorship meeting (M{$request->mentorid}-U{$userid})";
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
 				$onlineMeeting = $this->meetingService->createMeeting($data);
@@ -380,7 +389,7 @@ class MentorsController extends Controller
 				$startUrl = $onlineMeeting['data']['start_url'];
 				$joinUrl = $onlineMeeting['data']['join_url'];
 
-				MentorshipRequest::create([
+				$createMentor = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
 					'user_id' => $userid,
 					'comment' => $request->notes,
@@ -401,11 +410,12 @@ class MentorsController extends Controller
 					SendMentorshipRequestJob::dispatch($request->mentorid, $date, $request->period, $userid, null, null, 'addwait');
 				}
 				}
+				
 
 				if ($successCount > 0) {
-					return back()->with(['msg' => "Request_successfully_added_Startup", 'class' => 'success']);
+					return back()->with(['message' => "Request_successfully_added_Startup"]);
 				} else {
-					return back()->with(['msg' => "Error, can't add request", 'class' => 'danger', 'errors' => $errors]);
+					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
 				}
 			}
 
@@ -429,11 +439,12 @@ class MentorsController extends Controller
 					$request->timeTo
 				]);
 				if ($schedules == null) {
-					return back()->with(['error' => 'mentor_not_available_in_this_time']);
+					return back()->with(['msg' => 'mentor_not_available_in_this_time']);
 				}
 				if ($request->mentorid) {
+					
 					if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
-						return back()->with(['error' => 'cannot_schedule_past_meeting']);
+						return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 					}
 					$fileName = '';
 					if ($request->hasFile('file_url')) {
