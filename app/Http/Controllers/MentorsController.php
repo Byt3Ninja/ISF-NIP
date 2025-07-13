@@ -324,7 +324,9 @@ class MentorsController extends Controller
 	
 		$user = auth()->user();
 		if($user->hasRole('admin')) {
+			
 			if ($request->has('selected_dates')) {
+				
 				$errors = [];
 				$successCount = 0;
 
@@ -360,14 +362,15 @@ class MentorsController extends Controller
 
 				$fileName = '';
 				if ($request->hasFile('file_url')) {
-					$fileName = $request->file('file_url')->store(Auth::id(), ['disk' => 'PrivateDisk']);
+					$fileName = $request->file('file_url')->store($request->user_id, ['disk' => 'PrivateDisk']);
 				}
 
 				$cycle = Cycle::find($request->cycle_id);
+				
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
 				$approved = $autoApprove == 1 ? 'Yes' : null;
 
-				$userid = Auth::id();
+				$userid = $request->user_id;
 				$topic = "Online mentorship meeting (M{$request->mentorid}-U{$userid})";
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
 				$onlineMeeting = $this->meetingService->createMeeting($data);
@@ -381,7 +384,7 @@ class MentorsController extends Controller
 				$startUrl = $onlineMeeting['data']['start_url'];
 				$joinUrl = $onlineMeeting['data']['join_url'];
 
-				MentorshipRequest::create([
+				$createMentor = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
 					'user_id' => $userid,
 					'comment' => $request->notes,
@@ -402,11 +405,12 @@ class MentorsController extends Controller
 					SendMentorshipRequestJob::dispatch($request->mentorid, $date, $request->period, $userid, null, null, 'addwait');
 				}
 				}
+				
 
 				if ($successCount > 0) {
-					return back()->with(['msg' => "Request_successfully_added_Startup", 'class' => 'success']);
+					return back()->with(['message' => "Request_successfully_added_Startup"]);
 				} else {
-					return back()->with(['msg' => "Error, can't add request", 'class' => 'danger', 'errors' => $errors]);
+					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
 				}
 			}
 

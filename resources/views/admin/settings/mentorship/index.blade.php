@@ -417,7 +417,7 @@
         let mentorName = $('input[name="mentor"]:checked').data('name');
         let mentorRating = $('input[name="mentor"]:checked').data('rating');
         let mentorId = $('input[name="mentor"]:checked').data('id');
-        // const userId = $('#userid').val(id);
+        const userId = $('#addUserID').val(id);
         // // $('#mentorid').val(mentor);
         // const orgId = $('#addOrganizationID').val(organization_id);
         // const cycleId = $('#addCycleID').val(cycle_id);
