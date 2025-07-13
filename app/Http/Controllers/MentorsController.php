@@ -321,6 +321,7 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		
 		$user = auth()->user();
 		if($user->hasRole('admin')) {
 			if ($request->has('selected_dates')) {
@@ -429,11 +430,12 @@ class MentorsController extends Controller
 					$request->timeTo
 				]);
 				if ($schedules == null) {
-					return back()->with(['error' => 'mentor_not_available_in_this_time']);
+					return back()->with(['msg' => 'mentor_not_available_in_this_time']);
 				}
 				if ($request->mentorid) {
+					
 					if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
-						return back()->with(['error' => 'cannot_schedule_past_meeting']);
+						return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 					}
 					$fileName = '';
 					if ($request->hasFile('file_url')) {
