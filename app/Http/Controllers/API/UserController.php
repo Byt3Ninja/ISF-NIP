@@ -60,6 +60,7 @@ class UserController extends Controller
  *                 @OA\Property(property="phone", type="string", example="01012345678"),
  *                 @OA\Property(property="role", type="string", example="User"),
  *                 @OA\Property(property="haveCompany", type="boolean", example=true),
+ *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg"),
  *                 @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-09T10:00:00")
  *             )),
  *             @OA\Property(property="meta", type="object",
@@ -98,11 +99,29 @@ class UserController extends Controller
         }
 
         $query = User::query();
-        $query->where('id', '!=', $user->id);
 
         if ($user->hasRole('OrganizationManager')) {
             $query->where('organization_id', $user->organization_id);
         }
+
+       if ($request->filled('gender')) {
+        $gender = strtolower($request->gender);
+        if (in_array($gender, ['male', 'female'])) {
+            $query->where('gender', $gender);
+        }
+     }
+
+    if ($request->has('haveCompany')) {           
+        $value = filter_var(
+            $request->haveCompany,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        );
+
+        if (! is_null($value)) {
+            $query->where('HaveCompany', $value);
+        }
+      }
 
         if ($request->filled('role')) {
             $query->whereHas('roles', function ($q) use ($request) {
@@ -133,6 +152,7 @@ class UserController extends Controller
                 'phone' => $user->phone,
                 'role' => $user->getRoleNames()->first(),
                 'haveCompany' => (bool)$user->HaveCompany,
+                'imgUrl' => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
                 'createdAt' => $user->created_at->toDateTimeString(),
             ];
         });
@@ -226,7 +246,7 @@ public function show($id)
             'gender' => $user->gender,
             'phone' => $user->phone,
             'role' => $user->getRoleNames()->first(),
-            'imgUrl' => $user->img_url ,
+            'imgUrl' => $user->img_url,
             'haveCompany' => (bool)$user->haveCompany,
             'createdAt' => $user->created_at->toDateTimeString(),
         ]

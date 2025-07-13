@@ -1200,6 +1200,10 @@
                                                         "type": "boolean",
                                                         "example": true
                                                     },
+                                                    "imgUrl": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/image.jpg"
+                                                    },
                                                     "createdAt": {
                                                         "type": "string",
                                                         "format": "date-time",
