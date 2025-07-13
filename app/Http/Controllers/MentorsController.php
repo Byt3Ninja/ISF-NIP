@@ -328,7 +328,7 @@ class MentorsController extends Controller
 	{
 	
 		$user = auth()->user();
-		if($user->hasRole('admin')) {
+		if($user->hasRole('admin') || $user->hasRole('organizationManager')){
 			
 			if ($request->has('selected_dates')) {
 				
@@ -373,7 +373,7 @@ class MentorsController extends Controller
 				$cycle = Cycle::find($request->cycle_id);
 				
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
-				$approved = $autoApprove == 1 ? 'Yes' : null;
+				$approved = 'Yes';
 
 				$userid = $request->user_id;
 				$topic = "Online mentorship meeting (M{$request->mentorid}-U{$userid})";
