@@ -2202,10 +2202,25 @@ class HomeController extends Controller
         $messages = Messenger::where('receiver', Auth::user()->id)->whereNull('read')->count();
         $servrequests = ServicesRequests::whereNull('approved')->count();
         $mentrequests = new MentorshipRequest();
-        $managers = User::join('model_has_roles', 'id', '=', 'model_id')->whereIn('role_id', [5, 1])->count();
+        // $managers = User::join('model_has_roles', 'id', '=', 'model_id')->whereIn('role_id', [5, 1])->count();
+		$managers = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->whereIn('roles.default_for', ['admin', 'organizationmanager'])
+			->select('users.*')
+			->get();
         $cmessages = Messages::where('read', '<>', 1)->count();
-        $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
-        $judgers = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+        // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
+		$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'mentor')
+			->select('users.*')
+			->get();
+        // $judgers = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+		$judgers = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'judger')
+			->select('users.*')
+			->get();
 
         $cycles = new Cycle();
         $sessions = TrainingSession::whereHas('step', function ($q) {

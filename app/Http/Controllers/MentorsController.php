@@ -86,7 +86,12 @@ class MentorsController extends Controller
 				return $q->where('organization_id', $organization_id);
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
-		$mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+		$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'mentor')
+			->select('users.*')
+			->get();
 		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 		$cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);

@@ -75,7 +75,12 @@
                 <br>
                 @php
                     $specializations = [];
-                    $TMentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+                    // $TMentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+                    $TMentors = App\User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+											->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+											->where('roles.default_for', 'mentor')
+											->select('users.*')
+                      ->get();
                     foreach ($TMentors as $mentor) {
                             $specialization = $mentor->bio->{'specialization_' . $l} ?? null;
                             if ($specialization && !in_array($specialization, $specializations)) {

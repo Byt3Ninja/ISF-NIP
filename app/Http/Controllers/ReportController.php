@@ -147,7 +147,12 @@ class ReportController extends Controller
         })->get();
         // ==============> counts <=================
 
-        $data['mentors_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
+        // $data['mentors_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
+		$data['mentors_count'] = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'mentor')
+			->select('users.*')
+			->count();
         $data['total_sessions_count']= $mentorRequests->count();
         $data['mentorships_period'] =$mentorRequests->sum('period')/60;
         $data['approved_sessions_count'] = $mentorRequests->whereNotNull('start_url')->count();
@@ -203,7 +208,12 @@ class ReportController extends Controller
     }
 
     protected function judgeReport($organization_id){
-        $data['judgers_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+        // $data['judgers_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+		$data['judgers_count'] = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'judger')
+			->select('users.*')
+			->count();
         $screenings =Company::whereHas('stepdata',function ($q)use ($organization_id){
             $q->when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->whereHas('cycle',function ($query) use ($organization_id){

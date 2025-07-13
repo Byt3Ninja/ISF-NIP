@@ -157,8 +157,12 @@ class ProgramController extends Controller
         // $id = $program->pluck('id')[0];
         //         $steps = Step::where('cycle_id', $id)->orderBy('arr','ASC')->get();
 
-        $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
-
+        // $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
+		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'judger')
+			->select('users.*')
+			->get();
 
         $stepsData = [];
         foreach ($steps as $step) {

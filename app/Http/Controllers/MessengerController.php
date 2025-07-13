@@ -91,7 +91,12 @@ class MessengerController extends Controller
         {
             $cycles = Cycle::select('id', 'title')->get();
             $users = Company::get();
-            $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+            // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+			$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+				->where('roles.default_for', 'mentor')
+				->select('users.*')
+				->get();
             $organizations = Organization::all();
         }
         elseif( $user->hasRole('Mentor'))
@@ -503,7 +508,12 @@ class MessengerController extends Controller
 
             $users = Company::get();
 
-            $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+            // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+			$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+				->where('roles.default_for', 'mentor')
+				->select('users.*')
+				->get();
             $organizations = Organization::all();
             if ($request->has('cycle_id') && !empty($request->cycle_id)) {
                 $users = Company::where('cycle', $request->cycle_id)
