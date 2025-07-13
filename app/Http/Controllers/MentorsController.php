@@ -321,7 +321,7 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-		dd($request->all());
+	
 		$user = auth()->user();
 		if($user->hasRole('admin')) {
 			if ($request->has('selected_dates')) {
