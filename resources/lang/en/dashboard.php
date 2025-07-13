@@ -158,4 +158,7 @@ return [
     'No Category' => 'No Category',
     'No Organization' => 'No Organization',
     'cannot_schedule_past_meeting' => 'You cannot schedule a Meeting in the Past',
+    'Click to select multiple dates for your sessions' => 'Click to select multiple dates for your sessions',
+    'Select multiple dates' => 'Select multiple dates',
+    'Hide schedule' => 'Hide schedule',
 ];

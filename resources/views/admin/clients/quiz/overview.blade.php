@@ -196,7 +196,7 @@
 									</td>
 									<td>
 										<i class="ti text-primary ti-calendar-time me-1"></i>
-										{{ $attempt->created_at->format('jS M. Y h:i A') }}
+										{{ $attempt->created_at?->format('jS M. Y h:i A') }}
 									</td>
 									<td class="text-center">
 										<i class="ti text-primary ti-hourglass me-1"></i>

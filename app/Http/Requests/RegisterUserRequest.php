@@ -22,21 +22,21 @@ class RegisterUserRequest extends FormRequest
     public function rules(): array
     {
          $rules = [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name'  => ['required', 'string', 'max:255'],
+            'firstName' => ['required', 'string', 'max:255'],
+            'lastName'  => ['required', 'string', 'max:255'],
             'gender'        => ['required'],
             'phone'         => ['required', 'unique:users,phone'],
             'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password'      => ['required', 'string', 'min:8', 'confirmed'],
             'role'          => ['required', 'in:Mentor,Registered,Judger'],
-            'title_en'      => ['nullable', 'string'],
+            'title'      => ['nullable', 'string'],
             'userbio'       => ['nullable', 'string'],
             'linkedin'      => ['nullable', 'string'],
             'expertise'     => ['nullable', 'array', 'exists:expertises,id'],
         ];
 
         if ($this->input('role') === 'Mentor') {
-            $rules['title_en'] = ['required', 'string', 'max:255'];
+            $rules['title'] = ['required', 'string', 'max:255'];
         }
 
         return $rules;
@@ -45,7 +45,7 @@ class RegisterUserRequest extends FormRequest
      public function messages(): array
     {
         return [
-            'title_en.required' => 'The title is required for Mentors.',
+            'title.required' => __('api.title_required'),
         ];
     }
 }

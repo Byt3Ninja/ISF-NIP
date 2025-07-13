@@ -294,50 +294,50 @@ document.addEventListener('DOMContentLoaded', function () {
     fields: {
       company_description: {
         validators: {
-          regexp: {
-            regexp: /^[\p{L}\p{P}\p{S}\s.]+$/u,
-            message: descTranslations[lang].company_description.stringOnly
-          }        
+          // regexp: {
+          //   regexp: /^[\p{L}\p{P}\p{S}\s.]+$/u,
+          //   message: descTranslations[lang].company_description.stringOnly
+          // }        
         }
       },
       about_problem: {
         validators: {
-          regexp: {
-            regexp: /^[\p{L}\s.]+$/u,
-            message: descTranslations[lang].about_problem.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[\p{L}\s.]+$/u,
+          //   message: descTranslations[lang].about_problem.stringOnly
+          // }
         }
       },
       about_market_opportunity: {
         validators: {
-          regexp: {
-            regexp: /^[\p{L}\s.]+$/u,
-            message: descTranslations[lang].about_market_opportunity.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[\p{L}\s.]+$/u,
+          //   message: descTranslations[lang].about_market_opportunity.stringOnly
+          // }
         }
       },
       about_competitors: {
         validators: {
-          regexp: {
-            regexp: /^[\p{L}\s.]+$/u,
-            message: descTranslations[lang].about_competitors.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[\p{L}\s.]+$/u,
+          //   message: descTranslations[lang].about_competitors.stringOnly
+          // }
         }
       },
       about_monetize: {
         validators: {
-          regexp: {
-            regexp: /^[\p{L}\s.]+$/u,
-            message: descTranslations[lang].about_monetize.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[\p{L}\s.]+$/u,
+          //   message: descTranslations[lang].about_monetize.stringOnly
+          // }
         }
       },
       about_challenges: {
         validators: {
-          regexp: {
-            regexp: /^[\p{L}\s.]+$/u,
-            message: descTranslations[lang].about_challenges.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[\p{L}\s.]+$/u,
+          //   message: descTranslations[lang].about_challenges.stringOnly
+          // }
         }
       }
     },

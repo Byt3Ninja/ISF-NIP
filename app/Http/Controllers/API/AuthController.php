@@ -6,10 +6,12 @@ use App\User;
 use App\Settings;
 use App\UsersBio;
 use Illuminate\Http\Request;
+use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Validation\ValidationException;
@@ -44,7 +46,8 @@ class AuthController extends Controller
      *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
      *                 @OA\Property(property="email", type="string", example="user@example.com"),
      *                 @OA\Property(property="phone", type="string", example="+201234567890"),
-     *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg")
+     *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/image.jpg"),
+     *  *              @OA\Property(property="role", type="string", example="user")
      *             )
      *         )
      *     ),
@@ -69,19 +72,24 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->status !== 'active') {
+         return response()->json(['success'  => false,'message' => __('api.inactive_user')], 403);
+        }
+
         $l = app()->getLocale();
         $token = $user->createToken('auth-login')->plainTextToken;
         $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
 
-        return response()->json(['status'  => true, 'message' => __('api.login_success'), 'token'   => $token, 'data' => [
+        return response()->json(['success'  => true, 'message' => __('api.login_success'), 'token'   => $token, 'data' => [
                 'id' => $user->id,
                 'firstName' => $user->{'first_name_' . $l},
                 'lastName' => $user->{'last_name_' . $l},
                 'email' => $user->email,
                 'phone' => $user->country_code . $user->phone,
                 'imgUrl' => $user->img_url,
+                'role'   => $user->getRoleNames()->first(),
             ],
-        ]);
+        ],200);
     }
 
     /**
@@ -151,8 +159,8 @@ class AuthController extends Controller
             'phone'         => $data['phone'],
             'email'         => $data['email'],
             'password'      => Hash::make($data['password']),
-            'title_en'      => $data['title_en'] ?? null,
-            'title_ar'      => $data['title_en'] ?? null,
+            'title_en'      => $data['title'] ?? null,
+            'title_ar'      => $data['title'] ?? null,
         ];
 
         if ($settings && $settings->VFEmail != 1) {
@@ -195,9 +203,12 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth-register')->plainTextToken;
+          
+        // Send welcome email
+        Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => __('api.registered_successfully'),
             'token' => $token,
             'data' => [
@@ -208,5 +219,50 @@ class AuthController extends Controller
                 'role'       => $data['role'],
             ]
         ],201);
+    }
+ /**
+ * @OA\Post(
+ *     path="/api/logout",
+ *     summary="Logout the authenticated user",
+ *     tags={"Authentication"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successfully logged out",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Logged out successfully")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated"
+ *     ),
+ *     @OA\Parameter(
+ *         name="Authorization",
+ *         in="header",
+ *         required=true,
+ *         description="Bearer token",
+ *         @OA\Schema(type="string", example="Bearer eyJ0eXAiOiJKV1QiLCJh...")
+ *     )
+ * )
+ */
+     public function logout(Request $request)
+    {
+       $user = $request->user();
+
+       if (!$user || !$user->currentAccessToken()) {
+        return response()->json([
+            'status' => false,
+            'message' => __('api.unauthenticated')
+         ], 401);
+       }
+
+      $user->currentAccessToken()->delete();
+
+      return response()->json([
+        'success' => true,
+        'message' => __('api.logged_out')
+     ],200);
     }
 }
