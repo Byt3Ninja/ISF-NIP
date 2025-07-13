@@ -17,6 +17,7 @@
           <input type="hidden" name="mentorid" value="0" id="mentorid">
           <input type="hidden" name="organization_id" id="addOrganizationID">
           <input type="hidden" name="cycle_id" id="addCycleID">
+          <input type="hidden" name="user_id" id="addUserID">
           
           <!-- Mentor Schedule Section -->
           <div class="mb-4" id="mentor-schedule-container">
