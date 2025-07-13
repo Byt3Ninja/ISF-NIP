@@ -433,7 +433,7 @@ class MentorsController extends Controller
 					return back()->with(['msg' => 'mentor_not_available_in_this_time']);
 				}
 				if ($request->mentorid) {
-					dd($request->mentorid);
+					
 					if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
 						return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 					}
