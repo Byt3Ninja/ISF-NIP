@@ -397,6 +397,11 @@
             <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
           </div>
+
+          <div class="form-group mb-4" id="team_number">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
+             <input id='count_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal" aria-label="Close">
@@ -666,7 +671,10 @@
           let step = $('#StepSelect').find(":selected").val();
           let steptxt = $('#StepSelect').find(":selected").text();
           let menu = $('#menu' + step);
-          $('#menu1,#menu2').hide();
+          $('#menu1,#menu2,#team_number').hide();
+          if(step === '6'){
+            $('#team_number').show();
+          }
           if (menu !== null) {
             $.ajax({
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
