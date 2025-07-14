@@ -2083,5 +2083,9 @@ return [
 	'quizQuestionNotFound' => 'لم يتم العثور على سؤال الاختبار. يرجى الاتصال بالمسؤول.',
 	'quizStartError' => 'حدث خطأ أثناء بدء الاختبار. يرجى المحاولة مرة أخرى.',
 	'Select your answer and click Next to continue' => 'حدد إجابتك وانقر على التالي للمتابعة',
-	'Time Remaining' => 'الوقت المتبقي', 
+	'Time Remaining' => 'الوقت المتبقي',
+	'Program_Type' => 'نوع البرنامج', 
+	'Team Formation' => 'تنسيق الفريق',
+	'HackathonAllowed' => 'تنسيق الفريق يسمح فقط للبرنامج Hackathon',
+	'AddDateFirst' => 'يرجى إضافة تاريخ البداية والنهاية أولاً.',
 ];

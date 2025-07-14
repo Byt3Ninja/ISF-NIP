@@ -50,11 +50,31 @@
         @endforeach
       </select>
     </div>
-    <div class="mb-6">
+    <div class="form-group">
+    <label for="program_type">{{ __('admin.Program_Type') }}</label>
+     @php
+        $selectedType = old('program_type', isset($ccycle) ? $ccycle->type : '');
+    @endphp
+    <select name="program_type"
+            id="program_type"
+            class="form-control"
+            {{ isset($ccycle) ? 'disabled' : 'required' }}>
+        @foreach(\App\Cycle::programTypes() as $type)
+            <option value="{{ $type }}" {{ $selectedType == $type ? 'selected' : '' }}>
+                {{ $type }}
+            </option>
+        @endforeach
+    </select>
+
+    @if(isset($ccycle))
+        <input type="hidden" name="program_type" value="{{ $ccycle->type }}">
+    @endif
+</div>
+    <div class="mb-6 mt-3">
       <label for="program-title" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Cycle title') }}
       </label>
-      <input type="hidden" name="type" id="type">
+      {{-- <input type="hidden" name="type" id="type"> --}}
       <input type="hidden" name="cycleid" id="cycleid">
       <input type="hidden" name="start" id="start" />
       <input type="hidden" name="end" id="end" />

@@ -68,6 +68,11 @@ class Cycle extends Model
         return $this->hasMany(SurveyResponses::class);
     }
 
+    public static function programTypes(): array
+    {
+        return ['Incubator', 'Accelerator', 'Hackathon'];
+    }
+
    
     
 
