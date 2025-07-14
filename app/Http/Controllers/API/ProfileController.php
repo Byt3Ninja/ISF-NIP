@@ -318,17 +318,25 @@ class ProfileController extends Controller
         $user->last_name_en = $request->input('lastName');
         $user->last_name_ar = $request->input('lastName');
     }
-    $user->email = $request->input('email');
-    $user->gender = $request->input('gender');
+     if ($request->filled('email')) {
+        $user->email = $request->input('email');
+    }
+     if ($request->filled('gender')) {
+        $user->gender = $request->input('gender');
+    }
     $user->country_code  = $request->input('countryCode');
     $user->country_code_w_a = $request->input('country_code_w_a');
     $user->phone         = $request->input('phone');
     $user->whatsapp      = $request->input('whatsapp');
     $user->zip_code      = $request->input('zipCode');
     $user->address       = $request->input('address');
-    $user->title_en      = $request->input('title');
+    if ($request->filled('title')) {
+     $user->title_en    = $request->input('title');
+    }
     $user->language      = $request->input('language');
-    $user->timezone      = $request->input('timezone');
+    if ($request->filled('timezone')) {
+      $user->timezone      = $request->input('timezone');
+    }
     $user->currency      = $request->input('currency');
     $user->country_id    = $request->input('country_id');
     $user->state_id      = $request->input('state_id');
