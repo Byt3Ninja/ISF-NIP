@@ -324,23 +324,54 @@ class ProfileController extends Controller
      if ($request->filled('gender')) {
         $user->gender = $request->input('gender');
     }
-    $user->country_code  = $request->input('countryCode');
-    $user->country_code_w_a = $request->input('country_code_w_a');
-    $user->phone         = $request->input('phone');
-    $user->whatsapp      = $request->input('whatsapp');
-    $user->zip_code      = $request->input('zipCode');
-    $user->address       = $request->input('address');
+    if ($request->has('countryCode')) {
+        $user->country_code = $request->input('countryCode');
+    }
+
+    if ($request->has('country_code_w_a')) {
+        $user->country_code_w_a = $request->input('country_code_w_a');
+    }
+
+    if ($request->has('phone')) {
+        $user->phone = $request->input('phone');
+    }
+
+    if ($request->has('whatsapp')) {
+        $user->whatsapp = $request->input('whatsapp');
+    }
+
+    if ($request->has('zipCode')) {
+        $user->zip_code = $request->input('zipCode');
+    }
+
+    if ($request->has('address')) {
+        $user->address = $request->input('address');
+    }
     if ($request->filled('title')) {
      $user->title_en    = $request->input('title');
     }
-    $user->language      = $request->input('language');
+    if ($request->has('language')) {
+        $user->language = $request->input('language');
+    }
     if ($request->filled('timezone')) {
       $user->timezone      = $request->input('timezone');
     }
-    $user->currency      = $request->input('currency');
-    $user->country_id    = $request->input('country_id');
-    $user->state_id      = $request->input('state_id');
-    $user->HaveCompany    = $request->input('HaveCompany');
+     if ($request->has('currency')) {
+        $user->currency = $request->input('currency');
+    }
+
+    if ($request->has('country_id')) {
+        $user->country_id = $request->input('country_id');
+    }
+
+    if ($request->has('state_id')) {
+        $user->state_id = $request->input('state_id');
+    }
+
+    if ($request->has('HaveCompany')) {
+        $user->HaveCompany = $request->input('HaveCompany');
+    }
+
     if ($request->hasFile('imgUrl')) {
         $img = $request->file('imgUrl');
         $imgPath = $img->store('users', ['disk' => 'public_uploads']);
