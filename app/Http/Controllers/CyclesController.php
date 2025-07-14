@@ -653,7 +653,7 @@ class CyclesController extends Controller
             'field_ids' => implode(",", $field_map_ids)
         ];
         //        if (Auth::user()->company->step==$id) {
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
         //        }
         return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
