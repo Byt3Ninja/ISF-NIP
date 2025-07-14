@@ -865,8 +865,9 @@
                                         "example": 10
                                     },
                                     "HaveCompany": {
+                                        "description": "1 = Yes, 0 = No",
                                         "type": "boolean",
-                                        "example": true
+                                        "example": 1
                                     },
                                     "imgUrl": {
                                         "type": "string",
@@ -924,7 +925,7 @@
                                                     "type": "string",
                                                     "example": "+20"
                                                 },
-                                                "country_code_w_a": {
+                                                "countryCodeWA": {
                                                     "type": "string",
                                                     "example": "+20"
                                                 },
@@ -959,10 +960,6 @@
                                                 "state": {
                                                     "type": "string",
                                                     "example": "Cairo"
-                                                },
-                                                "HaveCompany": {
-                                                    "type": "boolean",
-                                                    "example": true
                                                 },
                                                 "imgUrl": {
                                                     "type": "string",

@@ -250,7 +250,7 @@ class ProfileController extends Controller
  *                 @OA\Property(property="currency", type="string", example="EGP"),
  *                 @OA\Property(property="country_id", type="integer", example=1),
  *                 @OA\Property(property="state_id", type="integer", example=10),
- *                 @OA\Property(property="HaveCompany", type="boolean", example=true),
+ *                 @OA\Property(property="HaveCompany", type="boolean", example=1, description="1 = Yes, 0 = No"),
  *                 @OA\Property(property="imgUrl", type="string", format="binary")
  *             )
  *         )
@@ -269,7 +269,7 @@ class ProfileController extends Controller
  *                 @OA\Property(property="gender", type="string", example="male"),
  *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
  *                 @OA\Property(property="countryCode", type="string", example="+20"),
- *                 @OA\Property(property="country_code_w_a", type="string", example="+20"),
+ *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
  *                 @OA\Property(property="zipCode", type="string", example="12345"),
  *                 @OA\Property(property="address", type="string", example="123 Nile Street"),
  *                 @OA\Property(property="title", type="string", example="Software Engineer"),
@@ -278,7 +278,6 @@ class ProfileController extends Controller
  *                 @OA\Property(property="currency", type="string", example="EGP"),
  *                 @OA\Property(property="country", type="string", example="Egypt"),
  *                 @OA\Property(property="state", type="string", example="Cairo"),
- *                 @OA\Property(property="HaveCompany", type="boolean", example=true),
  *                 @OA\Property(property="imgUrl", type="string", example="https://yourapp.com/uploads/users/avatar.jpg")
  *             )
  *         )
@@ -328,8 +327,8 @@ class ProfileController extends Controller
         $user->country_code = $request->input('countryCode');
     }
 
-    if ($request->has('country_code_w_a')) {
-        $user->country_code_w_a = $request->input('country_code_w_a');
+    if ($request->has('countryCodeWA')) {
+        $user->country_code_w_a = $request->input('countryCodeWA');
     }
 
     if ($request->has('phone')) {
@@ -399,7 +398,7 @@ class ProfileController extends Controller
             'gender'         => $user->gender,
             'whatsapp'       => $user->whatsapp,
             'countryCode'    => $user->country_code,
-            'country_code_w_a' => $user->country_code_w_a,
+            'countryCodeWA' => $user->country_code_w_a,
             'zipCode'       => $user->zip_code,
             'address'        => $user->address,
             'title'          => $user->title_en,
