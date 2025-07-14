@@ -33,7 +33,7 @@
                                             <input type="hidden" name="cycle" value="{{$c}}" />
                                             <input type="hidden" name="id" value="{{$step->id}}" />
                                             <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
-                                            
+                                           
                                             @foreach($fields as $field)
                                                 @php
                                                     $options = $field->pivot->options? json_decode($field->pivot->options) : null;

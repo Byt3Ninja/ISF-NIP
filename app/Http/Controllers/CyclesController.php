@@ -304,7 +304,8 @@ class CyclesController extends Controller
                         Formfield::insert([
                             'step_id' => $id,
                             'field_id' => $n->field_id,
-                            'options' => json_encode($n->options)
+                            'options' => json_encode($n->options),
+                            'builder_forms_id' => $n->id
                         ]);
                     }
                 }
@@ -381,7 +382,8 @@ class CyclesController extends Controller
                         Formfield::insert([
                             'step_id' => $id,
                             'field_id' => $n->field_id,
-                            'options' => json_encode($n->options)
+                            'options' => json_encode($n->options),
+                            'builder_forms_id' => $n->id
                         ]);
                     }
                 }
@@ -435,6 +437,7 @@ class CyclesController extends Controller
             $step = Step::where('id', $request->sid)->first()->toArray();
             return response()->json($step);
         } elseif ($type == 8) {
+            
             /// deleted saved data if type changed
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
@@ -455,6 +458,23 @@ class CyclesController extends Controller
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mScreeningSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->has("mFormSelect") && $request->mFormSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mFormSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                $step8 = Step::find($request->sid);
+                $form_fields = FormField::where('step_id', $step8->id)->where('builder_forms_id', $step8->data)->get();
+                if ($form_fields->isEmpty()) {
+                    $new = BuilderField::where('builder_form_id', $step8->data)->orderBy('id')->get();
+                    if (count($new) > 0) {
+                        foreach ($new as $n) {
+                            Formfield::insert([
+                                'step_id' => $request->sid,
+                                'field_id' => $n->field_id,
+                                'options' => json_encode($n->options),
+                                'builder_forms_id' => $n->builder_form_id
+                            ]);
+                        }
+                    }
+                }else{
+                    $form_fields = FormField::where('step_id', $step8->id)->whereNull('builder_forms_id')->update(['builder_forms_id' => $request->mFormSelect]);
+                }
             } else {
                 
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'count_team_number' => $request->count_team_number, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
@@ -644,11 +664,11 @@ class CyclesController extends Controller
         }
         //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
-        $field_map_ids = Formfield::where('step_id', $id)->select('id')->pluck('id')->toArray();
+        $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data = [
             'title' => $step->title,
-            'fields' => $step->fields()->orderBy('form_fields.id', 'asc')->get(),
+            'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
             'form_id' => $step->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
