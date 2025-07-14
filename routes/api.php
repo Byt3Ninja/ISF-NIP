@@ -38,12 +38,11 @@ Route::get('/me', [ProfileController::class, 'me'])->middleware('auth:sanctum');
 Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate'])->middleware('auth:sanctum');
 Route::apiResource('users', UserController::class)->middleware('auth:sanctum');
 Route::get('/roles', [RoleController::class, 'index'])->middleware('auth:sanctum');
-Route::put('/profile', [ProfileController::class, 'updateProfile'])->middleware('auth:sanctum');
+Route::post('/profile', [ProfileController::class, 'updateProfile'])->middleware('auth:sanctum');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->middleware('auth:sanctum');
 Route::put('/profile/bio', [ProfileController::class, 'updateBio'])->middleware('auth:sanctum');
 Route::get('/countries', [CountryController::class, 'index'])->middleware('auth:sanctum');
 Route::get('countries/{id}/states', [CountryController::class, 'getStates']);
-Route::post('/profile/image', [ProfileController::class, 'uploadImage'])->middleware('auth:sanctum');
 
 
 
