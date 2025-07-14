@@ -22,6 +22,7 @@ use App\Finalscreening;
 use App\TrainingSession;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
+use Illuminate\Validation\Rule;
 use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
@@ -384,6 +385,25 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
+            }elseif ($stype == 6) {
+              if (is_null($request->fromDate) || is_null($request->toDate)) {
+                   return redirect()->back()->with(['message2' => __('admin.AddDateFirst'), 'class' => 'danger']);
+               }
+                $cycle = \App\Cycle::find($request->cid);
+                if (!$cycle || $cycle->type !== 'Hackathon') {
+                return redirect()->back()->with(['message2' => __('admin.HackathonAllowed'), 'class' => 'danger']);
+                }
+                Step::insert([
+                'cycle_id' => $request->cid,
+                'title' => $request->title,
+                'description' => $request->description,
+                'stype' => $stype,
+                'data' => null,
+                'arr' => $request->arr,
+                'from' => $request->fromDate,
+                'to' => $request->toDate,
+                'count_team_number' => $request->count_team_number,
+                ]);
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($type == 6) {
@@ -419,6 +439,9 @@ class CyclesController extends Controller
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
             }
+            if($request->count_team_number !== null){
+                Step::where('id', $request->sid)->update(['count_team_number' => $request->count_team_number]);
+            }
             /// Save Modified step
             if ($request->ScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->ScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
@@ -433,11 +456,11 @@ class CyclesController extends Controller
             } elseif ($request->has("mFormSelect") && $request->mFormSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mFormSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } else {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'count_team_number' => $request->count_team_number, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
- 
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
@@ -448,6 +471,7 @@ class CyclesController extends Controller
                 'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'program_type' => ['required', Rule::in(Cycle::programTypes())],
             ]);
 
             $existTitle = Cycle::where('organization_id', $request->organization_id2)->where('title', $request->title)->first();
@@ -462,6 +486,7 @@ class CyclesController extends Controller
                 }
                 $cycle = new Cycle();
                 $cycle->organization_id = $request->organization_id2;
+                $cycle->type = $request->program_type;
                 $cycle->title = $request->title;
                 $cycle->description = $request->description;
                 $cycle->start = Carbon::parse($request->start);

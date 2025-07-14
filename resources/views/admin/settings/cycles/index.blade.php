@@ -98,6 +98,9 @@
                   </div>
                 </div>
                 <br />
+                @php
+                  $selectedCycle = \App\Cycle::find($id);
+                @endphp
                 <div class="row d-flex align-items-end">
                   <div class="col-12 col-md-6">
                     <div class="form-group">
@@ -108,6 +111,9 @@
                         <option value="3">{{ __('cycles.Mentorship') }}</option>
                         <option value="4">{{ __('cycles.Training') }}</option>
                         <option value="5">{{ __('cycles.Final evaluation') }}</option>
+                        @if ($selectedCycle && $selectedCycle->type === 'Hackathon' && $_user->hasAnyRole(['Admin', 'organizationManager']))
+                            <option value="6">{{ __('admin.Team Formation') }}</option>
+                        @endif
                       </select>
                     </div>
                   </div>
@@ -200,11 +206,13 @@
                                           $set = $step->id . '/final/';
                                       }
                                     @endphp
+                                    @if($step->stype != 6)
                            <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
                             <span class="btn btn-icon btn-label-warning rounded-circle">
                                 <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
                             </span>
                         </a>
+                        @endif
                         @if($step->stype == 1 && $step->form)
                         <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
                           <span class="btn btn-icon btn-label-primary rounded-circle">
@@ -391,6 +399,11 @@
             <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
           </div>
+
+          <div class="form-group mb-4" id="team_number">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
+             <input id='count_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal" aria-label="Close">
@@ -468,6 +481,13 @@
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
           </div>
+
+          <div class="form-group mb-4" id="mteam_number" style="display: none;">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
+             <input id='mcount_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+          </div>
+
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
@@ -660,7 +680,10 @@
           let step = $('#StepSelect').find(":selected").val();
           let steptxt = $('#StepSelect').find(":selected").text();
           let menu = $('#menu' + step);
-          $('#menu1,#menu2').hide();
+          $('#menu1,#menu2,#team_number').hide();
+          if(step === '6'){
+            $('#team_number').show();
+          }
           if (menu !== null) {
             $.ajax({
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
@@ -724,8 +747,14 @@
             },
             success: function(response) {
               step = response.stype;
+              console.log(step);
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
+              if(step == 6){
+                $('#mteam_number').show();
+              }else{
+                $('#mteam_number').hide();
+              }
               if (response.data !== null) {
                 if (step == 1 || step == 5) {
                   $('#mFormSelect').val(response.data);
@@ -770,6 +799,7 @@
               $('#sid').val(response.id);
               $('#mtitle').val(response.title);
               $('#mdescription').val(response.description);
+              $('#mcount_team_number').val(response.count_team_number);
               
               $('#step-range-picker').daterangepicker({
                 opens: isRtl ? 'left' : 'right',

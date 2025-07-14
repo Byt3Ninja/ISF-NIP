@@ -8,6 +8,7 @@ use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Mail\ConfirmEmailUpdate;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -221,58 +222,72 @@ class ProfileController extends Controller
         ],200);
     }
  /**
-     * @OA\Put(
-     *     path="/api/profile",
-     *     summary="Update user profile",
-     *     description="Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
-     *     operationId="updateProfile",
-     *     tags={"User"},
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 required={},
-     *                 @OA\Property(property="firstName", type="string"),
-     *                 @OA\Property(property="lastName", type="string"),
-     *                 @OA\Property(property="countryCode", type="string"),
-     *                 @OA\Property(property="country_code_w_a", type="string"),
-     *                 @OA\Property(property="phone", type="string"),
-     *                 @OA\Property(property="whatsapp", type="string"),
-     *                 @OA\Property(property="email", type="string", format="email"),
-     *                 @OA\Property(property="zip_code", type="string"),
-     *                 @OA\Property(property="address", type="string"),
-     *                 @OA\Property(property="title", type="string"),
-     *                 @OA\Property(property="language", type="string"),
-     *                 @OA\Property(property="timezone", type="string"),
-     *                 @OA\Property(property="currency", type="string"),
-     *                 @OA\Property(property="country_id", type="integer"),
-     *                 @OA\Property(property="state_id", type="integer"),
-     *                 @OA\Property(property="imgUrl", type="string", format="binary")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Profile updated successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Profile updated successfully"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="firstName", type="string"),
-     *                 @OA\Property(property="lastName", type="string"),
-     *                 @OA\Property(property="email", type="string"),
-     *                 @OA\Property(property="phone", type="string"),
-     *                 @OA\Property(property="imgUrl", type="string")
-     *             )
-     *         )
-     *     )
-     * )
-     */
+ * @OA\Post(
+ *     path="/api/profile",
+ *     summary="Update user profile",
+ *     description="Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
+ *     operationId="updateProfile",
+ *     tags={"User"},
+ *     security={{"sanctum":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
+ *                 @OA\Property(property="gender", type="string", example="male"),
+ *                 @OA\Property(property="countryCode", type="string", example="+20"),
+ *                 @OA\Property(property="country_code_w_a", type="string", example="+20"),
+ *                 @OA\Property(property="phone", type="string", example="0100000000"),
+ *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
+ *                 @OA\Property(property="email", type="string", format="email", example="ahmed@example.com"),
+ *                 @OA\Property(property="zipCode", type="string", example="12345"),
+ *                 @OA\Property(property="address", type="string", example="123 Nile Street"),
+ *                 @OA\Property(property="title", type="string", example="Software Engineer"),
+ *                 @OA\Property(property="language", type="string", example="en"),
+ *                 @OA\Property(property="timezone", type="string", example="Africa/Cairo"),
+ *                 @OA\Property(property="currency", type="string", example="EGP"),
+ *                 @OA\Property(property="country_id", type="integer", example=1),
+ *                 @OA\Property(property="state_id", type="integer", example=10),
+ *                 @OA\Property(property="HaveCompany", type="boolean", example=1, description="1 = Yes, 0 = No"),
+ *                 @OA\Property(property="imgUrl", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Profile updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Profile updated successfully"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
+ *                 @OA\Property(property="email", type="string", format="email", example="ahmed@example.com"),
+ *                 @OA\Property(property="phone", type="string", example="0100000000"),
+ *                 @OA\Property(property="gender", type="string", example="male"),
+ *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
+ *                 @OA\Property(property="countryCode", type="string", example="+20"),
+ *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
+ *                 @OA\Property(property="zipCode", type="string", example="12345"),
+ *                 @OA\Property(property="address", type="string", example="123 Nile Street"),
+ *                 @OA\Property(property="title", type="string", example="Software Engineer"),
+ *                 @OA\Property(property="language", type="string", example="en"),
+ *                 @OA\Property(property="timezone", type="string", example="Africa/Cairo"),
+ *                 @OA\Property(property="currency", type="string", example="EGP"),
+ *                 @OA\Property(property="country", type="string", example="Egypt"),
+ *                 @OA\Property(property="state", type="string", example="Cairo"),
+ *                 @OA\Property(property="imgUrl", type="string", example="https://yourapp.com/uploads/users/avatar.jpg")
+ *             )
+ *         )
+ *     )
+ * )
+ */
     public function updateProfile(Request $request)
 {
     $user = Auth::user();
+    $locale = app()->getLocale();
 
     $request->validate([
         'firstName'     => 'nullable|string|max:255',
@@ -282,7 +297,7 @@ class ProfileController extends Controller
         'phone'             => 'nullable|string|max:20',
         'whatsapp'          => 'nullable|string|max:20',
         'email'             => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
-        'zip_code'          => 'nullable|string|max:20',
+        'zipCode'          => 'nullable|string|max:20',
         'address'           => 'nullable|string|max:255',
         'title'          => 'nullable|string|max:255',
         'language'          => 'nullable|string|max:10',
@@ -290,32 +305,84 @@ class ProfileController extends Controller
         'currency'          => 'nullable|string|max:10',
         'country_id'        => 'nullable|exists:countries,id',
         'state_id'          => 'nullable|exists:states,id',
+        'imgUrl'            => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
     ]);
 
-    // === Email Change ===
-    if ($request->filled('email') && $request->email !== $user->email) {
-        $user->new_email = $request->email;
-        $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-        Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+    if ($request->filled('firstName')) {
+        $user->first_name_en = $request->input('firstName');
+        $user->first_name_ar = $request->input('firstName');
     }
 
-    $user->first_name_en = $request->input('firstName');
-    $user->last_name_en  = $request->input('lastName');
-    $user->first_name_ar = $request->input('firstName');
-    $user->last_name_ar  = $request->input('lastName');
-    $user->country_code  = $request->input('countryCode');
-    $user->country_code_w_a = $request->input('country_code_w_a');
-    $user->phone         = $request->input('phone');
-    $user->whatsapp      = $request->input('whatsapp');
-    $user->zip_code      = $request->input('zipCode');
-    $user->address       = $request->input('address');
-    $user->title_en      = $request->input('title');
-    $user->language      = $request->input('language');
-    $user->timezone      = $request->input('timezone');
-    $user->currency      = $request->input('currency');
-    $user->country_id    = $request->input('country_id');
-    $user->state_id      = $request->input('state_id');
-    $user->HaveCompany    = $request->input('HaveCompany');
+    if ($request->filled('lastName')) {
+        $user->last_name_en = $request->input('lastName');
+        $user->last_name_ar = $request->input('lastName');
+    }
+     if ($request->filled('email')) {
+        $user->email = $request->input('email');
+    }
+     if ($request->filled('gender')) {
+        $user->gender = $request->input('gender');
+    }
+    if ($request->has('countryCode')) {
+        $user->country_code = $request->input('countryCode');
+    }
+
+    if ($request->has('countryCodeWA')) {
+        $user->country_code_w_a = $request->input('countryCodeWA');
+    }
+
+    if ($request->has('phone')) {
+        $user->phone = $request->input('phone');
+    }
+
+    if ($request->has('whatsapp')) {
+        $user->whatsapp = $request->input('whatsapp');
+    }
+
+    if ($request->has('zipCode')) {
+        $user->zip_code = $request->input('zipCode');
+    }
+
+    if ($request->has('address')) {
+        $user->address = $request->input('address');
+    }
+    if ($request->filled('title')) {
+     $user->title_en    = $request->input('title');
+    }
+    if ($request->has('language')) {
+        $user->language = $request->input('language');
+    }
+    if ($request->filled('timezone')) {
+      $user->timezone      = $request->input('timezone');
+    }
+     if ($request->has('currency')) {
+        $user->currency = $request->input('currency');
+    }
+
+    if ($request->has('country_id')) {
+        $user->country_id = $request->input('country_id');
+    }
+
+    if ($request->has('state_id')) {
+        $user->state_id = $request->input('state_id');
+    }
+
+    if ($request->has('HaveCompany')) {
+        $user->HaveCompany = $request->input('HaveCompany');
+    }
+
+    if ($request->hasFile('imgUrl')) {
+        $img = $request->file('imgUrl');
+        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
+
+        // Resize image
+        Image::make(Storage::disk('public_uploads')->path($imgPath))
+            ->resize(null, 200, function ($con) {
+                $con->aspectRatio();
+            })->save();
+
+        $user->img_url = $imgPath;
+    }
 
     $user->save();
 
@@ -323,10 +390,24 @@ class ProfileController extends Controller
         'success' => true,
         'message' => __('api.ProfileUpdated'),
         'data' => [
-            'firstName' => $user->first_name_en,
-            'lastName'  => $user->last_name_en,
-            'email'     => $user->email,
-            'phone'     => $user->phone,
+           'firstName' => $user->first_name_en,
+           'lastName'  => $user->last_name_en,
+           'lastName'  => $user->last_name_en,
+            'email'         => $user->email,
+            'phone'          => $user->phone,
+            'gender'         => $user->gender,
+            'whatsapp'       => $user->whatsapp,
+            'countryCode'    => $user->country_code,
+            'countryCodeWA' => $user->country_code_w_a,
+            'zipCode'       => $user->zip_code,
+            'address'        => $user->address,
+            'title'          => $user->title_en,
+            'language'       => $user->language,
+            'timezone'       => $user->timezone,
+            'currency'       => $user->currency,
+            'country'          => optional($user->country)->{'name_' . $locale},
+            'state'            => optional($user->state)->{'name_' . $locale},
+            'HaveCompany'    => $user->HaveCompany,
             'imgUrl'    => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
         ]
     ]);
@@ -476,33 +557,5 @@ public function updateBio(Request $request)
     ]);
 }
 
-public function uploadImage(Request $request) 
-{
-    $user = auth()->user();
-    $validated = $request->validate([
-        'imgUrl' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    if ($request->hasFile('imgUrl')) {
-        $img = $request->file('imgUrl');
-        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
-
-        // Resize
-        Image::make(Storage::disk('public_uploads')->path($imgPath))
-            ->resize(null, 200, function ($con) {
-                $con->aspectRatio();
-            })->save();
-
-        $user->img_url = $imgPath;
-    }
-    $user->save();
-    return response()->json([
-        'success' => true,
-        'message' => __('api.ImageUpdated'),
-        'data' => [
-            'imgUrl'    => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
-        ]
-    ]);
-}
 
 }

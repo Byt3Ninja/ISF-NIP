@@ -786,7 +786,7 @@
             }
         },
         "/api/profile": {
-            "put": {
+            "post": {
                 "tags": [
                     "User"
                 ],
@@ -798,53 +798,76 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [],
                                 "properties": {
                                     "firstName": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Ahmed"
                                     },
                                     "lastName": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Mohamed"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male"
                                     },
                                     "countryCode": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "+20"
                                     },
                                     "country_code_w_a": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "+20"
                                     },
                                     "phone": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "0100000000"
                                     },
                                     "whatsapp": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "0100000000"
                                     },
                                     "email": {
                                         "type": "string",
-                                        "format": "email"
+                                        "format": "email",
+                                        "example": "ahmed@example.com"
                                     },
-                                    "zip_code": {
-                                        "type": "string"
+                                    "zipCode": {
+                                        "type": "string",
+                                        "example": "12345"
                                     },
                                     "address": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "123 Nile Street"
                                     },
                                     "title": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Software Engineer"
                                     },
                                     "language": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "en"
                                     },
                                     "timezone": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Africa/Cairo"
                                     },
                                     "currency": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "EGP"
                                     },
                                     "country_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 1
                                     },
                                     "state_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "HaveCompany": {
+                                        "description": "1 = Yes, 0 = No",
+                                        "type": "boolean",
+                                        "example": 1
                                     },
                                     "imgUrl": {
                                         "type": "string",
@@ -874,19 +897,73 @@
                                         "data": {
                                             "properties": {
                                                 "firstName": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "example": "Ahmed"
                                                 },
                                                 "lastName": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "example": "Mohamed"
                                                 },
                                                 "email": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "ahmed@example.com"
                                                 },
                                                 "phone": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "example": "0100000000"
+                                                },
+                                                "gender": {
+                                                    "type": "string",
+                                                    "example": "male"
+                                                },
+                                                "whatsapp": {
+                                                    "type": "string",
+                                                    "example": "0100000000"
+                                                },
+                                                "countryCode": {
+                                                    "type": "string",
+                                                    "example": "+20"
+                                                },
+                                                "countryCodeWA": {
+                                                    "type": "string",
+                                                    "example": "+20"
+                                                },
+                                                "zipCode": {
+                                                    "type": "string",
+                                                    "example": "12345"
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "123 Nile Street"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Software Engineer"
+                                                },
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "en"
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "example": "Africa/Cairo"
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "EGP"
+                                                },
+                                                "country": {
+                                                    "type": "string",
+                                                    "example": "Egypt"
+                                                },
+                                                "state": {
+                                                    "type": "string",
+                                                    "example": "Cairo"
                                                 },
                                                 "imgUrl": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "example": "https://yourapp.com/uploads/users/avatar.jpg"
                                                 }
                                             },
                                             "type": "object"
