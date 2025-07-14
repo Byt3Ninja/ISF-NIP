@@ -318,8 +318,12 @@ class ProfileController extends Controller
         $user->last_name_en = $request->input('lastName');
         $user->last_name_ar = $request->input('lastName');
     }
-    $user->email = $request->input('email');
-    $user->gender = $request->input('gender');
+     if ($request->filled('email')) {
+        $user->email = $request->input('email');
+    }
+     if ($request->filled('gender')) {
+        $user->gender = $request->input('gender');
+    }
     $user->country_code  = $request->input('countryCode');
     $user->country_code_w_a = $request->input('country_code_w_a');
     $user->phone         = $request->input('phone');
