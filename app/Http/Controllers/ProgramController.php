@@ -79,6 +79,9 @@ class ProgramController extends Controller
         if ($request->private == 'No') {
             $cycles = $cycles->whereNull('private');
         }
+        if ($request->filled('program_type')) {
+         $cycles->where('type', $request->program_type);
+        }
         $cycles = $cycles->orderBy('id', 'desc')->get();
         return view('admin.programs.index', compact('cycles'));
     }

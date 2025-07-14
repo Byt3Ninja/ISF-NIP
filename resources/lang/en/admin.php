@@ -2038,4 +2038,8 @@ return [
 	'quizStartError' => 'An error occurred while starting the quiz. Please try again.',
 	'Select your answer and click Next to continue' => 'Select your answer and click Next to continue',
 	'Time Remaining' => 'Time Remaining',
+	'Program_Type' => 'Program Type',
+	'Team Formation' => 'Team Formation',
+	'HackathonAllowed' => 'Team Formation is only allowed for Hackathon Programs',
+	'AddDateFirst' => 'Please Add Start and End Date first.',
 ];

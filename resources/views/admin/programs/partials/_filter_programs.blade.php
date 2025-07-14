@@ -24,12 +24,12 @@
                 @endforeach
               </select>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-3 col-lg-2">
               <input class="form-control datepicker" placeholder="{{ __('admin.StartDate') }}" name="start_date"
                 value="{{ request('start_date') }}" />
             </div>
 
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-3 col-lg-2">
               <input class="form-control datepicker" placeholder="{{ __('admin.EndDate') }}" name="end_date"
                 value="{{ request('end_date') }}" />
             </div>
@@ -44,6 +44,16 @@
                 </option>
               </select>
             </div>
+             <div class="col-12 col-md-6 col-lg-2">
+              <select name="program_type" class="form-select select2" data-placeholder="{{ __('admin.Program_Type') }}">
+                <option value="">{{ __('admin.Program_Type') }}</option>
+                  @foreach (\App\Cycle::programTypes() as $type)
+                    <option value="{{ $type }}" {{ request('program_type') == $type ? 'selected' : '' }}>
+                         {{ $type }}
+                    </option>
+                  @endforeach
+               </select>
+           </div>
           </div>
         </form>
       </div>

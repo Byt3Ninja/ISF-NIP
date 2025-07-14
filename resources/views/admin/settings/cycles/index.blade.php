@@ -98,6 +98,9 @@
                   </div>
                 </div>
                 <br />
+                @php
+                  $selectedCycle = \App\Cycle::find($id);
+                @endphp
                 <div class="row d-flex align-items-end">
                   <div class="col-12 col-md-6">
                     <div class="form-group">
@@ -108,6 +111,9 @@
                         <option value="3">{{ __('cycles.Mentorship') }}</option>
                         <option value="4">{{ __('cycles.Training') }}</option>
                         <option value="5">{{ __('cycles.Final evaluation') }}</option>
+                        @if ($selectedCycle && $selectedCycle->type === 'Hackathon' && $_user->hasAnyRole(['Admin', 'organizationManager']))
+                            <option value="6">{{ __('admin.Team Formation') }}</option>
+                        @endif
                       </select>
                     </div>
                   </div>
