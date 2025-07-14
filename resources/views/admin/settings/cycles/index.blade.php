@@ -206,11 +206,13 @@
                                           $set = $step->id . '/final/';
                                       }
                                     @endphp
+                                    @if($step->stype != 6)
                            <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
                             <span class="btn btn-icon btn-label-warning rounded-circle">
                                 <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
                             </span>
                         </a>
+                        @endif
                         @if($step->stype == 1 && $step->form)
                         <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
                           <span class="btn btn-icon btn-label-primary rounded-circle">
@@ -479,6 +481,13 @@
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
           </div>
+
+          <div class="form-group mb-4" id="mteam_number" style="display: none;">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
+             <input id='mcount_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+          </div>
+
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
@@ -738,8 +747,14 @@
             },
             success: function(response) {
               step = response.stype;
+              console.log(step);
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
+              if(step == 6){
+                $('#mteam_number').show();
+              }else{
+                $('#mteam_number').hide();
+              }
               if (response.data !== null) {
                 if (step == 1 || step == 5) {
                   $('#mFormSelect').val(response.data);
@@ -784,6 +799,7 @@
               $('#sid').val(response.id);
               $('#mtitle').val(response.title);
               $('#mdescription').val(response.description);
+              $('#mcount_team_number').val(response.count_team_number);
               
               $('#step-range-picker').daterangepicker({
                 opens: isRtl ? 'left' : 'right',

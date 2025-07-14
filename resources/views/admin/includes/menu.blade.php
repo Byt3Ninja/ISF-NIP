@@ -290,6 +290,13 @@
       @endif
     @endif
     @if ($_user->hasAnyRole('Registered'))
+
+    <li class="{{ Request::is('dashboard/hackathon') ? 'active' : '' }} menu-item"><a
+          href="/dashboard/hackathon" class="menu-link">
+          <i class="ti ti-file-text ti-md me-2 me-lg-4 ti-lg"></i>
+          <div>{{ __('admin.Hackathon') }}</div>
+        </a>
+      </li>
     {{-- @if (!app()->environment('production', 'beta')) --}}
       @if( $_user->ableToAny(['service_requests.list_mine', 'mentorships.list_mine'], $permissions) )
       <li class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
@@ -314,6 +321,7 @@
           </li>
           @endif
         </ul>
+        
       </li>
       @endif
     {{-- @endif --}}
@@ -435,6 +443,12 @@
           <li class="{{ Request::is('dashboard/programlist*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/programlist" class="menu-link">
               <span class="menu-item">{{ __('admin.ProgramList') }}</span>
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/hackathon*') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/hackathon" class="menu-link">
+              <span class="menu-item">{{ __('admin.Hackathon') }}</span>
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
             </a>
           </li>

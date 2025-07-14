@@ -2043,4 +2043,5 @@ return [
 	'HackathonAllowed' => 'Team Formation is only allowed for Hackathon Programs',
 	'AddDateFirst' => 'Please Add Start and End Date first.',
 	'maxInTeam' => 'Maximum Number of Team Members',
+	'Hackathon' => 'Hackathon',
 ];

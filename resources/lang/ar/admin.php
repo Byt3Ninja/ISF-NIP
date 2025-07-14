@@ -2089,4 +2089,5 @@ return [
 	'HackathonAllowed' => 'تنسيق الفريق يسمح فقط للبرنامج Hackathon',
 	'AddDateFirst' => 'يرجى إضافة تاريخ البداية والنهاية أولاً.',
 	'maxInTeam' => 'الحد الاقصى لعدد الفريقات',
+	'Hackathon' => 'هاكاثون',
 ];

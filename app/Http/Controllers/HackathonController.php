@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 // use App\Hackathon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HackathonController extends Controller
 {
     public function index()
     {
-        // $hackathons = Hackathon::all();
+        $hackathons = "SELECT * FROM cycles WHERE `type` = 'Hackathon' ORDER BY created_at DESC";
+        $hackathons = collect(DB::select($hackathons));
+        
         // return view('admin.hackathon.index', compact('hackathons'));
-        return view('admin.hackathon.index');
+        return view('admin.hackathon.index', compact('hackathons'));
     }
 
     public function manage( )
