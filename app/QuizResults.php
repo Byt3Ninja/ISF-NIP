@@ -47,4 +47,20 @@ class QuizResults extends Model
 	{
 		return $this->hasMany(QuizResponses::class, 'result_id');
 	}
+
+	public static function refresh_my_attempts()
+	{
+		$user = auth()->user()->id;
+		$my_pending_attempts = self::where('user_id', $user)->where('status', 0)->with(['quiz'])->get();
+		foreach( $my_pending_attempts as $attempt )
+		{
+			$attempt_quiz = $attempt->quiz;
+			if( !$attempt->status && $attempt->started_at->diffInMinutes(now()) > $attempt_quiz->time_limit )
+			{
+				$attempt->status = true;
+				$attempt->ended_at = $attempt->started_at->copy()->addMinutes( $attempt_quiz->time_limit );
+				$attempt->save();
+			}
+		}
+	}
 }
