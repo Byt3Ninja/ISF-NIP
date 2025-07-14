@@ -402,7 +402,8 @@ class CyclesController extends Controller
              'data' => null,
              'arr' => $request->arr,
              'from' => $request->fromDate,
-             'to' => $request->toDate
+             'to' => $request->toDate,
+             'count_team_number' => $request->count_team_number,
           ]);
        }
             return redirect()->back()->with('message', 'Saved');

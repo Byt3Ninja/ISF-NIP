@@ -45,9 +45,9 @@
               </select>
             </div>
              <div class="col-12 col-md-6 col-lg-2">
-              <select name="program_type" class="form-select select2" data-placeholder="{{ __('admin.Program_Type') }}">
-                <option value="">{{ __('admin.Program_Type') }}</option>
-                  @foreach (\App\Cycle::programTypes() as $type)
+              <select name="program_type" class="form-select" data-placeholder="{{ __('admin.All') }}">
+              <option value="">{{ __('admin.All') }}</option>
+                @foreach (\App\Cycle::programTypes() as $type)
                     <option value="{{ $type }}" {{ request('program_type') == $type ? 'selected' : '' }}>
                          {{ $type }}
                     </option>
