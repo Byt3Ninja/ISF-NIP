@@ -557,7 +557,7 @@
                           $avgRating = $requests->whereNotNull('rating')->avg('rating');
                         @endphp
                       <tr>
-                          <td class="text-right-align">{{ $company->{'name_' . app()->getLocale()} }}</td>
+                          <td class="text-right-align">{{ $company?->{'name_' . app()->getLocale()} }}</td>
                           <td>{{ $mentor->first_name . ' ' . $mentor->last_name ?? 'N/A' }}</td>
                           <td>{{ $totalSessions }}</td>
                           <td>{{ number_format($totalHours, 1) }}</td>
