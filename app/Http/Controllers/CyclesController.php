@@ -385,27 +385,26 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            }
-            elseif ($stype == 6) {
+            }elseif ($stype == 6) {
               if (is_null($request->fromDate) || is_null($request->toDate)) {
                    return redirect()->back()->with(['message2' => __('admin.AddDateFirst'), 'class' => 'danger']);
                }
-            $cycle = \App\Cycle::find($request->cid);
-            if (!$cycle || $cycle->type !== 'Hackathon') {
-               return redirect()->back()->with(['message2' => __('admin.HackathonAllowed'), 'class' => 'danger']);
+                $cycle = \App\Cycle::find($request->cid);
+                if (!$cycle || $cycle->type !== 'Hackathon') {
+                return redirect()->back()->with(['message2' => __('admin.HackathonAllowed'), 'class' => 'danger']);
+                }
+                Step::insert([
+                'cycle_id' => $request->cid,
+                'title' => $request->title,
+                'description' => $request->description,
+                'stype' => $stype,
+                'data' => null,
+                'arr' => $request->arr,
+                'from' => $request->fromDate,
+                'to' => $request->toDate,
+                'count_team_number' => $request->count_team_number,
+                ]);
             }
-            Step::insert([
-             'cycle_id' => $request->cid,
-             'title' => $request->title,
-             'description' => $request->description,
-             'stype' => $stype,
-             'data' => null,
-             'arr' => $request->arr,
-             'from' => $request->fromDate,
-             'to' => $request->toDate,
-             'count_team_number' => $request->count_team_number,
-          ]);
-       }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($type == 6) {
             /// Delete step
@@ -440,6 +439,9 @@ class CyclesController extends Controller
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
             }
+            if($request->count_team_number !== null){
+                Step::where('id', $request->sid)->update(['count_team_number' => $request->count_team_number]);
+            }
             /// Save Modified step
             if ($request->ScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->ScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
@@ -454,7 +456,8 @@ class CyclesController extends Controller
             } elseif ($request->has("mFormSelect") && $request->mFormSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mFormSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } else {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'count_team_number' => $request->count_team_number, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {

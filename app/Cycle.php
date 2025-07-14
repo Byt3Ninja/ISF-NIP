@@ -70,7 +70,8 @@ class Cycle extends Model
 
     public static function programTypes(): array
     {
-        return ['Incubator', 'Accelerator', 'Hackathon'];
+        // return ['Incubator', 'Accelerator', 'Hackathon'];
+        return ['General_Program', 'Hackathon'];
     }
 
    
