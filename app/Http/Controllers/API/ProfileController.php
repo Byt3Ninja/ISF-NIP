@@ -8,6 +8,7 @@ use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Mail\ConfirmEmailUpdate;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -263,7 +264,7 @@ class ProfileController extends Controller
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
  *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
- *                 @OA\Property(property="newEmail", type="string", nullable=true, example="new-email@example.com"),
+ *                 @OA\Property(property="email", type="string", format="email", example="ahmed@example.com"),
  *                 @OA\Property(property="phone", type="string", example="0100000000"),
  *                 @OA\Property(property="gender", type="string", example="male"),
  *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
@@ -308,15 +309,6 @@ class ProfileController extends Controller
         'imgUrl'            => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
     ]);
 
-    // === Email Change ===
-    $newEmailSet = false;
-    if ($request->filled('email') && $request->email !== $user->email) {
-        $user->new_email = $request->email;
-        $newEmailSet = true;
-        $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-        Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
-    }
-
     if ($request->filled('firstName')) {
         $user->first_name_en = $request->input('firstName');
         $user->first_name_ar = $request->input('firstName');
@@ -326,8 +318,7 @@ class ProfileController extends Controller
         $user->last_name_en = $request->input('lastName');
         $user->last_name_ar = $request->input('lastName');
     }
-    $user->first_name_ar = $request->input('firstName');
-    $user->last_name_ar  = $request->input('lastName');
+    $user->email = $request->input('email');
     $user->gender = $request->input('gender');
     $user->country_code  = $request->input('countryCode');
     $user->country_code_w_a = $request->input('country_code_w_a');
@@ -363,7 +354,8 @@ class ProfileController extends Controller
         'data' => [
            'firstName' => $user->first_name_en,
            'lastName'  => $user->last_name_en,
-           'newEmail'      => $newEmailSet ? $user->new_email : null,
+           'lastName'  => $user->last_name_en,
+            'email'         => $user->email,
             'phone'          => $user->phone,
             'gender'         => $user->gender,
             'whatsapp'       => $user->whatsapp,

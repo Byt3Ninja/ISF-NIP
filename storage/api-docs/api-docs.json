@@ -903,10 +903,10 @@
                                                     "type": "string",
                                                     "example": "Mohamed"
                                                 },
-                                                "newEmail": {
+                                                "email": {
                                                     "type": "string",
-                                                    "example": "new-email@example.com",
-                                                    "nullable": true
+                                                    "format": "email",
+                                                    "example": "ahmed@example.com"
                                                 },
                                                 "phone": {
                                                     "type": "string",
