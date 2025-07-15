@@ -7,6 +7,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\OrganizationController;
@@ -47,7 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
-    
+    Route::get('currencies', [CurrencyController::class, 'index']);
+
 });
 
 
