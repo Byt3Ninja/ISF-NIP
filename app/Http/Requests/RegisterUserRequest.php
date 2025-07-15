@@ -37,6 +37,9 @@ class RegisterUserRequest extends FormRequest
 
         if ($this->input('role') === 'Mentor') {
             $rules['title'] = ['required', 'string', 'max:255'];
+            $rules['linkedin'] = ['nullable', 'url', 'starts_with:https://'];
+            $rules['expertise'] = ['required', 'array', 'exists:expertises,id'];
+            $rules['userbio'] = ['required', 'string', 'max:100'];
         }
 
         return $rules;
@@ -46,6 +49,9 @@ class RegisterUserRequest extends FormRequest
     {
         return [
             'title.required' => __('api.title_required'),
+            'linkedin.required' => __('api.linkedin_required'),
+            'expertise.required' => __('api.expertise_required'),
+            'userbio.required' => __('api.userbio_required'),
         ];
     }
 }
