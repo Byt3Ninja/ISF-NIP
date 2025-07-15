@@ -2046,4 +2046,5 @@ return [
 	'AddDateFirst' => 'Please Add Start and End Date first.',
 	'maxInTeam' => 'Maximum Number of Team Members',
 	'Hackathon' => 'Hackathon',
+	'Quiz_Results' => 'Quiz Results',
 ];

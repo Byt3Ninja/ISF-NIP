@@ -2599,6 +2599,26 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "quizzes.quiz_Results_view",
+                "description": "View Quiz Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.quiz_results_view_details",
+                "description": "View Quiz Results Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },

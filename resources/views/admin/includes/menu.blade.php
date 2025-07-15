@@ -702,7 +702,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </li>
         </ul>
       </li>
-      <li class="{{ Request::is('*quizzes*', '*surveys*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li class="{{ Request::is('*quizzes*', '*surveys*', '*quizResults*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-stack me-3 ti-md"></i>
           <div>{{ __('admin.quizzesAndSurveys') }}</div>
@@ -714,6 +714,13 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.quizzes') }}</span>
             </a>
           </li>
+           <li class="{{ Request::is('dashboard/quizResults*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('quizzes.quiz_Results_view') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Quiz_Results') }}</span>
+            </a>
+          </li>
+          
           <li class="{{ Request::is('dashboard/surveys*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/surveys">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -727,6 +734,9 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.Survey_Results') }}</span>
             </a>
           </li>
+
+         
+
         </ul>
       </li>
       <li class="{{ Request::is('dashboard/final/*') ? 'sidebar-group-active open' : '' }} menu-item">
