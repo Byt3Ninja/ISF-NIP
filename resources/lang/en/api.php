@@ -23,4 +23,7 @@ return [
 	'MentorBioUpdated' => 'Mentor Bio Updated Successfully',
 	'inactive_user' => 'Your account is Inactive Contact Support.',
 	'ImageUpdated' => 'Image Uploaded Successfully',
+	'linkedin_required' => 'Linkedin is required For Mentors',
+	'expertise_required' => 'Expertise is required For Mentors',
+	'userbio_required' => 'Userbio is required For Mentors',
 ];

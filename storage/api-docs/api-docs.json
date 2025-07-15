@@ -564,6 +564,147 @@
                 }
             }
         },
+        "/api/organizations": {
+            "get": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Get list of all organizations with full details",
+                "operationId": "38539e67fb3c20065e66e337a5fc6a37",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter organizations by status (1 = active, 0 = inactive)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of organizations returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Tech Org"
+                                                    },
+                                                    "imgUrl": {
+                                                        "type": "string",
+                                                        "example": "/uploads/logo.png"
+                                                    },
+                                                    "status": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "startups": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "cycles": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Admin User"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "admin@org.com"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "01012345678"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "/uploads/user.jpg"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "totalOrganizations": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "totalActiveOrganizations": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "totalInactiveOrganizations": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admins can access this endpoint",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/me": {
             "get": {
                 "tags": [
@@ -1891,6 +2032,10 @@
         {
             "name": "Expertises",
             "description": "Expertises"
+        },
+        {
+            "name": "Organizations",
+            "description": "Organizations"
         },
         {
             "name": "User",

@@ -23,4 +23,7 @@ return [
 	'MentorBioUpdated' => 'تم تحديث الملف الشخصي للمرشد بنجاح',
 	'inactive_user' => 'حسابك غير نشط. يرجى الاتصال بالدعم',
 	'ImageUpdated' => 'تم تحديث الصورة بنجاح',
+	'linkedin_required' => 'الرابط المركزي مطلوب للمرشدين',
+	'expertise_required' => 'التخصص مطلوب للمرشدين',
+	'expertise_required' => 'تم تحديث التخصص بنجاح',
 ];

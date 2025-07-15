@@ -9,6 +9,7 @@ use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
+use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 
 /*
@@ -43,6 +44,8 @@ Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->m
 Route::put('/profile/bio', [ProfileController::class, 'updateBio'])->middleware('auth:sanctum');
 Route::get('/countries', [CountryController::class, 'index'])->middleware('auth:sanctum');
 Route::get('countries/{id}/states', [CountryController::class, 'getStates']);
+Route::get('/organizations', [OrganizationController::class, 'index'])->middleware('auth:sanctum');
+
 
 
 
