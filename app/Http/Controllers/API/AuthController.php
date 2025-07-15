@@ -10,6 +10,7 @@ use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AuthResource;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -80,15 +81,11 @@ class AuthController extends Controller
         $token = $user->createToken('auth-login')->plainTextToken;
         $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
 
-        return response()->json(['success'  => true, 'message' => __('api.login_success'), 'token'   => $token, 'data' => [
-                'id' => $user->id,
-                'firstName' => $user->{'first_name_' . $l},
-                'lastName' => $user->{'last_name_' . $l},
-                'email' => $user->email,
-                'phone' => $user->country_code . $user->phone,
-                'imgUrl' => $user->img_url,
-                'role'   => $user->getRoleNames()->first(),
-            ],
+        return response()->json([
+            'success'  => true, 
+            'message' => __('api.login_success'), 
+            'token'   => $token, 
+            'data' => new AuthResource($user),
         ],200);
     }
 
@@ -211,13 +208,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => __('api.registered_successfully'),
             'token' => $token,
-            'data' => [
-                'firstName' => $user->first_name_en,
-                'lastName'  => $user->last_name_en,
-                'email'      => $user->email,
-                'phone'      => $user->phone,
-                'role'       => $data['role'],
-            ]
+            'data' => new AuthResource($user),
         ],201);
     }
  /**

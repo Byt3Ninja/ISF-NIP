@@ -815,7 +815,7 @@
                                         "type": "string",
                                         "example": "+20"
                                     },
-                                    "country_code_w_a": {
+                                    "countryCodeWA": {
                                         "type": "string",
                                         "example": "+20"
                                     },
@@ -996,12 +996,12 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "current_password",
+                                    "currentPassword",
                                     "password",
                                     "password_confirmation"
                                 ],
                                 "properties": {
-                                    "current_password": {
+                                    "currentPassword": {
                                         "type": "string",
                                         "example": "oldpassword123"
                                     },
@@ -1073,13 +1073,25 @@
                                         "format": "url"
                                     },
                                     "entrepreneurial_experience": {
-                                        "type": "boolean"
+                                        "description": "1 for true, 0 for false",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
                                     },
                                     "entrepreneurial_experience_brief": {
                                         "type": "string"
                                     },
                                     "profile_privacy": {
-                                        "type": "boolean"
+                                        "description": "1 for true, 0 for false",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
                                     },
                                     "mentorship_approach": {
                                         "type": "array",
@@ -1423,6 +1435,19 @@
                                     "role": {
                                         "type": "integer",
                                         "example": 2
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "example": "https://example.com/uploads/avatar.jpg"
+                                    },
+                                    "createdAt": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-15 09:30:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "active"
                                     }
                                 },
                                 "type": "object"
@@ -1470,6 +1495,23 @@
                                                 "role": {
                                                     "type": "string",
                                                     "example": "User"
+                                                },
+                                                "haveCompany": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/uploads/avatar.jpg"
+                                                },
+                                                "createdAt": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-07-15 09:30:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
                                                 }
                                             },
                                             "type": "object"
@@ -1652,6 +1694,23 @@
                                     "role": {
                                         "type": "integer",
                                         "example": 2
+                                    },
+                                    "haveCompany": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "example": "https://example.com/uploads/avatar.jpg"
+                                    },
+                                    "createdAt": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-15 09:30:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "active"
                                     }
                                 },
                                 "type": "object"
