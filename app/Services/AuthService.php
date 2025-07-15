@@ -3,29 +3,30 @@
 namespace App\Services;
 
 use App\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 use App\Settings;
 use App\UsersBio;
+use App\Traits\ApiResponder;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+
 class AuthService
 {
+    use ApiResponder;
     public function attemptLogin(string $email, string $password): User
     {
         $user = User::where('email', $email)->first();
 
         if (! $user || ! Hash::check($password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => [__('api.incorrect_credentials')],
-            ]);
+            throw new \Exception(json_encode(['type' => 'credential', 'message' => __('api.incorrect_credentials')]));
         }
 
         if ($user->status !== 'active') {
-            abort(403, __('api.inactive_user'));
-        }
+            throw new \Exception(json_encode(['type' => 'inactive', 'message' => __('api.inactive_user')]));
+        }   
+
 
         return $user;
     }

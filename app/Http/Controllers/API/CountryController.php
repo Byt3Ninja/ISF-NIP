@@ -39,10 +39,7 @@ class CountryController extends Controller
 {
     $countries = DB::table('countries')->get();
 
-    return response()->json([
-        'success' => true,
-        'data' => CountryResource::collection($countries)
-    ]);
+    return $this->success(CountryResource::collection($countries));
 }
 /**
  * @OA\Get(
@@ -80,10 +77,7 @@ public function getStates($id)
 {
     $states = DB::table('states')->where('country_id', $id)->get();
 
-    return response()->json([
-        'success' => true,
-        'data' => StateResource::collection($states)
-    ]);
+    return $this->success(StateResource::collection($states));
 }
 
 }

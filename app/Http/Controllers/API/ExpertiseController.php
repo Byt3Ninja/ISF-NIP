@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -9,6 +10,7 @@ use App\Http\Resources\ExpertiseResource;
 
 class ExpertiseController extends Controller
 {
+   use ApiResponder;
   /**
  * @OA\Get(
  *     path="/api/expertises",
@@ -43,11 +45,7 @@ class ExpertiseController extends Controller
     {
       $expertises = DB::table('expertises')->get();
 
-     return response()->json([
-        'success' => true,
-        'data' => ExpertiseResource::collection($expertises),
-     ],200);
-     
+      return $this->success(ExpertiseResource::collection($expertises));
     }
 
 }
