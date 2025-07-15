@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\User;
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
+    use ApiResponder;
     /**
  * @OA\Get(
  *     path="/api/users",
@@ -91,8 +93,7 @@ class UserController extends Controller
      public function index(Request $request)
     {
         $user = Auth::user();
-
-        if (!$user->hasRole('Admin') && !$user->hasRole('OrganizationManager')) {
+        if (!$user->ableTo('users.index')) {
             return response()->json([
                 'success' => false,
                 'message' => __('api.forbidden')
@@ -146,10 +147,7 @@ class UserController extends Controller
 
         $data = UserResource::collection($users);
 
-        return response()->json([
-            'success' => true,
-            'data' => $data,
-            'meta' => [
+        return $this->success($data,['meta' => [
                 'currentPage' => $users->currentPage(),
                 'lastPage' => $users->lastPage(),
                 'total' => $users->total(),
@@ -160,8 +158,7 @@ class UserController extends Controller
                     'prev' => $users->previousPageUrl(),
                     'next' => $users->nextPageUrl(),
                 ]
-            ]
-        ]);
+            ]]);
     }
 
     /**
@@ -218,18 +215,13 @@ public function show($id)
         ], 404);
     }
 
-     if (!$user->hasRole('Admin') && !$user->hasRole('OrganizationManager')) {
+     if (!$user->ableTo('users.show')) {
             return response()->json([
                 'success' => false,
                 'message' => __('api.forbidden')
             ], Response::HTTP_FORBIDDEN);
     }
-    
-    $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
-    return response()->json([
-        'success' => true,
-        'data' =>  new UserResource($user),
-    ]);
+   return $this->success(new UserResource($user));
 }
 /**
  * @OA\Post(
@@ -289,7 +281,7 @@ public function show($id)
 public function store(StoreUserApiRequest $request)
 {
     $user = auth()->user();
-    if (!$user->hasRole('Admin')) {
+    if (!$user->ableToAny(['users.create', 'users.store'])) {
             return response()->json([
                 'success' => false,
                 'message' => __('api.forbidden')
@@ -331,12 +323,7 @@ public function store(StoreUserApiRequest $request)
 
         DB::commit();
         $user->refresh();
-        return response()->json([
-            'success' => true,
-            'message' => __('api.user_created'),
-            'data' => new UserResource($user),
-        ], 201);
-
+        return $this->created(new UserResource($user),__('api.user_created'));
     } catch (\Throwable $e) {
         DB::rollBack();
         report($e);
@@ -414,7 +401,7 @@ public function update(UpdateUserApiRequest $request,$id)
 {
     $user = auth()->user();
     
-    if (!$user->hasRole('Admin')) {
+    if (!$user->ableToAny(['users.edit', 'users.update'])) {
             return response()->json([
                 'success' => false,
                 'message' => __('api.forbidden')
@@ -471,13 +458,9 @@ public function update(UpdateUserApiRequest $request,$id)
                 'model_id'   => $user->id,
             ]);
         }
-            DB::commit();
+        DB::commit();
 
-        return response()->json([
-            'success' => true,
-            'message' => __('api.user_updated'),
-            'data' => new UserResource($user),
-        ]);
+        return $this->success(new UserResource($user), __('api.updated'));
        }catch (\Throwable $e) {
          DB::rollBack();
          report($e);
@@ -533,16 +516,16 @@ public function update(UpdateUserApiRequest $request,$id)
 
 public function deactivate($id)
 {
-    $authUser = auth()->user();
+    $user = auth()->user();
 
-    if (!$authUser->hasRole('Admin')) {
+    if (!$user->ableToAny(['users.edit', 'users.update'])) {
         return response()->json([
             'success' => false,
             'message' => __('api.forbidden'),
         ], Response::HTTP_FORBIDDEN);
     }
 
-    if ($authUser->id == $id) {
+    if ($user->id == $id) {
         return response()->json([
             'success' => false,
             'message' => __('api.cannot_deactivate_self'),
@@ -551,7 +534,7 @@ public function deactivate($id)
 
     $user = User::findOrFail($id);
 
-    if ($user->hasRole('super_admin')) {
+    if ($user->hasRole('Admin')) {
         return response()->json([
             'success' => false,
             'message' => __('api.cannot_deactivate_super_admin'),
@@ -560,11 +543,11 @@ public function deactivate($id)
 
     $user->status = 'inactive';
     $user->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => __('api.user_deactivated'),
-    ], Response::HTTP_OK);
+    return $this->success(__('api.user_deactivated'));
+    // return response()->json([
+    //     'success' => true,
+    //     'message' => __('api.user_deactivated'),
+    // ], Response::HTTP_OK);
 }
 
 

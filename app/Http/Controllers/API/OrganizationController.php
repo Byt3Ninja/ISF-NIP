@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\OrganizationResource;
+use App\Traits\ApiResponder;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrganizationController extends Controller
 {
+    use ApiResponder;
    /**
  * @OA\Get(
  *     path="/api/organizations",
@@ -66,7 +68,7 @@ class OrganizationController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        if (! $user->hasRole('Admin')) {
+        if (!$user->ableTo('organizations.index')) {
             return response()->json([
                 'success' => false,
                 'message' => __('api.forbidden'),
@@ -98,14 +100,15 @@ class OrganizationController extends Controller
         $totalInactive = Organization::where('status', 0)->count();
     }
 
-    return response()->json([
-        'success' => true,
-        'data' => OrganizationResource::collection($organizations),
-        'meta' => [
-            'totalOrganizations' => $totalOrganizations,
-            'totalActiveOrganizations' => $totalActive,
-            'totalInactiveOrganizations' => $totalInactive,
-        ],
-    ]);       
+    return $this->success(
+            OrganizationResource::collection($organizations),
+            [
+                'meta' => [
+                    'totalOrganizations' => $totalOrganizations,
+                    'totalActiveOrganizations' => $totalActive,
+                    'totalInactiveOrganizations' => $totalInactive,
+                ]
+            ]
+        );
     }
 }

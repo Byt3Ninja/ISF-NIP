@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
 use App\Http\Requests\LoginRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\RegisterUserRequest;
 
 class AuthController extends Controller
 {
+    use ApiResponder;
     protected AuthService $authService;
 
     public function __construct(AuthService $authService)
@@ -58,15 +60,19 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        $user = $this->authService->attemptLogin($request->email, $request->password);
-        $token = $this->authService->generateToken($user);
+        try{
+            $user = $this->authService->attemptLogin($request->email, $request->password);
+            $token = $this->authService->generateToken($user);
+            return $this->responseWithToken($token,new AuthResource($user),__('api.login_success'), 200);
+        }catch(\Exception $e){
+            $data = json_decode($e->getMessage());
+            if($data['type'] == 'credential'){ 
+                return $this->validationError($data['message']);
+            }elseif($data['type'] == 'inactive'){
+                return $this->forbidden($data['message']);
+            }
+        }
 
-        return response()->json([
-            'success'  => true, 
-            'message' => __('api.login_success'), 
-            'token'   => $token, 
-            'data' => new AuthResource($user),
-        ],200);
     }
 
     /**
@@ -125,15 +131,8 @@ class AuthController extends Controller
     public function register(RegisterUserRequest  $request)
     {
         try {
-            $result = $this->authService->register($request->validated());
-
-            return response()->json([
-                'success' => true,
-                'message' => __('api.registered_successfully'),
-                'token'   => $result['token'],
-                'data'    => new AuthResource($result['user']),
-            ], 201);
-
+        $result = $this->authService->register($request->validated());
+        return $this->created(new AuthResource($result['user']),__('api.registered_successfully'),['token' => $result['token']]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,

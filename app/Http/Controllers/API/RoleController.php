@@ -6,10 +6,12 @@ use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RoleResource;
+use App\Traits\ApiResponder;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleController extends Controller
 {
+    use ApiResponder;
     /**
  * @OA\Get(
  *     path="/api/roles",
@@ -47,16 +49,10 @@ class RoleController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if (!$user->hasRole('Admin')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden')
-         ], Response::HTTP_FORBIDDEN);
+        if (!$user->ableTo('roles.index')) {
+            return $this->forbidden(__('api.forbidden'));
        }
         $roles = Role::select('id', 'name')->get();
-        return response()->json([
-            'success' => true,
-            'data' => RoleResource::collection($roles),
-        ]);
+        return $this->success(RoleResource::collection($roles));
     }
 }

@@ -32,20 +32,23 @@ Route::get('company', [RegistrationController::class, 'getCompany']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/dashboard',[DashboardController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/expertises',[ExpertiseController::class, 'index']);
-Route::get('/me', [ProfileController::class, 'me'])->middleware('auth:sanctum');
-Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate'])->middleware('auth:sanctum');
-Route::apiResource('users', UserController::class)->middleware('auth:sanctum');
-Route::get('/roles', [RoleController::class, 'index'])->middleware('auth:sanctum');
-Route::post('/profile', [ProfileController::class, 'updateProfile'])->middleware('auth:sanctum');
-Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->middleware('auth:sanctum');
-Route::put('/profile/bio', [ProfileController::class, 'updateBio'])->middleware('auth:sanctum');
-Route::get('/countries', [CountryController::class, 'index'])->middleware('auth:sanctum');
 Route::get('countries/{id}/states', [CountryController::class, 'getStates']);
-Route::get('/organizations', [OrganizationController::class, 'index'])->middleware('auth:sanctum');
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/countries', [CountryController::class, 'index']);
+    Route::get('/organizations', [OrganizationController::class, 'index']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/dashboard',[DashboardController::class, 'index']);
+    Route::get('/me', [ProfileController::class, 'me']);
+    Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate']);
+    Route::apiResource('users', UserController::class);
+    Route::get('/roles', [RoleController::class, 'index']);
+    Route::post('/profile', [ProfileController::class, 'updateProfile']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+    Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
+    
+});
 
 
 

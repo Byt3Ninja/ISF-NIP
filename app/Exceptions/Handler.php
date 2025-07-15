@@ -2,10 +2,11 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
-//use Sentry\Laravel\Facade\Sentry;
 use Sentry\Laravel\Facade as Sentry;
+//use Sentry\Laravel\Facade\Sentry;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 
@@ -45,7 +46,7 @@ class Handler extends ExceptionHandler
 {
     if ($exception instanceof MethodNotAllowedHttpException) {
         return response()->json([
-            'status' => false,
+            'success' => false,
             'message' => 'The Request method is not allowed'
         ], 405);
     }

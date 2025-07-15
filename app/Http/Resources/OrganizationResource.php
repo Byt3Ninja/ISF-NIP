@@ -2,12 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrganizationResource extends JsonResource
 {
+    use ApiResponder;
     /**
      * Transform the resource into an array.
      *
@@ -18,10 +20,12 @@ class OrganizationResource extends JsonResource
         $totalStartups = $this->cycles->sum(function ($cycle) {
             return $cycle->companies->count();
         });
+        $locale = app()->getLocale();
+        $name = $locale === 'ar' ? $this->name_ar : $this->name_en;
 
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => $name,
             'imgUrl' => $this->img_url ? asset($this->img_url) : null,
             'status' => $this->status,
             'startups' => $totalStartups,
