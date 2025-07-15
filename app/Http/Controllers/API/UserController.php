@@ -8,6 +8,7 @@ use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -143,19 +144,7 @@ class UserController extends Controller
 
         $users = $query->paginate(10);
 
-        $data = $users->map(function ($user) {
-            return [
-                'firstName' => $user->first_name_en,
-                'lastName' => $user->last_name_en,
-                'email' => $user->email,
-                'gender' => $user->gender,
-                'phone' => $user->phone,
-                'role' => $user->getRoleNames()->first(),
-                'haveCompany' => (bool)$user->HaveCompany,
-                'imgUrl' => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
-                'createdAt' => $user->created_at->toDateTimeString(),
-            ];
-        });
+        $data = UserResource::collection($users);
 
         return response()->json([
             'success' => true,
@@ -239,17 +228,7 @@ public function show($id)
     $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
     return response()->json([
         'success' => true,
-        'data' => [
-            'firstName' => $user->first_name_en,
-            'lastName' => $user->last_name_en,
-            'email' => $user->email,
-            'gender' => $user->gender,
-            'phone' => $user->phone,
-            'role' => $user->getRoleNames()->first(),
-            'imgUrl' => $user->img_url,
-            'haveCompany' => (bool)$user->haveCompany,
-            'createdAt' => $user->created_at->toDateTimeString(),
-        ]
+        'data' =>  new UserResource($user),
     ]);
 }
 /**
@@ -270,7 +249,10 @@ public function show($id)
  *             @OA\Property(property="gender", type="string", enum={"male", "female"}, example="male"),
  *             @OA\Property(property="password", type="string", format="password", example="secret123"),
  *             @OA\Property(property="password_confirmation", type="string", format="password", example="secret123"),
- *             @OA\Property(property="role", type="integer", example=2)
+ *             @OA\Property(property="role", type="integer", example=2),
+ *             @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/avatar.jpg"),
+ *             @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-15 09:30:00"),
+ *             @OA\Property(property="status", type="string", example="active")
  *         )
  *     ),
  *     @OA\Response(
@@ -285,7 +267,11 @@ public function show($id)
  *                 @OA\Property(property="lastName", type="string", example="Ali"),
  *                 @OA\Property(property="email", type="string", example="ahmed@example.com"),
  *                 @OA\Property(property="phone", type="string", example="01012345678"),
- *                 @OA\Property(property="role", type="string", example="User")
+ *                 @OA\Property(property="role", type="string", example="User"),
+ *                 @OA\Property(property="haveCompany", type="boolean", example=false),
+ *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/avatar.jpg"),
+ *                 @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-15 09:30:00"),
+ *                 @OA\Property(property="status", type="string", example="active")
  *             )
  *         )
  *     ),
@@ -344,19 +330,11 @@ public function store(StoreUserApiRequest $request)
         Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
 
         DB::commit();
-
+        $user->refresh();
         return response()->json([
             'success' => true,
             'message' => __('api.user_created'),
-            'data' => [
-                'id' => $user->id,
-                'firstName' => $user->first_name_en,
-                'lastName' => $user->last_name_en,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'gender' => $user->gender,
-                'role' => $user->getRoleNames()->first(),
-            ]
+            'data' => new UserResource($user),
         ], 201);
 
     } catch (\Throwable $e) {
@@ -394,7 +372,11 @@ public function store(StoreUserApiRequest $request)
  *             @OA\Property(property="gender", type="string", enum={"male", "female"}, example="male"),
  *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
  *             @OA\Property(property="password_confirmation", type="string", format="password", example="newpassword123"),
- *             @OA\Property(property="role", type="integer", example=2)
+ *             @OA\Property(property="role", type="integer", example=2),
+ *             @OA\Property(property="haveCompany", type="boolean", example=false),
+ *             @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/avatar.jpg"),
+ *             @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-15 09:30:00"),
+ *             @OA\Property(property="status", type="string", example="active")
  *         )
  *     ),
  *     @OA\Response(
@@ -494,14 +476,7 @@ public function update(UpdateUserApiRequest $request,$id)
         return response()->json([
             'success' => true,
             'message' => __('api.user_updated'),
-            'data' => [
-                'id' => $user->id,
-                'firstName' => $user->first_name_en,
-                'lastName' => $user->last_name_en,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'role' => $user->getRoleNames()->first(),
-            ]
+            'data' => new UserResource($user),
         ]);
        }catch (\Throwable $e) {
          DB::rollBack();

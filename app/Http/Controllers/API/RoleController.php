@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RoleResource;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleController extends Controller
@@ -55,7 +56,7 @@ class RoleController extends Controller
         $roles = Role::select('id', 'name')->get();
         return response()->json([
             'success' => true,
-            'data' => $roles,
+            'data' => RoleResource::collection($roles),
         ]);
     }
 }

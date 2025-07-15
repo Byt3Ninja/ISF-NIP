@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StateResource;
+use App\Http\Resources\CountryResource;
 
 class CountryController extends Controller
 {
@@ -35,14 +37,11 @@ class CountryController extends Controller
  */
     public function index(Request $request)
 {
-    $locale = app()->getLocale(); 
-    $nameColumn = $locale === 'ar' ? 'name_ar' : 'name_en';
-
-    $countries = DB::table('countries')->select('id', "$nameColumn as title")->get();
+    $countries = DB::table('countries')->get();
 
     return response()->json([
         'success' => true,
-        'data' => $countries
+        'data' => CountryResource::collection($countries)
     ]);
 }
 /**
@@ -79,16 +78,11 @@ class CountryController extends Controller
  */
 public function getStates($id)
 {
-    $locale = app()->getLocale(); 
-    $nameColumn = $locale === 'ar' ? 'name_ar' : 'name_en';
-
-    $states = DB::table('states')->where('country_id', $id)
-                ->select('id', "$nameColumn as title")
-                ->get();
+    $states = DB::table('states')->where('country_id', $id)->get();
 
     return response()->json([
         'success' => true,
-        'data' => $states
+        'data' => StateResource::collection($states)
     ]);
 }
 
