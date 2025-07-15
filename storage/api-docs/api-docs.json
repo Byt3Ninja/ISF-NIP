@@ -392,6 +392,58 @@
                 }
             }
         },
+        "/api/currencies": {
+            "get": {
+                "tags": [
+                    "Currency"
+                ],
+                "summary": "Get enabled currencies",
+                "description": "Returns a list of all enabled currencies with code, name, symbol, rate, and flag.",
+                "operationId": "getCurrencies",
+                "responses": {
+                    "200": {
+                        "description": "Currencies retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "currencyCode": {
+                                                        "type": "string",
+                                                        "example": "USD"
+                                                    },
+                                                    "currencyName": {
+                                                        "type": "string",
+                                                        "example": "US Dollar"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/dashboard": {
             "get": {
                 "tags": [
@@ -2024,6 +2076,10 @@
         {
             "name": "Location",
             "description": "Location"
+        },
+        {
+            "name": "Currency",
+            "description": "Currency"
         },
         {
             "name": "Dashboard",
