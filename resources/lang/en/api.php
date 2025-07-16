@@ -26,4 +26,7 @@ return [
 	'linkedin_required' => 'Linkedin is required For Mentors',
 	'expertise_required' => 'Expertise is required For Mentors',
 	'userbio_required' => 'Userbio is required For Mentors',
+	'OtherGovernorates' => 'Other Governorates',
+	'governorates' => 'Governorates',
+	'OtherCountries' => 'Other Countries',
 ];

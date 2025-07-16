@@ -474,21 +474,21 @@ public function updatePassword(Request $request)
      *             @OA\Property(property="specialization", type="string"),
      *             @OA\Property(property="linkedin", type="string", format="url"),
      *                  @OA\Property(
-     *                 property="entrepreneurial_experience",
+     *                 property="entrepreneurialExperience",
      *                 type="integer",
      *                 enum={0,1},
      *                 description="1 for true, 0 for false",
      *                 example=1
      *             ),
-     *             @OA\Property(property="entrepreneurial_experience_brief", type="string"),
+     *             @OA\Property(property="entrepreneurialExperienceBrief", type="string"),
      *              @OA\Property(
-     *                 property="profile_privacy",
+     *                 property="profilePrivacy",
      *                 type="integer",
      *                 enum={0,1},
      *                 description="1 for true, 0 for false",
      *                 example=1
      *             ),
-     *             @OA\Property(property="mentorship_approach", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="mentorshipApproach", type="array", @OA\Items(type="string")),
      *             @OA\Property(property="expertise_ids", type="array", @OA\Items(type="integer"))
      *         )
      *     ),
@@ -520,8 +520,8 @@ public function updateBio(Request $request)
         'entrepreneurialExperience'    => 'nullable|boolean',
         'entrepreneurialExperienceBrief' => 'nullable|string',
         'profilePrivacy'               => 'nullable|boolean',
-        'expertise_ids'                 => 'nullable|array',
-        'expertise_ids.*'               => 'exists:expertises,id',
+        'expertiseIds'                 => 'nullable|array',
+        'expertiseIds.*'               => 'exists:expertises,id',
     ]);
 
     $bio = UsersBio::firstOrNew(['user_id' => $user->id]);
@@ -574,7 +574,7 @@ public function updateBio(Request $request)
     
 
     if (isset($validated['expertiseIds'])) {
-        $user->mentorExpertises()->sync($validated['expertise_ids']);
+        $user->mentorExpertises()->sync($validated['expertiseIds']);
     }
 
     return response()->json([

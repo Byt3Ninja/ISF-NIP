@@ -22,7 +22,7 @@ class UserResource extends JsonResource
             'gender' => $this->gender,
             'phone' => $this->phone,
             'role' => $this->getRoleNames()->first(),
-            'haveCompany' => (bool) $this->haveCompany,
+            'haveCompany' => (bool) $this->HaveCompany,
             'imgUrl' => $this->img_url ? Storage::disk('public_uploads')->url($this->img_url) : null,
             'createdAt' => $this->created_at->toDateTimeString(),
             'status' => $this->status,

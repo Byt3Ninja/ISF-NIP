@@ -25,5 +25,7 @@ return [
 	'ImageUpdated' => 'تم تحديث الصورة بنجاح',
 	'linkedin_required' => 'الرابط المركزي مطلوب للمرشدين',
 	'expertise_required' => 'التخصص مطلوب للمرشدين',
-	'expertise_required' => 'تم تحديث التخصص بنجاح',
+	'OtherGovernorates' => 'المحافظات الأخرى',
+	'governorates' => 'المحافظات',
+	'OtherCountries' => 'الدول الأخرى',
 ];

@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthResource;
 use App\Http\Requests\RegisterUserRequest;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -65,12 +66,13 @@ class AuthController extends Controller
             $token = $this->authService->generateToken($user);
             return $this->responseWithToken($token,new AuthResource($user),__('api.login_success'), 200);
         }catch(\Exception $e){
-            $data = json_decode($e->getMessage());
+            $data = json_decode($e->getMessage(), true);
             if($data['type'] == 'credential'){ 
                 return $this->validationError($data['message']);
             }elseif($data['type'] == 'inactive'){
                 return $this->forbidden($data['message']);
             }
+            return $this->serverError(); 
         }
 
     }
@@ -133,12 +135,10 @@ class AuthController extends Controller
         try {
         $result = $this->authService->register($request->validated());
         return $this->created(new AuthResource($result['user']),__('api.registered_successfully'),['token' => $result['token']]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.registration_failed'),
-            ], 500);
-        }
+       } catch (\Throwable $e) {
+        report($e);
+        return $this->serverError();
+    }
     }
  /**
  * @OA\Post(
@@ -169,20 +169,6 @@ class AuthController extends Controller
  */
      public function logout(Request $request)
     {
-       $user = $request->user();
-
-       if (!$user || !$user->currentAccessToken()) {
-        return response()->json([
-            'status' => false,
-            'message' => __('api.unauthenticated')
-         ], 401);
-       }
-
-      $user->currentAccessToken()->delete();
-
-      return response()->json([
-        'success' => true,
-        'message' => __('api.logged_out')
-     ],200);
+        return $this->authService->logout($request, $request->user());
     }
 }

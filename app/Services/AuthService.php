@@ -6,6 +6,7 @@ use App\User;
 use App\Settings;
 use App\UsersBio;
 use App\Traits\ApiResponder;
+use Illuminate\Http\Request;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -103,4 +104,17 @@ class AuthService
             throw $e;
         }
     }
+
+    public function logout(Request $request, ?User $user)
+{
+      $bearerToken = $request->bearerToken();
+
+    if (! $bearerToken || ! $user || ! $user->currentAccessToken()) {
+        return $this->unauthorized(__('api.unauthenticated'));
+    }
+
+    $user->currentAccessToken()->delete();
+
+    return $this->success(null, [], __('api.logged_out'), 200);
+}
 }

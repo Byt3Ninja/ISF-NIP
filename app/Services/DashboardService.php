@@ -1,0 +1,361 @@
+<?php
+
+namespace App\Services;
+
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class DashboardService
+{
+    protected $locale;
+    protected $nameColumn;
+
+    public function __construct()
+    {
+        $this->locale = app()->getLocale();
+        $this->nameColumn = $this->locale === 'ar' ? 'name_ar' : 'name_en';
+    }
+
+    public function getAdminDashboardData(string $nameColumn): array
+    {
+        $totalUsers = DB::table('users')->count();
+        $prevTotalUsers = DB::table('users')->whereDate('created_at', '<', Carbon::now()->subMonth())->count();
+        $userChange = $prevTotalUsers > 0 ? round((($totalUsers - $prevTotalUsers) / $prevTotalUsers) * 100, 1) : 0;
+
+        $totalSessions = DB::table('training_sessions')->count();
+        $prevTotalSessions = DB::table('training_sessions')->whereDate('created_at', '<', Carbon::now()->subMonth())->count();
+        $sessionsChange = $prevTotalSessions > 0 ? round((($totalSessions - $prevTotalSessions) / $prevTotalSessions) * 100, 1) : 0;
+
+        $totalDuration = DB::table('training_sessions')->sum('duration');
+        $prevDuration = DB::table('training_sessions')->whereDate('created_at', '<', Carbon::now()->subMonth())->sum('duration');
+        $durationChange = $prevDuration > 0 ? round((($totalDuration - $prevDuration) / $prevDuration) * 100, 1) : 0;
+
+        $screeningFirst = DB::table('screenings')->count();
+        $screeningFinal = DB::table('finalscreenings')->count();
+
+        $roles = DB::table('roles')->pluck('name', 'id')->toArray();
+        $roleCounts = [];
+        foreach (['Registered', 'Mentor', 'Judger', 'organizationManager'] as $key) {
+            $roleId = array_search($key, $roles);
+            $count = DB::table('model_has_roles')->where('role_id', $roleId)->count();
+            $roleCounts[strtolower(str_replace(' ', '', $key)) . 's'] = $count;
+        }
+
+        $genderStats = DB::table('users')->selectRaw("gender, COUNT(*) as count")->groupBy('gender')->pluck('count', 'gender')->toArray();
+        $male = $genderStats['Male'] ?? 0;
+        $female = $genderStats['Female'] ?? 0;
+        $totalGender = $male + $female;
+        $genderChange = $totalGender > 0 ? round((($totalGender - 63) / 63) * 100, 1) : 0;
+
+
+        $topSectors = DB::table('companies')->select('sector', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('sector')->groupBy('sector')->orderByDesc('count')->get();
+
+
+
+        $states = DB::table('companies')->leftJoin('states', 'states.id', '=', 'companies.state_id')
+            ->select("states.{$nameColumn} as state", DB::raw('COUNT(companies.id) as count'))
+            ->groupBy("states.{$nameColumn}")->get();
+
+        $countries = DB::table('companies')->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
+            ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
+            ->groupBy("countries.{$nameColumn}")->get();
+             $sdgCompanies = DB::table('companies')->select('Sustainable_development')
+        ->whereNotNull('Sustainable_development')->get();
+
+      $sdgCounts = [];
+         foreach ($sdgCompanies as $company) {
+         $sdgArray = json_decode($company->Sustainable_development, true);
+          if (is_array($sdgArray)) {
+            foreach ($sdgArray as $sdgSlug) {
+                $sdgCounts[$sdgSlug] = ($sdgCounts[$sdgSlug] ?? 0) + 1;
+            }
+            }
+        }
+
+        $sdgStartups = [
+            'totalStartups' => array_sum($sdgCounts),
+            'distribution' => collect($sdgCounts)->map(function ($count, $sdgSlug) {
+              return [
+                'sdg' => $sdgSlug,
+                'count' => $count,
+                ];
+            })->values(),
+         ];
+            
+
+        $stateCounts = DB::table('users')->leftJoin('states', 'states.id', '=', 'users.state_id')
+            ->select("states.{$nameColumn} as state", DB::raw('COUNT(users.id) as count'))
+            ->whereNotNull('users.state_id')->groupBy("states.{$nameColumn}")->orderByDesc('count')->get();
+
+        $totalUsers = max($totalUsers, 1);
+        $topGovernorate = $stateCounts->first()->state ?? 'N/A';
+        $topStateCounts = $stateCounts->take(8);
+        $othersCount = $stateCounts->skip(8)->sum('count');
+        $othersPercentage = round(($othersCount / $totalUsers) * 100, 1);
+
+        $distribution = $topStateCounts->map(function ($item) use ($totalUsers) {
+            return [
+                'governorate' => $item->state ?? 'Unknown',
+                'count' => $item->count,
+                'percentage' => round(($item->count / $totalUsers) * 100, 1),
+            ];
+        })->toArray();
+
+        if ($othersCount > 0) {
+            $distribution[] = [
+                'governorate' => __("api.OtherGovernorates") . ' (' . $stateCounts->count() - 8 . ' ' . __('api.governorates') . ')',
+                'count' => $othersCount,
+                'percentage' => $othersPercentage,
+            ];
+        }
+
+        $programsProgress = DB::table('cycles')->select('title', 'start', 'end')->get();
+        $programStartups = DB::table('companies')->join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
+            ->groupBy('cycles.title')->pluck('count', 'title');
+
+        $sectorDistribution = DB::table('companies')->join('sectors', 'companies.sector', '=', 'sectors.id')
+            ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
+            ->groupBy("sectors.{$nameColumn}")->orderByDesc('count')->get();
+        $totalStartups = $sectorDistribution->sum('count');
+        $topSectors = $sectorDistribution->take(10)->map(function ($item) use ($totalStartups) {
+            return [
+                'sector' => $item->sector,
+                'percentage' => round(($item->count / $totalStartups) * 100),
+            ];
+        });
+
+        $sectorBreakdown = $sectorDistribution->take(10)->map(function ($item) use ($totalStartups) {
+            return [
+                'sector' => $item->sector,
+                'percentage' => round(($item->count / $totalStartups) * 100, 1),
+            ];
+        });
+
+        $headquarters = DB::table('companies')->join('countries', 'companies.country_id', '=', 'countries.id')
+            ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
+            ->groupBy("countries.{$nameColumn}")->orderByDesc('count')->get();
+        $hqTop = $headquarters->take(6);
+        $hqOthers = $headquarters->skip(6)->sum('count');
+        $hqDistribution = $hqTop->map(function ($item) {
+            return ['country' => $item->country, 'count' => $item->count];
+        })->toArray();
+        if ($hqOthers > 0) {
+            $hqDistribution[] = ['country' => __('api.OtherCountries'), 'count' => $hqOthers];
+        }
+
+    $targetMarketCompanies = DB::table('companies')->select('targeted_market')->whereNotNull('targeted_market')->get();
+    $countryCounts = [];
+    foreach ($targetMarketCompanies as $company) {
+        $ids = json_decode($company->targeted_market, true);
+        if (is_array($ids)) {
+            foreach ($ids as $id) {
+                $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
+            }
+        }
+    }
+
+    $countryNames = DB::table('countries')->whereIn('id', array_keys($countryCounts))
+        ->pluck($nameColumn, 'id');
+    $totalMarkets = array_sum($countryCounts);
+    $targetMarketDistribution = collect($countryCounts)->map(function ($count, $id) use ($countryNames, $totalMarkets) {
+        return [
+            'market' => $countryNames[$id] ?? 'Unknown',
+            'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
+        ];
+    })->values();
+
+        $devStageStats = DB::table('companies')
+        ->join('stages', 'companies.stage', '=', 'stages.id') 
+        ->select("stages.{$nameColumn} as stage", DB::raw('COUNT(companies.id) as count'))
+        ->whereNotNull('stage')
+        ->groupBy("stages.{$nameColumn}")
+        ->get();
+
+        $totalDevStages = $devStageStats->sum('count');
+
+        $devStagesDistribution = $devStageStats->map(function ($item) use ($totalDevStages) {
+        return [
+            'stage' => $item->stage,
+            'count' => $item->count, 
+            'percentage' => $totalDevStages > 0 ? round(($item->count / $totalDevStages) * 100, 1) : 0,
+        ];
+        });     
+
+        $businessModelStats = DB::table('companies')->select('business_model', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('business_model')->groupBy('business_model')->orderByDesc('count')->get();
+        $totalBizModels = $businessModelStats->sum('count');
+        $businessModelDistribution = $businessModelStats->map(function ($item) {
+            return ['model' => $item->business_model, 'count' => $item->count];
+        });
+
+        $completedSessions = DB::table('mentorship_requests')->whereNull('deleted_at')
+        ->whereNotNull('start_url')
+        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->select('done')
+        ->get();
+
+        $totalSessionsAttended = $completedSessions->count();
+        $totalSessionsMarked = $completedSessions->sum('done');
+        $attendanceRate = $totalSessionsAttended > 0 ? round(($totalSessionsMarked / $totalSessionsAttended) * 100, 1) : 0;
+
+        $totalTasks = DB::table('mentorship_tasks')->count();
+        $completedTasks = DB::table('mentorship_tasks')->where('status', 'completed')->count();
+        $completedTasksRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
+
+      return [
+            'totalUsers' => $totalUsers,
+            'totalUsersChange' => $userChange,
+            'totalSessions' => $totalSessions,
+            'totalSessionsChange' => $sessionsChange,
+            'sessionsDuration' => round($totalDuration / 60, 1) . 'h',
+            'sessionsDurationChange' => $durationChange,
+            'startupAttendanceRate' => [
+                'rate' => $attendanceRate,
+            ],
+            'completedTasks' => [
+                 'rate' => $completedTasksRate,
+            ],
+
+        'screening' => [
+            'first' => $screeningFirst,
+            'final' => $screeningFinal,
+            'total' => $screeningFirst + $screeningFinal,
+        ],
+        'userRoles' => $roleCounts,
+        'userGender' => [
+            'male' => $male,
+            'female' => $female,
+            'total' => $totalGender,
+            'malePercentage' => $totalGender > 0 ? round(($male / $totalGender) * 100) : 0,
+            'femalePercentage' => $totalGender > 0 ? round(($female / $totalGender) * 100) : 0,
+            'change' => $genderChange,
+        ],
+        'userDemographics' => [
+            'totalUsers' => $totalUsers,
+            'totalGovernorates' => $stateCounts->count(),
+            'topGovernorate' => $topGovernorate,
+            'distribution' => $distribution,
+        ],
+        'programsProgressOverTime' => $programsProgress,
+        'programStartups' => $programStartups, 
+        'topStartupSectors' => [
+          'totalStartups' => $totalStartups,
+          'distribution' => $topSectors,
+        ],
+        'sectorBreakdown' => [
+          'distribution' => $sectorBreakdown,
+        ],
+        'startupHeadquarters' => [
+          'distribution' => $hqDistribution,
+        ],
+        'targetMarketDistribution' => [
+          'totalMarkets' => $totalMarkets,
+          'distribution' => $targetMarketDistribution,
+        ],
+       'developmentStages' => [
+         'totalStartups' => $totalDevStages,
+         'distribution' => $devStagesDistribution,
+       ],
+       'businessModels' => [
+         'totalStartups' => $totalBizModels,
+         'distribution' => $businessModelDistribution,
+      ],
+       'countryDistribution' => $countries,
+       'stateDistribution' => $states,
+       'sdgStartups' => $sdgStartups,
+       'metadata' => [
+        'lastUpdated' => now()->format('g:i:s A'),
+       ],
+];
+
+}
+
+    public function getMentorDashboardData(int $mentorId): array
+    {
+        $comingSessionsCount = DB::table('mentorship_requests')
+            ->where('mentor_id', $mentorId)
+            ->whereNotNull('zoom_date')
+            ->where('approved', 'yes')
+            ->where('zoom_date', '>=', Carbon::now())
+            ->count();
+
+        $schedules = DB::table('schedules')
+            ->where('user_id', $mentorId)
+            ->where('active', 1)
+            ->select('days', 'tfrom', 'tto', 'notes')
+            ->get()
+            ->map(function ($schedule) {
+                return [
+                    'days' => json_decode($schedule->days, true) ?: $schedule->days,
+                    'tfrom' => $schedule->tfrom,
+                    'tto' => $schedule->tto,
+                    'notes' => $schedule->notes,
+                ];
+            });
+
+        $nextSessions = DB::table('mentorship_requests as mr')
+            ->join('users as u', 'u.id', '=', 'mr.user_id')
+            ->leftJoin('companies as c', 'c.id', '=', 'u.company_id')
+            ->where('mr.mentor_id', $mentorId)
+            ->whereNotNull('mr.zoom_date')
+            ->where('mr.approved', 'yes')
+            ->where('mr.zoom_date', '>=', Carbon::now())
+            ->orderBy('mr.zoom_date', 'asc')
+            ->select(
+                'mr.zoom_date as date',
+                'mr.admin_comment as admin_notes',
+                'mr.join_url as meeting_link',
+                'u.first_name_en',
+                'u.last_name_en',
+                'c.name_en as company',
+                'c.logo as company_logo'
+            )
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'companyLogo' => $session->company_logo,
+                    'company' => $session->company,
+                    'user' => trim($session->first_name_en . ' ' . $session->last_name_en),
+                    'date' => Carbon::parse($session->date)->format('Y-m-d H:i'),
+                    'adminNotes' => $session->admin_notes,
+                    'meetingLink' => $session->meeting_link,
+                ];
+            });
+
+        $tasks = DB::table('mentorship_requests as mr')
+            ->leftJoin('mentorship_tasks as mt', 'mt.mentorship_request_id', '=', 'mr.id')
+            ->whereNull('mr.deleted_at')
+            ->where('mr.mentor_id', $mentorId)
+            ->select('mr.id as request_id', 'mt.id as task_id', 'mt.title as task_title', 'mt.status as task_status')
+            ->get();
+
+        $sessionWithoutTasks = $tasks->whereNull('task_id')->values()->count();
+        $completedTasks = $tasks->where('task_status', 'completed')->values()->count();
+        $nonCompletedTasks = $tasks->where('task_status', 'pending')->values()->count();
+
+        $completedSessions = DB::table('mentorship_requests')
+            ->where('mentor_id', $mentorId)
+            ->whereNull('deleted_at')
+            ->whereNotNull('start_url')
+            ->whereDate('zoom_date', '<=', now()->toDateString())
+            ->select('done')
+            ->get();
+
+        $total = $completedSessions->count();
+        $attended = $completedSessions->sum('done');
+        $attendsRate = $total > 0 ? round(($attended / $total) * 100, 2) . '%' : '0%';
+
+        return [
+            'comingSessionsCount' => $comingSessionsCount,
+            'currentSchedule' => $schedules,
+            'nextSessions' => $nextSessions,
+            'completedTasks' => $completedTasks,
+            'nonCompletedTasks' => $nonCompletedTasks,
+            'sessionWithoutTasks' => $sessionWithoutTasks,
+            'startupAttendanceRate' => $attendsRate,
+        ];
+    }
+}
