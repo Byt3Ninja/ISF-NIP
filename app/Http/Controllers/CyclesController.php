@@ -298,14 +298,17 @@ class CyclesController extends Controller
                     'to' => $request->toDate
                 ]);
                 // make a copy of form fields
+               
                 $new = BuilderField::where('builder_form_id', $data)->orderBy('id')->get();
+                
                 if (count($new) > 0) {
                     foreach ($new as $n) {
+                      
                         Formfield::insert([
                             'step_id' => $id,
                             'field_id' => $n->field_id,
                             'options' => json_encode($n->options),
-                            'builder_forms_id' => $n->id
+                            'builder_forms_id' => $n->builder_form_id
                         ]);
                     }
                 }
@@ -383,7 +386,7 @@ class CyclesController extends Controller
                             'step_id' => $id,
                             'field_id' => $n->field_id,
                             'options' => json_encode($n->options),
-                            'builder_forms_id' => $n->id
+                            'builder_forms_id' => $n->builder_form_id
                         ]);
                     }
                 }
