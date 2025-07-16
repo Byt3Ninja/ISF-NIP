@@ -119,10 +119,10 @@
                   @foreach($upcomingSessions as $session)
                   <tr>
                     <td>
-                        <span class="text-dark line-clamp-2">{{ $session->user->company->{'name_' . $l} }}</span>
+                        <span class="text-dark line-clamp-2">{{ $session?->user?->company?->{'name_' . $l} }}</span>
                     </td>
                     <td>
-                        <span class="text-dark line-clamp-2">{{ $session->user->first_name_en }} {{ $session->user->last_name_en }}</span>
+                        <span class="text-dark line-clamp-2">{{ $session?->user?->first_name_en }} {{ $session?->user?->last_name_en }}</span>
                     </td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
