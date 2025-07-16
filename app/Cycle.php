@@ -70,8 +70,11 @@ class Cycle extends Model
 
     public static function programTypes(): array
     {
-        // return ['Incubator', 'Accelerator', 'Hackathon'];
-        return ['General_Program', 'Hackathon'];
+      $types = ['General_Program', 'Hackathon'];
+
+      return collect($types)->mapWithKeys(function ($type) {
+        return [$type => __('cycles.' . $type)];
+    })->toArray();
     }
 
    

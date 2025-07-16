@@ -422,7 +422,7 @@ return [
     'Active filters' => 'Active filters',
     'Status' => 'Status',
     'Score' => 'Score',
-    'General_Program' => 'General Program',
+    'General_Program' => 'General_Program',
     'Hackathon' => 'Hackathon',
 ];
 
