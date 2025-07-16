@@ -55,9 +55,9 @@ trait ApiResponder
         return $this->error($message, 403);
     }
 
-    protected function validationError($message = 'Unprocessable Content'): JsonResponse
+    protected function validationError($message = 'Unprocessable Content', $statusCode = 422, $data = null, $extra = []): JsonResponse
     {
-        return $this->error($message, 422);
+        return $this->error($message, $statusCode, $data, $extra);
     }
 
     protected function serverError($message = 'Internal Server Error'): JsonResponse

@@ -3,9 +3,12 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Traits\ApiResponder;
 class RegisterUserRequest extends FormRequest
 {
+     use ApiResponder;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -53,5 +56,16 @@ class RegisterUserRequest extends FormRequest
             'expertise.required' => __('api.expertise_required'),
             'userbio.required' => __('api.userbio_required'),
         ];
+    }
+
+     protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            $this->validationError(
+                'Validation Error',
+                422,
+                $validator->errors()
+            )
+        );
     }
 }
