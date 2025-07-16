@@ -59,9 +59,9 @@
             id="program_type"
             class="form-control"
             {{ isset($ccycle) ? 'disabled' : 'required' }}>
-        @foreach(\App\Cycle::programTypes() as $type)
-            <option value="{{ $type }}" {{ $selectedType == $type ? 'selected' : '' }}>
-                {{ __('cycles.' . $type) }}
+        @foreach(\App\Cycle::programTypes() as $value => $label)
+            <option value="{{ $value }}" {{ $selectedType == $value ? 'selected' : '' }}>
+                {{ $label }}
             </option>
         @endforeach
     </select>
