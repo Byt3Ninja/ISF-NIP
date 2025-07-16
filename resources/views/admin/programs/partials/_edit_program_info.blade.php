@@ -51,7 +51,7 @@
       </select>
     </div>
     <div class="form-group">
-    <label for="program_type">{{ __('admin.Program_Type') }}</label>
+    <label class="form-label fs-6 fw-semibold" for="program_type">{{ __('admin.Program_Type') }}</label>
      @php
         $selectedType = old('program_type', isset($ccycle) ? $ccycle->type : '');
     @endphp
@@ -61,7 +61,7 @@
             {{ isset($ccycle) ? 'disabled' : 'required' }}>
         @foreach(\App\Cycle::programTypes() as $type)
             <option value="{{ $type }}" {{ $selectedType == $type ? 'selected' : '' }}>
-                {{ $type }}
+                {{ __('cycles.' . $type) }}
             </option>
         @endforeach
     </select>
