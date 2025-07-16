@@ -902,7 +902,7 @@
 																@if( $now <= $end_time )
 																<a href="{{ $session->start_url }}" target="_blank">
 																	<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																		<i class="ti ti-link"></i> Join Meeting
+																		<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
 																	</button>
 																</a>
 																@else
