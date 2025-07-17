@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000",
+            "url": "http://www.incubator.local/",
             "description": "API Server"
         }
     ],
@@ -858,7 +858,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Only admins can access this endpoint",
+                        "description": "Forbidden - Only admins and org managers can access this endpoint",
                         "content": {
                             "application/json": {
                                 "schema": {

@@ -2623,6 +2623,55 @@
         ]
     },
     {
+        "name": "Hacathon",
+        "description": null,
+        "permissions": [
+            {
+                "name": "hackathon.view",
+                "description": "View All Hackathon",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.apply",
+                "description": " Apply for Hackathon",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.hackathonSubmissions",
+                "description": "View Hackathon Submissions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "hackathon.createTeam",
+                "description": "Create Hackathon Team",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Surveys",
         "description": null,
         "permissions": [
