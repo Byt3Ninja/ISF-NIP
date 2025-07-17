@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\OrganizationResource;
 use App\Traits\ApiResponder;
-use Symfony\Component\HttpFoundation\Response;
 
 class OrganizationController extends Controller
 {
@@ -57,7 +56,7 @@ class OrganizationController extends Controller
  *     ),
  *     @OA\Response(
  *         response=403,
- *         description="Forbidden - Only admins can access this endpoint",
+ *         description="Forbidden - Only admins and org managers can access this endpoint",
  *         @OA\JsonContent(
  *             @OA\Property(property="success", type="boolean", example=false),
  *             @OA\Property(property="message", type="string", example="Access denied.")
@@ -69,10 +68,7 @@ class OrganizationController extends Controller
     {
         $user = Auth::user();
         if (!$user->ableTo('organizations.index')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden'),
-            ], Response::HTTP_FORBIDDEN);
+            return $this->forbidden(__('api.forbidden'));
         }
 
     $query = Organization::with(['user.company', 'cycles']);

@@ -29,4 +29,6 @@ return [
 	'OtherGovernorates' => 'Other Governorates',
 	'governorates' => 'Governorates',
 	'OtherCountries' => 'Other Countries',
+	'country_not_found' => 'Country not found',
+	'validation_error' => 'Validation Error',
 ];
