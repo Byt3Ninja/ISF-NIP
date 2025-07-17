@@ -28,4 +28,6 @@ return [
 	'OtherGovernorates' => 'المحافظات الأخرى',
 	'governorates' => 'المحافظات',
 	'OtherCountries' => 'الدول الأخرى',
+	'country_not_found' => 'الدولة غير موجودة',
+	'validation_error' => 'خطاء في التحقق من البيانات',
 ];

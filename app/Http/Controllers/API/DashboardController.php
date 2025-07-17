@@ -128,14 +128,19 @@ class DashboardController extends Controller
         $nameColumn = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         if ($user->hasRole('Admin')) {
-            $data = $this->dashboardService->getAdminDashboardData($nameColumn);
+            $data = $this->dashboardService->adminDashboard($nameColumn);
             return $this->success($data);
         }
 
-        if ($user->hasRole('Mentor')) {
-            $data = $this->dashboardService->getMentorDashboardData($user->id);
+        elseif ($user->hasRole('Mentor')) {
+            $data = $this->dashboardService->mentorDashboard($user->id);
             return $this->success($data);
         }
+        elseif ($user->hasRole('organizationManager')) {
+            $data = $this->dashboardService->organizationManagerDashboard($user->organization_id, $nameColumn);
+            return $this->success($data);
+        }
+        
 
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -10,6 +11,7 @@ use App\Http\Resources\CountryResource;
 
 class CountryController extends Controller
 {
+    use ApiResponder;
     /**
  * @OA\Get(
  *     path="/api/countries",
@@ -75,8 +77,12 @@ class CountryController extends Controller
  */
 public function getStates($id)
 {
-    $states = DB::table('states')->where('country_id', $id)->get();
+    $country = DB::table('countries')->where('id', $id)->exists();
+    if (!$country) {
+        return $this->error(__('api.country_not_found'), 404, null);
+    }
 
+    $states = DB::table('states')->where('country_id', $id)->get();
     return $this->success(StateResource::collection($states));
 }
 

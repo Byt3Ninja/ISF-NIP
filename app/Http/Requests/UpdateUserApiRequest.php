@@ -47,7 +47,7 @@ class UpdateUserApiRequest extends FormRequest
        protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-            $this->validationError('Validation Error', 422, $validator->errors())
+            $this->validationError(__('api.validation_error'), 422, $validator->errors())
         );
     }
 }

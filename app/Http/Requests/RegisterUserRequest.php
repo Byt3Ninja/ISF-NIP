@@ -62,7 +62,7 @@ class RegisterUserRequest extends FormRequest
     {
         throw new HttpResponseException(
             $this->validationError(
-                'Validation Error',
+                __('api.validation_error'),
                 422,
                 $validator->errors()
             )

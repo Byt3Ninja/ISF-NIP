@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -17,7 +16,7 @@ class DashboardService
         $this->nameColumn = $this->locale === 'ar' ? 'name_ar' : 'name_en';
     }
 
-    public function getAdminDashboardData(string $nameColumn): array
+    public function adminDashboard(string $nameColumn): array
     {
         $totalUsers = DB::table('users')->count();
         $prevTotalUsers = DB::table('users')->whereDate('created_at', '<', Carbon::now()->subMonth())->count();
@@ -64,7 +63,7 @@ class DashboardService
              $sdgCompanies = DB::table('companies')->select('Sustainable_development')
         ->whereNotNull('Sustainable_development')->get();
 
-      $sdgCounts = [];
+         $sdgCounts = [];
          foreach ($sdgCompanies as $company) {
          $sdgArray = json_decode($company->Sustainable_development, true);
           if (is_array($sdgArray)) {
@@ -146,26 +145,26 @@ class DashboardService
             $hqDistribution[] = ['country' => __('api.OtherCountries'), 'count' => $hqOthers];
         }
 
-    $targetMarketCompanies = DB::table('companies')->select('targeted_market')->whereNotNull('targeted_market')->get();
-    $countryCounts = [];
-    foreach ($targetMarketCompanies as $company) {
-        $ids = json_decode($company->targeted_market, true);
-        if (is_array($ids)) {
-            foreach ($ids as $id) {
+        $targetMarketCompanies = DB::table('companies')->select('targeted_market')->whereNotNull('targeted_market')->get();
+        $countryCounts = [];
+        foreach ($targetMarketCompanies as $company) {
+         $ids = json_decode($company->targeted_market, true);
+            if (is_array($ids)) {
+             foreach ($ids as $id) {
                 $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
+                }
             }
         }
-    }
 
-    $countryNames = DB::table('countries')->whereIn('id', array_keys($countryCounts))
+        $countryNames = DB::table('countries')->whereIn('id', array_keys($countryCounts))
         ->pluck($nameColumn, 'id');
-    $totalMarkets = array_sum($countryCounts);
-    $targetMarketDistribution = collect($countryCounts)->map(function ($count, $id) use ($countryNames, $totalMarkets) {
-        return [
-            'market' => $countryNames[$id] ?? 'Unknown',
-            'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
-        ];
-    })->values();
+        $totalMarkets = array_sum($countryCounts);
+        $targetMarketDistribution = collect($countryCounts)->map(function ($count, $id) use ($countryNames, $totalMarkets) {
+            return [
+             'market' => $countryNames[$id] ?? 'Unknown',
+             'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
+            ];
+        })->values();
 
         $devStageStats = DB::table('companies')
         ->join('stages', 'companies.stage', '=', 'stages.id') 
@@ -205,7 +204,7 @@ class DashboardService
         $completedTasks = DB::table('mentorship_tasks')->where('status', 'completed')->count();
         $completedTasksRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
-      return [
+        return [
             'totalUsers' => $totalUsers,
             'totalUsersChange' => $userChange,
             'totalSessions' => $totalSessions,
@@ -267,13 +266,13 @@ class DashboardService
        'stateDistribution' => $states,
        'sdgStartups' => $sdgStartups,
        'metadata' => [
-        'lastUpdated' => now()->format('g:i:s A'),
+        'lastUpdated' => now()->format('Y-m-d H:i:s'),
        ],
-];
+   ];
 
 }
 
-    public function getMentorDashboardData(int $mentorId): array
+    public function mentorDashboard(int $mentorId): array
     {
         $comingSessionsCount = DB::table('mentorship_requests')
             ->where('mentor_id', $mentorId)
@@ -358,4 +357,301 @@ class DashboardService
             'startupAttendanceRate' => $attendsRate,
         ];
     }
+
+   public function organizationManagerDashboard(int $organizationId, string $nameColumn): array
+{
+    $usersQuery = DB::table('users')->where('organization_id',$organizationId);
+    $totalUsers = $usersQuery->count();
+    $prevTotalUsers = (clone $usersQuery)->whereDate('created_at', '<', Carbon::now()->subMonth())->count();
+    $userChange = $prevTotalUsers > 0 ? round(($totalUsers - $prevTotalUsers) / $prevTotalUsers * 100, 1) : 0;
+
+    $sessionsQuery = DB::table('training_sessions')
+        ->join('steps', 'training_sessions.step_id', '=', 'steps.id')
+        ->join('cycles', 'steps.cycle_id', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organizationId);
+
+    $totalSessions = $sessionsQuery->count();
+    $prevTotalSessions = (clone $sessionsQuery)->whereDate('training_sessions.created_at', '<', Carbon::now()->subMonth())->count();
+    $totalDuration = $sessionsQuery->sum('training_sessions.duration');
+    $prevDuration = (clone $sessionsQuery)->whereDate('training_sessions.created_at', '<', Carbon::now()->subMonth())->sum('training_sessions.duration');
+
+    $sessionsChange = $prevTotalSessions > 0 ? round(($totalSessions - $prevTotalSessions) / $prevTotalSessions * 100, 1) : 0;
+    $durationChange = $prevDuration > 0 ? round(($totalDuration - $prevDuration) / $prevDuration * 100, 1) : 0;
+
+    $screeningFirst = DB::table('screenings')
+        ->join('users', 'screenings.user_id', '=', 'users.id')
+        ->where('users.organization_id', $organizationId)->count();
+
+    $screeningFinal = DB::table('finalscreenings')
+        ->join('steps', 'finalscreenings.step_id', '=', 'steps.id')
+        ->join('cycles', 'steps.cycle_id', '=', 'cycles.id')
+        ->where('cycles.organization_id',$organizationId)->count();
+
+    $roles = DB::table('roles')->pluck('name', 'id')->toArray();
+    $roleCounts = [];
+    foreach (['Registered', 'Mentor', 'Judger', 'organizationManager'] as $key) {
+        $roleId = array_search($key, $roles);
+        $count = DB::table('model_has_roles')
+            ->join('users', 'users.id', '=', 'model_has_roles.model_id')
+            ->where('users.organization_id', $organizationId)
+            ->where('model_has_roles.role_id', $roleId)->count();
+        $roleCounts[strtolower(str_replace(' ', '', $key)) . 's'] = $count;
+    }
+
+    $genderStats = DB::table('users')
+        ->where('organization_id', $organizationId)
+        ->selectRaw("gender, COUNT(*) as count")
+        ->groupBy('gender')
+        ->pluck('count', 'gender')->toArray();
+    $male = $genderStats['Male'] ?? 0;
+    $female = $genderStats['Female'] ?? 0;
+    $totalGender = $male + $female;
+    $genderChange = $totalGender > 0 ? round(($totalGender - 63) / 63 * 100, 1) : 0;
+
+    $stateCounts = DB::table('users')
+        ->where('organization_id', $organizationId)
+        ->leftJoin('states', 'states.id', '=', 'users.state_id')
+        ->whereNotNull('users.state_id')
+        ->select("states.{$nameColumn} as state", DB::raw('COUNT(users.id) as count'))
+        ->groupBy("states.{$nameColumn}")
+        ->orderByDesc('count')->get();
+
+    $topGovernorate = $stateCounts->first()->state ?? 'N/A';
+    $topStateCounts = $stateCounts->take(8);
+    $othersCount = $stateCounts->skip(8)->sum('count');
+    $othersPercentage = round(($othersCount / max($totalUsers, 1)) * 100, 1);
+    $distribution = $topStateCounts->map(fn($item) => [
+        'governorate' => $item->state ?? 'Unknown',
+        'count' => $item->count,
+        'percentage' => round(($item->count / max($totalUsers, 1)) * 100, 1),
+    ])->toArray();
+
+    if ($othersCount > 0) {
+        $distribution[] = [
+            'governorate' => __("api.OtherGovernorates") . ' (' . $stateCounts->count() - 8 . ' ' . __('api.governorates') . ')',
+            'count' => $othersCount,
+            'percentage' => $othersPercentage,
+        ];
+    }
+
+    $programsProgress = DB::table('cycles')->where('organization_id', $organizationId)->select('title', 'start', 'end')->get();
+
+    $programStartups = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
+        ->groupBy('cycles.title')->pluck('count', 'title');
+
+    $sectorDistribution = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->join('sectors', 'companies.sector', '=', 'sectors.id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
+        ->groupBy("sectors.{$nameColumn}")->orderByDesc('count')->get();
+
+    $totalStartups = $sectorDistribution->sum('count');
+    $topSectors = $sectorDistribution->take(10)->map(fn($item) => [
+        'sector' => $item->sector,
+        'percentage' => round(($item->count / $totalStartups) * 100),
+    ]);
+
+    $sectorBreakdown = $sectorDistribution->take(10)->map(fn($item) => [
+        'sector' => $item->sector,
+        'percentage' => round(($item->count / $totalStartups) * 100, 1),
+    ]);
+
+    $states = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->leftJoin('states', 'states.id', '=', 'companies.state_id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select("states.{$nameColumn} as state", DB::raw('COUNT(companies.id) as count'))
+        ->groupBy("states.{$nameColumn}")->get();
+
+    $countries = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
+        ->groupBy("countries.{$nameColumn}")->get();
+       
+       
+    $targetMarketCompanies = DB::table('companies')
+    ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+    ->where('cycles.organization_id', $organizationId)
+    ->whereNotNull('companies.targeted_market')
+    ->select('companies.targeted_market')
+    ->get();
+
+    $countryCounts = [];
+
+    foreach ($targetMarketCompanies as $company) {
+        $ids = json_decode($company->targeted_market, true);
+        if (is_array($ids)) {
+         foreach ($ids as $id) {
+            $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
+          }
+        }
+    }
+
+    $countryNames = DB::table('countries')->whereIn('id', array_keys($countryCounts))
+    ->pluck($nameColumn, 'id');
+
+    $totalMarkets = array_sum($countryCounts);
+    $targetMarketDistribution = collect($countryCounts)->map(function ($count, $id) use ($countryNames, $totalMarkets) {
+        return [
+        'market' => $countryNames[$id] ?? 'Unknown',
+        'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
+        ];
+    })->values();
+
+    $devStageStats = DB::table('companies')
+    ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+    ->join('stages', 'companies.stage', '=', 'stages.id')
+    ->where('cycles.organization_id', $organizationId)
+    ->whereNotNull('companies.stage')
+    ->select("stages.{$nameColumn} as stage", DB::raw('COUNT(companies.id) as count'))
+    ->groupBy("stages.{$nameColumn}")
+    ->get();
+
+    $totalDevStages = $devStageStats->sum('count');
+
+    $devStagesDistribution = $devStageStats->map(function ($item) use ($totalDevStages) {
+     return [
+        'stage' => $item->stage,
+        'count' => $item->count,
+        'percentage' => $totalDevStages > 0 ? round(($item->count / $totalDevStages) * 100, 1) : 0,
+     ];
+   });
+
+  
+    $businessModelDistribution = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select('companies.business_model', DB::raw('COUNT(*) as count'))
+        ->groupBy('companies.business_model')->get();
+    $totalBizModels = $businessModelDistribution->sum('count');
+
+    $sdgCompanies = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select('Sustainable_development')->whereNotNull('Sustainable_development')->get();
+    $sdgCounts = [];
+    foreach ($sdgCompanies as $company) {
+        $sdgArray = json_decode($company->Sustainable_development, true);
+        if (is_array($sdgArray)) {
+            foreach ($sdgArray as $sdgSlug) {
+                $sdgCounts[$sdgSlug] = ($sdgCounts[$sdgSlug] ?? 0) + 1;
+            }
+        }
+    }
+    $sdgStartups = [
+        'totalStartups' => array_sum($sdgCounts),
+        'distribution' => collect($sdgCounts)->map(fn($count, $sdgSlug) => ['sdg' => $sdgSlug, 'count' => $count])->values(),
+    ];
+
+    $completedSessions = DB::table('mentorship_requests')
+        ->join('users', 'mentorship_requests.user_id', '=', 'users.id')
+        ->where('users.organization_id', $organizationId)
+        ->whereNull('mentorship_requests.deleted_at')
+        ->whereNotNull('start_url')
+        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->select('done')->get();
+
+    $totalSessionsAttended = $completedSessions->count();
+    $totalSessionsMarked = $completedSessions->sum('done');
+    $attendanceRate = $totalSessionsAttended > 0 ? round(($totalSessionsMarked / $totalSessionsAttended) * 100, 1) : 0;
+
+    $totalTasks = DB::table('mentorship_tasks')
+        ->join('users', 'mentorship_tasks.user_id', '=', 'users.id')
+        ->where('users.organization_id', $organizationId)->count();
+    $completedTasks = DB::table('mentorship_tasks')
+        ->join('users', 'mentorship_tasks.user_id', '=', 'users.id')
+        ->where('users.organization_id', $organizationId)
+        ->where('mentorship_tasks.status', 'completed')->count();
+    $completedTasksRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
+
+    $headquarters = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->join('countries', 'companies.country_id', '=', 'countries.id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
+        ->groupBy("countries.{$nameColumn}")
+        ->orderByDesc('count')
+        ->get();
+
+    $hqTop = $headquarters->take(6);
+    $hqOthers = $headquarters->skip(6)->sum('count');
+
+    $hqDistribution = $hqTop->map(function ($item) {
+        return [
+            'country' => $item->country,
+            'count' => $item->count,
+        ];
+    })->toArray();
+
+    if ($hqOthers > 0) {
+        $hqDistribution[] = [
+            'country' => __('api.OtherCountries'),
+            'count' => $hqOthers,
+        ];
+    }
+
+    return [
+        'totalUsers' => $totalUsers,
+        'totalUsersChange' => $userChange,
+        'totalSessions' => $totalSessions,
+        'totalSessionsChange' => $sessionsChange,
+        'sessionsDuration' => round($totalDuration / 60, 1) . 'h',
+        'sessionsDurationChange' => $durationChange,
+        'startupAttendanceRate' => ['rate' => $attendanceRate],
+        'completedTasks' => ['rate' => $completedTasksRate],
+        'screening' => [
+            'first' => $screeningFirst,
+            'final' => $screeningFinal,
+            'total' => $screeningFirst + $screeningFinal,
+        ],
+        'userRoles' => $roleCounts,
+        'userGender' => [
+            'male' => $male,
+            'female' => $female,
+            'total' => $totalGender,
+            'malePercentage' => $totalGender > 0 ? round(($male / $totalGender) * 100) : 0,
+            'femalePercentage' => $totalGender > 0 ? round(($female / $totalGender) * 100) : 0,
+            'change' => $genderChange,
+        ],
+        'userDemographics' => [
+            'totalUsers' => $totalUsers,
+            'totalGovernorates' => $stateCounts->count(),
+            'topGovernorate' => $topGovernorate,
+            'distribution' => $distribution,
+        ],
+        'programsProgressOverTime' => $programsProgress,
+        'programStartups' => $programStartups,
+        'topStartupSectors' => [
+            'totalStartups' => $totalStartups,
+            'distribution' => $topSectors,
+        ],
+        'sectorBreakdown' => ['distribution' => $sectorBreakdown],
+        'startupHeadquarters' => [
+           'distribution' => $hqDistribution,
+        ],
+        'targetMarketDistribution' => [
+            'totalMarkets' => $totalMarkets,
+            'distribution' => $targetMarketDistribution,
+        ],
+        'developmentStages' => [
+            'totalStartups' => $totalDevStages,
+            'distribution' => $devStagesDistribution,
+        ],
+        'businessModels' => [
+            'totalStartups' => $totalBizModels,
+            'distribution' => $businessModelDistribution,
+        ],
+        'countryDistribution' => $countries,
+        'stateDistribution' => $states,
+        'sdgStartups' => $sdgStartups,
+        'metadata' => ['lastUpdated' => now()->format('Y-m-d H:i:s')],
+    ];
+}
+
 }
