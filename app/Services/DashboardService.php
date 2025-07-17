@@ -306,7 +306,7 @@ class DashboardService
             ->select(
                 'mr.zoom_date as date',
                 'mr.admin_comment as admin_notes',
-                'mr.join_url as meeting_link',
+                'mr.start_url as meeting_link',
                 'u.first_name_en',
                 'u.last_name_en',
                 'c.name_en as company',
