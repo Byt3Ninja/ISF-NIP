@@ -115,21 +115,28 @@ class DashboardService
             ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
             ->groupBy('cycles.title')->pluck('count', 'title');
 
-        $sectorDistribution = DB::table('companies')->join('sectors', 'companies.sector', '=', 'sectors.id')
-            ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
-            ->groupBy("sectors.{$nameColumn}")->orderByDesc('count')->get();
+       $sectorDistribution = DB::table('companies')
+        ->join('sectors', 'companies.sector', '=', 'sectors.id')
+        ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
+        ->groupBy("sectors.{$nameColumn}")
+        ->orderByDesc('count')
+        ->get();
+
         $totalStartups = $sectorDistribution->sum('count');
+
         $topSectors = $sectorDistribution->take(10)->map(function ($item) use ($totalStartups) {
             return [
-                'sector' => $item->sector,
-                'percentage' => round(($item->count / $totalStartups) * 100),
+            'sector' => $item->sector,
+            'count' => $item->count,
+            'percentage' => $totalStartups > 0 ? round(($item->count / $totalStartups) * 100) : 0,
             ];
         });
 
         $sectorBreakdown = $sectorDistribution->take(10)->map(function ($item) use ($totalStartups) {
-            return [
-                'sector' => $item->sector,
-                'percentage' => round(($item->count / $totalStartups) * 100, 1),
+         return [
+            'sector' => $item->sector,
+            'count' => $item->count,
+            'percentage' => $totalStartups > 0 ? round(($item->count / $totalStartups) * 100, 1) : 0,
             ];
         });
 
@@ -145,26 +152,35 @@ class DashboardService
             $hqDistribution[] = ['country' => __('api.OtherCountries'), 'count' => $hqOthers];
         }
 
-        $targetMarketCompanies = DB::table('companies')->select('targeted_market')->whereNotNull('targeted_market')->get();
+       $targetMarketCompanies = DB::table('companies')
+        ->select('targeted_market')
+        ->whereNotNull('targeted_market')
+        ->get();
+
         $countryCounts = [];
+
         foreach ($targetMarketCompanies as $company) {
          $ids = json_decode($company->targeted_market, true);
             if (is_array($ids)) {
-             foreach ($ids as $id) {
-                $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
-                }
+            foreach ($ids as $id) {
+            $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
+            }
             }
         }
 
-        $countryNames = DB::table('countries')->whereIn('id', array_keys($countryCounts))
+        $countryNames = DB::table('countries')
+        ->whereIn('id', array_keys($countryCounts))
         ->pluck($nameColumn, 'id');
+
         $totalMarkets = array_sum($countryCounts);
+
         $targetMarketDistribution = collect($countryCounts)->map(function ($count, $id) use ($countryNames, $totalMarkets) {
             return [
-             'market' => $countryNames[$id] ?? 'Unknown',
-             'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
+            'market' => $countryNames[$id] ?? 'Unknown',
+            'count' => $count,
+            'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
             ];
-        })->values();
+        })->sortByDesc('count')->values();
 
         $devStageStats = DB::table('companies')
         ->join('stages', 'companies.stage', '=', 'stages.id') 
@@ -443,22 +459,27 @@ class DashboardService
         ->groupBy('cycles.title')->pluck('count', 'title');
 
     $sectorDistribution = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-        ->join('sectors', 'companies.sector', '=', 'sectors.id')
-        ->where('cycles.organization_id', $organizationId)
-        ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
-        ->groupBy("sectors.{$nameColumn}")->orderByDesc('count')->get();
+    ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+    ->join('sectors', 'companies.sector', '=', 'sectors.id')
+    ->where('cycles.organization_id', $organizationId)
+    ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
+    ->groupBy("sectors.{$nameColumn}")
+    ->orderByDesc('count')
+    ->get();
 
-    $totalStartups = $sectorDistribution->sum('count');
-    $topSectors = $sectorDistribution->take(10)->map(fn($item) => [
-        'sector' => $item->sector,
-        'percentage' => round(($item->count / $totalStartups) * 100),
-    ]);
+   $totalStartups = $sectorDistribution->sum('count');
 
-    $sectorBreakdown = $sectorDistribution->take(10)->map(fn($item) => [
-        'sector' => $item->sector,
-        'percentage' => round(($item->count / $totalStartups) * 100, 1),
-    ]);
+   $topSectors = $sectorDistribution->take(10)->map(fn($item) => [
+    'sector' => $item->sector,
+    'count' => $item->count,
+    'percentage' => $totalStartups > 0 ? round(($item->count / $totalStartups) * 100) : 0,
+  ]);
+
+  $sectorBreakdown = $sectorDistribution->take(10)->map(fn($item) => [
+    'sector' => $item->sector,
+    'count' => $item->count,
+    'percentage' => $totalStartups > 0 ? round(($item->count / $totalStartups) * 100, 1) : 0,
+  ]);
 
     $states = DB::table('companies')
         ->join('cycles', 'companies.cycle', '=', 'cycles.id')
@@ -475,32 +496,34 @@ class DashboardService
         ->groupBy("countries.{$nameColumn}")->get();
        
        
-    $targetMarketCompanies = DB::table('companies')
-    ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-    ->where('cycles.organization_id', $organizationId)
-    ->whereNotNull('companies.targeted_market')
-    ->select('companies.targeted_market')
-    ->get();
+   $targetMarketCompanies = DB::table('companies')
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organizationId)
+        ->select('companies.targeted_market')
+        ->whereNotNull('companies.targeted_market')
+        ->get();
 
     $countryCounts = [];
 
     foreach ($targetMarketCompanies as $company) {
         $ids = json_decode($company->targeted_market, true);
         if (is_array($ids)) {
-         foreach ($ids as $id) {
-            $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
-          }
+            foreach ($ids as $id) {
+                $countryCounts[$id] = ($countryCounts[$id] ?? 0) + 1;
+            }
         }
     }
 
-    $countryNames = DB::table('countries')->whereIn('id', array_keys($countryCounts))
-    ->pluck($nameColumn, 'id');
+    $countryNames = DB::table('countries')
+        ->whereIn('id', array_keys($countryCounts))
+        ->pluck($nameColumn, 'id');
 
     $totalMarkets = array_sum($countryCounts);
     $targetMarketDistribution = collect($countryCounts)->map(function ($count, $id) use ($countryNames, $totalMarkets) {
         return [
-        'market' => $countryNames[$id] ?? 'Unknown',
-        'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
+            'market' => $countryNames[$id] ?? 'Unknown',
+            'count' => $count,
+            'percentage' => $totalMarkets > 0 ? round(($count / $totalMarkets) * 100, 1) : 0,
         ];
     })->values();
 
