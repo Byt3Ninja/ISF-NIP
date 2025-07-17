@@ -2093,4 +2093,5 @@ return [
 	'maxInTeam' => 'الحد الاقصى لعدد الفريقات',
 	'Hackathon' => 'هاكاثون',
 	'Quiz_Results' => 'نتايج الاختبار',
+	'Invitation_to_Join_a_Hackathon_Team' => 'دعوة للانضمام الى فريق هاكثون',
 ];

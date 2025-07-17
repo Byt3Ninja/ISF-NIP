@@ -107,10 +107,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
 
     // Hackathon Routes
-    Route::get('hackathon', [HackathonController::class, 'index']);
+    Route::get('hackathon', 'HackathonController@index')->name('hackathon.view');
+    Route::get('apply/{id}/hackathon', 'HackathonController@applyHackathon')->name('hackathon.apply');
+    Route::get('submission/{id}/hackathon', 'HackathonController@hackathonSubmissions')->name('hackathon.hackathonSubmissions');
+    Route::post('hackathon/createTeam', 'HackathonController@createTeam')->name('hackathon.createTeam');
     Route::get('hackathon/manage', [HackathonController::class, 'manage']);
     Route::get('hackathon/my-team', [HackathonController::class, 'myTeam']);
-    Route::get('hackathon/details', [HackathonController::class, 'show']);
+    Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');

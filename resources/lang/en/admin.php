@@ -2047,4 +2047,5 @@ return [
 	'maxInTeam' => 'Maximum Number of Team Members',
 	'Hackathon' => 'Hackathon',
 	'Quiz_Results' => 'Quiz Results',
+	'Invitation_to_Join_a_Hackathon_Team' => 'Invitation to Join a Hackathon Team',
 ];

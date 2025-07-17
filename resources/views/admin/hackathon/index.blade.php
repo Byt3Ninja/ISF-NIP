@@ -17,69 +17,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
 </head>
 
-@php
-  $hackathons = [
-    [
-      'title' => 'Future of AI Hackathon',
-      'date' => 'March 15 - 17, 2024',
-      'location' => 'Virtual',
-      'status' => 'Upcoming',
-      'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
-      'tags' => ['AI', 'Big Data'],
-    ],
-    [
-      'title' => 'Sustainability Hackathon',
-      'date' => 'April 20 - 22, 2024',
-      'location' => 'Hybrid (Riyadh & Online)',
-      'status' => 'Ongoing',
-      'description' => 'Develop innovative solutions for sustainable development goals.',
-      'tags' => ['Sustainability', 'Green Tech'],
-    ],
-    [
-      'title' => 'HealthTech Hackathon',
-      'date' => 'May 10 - 12, 2024',
-      'location' => 'Virtual',
-      'status' => 'Upcoming',
-      'description' => 'Create innovative health tech solutions to improve patient care.',
-      'tags' => ['HealthTech', 'AI'],
-    ],
-    [
-      'title' => 'FinTech Innovation Challenge',
-      'date' => 'June 5 - 7, 2024',
-      'location' => 'Hybrid (Dubai & Online)',
-      'status' => 'Upcoming',
-      'description' => 'Develop cutting-edge financial technology solutions.',
-      'tags' => ['FinTech', 'Blockchain'],
-    ],
-    [
-      'title' => 'Smart Cities Hackathon',
-      'date' => 'July 15 - 17, 2024',
-      'location' => 'Virtual',
-      'status' => 'Upcoming',
-      'description' => 'Innovate solutions for smart city challenges.',
-      'tags' => ['Smart Cities', 'IoT'],
-    ],
-  ];
 
-  $pastHackathons = [
-    [
-      'title' => 'Cybersecurity Challenge',
-      'date' => 'January 10 - 12, 2024',
-      'location' => 'Virtual',
-      'status' => 'Completed',
-      'description' => 'Develop solutions to enhance cybersecurity in digital platforms.',
-      'tags' => ['Cybersecurity', 'AI'],
-    ],
-    [
-      'title' => 'E-commerce Innovation Hackathon',
-      'date' => 'February 5 - 7, 2024',
-      'location' => 'Hybrid (Cairo & Online)',
-      'status' => 'Completed',
-      'description' => 'Create innovative solutions for the e-commerce industry.',
-      'tags' => ['E-commerce', 'AI'],
-    ],
-  ];
-@endphp
 
 <body>
   <!-- Include original navbar -->

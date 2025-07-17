@@ -165,20 +165,20 @@
 </head>
 
 @php
-    $currentHackathon = [
-        'title' => 'Future of AI Hackathon',
-        'title_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
-        'date' => 'March 15 - 17, 2024',
-        'date_ar' => '15 - 17 مارس 2024',
-        'location' => 'Virtual',
-        'location_ar' => 'افتراضي',
-        'status' => 'Upcoming',
-        'status_ar' => 'قادم',
-        'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
-        'description_ar' => 'هذا الهاكثون يهدف إلى جمع المبتكرين والمطورين لخلق حلول رائدة باستخدام تقنيات الذكاء الاصطناعي لمواجهة التحديات الحالية والمستقبلية في مختلف القطاعات.',
-        'tags' => ['AI', 'Big Data'],
-        'tags_ar' => ['الذكاء الاصطناعي', 'البيانات الضخمة'],
-    ];
+    // $currentHackathon = [
+    //     'title' => 'Future of AI Hackathon',
+    //     'title_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
+    //     'date' => 'March 15 - 17, 2024',
+    //     'date_ar' => '15 - 17 مارس 2024',
+    //     'location' => 'Virtual',
+    //     'location_ar' => 'افتراضي',
+    //     'status' => 'Upcoming',
+    //     'status_ar' => 'قادم',
+    //     'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
+    //     'description_ar' => 'هذا الهاكثون يهدف إلى جمع المبتكرين والمطورين لخلق حلول رائدة باستخدام تقنيات الذكاء الاصطناعي لمواجهة التحديات الحالية والمستقبلية في مختلف القطاعات.',
+    //     'tags' => ['AI', 'Big Data'],
+    //     'tags_ar' => ['الذكاء الاصطناعي', 'البيانات الضخمة'],
+    // ];
 @endphp
 
 <body>
@@ -387,6 +387,14 @@
                         <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Results' : 'النتائج' }}
                     </button>
                 </li>
+
+                <li class="nav-item me-1" role="presentation" id="submissions-tab-li">
+                    <button class="nav-link rounded" id="submissions-tab-btn" data-bs-toggle="tab" data-bs-target="#submissions"
+                        type="button" role="tab" aria-controls="submissions" aria-selected="false">
+                        <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Submissions' : 'الاجابات' }}
+                    </button>
+                </li>
+
             </ul>
 
             <div class="tab-content p-0 mb-12" id="hackathonTabContent">
@@ -960,6 +968,13 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                </div>
+
+                 <!-- Results Tab (conditionally shown) -->
+                <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab-btn">
+                    <div class="card">
+                       
                     </div>
                 </div>
 
