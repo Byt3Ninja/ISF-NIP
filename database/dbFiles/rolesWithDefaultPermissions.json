@@ -6459,5 +6459,39 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Activity Log",
+    "description": null,
+    "permissions": [
+        {
+            "name": "activities.index",
+            "description": "View Activity Log Page",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin"
+            ]
+        },
+        {
+            "name": "activity.log",
+            "description": "Create Activity Log",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin"
+            ]
+        },
+        {
+            "name": "activities.destroy",
+            "description": "Delete Activity Log",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        }
+    ]
     }
 ]
