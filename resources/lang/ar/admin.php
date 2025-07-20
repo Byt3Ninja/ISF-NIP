@@ -2146,4 +2146,6 @@ return [
     'Activate_to_sort_ascending' => 'تفعيل للترتيب تصاعديًا',
     'Activate_to_sort_descending' => 'تفعيل للترتيب تنازليًا',
     'Export_to_Excel' => 'تصدير إلى إكسل',
+		'Activity_Log' => 'سجل النشاط',
+		'No_activities_logged' => 'لا توجد أنشطة مسجلة',
 ];

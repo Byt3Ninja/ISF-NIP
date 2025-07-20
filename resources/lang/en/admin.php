@@ -2089,4 +2089,6 @@ return [
     'Activate_to_sort_ascending' => 'Activate to sort ascending',
     'Activate_to_sort_descending' => 'Activate to sort descending',
     'Export_to_Excel' => 'Export to Excel',
+		'Activity_Log' => 'Activity Log',
+		'No_activities_logged' => 'No activities logged',
 ];
