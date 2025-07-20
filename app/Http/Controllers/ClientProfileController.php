@@ -5,6 +5,7 @@ use App\Otp;
 use App\User;
 use App\Cycle;
 use App\Country;
+use App\Activity;
 use App\Currency;
 use App\Schedule;
 use App\Settings;
@@ -18,15 +19,15 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ConfirmEmailUpdate;
 use App\Services\WhatsAppService;
+use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\UpdateClientProfileRequest;
-use Intervention\Image\ImageManagerStatic as Image;
 use Storage, Hash, Exception, Session, URL, File;
+use Intervention\Image\ImageManagerStatic as Image;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
-use PragmaRX\Google2FA\Google2FA;
 
 class ClientProfileController extends Controller
 {
@@ -95,8 +96,11 @@ class ClientProfileController extends Controller
 
 
 
-
-            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data'));
+        // Fetch activities
+        $activities = Activity::where('user_id', Auth::user()->id)
+        ->orderBy('activity_time', 'desc')
+        ->get();
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data','activities'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);

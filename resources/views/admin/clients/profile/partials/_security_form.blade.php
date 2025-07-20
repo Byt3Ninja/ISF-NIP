@@ -70,6 +70,35 @@ $passwordRules = [
         <li class="{{ $key != array_key_last($passwordRules) ? 'mb-4' : '' }}">{{ $rule }}</li>
         @endforeach
       </ul>
+      <!-- Activity Log Table -->
+                    @if ($activities->isNotEmpty())
+                        <table class="table table-striped mb-4 mt-4">
+                            <thead>
+                                <tr>
+                                    <th>@lang('admin.browser')</th>
+                                    <th>@lang('admin.device')</th>
+                                    <th>@lang('admin.platform')</th>
+                                    <th>@lang('admin.IP_Address')</th>
+                                    <th>@lang('admin.Location')</th>
+                                    <th>@lang('admin.Login_Time')</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($activities as $activity)
+                                    <tr>
+                                        <td>{{ $activity->browser }}</td>
+                                        <td>{{ $activity->device }}</td>
+                                        <td>{{ $activity->platform }}</td>
+                                        <td>{{ $activity->ip_address }}</td>
+                                        <td>{{ $activity->location }}</td>
+                                        <td>{{ $activity->activity_time->format('d M Y, H:i') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <p class="text-muted">@lang('admin.No_activities_logged')</p>
+                    @endif
 
       
 

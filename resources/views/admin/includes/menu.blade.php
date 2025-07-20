@@ -863,6 +863,14 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </a>
           </li>
         @endif
+        @if( $_user->ableTo('activities.index', $permissions) )
+          <li class="{{ Request::is('*activities*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('activities.index') }}">
+              <i class="menu-icon tf-icons ti ti-activity"></i>
+              <div>{{ __('admin.Activities') }}</div>
+            </a>
+          </li>
+        @endif
       @endif
 
       @if ($_user->hasAnyRole('organizationManager'))

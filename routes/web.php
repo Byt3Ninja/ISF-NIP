@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
-use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ImporterController;
+use App\Http\Controllers\ActivityControlller;
+use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
@@ -599,11 +600,16 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/projects/{project}/add-team-members', 'ProjectController@addTeamMembers')->name('projects.team_add_member');
     Route::delete('/projects/{project}/remove-team-member/{teamMember}', 'ProjectController@removeTeamMember')->name('projects.team_remove_member');
     Route::resource('projects', 'ProjectController');
-    /* End of Projectss Routes */
+    /* End of Projects Routes */
 
     Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate_view_form');
     Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate_execute');
 
+     /* Start of Activities Routes */
+    Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
+    Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
+    Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
+    /* End of Activities Routes */
 
 
     // ===============> Reports <============
