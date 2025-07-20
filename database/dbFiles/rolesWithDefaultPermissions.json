@@ -6462,15 +6462,16 @@
     },
     {
         "name": "Activity Log",
-    "description": null,
-    "permissions": [
+        "description": null,
+        "permissions": [
         {
             "name": "activities.index",
             "description": "View Activity Log Page",
             "guard_name": "web",
             "is_core": 0,
             "default_for": [
-                "admin"
+                "admin",
+                "organizationmanager"
             ]
         },
         {
@@ -6479,7 +6480,8 @@
             "guard_name": "web",
             "is_core": 0,
             "default_for": [
-                "admin"
+                "admin",
+                "organizationmanager"
             ]
         },
         {
