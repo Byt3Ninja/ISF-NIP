@@ -179,6 +179,8 @@
                     <th>@lang('admin.user')</th>
                     <th>@lang('admin.browser')</th>
                     <th>@lang('admin.device')</th>
+                    <th>@lang('admin.platform')</th>
+                    <th>@lang('admin.IP_Address')</th>
                     <th>@lang('admin.location')</th>
                     <th>@lang('admin.Login_Time')</th>
                     <th>@lang('admin.Actions')</th>
@@ -190,6 +192,8 @@
                         <td>{{ $activity->user->first_name_en . ' ' . $activity->user->last_name_en }}</td>
                         <td>{{ $activity->browser }}</td>
                         <td>{{ $activity->device }}</td>
+                        <td>{{ $activity->platform }}</td>
+                        <td>{{ $activity->ip_address }}</td>
                         <td>{{ $activity->location }}</td>
                         <td>{{ $activity->activity_time->format('d M Y, H:i') }}</td>
                         <td>
