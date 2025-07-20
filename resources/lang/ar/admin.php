@@ -2148,4 +2148,12 @@ return [
     'Export_to_Excel' => 'تصدير إلى إكسل',
 		'Activity_Log' => 'سجل النشاط',
 		'No_activities_logged' => 'لا توجد أنشطة مسجلة',
+		'Users_Activities' => 'أنشطة المستخدمين',
+		'Date_From' => 'تاريخ من',
+		'Date_To' => 'تاريخ إلى',
+		'Filter_Activities' => 'تصفية الأنشطة',
+		'No_devices_logged' => 'لا توجد أجهزة مسجلة',
+		'No_browsers_logged' => 'لا توجد متصفحات مسجلة',
+		'No_countries_logged' => 'لا توجد دول مسجلة',
+		'No_peak_hours_logged' => 'لا توجد ساعات ذروة مسجلة',
 ];

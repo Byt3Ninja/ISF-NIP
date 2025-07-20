@@ -2091,4 +2091,12 @@ return [
     'Export_to_Excel' => 'Export to Excel',
 		'Activity_Log' => 'Activity Log',
 		'No_activities_logged' => 'No activities logged',
+		'Users_Activities' => 'Users Activities',
+		'Date_From' => 'Date From',
+		'Date_To' => 'Date To',
+		'Filter_Activities' => 'Filter Activities',
+		'No_devices_logged' => 'No devices logged',
+		'No_browsers_logged' => 'No browsers logged',
+		'No_countries_logged' => 'No countries logged',
+		'No_peak_hours_logged' => 'No peak hours logged',
 ];
