@@ -17,7 +17,7 @@ class CurrencyController extends Controller
  *     summary="Get enabled currencies",
  *     description="Returns a list of all enabled currencies with code, name, symbol, rate, and flag.",
  *     operationId="getCurrencies",
- *     tags={"Currency"},
+ *     tags={"Currencies"},
  *     @OA\Response(
  *         response=200,
  *         description="Currencies retrieved successfully",

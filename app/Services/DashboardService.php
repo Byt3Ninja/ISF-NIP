@@ -59,9 +59,12 @@ class DashboardService
 
         $countries = DB::table('companies')->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
             ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
-            ->groupBy("countries.{$nameColumn}")->get();
-             $sdgCompanies = DB::table('companies')->select('Sustainable_development')
-        ->whereNotNull('Sustainable_development')->get();
+            ->groupBy("countries.{$nameColumn}")
+            ->get();
+             
+        $sdgCompanies = DB::table('companies')->select('Sustainable_development')
+        ->whereNotNull('Sustainable_development')
+        ->get();
 
          $sdgCounts = [];
          foreach ($sdgCompanies as $company) {
@@ -73,15 +76,16 @@ class DashboardService
             }
         }
 
-        $sdgStartups = [
-            'totalStartups' => array_sum($sdgCounts),
-            'distribution' => collect($sdgCounts)->map(function ($count, $sdgSlug) {
-              return [
-                'sdg' => $sdgSlug,
+       $sdgStartups = [
+        'totalStartups' => array_sum($sdgCounts),
+        'distribution' => collect($sdgCounts)->map(function ($count, $sdgSlug) {
+            $key = str_replace(['sdg-', '-'], ['', '_'], $sdgSlug);
+             return [
+                'sdg' => __('admin.' . $key),
                 'count' => $count,
-                ];
+            ];
             })->values(),
-         ];
+        ];
             
 
         $stateCounts = DB::table('users')->leftJoin('states', 'states.id', '=', 'users.state_id')
@@ -110,10 +114,37 @@ class DashboardService
             ];
         }
 
-        $programsProgress = DB::table('cycles')->select('title', 'start', 'end')->get();
-        $programStartups = DB::table('companies')->join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
-            ->groupBy('cycles.title')->pluck('count', 'title');
+       $now = Carbon::now();
+       $cycles = DB::table('cycles')->select('title', 'start', 'end')->get();
+
+       $programsProgress = [
+            'month' => $now->locale(app()->getLocale())->translatedFormat('F')
+        ];
+
+      foreach ($cycles as $cycle) {
+        $start = Carbon::parse($cycle->start);
+        $end = Carbon::parse($cycle->end);
+
+        if ($end->lessThanOrEqualTo($start)) {
+            $progress = 0;
+        } elseif ($now->lessThan($start)) {
+            $progress = 0;
+        } elseif ($now->greaterThanOrEqualTo($end)) {
+         $progress = 100;
+         } else {
+            $totalDays = $end->diffInDays($start);
+            $elapsedDays = $now->diffInDays($start);
+            $progress = round(($elapsedDays / $totalDays) * 100);
+        }
+
+        $monthLabel = $start->format('Y-m');
+        $key = "{$cycle->title} ({$monthLabel})";
+
+       $programsProgress[$key] = $progress;
+    }
+       $programStartups = DB::table('companies')->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
+        ->groupBy('cycles.title')->pluck('count', 'title');
 
        $sectorDistribution = DB::table('companies')
         ->join('sectors', 'companies.sector', '=', 'sectors.id')
@@ -450,8 +481,39 @@ class DashboardService
         ];
     }
 
-    $programsProgress = DB::table('cycles')->where('organization_id', $organizationId)->select('title', 'start', 'end')->get();
+    $now = Carbon::now();
+    $locale = app()->getLocale();
 
+    $programsProgress = [
+        'month' => $now->locale($locale)->translatedFormat('F')
+    ];
+
+    $cycles = DB::table('cycles')
+    ->where('organization_id', $organizationId)
+    ->select('title', 'start', 'end')
+    ->get();
+
+    foreach ($cycles as $cycle) {
+        $start = Carbon::parse($cycle->start);
+        $end = Carbon::parse($cycle->end);
+
+    if ($end->lessThanOrEqualTo($start)) {
+        $progress = 0;
+    } elseif ($now->lessThan($start)) {
+        $progress = 0;
+    } elseif ($now->greaterThanOrEqualTo($end)) {
+        $progress = 100;
+    } else {
+        $totalDays = $end->diffInDays($start);
+        $elapsedDays = $now->diffInDays($start);
+        $progress = round(($elapsedDays / $totalDays) * 100);
+    }
+
+    $monthLabel = $start->format('Y-m');
+    $key = "{$cycle->title} ({$monthLabel})";
+
+    $programsProgress[$key] = $progress;
+}
     $programStartups = DB::table('companies')
         ->join('cycles', 'companies.cycle', '=', 'cycles.id')
         ->where('cycles.organization_id', $organizationId)
@@ -567,10 +629,16 @@ class DashboardService
             }
         }
     }
-    $sdgStartups = [
+     $sdgStartups = [
         'totalStartups' => array_sum($sdgCounts),
-        'distribution' => collect($sdgCounts)->map(fn($count, $sdgSlug) => ['sdg' => $sdgSlug, 'count' => $count])->values(),
-    ];
+        'distribution' => collect($sdgCounts)->map(function ($count, $sdgSlug) {
+            $key = str_replace(['sdg-', '-'], ['', '_'], $sdgSlug);
+             return [
+                'sdg' => __('admin.' . $key),
+                'count' => $count,
+            ];
+            })->values(),
+      ];
 
     $completedSessions = DB::table('mentorship_requests')
         ->join('users', 'mentorship_requests.user_id', '=', 'users.id')

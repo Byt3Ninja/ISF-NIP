@@ -22,7 +22,7 @@ class ProfileController extends Controller
  *     summary="Get authenticated user profile",
  *     description="Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
  *     operationId="getMe",
- *     tags={"User"},
+ *     tags={"Profile"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
  *         response=200,
@@ -224,7 +224,7 @@ class ProfileController extends Controller
  *     summary="Update user profile",
  *     description="Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
  *     operationId="updateProfile",
- *     tags={"User"},
+ *     tags={"Profile"},
  *     security={{"sanctum":{}}},
  *     @OA\RequestBody(
  *         required=true,
@@ -415,7 +415,7 @@ class ProfileController extends Controller
      *     summary="Update user password",
      *     description="Change the authenticated user's password.",
      *     operationId="updatePassword",
-     *     tags={"User"},
+     *     tags={"Profile"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -465,7 +465,7 @@ public function updatePassword(Request $request)
      *     summary="Update mentor bio",
      *     description="Update mentor bio details such as specialization, experience, and mentorship approach.",
      *     operationId="updateBio",
-     *     tags={"User"},
+     *     tags={"Profile"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,

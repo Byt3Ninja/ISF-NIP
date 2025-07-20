@@ -18,7 +18,7 @@ class CountryController extends Controller
  *     summary="Get list of countries",
  *     description="Returns a list of all countries based on the current app locale (name_en or name_ar).",
  *     operationId="getCountries",
- *     tags={"Location"},
+ *     tags={"Countries"},
  *     @OA\Response(
  *         response=200,
  *         description="Countries retrieved successfully",
@@ -49,7 +49,7 @@ class CountryController extends Controller
  *     summary="Get list of states for a country",
  *     description="Returns a list of states for a given country ID based on the current app locale.",
  *     operationId="getStates",
- *     tags={"Location"},
+ *     tags={"States"},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use Carbon\Carbon;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -13,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * @OA\Get(
  *     path="/api/dashboard",
- *     summary="Get dashboard data for Admin or Mentor",
+ *     summary="Get dashboard data for Admin , Organization Manager and Mentor",
  *     tags={"Dashboard"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(

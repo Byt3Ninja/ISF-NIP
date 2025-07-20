@@ -18,7 +18,7 @@ class RoleController extends Controller
  *     summary="Get list of available roles",
  *     description="Returns a list of all roles. Only accessible by Admin users.",
  *     operationId="getRoles",
- *     tags={"Role"},
+ *     tags={"Roles"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
  *         response=200,

@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://www.incubator.local/",
+            "url": "http://localhost:8000",
             "description": "API Server"
         }
     ],
@@ -295,7 +295,7 @@
         "/api/countries": {
             "get": {
                 "tags": [
-                    "Location"
+                    "Countries"
                 ],
                 "summary": "Get list of countries",
                 "description": "Returns a list of all countries based on the current app locale (name_en or name_ar).",
@@ -339,7 +339,7 @@
         "/api/countries/{id}/states": {
             "get": {
                 "tags": [
-                    "Location"
+                    "States"
                 ],
                 "summary": "Get list of states for a country",
                 "description": "Returns a list of states for a given country ID based on the current app locale.",
@@ -395,7 +395,7 @@
         "/api/currencies": {
             "get": {
                 "tags": [
-                    "Currency"
+                    "Currencies"
                 ],
                 "summary": "Get enabled currencies",
                 "description": "Returns a list of all enabled currencies with code, name, symbol, rate, and flag.",
@@ -449,7 +449,7 @@
                 "tags": [
                     "Dashboard"
                 ],
-                "summary": "Get dashboard data for Admin or Mentor",
+                "summary": "Get dashboard data for Admin , Organization Manager and Mentor",
                 "operationId": "ed4235c7e3cd435fdad1da90707874d1",
                 "responses": {
                     "200": {
@@ -888,7 +888,7 @@
         "/api/me": {
             "get": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Get authenticated user profile",
                 "description": "Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
@@ -1109,7 +1109,7 @@
         "/api/profile": {
             "post": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Update user profile",
                 "description": "Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
@@ -1306,7 +1306,7 @@
         "/api/profile/password": {
             "put": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Update user password",
                 "description": "Change the authenticated user's password.",
@@ -1372,7 +1372,7 @@
         "/api/profile/bio": {
             "put": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Update mentor bio",
                 "description": "Update mentor bio details such as specialization, experience, and mentorship approach.",
@@ -1464,7 +1464,7 @@
         "/api/roles": {
             "get": {
                 "tags": [
-                    "Role"
+                    "Roles"
                 ],
                 "summary": "Get list of available roles",
                 "description": "Returns a list of all roles. Only accessible by Admin users.",
@@ -2202,12 +2202,16 @@
             "description": "Authentication"
         },
         {
-            "name": "Location",
-            "description": "Location"
+            "name": "Countries",
+            "description": "Countries"
         },
         {
-            "name": "Currency",
-            "description": "Currency"
+            "name": "States",
+            "description": "States"
+        },
+        {
+            "name": "Currencies",
+            "description": "Currencies"
         },
         {
             "name": "Dashboard",
@@ -2222,12 +2226,12 @@
             "description": "Organizations"
         },
         {
-            "name": "User",
-            "description": "User"
+            "name": "Profile",
+            "description": "Profile"
         },
         {
-            "name": "Role",
-            "description": "Role"
+            "name": "Roles",
+            "description": "Roles"
         },
         {
             "name": "Users",
