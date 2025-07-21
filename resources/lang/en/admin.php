@@ -2099,4 +2099,5 @@ return [
 		'No_browsers_logged' => 'No browsers logged',
 		'No_countries_logged' => 'No countries logged',
 		'No_peak_hours_logged' => 'No peak hours logged',
+		'quizNoQuestions' => 'This quiz has no questions. Please contact administrator.'
 ];

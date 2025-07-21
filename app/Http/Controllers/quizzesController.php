@@ -450,7 +450,7 @@ class quizzesController extends Controller
 				}
 				$questions = $quiz->questions;
 				if (empty($questions) || $questions->count() == 0) {
-					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => 'This quiz has no questions. Please contact administrator.', 'class' => 'danger']);
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizNoQuestions'), 'class' => 'danger']);
 				}
 				if ($quiz->shuffle) {
 					$questions = $questions->shuffle();

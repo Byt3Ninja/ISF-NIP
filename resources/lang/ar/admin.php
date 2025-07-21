@@ -2156,4 +2156,5 @@ return [
 		'No_browsers_logged' => 'لا توجد متصفحات مسجلة',
 		'No_countries_logged' => 'لا توجد دول مسجلة',
 		'No_peak_hours_logged' => 'لا توجد ساعات ذروة مسجلة',
+		'quizNoQuestions' => 'لا توجد أسئلة في هذا الاختبار. يرجى الاتصال بالمسؤول.'
 ];
