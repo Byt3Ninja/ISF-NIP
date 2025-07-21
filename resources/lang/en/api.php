@@ -31,4 +31,6 @@ return [
 	'OtherCountries' => 'Other Countries',
 	'country_not_found' => 'Country not found',
 	'validation_error' => 'Validation Error',
+	'programCreated' => 'Program Created Successfully',
+	'programUpdated' => 'Program Updated Successfully',
 ];

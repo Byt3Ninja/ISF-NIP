@@ -64,4 +64,9 @@ class Organization extends Model
 	{
 		return $this->belongsToMany(QuestionsBank::class, 'organization_question_bank', 'organization_id', 'question_id');
 	}
+
+	public function getLocalizedNameAttribute(): string
+{
+    return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
+}
 }
