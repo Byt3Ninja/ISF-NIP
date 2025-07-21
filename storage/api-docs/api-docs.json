@@ -1461,6 +1461,329 @@
                 ]
             }
         },
+        "/api/programs": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Create a new program",
+                "operationId": "storeProgram",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "organization",
+                                    "type",
+                                    "title",
+                                    "start",
+                                    "end"
+                                ],
+                                "properties": {
+                                    "organization": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "incubation"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Startup Incubator 2025"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "A program for early-stage startups"
+                                    },
+                                    "start": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-08-01"
+                                    },
+                                    "end": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-01"
+                                    },
+                                    "private": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "allowNonCompany": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "budgetAllocation": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10000
+                                    },
+                                    "currencyType": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "autoApproveMentorshipRequests": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "programGuideline": {
+                                        "type": "string",
+                                        "example": "Follow company policies."
+                                    },
+                                    "financialGuideline": {
+                                        "type": "string",
+                                        "example": "Financial rules and regulations."
+                                    },
+                                    "legalGuideline": {
+                                        "type": "string",
+                                        "example": "Legal instructions here."
+                                    },
+                                    "programGuidelineFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "financialPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "legalPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "delegationPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Program created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "title": "Startup Incubator 2025"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/programs/{id}": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Update an existing program",
+                "operationId": "updateProgram",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "organization": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "acceleration"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Startup Acceleration 2025"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated program description"
+                                    },
+                                    "start": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-09-01"
+                                    },
+                                    "end": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-01"
+                                    },
+                                    "private": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "allowNonCompany": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "budgetAllocation": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15000
+                                    },
+                                    "currencyType": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "autoApproveMentorshipRequests": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "programGuideline": {
+                                        "type": "string",
+                                        "example": "Updated guideline..."
+                                    },
+                                    "financialGuideline": {
+                                        "type": "string",
+                                        "example": "Updated financial info..."
+                                    },
+                                    "legalGuideline": {
+                                        "type": "string",
+                                        "example": "Updated legal policy..."
+                                    },
+                                    "programGuidelineFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "financialPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "legalPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "delegationPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Program updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "title": "Startup Acceleration 2025"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/roles": {
             "get": {
                 "tags": [
@@ -2228,6 +2551,10 @@
         {
             "name": "Profile",
             "description": "Profile"
+        },
+        {
+            "name": "Programs",
+            "description": "Programs"
         },
         {
             "name": "Roles",

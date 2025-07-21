@@ -19,7 +19,7 @@ use App\Http\Requests\UpdateProgramRequest;
 class ProgramController extends Controller
 {
      use ApiResponder;
-     /**
+   /**
  * @OA\Post(
  *     path="/api/programs",
  *     operationId="storeProgram",
@@ -46,22 +46,34 @@ class ProgramController extends Controller
  *                 @OA\Property(property="programGuideline", type="string", example="Follow company policies."),
  *                 @OA\Property(property="financialGuideline", type="string", example="Financial rules and regulations."),
  *                 @OA\Property(property="legalGuideline", type="string", example="Legal instructions here."),
- *                 @OA\Property(property="programGuidelineFile", type="file"),
- *                 @OA\Property(property="financialPolicyPdf", type="file"),
- *                 @OA\Property(property="legalPolicyPdf", type="file"),
- *                 @OA\Property(property="delegationPdf", type="file"),
- *                 @OA\Property(property="imgUrl", type="file"),
+ *                 @OA\Property(property="programGuidelineFile", type="string", format="binary"),
+ *                 @OA\Property(property="financialPolicyPdf", type="string", format="binary"),
+ *                 @OA\Property(property="legalPolicyPdf", type="string", format="binary"),
+ *                 @OA\Property(property="delegationPdf", type="string", format="binary"),
+ *                 @OA\Property(property="imgUrl", type="string", format="binary"),
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=201,
  *         description="Program created successfully",
- *         @OA\JsonContent(ref="#/components/schemas/ProgramResource")
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="data", type="object", example={"id": 1, "title": "Startup Incubator 2025"})
+ *         )
  *     ),
  *     @OA\Response(
  *         response=422,
- *         description="Validation error"
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 additionalProperties={"type": "array", "items": {"type": "string"}}
+ *             )
+ *         )
  *     )
  * )
  */
@@ -172,18 +184,21 @@ class ProgramController extends Controller
  *                 @OA\Property(property="programGuideline", type="string", example="Updated guideline..."),
  *                 @OA\Property(property="financialGuideline", type="string", example="Updated financial info..."),
  *                 @OA\Property(property="legalGuideline", type="string", example="Updated legal policy..."),
- *                 @OA\Property(property="programGuidelineFile", type="file"),
- *                 @OA\Property(property="financialPolicyPdf", type="file"),
- *                 @OA\Property(property="legalPolicyPdf", type="file"),
- *                 @OA\Property(property="delegationPdf", type="file"),
- *                 @OA\Property(property="imgUrl", type="file"),
+ *                 @OA\Property(property="programGuidelineFile", type="string", format="binary"),
+ *                 @OA\Property(property="financialPolicyPdf", type="string", format="binary"),
+ *                 @OA\Property(property="legalPolicyPdf", type="string", format="binary"),
+ *                 @OA\Property(property="delegationPdf", type="string", format="binary"),
+ *                 @OA\Property(property="imgUrl", type="string", format="binary"),
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=200,
  *         description="Program updated successfully",
- *         @OA\JsonContent(ref="#/components/schemas/ProgramResource")
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="data", type="object", example={"id": 1, "title": "Startup Acceleration 2025"})
+ *         )
  *     ),
  *     @OA\Response(
  *         response=404,
@@ -191,7 +206,16 @@ class ProgramController extends Controller
  *     ),
  *     @OA\Response(
  *         response=422,
- *         description="Validation error"
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 additionalProperties={"type": "array", "items": {"type": "string"}}
+ *             )
+ *         )
  *     )
  * )
  */
