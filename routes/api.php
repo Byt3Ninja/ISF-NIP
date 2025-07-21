@@ -7,6 +7,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
@@ -34,7 +35,7 @@ Route::get('company', [RegistrationController::class, 'getCompany']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/expertises',[ExpertiseController::class, 'index']);
-Route::get('countries/{id}/states', [CountryController::class, 'getStates']);
+Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/countries', [CountryController::class, 'index']);
@@ -48,7 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
-    Route::get('currencies', [CurrencyController::class, 'index']);
+    Route::get('/currencies', [CurrencyController::class, 'index']);
+    Route::post('programs', [ProgramController::class, 'store']);
+    Route::post('programs/{id}', [ProgramController::class, 'update']);
 
 });
 
