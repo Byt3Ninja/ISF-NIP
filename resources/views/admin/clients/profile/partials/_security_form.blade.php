@@ -94,7 +94,7 @@ $passwordRules = [
           </tr>
         </thead>
         <tbody>
-          @foreach($dummyActivities as $activity)
+          @foreach($activities as $activity)
           <tr>
             <td>{{ $activity->browser }}</td>
             <td>{{ $activity->device }}</td>

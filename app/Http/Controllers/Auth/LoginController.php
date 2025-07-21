@@ -81,16 +81,14 @@ class LoginController extends Controller
     {
         $ip = request()->ip();
 
-        if ($ip === '127.0.0.1' || $ip === '::1') {
-            try {
-                $response = Http::get('https://api.ipify.org?format=json');
-                $data = $response->json();
-                $ip = $data['ip'] ?? $ip;
+        try {
+               $response = Http::get('https://api.ipify.org?format=json');
+               $data = $response->json();
+               $ip = $data['ip'] ?? $ip;
             } catch (\Exception $e) {
                 Log::error('Failed to get client IP: ' . $e->getMessage());
-            }
         }
-
+     
         return $ip;
     }
 
