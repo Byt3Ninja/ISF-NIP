@@ -221,12 +221,14 @@
                                     {{ $l == 'en' ? 'My Profile' : 'ملفي الشخصي' }}
                                 </a>
                             </li>
+                            @if($currentHackathon['step_stype'] != 1)
                             <li>
                                 <a class="dropdown-item" href="#">
                                     <i class="ti ti-users me-2"></i>
                                     {{ $l == 'en' ? 'My Team' : 'فريقي' }}
                                 </a>
                             </li>
+                            @endif
                             <li>
                                 <a class="dropdown-item" href="/dashboard">
                                     <i class="ti ti-dashboard me-2"></i>
@@ -279,11 +281,30 @@
                     </div>
                     <div id="action-buttons-placeholder" class="mt-4">
                         <!-- Buttons will be injected by JS -->
+                        @php
+                            $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
+                        @endphp
+                        @if($teamcreated != null)
                         <a href="/dashboard/hackathon/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
                             style="border-radius: 50px; font-weight: 600;">
                             <i class="ti ti-settings me-2 me-2"></i>
                             {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
                         </a>
+                        @else
+                        @if($currentHackathon['step_stype'] == 6)
+                        <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3"
+                            style="border-radius: 50px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#createTeamModal">
+                            <i class="ti ti-settings me-2 me-2"></i>
+                            {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
+                        </a>
+                        @else
+                        <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3"
+                            style="border-radius: 50px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#applyModal">
+                            <i class="ti ti-send me-2 me-2"></i>
+                            {{ $l == 'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}
+                        </a>
+                        @endif
+                        @endif
                         {{-- <button class="btn btn-light btn-lg px-4 py-2 me-3"
                             style="border-radius: 50px; font-weight: 600;">
                             <i class="ti ti-user-plus me-2 me-2"></i>
@@ -368,12 +389,15 @@
                         والمحكمون' }}
                     </button>
                 </li>
+                
+                @if($currentHackathon['step_stype'] != 1)
                 <li class="nav-item me-1" role="presentation" id="teams-tab-li">
                     <button class="nav-link rounded" id="teams-tab-btn" data-bs-toggle="tab" data-bs-target="#teams"
                         type="button" role="tab" aria-controls="teams" aria-selected="false">
                         <i class="bi bi-people-fill me-2"></i> {{ $l == 'en' ? 'Team Formation' : 'تكوين الفرق' }}
                     </button>
                 </li>
+                @endif
                 <li class="nav-item me-1" role="presentation" id="submission-tab-li">
                     <button class="nav-link rounded" id="submission-tab-btn" data-bs-toggle="tab"
                         data-bs-target="#submission" type="button" role="tab" aria-controls="submission"
@@ -717,7 +741,7 @@
                         </div>
                     </div>
                 </div>
-
+            @if($currentHackathon['step_stype'] != 1)
                 <!-- Teams Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="teams" role="tabpanel" aria-labelledby="teams-tab-btn">
                     <div class="card">
@@ -794,7 +818,7 @@
                         </div>
                     </div>
                 </div>
-
+           @endif
                 <!-- Submission Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submission" role="tabpanel" aria-labelledby="submission-tab-btn">
                     <div class="card">
@@ -974,6 +998,51 @@
                  <!-- Results Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab-btn">
                     <div class="card">
+
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ $l == 'en' ? 'Former Submissions Requests' : 'طلبات تقديم الشركات' }}
+                            </h5>
+                           <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Question' : 'السؤال' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Answer' : 'الجواب' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Actions' : 'الإجراءات' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($data as $submission)
+                                        @foreach ($submission->answers as $group)
+                                            @foreach ($group as $answer)
+                                                <tr>
+                                                    <td>{{ $answer->name }}</td>
+                                                    <td>{{ $answer->label }}</td>
+                                                    <td>{{ $answer->value }}</td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <select id="cstep" class="select form-control"
+                                                                onchange="changestep({{ $answer->company_id }},this.options[this.selectedIndex].value)">
+                                                                <option value="0">{{ __('cycles.Disapprove') }}</option>
+                                                                @foreach (\App\Step::where('cycle_id', $submission->cycle_id)->orderBy('arr')->get() as $step)
+                                                                <option value="{{ $step->id }}"
+                                                                    {{ $step->id == $answer->company_step ? 'selected' : '' }}>
+                                                                    {{ $step->title }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
+                                    @endforeach
+                                </tbody>
+                            </table>
+                           
+                    
+                            
+                        </div>
                        
                     </div>
                 </div>
@@ -981,6 +1050,7 @@
             </div>
         </div>
 
+        @if($currentHackathon['step_stype'] == 6)
         <!-- Create Team Modal -->
         <div class="modal fade" id="createTeamModal" tabindex="-1" aria-labelledby="createTeamModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -992,33 +1062,37 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="createTeamForm">
+                        <form method="POST" action="/dashboard/hackathon/createTeam">
+                            @csrf
+                            <input type="hidden" name="step_id" value="{{ $currentHackathon['step_id'] }}">
+                            <input type="hidden" name="cycle_id" value="{{ $id }}">
                             <div class="mb-3">
                                 <label for="teamName" class="form-label">
                                     {{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}
                                 </label>
-                                <input type="text" class="form-control" id="teamName" required>
+                                <input type="text" class="form-control" name="team_name" value="{{ Auth::user()->company->{'name_' . $l} ?? '' }}" id="teamName" required>
                             </div>
                             <div class="mb-3">
                                 <label for="teamDescription" class="form-label">
                                     {{ $l == 'en' ? 'Brief Team/Idea Description (Optional)' : 'وصف مختصر للفريق/الفكرة (اختياري)' }}
                                 </label>
-                                <textarea class="form-control" id="teamDescription" rows="2"></textarea>
+                                <textarea class="form-control" name="description" id="teamDescription" rows="2"></textarea>
                             </div>
-                        </form>
+                       
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
                             {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
                         </button>
-                        <button type="button" class="btn btn-primary" onclick="createTeam()">
+                        <button type="submit"  class="btn btn-primary" >
                             {{ $l == 'en' ? 'Create Team' : 'إنشاء الفريق' }}
                         </button>
                     </div>
+                     </form>
                 </div>
             </div>
         </div>
-
+        @endif
         <!-- Solution Details Modal -->
         <div class="modal fade" id="solutionDetailsModal" tabindex="-1" aria-labelledby="solutionDetailsModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -1306,19 +1380,19 @@
             window.location.href = url.href;
         }
 
-        function createTeam() {
-            const teamName = document.getElementById('teamName').value;
-            if (!teamName.trim()) {
-                alert('{{ $l == "en" ? "Please enter a team name." : "يرجى إدخال اسم للفريق." }}');
-                return;
-            }
-            alert(`{{ $l == "en" ? "Team created successfully!" : "تم إنشاء فريق" }} "${teamName}" {{ $l == "en" ? "" : "بنجاح!" }}`);
-            var createTeamModal = bootstrap.Modal.getInstance(document.getElementById('createTeamModal'));
-            createTeamModal.hide();
-            const url = new URL(window.location);
-            url.searchParams.set('teamCreated', 'true');
-            window.location.href = url.href;
-        }
+        // function createTeam() {
+        //     const teamName = document.getElementById('teamName').value;
+        //     if (!teamName.trim()) {
+        //         alert('{{ $l == "en" ? "Please enter a team name." : "يرجى إدخال اسم للفريق." }}');
+        //         return;
+        //     }
+        //     alert(`{{ $l == "en" ? "Team created successfully!" : "تم إنشاء فريق" }} "${teamName}" {{ $l == "en" ? "" : "بنجاح!" }}`);
+        //     var createTeamModal = bootstrap.Modal.getInstance(document.getElementById('createTeamModal'));
+        //     createTeamModal.hide();
+        //     const url = new URL(window.location);
+        //     url.searchParams.set('teamCreated', 'true');
+        //     window.location.href = url.href;
+        // }
 
         function joinTeam(teamName) {
             if (confirm(`{{ $l == "en" ? "Are you sure you want to request to join team" : "هل أنت متأكد أنك تريد طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
@@ -1416,6 +1490,35 @@
                 countdownElement.innerHTML = `${days} {{ $l == 'en' ? 'days' : 'يوم' }} {{ $l == 'en' ? 'and' : 'و' }} ${hours} {{ $l == 'en' ? 'hours' : 'ساعة' }} {{ $l == 'en' ? 'and' : 'و' }} ${minutes} {{ $l == 'en' ? 'minutes' : 'دقيقة' }} {{ $l == 'en' ? 'and' : 'و' }} ${seconds} {{ $l == 'en' ? 'seconds' : 'ثانية' }}`;
             }, 1000);
         }
+
+        function changestep(company, step) {
+      if (confirm("{{ __('cycles.sure change step') }}")) {
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/screening/changestep",
+          data: {
+            "company": company,
+            "step": step,
+          },
+          success: function(response) {
+            // alert(response.ddddd);
+            console.log(response);
+            // location.href = '/dashboard/hackathon/details/{{ $id }}';
+            location.reload();
+          },
+          error: function(error) {
+            console.log("Error Occurred, arrange failed");
+          }
+        });
+      } else {
+        location.reload();
+      }
+    }
     </script>
 </body>
 
