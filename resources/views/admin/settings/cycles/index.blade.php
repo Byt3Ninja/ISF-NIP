@@ -397,7 +397,7 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control"></textarea>
+              class="form-control" required></textarea>
           </div>
 
           <div class="form-group mb-4" id="team_number">
@@ -479,7 +479,7 @@
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
           <div class="form-group mb-0">
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control"></textarea>
+              class="form-control" required></textarea>
           </div>
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">

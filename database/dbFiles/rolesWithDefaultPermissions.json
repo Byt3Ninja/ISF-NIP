@@ -6336,7 +6336,10 @@
                 "description": "Show Programs Card - (Startup)",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             },
             {
                 "name": "dashboard.widgets_cards_rate_view",
