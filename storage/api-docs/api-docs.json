@@ -449,17 +449,17 @@
                 "tags": [
                     "Dashboard"
                 ],
-                "summary": "Get dashboard data for Admin , Organization Manager , Judger and Mentor",
+                "summary": "Retrieve dashboard data for Admin, Organization Manager, Judger, or Mentor",
                 "operationId": "ed4235c7e3cd435fdad1da90707874d1",
                 "responses": {
                     "200": {
-                        "description": "Dashboard data returned successfully",
+                        "description": "Dashboard data retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "description": "Admin Dashboard Response",
+                                            "title": "Admin Dashboard",
                                             "properties": {
                                                 "totalUsers": {
                                                     "type": "integer",
@@ -579,7 +579,7 @@
                                             "type": "object"
                                         },
                                         {
-                                            "description": "Mentor Dashboard Response",
+                                            "title": "Mentor Dashboard",
                                             "properties": {
                                                 "comingSessionsCount": {
                                                     "type": "integer",
@@ -662,12 +662,26 @@
                                                 "startupAttendanceRate": {
                                                     "type": "string",
                                                     "example": "85%"
+                                                },
+                                                "mentorAverageRating": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.5
+                                                },
+                                                "totalMentorshipHours": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 42.5
+                                                },
+                                                "totalMentorshipSessions": {
+                                                    "type": "integer",
+                                                    "example": 18
                                                 }
                                             },
                                             "type": "object"
                                         },
                                         {
-                                            "description": "Judger Dashboard Response",
+                                            "title": "Judger Dashboard",
                                             "properties": {
                                                 "screening": {
                                                     "type": "integer",

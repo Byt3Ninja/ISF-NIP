@@ -398,6 +398,23 @@ class DashboardService
         $attended = $completedSessions->sum('done');
         $attendsRate = $total > 0 ? round(($attended / $total) * 100, 2) . '%' : '0%';
 
+        $mentorAverageRating = DB::table('mentorship_requests')
+            ->where('mentor_id', $mentorId)
+            ->whereNotNull('rating')
+            ->avg('rating');
+        $mentorRatingAverage = $mentorAverageRating ? round($mentorAverageRating, 2) : null;
+
+        $totalHours = DB::table('mentorship_requests')
+            ->where('mentor_id', $mentorId)
+            ->whereNotNull('period')
+            ->sum('period'); 
+        $totalHoursFormatted = round($totalHours / 60, 2);
+
+        $totalSessions = DB::table('mentorship_requests')
+        ->where('mentor_id', $mentorId)
+        ->whereNotNull('zoom_date')
+        ->count();
+
         return [
             'comingSessionsCount' => $comingSessionsCount,
             'currentSchedule' => $schedules,
@@ -406,6 +423,9 @@ class DashboardService
             'nonCompletedTasks' => $nonCompletedTasks,
             'sessionWithoutTasks' => $sessionWithoutTasks,
             'startupAttendanceRate' => $attendsRate,
+            'mentorAverageRating' => $mentorRatingAverage,
+            'totalMentorshipHours' => $totalHoursFormatted,
+            'totalMentorshipSessions' => $totalSessions,
         ];
     }
 

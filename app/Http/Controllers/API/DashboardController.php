@@ -12,16 +12,16 @@ use Illuminate\Support\Facades\Auth;
 /**
  * @OA\Get(
  *     path="/api/dashboard",
- *     summary="Get dashboard data for Admin , Organization Manager , Judger and Mentor",
+ *     summary="Retrieve dashboard data for Admin, Organization Manager, Judger, or Mentor",
  *     tags={"Dashboard"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
  *         response=200,
- *         description="Dashboard data returned successfully",
+ *         description="Dashboard data retrieved successfully",
  *         @OA\JsonContent(
  *             oneOf={
  *                 @OA\Schema(
- *                     description="Admin Dashboard Response",
+ *                     title="Admin Dashboard",
  *                     @OA\Property(property="totalUsers", type="integer", example=150),
  *                     @OA\Property(property="totalUsersChange", type="number", format="float", example=5.4),
  *                     @OA\Property(property="totalSessions", type="integer", example=200),
@@ -67,7 +67,7 @@ use Illuminate\Support\Facades\Auth;
  *                     )
  *                 ),
  *                 @OA\Schema(
- *                     description="Mentor Dashboard Response",
+ *                     title="Mentor Dashboard",
  *                     @OA\Property(property="comingSessionsCount", type="integer", example=2),
  *                     @OA\Property(
  *                         property="currentSchedule",
@@ -94,10 +94,13 @@ use Illuminate\Support\Facades\Auth;
  *                     @OA\Property(property="completedTasks", type="integer", example=5),
  *                     @OA\Property(property="nonCompletedTasks", type="integer", example=2),
  *                     @OA\Property(property="sessionWithoutTasks", type="integer", example=3),
- *                     @OA\Property(property="startupAttendanceRate", type="string", example="85%")
+ *                     @OA\Property(property="startupAttendanceRate", type="string", example="85%"),
+ *                     @OA\Property(property="mentorAverageRating", type="number", format="float", example=4.5),
+ *                     @OA\Property(property="totalMentorshipHours", type="number", format="float", example=42.5),
+ *                     @OA\Property(property="totalMentorshipSessions", type="integer", example=18)
  *                 ),
  *                 @OA\Schema(
- *                     description="Judger Dashboard Response",
+ *                     title="Judger Dashboard",
  *                     @OA\Property(property="screening", type="integer", example=10),
  *                     @OA\Property(property="finalScreening", type="integer", example=5),
  *                     @OA\Property(
@@ -114,14 +117,14 @@ use Illuminate\Support\Facades\Auth;
  *                             @OA\Property(
  *                                 property="companies",
  *                                 type="array",
- *                                @OA\Items(
-*                                   @OA\Property(property="startupLogo", type="string", example="https://example.com/logo.png"),
-*                                   @OA\Property(property="startupName", type="string", example="TechStart"),
-*                                   @OA\Property(property="imgUrl", type="string", example="https://example.com/user.png"),
-*                                   @OA\Property(property="userName", type="string", example="Sarah Johnson"),
-*                                   @OA\Property(property="userTitle", type="string", example="CEO"),
-*                                   @OA\Property(property="evaluationStatus", type="string", example="completed")
-*                             )
+ *                                 @OA\Items(
+ *                                     @OA\Property(property="startupLogo", type="string", example="https://example.com/logo.png"),
+ *                                     @OA\Property(property="startupName", type="string", example="TechStart"),
+ *                                     @OA\Property(property="imgUrl", type="string", example="https://example.com/user.png"),
+ *                                     @OA\Property(property="userName", type="string", example="Sarah Johnson"),
+ *                                     @OA\Property(property="userTitle", type="string", example="CEO"),
+ *                                     @OA\Property(property="evaluationStatus", type="string", example="completed")
+ *                                 )
  *                             )
  *                         )
  *                     )
@@ -139,6 +142,7 @@ use Illuminate\Support\Facades\Auth;
  *     )
  * )
  */
+
 class DashboardController extends Controller
 {
     use ApiResponder;
