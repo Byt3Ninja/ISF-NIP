@@ -402,7 +402,7 @@
 
           <div class="form-group mb-4" id="team_number">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='count_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='count_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
         </div>
         <div class="modal-footer">
