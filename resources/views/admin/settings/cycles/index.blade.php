@@ -484,7 +484,7 @@
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='mcount_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='mcount_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
 
 
