@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Step;
+use App\Screening;
 use Carbon\Carbon;
+use App\Finalscreening;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardService
 {
@@ -744,5 +748,109 @@ class DashboardService
         'metadata' => ['lastUpdated' => now()->format('Y-m-d H:i:s')],
     ];
 }
+public function judgerDashboard(): array
+{
+    $judgerId = auth()->id();
 
+    $screeningsCount = Screening::where('user_id', $judgerId)->count();
+    $finalScreeningsCount = FinalScreening::whereJsonContains('judges', (string) $judgerId)->count();
+
+    $stepIds = Screening::where('user_id', $judgerId)->pluck('step_id')->unique();
+
+    if ($stepIds->isEmpty()) {
+        return [
+            'screeningsCount' => $screeningsCount,
+            'finalScreeningsCount' => $finalScreeningsCount,
+            'judgingList' => [],
+        ];
+    }
+
+    $getNotEvaluatedCompanies = collect(DB::select("
+        SELECT
+            results.id AS result_id,
+            results.evaluation_id,
+            eval.step_id AS step_id,
+            results.company_id AS company_id,
+            results.status
+        FROM
+            screening_evaluation_results as results
+        LEFT JOIN
+            screening_evaluation as eval ON eval.id = results.evaluation_id
+        WHERE
+            results.user_id = ?
+    ", [ $judgerId ]));
+
+    $establishedEvaluations = collect(DB::select("
+        SELECT
+            eval.id,
+            eval.step_id,
+            eval.status
+        FROM
+            screening_evaluation as eval
+        WHERE
+            eval.step_id IN (" . implode(',', $stepIds->toArray()) . ")
+    "));
+
+    $steps = Step::whereIn('id', $stepIds)
+        ->with([
+            'cycle:id,title,start,end',
+            'companies' => function ($q) {
+                $q->select('id', 'name_en','logo','step', 'cycle')
+                    ->with(['user:id,first_name_en,last_name_en,title_en,company_id,img_url']);
+            }
+        ])
+        ->get(['id', 'title', 'description', 'from', 'to', 'cycle_id']);
+
+    $judgingList = $steps->map(function ($step) use ($getNotEvaluatedCompanies, $establishedEvaluations) {
+        $stepEval = $establishedEvaluations->firstWhere('step_id', $step->id);
+        $isEvalEstablished = $stepEval && $stepEval->status != 0;
+
+        $companies = $step->companies->map(function ($company) use ($getNotEvaluatedCompanies, $isEvalEstablished, $step) {
+            $user = $company->user;
+            $userImg = $user?->img_url
+                ? Storage::disk('public_uploads')->url($user->img_url)
+                : null;
+
+            if (!$isEvalEstablished) {
+                $evaluationStatus = 'not_started';
+            } else {
+                $responds = $getNotEvaluatedCompanies->where('company_id', $company->id)
+                    ->where('step_id', $step->id);
+
+                if ($responds->isEmpty()) {
+                    $evaluationStatus = 'not_evaluated';
+                } else {
+                    $havePending = $responds->where('status', 0)->count();
+                    $evaluationStatus = $havePending > 0 ? 'in_progress' : 'evaluated';
+                }
+            }
+
+            return [
+                'startupLogo' => $company->logo_url,
+                'startupName'       => $company->name_en,
+                'imgUrl'           => $userImg,
+                'userName'          => optional($user)->first_name_en . ' ' . optional($user)->last_name_en,
+                'userTitle'         => optional($user)->title_en,
+                'evaluationStatus'  => $evaluationStatus,
+            ];
+        });
+
+        return [
+            'stepTitle'     => $step->title,
+            'stepFrom'      => $step->from ? Carbon::parse($step->from)->format('Y-m-d') : null,
+            'stepTo'        => $step->to ? Carbon::parse($step->to)->format('Y-m-d') : null,
+            'stepDesc'      => $step->description,
+            'cycleTitle'    => optional($step->cycle)->title,
+            'cycleStart'    => optional($step->cycle)?->start ? Carbon::parse($step->cycle->start)->format('Y-m-d') : null,
+            'cycleEnd'      => optional($step->cycle)?->end ? Carbon::parse($step->cycle->end)->format('Y-m-d') : null,
+            'companies'     => $companies->toArray(),
+        ];
+    });
+
+    return [
+        'screening'      => $screeningsCount,
+        'finalScreening' => $finalScreeningsCount,
+        'judgingList'    => $judgingList->toArray(),
+    ];
+}
 }

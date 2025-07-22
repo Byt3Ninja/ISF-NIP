@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * @OA\Get(
  *     path="/api/dashboard",
- *     summary="Get dashboard data for Admin , Organization Manager and Mentor",
+ *     summary="Get dashboard data for Admin , Organization Manager , Judger and Mentor",
  *     tags={"Dashboard"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
@@ -95,6 +95,36 @@ use Illuminate\Support\Facades\Auth;
  *                     @OA\Property(property="nonCompletedTasks", type="integer", example=2),
  *                     @OA\Property(property="sessionWithoutTasks", type="integer", example=3),
  *                     @OA\Property(property="startupAttendanceRate", type="string", example="85%")
+ *                 ),
+ *                 @OA\Schema(
+ *                     description="Judger Dashboard Response",
+ *                     @OA\Property(property="screening", type="integer", example=10),
+ *                     @OA\Property(property="finalScreening", type="integer", example=5),
+ *                     @OA\Property(
+ *                         property="judgingList",
+ *                         type="array",
+ *                         @OA\Items(
+ *                             @OA\Property(property="stepTitle", type="string", example="Initial Screening"),
+ *                             @OA\Property(property="stepFrom", type="string", example="2025-06-01"),
+ *                             @OA\Property(property="stepTo", type="string", example="2025-06-30"),
+ *                             @OA\Property(property="stepDesc", type="string", example="Evaluate startups in the first round."),
+ *                             @OA\Property(property="cycleTitle", type="string", example="Summer Accelerator 2025"),
+ *                             @OA\Property(property="cycleStart", type="string", example="2025-05-01"),
+ *                             @OA\Property(property="cycleEnd", type="string", example="2025-08-01"),
+ *                             @OA\Property(
+ *                                 property="companies",
+ *                                 type="array",
+ *                                @OA\Items(
+*                                   @OA\Property(property="startupLogo", type="string", example="https://example.com/logo.png"),
+*                                   @OA\Property(property="startupName", type="string", example="TechStart"),
+*                                   @OA\Property(property="imgUrl", type="string", example="https://example.com/user.png"),
+*                                   @OA\Property(property="userName", type="string", example="Sarah Johnson"),
+*                                   @OA\Property(property="userTitle", type="string", example="CEO"),
+*                                   @OA\Property(property="evaluationStatus", type="string", example="completed")
+*                             )
+ *                             )
+ *                         )
+ *                     )
  *                 )
  *             }
  *         )
@@ -138,6 +168,17 @@ class DashboardController extends Controller
         elseif ($user->hasRole('organizationManager')) {
             $data = $this->dashboardService->organizationManagerDashboard($user->organization_id, $nameColumn);
             return $this->success($data);
+        }
+        elseif ($user->hasRole('Judger')) {
+            $data = $this->dashboardService->judgerDashboard($nameColumn);
+            return $this->success($data);
+        }
+        // elseif ($user->hasRole('Registered')) {
+        //     $data = $this->dashboardService->judgerDashboard($nameColumn);
+        //     return $this->success($data);
+        // }
+        else{
+            return $this->forbidden(__('api.forbidden'));
         }
         
 

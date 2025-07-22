@@ -449,7 +449,7 @@
                 "tags": [
                     "Dashboard"
                 ],
-                "summary": "Get dashboard data for Admin , Organization Manager and Mentor",
+                "summary": "Get dashboard data for Admin , Organization Manager , Judger and Mentor",
                 "operationId": "ed4235c7e3cd435fdad1da90707874d1",
                 "responses": {
                     "200": {
@@ -662,6 +662,88 @@
                                                 "startupAttendanceRate": {
                                                     "type": "string",
                                                     "example": "85%"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "description": "Judger Dashboard Response",
+                                            "properties": {
+                                                "screening": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "finalScreening": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "judgingList": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "stepTitle": {
+                                                                "type": "string",
+                                                                "example": "Initial Screening"
+                                                            },
+                                                            "stepFrom": {
+                                                                "type": "string",
+                                                                "example": "2025-06-01"
+                                                            },
+                                                            "stepTo": {
+                                                                "type": "string",
+                                                                "example": "2025-06-30"
+                                                            },
+                                                            "stepDesc": {
+                                                                "type": "string",
+                                                                "example": "Evaluate startups in the first round."
+                                                            },
+                                                            "cycleTitle": {
+                                                                "type": "string",
+                                                                "example": "Summer Accelerator 2025"
+                                                            },
+                                                            "cycleStart": {
+                                                                "type": "string",
+                                                                "example": "2025-05-01"
+                                                            },
+                                                            "cycleEnd": {
+                                                                "type": "string",
+                                                                "example": "2025-08-01"
+                                                            },
+                                                            "companies": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "startupLogo": {
+                                                                            "type": "string",
+                                                                            "example": "https://example.com/logo.png"
+                                                                        },
+                                                                        "startupName": {
+                                                                            "type": "string",
+                                                                            "example": "TechStart"
+                                                                        },
+                                                                        "imgUrl": {
+                                                                            "type": "string",
+                                                                            "example": "https://example.com/user.png"
+                                                                        },
+                                                                        "userName": {
+                                                                            "type": "string",
+                                                                            "example": "Sarah Johnson"
+                                                                        },
+                                                                        "userTitle": {
+                                                                            "type": "string",
+                                                                            "example": "CEO"
+                                                                        },
+                                                                        "evaluationStatus": {
+                                                                            "type": "string",
+                                                                            "example": "completed"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
