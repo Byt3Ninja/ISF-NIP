@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 // use App\Hackathon;
 
-use App\Company;
 use App\Step;
 use App\User;
 use stdClass;
 use App\Cycle;
+use App\Company;
 use App\Formfield;
 use Carbon\Carbon;
 use App\Team_member;
@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\InviteToHackathon;
+use Beta\Microsoft\Graph\Model\Team;
+use Illuminate\Support\Facades\Notification;
 
 class HackathonController extends Controller
 {
@@ -45,8 +47,8 @@ class HackathonController extends Controller
         $hackathons_raw = collect(DB::select($hackathons_query));
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
-        
-        $hackathons = $hackathons_raw->map(function ($item, $key) use ($step) {
+        $team_formation = TeamFormation::whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->where('user_id', Auth::user()->id)->get();
+        $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
         $now = now();
         $start = \Carbon\Carbon::parse($item->c_start_date);
         $end = \Carbon\Carbon::parse($item->c_end_date);
@@ -66,6 +68,7 @@ class HackathonController extends Controller
                 'step_id' => $step->where('cycle_id', $item->c_id)->first()->id ?? null,
                 'step_start' => $step->where('cycle_id', $item->c_id)->first()->from?->format('Y-m-d') ?? null,
                 'step_end' => $step->where('cycle_id', $item->c_id)->first()->to?->format('Y-m-d') ?? null,
+                'team_formation_id' => $team_formation->where('cycle_id', $item->c_id)->first()->id ?? null,
             ];
          });
 
@@ -81,16 +84,85 @@ class HackathonController extends Controller
         return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step'));
     }
 
-    public function manage( )
+    public function manage($id)
     {
-        return view('admin.hackathon.manage-team');
+        $user = Auth::user();
+                 
+        $team_Formation = "SELECT 
+        tf.id as 'tf_id',
+        tf.name as 'tf_name',
+        tf.description as 'tf_description',
+        tf.cycle_id as 'tf_cycle_id',
+        tf.step_id as 'tf_step_id',
+        tf.user_id as 'tf_user_id',
+        tf.created_at as 'tf_created_at',
+        tf.updated_at as 'tf_updated_at',
+        u.id as 'u_id',
+        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+        u.email as 'u_email',
+        u.img_url as 'u_img_url',
+        c.id as 'c_id',
+        c.name_en as 'c_name_en',
+        c.name_ar as 'c_name_ar',
+        c.logo as 'c_logo',
+        tm.id as 'tm_id',
+        tm.user_id as 'tm_user_id',
+        tm.team_formation_id as 'tm_team_formation_id',
+        tm.Name as 'tm_name',
+        tm.email as 'tm_email',
+        tm.acceptInvition as 'tm_acceptInvition',
+        tm.isTeamLeader as 'tm_isTeamLeader',
+        tm.created_at as 'tm_created_at',
+        tm.updated_at as 'tm_updated_at',
+        s.id as 's_id',
+        s.title as 's_title',
+        s.count_team_number as 's_count_team_number',
+        s.stype as 's_stype'
+        FROM 
+        team_formations as tf
+        LEFT JOIN users as u ON u.id = tf.user_id
+        LEFT JOIN companies as c ON c.id = u.company_id
+        LEFT JOIN team_members as tm ON tm.team_formation_id = tf.id
+        LEFT JOIN steps as s ON s.id = tf.step_id
+        LEFT JOIN cycles as cy ON cy.id = tf.cycle_id
+        WHERE tm.team_formation_id = ? ";
+        $team_Formation_raw = collect(DB::select($team_Formation, [$id]));
+        
+        $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
+       $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
+        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members'));
     }
 
     public function myTeam()
     {
         // $hackathon = Hackathon::findOrFail($id);
         // return view('admin.hackathon.my-team', compact('hackathon'));
-        return view('admin.hackathon.team-workspace');
+        $user = Auth::user();
+        $team_Formation_q = "SELECT 
+        tf.*,
+        u.id as 'u_id',
+        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+        u.email as 'u_email',
+        u.img_url as 'u_img_url',
+        tm.id as 'tm_id',
+        tm.user_id as 'tm_user_id',
+        tm.team_formation_id as 'tm_team_formation_id',
+        tm.Name as 'tm_name',
+        tm.email as 'tm_email',
+        tm.acceptInvition as 'tm_acceptInvition',
+        tm.isTeamLeader as 'tm_isTeamLeader' 
+        FROM 
+        team_formations as tf
+        LEFT JOIN users as u ON u.id = tf.user_id
+        LEFT JOIN team_members as tm ON tm.team_formation_id = tf.id
+        WHERE tf.user_id = ? AND tm.acceptInvition = 'accepted'";
+        $team_Formation_raw = collect(DB::select($team_Formation_q, [$user->id]));
+
+
+        // dd($team_Forsmation_raw);
+        return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
     }
 
     public function show($id) {
@@ -111,6 +183,10 @@ class HackathonController extends Controller
         o.img_url as 'o_logo',
         o.created_at as 'o_created_at',
         o.updated_at as 'o_updated_at',
+        u.id as 'U_id',
+        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+        u.email as 'u_email',
         com.id as 'Com_id',
         com.name_en as 'Com_name_en',
         com.name_ar as 'Com_name_ar',
@@ -123,17 +199,12 @@ class HackathonController extends Controller
         LEFT JOIN users as u ON u.company_id = com.id
         LEFT JOIN organizations as o ON c.organization_id = o.id
         WHERE c.type = 'Hackathon'
-        AND c.id = ?";
-        if(!$user->hasRole('admin')){
-        $hackathons_query .= " AND u.id = ?";
-        }
+        AND c.id = ? ";
+        
         $hackathons_query .= " ORDER BY c.created_at DESC";
-
-       if(!$user->hasRole('admin')){
-        $hackathons_raw = collect(DB::select($hackathons_query, [$id, $user->id]));
-       }else{
         $hackathons_raw = collect(DB::select($hackathons_query, [$id]));
-       }
+       
+       
         if ($hackathons_raw->isNotEmpty()) {
             $item = $hackathons_raw->first();
 
@@ -173,7 +244,7 @@ class HackathonController extends Controller
                 'cycle_id' => $id,
             ];
         }
-            // dd($currentHackathon);
+          
       
 
 
@@ -464,50 +535,113 @@ class HackathonController extends Controller
 
     public function invitation(Request $request){
         $request->validate([
-            'email' => 'required|email',
-            'user_id' => 'required|exists:users,id',
+            'memberEmail' => 'required|email',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
+        $email = $request->memberEmail;
         $user = Auth::user();
         $team_q = TeamFormation::where('user_id', $user->id)->first();
         if (!$team_q) {
             return redirect()->back()->with('error', 'You are not authorized to send invitations.');
         }
-        $user_q = User::where('email', $request->email)->where('id', $request->user_id)->first();
+        $user_q = User::where('email', $request->memberEmail)->where('id', $request->user_id)->first();
         if (!$user_q) {
-            return redirect()->back()->with('error', 'User not found.');
-        }
+            $teamMember = new Team_member();
+            $teamMember->Name = 'Waiting for user';
+            $teamMember->TeamMember = 'hackathon';
+            $teamMember->isTeamLeader = 0;
+            $teamMember->team_formation_id = $team_q->id;
+            $teamMember->email = $email;
+            $teamMember->acceptInvition = 'pending';
+            $teamMember->Company_id = $user->company_id;
+            $teamMember->code = uniqid('inv_');
+            $teamMember->expire_at = now()->addHours(24);
+            $teamMember->save();
+            
+           Notification::route('mail', $email)->notify(new InviteToHackathon($user, $team_q, $teamMember));
+           
+            return redirect()->back()->with('success', 'Invitation sent successfully. Waiting for user to join.');
+        }else{
+     
         $teamMember = new Team_member();
         $teamMember->user_id = $request->user_id;
         $teamMember->Name = $user_q->first_name . ' ' . $user_q->last_name;
         $teamMember->TeamMember = 'hackathon';
         $teamMember->isTeamLeader = 0;
         $teamMember->team_formation_id = $team_q->id;
-        $teamMember->email = $request->email;
+        $teamMember->email = $email;
         $teamMember->acceptInvition = 'pending';
+        $teamMember->Company_id = $user->company_id;
+        $teamMember->code = uniqid('inv_');
+        $teamMember->expire_at = now()->addHours(24);
         $teamMember->save();
-
-        $user_q->notify(new InviteToHackathon($user, $team_q));
+        $user_q->notify(new InviteToHackathon($user, $team_q, $teamMember));
+        }
+        
 
         // Send invitation email logic here
 
         return redirect()->back()->with('success', 'Invitation sent successfully.');
     }
 
-    public function acceptInvitation($id)
+    public function cancelInvitation(Request $request)
     {
         $user = Auth::user();
-        $teamMember = Team_member::where('user_id', $user->id)->where('id', $id)->where('acceptInvition', 'pending')->first();
+        $teamMember = Team_member::where('id', $request->id)->where('acceptInvition', 'pending')->first();
         if (!$teamMember) {
-            return redirect()->back()->with('error', 'Invitation not found.');
+            return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
-        $teamMember->acceptInvition = 'accepted';
+        $teamMember->acceptInvition = 'cancelled';
         $teamMember->save();
 
-        $allteamMembers = Team_member::where('user_id', $user->id)->where('acceptInvition', 'pending')
-            ->get();
-            $allteamMembers->acceptInvition = 'rejected';
-            $allteamMembers->save();
+        return response()->json(['success' => true, 'message' => __("admin.Invitation_cancelled_successfully.")]);
+    }
+
+    public function acceptInvitation($id)
+    {
+       
+        $user = Auth::user();
+        $isExpired = Team_member::where('id', $id)
+            ->where('acceptInvition', 'pending')
+            ->where('created_at', '<', now()->subHours(24))
+            ->first();
+           
+            if($isExpired) {
+                $isExpired->acceptInvition = 'expired';
+                $isExpired->Name = $user->first_name . ' ' . $user->last_name;
+                $isExpired->TeamMember = 'hackathon';
+                $isExpired->isTeamLeader = 0;
+                $isExpired->user_id = $user->id;
+                $isExpired->save();
+                return redirect()->back()->with('error', 'Invitation has expired.');
+            }
+                
+                $teamMember = Team_member::where('id', $id)
+                ->where('acceptInvition', 'pending')
+                ->first();
+            if (!$teamMember) {
+                return redirect()->back()->with('error', 'Invitation not found.');
+            }
+                $teamMember->acceptInvition = 'accepted';
+                $teamMember->Name = $user->first_name . ' ' . $user->last_name;
+                $teamMember->TeamMember = 'hackathon';
+                $teamMember->isTeamLeader = 0;
+                $teamMember->user_id = $user->id;
+                $teamMember->save();
+
+                $allteamMembers = Team_member::where('Email', $teamMember->Email)
+                ->where('acceptInvition', 'pending')
+                ->get();
+            
+                foreach ($allteamMembers as $allteamMember) {
+                    $allteamMember->acceptInvition = 'rejected';
+                    $allteamMember->Name = $user->first_name . ' ' . $user->last_name;
+                    $allteamMember->TeamMember = 'hackathon';
+                    $allteamMember->isTeamLeader = 0;
+                    $allteamMember->user_id = $user->id;
+                    $allteamMember->save();
+                }
 
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
     }
@@ -515,27 +649,50 @@ class HackathonController extends Controller
     public function rejectInvitation($id)
     {
         $user = Auth::user();
-        $teamMember = Team_member::where('user_id', $user->id)->where('id', $id)->where('acceptInvition', 'pending')->first();
-        if (!$teamMember) {
-            return redirect()->back()->with('error', 'Invitation not found.');
-        }
-        $teamMember->acceptInvition = 'rejected';
-        $teamMember->save();
+        $isExpired = Team_member::where('id', $id)
+            ->where('acceptInvition', 'pending')
+            ->where('created_at', '<', now()->subHours(24))
+            ->first();
+           
+            if($isExpired) {
+                $isExpired->acceptInvition = 'expired';
+                $isExpired->Name = $user->first_name . ' ' . $user->last_name;
+                $isExpired->TeamMember = 'hackathon';
+                $isExpired->isTeamLeader = 0;
+                $isExpired->user_id = $user->id;
+                $isExpired->save();
+                return redirect()->back()->with('error', 'Invitation has expired.');
+            }
+                
+                $teamMember = Team_member::where('id', $id)
+                ->where('acceptInvition', 'pending')
+                ->first();
+            if (!$teamMember) {
+                return redirect()->back()->with('error', 'Invitation not found.');
+            }
+                $teamMember->acceptInvition = 'rejected';
+                $teamMember->Name = $user->first_name . ' ' . $user->last_name;
+                $teamMember->TeamMember = 'hackathon';
+                $teamMember->isTeamLeader = 0;
+                $teamMember->user_id = $user->id;
+                $teamMember->save();
+
+                
 
         return redirect()->back()->with('success', 'Invitation rejected successfully.');
     }
 
-    public function getOutTeam()
+    public function getOutTeam(Request $request)
     {
         $user = Auth::user();
-        $teamMember = Team_member::where('user_id', $user->id)->where('acceptInvition', 'accepted')->first();
+        $teamMember = Team_member::where('id', $request->id)->where('acceptInvition', 'accepted')->first();
         if (!$teamMember) {
-            return redirect()->back()->with('error', 'You are not part of any team.');
+            return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
-        $teamMember->acceptInvition = 'rejected';
+        $teamMember->acceptInvition = 'removed';
         $teamMember->save();
 
-        return redirect()->back()->with('success', 'You have successfully left the team.');
+        return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
 
 }

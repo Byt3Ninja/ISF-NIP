@@ -13,11 +13,13 @@ class InviteToHackathon extends Notification implements ShouldQueue
 
     public $teamLeader;
     public $team_q;
+    public $teamMember;
 
-    public function __construct($teamLeader, $team_q)
+    public function __construct($teamLeader, $team_q, $teamMember)
     {
         $this->teamLeader = $teamLeader;
         $this->team_q = $team_q;
+        $this->teamMember = $teamMember;
     }
 
     public function via($notifiable)
@@ -37,6 +39,6 @@ class InviteToHackathon extends Notification implements ShouldQueue
 
             return (new MailMessage)
             ->subject(__('admin.Invitation_to_Join_a_Hackathon_Team'))
-            ->markdown('emails.hackathon_inviteTeam', ['data' => $this->teamLeader, 'teamName' => $this->team_q]);
+            ->markdown('emails.hackathon_inviteTeam', ['data' => $this->teamLeader, 'teamName' => $this->team_q, 'teamMember' => $this->teamMember]);
     }
 }

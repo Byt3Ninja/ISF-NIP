@@ -109,11 +109,20 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Hackathon Routes
     Route::get('hackathon', 'HackathonController@index')->name('hackathon.view');
+    Route::get('hackathon/{id}/manage', 'HackathonController@manage')->name('hackathon.manageTeam');
     Route::get('apply/{id}/hackathon', 'HackathonController@applyHackathon')->name('hackathon.apply');
     Route::get('submission/{id}/hackathon', 'HackathonController@hackathonSubmissions')->name('hackathon.hackathonSubmissions');
     Route::post('hackathon/createTeam', 'HackathonController@createTeam')->name('hackathon.createTeam');
-    Route::get('hackathon/manage', [HackathonController::class, 'manage']);
-    Route::get('hackathon/my-team', [HackathonController::class, 'myTeam']);
+    Route::post('hackathon/invitation', 'HackathonController@invitation')->name('hackathon.invitation');
+    Route::post('hackathon/cancelinvitation', 'HackathonController@cancelInvitation')->name('hackathon.Cancelinvitation');
+    Route::patch('hackathon/acceptInvitation/{id}', 'HackathonController@acceptInvitation')->name('hackathon.acceptInvitation');
+    Route::patch('hackathon/rejectInvitation/{id}', 'HackathonController@rejectInvitation')->name('hackathon.rejectInvitation');
+    Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
+    Route::get('hackathon/my-team', 'HackathonController@myTeam')->name('hackathon.myTeam');
+    //waiting list
+    Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
+    // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
+    
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');

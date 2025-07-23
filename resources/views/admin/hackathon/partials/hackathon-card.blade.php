@@ -38,7 +38,7 @@
           <i class="ti ti-info-circle me-1"></i>
           {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
         </a>
-          @if($apply && $apply->isEmpty()) 
+          @if($apply && $apply->isEmpty())
         <button 
           type="button" 
           class="btn btn-{{ now()->isBefore($hackathon['step_end']) == 'Upcoming' ? 'primary' : 'success'}}" style="flex: 1;" data-bs-toggle="modal"
@@ -46,11 +46,10 @@
           {{-- data-bs-target="#applyModal{{ $loop->index + 1 }}" --}}
           onclick="window.location.href='/dashboard/apply/{{ $hackathon['step_id'] }}/hackathon'"
           @else
-          onclick="window.location.href='/dashboard/hackathon/manage'"
+          onclick="window.location.href='/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage'"
           {{-- onclick="window.location.href='{{ route('admin.hackathon.manage', $hackathon['id']) }}'" --}}
           @endif
         >
-        
           <i class="ti ti-{{  now()->isBefore($hackathon['step_end']) == 'Upcoming' ? 'send' : 'users' }} me-1"></i>
           {{ now()->isBefore($hackathon['step_end']) ? __('admin.ApplyHackathon') : __('admin.Manage Team') }}
         </button>
@@ -58,7 +57,7 @@
         @if($team && $team->isEmpty())
         <button type="button" class="btn btn-warning" style="flex: 1;" disabled ><i class="ti ti-users me-1"></i>{{ $l == 'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
         @else
-        <a href="/dashboard/hackathon/manage" class="btn btn-success" style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
+        <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success" style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
         @endif
         @endif
       </div>

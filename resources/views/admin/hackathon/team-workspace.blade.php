@@ -78,12 +78,21 @@ $teamData = [
                             <i class="ti ti-home"></i>
                             {{ $l == 'en' ? 'Home' : 'الرئيسية' }}</a>
                     </li>
+                    @php
+                        $leaderornot = App\Team_member::where('user_id', Auth::user()->id)
+                            ->where('acceptInvition', 'accepted')
+                            ->where('isTeamLeader', 1)
+                            ->first();
+                    @endphp
+                    @if ($leaderornot != null)
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/hackathon/manage" id="back-to-team-management">
+                        <a class="nav-link" href="/dashboard/hackathon/{{ $team_Formation_raw->first()->id }}/manage
+                        " id="back-to-team-management">
                             <i class="ti ti-arrow-left"></i> 
                             {{ $l == 'en' ? 'Back to Team Management' : 'العودة لإدارة الفريق' }}
                         </a>
                     </li>
+                    @endif
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">

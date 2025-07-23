@@ -2668,6 +2668,83 @@
                     "organizationmanager",
                     "registered"
                 ]
+            },
+            {
+                "name": "hackathon.invitation",
+                "description": " Invite Hackathon Participants",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.acceptInvitation",
+                "description": " Accept Hackathon Invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.rejectInvitation",
+                "description": " Reject Hackathon Invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.Cancelinvitation",
+                "description": " Cancel Hackathon Invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.manageTeam",
+                "description": " Manage Hackathon Team Members ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.getOutTeam",
+                "description": " Remove Member from Hackathon Team ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.myTeam",
+                "description": " View My Hackathon Team Work Spice ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
             }
         ]
     },
