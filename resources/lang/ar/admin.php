@@ -2160,4 +2160,5 @@ return [
 		'The count team number must be greater than 0.' => 'يجب أن يكون عدد أعضاء الفريق أكبر من صفر.',
 		'The description may not be greater than 100 characters.' => 'يجب ألا يتجاوز الوصف 100 حرف.',
 		'The description field is required.' => 'الوصف مطلوب.',
+		'The count team number field is required.' => 'عدد اعضاء الفريق مطلوب.',
 ];
