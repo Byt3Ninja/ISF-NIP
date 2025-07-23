@@ -397,12 +397,12 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control"></textarea>
+              class="form-control" required></textarea>
           </div>
 
           <div class="form-group mb-4" id="team_number">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='count_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='count_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
         </div>
         <div class="modal-footer">
@@ -479,12 +479,12 @@
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
           <div class="form-group mb-0">
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control"></textarea>
+              class="form-control" required></textarea>
           </div>
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='mcount_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='mcount_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
 
 

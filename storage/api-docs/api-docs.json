@@ -449,17 +449,17 @@
                 "tags": [
                     "Dashboard"
                 ],
-                "summary": "Get dashboard data for Admin , Organization Manager and Mentor",
+                "summary": "Retrieve dashboard data for Admin, Organization Manager, Judger, Mentor, or Startup",
                 "operationId": "ed4235c7e3cd435fdad1da90707874d1",
                 "responses": {
                     "200": {
-                        "description": "Dashboard data returned successfully",
+                        "description": "Dashboard data retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "oneOf": [
                                         {
-                                            "description": "Admin Dashboard Response",
+                                            "title": "Admin Dashboard",
                                             "properties": {
                                                 "totalUsers": {
                                                     "type": "integer",
@@ -579,7 +579,7 @@
                                             "type": "object"
                                         },
                                         {
-                                            "description": "Mentor Dashboard Response",
+                                            "title": "Mentor Dashboard",
                                             "properties": {
                                                 "comingSessionsCount": {
                                                     "type": "integer",
@@ -662,6 +662,455 @@
                                                 "startupAttendanceRate": {
                                                     "type": "string",
                                                     "example": "85%"
+                                                },
+                                                "mentorAverageRating": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.5
+                                                },
+                                                "totalMentorshipHours": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 42.5
+                                                },
+                                                "totalMentorshipSessions": {
+                                                    "type": "integer",
+                                                    "example": 18
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "title": "Judger Dashboard",
+                                            "properties": {
+                                                "screening": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "finalScreening": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "judgingList": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "stepTitle": {
+                                                                "type": "string",
+                                                                "example": "Initial Screening"
+                                                            },
+                                                            "stepFrom": {
+                                                                "type": "string",
+                                                                "example": "2025-06-01"
+                                                            },
+                                                            "stepTo": {
+                                                                "type": "string",
+                                                                "example": "2025-06-30"
+                                                            },
+                                                            "stepDesc": {
+                                                                "type": "string",
+                                                                "example": "Evaluate startups in the first round."
+                                                            },
+                                                            "cycleTitle": {
+                                                                "type": "string",
+                                                                "example": "Summer Accelerator 2025"
+                                                            },
+                                                            "cycleStart": {
+                                                                "type": "string",
+                                                                "example": "2025-05-01"
+                                                            },
+                                                            "cycleEnd": {
+                                                                "type": "string",
+                                                                "example": "2025-08-01"
+                                                            },
+                                                            "companies": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "startupLogo": {
+                                                                            "type": "string",
+                                                                            "example": "https://example.com/logo.png"
+                                                                        },
+                                                                        "startupName": {
+                                                                            "type": "string",
+                                                                            "example": "TechStart"
+                                                                        },
+                                                                        "imgUrl": {
+                                                                            "type": "string",
+                                                                            "example": "https://example.com/user.png"
+                                                                        },
+                                                                        "userName": {
+                                                                            "type": "string",
+                                                                            "example": "Sarah Johnson"
+                                                                        },
+                                                                        "userTitle": {
+                                                                            "type": "string",
+                                                                            "example": "CEO"
+                                                                        },
+                                                                        "evaluationStatus": {
+                                                                            "type": "string",
+                                                                            "example": "completed"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "title": "Startup Dashboard",
+                                            "properties": {
+                                                "program": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Summer Accelerator"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "A 3-month program for early-stage startups."
+                                                        },
+                                                        "startDate": {
+                                                            "type": "string",
+                                                            "example": "2025-05-01"
+                                                        },
+                                                        "endDate": {
+                                                            "type": "string",
+                                                            "example": "2025-08-01"
+                                                        },
+                                                        "currentStep": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "totalSteps": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "progress": {
+                                                            "type": "string",
+                                                            "example": "60%"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "programSteps": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Product Development"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Refining your MVP"
+                                                            },
+                                                            "dueDate": {
+                                                                "type": "string",
+                                                                "example": "20-07-2025"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "Started"
+                                                            },
+                                                            "completedDate": {
+                                                                "type": "string",
+                                                                "example": "15-07-2025"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "mentors": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Jane Smith"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "jane@example.com"
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Product Coach"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/jane.jpg"
+                                                            },
+                                                            "bio": {
+                                                                "type": "string",
+                                                                "example": "Experienced in agile and product."
+                                                            },
+                                                            "linkedin": {
+                                                                "type": "string",
+                                                                "example": "https://linkedin.com/in/janesmith"
+                                                            },
+                                                            "specialization": {
+                                                                "type": "string",
+                                                                "example": "Product Strategy"
+                                                            },
+                                                            "mentorExpertises": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "example": [
+                                                                    "Product",
+                                                                    "Agile"
+                                                                ]
+                                                            },
+                                                            "rating": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4.7
+                                                            },
+                                                            "programCount": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "programIds": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "example": [
+                                                                    1,
+                                                                    2,
+                                                                    3
+                                                                ]
+                                                            },
+                                                            "role": {
+                                                                "type": "string",
+                                                                "example": "mentor"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "availableSurveys": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "triggeredOn": {
+                                                                "type": "string",
+                                                                "example": "mentorship"
+                                                            },
+                                                            "triggeredBy": {
+                                                                "type": "string",
+                                                                "example": "session"
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Mentorship Session Feedback"
+                                                            },
+                                                            "mentorName": {
+                                                                "type": "string",
+                                                                "example": "Sarah Johnson"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "mentorshipSessions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "mentorId": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "mentorName": {
+                                                                "type": "string",
+                                                                "example": "Ahmed Farouk"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/ahmed.jpg"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2025-07-25"
+                                                            },
+                                                            "time": {
+                                                                "type": "string",
+                                                                "example": "14:30"
+                                                            },
+                                                            "duration": {
+                                                                "type": "integer",
+                                                                "example": 60
+                                                            },
+                                                            "adminNotes": {
+                                                                "type": "string",
+                                                                "example": "Discuss MVP goals"
+                                                            },
+                                                            "meetingLink": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/j/123456789"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "latestServices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "serviceId": {
+                                                                "type": "integer",
+                                                                "example": 7
+                                                            },
+                                                            "serviceName": {
+                                                                "type": "string",
+                                                                "example": "Legal Consultation"
+                                                            },
+                                                            "serviceType": {
+                                                                "type": "string",
+                                                                "example": "Legal"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "services": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "mentorCount": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "completedTasks": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "mentorAvailabilitySlots": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 22
+                                                            },
+                                                            "mentorId": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "mentorName": {
+                                                                "type": "string",
+                                                                "example": "Ahmed Farouk"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/ahmed.jpg"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "weekly"
+                                                            },
+                                                            "days": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "example": [
+                                                                    "Sunday",
+                                                                    "Tuesday"
+                                                                ]
+                                                            },
+                                                            "start": {
+                                                                "type": "string",
+                                                                "example": "10:00"
+                                                            },
+                                                            "end": {
+                                                                "type": "string",
+                                                                "example": "12:00"
+                                                            },
+                                                            "notes": {
+                                                                "type": "string",
+                                                                "example": "Available for UI/UX mentoring"
+                                                            },
+                                                            "availability": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "latestEvents": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 15
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Demo Day"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2025-07-30"
+                                                            },
+                                                            "time": {
+                                                                "type": "string",
+                                                                "example": "13:00:00"
+                                                            },
+                                                            "allDay": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "analytics": {
+                                                    "properties": {
+                                                        "programProgress": {
+                                                            "type": "string",
+                                                            "example": "60%"
+                                                        },
+                                                        "tasksCompleted": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "totalTasks": {
+                                                            "type": "integer",
+                                                            "example": 8
+                                                        },
+                                                        "mentorshipHours": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 9.5
+                                                        }
+                                                    },
+                                                    "type": "object"
                                                 }
                                             },
                                             "type": "object"

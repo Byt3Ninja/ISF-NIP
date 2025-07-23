@@ -391,6 +391,19 @@ class CyclesController extends Controller
                     }
                 }
             }elseif ($stype == 6) {
+               $validator = Validator::make($request->all(), [
+                    'title' => 'required|string|max:100',
+                    'description' => 'required|string|max:100',
+                    'count_team_number' => 'required|numeric|gt:0',
+                    ]);
+                if ($validator->fails()) {
+                    return redirect()->back()
+                    ->withInput()
+                    ->with([
+                    'message2' => $validator->errors()->first(),
+                    'class' => 'danger'
+                    ]);
+                }
               if (is_null($request->fromDate) || is_null($request->toDate)) {
                    return redirect()->back()->with(['message2' => __('admin.AddDateFirst'), 'class' => 'danger']);
                }
@@ -407,7 +420,7 @@ class CyclesController extends Controller
                 'arr' => $request->arr,
                 'from' => $request->fromDate,
                 'to' => $request->toDate,
-                'count_team_number' => $request->count_team_number,
+                'count_team_number' => $request->count_team_number ??0,
                 ]);
             }
             return redirect()->back()->with('message', 'Saved');

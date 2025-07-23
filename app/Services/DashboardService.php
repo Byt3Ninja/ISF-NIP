@@ -2,8 +2,17 @@
 
 namespace App\Services;
 
+use App\Step;
+use App\User;
+use App\Cycle;
+use App\Service;
+use App\Screening;
 use Carbon\Carbon;
+use App\Finalscreening;
+use App\SurveyResponses;
+use App\MentorshipRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardService
 {
@@ -394,6 +403,23 @@ class DashboardService
         $attended = $completedSessions->sum('done');
         $attendsRate = $total > 0 ? round(($attended / $total) * 100, 2) . '%' : '0%';
 
+        $mentorAverageRating = DB::table('mentorship_requests')
+            ->where('mentor_id', $mentorId)
+            ->whereNotNull('rating')
+            ->avg('rating');
+        $mentorRatingAverage = $mentorAverageRating ? round($mentorAverageRating, 2) : null;
+
+        $totalHours = DB::table('mentorship_requests')
+            ->where('mentor_id', $mentorId)
+            ->whereNotNull('period')
+            ->sum('period'); 
+        $totalHoursFormatted = round($totalHours / 60, 2);
+
+        $totalSessions = DB::table('mentorship_requests')
+        ->where('mentor_id', $mentorId)
+        ->whereNotNull('zoom_date')
+        ->count();
+
         return [
             'comingSessionsCount' => $comingSessionsCount,
             'currentSchedule' => $schedules,
@@ -402,6 +428,9 @@ class DashboardService
             'nonCompletedTasks' => $nonCompletedTasks,
             'sessionWithoutTasks' => $sessionWithoutTasks,
             'startupAttendanceRate' => $attendsRate,
+            'mentorAverageRating' => $mentorRatingAverage,
+            'totalMentorshipHours' => $totalHoursFormatted,
+            'totalMentorshipSessions' => $totalSessions,
         ];
     }
 
@@ -742,6 +771,416 @@ class DashboardService
         'stateDistribution' => $states,
         'sdgStartups' => $sdgStartups,
         'metadata' => ['lastUpdated' => now()->format('Y-m-d H:i:s')],
+    ];
+}
+public function judgerDashboard(): array
+{
+    $judgerId = auth()->id();
+
+    $screeningsCount = Screening::where('user_id', $judgerId)->count();
+    $finalScreeningsCount = FinalScreening::whereJsonContains('judges', (string) $judgerId)->count();
+
+    $stepIds = Screening::where('user_id', $judgerId)->pluck('step_id')->unique();
+
+    if ($stepIds->isEmpty()) {
+        return [
+            'screeningsCount' => $screeningsCount,
+            'finalScreeningsCount' => $finalScreeningsCount,
+            'judgingList' => [],
+        ];
+    }
+
+    $getNotEvaluatedCompanies = collect(DB::select("
+        SELECT
+            results.id AS result_id,
+            results.evaluation_id,
+            eval.step_id AS step_id,
+            results.company_id AS company_id,
+            results.status
+        FROM
+            screening_evaluation_results as results
+        LEFT JOIN
+            screening_evaluation as eval ON eval.id = results.evaluation_id
+        WHERE
+            results.user_id = ?
+    ", [ $judgerId ]));
+
+    $establishedEvaluations = collect(DB::select("
+        SELECT
+            eval.id,
+            eval.step_id,
+            eval.status
+        FROM
+            screening_evaluation as eval
+        WHERE
+            eval.step_id IN (" . implode(',', $stepIds->toArray()) . ")
+    "));
+
+    $steps = Step::whereIn('id', $stepIds)
+        ->with([
+            'cycle:id,title,start,end',
+            'companies' => function ($q) {
+                $q->select('id', 'name_en','logo','step', 'cycle')
+                    ->with(['user:id,first_name_en,last_name_en,title_en,company_id,img_url']);
+            }
+        ])
+        ->get(['id', 'title', 'description', 'from', 'to', 'cycle_id']);
+
+    $judgingList = $steps->map(function ($step) use ($getNotEvaluatedCompanies, $establishedEvaluations) {
+        $stepEval = $establishedEvaluations->firstWhere('step_id', $step->id);
+        $isEvalEstablished = $stepEval && $stepEval->status != 0;
+
+        $companies = $step->companies->map(function ($company) use ($getNotEvaluatedCompanies, $isEvalEstablished, $step) {
+            $user = $company->user;
+            $userImg = $user?->img_url
+                ? Storage::disk('public_uploads')->url($user->img_url)
+                : null;
+
+            if (!$isEvalEstablished) {
+                $evaluationStatus = 'not_started';
+            } else {
+                $responds = $getNotEvaluatedCompanies->where('company_id', $company->id)
+                    ->where('step_id', $step->id);
+
+                if ($responds->isEmpty()) {
+                    $evaluationStatus = 'not_evaluated';
+                } else {
+                    $havePending = $responds->where('status', 0)->count();
+                    $evaluationStatus = $havePending > 0 ? 'in_progress' : 'evaluated';
+                }
+            }
+
+            return [
+                'startupLogo' => $company->logo_url,
+                'startupName'       => $company->name_en,
+                'imgUrl'           => $userImg,
+                'userName'          => optional($user)->first_name_en . ' ' . optional($user)->last_name_en,
+                'userTitle'         => optional($user)->title_en,
+                'evaluationStatus'  => $evaluationStatus,
+            ];
+        });
+
+        return [
+            'stepTitle'     => $step->title,
+            'stepFrom'      => $step->from ? Carbon::parse($step->from)->format('Y-m-d') : null,
+            'stepTo'        => $step->to ? Carbon::parse($step->to)->format('Y-m-d') : null,
+            'stepDesc'      => $step->description,
+            'cycleTitle'    => optional($step->cycle)->title,
+            'cycleStart'    => optional($step->cycle)?->start ? Carbon::parse($step->cycle->start)->format('Y-m-d') : null,
+            'cycleEnd'      => optional($step->cycle)?->end ? Carbon::parse($step->cycle->end)->format('Y-m-d') : null,
+            'companies'     => $companies->toArray(),
+        ];
+    });
+
+    return [
+        'screening'      => $screeningsCount,
+        'finalScreening' => $finalScreeningsCount,
+        'judgingList'    => $judgingList->toArray(),
+    ];
+}
+public function startupDashboard($userId)
+{
+    $user = User::with('company')->find($userId);
+    $company = $user->company;
+
+    $cycle = Cycle::find($company->cycle);
+    $currentStep = Step::find($company->step);
+    $totalSteps = Step::where('cycle_id', $cycle->id)->count();
+
+    $stepData = Step::where('id', $company->step)->first();
+    $locale = app()->getLocale();
+    $l = $locale;
+
+    $steps = Step::where('cycle_id', $cycle->id)
+        ->orderBy('arr')
+        ->get()
+        ->map(function ($step) use ($l,$stepData) {
+            $to = Carbon::parse($step->to)->format('d-m-Y');
+
+            $status = $l === 'ar' ? 'لم تبدأ' : 'Not started';
+            $completedDate = null;
+
+            if ($stepData) {
+                if ($stepData->arr > $step->arr) {
+                    $status = $l === 'ar' ? 'انتهت' : 'Completed';
+                    $completedDate = $to;
+                } elseif ($stepData->arr == $step->arr) {
+                    $status = $l === 'ar' ? 'بدأت' : 'Started';
+                }
+            }
+
+            return [
+                'id' => $step->id,
+                'name' => $step->title,
+                'description' => $step->description,
+                'dueDate' => $to,
+                'status' => $status,
+                'completedDate' => $completedDate,
+            ];
+        });
+
+    $progress = '0%';
+    if ($cycle->start && $cycle->end) {
+        $start = Carbon::parse($cycle->start);
+        $end = Carbon::parse($cycle->end);
+        $today = Carbon::today();
+
+        $totalDays = $start->diffInDays($end);
+        $passedDays = $start->diffInDays(min($today, $end));
+        $progress = $totalDays > 0 ? round(($passedDays / $totalDays) * 100, 2) . '%' : '0%';
+    }
+
+    $mentorIds = DB::table('cycles_mentors')
+        ->where('cycle_id', $cycle->id)
+        ->pluck('user_id');
+
+    $allMentorPrograms = DB::table('cycles_mentors')
+        ->whereIn('user_id', $mentorIds)
+        ->get()
+        ->groupBy('user_id');
+
+    $mentors = User::whereIn('id', $mentorIds)
+        ->with([
+            'bio:id,user_id,bio_en,bio_ar,linkedin,specialization_en,specialization_ar',
+            'mentorExpertises:id,title,title_ar',
+            'roles:name'
+        ])
+        ->get()
+        ->map(function ($mentor) use ($allMentorPrograms, $locale) {
+            $rating = MentorshipRequest::where('mentor_id', $mentor->id)
+                ->whereNotNull('rating')
+                ->avg('rating');
+
+            $programs = $allMentorPrograms[$mentor->id] ?? collect();
+            $imgUrl = $mentor?->img_url 
+                ? Storage::disk('public_uploads')->url($mentor->img_url)
+                : null;
+
+            return [
+                'id' => $mentor->id,
+                'name' => $mentor->name,
+                'email' => $mentor->email,
+                'title' => $mentor->title_en,
+                'imgUrl' => $imgUrl,
+                'bio' => optional($mentor->bio)->{"bio_$locale"},
+                'linkedin' => optional($mentor->bio)->linkedin,
+                'specialization' => optional($mentor->bio)->{"specialization_" . $locale},
+                'mentorExpertises' => $mentor->mentorExpertises->map(fn ($exp) => $exp->{"title" . ($locale === 'ar' ? '_ar' : '')}),
+                'rating' => round($rating ?? 0, 2),
+                'programCount' => $programs->pluck('cycle_id')->unique()->count(),
+                'programIds' => $programs->pluck('cycle_id')->unique()->values(),
+                'role' => $mentor->getRoleNames()->first(),
+            ];
+        });
+
+        
+    $availableSurveys = SurveyResponses::where('user_id', $user->id)
+    ->where('cycle_id', $cycle->id)
+    ->whereNull('responses')
+    ->with([
+        'mentorship_session.mentor',
+        'mentorship_step',
+        'training_session',
+        'training_step',
+        'training_quiz',
+    ])
+    ->get();
+
+    $availableSurveys = $availableSurveys->map(function ($item) {
+     $response = [
+        'id' => $item->id,
+        'triggeredOn' => $item->triggered_on,
+        'triggeredBy' => $item->triggered_by,
+     ];
+
+    if ($item->triggered_by === 'due') {
+        if ($item->triggered_on === 'mentorship') {
+            $response['title'] = $item->mentorship_step?->title ?? 'N/A';
+        } elseif ($item->triggered_on === 'training') {
+            $response['title'] = $item->training_step?->title ?? 'N/A';
+        }
+    }
+
+    if ($item->triggered_by === 'session') {
+        if ($item->triggered_on === 'mentorship') {
+            $mentor = $item->mentorship_session?->mentor;
+            $response['mentorName'] = $mentor
+                ? trim($mentor->first_name_en . ' ' . $mentor->last_name_en)
+                : null;
+        } elseif ($item->triggered_on === 'training') {
+            $response['mentorName'] = null; 
+        }
+    }
+
+    if ($item->triggered_by === 'quiz' && $item->triggered_on === 'training') {
+        $response['title'] = $item->training_quiz?->title ?? 'N/A';
+    }
+
+    return $response;
+});
+
+
+    $nextMentorshipSessions = DB::table('mentorship_requests as mr')
+    ->join('users as m', 'm.id', '=', 'mr.mentor_id')
+    ->where('mr.user_id', $userId)
+    ->whereNotNull('mr.zoom_date')
+    ->where('mr.zoom_date', '>=', Carbon::now())
+    ->orderBy('mr.zoom_date', 'asc')
+    ->select(
+        'mr.zoom_date as zoom_date',
+        'mr.period',
+        'mr.mentor_id',
+        'mr.admin_comment as admin_notes',
+        'mr.join_url as meeting_link',
+        DB::raw("CONCAT(m.first_name_en, ' ', m.last_name_en) as mentor_name"),
+        'm.img_url as mentor_img'
+    )
+    ->get()
+    ->map(function ($session) {
+        $zoomDate = Carbon::parse($session->zoom_date);
+
+        return [
+            'mentorId' => $session->mentor_id,
+            'mentorName' => $session->mentor_name,
+            'imgUrl' => $session->mentor_img 
+                ? Storage::disk('public_uploads')->url($session->mentor_img) 
+                : null,
+            'date' => $zoomDate->format('Y-m-d'),
+            'time' => $zoomDate->format('H:i'),
+            'duration' => $session->period,
+            'adminNotes' => $session->admin_notes,
+            'meetingLink' => $session->meeting_link,
+        ];
+    });
+
+    $latestServices = Service::whereHas('organizations')
+    ->with([
+        'serviceCategory:id,name_en,name_ar',
+    ])
+    ->orderBy('created_at', 'desc')
+    ->take(5)
+    ->get()
+    ->map(function ($service) use ($locale) {
+        return [
+            'serviceId' => $service->id,
+            'serviceName' => $locale === 'ar' ? $service->name_ar : $service->name_en,
+            'serviceType' => $service->serviceCategory
+                ? ($locale === 'ar' ? $service->serviceCategory->name_ar : $service->serviceCategory->name_en)
+                : null,
+        ];
+    });
+
+    $services = Service::whereHas('organizations')->count();
+    $mentorCount = $mentorIds->unique()->count();
+    $completedTasks = DB::table('mentorship_tasks')->where('status', 'completed')->count();
+
+    $mentorSchedules = DB::table('schedules as s')
+    ->join('users as u', 'u.id', '=', 's.user_id')
+    ->whereIn('s.user_id', $mentorIds)
+    ->select(
+        's.id',
+        's.user_id as mentor_id',
+        DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as mentor_name"),
+        'u.img_url as mentor_img',
+        's.type',
+        's.days',
+        's.tfrom',
+        's.tto',
+        's.notes',
+        's.active'
+    )
+    ->get()
+    ->map(function ($schedule) {
+        return [
+            'id' => $schedule->id,
+            'mentorId' => $schedule->mentor_id,
+            'mentorName' => $schedule->mentor_name,
+            'imgUrl' => $schedule->mentor_img 
+                ? Storage::disk('public_uploads')->url($schedule->mentor_img)
+                : null,
+            'type' => $schedule->type,
+            'days' => $schedule->days ? explode(',', $schedule->days) : [],
+            'start' => $schedule->tfrom,
+            'end' => $schedule->tto,
+            'notes' => $schedule->notes,
+            'availability' => (bool) $schedule->active,
+        ];
+    });
+
+     $latestEvents = DB::table('calendars')
+        ->select('id', 'title', 'start','allDay')
+        ->whereDate('start', '>=', now()->format('Y-m-d'))
+        ->where(function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->orderBy('start', 'asc')
+        ->limit(5)
+        ->get()
+        ->map(function ($event) {
+            $start = Carbon::parse($event->start);
+            $time = $start->format('H:i:s');
+
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'date' => $start->format('Y-m-d'),
+                'time' => $time,
+                'allDay' => $event->allDay ? true : false,
+            ];
+        });
+
+        $tasks = DB::table('mentorship_requests as mr')
+            ->leftJoin('mentorship_tasks as mt', 'mt.mentorship_request_id', '=', 'mr.id')
+            ->where('mr.user_id', $user->id)
+            ->select('mr.id as request_id', 'mt.id as task_id', 'mt.title as task_title', 'mt.status as task_status')
+            ->get();
+
+        $completedTasks = $tasks->where('task_status', 'completed')->values()->count();
+
+        $completedSessions = DB::table('mentorship_requests')
+            ->where('user_id', $user->id)
+            ->whereNotNull('start_url')
+            ->whereDate('zoom_date', '<=', now()->toDateString())
+            ->select('done')
+            ->get();
+
+        $total = $completedSessions->count();
+        $totalMentorshipMinutes = DB::table('mentorship_requests')
+        ->where('user_id', $user->id)
+        ->whereNotNull('start_url') 
+        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->sum('period');
+
+     $mentorshipHours = round($totalMentorshipMinutes / 60, 2);
+
+    return [
+        'program' => [
+            'id' => $cycle->id,
+            'name' => $cycle->title,
+            'description' => $cycle->description,
+            'startDate' => $cycle->start->format('Y-m-d'),
+            'endDate' => $cycle->end->format('Y-m-d'),
+            'currentStep' => $currentStep->id,
+            'totalSteps' => $totalSteps,
+            'progress' => $progress,
+        ],
+        'programSteps' => $steps,
+        'mentors' => $mentors,
+        'availableSurveys' => $availableSurveys,
+        'mentorshipSessions' => $nextMentorshipSessions,
+        'latestServices' => $latestServices,
+        'services' => $services,
+        'mentorCount' => $mentorCount,
+        'programProgress' => $progress,
+        'completedTasks' => $completedTasks,
+        'mentorAvailabilitySlots' => $mentorSchedules,
+        'latestEvents' => $latestEvents,
+        'analytics' => [
+            'programProgress' => $progress,
+            'tasksCompleted' => $completedTasks,
+            'totalTasks' => $total,
+            'mentorshipHours' => $mentorshipHours,
+        ]
     ];
 }
 

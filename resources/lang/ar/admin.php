@@ -2156,5 +2156,9 @@ return [
 		'No_browsers_logged' => 'لا توجد متصفحات مسجلة',
 		'No_countries_logged' => 'لا توجد دول مسجلة',
 		'No_peak_hours_logged' => 'لا توجد ساعات ذروة مسجلة',
-		'quizNoQuestions' => 'لا توجد أسئلة في هذا الاختبار. يرجى الاتصال بالمسؤول.'
+		'quizNoQuestions' => 'لا توجد أسئلة في هذا الاختبار. يرجى الاتصال بالمسؤول.',
+		'The count team number must be greater than 0.' => 'يجب أن يكون عدد أعضاء الفريق أكبر من صفر.',
+		'The description may not be greater than 100 characters.' => 'يجب ألا يتجاوز الوصف 100 حرف.',
+		'The description field is required.' => 'الوصف مطلوب.',
+		'The count team number field is required.' => 'عدد اعضاء الفريق مطلوب.',
 ];

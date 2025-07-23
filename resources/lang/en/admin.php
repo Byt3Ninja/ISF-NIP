@@ -2099,5 +2099,11 @@ return [
 		'No_browsers_logged' => 'No browsers logged',
 		'No_countries_logged' => 'No countries logged',
 		'No_peak_hours_logged' => 'No peak hours logged',
-		'quizNoQuestions' => 'This quiz has no questions. Please contact administrator.'
+		'quizNoQuestions' => 'This quiz has no questions. Please contact administrator.',
+		'The count team number must be greater than 0.' => 'The number of team members must be greater than zero.',
+		'The title may not be greater than 100 characters.' => 'The title must not exceed 100 characters.',
+		'The title field is required.' => 'The title is required.',
+		'The description may not be greater than 100 characters.' => 'The description must not exceed 100 characters.',
+		'The description field is required.' => 'The description is required.',
+		'The count team number field is required.' => 'The number of team members is Required.',
 ];
