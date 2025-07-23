@@ -2105,4 +2105,5 @@ return [
 		'The title field is required.' => 'The title is required.',
 		'The description may not be greater than 100 characters.' => 'The description must not exceed 100 characters.',
 		'The description field is required.' => 'The description is required.',
+		'The count team number field is required.' => 'The number of team members is Required.',
 ];

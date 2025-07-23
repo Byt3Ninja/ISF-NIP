@@ -394,7 +394,7 @@ class CyclesController extends Controller
                $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:100',
                     'description' => 'required|string|max:100',
-                    'count_team_number' => 'nullable|numeric|gt:0',
+                    'count_team_number' => 'required|numeric|gt:0',
                     ]);
                 if ($validator->fails()) {
                     return redirect()->back()
@@ -420,7 +420,7 @@ class CyclesController extends Controller
                 'arr' => $request->arr,
                 'from' => $request->fromDate,
                 'to' => $request->toDate,
-                'count_team_number' => $request->count_team_number ?? 0,
+                'count_team_number' => $request->count_team_number ??0,
                 ]);
             }
             return redirect()->back()->with('message', 'Saved');
