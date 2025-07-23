@@ -2168,5 +2168,7 @@ return [
 	'Invitation_cancelled_successfully' => 'تم إلغاء الدعوة بنجاح.',
 	'Member_removed_successfully' => 'تم إزالة المستخدم بنجاح.',
 	'CancelFailed' => 'فشل في الغاء.',
+	'Project_Name' => 'اسم المشروع',
+	'Project_Description' => 'وصف المشروع',
 
 ];

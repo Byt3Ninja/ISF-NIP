@@ -95,6 +95,12 @@ class HackathonController extends Controller
         tf.cycle_id as 'tf_cycle_id',
         tf.step_id as 'tf_step_id',
         tf.user_id as 'tf_user_id',
+        tf.project_name_ar as 'tf_projectName_ar',
+        tf.project_name_en as 'tf_projectName_en',
+        tf.project_description_ar as 'tf_projectDescription_ar',
+        tf.project_description_en as 'tf_projectDescription_en',
+        tf.target_track as 'tf_targetTrack',
+        tf.project_status as 'tf_projectStatus',
         tf.created_at as 'tf_created_at',
         tf.updated_at as 'tf_updated_at',
         u.id as 'u_id',
@@ -474,8 +480,15 @@ class HackathonController extends Controller
             'description' => 'nullable|string|max:1000',
             'cycle_id' => 'required|exists:cycles,id',
             'step_id' => 'required|exists:steps,id',
+            'Project_Name_ar' => 'nullable|string|max:255',
+            'Project_Name_en' => 'nullable|string|max:255',
+            'Project_Description_ar' => 'nullable|string|max:1000',
+            'Project_Description_en' => 'nullable|string|max:1000',
+            'Target_Track' => 'nullable|integer',
+            'Project_Status' => 'nullable|integer',
+
         ]);
-         
+        
         $user = Auth::user();
         if($user->company != null){
             $company = Company::find($user->company->id);
@@ -511,7 +524,13 @@ class HackathonController extends Controller
         $teamformation->description = $request->description;
         $teamformation->cycle_id = $request->cycle_id;
         $teamformation->step_id = $request->step_id;
-        $teamformation->user_id = $user->id; // Assuming the user creating the team is the authenticated user
+        $teamformation->user_id = $user->id;
+        $teamformation->project_name_ar = $request->Project_Name_ar;
+        $teamformation->project_name_en = $request->Project_Name_en;
+        $teamformation->project_description_ar = $request->Project_Description_ar;
+        $teamformation->project_description_en = $request->Project_Description_en;
+        $teamformation->target_track = $request->Target_Track ?? 0;
+        $teamformation->project_status = $request->Project_Status ?? 0;
         $teamformation->save();
 
         
@@ -524,13 +543,37 @@ class HackathonController extends Controller
         $team_member->acceptInvition = 'accepted';
         $team_member->isTeamLeader = 1;
         $team_member->company_id = $user->company_id; 
+        $team_member->team_formation_id = $teamformation->id;
         $team_member->save();
 
-        
-
-
-
         return redirect()->back()->with('success', 'Team created successfully.');
+    }
+
+    public function EditProjectIdea(Request $request)
+    {
+
+        $request->validate([
+            'Project_Name_ar' => 'nullable|string|max:255',
+            'Project_Name_en' => 'nullable|string|max:255',
+            'Project_Description_ar' => 'nullable|string|max:1000',
+            'Project_Description_en' => 'nullable|string|max:1000',
+            'Target_Track' => 'nullable|integer',
+            'Project_Status' => 'nullable|integer',
+        ]);
+        $user = Auth::user();
+        $team_q = TeamFormation::where('user_id', $user->id)->where('id', $request->team_formation_id)->first();
+        if (!$team_q) {
+            return redirect()->back()->with('error', 'You are not authorized to edit the project idea.');
+        }
+        $team_q->project_name_ar = $request->Project_Name_ar;
+        $team_q->project_name_en = $request->Project_Name_en;
+        $team_q->project_description_ar = $request->Project_Description_ar;
+        $team_q->project_description_en = $request->Project_Description_en;
+        $team_q->target_track = $request->Target_Track ?? 0;
+        $team_q->project_status = $request->Project_Status ?? 0;
+        $team_q->save();
+        return redirect()->back()->with('success', 'Project idea updated successfully.');
+        
     }
 
     public function invitation(Request $request){

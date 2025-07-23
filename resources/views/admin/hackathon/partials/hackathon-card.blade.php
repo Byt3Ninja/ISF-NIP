@@ -31,6 +31,7 @@
         </span>
       @endforeach
     </div>
+    
     @php( $isUpcoming = $hackathon['status'] == 'Upcoming' )
     <div class="mt-auto">
       <div class="d-flex w-100 mb-2" role="group">
@@ -55,7 +56,14 @@
         </button>
         @else
         @if($team && $team->isEmpty())
+       
+        @if($stypeStep->first()->stype != 6)
+
         <button type="button" class="btn btn-warning" style="flex: 1;" disabled ><i class="ti ti-users me-1"></i>{{ $l == 'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
+        @else
+        
+
+        @endif
         @else
         <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success" style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
         @endif
