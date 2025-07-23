@@ -146,9 +146,16 @@
             $apply = collect(DB::select($apply, [Auth::user()->id, $hackathon['step_id']]));
       $team = "SELECT * FROM team_formations WHERE user_id = ?";
       $team = collect(DB::select($team, [Auth::user()->id]));
+      
+      $step_id = Auth::user()->company->step;
+     
+         $stypeStep_q = "SELECT * FROM steps WHERE id = ?";
+         $stypeStep = collect(DB::select($stypeStep_q, [$step_id]));
+         
+       
       @endphp
         <div class="col-lg-4 col-md-6">
-          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply, 'team' => $team])
+          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply, 'team' => $team, 'stypeStep' => $stypeStep])
         </div>
       @endforeach
     </div>

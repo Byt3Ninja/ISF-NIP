@@ -2112,5 +2112,7 @@ return [
 	'Invitation_not_found.' => 'Invitation not found.',
 	'Invitation_cancelled_successfully.' => 'Invitation cancelled successfully.',
 	'Member_removed_successfully.' => 'Member removed successfully.',
-	'CancelFailed' => 'Failed to cancel'
+	'CancelFailed' => 'Failed to cancel',
+	'Project_Name' => 'Project Name',
+	'Project_Description' => 'Project Description',
 ];

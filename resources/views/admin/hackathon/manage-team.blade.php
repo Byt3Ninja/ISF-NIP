@@ -188,7 +188,7 @@
             @endif
           </div>
           <div class="card-footer">
-            <a href="/dashboard/hackathon/my-team" class="btn btn-info">
+            <a  href="/dashboard/hackathon/my-team" class="btn btn-info">
               <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
             </a>
             @if($leaderOrnot->count() < 0)
@@ -197,7 +197,7 @@
             </button>
             @endif
              @if($leaderOrnot->count() > 0)
-            <button class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()" id="disbandTeamBtn" style="display:none;">
+            <button disabled class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()" id="disbandTeamBtn" style="display:none;">
               <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
             </button>
             @endif
@@ -212,17 +212,17 @@
           </div>
           <div class="card-body">
             <h6>{{ $l == 'en' ? 'Project Idea (Initial):' : 'فكرة المشروع (مبدئية):' }}</h6>
-            <p id="team-project-idea">{{ $l == 'en' ? 'Smart system for real estate market data analysis using artificial intelligence.' : 'نظام ذكي لتحليل بيانات السوق العقاري باستخدام الذكاء الاصطناعي.' }}</p>
+            <p id="team-project-idea">{{ $l == 'en' ? $team_Formation_raw->first()->tf_projectDescription_en : $team_Formation_raw->first()->tf_projectDescription_ar }}</p>
             <button class="btn btn-sm btn-outline-secondary mb-3" data-bs-toggle="modal" data-bs-target="#editProjectIdeaModal">
               <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
             </button>
 
             <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
-            <p id="team-target-track">{{ $l == 'en' ? 'AI in Financial Services' : 'الذكاء الاصطناعي في الخدمات المالية' }}</p>
+            <p id="team-target-track">{{ $l == 'en' ? $team_Formation_raw->first()->tf_targetTrack : $team_Formation_raw->first()->tf_targetTrack }}%</p>
              
             <h6>{{ $l == 'en' ? 'Project Status:' : 'حالة المشروع:' }}</h6>
             <div class="progress mb-2" style="height: 20px;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}</div>
+              <div class="progress-bar bg-success" role="progressbar" style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;" aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0" aria-valuemax="100">{{ $team_Formation_raw->first()->tf_projectStatus  }}% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}</div>
             </div>
             <small class="text-muted">{{ $l == 'en' ? 'Current Phase: Idea development and initial prototype.' : 'المرحلة الحالية: تطوير الفكرة والنموذج الأولي.' }}</small>
           </div>
@@ -279,22 +279,71 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="projectIdeaForm">
-            <div class="mb-3">
-              <label for="projectIdeaText" class="form-label">{{ $l == 'en' ? 'Project Idea' : 'فكرة المشروع' }}</label>
-              <textarea class="form-control" id="projectIdeaText" rows="4"></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="targetTrackSelect" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
-              <select class="form-select" id="targetTrackSelect">
-                <option selected>{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
-                <option value="ai_health">{{ $l == 'en' ? 'AI in Healthcare' : 'الذكاء الاصطناعي في الرعاية الصحية' }}</option>
-                <option value="ai_finance">{{ $l == 'en' ? 'AI in Financial Services' : 'الذكاء الاصطناعي في الخدمات المالية' }}</option>
-                <option value="ai_smartcity">{{ $l == 'en' ? 'AI for Smart Cities' : 'الذكاء الاصطناعي للمدن الذكية' }}</option>
-                <option value="other">{{ $l == 'en' ? 'Other (please specify)' : 'آخر (يرجى التحديد)' }}</option>
-              </select>
-            </div>
-          </form>
+          <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
+                            @csrf
+            <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+                            <div class="mb-3">
+                                <label for="Project_Name_en" class="form-label">
+                                    {{ __('admin.Project_Name') ." " . __('admin.English') }}
+                                </label>
+                                <input type="text" class="form-control" name="Project_Name_en" value="{{ $team_Formation_raw->first()->tf_projectName_en }}" id="Project_Name_en" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Project_Name_ar" class="form-label">
+                                    {{__('admin.Project_Name') ." " . __('admin.Arabic') }}
+                                </label>
+                                <input type="text" class="form-control" name="Project_Name_ar" value="{{ $team_Formation_raw->first()->tf_projectName_ar }}" id="Project_Name_ar" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Project_Description_en" class="form-label">
+                                    {{ __('admin.Project_Description') ." " . __('admin.English') }}
+                                </label>
+                                <textarea class="form-control" name="Project_Description_en" id="Project_Description_en" rows="2">{{ $team_Formation_raw->first()->tf_projectDescription_en }}</textarea>
+                            </div>
+
+                             <div class="mb-3">
+                                <label for="Project_Description_ar" class="form-label">
+                                    {{ __('admin.Project_Description') ." " .  __('admin.Arabic') }}
+                                </label>
+                                <textarea class="form-control" name="Project_Description_ar" id="Project_Description_ar" rows="2">{{ $team_Formation_raw->first()->tf_projectDescription_ar }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Target_Track" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
+                                <select class="form-select" id="Target_Track" name="Target_Track" >
+                                    <option value="" >{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
+                                    @for ($i = 5; $i <= 100; $i += 5)
+                                        <option value="{{ $i }}" {{ $team_Formation_raw->first()->tf_targetTrack == $i ? 'selected' : '' }}>{{ $i  .'%'}}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
+                                <select class="form-select" id="Project_Status" name="Project_Status">
+                                    <option value="" >{{ $l == 'en' ? 'Choose Status...' : 'اختر الحالة...' }}</option>
+                                    @php
+                                        $selectedStatus = (int) ($team_Formation_raw->first()->tf_projectStatus ?? 0);
+                                    @endphp
+                                    @for ($s = 0; $s <= 100; $s += 25)
+                                        <option value="{{ $s }}" {{ $selectedStatus == $s ? 'selected' : '' }}>{{ $s .'%' }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+
+
+                       
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                                    {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+                                </button>
+                                <button type="submit"  class="btn btn-primary" >
+                                    {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+                                </button>
+                            </div>
+                     </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}</button>
