@@ -20,6 +20,7 @@
 
 
 <body>
+  
   <!-- Include original navbar -->
   <nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm">
     <div class="container">
@@ -140,8 +141,14 @@
 
     <div class="row g-4 mb-8">
       @foreach ($hackathons as $hackathon)
+      @php
+        $apply = "SELECT * FROM form_data WHERE user_id = ? AND step_id = ?";
+            $apply = collect(DB::select($apply, [Auth::user()->id, $hackathon['step_id']]));
+      $team = "SELECT * FROM team_formations WHERE user_id = ?";
+      $team = collect(DB::select($team, [Auth::user()->id]));
+      @endphp
         <div class="col-lg-4 col-md-6">
-          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l])
+          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply, 'team' => $team])
         </div>
       @endforeach
     </div>

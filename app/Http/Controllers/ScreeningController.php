@@ -345,6 +345,7 @@ class ScreeningController extends Controller
 
 	public function changestep(Request $request)
 	{
+		
 		$approved = $by = null;
 		$data = [];
 		$company = Company::where('id', $request->company)->first();
@@ -353,11 +354,12 @@ class ScreeningController extends Controller
 			$data['new_step'] = 'Disapproved';
 		} else {
 			$cstep = Step::findOrFail($request->step);
-			if ($cstep->arr > 1) {
+			
+			
 				$approved = 1;
 				$by = Auth::id();
 				$data['new_step'] = $cstep?->title;
-			}
+			
 		}
 		$data['last_step'] = null;
 		if( !empty( $company->step ) )

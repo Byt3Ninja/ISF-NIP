@@ -64,8 +64,8 @@
 
   <!-- Main Content -->
   <main class="overflow-x-hidden mx-auto mb-12 mt-6" style="width: 90%;">
-    <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span id="hackathon-title-team-page" class="text-primary">{{ $l == 'en' ? 'AI Hackathon' : 'هاكثون الذكاء الاصطناعي' }}</span></h2>
-
+    <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span  class="text-primary">{{ $l == 'en' ? $team_Formation_raw->first()->tf_name : $team_Formation_raw->first()->tf_name  }}</span></h2>
+              
     <!-- No Team Section -->
     <div id="no-team-section" class="card card-body text-center p-5" style="display:none;">
       <i class="ti ti-users ti-xl text-muted mb-3"></i>
@@ -81,47 +81,92 @@
       <div class="col-md-7">
         <div class="card">
           <div class="card-header">
-            <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l == 'en' ? 'Heroes Team' : 'فريق الأبطال' }}</span></h5>
+            <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l == 'en' ? $team_Formation_raw->first()->tf_name  : $team_Formation_raw->first()->tf_name  }}</span></h5>
           </div>
           <div class="card-body">
-            <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span id="member-count">2</span>/5):</h6>
+            
+            @if( session()->has('success') )
+			<div class="row">
+				<div class="col-md-12">
+					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+						{{ __('admin.'. session()->get('success')) }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+			</div>
+			@endif
+			@if( session()->has('error') )
+			<div class="row">
+				<div class="col-md-12">
+					<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+						{{ __('admin.'.session()->get('error')) }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+			</div>
+			@endif
+
+            @php
+              $maxMembers = $team_Formation_raw->first()->s_count_team_number;
+              $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
+            @endphp
+            <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
             <ul class="list-group mb-3" id="team-members-list">
+              @php
+                $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
+              @endphp
+              @if($team_leader)
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div class="avatar avatar-sm me-2">
-                    <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle">
+                    <img src="{{ $team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar" class="rounded-circle">
                   </div>
-                  <strong>{{ $l == 'en' ? 'You (Team Leader)' : 'أنت (قائد الفريق)' }}</strong>
+                  <strong>{{ $l == 'en' ? 'You ('.$team_leader->user_name_en .')' : 'انت ('.$team_leader->user_name_ar .')' }} </strong>
                 </div>
                 <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
               </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
+              @endif
+              
+              @foreach ($team_members as $member)
+              <li id="Member{{ $member->tm_id }}" class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div class="avatar avatar-sm me-2">
-                    <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle">
+                    <img src="{{ $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar" class="rounded-circle">
                   </div>
-                  {{ $l == 'en' ? 'Team Member 2 (username)' : 'عضو الفريق 2 (اسم المستخدم)' }}
+                  {{ $l == 'en' ? 'Team Member 2 ('. $member->tm_name .')' : 'عضو الفريق 2 ('. $member->tm_name . ')' }}
                 </div>
-                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}" onclick="confirmRemoveMember('{{ $l == 'en' ? 'Team Member 2 (username)' : 'عضو الفريق 2 (اسم المستخدم)' }}')">
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}" onclick="confirmRemoveMember({{ $member->tm_id }}, '{{ $member->tm_name }}')">
                   <i class="ti ti-user-minus"></i>
                 </button>
               </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+              @endforeach
+
+              
+              @foreach ($team_Pinding as $index => $pendingMember)
+             
+              <li id="pendingMember{{ $pendingMember->tm_id }}" class="list-group-item d-flex justify-content-between align-items-center text-muted">
                 <div>
                   <i class="ti ti-user-plus me-2"></i>
-                  {{ $l == 'en' ? 'Pending invitation to: user3@example.com' : 'دعوة معلقة لـ: user3@example.com' }}
+                  {{ $l == 'en' ? 'Pending invitation to: '. $pendingMember->tm_email.'' : 'دعوة معلقة لـ: user3@example.com' }}
                 </div>
-                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation('user3@example.com')">
+                <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}"><button class="btn btn-sm btn-outline-secondary" data-id="{{ $pendingMember->tm_id }}" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation({{ $pendingMember->tm_id, $pendingMember->tm_email }})">
                   <i class="ti ti-x"></i>
                 </button>
+                
               </li>
-            </ul>
+              @endforeach
 
+            </ul>
+            @php
+              $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+            @endphp
+            @if($leaderOrnot->count() > 0)
             <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
-            <form id="inviteMemberForm" class="row g-3 align-items-center">
+            <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
+              @csrf
               <div class="col-auto flex-grow-1">
-                <input type="email" class="form-control" id="memberEmail" 
-                       placeholder="{{ $l == 'en' ? 'Member email address' : 'بريد العضو الإلكتروني' }}" required>
+                <input type="email" name="memberEmail" class="form-control" id="memberEmail" 
+                       placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
               </div>
               <div class="col-auto">
                 <button type="submit" class="btn btn-success">
@@ -129,22 +174,33 @@
                 </button>
               </div>
             </form>
+            @endif
             <hr>
+            @php
+                $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+              @endphp
+              
+              @if($teamLeader->isEmpty())
             <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:' }}</h6>
             <div id="join-requests-list">
               <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.' }}</div>
             </div>
+            @endif
           </div>
           <div class="card-footer">
             <a href="/dashboard/hackathon/my-team" class="btn btn-info">
               <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
             </a>
+            @if($leaderOrnot->count() < 0)
             <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
               <i class="ti ti-logout me-1"></i> {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
             </button>
+            @endif
+             @if($leaderOrnot->count() > 0)
             <button class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()" id="disbandTeamBtn" style="display:none;">
               <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
             </button>
+            @endif
           </div>
         </div>
       </div>
@@ -343,7 +399,7 @@
           const newItem = $(`
             <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
               <div><i class="ti ti-user-plus me-2"></i> {{ $l == 'en' ? 'Pending invitation to:' : 'دعوة معلقة لـ:' }} ${email}</div>
-              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation('${email}')">
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" >
                 <i class="ti ti-x"></i>
               </button>
             </li>
@@ -417,7 +473,11 @@
       });
     }
 
-    function confirmRemoveMember(memberName) {
+    function confirmRemoveMember(id, memberName) {
+
+      var url = '{{ route('hackathon.getOutTeam') }}';
+		  var token = '{{ csrf_token() }}';
+
       Swal.fire({
         title: '{{ $l == 'en' ? 'Remove Team Member?' : 'إزالة عضو الفريق؟' }}',
         text: `{{ $l == 'en' ? 'Are you sure you want to remove' : 'هل أنت متأكد أنك تريد إزالة' }} ${memberName} {{ $l == 'en' ? 'from the team?' : 'من الفريق؟' }}`,
@@ -431,10 +491,12 @@
         },
         reverseButtons: true,
       }).then((result) => {
-        if (result.isConfirmed) {
-          // Here you would typically make an AJAX call to remove the member
-          // For now, we'll just show a success message and remove the element
-          Swal.fire({
+
+          if (result.isConfirmed) {
+         
+          $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
+						function(response) {
+							Swal.fire({
             icon: 'success',
             title: '{{ $l == 'en' ? 'Member Removed!' : 'تم إزالة العضو!' }}',
             text: `${memberName} {{ $l == 'en' ? 'has been removed from the team.' : 'تم إزالته من الفريق.' }}`,
@@ -446,17 +508,40 @@
             },
             buttonsStyling: false,
           }).then(() => {
-            // Remove the member from the list (in a real scenario, this would be handled by server response)
-            event.target.closest('li').remove();
-            // Update member count
+            // Remove the pending member from the list
+            $('#Member'+id).remove();
+              // Update member count
             const currentCount = parseInt($('#member-count').text());
             $('#member-count').text(currentCount - 1);
           });
-        }
+        }).fail(function(error) { 
+						console.log(error);
+						Swal.fire({
+							icon: 'error',
+							title: "{{ __('admin.Error') }}!",
+							text: "{{ __('admin.DeleteFailed') }}",
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					});
+						}
+          // Here you would typically make an AJAX call to remove the member
+          // For now, we'll just show a success message and remove the element
+          
+        
       });
     }
 
-    function confirmCancelInvitation(email) {
+    function confirmCancelInvitation(id, email) {
+
+      var url = '{{ route('hackathon.Cancelinvitation') }}';
+		  var token = '{{ csrf_token() }}';
+
       Swal.fire({
         title: '{{ $l == 'en' ? 'Cancel Invitation?' : 'إلغاء الدعوة؟' }}',
         text: `{{ $l == 'en' ? 'Are you sure you want to cancel the invitation sent to' : 'هل أنت متأكد أنك تريد إلغاء الدعوة المرسلة إلى' }} ${email}{{ $l == 'en' ? '?' : '؟' }}`,
@@ -471,9 +556,10 @@
         reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
-          // Here you would typically make an AJAX call to cancel the invitation
-          // For now, we'll just show a success message and remove the element
-          Swal.fire({
+         
+          $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
+						function(response) {
+							Swal.fire({
             icon: 'success',
             title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
             text: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
@@ -485,10 +571,28 @@
             },
             buttonsStyling: false,
           }).then(() => {
-            // Remove the invitation from the list (in a real scenario, this would be handled by server response)
-            event.target.closest('li').remove();
+            // Remove the pending member from the list
+            $('#pendingMember'+id).remove();
           });
-        }
+        }).fail(function(error) { 
+						console.log(error);
+						Swal.fire({
+							icon: 'error',
+							title: "{{ __('admin.Error') }}!",
+							text: "{{ __('admin.CancelFailed') }}",
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					});
+						}
+          // Here you would typically make an AJAX call to cancel the invitation
+          // For now, we'll just show a success message and remove the element
+          
       });
     }
 
