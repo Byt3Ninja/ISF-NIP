@@ -402,7 +402,13 @@
 
           <div class="form-group mb-4" id="team_number">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='count_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input 
+                id='count_team_number' 
+                name='count_team_number' 
+                type="number" 
+                placeholder="{{ __('admin.maxInTeam') }}" 
+                class="form-control"
+              >
           </div>
         </div>
         <div class="modal-footer">
@@ -476,8 +482,8 @@
           <div class="mb-4">
             <input id='mtoDate' name='toDate' type="text" class="form-control" required readonly>
           </div> --}}
-          <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
-          <div class="form-group mb-0">
+          <div class="form-group mb-4">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control" required></textarea>
           </div>
@@ -523,6 +529,14 @@
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
 <script>
+
+  $('#count_team_number, #mcount_team_number').on('input', function () {
+    let val = $(this).val();
+    if (val < 1) {
+      $(this).val(1);
+    }
+  });
+
   function disableSubmitButton() {
     document.getElementById("submitBtn").disabled = true;
 }
