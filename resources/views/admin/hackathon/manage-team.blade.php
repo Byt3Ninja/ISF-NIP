@@ -176,16 +176,46 @@
             </form>
             @endif
             <hr>
+           
             @php
-                $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+                $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
               @endphp
+       
               
-              @if($teamLeader->isEmpty())
             <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:' }}</h6>
             <div id="join-requests-list">
+              @if($teamLeader->isEmpty())
               <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.' }}</div>
+              @else
+            
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ $teamLeader->first()->tm_name }}</strong>
+                                            
+                                        </div>
+
+                                        
+                                        <button class="btn btn-outline-primary btn-sm" onclick="ApprovedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                                            {{ $l == 'en' ? 'Approve' : ' موافقة ' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button>
+
+                                        <button class="btn btn-outline-danger btn-sm" onclick="RejectedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                                            {{ $l == 'en' ? 'Rejects' : ' رفض ' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button>
+                                       
+                                        {{-- <button class="btn btn-outline-primary btn-sm" disabled>
+                                            {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button> --}}
+                                        
+                                        
+                                    </div>
+
+              @endif
             </div>
-            @endif
+          
           </div>
           <div class="card-footer">
             <a  href="/dashboard/hackathon/my-team" class="btn btn-info">
@@ -679,6 +709,71 @@
         }
       });
     }
+
+    function ApprovedjoinTeam(id, teamName) {
+      
+        if (confirm(`{{ $l == "en" ? "Are you sure you want to Approved This request to join team" : "هل أنت متأكد أنك تريد الموافقة على  طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+            
+            fetch("{{ route('hackathon.ApprovedRequestJoinTeam') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // أو response.text() حسب ما يرجع الـ controller
+            })
+            .then(data => {
+                alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
+                // إعادة توجيه أو تحديث
+                window.location.href = window.location.href;
+            })
+            .catch(error => {
+                alert("{{ $l == 'en' ? 'There was an error sending the request.' : 'حدث خطأ أثناء إرسال الطلب.' }}");
+                console.error(error);
+            });
+        }
+    }
+
+    function RejectedjoinTeam(id, teamName) {
+      
+        if (confirm(`{{ $l == "en" ? "Are you sure you want to Reject This request to join team" : "هل أنت متأكد أنك تريد الرفض على  طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+            
+            fetch("{{ route('hackathon.RejectedRequestJoin') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // أو response.text() حسب ما يرجع الـ controller
+            })
+            .then(data => {
+                alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
+                // إعادة توجيه أو تحديث
+                window.location.href = window.location.href;
+            })
+            .catch(error => {
+                alert("{{ $l == 'en' ? 'There was an error sending the request.' : 'حدث خطأ أثناء إرسال الطلب.' }}");
+                console.error(error);
+            });
+        }
+    }
+
   </script>
 </body>
 

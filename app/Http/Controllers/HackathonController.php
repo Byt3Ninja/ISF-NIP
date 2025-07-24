@@ -356,7 +356,7 @@ class HackathonController extends Controller
         
                 $data = array_values($data);
 
-
+                            
                             $teams_q = "SELECT 
                             tf.id as tf_id,
                             tf.name as tf_name,
@@ -369,6 +369,7 @@ class HackathonController extends Controller
                             tm.Name as tm_name,
                             tm.Email as tm_email,
                             tm.isTeamLeader as tm_isTeamLeader,
+                            tm.acceptInvition as tm_acceptInvition,
                             tm.team_formation_id as tm_team_formation_id,
                             u.id as u_id,
                             concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
@@ -379,8 +380,12 @@ class HackathonController extends Controller
                             team_members as tm
                             LEFT JOIN team_formations as tf ON tm.team_formation_id = tf.id
                             LEFT JOIN users as u ON tm.user_id = u.id
-                            WHERE tm.user_id = ? AND tm.acceptInvition = 'accepted'";
-                            $teams = collect(DB::select($teams_q, [Auth::user()->id]));
+                            WHERE tm.acceptInvition = 'accepted'";
+                            $teams = collect(DB::select($teams_q));
+// $teamUser = $teams->where('tm_user_id', Auth::user()->id);
+// $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
+// dd($teams_with_user);
+
 
                                 $allteams_q = "SELECT 
                                 tf.id as tf_id,
@@ -426,7 +431,7 @@ class HackathonController extends Controller
 // dd($allteams->first()['tm_acceptInvition']);
 
         // return view('admin.hackathon.show', compact('hackathon'));
-        return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id', 'teams', 'allteams'));
+        return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id', 'teams', 'allteams', 'team_invition'));
     }
 
     function applyHackathon($id)
@@ -818,6 +823,7 @@ class HackathonController extends Controller
         }
                 $teamMember = new Team_member;
                 $teamMember->acceptInvition = 'join';
+                $teamMember->Email = $user->email;
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
                 $teamMember->isTeamLeader = 0;
@@ -828,6 +834,47 @@ class HackathonController extends Controller
                 
         return response()->json(['success' => true, 'message' => __("admin.Request_sent_successfully.")]);
         
+    }
+
+       public function ApprovedRequestJoin(Request $request)
+    {
+        
+        $teamMember = Team_member::where('id', $request->id)
+            ->where('acceptInvition', 'join')
+            ->first();
+            if(!$teamMember) {
+                return redirect()->back()->with('error', 'Request not found.');
+            }
+                $teamMember->acceptInvition = 'accepted';
+                $teamMember->save();
+                $allteamMembers = Team_member::where('Email', $teamMember->Email)
+                ->where('acceptInvition', 'join')
+                ->get();
+                foreach ($allteamMembers as $allteamMember) {
+                    $allteamMember->acceptInvition = 'rejected';
+                    $allteamMember->save();
+                }
+        return response()->json(['success' => true, 'message' => __("admin.Request_Approved_successfully.")]);
+    }
+    public function RejectedRequestJoin(Request $request)
+    {
+        
+        $teamMember = Team_member::where('id', $request->id)
+            ->where('acceptInvition', 'join')
+            ->first();
+            if(!$teamMember) {
+                return redirect()->back()->with('error', 'Request not found.');
+            }
+                $teamMember->acceptInvition = 'rejected';
+                $teamMember->save();
+                // $allteamMembers = Team_member::where('Email', $teamMember->Email)
+                // ->where('acceptInvition', 'join')
+                // ->get();
+                // foreach ($allteamMembers as $allteamMember) {
+                //     $allteamMember->acceptInvition = 'rejected';
+                //     $allteamMember->save();
+                // }
+        return response()->json(['success' => true, 'message' => __("admin.Request_Approved_successfully.")]);
     }
 
 }
