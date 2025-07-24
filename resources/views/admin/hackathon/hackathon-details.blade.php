@@ -779,16 +779,25 @@
                 </div>
             @if($currentHackathon['step_stype'] != 1)
                 <!-- Teams Tab (conditionally shown) -->
+                
                 <div class="tab-pane fade" id="teams" role="tabpanel" aria-labelledby="teams-tab-btn">
                     <div class="card">
                         <div class="card-body">
+                            @if(count($teams) == 0)
                             <h5 class="card-title">
                                 {{ $l == 'en' ? 'Team Formation and Joining' : 'تكوين الفرق والانضمام إليها' }}
                             </h5>
                             <p>
                                 {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is 5.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو 5.' }}
                             </p>
-
+                            @else
+                            <h5 class="card-title">
+                                {{ $l == 'en' ? 'Your Teams' : 'الفرق التي أنت فيها' }}
+                            </h5>
+                            <p>
+                                {{ $l == 'en' ? 'You are currently part of the following team(s). You can leave a team or join another one.' : 'أنت حالياً جزء من الفريق(الفرق) التالية. يمكنك مغادرة فريق أو الانضمام إلى آخر.' }}
+                            </p>
+                            @endif
                             <div id="my-current-team" class="mb-4 p-3 border rounded bg-light" style="display:none;">
                                 <h6>
                                     {{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }}
@@ -813,29 +822,91 @@
                                     {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
                                 </button>
                             </div>
-
+                           
                             <div id="team-actions">
+                                @if(count($teams) > 0)
+                                    @php
+                                        $isteamleader = $teams->where('tm_isTeamLeader', 1)->first();
+                                        $teamsMembers = $teams->where('tm_isTeamLeader', 0);
+                                    @endphp
+                                    
+                                    
+                                    <h6 class="mt-4">{{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }} <span class="fw-bold">{{$isteamleader->tf_name}}</span></h6>
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <i class="bi bi-person-check-fill text-success me-2"></i>
+                                            {{ $l == 'en' ? $isteamleader->tm_isTeamLeader == 1 ? 'You (Team Leader)' : $isteamleader->tm_name . ' (Team Leader)' : 'أنت (قائد الفريق)' }}
+                                        </li>
+                                        <hr>
+                                        @foreach($teamsMembers as $team)
+                                            <li>
+                                                
+                                                
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <a class="media-left" href="/dashboard/users/{{ $team->tm_user_id }}/edit">
+                                                        <img src="{{ $team->u_img_url }}" alt="avatar" class="rounded-circle me-3"
+                                                            height="40" width="40">
+                                                    </a>
+                                                    <a href="/dashboard/users/{{ $team->tm_user_id }}/edit">
+                                                        <div class="media-body">
+                                                            <h6 class="media-heading mb-0 text-nowrap">{{ $team->{'user_name_'.$l} }}</h6>
+                                                            <span class="font-small-2 text-nowrap">{{$team->tf_name }}</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <a href="collaboration-space.html?hackathonId=1&teamId=123" class="btn btn-success btn-sm">
+                                        <i class="bi bi-chat-dots-fill me-2"></i>
+                                        {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
+                                    </a>
+
+                                    
+                                    @else
                                 <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createTeamModal">
                                     <i class="bi bi-plus-circle-fill me-2"></i>
                                     {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
                                 </button>
+                                @endif
+                                @php
+                                
+
+                                @endphp
                                 <h6 class="mt-4">{{ $l == 'en' ? 'Join Existing Team:' : 'الانضمام إلى فريق قائم:' }}</h6>
+
                                 <div class="list-group" id="available-teams-list">
+
+                                    @foreach($allteams as $team)
+                                    
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>{{ $l == 'en' ? 'Team Innovators' : 'فريق المبتكرون' }}</strong>
-                                            (3/5 {{ $l == 'en' ? 'members' : 'أعضاء' }})
+                                            <strong>{{ $team['tf_name'] }}</strong>
+                                            ({{ $team['members_count'] }}/{{ $currentHackathon['max_team'] }} {{ $l == 'en' ? 'members' : 'أعضاء' }})
                                             <br>
                                             <small class="text-muted">
                                                 {{ $l == 'en' ? 'Looking for a developer and designer.' : 'يبحثون عن مطور ومصمم.' }}
                                             </small>
                                         </div>
-                                        <button class="btn btn-outline-primary btn-sm" onclick="joinTeam('{{ $l == 'en' ? 'Innovators' : 'المبتكرون' }}')">
+
+                                        @if($team['members_count'] < $currentHackathon['max_team'])
+                                        @if($team['tm_user_id']!=Auth::user()->id)
+                                        <button class="btn btn-outline-primary btn-sm" onclick="joinTeam('{{ $team['tf_id'] }}','{{ $team['tf_name'] }}')">
                                             {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
                                             <i class="bi bi-person-plus-fill ms-2"></i>
                                         </button>
+                                        @endif
+                                        @else
+                                        <button class="btn btn-outline-primary btn-sm" disabled>
+                                            {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button>
+                                        @endif
                                     </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    @endforeach
+
+
+                                    {{-- <div class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ $l == 'en' ? 'Team Stars' : 'فريق النجوم' }}</strong>
                                             (4/5 {{ $l == 'en' ? 'members' : 'أعضاء' }})
@@ -848,8 +919,10 @@
                                             {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
                                             <i class="bi bi-person-plus-fill me-2"></i>
                                         </button>
-                                    </div>
+                                    </div> --}}
                                 </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -1481,7 +1554,7 @@
         //     window.location.href = url.href;
         // }
 
-        function joinTeam(teamName) {
+        function joinTeam(id, teamName) {
             if (confirm(`{{ $l == "en" ? "Are you sure you want to request to join team" : "هل أنت متأكد أنك تريد طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
                 alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
                 const url = new URL(window.location);

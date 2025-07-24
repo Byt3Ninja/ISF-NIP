@@ -147,11 +147,15 @@
       $team = "SELECT * FROM team_formations WHERE user_id = ?";
       $team = collect(DB::select($team, [Auth::user()->id]));
       
-      $step_id = Auth::user()->company->step;
+      $step_id = Auth::user()->company?->step;
      
-         $stypeStep_q = "SELECT * FROM steps WHERE id = ?";
-         $stypeStep = collect(DB::select($stypeStep_q, [$step_id]));
-         
+      if($step_id != null){
+        $stypeStep_q = "SELECT * FROM steps WHERE id = ?";
+        $stypeStep = collect(DB::select($stypeStep_q, [$step_id]));
+      }else{
+        $stypeStep = null;
+      }
+        
        
       @endphp
         <div class="col-lg-4 col-md-6">
