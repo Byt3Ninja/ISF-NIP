@@ -182,85 +182,87 @@ class HackathonController extends Controller
         return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
     }
 
-    public function show($id) {
-
-        $user = Auth::user();
-        $hackathons_query = "SELECT
-        c.id as 'c_id',
-        c.title as 'c_title',
-        c.description as 'c_description',
-        c.start as 'c_start_date',
-        c.end as 'c_end_date',
-        c.type as 'c_type',
-        c.created_at as 'c_created_at',
-        c.updated_at as 'c_updated_at',
-        o.id as 'o_id',
-        o.name_ar as 'o_name_ar',
-        o.name_en as 'o_name_en',
-        o.img_url as 'o_logo',
-        o.created_at as 'o_created_at',
-        o.updated_at as 'o_updated_at',
-        u.id as 'U_id',
-        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
-        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
-        u.email as 'u_email',
-        com.id as 'Com_id',
-        com.name_en as 'Com_name_en',
-        com.name_ar as 'Com_name_ar',
-        com.logo as 'Com_logo',
-        com.cycle as 'Com_cycle',
-        com.step as 'Com_step'
-        FROM 
-        cycles as c
+public function show($id)
+{
+    $hackathons_query = "
+        SELECT
+            c.id as c_id,
+            c.title as c_title,
+            c.title_ar as c_title_ar,
+            c.description as c_description,
+            c.description_ar as c_description_ar,
+            c.start as c_start_date,
+            c.end as c_end_date,
+            o.name_ar as o_name_ar,
+            o.name_en as o_name_en,
+            u.id as U_id,
+            CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+            CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+            u.email as u_email,
+            com.id as Com_id,
+            com.name_en as Com_name_en,
+            com.name_ar as Com_name_ar,
+            com.logo as Com_logo,
+            com.cycle as Com_cycle,
+            com.step as Com_step
+        FROM cycles as c
         LEFT JOIN companies as com ON c.id = com.cycle
         LEFT JOIN users as u ON u.company_id = com.id
         LEFT JOIN organizations as o ON c.organization_id = o.id
-        WHERE c.type = 'Hackathon'
-        AND c.id = ? ";
-        
-        $hackathons_query .= " ORDER BY c.created_at DESC";
-        $hackathons_raw = collect(DB::select($hackathons_query, [$id]));
-       
-       
-        if ($hackathons_raw->isNotEmpty()) {
-            $item = $hackathons_raw->first();
+        WHERE c.type = 'Hackathon' AND c.id = ?
+        ORDER BY c.created_at DESC
+    ";
 
-            $now = now();
-            $start = Carbon::parse($item->c_start_date);
-            $end = Carbon::parse($item->c_end_date);
+    $hackathons_raw = collect(DB::select($hackathons_query, [$id]));
 
-            $status = $now->lt($start)
-                ? 'Upcoming'
-                : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
+    if ($hackathons_raw->isEmpty()) {
+        return abort(404, 'Hackathon not found');
+    }
 
-            $status_ar = match($status) {
-                'Upcoming' => 'قادم',
-                'Ongoing' => 'قائم',
-                'Finished' => 'منتهي',
-                default => '',
-            };
-                $step = Step::where('cycle_id', $id)->get();
-            $currentHackathon = [
-                'title' => $item->c_title,
-                'title_ar' => $item->c_title_ar ?? '',
-                'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
-                'date_ar' => $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.'.$end->format('m')) . ' ' . $end->format('Y'),
-                'location' => $item->o_name_en ?? 'Unknown',
-                'location_ar' => $item->o_name_ar ?? 'غير معروف',
-                'status' => $status,
-                'status_ar' => $status_ar,
-                'description' => $item->c_description,
-                'description_ar' => $item->c_description_ar ?? '',
-                'tags' => [],      // أضف التاجز هنا إذا عندك جدول مرتبط
-                'tags_ar' => [],   // نفس الشيء
-                'step_id' => $step->where('id', $item->Com_step)->first()->id ?? null,
-                'step_name' => $step->where('id', $item->Com_step)->first()->title ?? 'N/A',
-                'step_stype' => $step->where('id', $item->Com_step)->first()->stype ?? null,
-                'step_start' => $step->where('id', $item->Com_step)->first()->from?->format('Y-m-d') ?? null,
-                'step_end' => $step->where('id', $item->Com_step)->first()->to?->format('Y-m-d') ?? null,
-                'cycle_id' => $id,
-            ];
-        }
+    $item = $hackathons_raw->first();
+
+    $now = now();
+    $start = Carbon::parse($item->c_start_date);
+    $end = Carbon::parse($item->c_end_date);
+
+    $status = $now->lt($start)
+        ? 'Upcoming'
+        : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
+
+    $status_ar = match ($status) {
+        'Upcoming' => 'قادم',
+        'Ongoing' => 'قائم',
+        'Finished' => 'منتهي',
+        default => '',
+    };
+
+    $steps = Step::where('cycle_id', $id)->get();
+    $matchedStep = $steps->where('id', $item->Com_step)->first();
+
+    $currentHackathon = [
+        'title' => $item->c_title,
+        'title_ar' => $item->c_title_ar ?? '',
+        'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
+        'date_ar' => $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.' . $end->format('m')) . ' ' . $end->format('Y'),
+        'location' => $item->o_name_en ?? 'Unknown',
+        'location_ar' => $item->o_name_ar ?? 'غير معروف',
+        'status' => $status,
+        'status_ar' => $status_ar,
+        'description' => $item->c_description,
+        'description_ar' => $item->c_description_ar ?? '',
+        'tags' => [],      // add tags logic later
+        'tags_ar' => [],
+        'step_id' => $matchedStep?->id,
+        'step_name' => $matchedStep?->title ?? 'N/A',
+        'step_stype' => $matchedStep?->stype,
+        'step_start' => $matchedStep?->from?->format('Y-m-d'),
+        'step_end' => $matchedStep?->to?->format('Y-m-d'),
+        'cycle_id' => $id,
+    ];
+
+    return view('admin.hackathon.show', compact('currentHackathon', 'steps'));
+}
+
           
       
 
