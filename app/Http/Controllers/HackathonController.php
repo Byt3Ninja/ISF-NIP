@@ -22,67 +22,78 @@ use Illuminate\Support\Facades\Notification;
 class HackathonController extends Controller
 {
     public function index()
-    {
-        $hackathons_query = "SELECT
-        c.id as 'c_id',
-        c.title as 'c_title',
-        c.description as 'c_description',
-        c.start as 'c_start_date',
-        c.end as 'c_end_date',
-        c.type as 'c_type',
-        c.created_at as 'c_created_at',
-        c.updated_at as 'c_updated_at',
-      
-        o.id as 'o_id',
-        o.name_ar as 'o_name_ar',
-        o.name_en as 'o_name_en',
-        o.img_url as 'o_logo',
-        o.created_at as 'o_created_at',
-        o.updated_at as 'o_updated_at'
+{
+    $hackathons_query = "
+        SELECT
+            c.id as c_id,
+            c.title as c_title,
+            c.description as c_description,
+            c.start as c_start_date,
+            c.end as c_end_date,
+            c.type as c_type,
+            c.created_at as c_created_at,
+            c.updated_at as c_updated_at,
+            o.id as o_id,
+            o.name_ar as o_name_ar,
+            o.name_en as o_name_en,
+            o.img_url as o_logo,
+            o.created_at as o_created_at,
+            o.updated_at as o_updated_at
         FROM 
-        cycles as c
-        LEFT JOIN organizations as o ON c.organization_id = o.id
-        WHERE c.type = 'Hackathon'
-        AND `type` = 'Hackathon' ORDER BY c.created_at DESC";
-        $hackathons_raw = collect(DB::select($hackathons_query));
+            cycles as c
+        LEFT JOIN 
+            organizations as o ON c.organization_id = o.id
+        WHERE 
+            c.type = 'Hackathon'
+        ORDER BY 
+            c.created_at DESC
+    ";
 
-        $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
-        $team_formation = TeamFormation::whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->where('user_id', Auth::user()->id)->get();
-        $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
-        $now = now();
+    $hackathons_raw = collect(DB::select($hackathons_query));
+    $cycleIds = $hackathons_raw->pluck('c_id');
+
+    // Grouped by cycle_id for fast access
+    $steps = Step::where('stype', 1)->whereIn('cycle_id', $cycleIds)->get()->groupBy('cycle_id');
+    $teamFormations = TeamFormation::whereIn('cycle_id', $cycleIds)
+        ->where('user_id', Auth::id())
+        ->get()
+        ->groupBy('cycle_id');
+
+    $now = now();
+
+    $hackathons = $hackathons_raw->map(function ($item) use ($steps, $teamFormations, $now) {
         $start = \Carbon\Carbon::parse($item->c_start_date);
         $end = \Carbon\Carbon::parse($item->c_end_date);
+
         $status = $now->lt($start)
             ? 'Upcoming'
             : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
 
-            return [
-                'id' => $item->c_id,
-                'title' => $item->c_title,
-                'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
-                'location' => $item->o_name_en ?? 'Unknown',
-                'status' => $status,
-                'description' => $item->c_description,
-                'tags' => [],
-                'step_name' => $step->where('cycle_id', $item->c_id)->first()->title ?? 'N/A',
-                'step_id' => $step->where('cycle_id', $item->c_id)->first()->id ?? null,
-                'step_start' => $step->where('cycle_id', $item->c_id)->first()->from?->format('Y-m-d') ?? null,
-                'step_end' => $step->where('cycle_id', $item->c_id)->first()->to?->format('Y-m-d') ?? null,
-                'team_formation_id' => $team_formation->where('cycle_id', $item->c_id)->first()->id ?? null,
-            ];
-         });
+        $step = $steps[$item->c_id][0] ?? null;
+        $teamFormation = $teamFormations[$item->c_id][0] ?? null;
 
-            // استخراج الهاكاثونات المنتهية فقط
-            $pastHackathons = $hackathons->where('status', 'Finished')->values();
-            $hackathons = $hackathons->reject(function ($item) {
-                return $item['status'] === 'Finished';
-            })->values();
-        // dd($hackathons);
-           
-        
-        // return view('admin.hackathon.index', compact('hackathons'));
-        return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step'));
-    }
+        return [
+            'id' => $item->c_id,
+            'title' => $item->c_title,
+            'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
+            'location' => $item->o_name_en ?? 'Unknown',
+            'status' => $status,
+            'description' => $item->c_description,
+            'tags' => [],
+            'step_name' => $step?->title ?? 'N/A',
+            'step_id' => $step?->id,
+            'step_start' => $step?->from?->format('Y-m-d'),
+            'step_end' => $step?->to?->format('Y-m-d'),
+            'team_formation_id' => $teamFormation?->id,
+        ];
+    });
+
+    // Separate past hackathons
+    $pastHackathons = $hackathons->where('status', 'Finished')->values();
+    $hackathons = $hackathons->where('status', '!=', 'Finished')->values();
+
+    return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'steps'));
+}
 
     public function manage($id)
     {
