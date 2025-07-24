@@ -828,20 +828,21 @@
                                     @php
                                         $isteamleader = $teams->where('tm_isTeamLeader', 1)->first();
                                         $teamsMembers = $teams->where('tm_isTeamLeader', 0);
+                                        $teamUser = $teams->where('tm_user_id', Auth::user()->id);
+                                        $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
+                                        $isleader = $teams_with_user->where('tm_isTeamLeader', 1)->first();
                                     @endphp
                                     
-                                    
-                                    <h6 class="mt-4">{{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }} <span class="fw-bold">{{$isteamleader->tf_name}}</span></h6>
+                                    @if($teams_with_user != null)
+                                    <h6 class="mt-4">{{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }} <span class="fw-bold">{{$teams->first()->tf_name}}</span></h6>
+                                
                                     <ul class="list-unstyled">
-                                        <li>
-                                            <i class="bi bi-person-check-fill text-success me-2"></i>
-                                            {{ $l == 'en' ? $isteamleader->tm_isTeamLeader == 1 ? 'You (Team Leader)' : $isteamleader->tm_name . ' (Team Leader)' : 'أنت (قائد الفريق)' }}
-                                        </li>
+                                        
+                                       
+                                        
                                         <hr>
-                                        @foreach($teamsMembers as $team)
+                                        @foreach($teams_with_user as $team)
                                             <li>
-                                                
-                                                
                                                 <div class="d-flex align-items-center gap-2">
                                                     <a class="media-left" href="/dashboard/users/{{ $team->tm_user_id }}/edit">
                                                         <img src="{{ $team->u_img_url }}" alt="avatar" class="rounded-circle me-3"
@@ -853,10 +854,15 @@
                                                             <span class="font-small-2 text-nowrap">{{$team->tf_name }}</span>
                                                         </div>
                                                     </a>
+                                                    @if($team->tm_isTeamLeader == 1)
+                                                {{ $l == 'en' ? '(Team Leader)' : '(قائد الفريق)' }}
+                                                @endif
                                                 </div>
+                                                
                                             </li>
                                         @endforeach
                                     </ul>
+                                    @endif
                                     <a href="collaboration-space.html?hackathonId=1&teamId=123" class="btn btn-success btn-sm">
                                         <i class="bi bi-chat-dots-fill me-2"></i>
                                         {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
@@ -893,8 +899,14 @@
 
                                         @if($team['members_count'] < $currentHackathon['max_team'])
                                         @if($team['tm_user_id']!=Auth::user()->id)
-                                        
-                                        @if($team['tm_acceptInvition'] == null)
+                                       @php
+                                       $hasJoin = $team_invition->contains('tm_acceptInvition', 'join');
+                                        $hasAccepted = $team_invition->contains('tm_acceptInvition', 'accepted');
+                                        $allRejected = $team_invition->every(function($item) {
+                                            return $item->tm_acceptInvition === 'rejected';
+                                        });
+                                       @endphp
+                                        @if(!$hasJoin && !$hasAccepted && $allRejected)
                                         
                                         <button class="btn btn-outline-primary btn-sm" onclick="joinTeam('{{ $team['tf_id'] }}','{{ $team['tf_name'] }}')">
                                             {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
