@@ -406,8 +406,10 @@ class HackathonController extends Controller
 
                                 WHERE cycle_id=?";
                                 $allteams_raw = collect(DB::select($allteams_q, [$id]));
-                               
-                                $allteams = $allteams_raw->groupBy('tf_id')->map(function ($group) {
+                                $team_invition = $allteams_raw->where('tm_user_id', $user->id);
+// dd($team_invition);
+                                $allteams = $allteams_raw->groupBy('tf_id')->map(function ($group) use ($user, $team_invition) {
+                                   
                                     return [
                                         'tf_id' => $group->first()->tf_id,
                                         'tf_name' => $group->first()->tf_name,
@@ -415,12 +417,13 @@ class HackathonController extends Controller
                                         'tf_cycle_id' => $group->first()->tf_cycle_id,
                                         'tf_step_id' => $group->first()->tf_step_id,
                                         'tm_user_id' => $group->first()->tm_user_id,
+                                        'tm_acceptInvition' => $team_invition->first()?->tm_acceptInvition,
                                         'members_count' => $group->count(),
                                         'members' => $group,
                                     ];
                                 });
                                 
-// dd($allteams);
+// dd($allteams->first()['tm_acceptInvition']);
 
         // return view('admin.hackathon.show', compact('hackathon'));
         return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id', 'teams', 'allteams'));
@@ -805,10 +808,10 @@ class HackathonController extends Controller
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
 
-        public function RequestJoin($id)
+        public function RequestJoin(Request $request)
     {
         $user = Auth::user();
-        $teams = TeamFormation::where('id', $id)->first();
+        $teams = TeamFormation::where('id', $request->id)->first();
 
         if(!$teams){
             return redirect()->back()->with('error', 'Team not found.');
@@ -819,12 +822,12 @@ class HackathonController extends Controller
                 $teamMember->TeamMember = 'hackathon';
                 $teamMember->isTeamLeader = 0;
                 $teamMember->user_id = $user->id;
+                $teamMember->Company_id = $user->company_id ?? 0;
                 $teamMember->team_formation_id = $teams->id;
                 $teamMember->save();
-
                 
-
-        return redirect()->back()->with('success', 'Request to join team successfully.');
+        return response()->json(['success' => true, 'message' => __("admin.Request_sent_successfully.")]);
+        
     }
 
 }
