@@ -64,11 +64,11 @@ class HackathonController extends Controller
                 'status' => $status,
                 'description' => $item->c_description,
                 'tags' => [],
-                'step_name' => $step->where('cycle_id', $item->c_id)->first()->title ?? 'N/A',
-                'step_id' => $step->where('cycle_id', $item->c_id)->first()->id ?? null,
-                'step_start' => $step->where('cycle_id', $item->c_id)->first()->from?->format('Y-m-d') ?? null,
-                'step_end' => $step->where('cycle_id', $item->c_id)->first()->to?->format('Y-m-d') ?? null,
-                'team_formation_id' => $team_formation->where('cycle_id', $item->c_id)->first()->id ?? null,
+                'step_name' => $step->where('cycle_id', $item->c_id)->first()?->title ?? 'N/A',
+                'step_id' => $step->where('cycle_id', $item->c_id)->first()?->id ?? null,
+                'step_start' => $step->where('cycle_id', $item->c_id)->first()?->from?->format('Y-m-d') ?? null,
+                'step_end' => $step->where('cycle_id', $item->c_id)->first()?->to?->format('Y-m-d') ?? null,
+                'team_formation_id' => $team_formation->where('cycle_id', $item->c_id)->first()?->id ?? null,
             ];
          });
 
@@ -803,6 +803,28 @@ class HackathonController extends Controller
         $teamMember->save();
 
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
+    }
+
+        public function RequestJoin($id)
+    {
+        $user = Auth::user();
+        $teams = TeamFormation::where('id', $id)->first();
+
+        if(!$teams){
+            return redirect()->back()->with('error', 'Team not found.');
+        }
+                $teamMember = new Team_member;
+                $teamMember->acceptInvition = 'join';
+                $teamMember->Name = $user->first_name . ' ' . $user->last_name;
+                $teamMember->TeamMember = 'hackathon';
+                $teamMember->isTeamLeader = 0;
+                $teamMember->user_id = $user->id;
+                $teamMember->team_formation_id = $teams->id;
+                $teamMember->save();
+
+                
+
+        return redirect()->back()->with('success', 'Request to join team successfully.');
     }
 
 }
