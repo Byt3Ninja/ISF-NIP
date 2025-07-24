@@ -12,6 +12,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\Log;
+
 
 class ExportCycleCompData implements ShouldQueue
 {
@@ -34,8 +36,6 @@ class ExportCycleCompData implements ShouldQueue
     {
         $step = $this->data2['step'];
         $userEmail = $this->data2['userEmail'];
-    
-        
 
         $companies = Company::where('cycle', $step)->get();
        
@@ -113,7 +113,7 @@ class ExportCycleCompData implements ShouldQueue
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
     Mail::to(auth()->user()->email)
-        ->send(new ExportMail($tempFilePath, $fileName));
+        ->queue(new ExportMail($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

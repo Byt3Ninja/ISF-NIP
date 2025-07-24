@@ -35,19 +35,8 @@ class TypeController extends Controller
      */
     public function index()
     {
-        try{
-
-            $user =  $this->preProcessingCheck('view_type');
-            $types = Type::all();
-            return view('admin/settings/types/index', compact('types'));
-
-        }catch (Exception $e){
-
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-
-        }
+        $types = Type::all();
+        return view('admin/settings/types/index', compact('types'));
     }
 
     /**
@@ -57,18 +46,7 @@ class TypeController extends Controller
      */
     public function create()
     {
-        try{
-
-            $user =  $this->preProcessingCheck('add_type');
-            return view('admin/settings/types/create');
-
-        }catch (Exception $e){
-
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-
-        }
+        return view('admin/settings/types/create');
     }
 
     /**
@@ -79,23 +57,11 @@ class TypeController extends Controller
      */
     public function store(StoreTypeRequest $request)
     {
-        try{
-
-            $user =  $this->preProcessingCheck('add_type');
-            $result = Type::create($request->all());
-
-            if($result)
-                return redirect()->route('types.index')->with( ['msg' => __('StoredSuccessfully')] );
-            else
-                return back()->withInput()->with( ['msg' => __('FailedStore')] );
-
-        }catch (Exception $e){
-
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-
-        }
+        $result = Type::create($request->all());
+        if($result)
+            return redirect()->route('types.index')->with( ['msg' => __('StoredSuccessfully')] );
+        else
+            return back()->withInput()->with( ['msg' => __('FailedStore')] );
     }
 
     /**
@@ -106,8 +72,7 @@ class TypeController extends Controller
      */
     public function show(Type $Type)
     {
-        $user =  $this->preProcessingCheck('view_type');
-        abort(401);
+        //
     }
 
     /**
@@ -118,18 +83,7 @@ class TypeController extends Controller
      */
     public function edit(Type $type)
     {
-        try{
-
-            $user =  $this->preProcessingCheck('edit_type');
-            return view('admin/settings/types/edit', compact('type'));
-
-        }catch (Exception $e){
-
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-
-        }
+        return view('admin/settings/types/edit', compact('type'));
     }
 
     /**
@@ -141,23 +95,11 @@ class TypeController extends Controller
      */
     public function update(UpdateTypeRequest $request, Type $type)
     {
-        try{
-
-            $user =  $this->preProcessingCheck('edit_type');
-            $result = $type->update($request->all());
-
-            if($result)
-                return redirect()->route('types.index')->with( ['msg' => __('StoredSuccessfully')] );
-            else
-                return back()->withInput()->with( ['msg' => __('FailedStore')] );
-
-        }catch (Exception $e){dd($e);
-
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
-
-        }
+        $result = $type->update($request->all());
+        if($result)
+            return redirect()->route('types.index')->with( ['msg' => __('StoredSuccessfully')] );
+        else
+            return back()->withInput()->with( ['msg' => __('FailedStore')] );
     }
 
     /**
@@ -168,24 +110,7 @@ class TypeController extends Controller
      */
     public function destroy(Type $type)
     {
-        try{
-
-            $user =  $this->preProcessingCheck('delete_type');
-
-            $type->delete();
-
-            return response()->json([
-                'state' => 'success'
-            ], 200);
-
-        }catch (Exception $e){
-
-            //log what happend
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            return response()->json([
-                'state' => 'failed'
-            ], 500);
-
-        }
+        $type->delete();
+        return response()->json(['state' => 'success'], 200);
     }
 }

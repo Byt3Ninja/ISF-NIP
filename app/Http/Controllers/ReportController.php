@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Company;
-use App\Cycle;
-use App\FinalData;
-use App\Finalscreening;
-use App\MentorshipRequest;
-use App\Screening;
-use App\TrainingSession;
 use App\User;
+use App\Cycle;
+use App\Company;
+use App\FinalData;
+use App\Screening;
+use App\SurveyScopes;
+use App\Finalscreening;
+use App\SurveyResponses;
+use App\TrainingSession;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -24,7 +27,13 @@ class ReportController extends Controller
                 $query->where('organization_id',$organization_id);
             });
         })->get();
-        return view('admin.reports.index',compact('companies','cycles'));
+
+
+        $data['mentorRequests'] =  MentorshipRequest::all();
+        $available_surveys = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+
+
+        return view('admin.reports.index',compact('companies','cycles','available_surveys'));
     }
     public function View($type,Request $request){
         $organization_id = auth()->user()->organization_id;
@@ -49,6 +58,16 @@ class ReportController extends Controller
                 $data = $this->companiesReport($organization_id,$request->id);
                 $view = '_companyReport';
                 break;
+                
+            case 'mentorSurveys':
+                $data = $this->mentorSurveyReport();
+                $view = '_mentorSurvey';
+                break;
+
+            case 'startupSurveys':
+                $data = $this->startupSurveysReport();
+                $view = '_startupSurveyReport';
+                break;
 
         }
         $view = view('admin.reports.ajax.'.$view, $data)->render();
@@ -57,6 +76,64 @@ class ReportController extends Controller
     }
 
     // =============> ajax report functions <=============
+
+    // =============> ajax report StartupSurveys <=============
+    public function surveyReport(Request $request)
+    {
+        $surveyId = $request->id;
+        $available_surveys = SurveyResponses::with(['user', 'cycle.companies', 'survey.organization'])
+        ->where('id', $surveyId)->first();
+
+       return view('admin.reports.show-survey', [
+        'available_surveys' => $available_surveys,
+        'organizationName' => $available_surveys->survey->organization->{'name_' . app()->getLocale()} ?? '-',
+        'programName' => $available_surveys->cycle->title ?? '-',
+        'startupName' => $available_surveys->cycle->companies->first()?->{'name_' . app()->getLocale()} ?? '-',
+        'submitterName' => $available_surveys->user->first_name_en . ' ' . $available_surveys->user->last_name_en ?? '-',
+        'submitDate' => $available_surveys->created_at?->format('Y-m-d H:i:s') ?? '-',
+      ]);
+
+    }
+
+    protected function startupSurveysReport(){
+        $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
+            return SurveyResponses::where('user_id', $request->user_id)
+                ->where('triggered_at', $request->id)
+                ->where('triggered_by', 'session')
+                ->exists();
+        });
+        $data['cycle_mentors'] = User::whereHas('mentorSessions')->get();
+
+        $data['available_surveys'] = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('user_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+        // ==============> counts <=================
+        $data['Total_Survey'] = $data['available_surveys']->count();
+        $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
+        $data['Survey_NotDone'] = $data['available_surveys']->whereNull('responses')->count();
+      
+        return $data;
+    }
+ // =============> ajax report MentorSurvey <=============
+    protected function mentorSurveyReport(){
+        $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
+            return SurveyResponses::where('user_id', $request->mentor_id)
+                ->where('triggered_at', $request->id)
+                ->where('triggered_by', 'session')
+                ->exists();
+        });
+        $data['cycle_mentors'] = User::whereHas('mentorSessions')->get();
+
+        $surveyScope = SurveyScopes::whereIn('type', ['mentor', 'both'])->get();
+        $data['available_surveys'] = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+        // ==============> counts <=================
+        $data['Total_Survey'] = $data['available_surveys']->count();
+        $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
+        $data['Survey_NotDone'] = $data['available_surveys']->whereNull('responses')->count();
+      
+        return $data;
+    }
+
 
     protected function mentorshipReport($organization_id){
         $mentorRequests =  MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
@@ -70,7 +147,12 @@ class ReportController extends Controller
         })->get();
         // ==============> counts <=================
 
-        $data['mentors_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
+        // $data['mentors_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
+		$data['mentors_count'] = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'mentor')
+			->select('users.*')
+			->count();
         $data['total_sessions_count']= $mentorRequests->count();
         $data['mentorships_period'] =$mentorRequests->sum('period')/60;
         $data['approved_sessions_count'] = $mentorRequests->whereNotNull('start_url')->count();
@@ -126,7 +208,12 @@ class ReportController extends Controller
     }
 
     protected function judgeReport($organization_id){
-        $data['judgers_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+        // $data['judgers_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+		$data['judgers_count'] = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'judger')
+			->select('users.*')
+			->count();
         $screenings =Company::whereHas('stepdata',function ($q)use ($organization_id){
             $q->when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->whereHas('cycle',function ($query) use ($organization_id){

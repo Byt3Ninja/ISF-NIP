@@ -1,100 +1,234 @@
 @extends('layouts.admin')
-@section('title', __('admin.Roles') )
-@section('index_url', route('roles.index') )
+
+@php
+$tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group) {
+  return [
+    'target' => Str::slug($group),
+    'label' => $group,
+  ];
+})->values()->toArray();
+@endphp
+
+
+@section('title', __('admin.Roles'))
+@section('index_url', route('roles.index'))
 @section('subTitle', __('admin.CreateRole'))
 @section('content')
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-overlay"></div>
-        
-        <div class="content-body">
-            <!-- BuilderForm start -->
-            <section id="basic-input">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">{{__('admin.CreateRole')}}</h4>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-body">
-                                    @if(session()->has('msg'))
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                <button type="button" class="close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                                <div class="d-flex align-items-center">
-                                                    <i class="ti ti-error"></i>
-                                                    <span>
-                                                        {{ __('admin.'.session()->get('msg')) }}
-                                                        {{ Session::forget('msg') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endif
-                                    <!-- Validation messages -->
-                                    @if(count($errors) >0)
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="alert alert-danger">
-                                                <ul>
-                                                    @foreach($errors->all() as $error)
-                                                    <li>{{ $error }} </li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endif
-                                        <form method="POST" action="{{ route("roles.store") }}" enctype="multipart/form-data">
-                                            @csrf
-                                        <div class="row mb-4">
-                                            <div class="col-md-12">
-                                                <fieldset class="form-group">
-                                                    <label class="fs-6 mb-1" for="basicInput">{{ __('admin.Title')}}</label>
-                                                    <input type="text" class="form-control" id="name" name='name'
-                                                        required placeholder="{{__('admin.Title')}}" >
-                                                </fieldset>
-
-                                            </div>
-                                        </div>
-                                            <div class="form-group">
-                                                <label class="fs-6 mb-1" class="required" for="permissions">{{ __('Permissions') }}</label>
-
-                                                <select class="form-control select {{ $errors->has('permissions') ? 'is-invalid' : '' }}" name="permissions[]" id="permissions" multiple >
-                                                    @foreach($permissions as $id => $permission)
-                                                        <option value="{{ $id }}" {{ in_array($id, old('permissions', [])) ? 'selected' : '' }}>{{ $permission }}</option>
-                                                    @endforeach
-                                                </select>
-                                                @if($errors->has('permissions'))
-                                                    <div class="invalid-feedback">
-                                                        {{ $errors->first('permissions') }}
-                                                    </div>
-                                                @endif
-
-                                            </div>
-                                        <div class="row mt-4">
-                                            <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
-                                            </div>
-                                        </div>
-                                </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- BuilderForm end -->
+    @if(session()->has('success'))
+    <x-alert type="success"
+      message=" {{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}" />
+    @elseif(session()->has('msg'))
+    <x-alert type="danger" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+    @endif
+    <!-- Validation messages -->
+    @if($errors->any())
+    @foreach($errors->all() as $error)
+    <x-alert type="danger" message="{{ $error }}" />
+    @endforeach
+    @endif
+    <div class="card">
+      <div class="card-header border-bottom mb-6">
+        <div class="row d-flex justify-content-between align-items-center ps-0 ps-md-6">
+          <div class="col-12 col-md-8">
+            <h4 class="fw-bold mb-3 mb-md-0">{{ __('admin.CreateRole') }}</h4>
+          </div>
+          <div class="col-12 col-md-4">
+            <select class="form-select select2" id="group-select" data-placeholder="{{ __('admin.Search groups...') }}">
+              <option value="" disabled selected>{{ __('admin.Search groups...') }}</option>
+              @foreach ($tabs as $tab)
+              <option value="{{ Str::slug($tab['label'], '-') }}">{{ $tab['label'] }}</option>
+              @endforeach
+            </select>
+          </div>
         </div>
+      </div>
+      <div class="card-body">
+        <!-- Tabs (mobile) -->
+        <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
+          <ul class="nav nav-pills flex-nowrap" role="tablist">
+            @foreach ($tabs as $key => $tab)
+            <li class="nav-item d-flex justify-content-center align-items-center">
+              <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }}"
+                data-bs-toggle="tab" role="tab">
+                {{-- <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i> --}}
+                {{ $tab['label'] }}
+              </a>
+            </li>
+            @endforeach
+          </ul>
+        </div>
+        <!-- / Tabs (mobile) -->
+
+        <form class="p-0 w-100" method="POST" action="{{ route('roles.store') }}" enctype="multipart/form-data">
+          @csrf
+          <div class="row mb-6 border-bottom pb-3 px-5">
+            <div class="col-md-6 mb-3">
+              <label for="name" class="form-label fs-6 mb-1 fw-semibold">{{ __('admin.Title') }}</label>
+              <input type="text" class="form-control" id="name" name="name" required value="" placeholder="{{ __('admin.Title') }}" />
+            </div>
+
+            <div class="col-12 col-md-6 form-group mb-6">
+              <label class="form-label fs-6 mb-1 fw-semibold" for="default_for">{{ __('admin.roleType') }}</label>
+              <select name="default_for" id="default_for" class="form-select border-light light-shadow">
+                <option value="admin">{{ __('admin.roleAdmin') }}</option>
+                <option value="editor">{{ __('admin.roleEditor') }}</option>
+                <option value="coordinator">{{ __('admin.roleCoordinator') }}</option>
+                <option value="page">{{ __('admin.rolePageManager') }}</option>
+                <option value="manager">{{ __('admin.roleManager') }}</option>
+                <option value="mentor">{{ __('admin.roleMentor') }}</option>
+                <option value="judger">{{ __('admin.roleJudger') }}</option>
+                <option value="registered">{{ __('admin.roleRegistered') }}</option>
+                <option value="pages">{{ __('admin.rolePagesEditor') }}</option>
+                <option value="organizationmanager">{{ __('admin.roleOrganizationManager') }}</option>
+                <option value="other">{{ __('admin.roleOther') }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 col-md-3 d-none d-md-block">
+              <div class="w-100" style="height: 600px; overflow-y: auto;">
+                <nav class="nav-align-left mb-6 p-4 bg-white w-100 bg-danger">
+                  <!-- Tabs -->
+                  <ul class="nav nav-tabs nav-fill border-none m-auto w-100" role="tablist" id="group-tabs">
+                    @foreach ($tabs as $key => $tab)
+                    <li
+                      class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center group-tab"
+                      data-label="{{ Str::slug($tab['label'], '-') }}">
+                      <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+                        data-bs-toggle="tab" role="tab">
+                        {{-- <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i> --}}
+                        {{ $tab['label'] }}
+                      </a>
+                    </li>
+                    @endforeach
+                  </ul>
+                  <!-- / Tabs -->
+                </nav>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-9">
+              <!-- Tab Content On Tab Click -->
+              <div class="tab-content p-0" id="tab-content">
+                @foreach ($tabs as $index => $tab)
+                <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6"
+                  id="navs-left-{{ strtolower($tab['target']) }}">
+                  <div class="card shadow-none">
+                    <div class="card-header ms-2 p-0 p-md-auto">
+                      <div class="row pb-3 border-bottom mb-4">
+                        <div class="col-12 col-md-6">
+                          <h5 class="card-title mb-0 fw-semibold pt-2 mb-3 mb-md-0">{{ $tab['label'] }}</h5>
+                        </div>
+                        <div class="col-12 col-md-4 mb-3 mb-md-0">
+                          <!-- Search Input -->
+                          <div class="position-relative">
+                            <input type="text" class="form-control permission-search" 
+                              placeholder="{{ __('admin.Search_Permissions') }}..." />
+                            <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
+                              <i class="ti ti-search text-muted"></i>
+                            </span>
+                          </div>
+                          <!-- / Search Input -->
+                        </div>
+                        <div class="col-12 col-md-2 d-flex justify-content-md-end align-items-center">
+                          <!-- Select All -->
+                          <div class="form-check">
+                            <input type="checkbox" class="form-check-input select-all-row"
+                              id="select-all-{{ strtolower($tab['target']) }}">
+                            <label class="form-check-label" for="select-all-{{ strtolower($tab['target']) }}">{{
+                              __('admin.Select_All') }}</label>
+                          </div>
+                          <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
+                            <i class="ti ti-check text-muted"></i>
+                          </span>
+                          <!-- / Select All -->
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-0 w-100">
+                      <div class="permission-list w-100">
+                        @foreach( $_permissions->where('group', $tab['label']) as $permission )
+                        <div class="card permission-card card-body border mb-3">
+                          <li class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                            <div class="d-flex flex-column">
+                              <h5 class="mb-0">{{ $permission->description }}</h5>
+                              <span>{{ $permission->name }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center gap-3">
+                              <div class="form-check d-flex align-items-center gap-2 w-px-100 h-px-40 mt-4 mt-md-0">
+                                <input class="form-check-input" type="checkbox" name="permissions[]"
+                                  value="{{ $permission->id }}" id="permission-{{ $permission->name }}"
+                                  onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'" />
+                                <label class="form-check-label" for="permission-{{ $permission->name }}">
+                                  {{ __('admin.Select') }}
+                                </label>
+                              </div>
+                              <a href="/dashboard/permissions/{{ $permission->id }}/edit"
+                                class="btn btn-sm btn-icon rounded-circle btn-label-secondary">
+                                <i class="ti ti-edit"></i>
+                              </a>
+                            </div>
+                          </li>
+                        </div>
+                        @endforeach
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endforeach
+              </div>
+              <!-- / Tab Content On Tab Click -->
+            </div>
+          </div>
+          <div class="d-flex justify-content-end align-items-center gap-6 mt-8">
+            <button type="reset" class="btn btn-label-secondary">{{ __('admin.Reset') }}</button>
+            <button type="submit" class="btn btn-primary">{{ __('admin.Submit') }}</button>
+          </div>
+        </form>
+      </div>
     </div>
-</div>
-<!-- END: Content-->
-@stop
+  </div>
+  @stop
+
+  @section('pagescripts')
+  <script>
+    // Activate navigation tabs based on selected group
+  const groupSelect = $('#group-select');
+  groupSelect.on('change', function () {
+    const selectedGroup = $(this).val().toLowerCase().trim();
+    console.log('selectedGroup', selectedGroup);
+    $('.group-tab').each(function () {
+      const groupLabel = $(this).data('label').toLowerCase().trim();
+      console.log('groupLabel', groupLabel);
+      if (groupLabel === selectedGroup) {
+        $(this).addClass('active');
+        $(`#navs-left-${groupLabel}`).addClass('show active');
+        $(this).find('a').addClass('active'); // Activate the nav item
+      } else {
+        $(this).removeClass('active');
+        $(`#navs-left-${groupLabel}`).removeClass('show active');
+        $(this).find('a').removeClass('active'); // Deactivate the nav item
+      }
+    });
+  });
+
+  // Search across all permission cards in all tabs
+  $('.permission-search').on('keyup', function () {
+    const query = $(this).val().toLowerCase();
+    const tabPane = $(this).closest('.tab-pane');
+    tabPane.find(".permission-card").each(function () {
+      $(this).toggle($(this).text().toLowerCase().indexOf(query) > -1);
+    });
+  });
+
+  // Select all checkboxes in a group
+  $('.select-all-row').on('change', function () {
+    const groupId = $(this).attr('id').replace('select-all-', '');
+    const isChecked = $(this).is(':checked');
+    $(`#navs-left-${groupId} .permission-list input[type="checkbox"]`).prop('checked', isChecked);
+  });
+  </script>
+  @stop

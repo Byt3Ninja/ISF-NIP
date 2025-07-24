@@ -84,6 +84,9 @@
         }
     </style>
 </head>
+@php
+$setting = \App\settings::where('id', 1)->first();
+@endphp
 <body style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
 <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f8f8f9;" width="100%">
     <tbody>
@@ -130,7 +133,7 @@
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto" src="{{ asset('email-assets') }}/images/arweqah_sa_cover.jpeg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
+                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto" src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -180,7 +183,7 @@
                                                                         <v:textbox inset="0px,0px,0px,0px">
                                                                             <center style="color:#ffffff; font-family:Tahoma, sans-serif; font-size:16px">
                                                                     <![endif]-->
-                                                                    <a href="{{ $url }}">
+                                                                    <a href="{{ $url }}" target="_blank">
                                                                     <div style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#1aa19c;border-radius:60px;width:auto;border-top:0px solid transparent;font-weight:undefined;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:15px;padding-bottom:15px;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;"><span style="padding-left:30px;padding-right:30px;font-size:16px;display:inline-block;letter-spacing:normal;"><span style="margin: 0; word-break: break-word; line-height: 32px;"><strong>Activate Your Account</strong></span></span></div><!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
                                                                     </a>
                                                                 </div>
@@ -295,7 +298,7 @@
                                         <tr>
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="GrowthLab" height="auto" src="{{ url('email-assets') }}/images/footer.png" style="display: block; height: auto; border: 0; width: 100%;" title="Growthlab" width="640"/></div>
+                                                    <div style="max-width: 640px;"><img alt="GrowthLab" height="auto" src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="Growthlab" width="640"/></div>
                                                 </div>
                                             </td>
                                         </tr>

@@ -38,8 +38,8 @@
                       onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
                       @foreach ($cycles as $cycle)
                         <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                          {{ __('cycles.from') }} {{ $cycle->start->format('d-m') }} {{ __('cycles.to') }}
-                          {{ $cycle->end->format('d-m-Y') }} - {{ optional($cycle->organization)->name }}</option>
+                          {{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                          {{ $cycle->end->format('d-m-Y') ?? '-' }} - {{ optional($cycle->organization)->name }}</option>
                       @endforeach
                       @if (!$id)
                         <option> {{ __('cycles.No records saved') }} - ({{ __('cycles.Manage Cycle') }}).</option>
@@ -67,14 +67,73 @@
         <section>
           <div class="row">
             <div class="col-md-12">
-              <div class="card">
-                <div class="card-header border-bottom">
+              <div class="card card-body">
+                <div class="border-bottom">
                   <h4 class="card-title">{{ __('cycles.Mentors') }}</h4>
                 </div>
+
+                <br>
+                @php
+                    $specializations = [];
+                    // $TMentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+                    $TMentors = App\User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+											->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+											->where('roles.default_for', 'mentor')
+											->select('users.*')
+                      ->get();
+                    foreach ($TMentors as $mentor) {
+                            $specialization = $mentor->bio->{'specialization_' . $l} ?? null;
+                            if ($specialization && !in_array($specialization, $specializations)) {
+                                $specializations[] = $specialization;
+                            }
+                    }
+                @endphp
+                
+                <form id="filter-form" method="GET" action="/dashboard/mentorship/assign/{{ $id }}">
+                  <div class="row">
+                    <div class="col-8">
+                      <div class="row">
+                        <div class="col-auto col-md-4">
+                          <select name="specialization" class="form-select select2" id="specializationFilter" data-placeholder="{{ __('cycles.Specialization') }}">
+                              <option value="">{{ __('cycles.Specialization') }}</option>
+                              @php
+                                  $specializations = array_unique($specializations);
+                              @endphp
+                            <option value="0">All</option>
+                              @foreach ($specializations as $specialization)
+                                  <option value="{{ $specialization }}" {{ request('specialization') == $specialization ? 'selected' : '' }}>{{ $specialization }}</option>
+                              @endforeach
+                          </select>    
+                        </div>
+                        <div class="col-auto col-md-4">
+                          <select name="rate" class="form-select select2">
+                            <option value="0" {{ request('rate') == 0 ? 'selected' : '' }} >All</option>
+                            <option value="1" {{ request('rate') == 1 ? 'selected' : '' }} > 1 </option>
+                            <option value="2" {{ request('rate') == 2 ? 'selected' : '' }} > 2 </option>
+                            <option value="3" {{ request('rate') == 3 ? 'selected' : '' }} > 3 </option>
+                            <option value="4" {{ request('rate') == 4 ? 'selected' : '' }} > 4 </option>
+                            <option value="5" {{ request('rate') == 5 ? 'selected' : '' }} > 5 </option>
+                          </select>
+                        </div>
+                        <div class="col-auto col-md-4">
+                          <select name="assigning" class="form-select select2">
+                            <option value="0" {{ request('assigning') == 0 ? 'selected' : '' }} >All</option>
+                            <option value="checked" {{ request('assigning') == 'checked' ? 'selected' : '' }} > {{ __('admin.checked') }} </option>
+                            <option value="Notchecked" {{ request('assigning') == 'Notchecked' ? 'selected' : '' }} > {{ __('admin.Notchecked') }} </option>
+                          </select>  
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+                <hr>
+
                 <form action= "/dashboard/mentorship/assign/{{ $id }}" method="POST"
                   enctype="multipart/form-data">
                   {!! csrf_field() !!}
                   <input type="hidden" name="cycle" value="{{ $id }}">
+                   <input type="hidden" id="selected-mentors" name="selected_mentors" value="">
                   <div class="table-responsive">
                     <table class="table" id="mentorstable">
                       <thead class="bg-label-light">
@@ -82,18 +141,27 @@
                           <th class="text-nowrap fw-bold">{{ __('cycles.Name/Title') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Bio') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Specialization') }}</th>
-                          <th class="text-nowrap fw-bold">Linkedin</th>
+                          <th class="text-nowrap fw-bold">{{ __('admin.Linkedin') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Rate') }}</th>
                         </tr>
                       </thead>
                       <tbody>
+                       
                         @foreach ($mentors as $mentor)
                           <tr>
                             <td>
                               <div class="d-flex align-items-center">
-                                <input type='checkbox' id="checkbox{{ $mentor->id }}" class="checkbox-input"
-                                  {{ in_array($mentor->id, $cList) ? 'checked' : '' }} name='users[]'
-                                  value="{{ $mentor->id }}">
+                                <div class="form-check mb-0 ms-2">
+                                  <input 
+                                    class="form-check-input mentor-checkbox"
+                                    type='checkbox' 
+                                    id="checkbox{{ $mentor->id }}" 
+                                    {{ in_array($mentor->id, $cList) ? 'checked' : '' }}
+                                    {{-- name='users[]' --}}
+                                    value="{{ $mentor->id }}"
+                                  />
+                                </div>
+                                 
                                 <label for="checkbox{{ $mentor->id }}">
                                   <div class="d-flex align-items-center mx-2" style="height: 40px;">
                                     <a class="">
@@ -160,16 +228,55 @@
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
 
+  <script>
+    // Global array to maintain selected mentors across pagination
+    let selectedMentors = [];
+    
+    // Initialize selectedMentors with already checked mentors on page load
+    $(document).ready(function() {
+      $('.mentor-checkbox:checked').each(function() {
+        const value = $(this).val();
+        if (!selectedMentors.includes(value)) {
+          selectedMentors.push(value);
+        }
+      });
+      updateHiddenField();
+    });
+
+    // Use event delegation to handle checkbox changes across pagination
+    $(document).on('change', '.mentor-checkbox', function() {
+      const value = $(this).val();
+      
+      if ($(this).is(':checked')) {
+        // Add to selectedMentors if not already present
+        if (!selectedMentors.includes(value)) {
+          selectedMentors.push(value);
+        }
+      } else {
+        // Remove from selectedMentors
+        selectedMentors = selectedMentors.filter(id => id !== value);
+      }
+      
+      updateHiddenField();
+      console.log('selectedMentors', selectedMentors);
+    });
+    
+    // Function to update the hidden field
+    function updateHiddenField() {
+      $('#selected-mentors').val(selectedMentors.join(','));
+    }
+  </script>
+
   <script type="text/javascript">
     $(document).ready(function() {
-      $('.table').DataTable({
+      var table = $('.table').DataTable({
         "responsive": true,
         "searching": true,
         "lengthChange": false,
-        "paging": false,
+        "paging": true,
         "bInfo": false,
         "columnDefs": [{
-          "orderable": false,
+          "orderable": true,
           "targets": [3]
         }, ],
         @if ($l == 'ar')
@@ -195,13 +302,50 @@
               "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
               "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
             }
-          }
+          },
         @endif
+        "drawCallback": function(settings) {
+          // Restore checkbox states after pagination
+          restoreCheckboxStates();
+        }
       });
 
+      // Function to restore checkbox states based on selectedMentors array
+      function restoreCheckboxStates() {
+        $('.mentor-checkbox').each(function() {
+          const value = $(this).val();
+          if (selectedMentors.includes(value)) {
+            $(this).prop('checked', true);
+          }
+        });
+      }
+
+      // Handle "Select All" functionality
       $('#checkAll').click(function() {
-        $("input[type=checkbox]").prop('checked', $(this).prop('checked'));
+        const isChecked = $(this).prop('checked');
+        
+        // Get all currently visible checkboxes
+        $('.mentor-checkbox:visible').each(function() {
+          const value = $(this).val();
+          $(this).prop('checked', isChecked);
+          
+          if (isChecked) {
+            // Add to selectedMentors if not already present
+            if (!selectedMentors.includes(value)) {
+              selectedMentors.push(value);
+            }
+          } else {
+            // Remove from selectedMentors
+            selectedMentors = selectedMentors.filter(id => id !== value);
+          }
+        });
+        
+        updateHiddenField();
+        console.log('selectedMentors after select all', selectedMentors);
       });
+
+      // Make restoreCheckboxStates available globally
+      window.restoreCheckboxStates = restoreCheckboxStates;
     });
   </script>
 
@@ -209,6 +353,10 @@
     $('.date').datetimepicker({
       timepicker: true,
       format: 'Y-m-d H:i'
+    });
+
+    $('#filter-form .form-select').on('change', function() {
+      $('#filter-form').submit();
     });
   </script>
 @stop

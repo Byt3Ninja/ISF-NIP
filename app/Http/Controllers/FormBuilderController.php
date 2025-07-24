@@ -15,8 +15,8 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
-    public function showBuilder($id=1) {
-        $this->preProcessingCheck('edit_forms');
+    public function showBuilder(Request $request, $id=1)
+    {
         $organization_id=auth()->user()->organization_id;
 
         if (is_null($organization_id) && Organization::count() == 0){
@@ -122,6 +122,10 @@ class FormBuilderController extends Controller
             $builderForms = BuilderForm::all();
         }
 
+        if($request->org_id){
+            $builderForms = BuilderForm::where('organization_id',$request->org_id)->get();
+        }
+
         $data = [
             'builderForms'=>$builderForms,
             'title' => 'form builder',
@@ -134,9 +138,8 @@ class FormBuilderController extends Controller
     /**
      * show the form
      */
-    public function showForm($id) {
-
-        $this->preProcessingCheck('view_forms');
+    public function showForm($id)
+    {
         $form_id_toshow = $id;
         $the_form = BuilderForm::findOrFail($form_id_toshow);
         $field_map_ids = BuilderField::where('builder_form_id', $form_id_toshow)->select('id')->pluck('id')->toArray();
@@ -155,7 +158,6 @@ class FormBuilderController extends Controller
      * handle form submit request
      */
     public function handleFormRequest(Request $request) {
-        $this->preProcessingCheck('edit_forms');
         // must have data
         $validator = Validator::make($request->all(), [
             'builder_form_id' => 'required|integer|exists:builder_forms,id',
@@ -210,8 +212,8 @@ class FormBuilderController extends Controller
     /**
      * handle form data ajax request save
      */
-    public function saveForm($id, Request $request) {
-        $this->preProcessingCheck('edit_forms');
+    public function saveForm($id, Request $request)
+    {
         $request->validate([
             'form_fields_data' => 'required|json'
         ]);
@@ -219,8 +221,6 @@ class FormBuilderController extends Controller
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->id => $field->field_type];
         });
-//dd($request);
-//dd($request->all(all));
         // data from ajax request
         $field_data = collect(json_decode($request->form_fields_data));
 
@@ -296,8 +296,8 @@ class FormBuilderController extends Controller
         ]);
     }
 
-    public function modifyForm($set, Request $request) {
-        $this->preProcessingCheck('edit_forms');
+    public function modifyForm($set, Request $request)
+    {
 
         if ($set==1) {
             // make a copy

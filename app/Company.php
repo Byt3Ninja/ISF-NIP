@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    //    use Auditable;
+    // use Auditable;
+    public static $module = 'Company';
     protected $fillable = [
-        'organization_id',
         'country_id',
         'state_id',
         'city_id',
@@ -19,13 +19,20 @@ class Company extends Model
         'name_ar',
         'address_en',
         'sector',
+        'Funding_Target',
+        'info_company',
         'business_categories',
+        'business_phase',
         'address_ar',
         'years_of_operations',
         'product_or_service',
+        'occupation',
+        'annual_revenue',
         'phone',
         'fax',
         'email',
+        'product_photo',
+        'product_video',
         'website',
         'est_date',
         'idea',
@@ -34,14 +41,19 @@ class Company extends Model
         'team_num',
         'stage',
         'raised_fund',
+        'equity_offered',
         'investors',
         'founder',
         'employees',
+        'collaborators',
+        'hear_about_us',
         'facebook',
         'twitter',
         'linkedin',
         'youtube',
         'google_map',
+        'instagram',
+        'tiktok',
         'logo',
         'cycle',
         'step',
@@ -72,21 +84,26 @@ class Company extends Model
         'CreatedTax',
         'Commercial_Register',
         'Tax_Card',
-        'Country_Register_id'
+        'Country_Register_id',
+        'targeted_market',
+        'industries'
     ];
 
 
     protected $casts = [
         'business_categories' => 'array',
+        'product_photo' => 'array',
     ];
+    public static function logo_handler( $img )
+    {
+        if( !$img ) { return '/app-assets/images/logo_placeholder.png'; }
+        return $img;
+    }
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
     {
         $image = $this->logo;
-        if (!$image) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return $image;
+        return self::logo_handler( $image );
     }
     public function getBusinessModelUrlAttribute()
     {
@@ -136,7 +153,7 @@ class Company extends Model
         return $this->hasOne(User::class);
     }
 
-    public function sector()
+    public function sectoR()
     {
         return $this->belongsTo(Sector::class, 'sector');
     }
@@ -166,7 +183,7 @@ class Company extends Model
         return $this->belongsTo(Cycle::class, 'cycle');
     }
 
-    public function stage()
+    public function stagE()
     {
         return $this->belongsTo(Stage::class, 'stage');
     }
@@ -275,5 +292,38 @@ class Company extends Model
     public function cycle()
     {
         return $this->belongsTo(Cycle::class, 'cycle', 'id');
+    }
+
+    public static function static_categories()
+    {
+        return [
+            __('admin.categories.food_beverage') => false,
+            __('admin.categories.technology') => false,
+            __('admin.categories.app_website') => false,
+            __('admin.categories.housewares_home_design') => false,
+            __('admin.categories.health_wellness_nutrition') => false,
+            __('admin.categories.fitness') => false,
+            __('admin.categories.sports') => false,
+            __('admin.categories.beauty') => false,
+            __('admin.categories.clothing_fashion') => false,
+            __('admin.categories.toys_games') => false,
+            __('admin.categories.children') => false,
+            __('admin.categories.entertainment_experiential') => false,
+            __('admin.categories.pets') => false,
+            __('admin.categories.music') => false,
+            __('admin.categories.holiday') => false,
+            __('admin.categories.other') => true,
+        ];
+    }
+
+    public static function business_phase()
+    {
+        return [
+            '1' => 'Idea',
+            '2' => 'Research & Development',
+            '3' => 'Prototype / Beta Testing',
+            '4' => 'Crowdfunding',
+            '5' => 'Operating / Shipping',
+        ];
     }
 }

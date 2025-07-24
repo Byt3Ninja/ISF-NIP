@@ -11,6 +11,7 @@ class QuestionsBank extends Model
 {
 	use Auditable;
 	public $timestamps = true;
+	public static $module = 'Questions Bank';
 	protected $table = 'questions_bank';
 	protected $primaryKey = 'id';
 
@@ -35,7 +36,6 @@ class QuestionsBank extends Model
 	];
 
 	protected $casts = [
-		'organization_id' => 'integer',
 		'category_id' => 'integer',
 		'group' => 'string',
 		'question' => 'string',
@@ -66,4 +66,14 @@ class QuestionsBank extends Model
 	{
 		return $this->belongsTo(SubCategory::class, 'subcategory_id');
 	}
+
+	public function organizations()
+	{
+		return $this->belongsToMany(Organization::class, 'organization_question_bank', 'question_id', 'organization_id');
+	}
+
+	public function getTagsArrayAttribute()
+    {
+        return $this->tags ? explode(',', $this->tags) : [];
+    }
 }

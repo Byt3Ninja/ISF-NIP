@@ -56,4 +56,14 @@ return [
     'redirect' => config('services.linkedin.redirect'),
     ],
 
+    'keygen' => [
+    'token' => env('KEYGEN_TOKEN'),
+    'account' => env('KEYGEN_ACCOUNT'),
+   ],
+   'google_calendar' => [
+    'client_id' => config('services.google_calendar.client_id'),
+    'client_secret' => config('services.google_calendar.client_secret'),
+    'redirect' => config('services.google_calendar.redirect'),
+],
+
 ];

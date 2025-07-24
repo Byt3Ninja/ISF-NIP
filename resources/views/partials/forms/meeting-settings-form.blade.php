@@ -1,4 +1,4 @@
-<form class="form d-flex flex-column h-100" action="{{ route('updateMeeting') }}" method="POST"
+<form class="form d-flex flex-column h-100" action="{{ route('settings.system_meeting_integration_update') }}" method="POST"
   enctype="multipart/form-data">
   {!! csrf_field() !!}
   @method('PUT')
@@ -10,13 +10,14 @@
       <fieldset class="form-label-group">
         <select class="form-control Meeting" id="Meeting" name="Meeting" required>
           <option value="0">{{ __('settings.Choose') }}</option>
-          <option value="Teams" {{ $Title->Meeting == 'Teams' ? 'selected' : '' }}>Teams</option>
-          <option value="Zoom" {{ $Title->Meeting == 'Zoom' ? 'selected' : '' }}>Zoom</option>
+          <option value="zoom" {{ strtolower( $Title->Meeting ) == 'zoom' ? 'selected' : '' }}>{{__('admin.Zoom')}}</option>
+          <option value="teams" {{ strtolower( $Title->Meeting ) == 'teams' ? 'selected' : '' }}>{{__('admin.Teams')}}</option>
+
         </select>
       </fieldset>
     </div>
 
-    <div class="MICROSOFT_CLIENT" @if ($Title->Meeting != 'Teams') style="display: none;" @endif>
+    <div id="teams_credentials" @if ($Title->Meeting != 'Teams') style="display: none;" @endif>
       <div class="form-group mb-3">
         <label class="form-label mb-1" for="MICROSOFT_CLIENT_ID">{{ __('settings.MICROSOFT_CLIENT_ID') }}</label>
         <input id="MICROSOFT_CLIENT_ID" type="text" class="form-control" value="{{ $Title->MICROSOFT_CLIENT_ID }}"
@@ -51,7 +52,7 @@
       </div>
     </div>
 
-    <div class="ZOOM_CLIENT" @if ($Title->Meeting != 'Zoom') style="display: none;" @endif>
+    <div id="zoom_credentials" @if ($Title->Meeting != 'Zoom') style="display: none;" @endif>
       <div class="form-group mb-3">
         <label class="form-label mb-1" for="ZOOM_CLIENT_ID">{{ __('settings.ZOOM_CLIENT_ID') }}</label>
         <input id="ZOOM_CLIENT_ID" type="text" class="form-control" value="{{ $Title->ZOOM_CLIENT_ID }}"
@@ -74,3 +75,16 @@
     <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
   </div>
 </form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      function toggleCredentials() {
+          let selectedPlatform = document.getElementById("Meeting").value;
+          document.getElementById("zoom_credentials").style.display = selectedPlatform === "zoom" ? "block" : "none";
+          document.getElementById("teams_credentials").style.display = selectedPlatform === "teams" ? "block" : "none";
+      }
+
+      document.getElementById("Meeting").addEventListener("change", toggleCredentials);
+      toggleCredentials();
+  });
+</script>

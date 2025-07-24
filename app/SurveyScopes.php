@@ -13,6 +13,7 @@ class SurveyScopes extends Model
 	use Auditable;
 	public $timestamps = true;
 	protected $table = 'survey_scopes';
+	public static $module = 'Survey Scopes';
 	protected $primaryKey = 'id';
 
 	protected $fillable = [

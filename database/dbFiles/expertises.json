@@ -2,211 +2,253 @@
   {
     "id": "1",
     "title": "Product Development",
+    "title_ar": "تطوير المنتج",
     "parent_id": null
   },
   {
     "id": "2",
     "title": "MVP development",
+    "title_ar": "تطوير MVP",
     "parent_id": "1"
   },
   {
     "id": "3",
     "title": "Prototyping",
+    "title_ar": "تصميم النماذج الأولية",
     "parent_id": "1"
   },
   {
     "id": "4",
     "title": "Product iteration",
+    "title_ar": "تحسين المنتج",
     "parent_id": "1"
   },
   {
     "id": "5",
     "title": "UX\/UI design",
+    "title_ar": "تصميم UX/UI",
     "parent_id": "1"
   },
   {
     "id": "6",
     "title": "Customer feedback",
+    "title_ar": "ملاحظات العملاء",
     "parent_id": "1"
   },
   {
     "id": "7",
     "title": "Market research",
+    "title_ar": "بحث السوق",
     "parent_id": "1"
   },
   {
     "id": "8",
     "title": "Market Fit",
+    "title_ar": "ملائمة السوق",
     "parent_id": null
   },
   {
     "id": "9",
     "title": "Market research",
+    "title_ar": "بحث السوق",
     "parent_id": "8"
   },
   {
     "id": "10",
     "title": "Customer segmentation",
+    "title_ar": "تقسيم العملاء",
     "parent_id": "8"
   },
   {
     "id": "11",
     "title": "Demand validation",
+    "title_ar": "التحقق من الطلب",
     "parent_id": "8"
   },
   {
     "id": "12",
     "title": "Competitive analysis",
+    "title_ar": "تحليل المنافسين",
     "parent_id": "8"
   },
   {
     "id": "13",
     "title": "Sales strategy",
+    "title_ar": "استراتيجية المبيعات",
     "parent_id": "8"
   },
   {
     "id": "14",
     "title": "Marketing tactics",
+    "title_ar": "أساليب التسويق",
     "parent_id": "8"
   },
   {
     "id": "15",
     "title": "Business Model",
+    "title_ar": "نموذج العمل",
     "parent_id": null
   },
   {
     "id": "16",
     "title": "Revenue model",
+    "title_ar": "نموذج الإيرادات",
     "parent_id": "15"
   },
   {
     "id": "17",
     "title": "Pricing strategy",
+    "title_ar": "استراتيجية التسعير",
     "parent_id": "15"
   },
   {
     "id": "18",
     "title": "Financial planning",
+    "title_ar": "التخطيط المالي",
     "parent_id": "15"
   },
   {
     "id": "19",
     "title": "Cost structure",
+    "title_ar": "هيكل التكاليف",
     "parent_id": "15"
   },
   {
     "id": "20",
     "title": "Budgeting",
+    "title_ar": "إعداد الميزانية",
     "parent_id": "15"
   },
   {
     "id": "21",
     "title": "Financial forecasting",
+    "title_ar": "التنبؤ المالي",
     "parent_id": "15"
   },
   {
     "id": "22",
     "title": "Team and Leadership",
+    "title_ar": "الفريق والقيادة",
     "parent_id": null
   },
   {
     "id": "23",
     "title": "Team building",
+    "title_ar": "بناء الفريق",
     "parent_id": "22"
   },
   {
     "id": "24",
     "title": "Leadership development",
+    "title_ar": "تطوير القيادة",
     "parent_id": "22"
   },
   {
     "id": "25",
     "title": "Organizational structure",
+    "title_ar": "الهيكل التنظيمي",
     "parent_id": "22"
   },
   {
     "id": "26",
     "title": "HR policies",
+    "title_ar": "سياسات الموارد البشرية",
     "parent_id": "22"
   },
   {
     "id": "27",
     "title": "Recruitment",
+    "title_ar": "التوظيف",
     "parent_id": "22"
   },
   {
     "id": "28",
     "title": "Talent management",
+    "title_ar": "إدارة المواهب",
     "parent_id": "22"
   },
   {
     "id": "29",
     "title": "Financial Health",
+    "title_ar": "الصحة المالية",
     "parent_id": null
   },
   {
     "id": "30",
     "title": "Financial management",
+    "title_ar": "الإدارة المالية",
     "parent_id": "29"
   },
   {
     "id": "31",
     "title": "Budgeting",
+    "title_ar": "إعداد الميزانية",
     "parent_id": "29"
   },
   {
     "id": "32",
     "title": "Financial analytics",
+    "title_ar": "تحليلات مالية",
     "parent_id": "29"
   },
   {
     "id": "33",
     "title": "KPI tracking",
+    "title_ar": "متابعة مؤشرات الأداء",
     "parent_id": "29"
   },
   {
     "id": "34",
     "title": "Fundraising strategy",
+    "title_ar": "استراتيجية جمع التمويل",
     "parent_id": "29"
   },
   {
     "id": "35",
     "title": "Investor relations",
+    "title_ar": "علاقات المستثمرين",
     "parent_id": "29"
   },
   {
     "id": "36",
     "title": "Operations",
+    "title_ar": "العمليات",
     "parent_id": null
   },
   {
     "id": "37",
     "title": "Process optimization",
+    "title_ar": "تحسين العمليات",
     "parent_id": "36"
   },
   {
     "id": "38",
     "title": "Lean operations",
+    "title_ar": "العمليات الرشيقة",
     "parent_id": "36"
   },
   {
     "id": "39",
     "title": "Supply chain management",
+    "title_ar": "إدارة سلسلة الإمداد",
     "parent_id": "36"
   },
   {
     "id": "40",
     "title": "Logistics",
+    "title_ar": "الخدمات اللوجستية",
     "parent_id": "36"
   },
   {
     "id": "41",
     "title": "Technology integration",
+    "title_ar": "تكامل التكنولوجيا",
     "parent_id": "36"
   },
   {
     "id": "42",
     "title": "Automation",
+    "title_ar": "الأتمتة",
     "parent_id": "36"
   }
 ]

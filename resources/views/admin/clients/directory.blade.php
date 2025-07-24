@@ -43,7 +43,7 @@
                       <div class="radio">
                         <input type="radio" name="type" id="c0" value=""
                           {{ Request::get('type') ? '' : 'checked=""' }}>
-                        <label for="c0">{{ __('admin.All') }}</label>
+                        <label class="form-label" for="c0">{{ __('admin.All') }}</label>
                       </div>
                     </fieldset>
                   </li>
@@ -53,7 +53,7 @@
                         <div class="radio">
                           <input type="radio" name="type" id="c{{ $cat->id }}" value="{{ $cat->id }}"
                             {{ Request::get('type') == $cat->id ? 'checked=""' : '' }}>
-                          <label for="c{{ $cat->id }}">{{ $cat->{'name_' . $l} }}</label>
+                          <label class="form-label" for="c{{ $cat->id }}">{{ $cat->{'name_' . $l} }}</label>
                         </div>
                       </fieldset>
                     </li>
@@ -90,7 +90,8 @@
                                   <a href="#" onclick="openservice({{ $row->id }})">{{ $row->{'name_' . $l} }}</a>
                                 </td>
                                 <td>{{ substr(strip_tags($row->{'description_' . $l}), 0, 40) }}...</td>
-                                <td>{{ $row->price }} SAR</td>
+                                <td>{{ $row->price . ' ' . ($currency->currency_code ?? 'SAR') }}</td>
+
                                 <td>
                                   <span class="d-flex align-items-center">
                                     {!! $row->totalRate()
@@ -133,47 +134,53 @@
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title" id="title"></h3>
-          <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
-            
-          </button>
+        <div class="modal-header mb-0">
+          <h4 class="modal-title" id="title"></h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="content-left">
             <input type="hidden" id="sid">
             <p id="description"> </p>
             <div>
-              <span class="text-bold-700">{{ __('admin.Price') }}: </span>
+              <span class="form-label">{{ __('admin.Price') }}: </span>
               <span id="price"></span>
             </div>
             <br>
-            <div class="form-group" id="showdates">
-              <label>{{ __('admin.Request Date/ Time') }}:</label>
+            <div id="vendor-info">
+              <span class="form-label">{{ __('admin.Vendor_Name') }}: </span>
+              <span class="mb-2" id="vendor-name"></span> <br /><br />
+              <span class="form-label">{{ __('admin.Vendor_Phone') }}: </span>
+              <span class="mb-2" id="vendor-phone"></span> <br /><br />
+              <span class="form-label">{{ __('admin.Vendor_Email') }}: </span>
+              <span id="vendor-email"></span>
+            </div>
+
+            <div class="form-group mt-4" id="showdates">
+              <label  class="form-label">{{ __('admin.Request Date/ Time') }}:</label>
               <input class='date width-200 form-control' type="text" name="datetime" id="date" value=""
                 required autocomplete="off">
             </div>
             <br>
-            <fieldset class="form-label-group" style="display: none;" id="textarea">
-              <textarea id="mycomment" class="form-control" rows="3" placeholder="{{ __('admin.Add your note') }}"></textarea>
-              <label for="mycomment">{{ __('admin.Add your note') }}</label>
-            </fieldset>
-
-            <div class=" d-inline-block mr-2 mb-1">
-              <input type="checkbox" id="checkboxGlow1" onclick="$('#textarea').toggle()">
-              <label for="checkboxGlow1">{{ __('admin.Add comment') }}</label>
+            <div class="form-check mb-3">
+              <input type="checkbox" class="form-check-input" id="checkboxGlow1" onclick="$('#textarea').toggle()">
+              <label class="form-check-label me-1" for="checkboxGlow1">{{ __('admin.Add comment') }}</label>
             </div>
+            <fieldset class="form-label-group" style="display: none;" id="textarea">
+              <label class="form-label" for="mycomment">{{ __('admin.Add your note') }}</label>
+              <textarea id="mycomment" class="form-control" rows="3" placeholder="{{ __('admin.Add your note') }}"></textarea>
+            </fieldset>
           </div>
           <div class="content-right">
             <div id="simg"></div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-success glow mr-auto ml-0" type="button"
-            onclick="requestserv()">{{ __('admin.Make a request') }}</button>
-          <button type="button" class="btn btn-light-primary" data-bs-dismiss="modal">
-            
-            <span class="d-none d-sm-block">{{ __('admin.Close') }}</span>
+          <button class="btn btn-primary" type="button" onclick="requestserv()">
+            {{ __('admin.Make a request') }}
+          </button>
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+            {{ __('admin.Close') }}
           </button>
         </div>
       </div>
@@ -219,15 +226,24 @@
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 
   <script>
-    $('#date').datetimepicker({
-      format: 'Y-m-d H:i',
-      onGenerate: function(ct) {
-        jQuery(this).find('.xdsoft_date')
-          .toggleClass('xdsoft_disabled');
-      },
-      maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}',
-      timepicker: true
+    // Date & TIme
+    $('#date').flatpickr({
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      minDate: "{{ date('Y-m-d H:i', strtotime('+1 hour')) }}", // Minimum date is 1 hour from now
+      maxDate: "{{ date('Y-m-d H:i', strtotime('+1 year')) }}", // Maximum date is 1 year from now
+      // time_24hr: true,
     });
+ 
+    //   $('#date').datetimepicker({
+    //     format: 'Y-m-d H:i',
+    //     onGenerate: function(ct) {
+    //       jQuery(this).find('.xdsoft_date')
+    //       .toggleClass('xdsoft_disabled');
+    //   },
+    //   maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}',
+    //   timepicker: true
+    // });
 
     function openservice(id) {
       $.ajaxSetup({
@@ -244,7 +260,24 @@
           $('#description').html(response.description_{{ $l }});
           $('#simg').html(img);
           $('#sid').val(response.id);
-          $('#price').html(response.price + ' {{ __('EGP') }}');
+           // Handle Price Visibility
+           if (response.hide_price && !response.is_admin) {
+                $('#price').closest('div').hide();
+            } else {
+                $('#price').closest('div').show();
+                $('#price').html(response.price + ' {{ __('EGP') }}');
+            }
+
+            // Handle Vendor Info Visibility
+            if (response.hide_vendor_info && !response.is_admin) {
+                $('#vendor-info').hide();
+            } else {
+                $('#vendor-info').show();
+                $('#vendor-name').html(response.vendor_name);
+                $('#vendor-phone').html(response.vendor_phone);
+                $('#vendor-email').html(response.vendor_email);
+            }
+
           $('#service-data').modal('show');
         },
         error: function(error) {
@@ -294,7 +327,13 @@
         title: '{{ __('admin.Service request') }}',
         text: message,
         icon: 'success',
-        confirmButtonText: 'OK'
+        showCancelButton: false,
+        showConfirmButton: true,
+        confirmButtonText: "{{ __('admin.OK') }}",
+        customClass: {
+            confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       });
     }
   </script>

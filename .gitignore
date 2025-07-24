@@ -1,6 +1,7 @@
 /node_modules
-/public/hot
+# /public
 /public/storage
+/public/pitch_decks
 /public/191014
 /storage/*.key
 /vendor
@@ -19,4 +20,5 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 composer.lock
-
+.codegpt
+.vscode

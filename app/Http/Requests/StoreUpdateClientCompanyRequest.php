@@ -37,7 +37,7 @@ class StoreUpdateClientCompanyRequest extends FormRequest
             'address_en' => ['sometimes', 'string'],
             'address_ar' => ['sometimes', 'string'],
             'phone' => ['sometimes'],
-            'email' => 'email|sometimes|unique:companies,email,'.$companyId,
+            // 'email' => 'email|sometimes|unique:companies,email,'.$companyId,
         ];
     }
 }

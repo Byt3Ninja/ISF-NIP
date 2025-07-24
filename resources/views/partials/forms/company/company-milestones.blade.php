@@ -31,7 +31,7 @@
         <div class="col-12 text-end mt-2" style="height: 40px;">
           <div
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddMileStone"
-            do="Achieved_Milestones">
+            do="Achieved_Milestones" company="{{ optional($client->company)->id }}">
             <i class="ti ti-plus me-3"></i>
             {{ __('admin.Add') }}
           </div>
@@ -60,8 +60,14 @@
                     <i class="ti ti-pencil me-2"></i>
                     {{ __('admin.Edit') }}
                   </div>
-                  <form action="{{ route('DeleteMileStone_Comp') }}"
-                    method="POST" style="display: inline-block;">
+                  
+                    @if($_user->hasAnyRole('Admin|organizationManager'))
+                    <form action="{{ route('company.profile_milestones_delete', $client->company->id) }}"
+                      method="POST" style="display: inline-block;">
+                    @else
+                    <form action="{{ route('company.profile_milestones_delete') }}"
+                      method="POST" style="display: inline-block;">
+                    @endif
                     @csrf
                     <input type="hidden" value="{{ $Achieved->id }}"
                       name="id">
@@ -120,7 +126,7 @@
                     <div class="text-center">
                       <div type="submit"
                         class="btn btn-primary me-3 data-submit EditMilestone"
-                        do="{{ $Achieved->id }}">{{ __('admin.submit') }}
+                        do="{{ $Achieved->id }}" company="{{ optional($client->company)->id }}">{{ __('admin.submit') }}
                       </div>
                       <button type="reset" class="btn btn-label-secondary"
                         data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
@@ -169,7 +175,7 @@
         <div class="col-12 text-end mt-2" style="height: 40px;">
           <div
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddMileStone"
-            do="Planned_Milestones">
+            do="Planned_Milestones" company="{{ optional($client->company)->id }}">
             <i class="ti ti-plus me-3"></i>
             {{ __('admin.Add') }}
           </div>
@@ -200,8 +206,13 @@
                     <i class="ti ti-pencil me-2"></i>
                     {{ __('admin.Edit') }}
                   </div>
-                  <form action="{{ route('DeleteMileStone_Comp') }}"
-                    method="POST" style="display: inline-block;">
+                  @if($_user->hasAnyRole('Admin|organizationManager'))
+                    <form action="{{ route('company.profile_milestones_delete', $client->company->id) }}"
+                      method="POST" style="display: inline-block;">
+                    @else
+                    <form action="{{ route('company.profile_milestones_delete') }}"
+                      method="POST" style="display: inline-block;">
+                    @endif
                     @csrf
                     <input type="hidden" value="{{ $Planned->id }}"
                       name="id">
@@ -267,7 +278,7 @@
                     <div class="text-center">
                       <div type="submit"
                         class="btn btn-primary me-3 data-submit EditMilestone"
-                        do="{{ $Planned->id }}">{{ __('admin.submit') }}
+                        do="{{ $Planned->id }}" company="{{ optional($client->company)->id }}">{{ __('admin.submit') }}
                       </div>
                       <button type="reset" class="btn btn-label-secondary"
                         data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
@@ -325,7 +336,7 @@
         <div class="col-12 text-end mt-2" style="height: 40px;">
           <div
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddMileStone"
-            do="Archived_Milestones">
+            do="Archived_Milestones" company="{{ optional($client->company)->id }}">
             <i class="ti ti-plus me-3"></i>
             {{ __('admin.Add') }}
           </div>
@@ -356,8 +367,13 @@
                     <i class="ti ti-pencil me-2"></i>
                     {{ __('admin.Edit') }}
                   </div>
-                  <form action="{{ route('DeleteMileStone_Comp') }}"
-                    method="POST" style="display: inline-block;">
+                  @if($_user->hasAnyRole('Admin|organizationManager'))
+                    <form action="{{ route('company.profile_milestones_delete', $client->company->id) }}"
+                      method="POST" style="display: inline-block;">
+                    @else
+                    <form action="{{ route('company.profile_milestones_delete') }}"
+                      method="POST" style="display: inline-block;">
+                    @endif
                     @csrf
                     <input type="hidden" value="{{ $Archived->id }}"
                       name="id">
@@ -412,7 +428,7 @@
                     <div class="text-center">
                       <div type="submit"
                         class="btn btn-primary me-3 data-submit EditMilestone"
-                        do="{{ $Archived->id }}">{{ __('admin.submit') }}
+                        do="{{ $Archived->id }}" company="{{ optional($client->company)->id }}">{{ __('admin.submit') }}
                       </div>
                       <button type="reset" class="btn btn-label-secondary"
                         data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>

@@ -28,6 +28,9 @@
 <!-- Favicon -->
 <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
+<!-- Flag Icons CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
@@ -64,12 +67,19 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
-{{-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" /> --}}
-{{-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" /> --}}
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css" />
 
-<link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
-<link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
-<link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css">
+<!-- For Searchable Select -->
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+<!-- For Date & Time Picker -->
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+
+{{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css"> --}}
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
 @yield('vendorstyle')
 <!-- END: Vendor CSS-->
@@ -80,6 +90,9 @@
 
 <!-- BEGIN: Custom CSS-->
 <!-- END: Custom CSS-->
+
+<!-- Jquery Js -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Helpers -->
 <script src="/vuexy/assets/vendor/js/helpers.js"></script>

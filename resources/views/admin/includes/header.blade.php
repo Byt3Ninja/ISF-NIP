@@ -1,6 +1,6 @@
 @php
   $msgs = 0;
-  if (Auth::user()->hasanyRole('Admin|Manager')) {
+  if (Auth::user()->hasAnyRole('Admin|Manager')) {
       $msgs = App\Messages::where('read', 0)->count();
   }
   $messages = App\Messenger::where('receiver', Auth::user()->id)
@@ -27,7 +27,7 @@
       <div class="nav-item navbar-search-wrapper mb-0">
         <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
           <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>
-          <span class="d-none d-md-inline-block text-muted fw-normal">Search (Ctrl+/)</span>
+          <span class="d-none d-md-inline-block text-muted fw-normal">{{ __('admin.Search') }} (Ctrl+/)</span>
         </a>
       </div>
     </div>
@@ -43,12 +43,14 @@
         <ul class="dropdown-menu dropdown-menu-end">
           <li class="dropdown dropdown-language nav-item">
             @if ($l == 'ar')
-              <a class="dropdown-item" href="/lang/en">
+              <a class="dropdown-item" href="/lang/en" 
+              data-language="en" data-text-direction="ltr">
                 <i class="flag-icon flag-icon-us"></i>
                 <span class="selected-language">English</span>
               </a>
             @else
-              <a class="dropdown-item" href="/lang/ar">
+              <a class="dropdown-item" href="/lang/ar" 
+              data-language="ar" data-text-direction="rtl">
                 <i class="flag-icon flag-icon-sa"></i>
                 <span class="selected-language">عربي</span>
               </a>
@@ -205,10 +207,10 @@
               <img 
                 class="rounded-circle" 
                 src="{{ auth()->user()->image_url }}"
-                onerror="this.src='/icons/account.svg'"
+                onerror="this.src='/images/user-placeholder.jpeg'"
               />
             @else
-              <img class="rounded-circle" src="/icons/account.svg" alt="avatar" />
+              <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
             @endif
           </div>
         </a>
@@ -222,10 +224,10 @@
                       <img 
                         class="rounded-circle" 
                         src="{{ auth()->user()->image_url }}"
-                        onerror="this.src='/icons/account.svg'"
+                        onerror="this.src='/images/user-placeholder.jpeg'"
                       />
                     @else
-                      <img class="rounded-circle" src="/icons/account.svg" alt="avatar" />
+                      <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
                     @endif
                   </div>
                 </div>

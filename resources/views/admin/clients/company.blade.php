@@ -1,12 +1,18 @@
 @extends('layouts.admin')
 
 @section('style')
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet"
-    href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+
   <style>
+    #contentWrapper {
+      margin-bottom: 5rem;
+    }
     .radius-15 {
       border-radius: 15px;
     }
@@ -19,8 +25,11 @@
     }
 
     @media screen and (min-width: 768px) {
+      #contentWrapper {
+       margin-bottom: 12rem;
+      }
       .custom-container {
-        width: 80%;
+        width: 78%;
       }
     }
   </style>
@@ -29,15 +38,15 @@
 @php
   $name = 'name_' . $l;
   $tabs = collect([
-      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Company Info' : 'معلومات الشركة'],
+      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
       ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
       ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
       ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
       ['team-info', 'ti-users', $l == 'en' ? 'Team Info' : ' الفريق'],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
-      ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
+      // ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
+      // ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
   ])
       ->map(function ($tab) {
@@ -48,30 +57,21 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="content-wrapper" id="contentWrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
-      <!-- Alert -->
-      @if (session()->has('msg'))
-        <x-alert type="{{ session()->get('class') ?? 'danger' }}"
-          message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
-      @endif
-      <!-- Validation messages -->
-      @if (count($errors) > 0)
-        @foreach ($errors->all() as $error)
-          <x-alert type="danger" message="{{ $error }}" />
-        @endforeach
-      @endif
-      <!-- / Alert -->
-
       <!-- Tabs (mobile) -->
       <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
         <ul class="nav nav-pills flex-nowrap" role="tablist">
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
-              <a href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link {{ $key == 0 ? 'active' : '' }}"
-                data-bs-toggle="tab" role="tab">
+              <a 
+                id="mobile-company-tab"
+                href="#navs-left-{{ $tab['target'] }}"
+                class="nav-link"
+                data-bs-toggle="tab" 
+                role="tab"
+              >
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
               </a>
@@ -83,15 +83,19 @@
 
       <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
+          class="nav-align-left nav-tabs-shadow mb-6 px-4 py-2 bg-white position-fixed d-none d-md-block" 
           style="height: auto; min-width: 15%; max-width: 15%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
-                  data-bs-toggle="tab" role="tab">
+            <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
+              <a 
+              id="company-tab"
+                  href="#navs-left-{{ $tab['target'] }}"
+                  class="nav-link py-3"
+                  data-bs-toggle="tab"
+                  role="tab"
+                >
                   <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                   {{ $tab['label'] }}
                 </a>
@@ -101,13 +105,29 @@
           <!-- / Tabs -->
         </nav>
         <!-- Tab Content On Tab Click -->
-        <div class="tab-content p-0 overflow-y-auto custom-container mb-6" 
+        <div 
+          id="company-tab-content"
+          class="tab-content p-0 overflow-y-auto custom-container mb-6" 
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
+          <!-- Alert -->
+          @if (session()->has('msg'))
+            <x-alert 
+              type="{{ session()->get('class') ?? 'danger' }}"
+              message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+            />
+          @endif
+          <!-- Validation messages -->
+          @if (count($errors) > 0)
+            @foreach ($errors->all() as $error)
+              <x-alert type="danger" message="{{ $error }}" />
+            @endforeach
+          @endif
+          <!-- / Alert -->
+
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
-              id="navs-left-{{ $tab['target'] }}">
-              @switch($tab['target'])
+          <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
+            @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break
@@ -129,12 +149,12 @@
                 @case('company-milestones')
                   @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
                 @break
-                @case('company-social')
+                {{-- @case('company-social')
                   @include('partials.forms.company.company-social', ['heading' => $tab['label']])
-                @break
-                @case('about_problem')
+                @break --}}
+                {{-- @case('about_problem')
                   @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
-                @break
+                @break --}}
                 @case('business_model')
                   @include('partials.forms.company.business_model', ['heading' => $tab['label']])
                 @break
@@ -146,23 +166,41 @@
       </div>
     </div>
     <!-- / Content -->
+    <div class="content-backdrop fade"></div>
   </div>
   <!-- / Content wrapper -->
 @stop
 
 @section('scripts')
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <!-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> -->
 @stop
 
 @section('pagescripts')
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-pickers.js"></script>
-
   <script>
+    const lang = '{{ $l }}';
+  </script>
+  <script src="/app-assets/js/1.js"></script>
+
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
+  <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
+  {{-- <script src="/vuexy/assets/js/founder-form.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/shareholder-form.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/investor-form.js"></script> --}}
+
+  <!-- <script>
     document.getElementById('img_url').addEventListener('change', function(
     event) {
       const file = event.target.files[0];
@@ -174,21 +212,87 @@
         reader.readAsDataURL(file);
       }
     });
-  </script> 
+  </script>  -->
 
   <script>
-    document.getElementById('update-form').addEventListener('submit', function(
-      event) {
-      var button = document.getElementById('submit-button');
-      var buttonText = document.getElementById('button-text');
-      var buttonSpinner = document.getElementById('button-spinner');
+    document.addEventListener('DOMContentLoaded', function() {
+      const pitchTabs = document.querySelectorAll('#pitch-tab');
+      const tabs = document.querySelectorAll('#company-tab');
+      const mobileTabs = document.querySelectorAll('#mobile-company-tab');
+      const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const pitchContent = document.querySelectorAll('#pitch-tab-content .tab-pane');
+      const activeCompanyTab = localStorage.getItem('activeCompanyTab');
+      const activePitchTab = localStorage.getItem('activePitchTab');
 
-      button.disabled = true;
-      buttonText.classList.add('d-none');
-      buttonSpinner.classList.remove('d-none');
+      pitchTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activePitchTab', JSON.stringify(index));
+        });
+
+        if (!activePitchTab) {
+          pitchTabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activePitchTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      pitchContent.forEach((tab, index) => {
+        if (!activePitchTab) {
+          pitchContent[0].classList.add('show', 'active');
+          return;
+        }
+
+        if (index === JSON.parse(activePitchTab)) {
+          tab.classList.add('fade', 'show', 'active');
+        }
+      });
+
+      mobileTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+
+        if (!activeCompanyTab) {
+          mobileTabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+
+        if (!activeCompanyTab) {
+          tabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      tabsContent.forEach((tab, index) => {
+        if (!activeCompanyTab) {
+          tabsContent[0].classList.add('show', 'active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('fade', 'show', 'active');
+        }
+      });
     });
   </script>
-
+  
   <script>
     $(document).ready(function() {
       $('.roundBtn').click(function() {
@@ -241,13 +345,13 @@
         '{{ $client->company ? optional($client->company)->state_id : 0 }}';
       var selected = '';
       $.ajax({
-        url: "{{ route('get_states_by_country') }}",
+        url: "{{ route('utils.locations_list_states_by_country') }}",
         data: {
           country_id: country_id
         },
         success: function(data) {
           $state.html(
-          '<option value="" >{{ __('admin.State') }}</option>');
+          '<option value="" disabled >{{ __('admin.State') }}</option>');
           $.each(data, function(id, value) {
             // selected = '';
             if (currentState === id) {
@@ -277,7 +381,7 @@
           state_id: state_id
         },
         success: function(data) {
-          $city.html('<option value="" >{{ __('admin.City') }}</option>');
+          $city.html('<option value="" disabled >{{ __('admin.City') }}</option>');
           $.each(data, function(id, value) {
             if (currentCity == id) {
               selected = 'selected';
@@ -294,7 +398,7 @@
   </script>
     
   <script>
-    $('#logo').filemanager(['image']);
+    // $('#logo').filemanager(['image']);
 
     function ssector(selection) {
       if (selection === 'other') {
@@ -374,23 +478,23 @@
     // Upload for Pitch Deck
     $('#pitch_deck').on('change', function() {
       uploadFile('pitch_deck', 'progress-bar-pitch_deck',
-        '{{ route('update_my_company') }}');
+        '{{ route('company.profile_update_mine') }}');
     });
 
     // Upload for Pitch Deck Video
     $('#pitch_deck_video').on('change', function() {
       uploadFile('pitch_deck_video', 'progress-bar-pitch_deck_video',
-        '{{ route('update_my_company') }}');
+        '{{ route('company.profile_update_mine') }}');
     });
 
     // Upload for Pitch Deck Video
     $('#img_url').on('change', function() {
       uploadFile('img_url', 'progress-bar-Logo',
-        '{{ route('update_my_company') }}');
+        '{{ route('company.profile_update_mine') }}');
     });
   </script>
 
-<script>
+{{-- <script>
 @if($client->company)
   const selectedCountryCode = '{{$client->company->country_code}}';
  @else
@@ -420,8 +524,111 @@
           select.appendChild(option);  // إضافة العنصر إلى القائمة المنسدلة
       });
   });
-</script>
+</script> --}}
+{{-- 
+<script>
+  // Initialize the phone input
+const phoneInput = document.getElementById("phone");
+const whatsappInput = document.getElementById("WhatsApp");
+const phoneError = document.getElementById('phone-error');
+const whatsappError = document.getElementById('whatsapp-error');
 
+const countryCodeFromDB = "{{ $client->company ? $client->company->country_code : '' }}".trim();
+const countryCodeWAFromDB = "{{ $client->company ? $client->company->country_code_w_a : '' }}".trim();
+
+// Initialize intl-tel-input
+const iti = intlTelInput(phoneInput, {
+  initialCountry: getCountryCode(countryCodeFromDB),
+  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  formatOnDisplay: false,
+  separateDialCode: true,
+  autoPlaceholder: "aggressive",
+  customPlaceholder: (placeholder) => "e.g. " + placeholder,
+});
+
+function getCountryCode(code) {
+  let dialCode = code.toString().trim();
+  const countryData = intlTelInputGlobals.getCountryData();
+  const country = countryData.find(country => `+${country.dialCode}` === dialCode);
+
+  if (country) {
+    console.log("Country Code Found: " + country.iso2);
+    return country.iso2;
+  }
+  return "eg";
+}
+
+const whatsappIti = intlTelInput(whatsappInput, {
+  initialCountry: getCountryCode(countryCodeWAFromDB),
+  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  separateDialCode: true,
+  formatOnDisplay: false,
+  autoPlaceholder: "aggressive",
+  customPlaceholder: (placeholder) => "e.g. " + placeholder,
+});
+
+
+// حقل مخفي للكود الدولي للواتساب
+const countryCodeWAInput = document.createElement("input");
+countryCodeWAInput.type = "hidden";
+countryCodeWAInput.name = "country_code_w_a";
+countryCodeWAInput.value = "{{ $client->company ? ( $client->company->country_code_w_a ?? '' ) : '' }}";
+whatsappInput.parentNode.appendChild(countryCodeWAInput);
+
+// تحديث الحقل المخفي عند تغيير الدولة في الواتساب
+whatsappInput.addEventListener("countrychange", () => {
+    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
+    countryCodeWAInput.value =  dialCode; // تعيين الكود الدولي
+    console.log("WhatsApp Dial Code Updated: " + countryCodeWAInput.value);
+});
+
+// حقل مخفي للكود الدولي
+const countryCodeInput = document.createElement("input");
+countryCodeInput.type = "hidden";
+countryCodeInput.name = "country_code";
+countryCodeInput.value = "{{ $client->company ? ( $client->company->country_code ?? '' ) : '' }}";
+phoneInput.parentNode.appendChild(countryCodeInput);
+
+// ضبط الدولة الافتراضية
+if (countryCodeFromDB) {
+    iti.setCountry(countryCodeFromDB);
+    countryCodeInput.value =  iti.getSelectedCountryData().dialCode;
+}
+
+// تحديث الحقل المخفي عند تغيير الدولة
+phoneInput.addEventListener("countrychange", () => {
+    const dialCode = iti.getSelectedCountryData().dialCode;
+    countryCodeInput.value =  dialCode;
+});
+
+whatsappInput.addEventListener("countrychange", () => {
+    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
+    console.log("WhatsApp Dial Code: " + dialCode);
+});
+
+// التحقق من صحة الرقم
+phoneInput.addEventListener("input", () => {
+    if (iti.isValidNumber()) {
+        phoneError.style.display = 'none';
+    } else {
+        phoneError.style.display = 'block';
+        phoneError.innerText = "Invalid phone number";
+    }
+});
+
+whatsappInput.addEventListener("input", () => {
+    if (whatsappIti.isValidNumber()) {
+        whatsappError.style.display = 'none';
+    } else {
+        whatsappError.style.display = 'block';
+        whatsappError.innerText = "Invalid WhatsApp number";
+    }
+});
+
+
+</script> --}}
 @stop
 
 

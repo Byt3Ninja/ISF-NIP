@@ -2,8 +2,8 @@
 
 @section('vendorstyle')
 <!-- Vendors CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
@@ -11,13 +11,28 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
 @section('style')
 <style>
+  .daterangepicker {
+    margin-top: 8rem !important;
+  }
+
+   input[type="file"]::file-selector-button {
+    background-color: #FFFF;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid lightgray;
+  }
+  input[type="file"]::file-selector-button:hover {
+    background-color: lightgray;
+  }
   .radius-15 {
     border-radius: 15px;
   }
@@ -46,40 +61,62 @@
 @stop
 
 @php
- $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $program->id)->count();
- $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $program->id)->count();
- $totalcompany = app(\App\Company::class)->where('cycle', '=', $program->id)->count();
- $orgid = App\Organization::where('id','=', $program->organization_id)->get();
+ $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $cycle->id)->count();
+ $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $cycle->id)->count();
+ $totalcompany = app(\App\Company::class)->where('cycle', '=', $cycle->id)->count();
+ $orgid = App\Organization::where('id','=', $cycle->organization_id)->get();
         foreach ($orgid as  $org) {
           $mentortotals = App\User::where('id','=',$org->user_id)->get();
           $mentor_Count = $mentortotals->count();
         }
-  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->count();
-  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->sum('period');
-  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->whereNotNull('rating')->avg('rating');
+  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->count();
+  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
+  $answerspinding = [];
+  $answerspinding = 0;
+  $answers=0;
 foreach ($steps as  $step) {
   $TotalStepsIds = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->count();
   $totalStepsIdsCount += $TotalStepsIds;
 
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
-}
-$mentors = $program->mentors()->distinct()->get();
+  $answerspinding = 0;
+  $answers = app(App\FinalData::class)->where('step_id', $step->id)->count();
+          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+          $answersdone = app(App\FinalData::class)
+          ->where('step_id', $step->id)
+          ->whereNotNull('answer') // الحقل ليس NULL
+          ->count();
 
+}
+$mentors = $cycle->mentors()->distinct()->get();
+
+if($totalStepsIdsCount > 0){
+  $totalStepsIdsCount = $totalStepsIdsCount;
+}else{
+  $totalStepsIdsCount = 0;
+}
+
+if($answerspinding > 0){
+  $answerspinding = $answerspinding;
+}else{
+  $answerspinding = 0;
+}
 
 $orgCollection = collect([
 [__('admin.Startups'), 'building-skyscraper', $totalcompany, 'primary'],
 [__('cycles.steps'), 'stack-2', $totalSteps, 'info'],
-[__('admin.Mentors'), 'user', $mentor_Count, 'light'],
+[__('admin.Mentors'), 'user', $mentors->count(), 'light'],
 [__('cycles.All requests'), 'report', $totalMentorRequest, 'warning'],
 [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
 [__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
 [__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
 [__('admin.Training sessions duration (hours)'), 'clock-hour-5', $totalDurationSum, 'success'],
-['filtration', 'transform', '5', 'warning'],
-['evaluation', 'presentation', '5', 'danger']
+[__('admin.Traditional_Evaluation_pending'), 'transform', $answerspinding, 'warning'],
+[__('admin.Evaluation'), 'presentation', $answers, 'danger']
 ]);
 
 
@@ -202,16 +239,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     @endif
     <!-- / Alert -->
     <div class="row">
-      <input type="hidden" id="ccycleOrg" value="{{ $program->organization_id }}" >
+      <input type="hidden" id="ccycleOrg" value="{{ $cycle->organization_id }}" >
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
             <div class="d-flex gap-6">
               <div class="d-none d-md-flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
-                  @if(!empty($program->organization->image_url))
+                  @if(!empty($cycle->organization->image_url))
                   @php
-                  $imageUrl = $program->organization->image_url;
+                  $imageUrl = $cycle->organization->image_url;
               
                    // استخراج المسار من الرابط
                    $imagePath = parse_url($imageUrl, PHP_URL_PATH);
@@ -219,7 +256,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                    // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                    $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
               @endphp
-                  <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" class="w-100 h-100 border radius-15"
+                  <img src="/{{ $imageUrl }}" class="w-100 h-100 border radius-15"
                     style="object-fit: contain;" alt="Program Image" />
                   @else
                   <img src="/images/background/logo.png" class="w-100 h-100 border radius-15"
@@ -231,7 +268,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
-                  <h4 class="text-primary mb-0">{{ $program->title }}</h4>
+                  <h4 class="text-primary mb-0">{{ $cycle->title }}</h4>
                   {{-- <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                   </a> --}}
@@ -243,23 +280,25 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </div>
                 </div> --}}
                 <div class="d-flex justify-content-between mb-4">
-                  <h5 class="mb-0">{{ $program->organization['name_' . $l] }}</h5>
+                  <h5 class="mb-0">{{ $cycle->organization['name_' . $l] }}</h5>
                   
-                  @if(!empty($program->private))
-                        <a 
-                          href="cycles/view/{{ $program->private }}"
+                  @if(!empty($cycle->private))
+                        {{-- <a 
+                          href="cycles/view/{{ $cycle->private }}"
                           class="btn btn-transparent"
                           target="_blank"
                           id="private-link"
-                        >
+                        > --}}
+                        <div class="btn btn-transparent" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
                         {{__('cycles.Private Link')}}
                           <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                        </a>
+                        </div>
+                        {{-- </a> --}}
                         @endif
                 </div>
                 <div class="row border radius-15 py-3 mb-3">
                   @foreach ($orgCountList as $item)
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-4 mb-2">
                       <div class="d-flex flex-nowrap shrink align-items-center">
                         <div class="badge bg-label-{{ $item['color'] }} me-2 p-2">
                           <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }} ti-24px"></i>
@@ -279,12 +318,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex flex-column">
                       <div class="d-flex align-items-center mb-2">
                         <i class="ti ti-user-circle text-primary ti-24px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Responsible')}}</span>
+                        <h6 class="mb-0">{{__('admin.Mentors')}}</span>
                       </div>
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
                         <a class="btn btn-sm btn-outline-primary rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
+                          href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -297,15 +336,15 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                        
                       </div>
                     </div>
-                    <div class="d-flex flex-column mt-3">
+                    <div class="d-flex flex-column my-3">
                       <div class="d-flex align-items-center my-2">
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
                       </div>
                       <div class="d-flex flex-wrap align-items-center ps-7">
                         <p class="text-muted">
-                          @if(!empty($program->description))
-                              {{ $program->description }}
+                          @if(!empty($cycle->description))
+                              {{ $cycle->description }}
                               @else
                               {{__('cycles.NA')}}
                               @endif
@@ -316,14 +355,14 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
-                        <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $program->start->format('Y-m-d') }}</span>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <div class="badge bg-label-secondary">
+                          <i class="ti ti-calendar ti-20px text-info"></i>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($cycle->start, 'Y-m-d') }}</span>
                         </div>
-                        <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $program->end->format('Y-m-d') }}</span>
+                        <div class="badge bg-label-secondary">
+                          <i class="ti ti-calendar ti-20px text-danger"></i>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($cycle->end, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -352,18 +391,35 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                           <li>
-                            <button id="editButton" class="dropdown-item ccycle text-primary">
-                              <i class="ti ti-edit me-2"></i>
-                              {{ __('cycles.Edit') }}
+                            <button id="editButton" class="dropdown-item text-dark">
+                              <i class="ti ti-file-export me-2 text-warning"></i>
+                              {{ __('cycles.Export_Data') }}
                             </button>
                           </li>
+                          <!-- <li>
+                            <button id="editButton" class="dropdown-item text-dark">
+                              <i class="ti ti-stack-2 me-2 text-danger"></i>
+                              {{ __('cycles.Edit_Step') }}
+                            </button>
+                          </li> -->
                           <li>
-                            @can('delete_user')
-                            <button class="dropdown-item text-danger" id="deleteButton">
-                              <i class="ti ti-trash me-2"></i>
+                            <a 
+                              id="editButton" 
+                              class="dropdown-item ccycle text-dark" 
+                              {{-- onclick="onEditProgramClick({{ $cycle->id }})" --}}
+                              href="/dashboard/programlist/edit/{{ $cycle->id }}"
+                            >
+                              <i class="ti ti-edit me-2 text-info"></i>
+                              {{ __('cycles.Edit_Program') }}
+                            </a>
+                          </li>
+                          <li>
+                            @if( $_user->ableTo('delete_user', $permissions) )
+                            <button class="dropdown-item text-dark" id="deleteButton">
+                              <i class="ti ti-trash me-2 text-danger"></i>
                               {{ __('cycles.Delete') }}
                             </button>
-                            @endcan
+                            @endif
                           </li>
                         </ul>
                       </div>
@@ -408,31 +464,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 ->count();
 
 
-        // Filter Screening
-        $finalScreenings = app(App\Finalscreening::class)->where('step_id', '=', $step->id)->get();
-        // حساب عدد السجلات لكل step_id
-          // حساب عدد السجلات لكل step_id
-          $totalFinalscreenCount = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
-              ->count();
-
-          // حساب عدد company_id الفريدة لكل step_id
-          $totalDistinctCompanies = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
-              ->distinct()
-              ->count('company_id');
-
-          // حساب عدد المحكمين
-          foreach ($finalScreenings as $screening) {
-            $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
-              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
-              // إضافة بيانات المحكمين إلى المصفوفة
-              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
-
-
-
-
-        }
+        
         @endphp
 
 
@@ -468,12 +500,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -502,7 +534,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias consequatur.
                       </div>
                     </div> --}}
-                    <div class="d-flex flex-column mt-3">
+                    <div class="d-flex flex-column my-3">
                       @if($step->description != '')
                         <div class="d-flex align-items-center my-2">
                           <i class="ti ti-message text-primary ti-20px me-2"></i>
@@ -517,14 +549,14 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex justify-content-between flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -538,7 +570,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
       @endif
       @if($step->stype == 2)
       <!-- Screening Step -->
-          
+          @php
+
+        $countJudges = count(json_decode($step->list, true)??[]) ?? 0 ;///
+        $scoped_judges = $judges->whereIn('id', json_decode($step->list, true) ?? []);
+        
+          @endphp
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
@@ -571,12 +608,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -593,7 +630,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex align-items-center">
                       <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Judgers') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        {{ $judges->count() }}
+                        {{ count($scoped_judges) }}
                       </small>
                     </div>
                   </div>
@@ -614,13 +651,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   $totalfiltration = 0;
                   $totalfiltrationPinding = 0;
                   $totalfiltrationDone = 0;
-
                   foreach ($companys as $key => $company) {
-                    
-                    $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
-                    $totalfiltrationPinding = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '=', '{}')->count();
-                    $totalfiltrationDone = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '!=', '{}')->count();
-                    
+                    $totalfiltration = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
+                    $totalfiltrationPinding = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->whereNull('answer')->count();
+                    $totalfiltrationDone = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->whereNotNull('answer')->count();
                   }
                     // $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $step->id)->count();
                   @endphp
@@ -663,7 +697,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 </div>
                 <div class="d-flex justify-content-between w-100">
                   <div class="d-flex align-items-center gap-3 mb-3">
-                    @if (count($judges) > 0)
+                    @if (count($scoped_judges) > 0)
                       <div class="d-flex align-items-center">
                         <i class="ti ti-gavel text-primary ti-24px me-2"></i>
                         <h6 class="mb-0">{{ __('admin.Judgers') }}</span>
@@ -685,9 +719,9 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-9">
                     <div class="d-flex flex-column">
                       <div class="d-flex flex-wrap gap-1">
-                        @foreach($judges as $judge)
+                        @foreach($scoped_judges as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $judge->id)}}">
+                          href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -720,14 +754,14 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -749,11 +783,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         @php
          
-        $mentoreCountRequest = app(App\MentorshipRequest::class)
-        ->where('cycle_id', '=', $step->cycle_id)
-        ->distinct()
-        ->count('mentor_id');
-
+        // $mentoreCountRequest = app(App\MentorshipRequest::class)
+        // ->where('cycle_id', '=', $step->cycle_id)
+        // ->distinct()
+        // ->count('mentor_id');
+        $mentoreCountRequest = App\CyclesMentors::where('cycle_id', $step->cycle_id)
+        ->count();
 
         $totalsessionsMen = app(App\MentorshipRequest::class)
         ->where('cycle_id', '=', $step->cycle_id)
@@ -794,10 +829,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0 text-nowrap">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                      <a id="mentors" href="/dashboard/mentorship/assign/{{ $step->id }}" class="btn btn-primary">
+                      <a id="mentors" href="/dashboard/mentorship/assign/{{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-user me-2"></i> {{ __('admin.Mentors') }}
                       </a>
-                      <a id="manage" href="/dashboard/mentorship/view/{{ $step->id }}" class="btn btn-primary">
+                      <a id="manage" href="/dashboard/mentorship/view/{{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                       </a>
                       <a id="sessions" href="/dashboard/mentorship/sessions?show=all&cycle_id={{ $step->cycle_id }}" class="btn btn-primary">
@@ -822,12 +857,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -840,8 +875,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-success me-2 p-2">
-                        <i class="ti ti-users text-success ti-24px"></i>
+                      <div class="badge bg-label-secondary me-2 p-2">
+                        <i class="ti ti-user text-secondary ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
                         <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Mentors') }}</span>
@@ -854,8 +889,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-danger me-2 p-2">
-                        <i class="ti ti-clock text-danger ti-24px"></i>
+                      <div class="badge bg-label-success me-2 p-2">
+                        <i class="ti ti-clock text-success ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
                         <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Mentorship_sessions_duration_(hours)') }}</span>
@@ -868,8 +903,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-warning me-2 p-2">
-                        <i class="ti ti-check text-warning ti-24px"></i>
+                      <div class="badge bg-label-info me-2 p-2">
+                        <i class="ti ti-database text-info ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
                         <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Mentorship_done_requests_count') }}</span>
@@ -896,8 +931,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-light me-2 p-2">
-                        <i class="ti ti-plus text-light ti-24px"></i>
+                      <div class="badge bg-label-warning me-2 p-2">
+                        <i class="ti ti-new-section text-warning ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
                         <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.New requests only') }}</span>
@@ -910,8 +945,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-dark me-2 p-2">
-                        <i class="ti ti-checkbox text-dark ti-24px"></i>
+                      <div class="badge bg-label-success me-2 p-2">
+                        <i class="ti ti-checkbox text-success ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
                         <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.approved requests') }}</span>
@@ -924,8 +959,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-primary me-2 p-2">
-                        <i class="ti ti-trash-x text-primary ti-24px"></i>
+                      <div class="badge bg-label-danger me-2 p-2">
+                        <i class="ti ti-trash-x text-danger ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
                         <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.disapproved requests') }}</span>
@@ -961,7 +996,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
                         <a class="btn btn-outline-info rounded-pill" style="height: 40px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
+                          href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="30" height="30" class="rounded-circle" />
@@ -977,7 +1012,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </div>
                     </div>
                     @if (!empty($step->description))
-                      <div class="d-flex flex-column mt-3">
+                      <div class="d-flex flex-column my-3">
                         <div class="d-flex align-items-center my-b-1">
                           <i class="ti ti-message text-primary ti-20px me-2"></i>
                           <h6 class="mb-0">{{__('admin.Description')}}</span>
@@ -991,14 +1026,14 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1013,6 +1048,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
       @endif
       @if($step->stype == 4)
+     
       <!-- Training Step -->
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
@@ -1029,7 +1065,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <a id="sessions" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-cast me-2"></i> {{ __('admin.Sessions') }}
                       </a>
-                      <a id="results" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
+                      <a id="results" href="/dashboard/training/results" class="btn btn-primary">
                         <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                       </a>
                     </div>
@@ -1048,12 +1084,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1138,7 +1174,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="row">
                   <div class="col-md-9">
                     @if (!empty($step->description))
-                    <div class="d-flex flex-column mt-3">
+                    <div class="d-flex flex-column my-3">
                       <div class="d-flex align-items-center mb-1">
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
@@ -1152,14 +1188,14 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1178,15 +1214,30 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         @php
 
-          
+         // Filter Screening
+        $finalScreenings = App\Finalscreening::where('step_id', '=', $step->id)->first();
+       
+        // حساب عدد السجلات لكل step_id
+          // حساب عدد السجلات لكل step_id
+          $totalFinalscreenCount = App\Finalscreening::where('step_id', '=', $step->id)->distinct()
+              ->count();
+          // حساب عدد company_id الفريدة لكل step_id
+          $totalDistinctCompanies = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->distinct()
+              ->count('company_id');
+              if(isset($finalScreenings->judges)){
+          // حساب عدد المحكمين
+            $finaljudges = is_string($finalScreenings->judges) ? json_decode($finalScreenings->judges, true) : $finalScreenings->judges;
+              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
+              // إضافة بيانات المحكمين إلى المصفوفة
+              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
+              }
+          $answers = app(App\FinalData::class)->whereNotNull('answer')->where('step_id', $step->id)->count();
+        
+          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
 
-          $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
-          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
-          $answersdone = app(App\Formdata::class)
-          ->where('step_id', $step->id)
-          ->whereNotNull('screening') // الحقل ليس NULL
-          ->where('screening', '!=', '{}') // الحقل ليس JSON فارغ
-          ->count();
+          $answersdone = $answers - $answerspinding;
 
   
         @endphp
@@ -1219,12 +1270,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1264,7 +1315,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-presentation text-danger ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Evaluation') }}evaluation</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Evaluation') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answers }}
                       </small>
@@ -1321,7 +1372,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($judgesDetails as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $judge->id)}}">
+                          href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -1348,14 +1399,14 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-2 mt-4 mt-md-0">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->from, 'Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ FormatDate($step->to, 'Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1429,12 +1480,18 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-3">
                 <label class="form-label" for="step-name">{{ __('cycles.Form title') }}:</label>
                 <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
-                class="form-control border light-shadow" required>
+                class="form-control" required>
               </div>
-              <div class="col-md-6 form-group mb-3">
+              <div class="col-12 mb-4">
+                <label for="step-range-picker" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
+                <input type="hidden" name="fromDate" id="mfromDate">
+                <input type="hidden" name="toDate" id="mtoDate">
+                <input type="text" id="step-range-picker" class="form-control" name="date_range" />
+              </div>
+              {{-- <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
                 <div class="position-relative">
-                  <input id='mfromDate' name='fromDate' type="text" class="form-control border light-shadow flatpickr-date" required>
+                  <input id='mfromDate' name='fromDate' type="text" class="form-control flatpickr-date" required>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
@@ -1443,21 +1500,18 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid to') }}:</label>
                 <div class="position-relative">
-                  <input id='mtoDate' name='toDate' type="text" class="form-control border light-shadow flatpickr-date" required>
+                  <input id='mtoDate' name='toDate' type="text" class="form-control flatpickr-date" required>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
                 </div>
-              </div>
+              </div> --}}
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">{{ __('cycles.Description') }}: </label>
-                <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control border light-shadow"></textarea>
+                <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control"></textarea>
             
               </div>
             </fieldset>
-         
-            
-
         </div>
         <div class="modal-footer">
           <button type="submit" value="submit" class="btn btn-primary">
@@ -1512,7 +1566,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Step Name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1522,7 +1576,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1536,7 +1590,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1548,7 +1602,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1631,7 +1685,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Mentorship Name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1641,7 +1695,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1655,7 +1709,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1667,7 +1721,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1735,7 +1789,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Training Name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1745,7 +1799,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1759,7 +1813,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1771,7 +1825,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1823,7 +1877,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Final screening name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1833,7 +1887,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1847,7 +1901,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1859,7 +1913,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1902,13 +1956,13 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     </div>
   </div> --}}
 <!-- / Final Screening Step Modal -->
+
+  {{-- @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit']) --}}
 @stop
 
 @section('scripts')
-{{-- <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script> --}}
-{{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
-{{-- <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script> --}}
 <!-- Vendors JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -1916,12 +1970,187 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 @stop
 
 @section('pagescripts')
-  @php($ccycle = \App\Cycle::find($program->id))
-  {{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
-  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
+  @php($ccycle = \App\Cycle::find($cycle->id))
+
+  <script>
+    function copyToClipboard(text) {
+  // إنشاء عنصر مؤقت
+  const tempInput = document.createElement("input");
+  tempInput.value = text;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+  alert("{{ __('admin.Copied') }}");
+}
+    // Set Language
+    const lang = '{{ $l }}';
+
+    // document.addEventListener('DOMContentLoaded', () => {
+    //   console.log('loaded');
+    //   var bsRangePickerBasic = $('#bs-rangepicker-basic');
+    //   if (bsRangePickerBasic.length) {
+    //     bsRangePickerBasic.daterangepicker({
+    //       opens: isRtl ? 'left' : 'right'
+    //     });
+    //   }
+    // });
+
+    // const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
+    // const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
+  
+    // const editFpTo = flatpickr(editValidalidTo, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
+
+    // const editFpFrom = flatpickr(editValidFrom, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
+
+    // Handle Append File
+    // const appendFile = (mode, file, conainerId) => {
+    //   console.log('file', file)
+    //   if (file) {
+    //     const fileName = file.split('/').pop();
+    //     const content = (`
+    //       <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
+    //         <div class="d-flex align-items-center gap-2">
+    //           <i class="ti ti-file fs-4 text-warning"></i>
+    //           <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
+    //         </div> 
+    //         <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
+    //           <i class="ti ti-download fs-5"></i>
+    //         </a>
+    //       </div>`
+    //     );
+    //     $(`#${mode}-program-modal ${conainerId}`).append(content);
+    //   }
+    // };
+
+    // Initialize Quill Editor
+    // const editorConfig = { theme: 'snow' };
+    // const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
+    // const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
+    // const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
+
+    // Clear Editor
+    // editGuidelineEditor.root.innerHTML = '';
+    // editFinancialEditor.root.innerHTML = '';
+    // editLegalEditor.root.innerHTML = '';
+
+    // Handle Editor Change
+    // const handleEditorChange = (editor, input) => {
+    //   editor.on('text-change', function() {
+    //     $(input).val(editor.root.innerHTML);
+    //   });
+    // };
+
+    // handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
+    // handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
+    // handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
+
+    // Handle Edit Program
+    // const onEditProgramClick = (cycleId) => {
+    //   if(cycleId){
+    //     $('#edit-program-modal').modal('show');
+      
+    //     $.ajaxSetup({
+    //       headers: {
+    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //       }
+    //     });
+
+    //     $.ajax({
+    //       type: "POST",
+    //       url: "/dashboard/cycles/modify",
+    //       data: {"cycleid": cycleId },
+    //       success: function(response) {
+    //         console.log(response); 
+
+    //         $('#edit-program-modal #date-range-picker').daterangepicker({
+    //           opens: isRtl ? 'left' : 'right',
+    //           drops: 'up',
+    //           startDate: response?.start ? moment(response?.start) : '',
+    //           endDate: response?.end ? moment(response?.end) : '',
+    //         }).on('apply.daterangepicker', function(ev, picker) {
+    //           $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
+    //           $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
+    //         });
+
+    //         $('#edit-program-modal #title').val(response.title ?? '');
+    //         $('#edit-program-modal #description').val(response.description ?? '');
+    //         $('#edit-program-modal #cycleid').val(cycleId); 
+    //         $('#edit-program-modal #type').val(1);
+    //         // $('#edit-program-modal #start').val(response.start ?? '');
+    //         // $('#edit-program-modal #end').val(response.end ?? '');
+    //         $('#edit-program-modal #organization').val(response.organization_id ?? '');
+    //         $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+    //         $('#edit-program-modal #auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1 ? true : false);
+
+    //         if (response.private) {
+    //           $('#edit-program-modal #private').prop('checked', true);
+    //           $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+    //           $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+    //         }
+
+    //         if (editGuidelineEditor) {
+    //           editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
+    //         }
+
+    //         $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
+
+    //         if (editFinancialEditor) {
+    //           editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
+    //         }
+    //         $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
+    //         $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
+    //         $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+
+    //         if (editLegalEditor) {
+    //           editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
+    //         }
+    //         $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
+    //         const guidelineFile = response?.program_guideline_file;
+    //         const financialFile = response.financial_guideline_file;
+    //         const legalFile = response?.legal_guideline_file;
+    //         const delegationFile = response.delegation_file;
+            
+    //         appendFile('edit', guidelineFile, '#guideline-file-container');
+    //         appendFile('edit', financialFile, '#financial-file-container');
+    //         appendFile('edit', legalFile, '#legal-file-container');
+
+    //         if (delegationFile) {
+    //           appendFile('edit', delegationFile, '#delegation-file-container');
+    //           $('#edit-program-modal delegation_option').prop('checked', true);
+    //         }
+    //       },
+    //       error: function(error) {
+    //         console.log(error);
+    //         resetValues();
+    //         alert("Error Occurred, Try again!");
+    //       }
+    //     });
+    //   }
+    // }; 
+  
+    // Initialize Quill editors
+    const quillEditors = document.querySelectorAll('#text-editor');
+    quillEditors.forEach(editor => {
+      new Quill(editor, {
+        theme: 'snow'
+      });
+    });
+  </script>
 
   <script>
     (() => {
@@ -1939,7 +2168,6 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         });
       });
     })();
-
   </script>
 
 {{-- <script>
@@ -2139,6 +2367,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               "cycleid": 0,
             },
             success: function(response) {
+              console.log('response', response)
               step = response.stype;
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
@@ -2184,8 +2413,19 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               $('#sid').val(response.id);
               $('#mtitle').val(response.title);
               $('#mdescription').val(response.description);
-              $('#mfromDate').val(response.from);
-              $('#mtoDate').val(response.to);
+
+              $('#step-range-picker').daterangepicker({
+                opens: isRtl ? 'left' : 'right',
+                drops: 'up',
+                startDate: response?.from ? moment(response?.from) : null,
+                endDate: response?.to ? moment(response?.to) : null,
+              }).on('apply.daterangepicker', function(ev, picker) {
+                $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+                $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+              });
+
+              // $('#mfromDate').val(response.from);
+              // $('#mtoDate').val(response.to);
               $('#customStepModal').modal('show');
             },
             error: function(error) {

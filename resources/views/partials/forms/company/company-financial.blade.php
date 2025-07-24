@@ -3,17 +3,22 @@
     <div class="border-bottom border-light mb-6">
       <h5 class="card-title">{{ $tab['label'] }}</h5>
     </div>
-    <form method="post" action="{{ route('update_my_company') }}"
+    @if($_user->hasAnyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('company.profile_update_mine', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('company.profile_update_mine') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="4" name="CompanyN">
 
       <div class="row">
         <div class="col-6 mb-3">
           <label for="Currency"
-            class="form-label">{{ __('settings.Currency') }}</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('settings.Currency') }}</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-10"
+            <select class="form-select px-10"
               name="Currency" id="Currency">
               <option value="">{{ __('settings.Currency') }}</option>
               @foreach ($Currencies as $Currency)
@@ -30,10 +35,10 @@
 
         <div class="col-6 mb-3">
           <label for="pre_money_valuation"
-            class="form-label">{{ __('admin.Pre_money_Valuation') }}</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Pre_money_Valuation') }}</label>
           <div class="position-relative">
             <input type="number"
-              class="form-control border-light light-shadow px-10"
+              class="form-control px-10"
               id="pre_money_valuation"
               placeholder="{{ __('admin.Pre_money_Valuation') }}"
               value="{{ $client->company ? $client->company->Pre_money_Valuation : old('pre_money_valuation') }}"
@@ -45,10 +50,10 @@
 
         <div class="col-6 mb-3">
           <label for="raised_fund"
-            class="form-label">{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency }}</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency }}</label>
           <div class="position-relative">
             <input type="number"
-              class="form-control border-light light-shadow px-10"
+              class="form-control px-10"
               id="raised_fund" placeholder="{{ __('admin.raised_fund_egp') }}"
               value="{{ $client->company ? $client->company->raised_fund : old('raised_fund') }}"
               name="raised_fund" autocomplete="raised_fund">
@@ -61,10 +66,10 @@
 
         <div class="col-6 mb-3">
           <label for="Funding_Target"
-            class="form-label">{{ __('admin.Funding_Target') }}{{ $Setting->Currency }}</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Funding_Target') }}{{ $Setting->Currency }}</label>
           <div class="position-relative">
             <input type="number"
-              class="form-control border-light light-shadow px-10"
+              class="form-control px-10"
               id="Funding_Target" placeholder="{{ __('admin.Funding_Target') }}"
               value="{{ $client->company ? $client->company->Funding_Target : old('Funding_Target') }}"
               name="Funding_Target" autocomplete="Funding_Target">
@@ -75,11 +80,11 @@
 
         <div class="col-6 mb-3">
           <label for="stage"
-            class="form-label">{{ __('admin.development_stage') }}*</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.development_stage') }}</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-10" required
+            <select class="form-select px-10" required
               id="stage" name="stage">
-              <option value="">{{ __('admin.stage') }}</option>
+              <option value="" disabled>{{ __('admin.development_stage') }}</option>
 
               @foreach ($Stages as $Stage)
               <option value="{{ $Stage->id }}"
@@ -97,11 +102,11 @@
 
         <div class="col-6 mb-3">
           <label for="development_stage"
-            class="form-label">{{ __('admin.Funding_Stage') }}*</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Funding_Stage') }}</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-10" required
+            <select class="form-select px-10" required
               id="development_stage" name="development_stage">
-              <option value="" disabled>{{ __('admin.development_stage') }}</option>
+              <option value="" disabled>{{ __('admin.Funding_Stage') }}</option>
               <option value="Pre_seed_funding_stage"
                 {{ !empty($client->company) && $client->company->development_stage == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
                 {{ __('admin.Pre_seed_funding_stage') }}
@@ -130,10 +135,10 @@
 
         <div class="col-6 mb-3">
           <label for="targeted_market"
-            class="form-label">{{ __('admin.Targeted_Market') }}</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Targeted_Market') }}</label>
             <div class="position-relative">
               <select
-                class="form-select select2 border-light light-shadow px-10"
+                class="form-select select2 px-10"
                 id="targeted_market"
                 name="targeted_market[]"
                 multiple
@@ -150,9 +155,9 @@
 
         <div class="col-6 mb-3">
           <label for="business_type"
-            class="form-label">{{ __('admin.Business Type') }}*</label>
+            class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Business Type') }}</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-10" required
+            <select class="form-select px-10" required
               id="business_type" name="business_type">
               <option value="">{{ __('admin.Business Type') }}</option>
               <option value="B2C"
@@ -179,22 +184,51 @@
           </div>
         </div>
 
-        <hr>
+        {{-- <hr> --}}
 
-        <div class="col-md-6 col-12 mb-6">
-          <label for="financial_plan" class="form-label">{{ __('admin.financial_plan') }}
-            *</label>
+        <div class="col-12 mt-6">
+         <h5 class="pb-2 mb-6 border-bottom">{{ __('admin.financial_plan') }}</h5>
           <div class="position-relative">
-              <div class="mt-3" style="display: grid; place-items: center;">
-                  <input id="financial_plan" readonly
-                    class="form-control border-light light-shadow px-8 "
-                    type="text" name="financial_plan" value="">
-                  <a data-input="financial_plan" data-preview="financial_plan"
-                    href="#"
-                    class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
-                    <i
-                      class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
-                  </a>
+
+            @if (optional($client->company)->financial_plan != null)
+                      <div class="card shadow-sm"
+                        style="border-radius: 15px; max-height: 300px;  overflow-y: auto;">
+                        <div class="card-body">
+                          <div
+                            class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                              <i class="ti ti-file fs-1 text-warning"></i>
+                              <span>{{ basename($client->company->financial_plan) }}</span>
+                            </div>
+                            <a class="btn btn-transparent"
+                              href="{{ $client->company->financial_plan }}" target="_blank"
+                              download="{{ basename($client->company->financial_plan) }}">
+                              <i class="ti ti-download fs-3 text-primary"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    @endif
+
+                    <div class="col-12 mb-4">
+                      <label for="financial_plan_description"
+                        class="form-label fs-6 fw-semibold mb-1">{{ __('admin.financial_plan_description') }}</label>
+                      <div class="position-relative">
+                          <textarea
+                          oninput="this.value = this.value.trimStart()"
+                           class="form-control px-10"
+                          id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}" name="financial_plan_description" autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
+                        <i class="ti ti-chart-bar fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+                          style="left: 7px;"></i>
+                      </div>
+                    </div>
+
+              <div >
+                <label for="financial_plan" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Financial plan attachment') }}</label>
+                  <input id="financial_plan"
+                    class="form-control px-8 "
+                    type="file" name="financial_plan" value="">
+                  
                 </div>
           </div>
         </div>
@@ -202,16 +236,7 @@
         
 
 
-        <div class="col-md-6 col-12 mb-6">
-          <label for="financial_plan_description"
-            class="form-label">{{ __('admin.financial_plan_description') }}*</label>
-          <div class="position-relative">
-              <textarea class="form-control border-light light-shadow px-10"
-              id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}*" name="financial_plan_description" required autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
-            <i class="ti ti-chart-bar fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-              style="left: 7px;"></i>
-          </div>
-        </div>
+        
 
 
 
@@ -221,9 +246,10 @@
 
 
 
-        <div class="col-12 d-flex justify-content-end">
+        <div class="col-12 d-flex justify-content-end mt-6">
           <button type="submit" class="btn btn-primary" id="submit-button">
-            <span id="button-text">{{ __('admin.Update') }}</span>
+            <span id="button-text"> {{ __('admin.Update') }}
+              <i class="ti ti-edit ms-2"></i></span>
             <span id="button-spinner"
               class="spinner-border spinner-border-sm d-none" role="status"
               aria-hidden="true"></span>

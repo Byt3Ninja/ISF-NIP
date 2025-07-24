@@ -84,6 +84,9 @@
         }
     </style>
 </head>
+@php
+$setting = \App\settings::where('id', 1)->first();
+@endphp
 <body style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
 <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f8f8f9;" width="100%">
     <tbody>
@@ -130,7 +133,7 @@
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="GrowthLab" height="auto" src="{{ url('email-assets') }}/images/arweqah_sa_cover.jpeg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
+                                                    <div style="max-width: 560px;"><img alt="GrowthLab" height="auto" src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -162,6 +165,7 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
+                                                    @if($status== 'in')
                                                     <p style="margin: 0;">Dear {{$owner_name_en}},</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name_en }}, has successfully transitioned from the {{ $last_step }} to the {{ $new_step }}.This advancement reflects your hard work and commitment to growth.</p>
@@ -172,6 +176,15 @@
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
                                                     <p style="margin: 0;">{{ $organization_name_en }}</p>
+                                                    @else
+                                                    <p style="margin: 0;">Dear {{$owner_name_en}},</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name_en }}, has successfully transitioned from the {{ $last_step }} to the {{ $new_step }}.</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">Please log in to your dashboard on our virtual incubator platform to  choose a new Program.</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">Best regards,</p>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -180,6 +193,7 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
+                                                    @if($status== 'in')
                                                     <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name_ar }}، قد انتقل بنجاح من {{ $last_step }} إلى  {{ $new_step }}. يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
@@ -189,6 +203,16 @@
                                                     <p style="margin: 0;">تهانينا على بلوغ هذه الخطوة الهامة! نحن نتطلع إلى رؤية المزيد من تقدمكم ونجاحكم.</p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
                                                     <p style="margin: 0;">{{ $organization_name_ar }}</p>
+                                                    @else
+                                                     <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name_ar }}، قد انتقل بنجاح من {{ $last_step }} إلى  {{ $new_step }}</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">الرجاء تسجيل الدخول إلى لوحة التحكم الخاصة بك على منصتنا للحاضنات الافتراضية للاشتراك ببرنامج جديد.</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">أطيب التحيات،</p>
+                                                    <p style="margin: 0;">{{ $organization_name_ar }}</p>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -255,7 +279,7 @@
                                         <tr>
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ url('email-assets') }}/images/footer.png" style="display: block; height: auto; border: 0; width: 100%;" title="GrowthLab" width="640"/></div>
+                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="GrowthLab" width="640"/></div>
                                                 </div>
                                             </td>
                                         </tr>

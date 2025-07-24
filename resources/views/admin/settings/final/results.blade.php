@@ -4,9 +4,8 @@
 @stop
 @section('content')
   <!-- BEGIN: Content-->
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-overlay"></div>
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-body">
         <section id="multiple-column-form">
           @if (session()->has('message'))
@@ -25,38 +24,42 @@
               </button>
             </div>
           @endif
-          <div class="row match-height">
-            <div class="col-xl-12 col-md-12 col-sm-12">
+          <div class="row">
+            <div class="col-12">
               <div class="card mb-4">
                 <div class="card-header" style="padding-bottom: 15px;">
                   <h4 class="card-title">{{ __('cycles.Portal Final Screening list') }}</h4>
                 </div>
                 <hr>
                 <div class="card-body">
-                  <span>{{ __('cycles.Select step from list to manage') }}</span>
-                  <fieldset class="input-group mt-2">
-                    <select id="cstep" class="select form-control rounded"
-                      style="margin-left: {{ $l == 'ar' ? '10px' : '0' }}; margin-right: {{ $l == 'ar' ? '0' : '10px' }}; width: 60%;"
-                      onchange="window.open('/dashboard/final/results/'+this.options[this.selectedIndex].value,'_self');">
-                      @foreach ($steps as $step)
-                        <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
-                          ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
-                          {{ $step->from->format('d-m') }}) - {{ optional(optional($step->cycle)->organization)->name }}
-                        </option>
-                      @endforeach
-                    </select>
-                    <div class="input-group-append">
-                      <button class="btn btn-label-primary"
-                        onclick="window.location.href='/dashboard/{{ $id }}/final'">
-                        <i class="ti ti-settings"></i> 
-                        <span class="mx-1">{{ __('cycles.Manage') }}</span>
-                      </button>
-                      <a class="btn btn-label-success" href="/dashboard/cycles/{{ $cstep->cycle_id ?? null }}">
-                        <i class="ti ti-pencil"></i>
-                        <span class="mx-1">{{ __('cycles.Cycle') }}</span>
-                      </a>
+                  <div class="row">
+                    <div class="col-12 col-lg-6">
+                      <label>{{ __('cycles.Select step from list to manage') }}</label>
+                      <select id="cstep" class="select2 form-select"
+                        onchange="window.open('/dashboard/final/results/'+this.options[this.selectedIndex].value,'_self');">
+                        @foreach ($steps as $step)
+                          <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
+                            ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
+                            {{ $step->from->format('d-m-Y') ?? '-' }})
+                            - {{ optional(optional($step->cycle)->organization)->name }}
+                          </option>
+                        @endforeach
+                      </select>
                     </div>
-                  </fieldset>
+                    <div class="col-12 col-lg-6">
+                      <div class="h-100 d-flex justify-content-end align-items-end gap-4">
+                        <button class="btn btn-label-primary"
+                          onclick="window.location.href='/dashboard/{{ $id }}/final'">
+                          <i class="ti ti-settings"></i>
+                          <span class="mx-1">{{ __('cycles.Manage') }}</span>
+                        </button>
+                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $cstep->cycle_id ?? null }}">
+                          <i class="ti ti-pencil"></i>
+                          <span class="mx-1">{{ __('cycles.Cycle') }}</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                   <br>
                   <span class="mb-2">{{ __('cycles.Select registered company') }}:</span>
                   <fieldset class="input-group mt-2">
@@ -65,8 +68,8 @@
                       <option value="0">{{ __('cycles.Select Company') }}</option>
                       @foreach ($companies as $company)
                         <option value="{{ $company->id }}" {{ $c ? ($company->id == $c->id ? 'selected' : '') : '' }}>
-                          {{ $company->{'name_' . $l} }} ({{ __('cycles.Added By') }}
-                          {{ $company->user->{'first_name_' . $l} }} {{ $company->user->{'last_name_' . $l} }})</option>
+                          {{ $company?->{'name_' . $l} }} ({{ __('cycles.Added By') }}
+                          {{ $company?->user?->{'first_name_' . $l} }} {{ $company?->user?->{'last_name_' . $l} }})</option>
                       @endforeach
                     </select>
                   </fieldset>
@@ -89,13 +92,13 @@
           </div>
         </section>
         <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
+          <div class="col-12">
             @if ($c)
               <div class="card">
                 <div class="card-header">
                   <h4 class="card-title secondary">{{ $cstep->title }} <small class="text-muted">
-                      {{ __('cycles.from') }} {{ $cstep->from->format('d-m') }} {{ __('cycles.to') }}
-                      {{ $cstep->to->format('d-m-Y') }}</small>
+                      {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                      {{ $cstep->to->format('d-m-Y') ?? '-' }}</small>
                     {{ __('cycles.for') }} :
                     <a href="/dashboard/companyProfile/{{ $c->id }}">
                       <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40"
@@ -155,9 +158,9 @@
       </section>
     </div>
   </div>
-  </div>
   <!-- END: Content-->
 @stop
+
 @section('pagescripts')
   <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>

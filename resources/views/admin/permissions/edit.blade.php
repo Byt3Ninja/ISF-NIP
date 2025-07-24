@@ -5,9 +5,8 @@
 @section('content')
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-overlay"></div>
-        
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="content-overlay"></div>
         <div class="content-body">
             <!-- BuilderForm start -->
             <section id="basic-input">
@@ -23,23 +22,16 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                <button type="button" class="close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
+                                                <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
                                                 <div class="d-flex align-items-center">
-                                                    <i class="ti ti-error"></i>
-                                                    <span>
-                                                        {{ __('admin.'.session()->get('msg')) }}
-                                                        {{ Session::forget('msg') }}
-                                                    </span>
+                                                    <i class="ti ti-error"></i> <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     @endif
                                     <!-- Validation messages -->
-                                    @if(count($errors) >0)
+                                    @if( count( $errors ) > 0 )
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="alert alert-danger">
@@ -52,29 +44,42 @@
                                         </div>
                                     </div>
                                     @endif
-                                        <form method="POST" action="{{ route("permissions.update", [$permission->id]) }}" enctype="multipart/form-data">
-                                            @method('PUT')
-                                            @csrf
+                                    <form method="POST" action="{{ route("permissions.update", [$permission->id]) }}" enctype="multipart/form-data">
+                                        @method('PUT')
+                                        @csrf
                                         <div class="row">
                                             <div class="col-md-12">
-
-                                                <fieldset class="form-group">
+                                                <fieldset class="form-group my-6">
                                                     <label class="fs-6 mb-1" for="basicInput">{{ __('admin.Title')}}</label>
-                                                    <input type="text" class="form-control" id="name" name='name'
-                                                        required placeholder="{{__('admin.Title')}}" style="direction: ltr;"
-                                                        value="{{ $permission->name }}" >
+                                                    <input type="text" class="form-control" id="name" name='name' required placeholder="{{__('admin.Title')}}" style="direction: ltr;" value="{{ $permission->name }}" />
                                                 </fieldset>
-
+                                                <fieldset class="form-group my-6">
+                                                    <label class="fs-6 mb-2" for="description">{{ __('admin.Description')}}</label>
+                                                    <input type="text" class="form-control" id="description" name='description' placeholder="{{__('admin.Description')}}" value="{{ $permission->description }}" />
+                                                </fieldset>
+                                                <fieldset class="form-group my-6">
+                                                    <label class="fs-6 mb-1" for="permission_group_id">{{ __('admin.permissionsGroup')}}</label>
+                                                    <select class="form-control form-select" name="permission_group_id" id="permission_group_id">
+                                                        <option value="">Un categorized</option>
+                                                        @foreach( $groups as $group )
+                                                            <option {{ $group->id == $permission->permission_group_id ? 'selected' : '' }} value="{{ $group->id }}">{{ $group->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </fieldset>
+                                                <div class="form-check my-6">
+                                                    <input type="checkbox" name="is_core" class="form-check-input select-all-row" id="is_core" @if($permission->is_core) checked="checked" @endif>
+                                                    <label class="form-check-label" for="is_core">Core Permission</label>
+                                                    <div><small class="form-text text-muted">Core permission will be granted to all users even if not assigned to any role</small></div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row mt-4">
                                             <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
                                             </div>
                                         </div>
+                                    </form>
                                 </div>
-                                </form>
                             </div>
                         </div>
                     </div>

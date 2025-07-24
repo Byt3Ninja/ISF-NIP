@@ -12,7 +12,6 @@ class DocumentationController extends Controller
 
     public function index()
     {
-        $this->preProcessingCheck('view_documentation');
         $docs = Documentation::orderBy('arr','ASC')->get();
         return view('admin/settings/documentations/index' , compact('docs'));
     }
@@ -20,15 +19,21 @@ class DocumentationController extends Controller
 
     public function create()
     {
-        $this->preProcessingCheck('manage_documentation');
         return view('admin/settings/documentations/create');
     }
 
 
     public function store(Request $request)
     {
-        $this->preProcessingCheck('manage_documentation');
-        $user =Auth::id();
+        $request->validate([
+            'menu_ar' => 'required|string',
+            'menu_en' => 'required|string',
+            'arr' => 'required|integer',
+            'role' => 'required|string',
+            'content_ar' => 'required|string',
+            'content_en' => 'required|string',
+        ]);
+        $user = Auth::id();
         $result = Documentation::create($request->except(['user_id']) + ['user_id' => $user]);
         if($result)
             return redirect()->route('documentation.index')->with( ['msg' => 'StoredSuccessfully'] );
@@ -39,7 +44,6 @@ class DocumentationController extends Controller
 
     public function show($id=1)
     {
-        $this->preProcessingCheck('view_documentation');
         $doc = Documentation::findOrfail($id);
         $menu = Documentation::orderBy('arr','ASC')->where('id',$id)->get(['id','menu_ar','menu_en']);
         return view('admin.documentation', compact('doc','menu'));
@@ -48,13 +52,19 @@ class DocumentationController extends Controller
 
     public function edit(Documentation $documentation)
     {
-        $this->preProcessingCheck('manage_documentation');
         return view('admin/settings/documentations/edit', compact('documentation'));
     }
 
     public function update(Request $request, Documentation $documentation)
     {
-        $this->preProcessingCheck('manage_documentation');
+        $request->validate([
+            'menu_ar' => 'required|string',
+            'menu_en' => 'required|string',
+            'arr' => 'required|integer',
+            'role' => 'required|string',
+            'content_ar' => 'required|string',
+            'content_en' => 'required|string',
+        ]);
         $user =auth()->id();
         $result = $documentation->update($request->except(['user_id'])+ ['user_id'=>$user]);
         if($result)
@@ -65,18 +75,7 @@ class DocumentationController extends Controller
 
     public function destroy(Documentation $doc)
     {
-        try{
-            $this->preProcessingCheck('manage_documentation');
-            $doc->delete();
-            return response()->json([
-                'state' => 'success'
-            ], 200);
-        }catch (Exception $e){
-            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            return response()->json([
-                'state' => 'failed'
-            ], 500);
-
-        }
+        $doc->delete();
+        return response()->json(['state' => 'success'], 200);
     }
 }

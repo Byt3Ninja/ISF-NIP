@@ -42,31 +42,35 @@
 
   // Bar Chart
   // --------------------------------------------------------------------
-  const barChart = document.getElementById('verticalBarChart');
-  if (barChart) {
-    const barChartVar = new Chart(barChart, {
+
+  const getBarChartConfig = ({ labels, data, precentage = false, max, stepSize }) => {
+    // get max value in customData array
+    const maxValue = data && data.length > 0 ? Math.round(Math.max(...data)) + 10 : 0;
+    const minValue = data && data.length > 0 ? Math.round(Math.min(...data)) : 0;
+    const stepValue = minValue ? minValue : 1;
+  
+    return {
       type: 'bar',
       data: {
-        labels: verticalBarLabels,
+        labels,
         datasets: [
           {
-            data: verticalBarData,
+            data,
             backgroundColor: [
-              'rgba(255, 99, 132, 0.8)',
-              'rgba(54, 162, 235, 0.8)',
-              'rgba(255, 206, 86, 0.8)',
-              'rgba(75, 192, 192, 0.8)',
-              'rgba(153, 102, 255, 0.8)',
-              'rgba(255, 159, 64, 0.8)',
-              'rgba(199, 199, 199, 0.8)',
-              'rgba(83, 102, 255, 0.8)',
-              'rgba(255, 99, 71, 0.8)',
-              'rgba(60, 179, 113, 0.8)',
-              'rgba(255, 140, 0, 0.8)',
-              'rgba(75, 0, 130, 0.8)',
-              'rgba(255, 20, 147, 0.8)',
-              'rgba(0, 191, 255, 0.8)',
-              'rgba(34, 139, 34, 0.8)'
+              'blue',
+              'green',
+              'gray',
+              'lightgray',
+              'orange',
+              'purple',
+              'red',
+              'yellow',
+              'pink',
+              'cyan',
+              'skyblue',
+              'black',
+              'brown',
+              'darkblue',
             ],
             borderColor: 'transparent',
             maxBarThickness: 15,
@@ -108,21 +112,28 @@
             }
           },
           y: {
-            min: 2,
-            max: 12,
+            min: 0,
+            max: maxValue ? maxValue : max ? max : precentage ? 100 : max ? max : 20,
             grid: {
               color: borderColor,
               drawBorder: false,
               borderColor: borderColor
             },
             ticks: {
-              stepSize: 2,
+              stepSize: stepValue ? stepValue : stepSize ? stepSize : precentage ? 10 : 1,
               color: labelColor
             }
           }
         }
       }
-    });
+    };
+  };
+  const chartDom = document.getElementById('verticalBarChart');
+
+  const chartConfig = getBarChartConfig({ labels: verticalBarLabels, data: verticalBarData, max: 300, stepSize: 30 });
+
+  if (chartDom) {
+    new Chart(chartDom, chartConfig);
   }
 
   // Horizontal Bar Chart

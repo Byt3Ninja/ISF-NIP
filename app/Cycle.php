@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Cycle extends Model
 {
     use Auditable;
+    public static $module = 'Program';
     protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d',];
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $fillable = [
+       'title', 'description', 'start', 'end', 'organization_id',
+    ];
 
     // =============> Attributes <======================
 
@@ -39,4 +42,40 @@ class Cycle extends Model
     {
         return $this->morphMany(CalenderSync::class, 'calenderable');
     }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'cycle_project')->withPivot(['status','created_at'])->withTimestamps(); 
+    }
+
+    public function mentorshipRequests()
+    {
+        return $this->hasMany(MentorshipRequest::class, 'cycle_id', 'id');
+    }
+
+    public function steps()
+    {
+        return $this->hasMany(Step::class);
+    }
+
+    public function trainingSessions()
+   {
+      return $this->hasManyThrough(TrainingSession::class, Step::class);
+   }
+
+    public function surveyResponses()
+    {
+        return $this->hasMany(SurveyResponses::class);
+    }
+
+    public static function programTypes(): array
+    {
+        // return ['Incubator', 'Accelerator', 'Hackathon'];
+        return ['General_Program', 'Hackathon'];
+    }
+
+   
+    
+
+
 }

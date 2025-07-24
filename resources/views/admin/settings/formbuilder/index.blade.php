@@ -113,6 +113,39 @@
                 </div>
                 <hr>
                 <div class="card-body">
+                  <br>
+
+										<form method="GET" action="/dashboard/show-builder">
+										  <div class="d-flex align-items-center mx-2">
+											<div style="display: flex; align-items: center;">
+											<button
+											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+											  style="border-radius: 17px; width: 40px; height: 40px;"
+											   type="submit" >
+											  <i class="ti ti-filter text-white ti-24px"></i>
+											</button>
+										  </div>
+										  <!-- Search Bar -->
+										  <div class="position-relative me-3 d-none d-md-flex">
+                        <select name="org_id" class="form-control">
+                          <option value="0">{{ __('admin.All') }}</option>
+                          @php
+                          $user = Auth::user();
+                          if($user->hasRole('organizationManager')){
+                          $organizations = App\Organization::where('id', $user->organization_id)->get();
+                        }else{
+                          $organizations = App\Organization::all();
+                        }
+                          @endphp
+                          @foreach ($organizations as $organization) 
+                          <option value="{{$organization->id}}" {{ $organization->id == request('org_id') ? 'selected' : '' }}> {{ $organization->{'name_' . $l} }}</option>
+                        @endforeach
+                        </select>
+                        </div>
+
+										</div>
+										</form>
+										<hr>
                   <label class="form-label mb-2 fs-6">{{ __('builder.Select from') }}:</label>
                   <fieldset class="form-group d-flex align-items-center w-100">
                     <div

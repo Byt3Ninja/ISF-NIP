@@ -6,6 +6,7 @@
  use Validator,Redirect,Response,File;
 
  use App\User;
+ use App\Settings;
  use Illuminate\Support\Str;
  use Illuminate\Support\Facades\Hash;
  use Laravel\Socialite\Facades\Socialite;
@@ -18,10 +19,23 @@ use Illuminate\Support\Facades\Http;
 
     public function redirect($provider){
     //   dd(config('services.LINKEDIN_CLIENT_ID'), config('services.LINKEDIN_CLIENT_SECRET'), config('services.LINKEDIN_REDIRECT_URI'));
-      
+        $settings = Settings::where('id', 1)->first();
+        $config = [
+            'services.google.client_id' => $settings->GOOGLE_CLIENT_ID ?? '',
+            'services.google.client_secret' => $settings->GOOGLE_CLIENT_SECRET ?? '',
+            'services.google.redirect' => $settings->GOOGLE_REDIRECT ?? '',
+        ];
+        config( $config );
         return Socialite::driver($provider)->redirect();
     }
     public function callback($provider){
+        $settings = Settings::where('id', 1)->first();
+        $config = [
+            'services.google.client_id' => $settings->GOOGLE_CLIENT_ID ?? '',
+            'services.google.client_secret' => $settings->GOOGLE_CLIENT_SECRET ?? '',
+            'services.google.redirect' => $settings->GOOGLE_REDIRECT ?? '',
+        ];
+        config( $config );
         $getInfo = Socialite::driver($provider)->user();
 
         
@@ -50,7 +64,7 @@ use Illuminate\Support\Facades\Http;
                 'provider_id' => $getInfo->id,
               	'email_verified_at' => now()
             ]);
-          $user->assignRole('Registered');
+          $user->allotRole('Registered');
           event(new WebMessage('NewUser', $getInfo->name, 1));
         }
         return $user;
@@ -64,7 +78,7 @@ use Illuminate\Support\Facades\Http;
     public function handleGoogleCallback(){
       
         try {
-            $guser = Socialite::driver('google')->user();
+            $guser = Socialite::driver('google')->stateless()->user();
             $finduser = User::where('google_id', $guser->id)->first();
             
 			if (!$finduser) {
@@ -88,7 +102,7 @@ use Illuminate\Support\Facades\Http;
                     'google_id'=> $guser->id,
 					'email_verified_at' => now()
                 ]);
-				$newUser->assignRole('Registered');
+				$newUser->allotRole('Registered');
                 event(new WebMessage('NewUser', $guser->name, 1));
               	auth()->login($newUser);
                 return redirect('/dashboard');
@@ -100,8 +114,15 @@ use Illuminate\Support\Facades\Http;
     }
 
     // ===========> LinkedIn <==========
-    public function redirectToLinkedIn()
+    public function redirectToLinkedIn($data)
     {
+        
+        if($data == '2520'){
+            session(['role' => 'Mentor']);
+        }else{
+            session(['role' => 'Registered']);
+        }
+    
         // dd(config('services.linkedin.client_id'), config('services.linkedin.client_secret'), config('services.linkedin.redirect'));
         $LINKEDIN_CLIENT_ID = config('services.linkedin.client_id');
         $LINKEDIN_CLIENT_SECRET = config('services.linkedin.client_secret');
@@ -116,12 +137,13 @@ use Illuminate\Support\Facades\Http;
             . '&client_id=' . $clientId
             . '&redirect_uri=' . urlencode($redirectUri)
             . '&scope=' . urlencode($scope);
-    
+            
         return redirect($url);
     }
     
     public function handleLinkedInCallback(Request $request)
     {
+        
         if (!$request->has('code')) {
             return redirect()->route('login')->with('error', 'Authorization code is missing');
         }
@@ -166,6 +188,7 @@ use Illuminate\Support\Facades\Http;
                       $user->last_name_en = $userInfo['family_name'] ?? '';
                       $user->first_name_ar = $userInfo['given_name'] ?? '';
                       $user->last_name_ar = $userInfo['family_name'] ?? '';
+                      $user->email = $userInfo['email'] ?? '';
                       $user->linkedin_id = $userInfo['sub'] ?? '';
                       $user->img_url = $userInfo['picture'] ?? null;
                       // ضبط كلمة المرور إذا كانت غير موجودة
@@ -177,13 +200,14 @@ use Illuminate\Support\Facades\Http;
                           $user->email_verified_at = now();
                       }
                       $user->save();
+                      $user->allotRole(session('role'));
                   } else {
                       // تحديث linkedin_id إذا تم العثور على المستخدم
                       $user->linkedin_id = $userInfo['sub'] ?? '';
                       $user->save();
                   }
                     auth()->login($user);
-    
+                    session()->forget('role');
                     return redirect('/dashboard');
                 }
             }

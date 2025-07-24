@@ -56,6 +56,12 @@ return [
             'visibility' => 'public',
         ],
 
+        'pitch_deck' => [
+            'driver' => 'local',
+            'root'   => public_path('pitch_decks'),
+            'url' => env('APP_URL') . '/pitch_decks',
+            'visibility' => 'public',
+        ],
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -108,17 +114,28 @@ return [
         ],
         'UsersLFMPublic' => [
             'driver' => 'local',
-            'root' => storage_path('app/uploads/files'),
-            'url' => env('APP_URL') . '/dashboard/uploads',
-            'visibility' => 'private',
+            'root' => public_path('orgnizations'),
+            'url' => env('APP_URL') . '/orgnizations',
+            'visibility' => 'public',
         ],
         'mentorship_tasks' => [
             'driver' => 'local',
             'root' => storage_path('app/mentorship_tasks'),
             'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
-        ]
-
+        ],
+        'companies' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/companies'),
+            'url' => env('APP_URL') . 'api/uploads/companies',
+            'visibility' => 'private',
+        ],
+        'QrCodePublic' => [
+            'driver' => 'local',
+            'root' => public_path('qrcodes'),
+            'url' => env('APP_URL') . '/qrcodes',
+            'visibility' => 'public',
+        ],
     ],
 
 ];

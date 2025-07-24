@@ -27,17 +27,55 @@
             <div class="card">
               <div class="card-header">
 
-                @if (Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
+                @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                   <a class="btn btn-primary"
-                    href="{{ route('training.create') }}">
+                    href="{{ route('trainings.create') }}">
                     <i class="ti ti-plus me-1"></i>
-                    {{ __('cycles.Add new Training') }}
+                    {{ __('admin.Add_new_Courses') }}
                   </a>
                 @endif
               </div>
               <div class="card-body">
                 <div class="card-text">
                   <div class="table-responsive">
+                    <br>
+
+										<form method="GET" action="/dashboard/training/all">
+										  <div class="d-flex align-items-center mx-2">
+											<div style="display: flex; align-items: center;">
+											<button
+											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+											  style="border-radius: 17px; width: 40px; height: 40px;"
+											   type="submit"
+											>
+											  <i class="ti ti-filter text-white ti-24px"></i>
+											</button>
+										  </div>
+										  <!-- Search Bar -->
+										 
+							
+										  <div class="position-relative me-3 d-none d-md-flex">
+											<select name="catTr_id" class="form-control">
+											  <option value="0">{{ __('admin.All') }}</option>
+											  @php
+											  $expertises = App\Expertise::all();
+											  @endphp
+											  @foreach ($expertises as $expert) 
+											  <option value="{{$expert->id}}" {{ $expert->id == request('catTr_id') ? 'selected' : '' }}> {{ $expert->title }}</option>
+											@endforeach
+											</select>
+										  </div>
+										  <div class="position-relative me-3 d-none d-md-flex">
+											<select name="status" class="form-control">
+											  <option value="0">{{ __('admin.All') }}</option>
+											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>{{ __('admin.Draft') }}</option>
+											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>{{ __('admin.Published') }}</option>
+											</select>
+										  </div>
+
+										</div>
+										</form>
+										<hr>
                     <table class="table mb-0" id="userstable">
                       <thead class="bg-label-light">
                         <tr>
@@ -92,7 +130,7 @@
                               @endforeach
                             </td>
                             <th>{{ $count_content }}</th>
-                            @if (Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
+                            @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                               <td>
                                 <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
                                   class="btn btn-icon btn-label-info rounded-circle">

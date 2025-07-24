@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class Step extends Model
 {
 	// use Auditable;
+	public static $module = 'Program Step';
 	protected $casts = ['from'  => 'date:Y-m-d', 'to' => 'date:Y-m-d',];
 	public function cycle()
 	{
@@ -50,4 +51,37 @@ class Step extends Model
 	{
 		return $this->morphMany(CalenderSync::class, 'calenderable');
 	}
+
+	// Accessor for judgers
+    public function getJudgersAttribute()
+    {
+        if ($this->data === 'grouptogroup') {
+            $judgeIds = collect($this->list ?? [])->flatten()->unique()->filter()->values();
+            return $judgeIds->count();
+        } elseif ($this->data === 'onetoall') {
+            $judgeIds = is_array($this->list) ? collect($this->list)->filter()->values() : collect([$this->list])->filter();
+            return $judgeIds->count();
+        } elseif ($this->data === 'grouptoall') {
+            $judgeIds = collect($this->list ?? [])->flatten()->unique()->filter()->values();
+            return $judgeIds->count();
+        }
+
+        $judgeIds = Screening::where('step_id', $this->id)
+            ->whereNotNull('users')
+            ->pluck('users')
+            ->map(function ($users) {
+                return is_array($users) ? $users : json_decode($users, true) ?? [];
+            })
+            ->flatten()
+            ->unique()
+            ->filter()
+            ->values();
+
+        return $judgeIds->count();
+    }
+
+	 public function screenings()
+    {
+        return $this->hasMany(Screening::class, 'step_id');
+    }
 }

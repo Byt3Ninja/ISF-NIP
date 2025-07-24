@@ -1,5 +1,5 @@
 @if ($Title->HomePage == true)
-  <form class="form d-flex flex-column h-100" action="{{ route('updateSMImgHome') }}" method="POST"
+  <form class="form d-flex flex-column h-100" action="{{ route('settings.system_social_home_image_update') }}" method="POST"
     enctype="multipart/form-data">
     @csrf
     @method('PUT')

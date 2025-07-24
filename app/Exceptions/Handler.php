@@ -6,6 +6,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 //use Sentry\Laravel\Facade\Sentry;
 use Sentry\Laravel\Facade as Sentry;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 
 class Handler extends ExceptionHandler
@@ -21,6 +22,12 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
+    public function report(Throwable $exception)
+	{
+		if( $this->shouldReport( $exception ) && app()->bound("sentry") ) { app("sentry")->captureException( $exception ); }
+		parent::report($exception);
+	}
+
     /**
      * Register the exception handling callbacks for the application.
      */
@@ -33,4 +40,16 @@ class Handler extends ExceptionHandler
 //            parent::report($e);
         });
     }
+
+    public function render($request, Throwable $exception)
+{
+    if ($exception instanceof MethodNotAllowedHttpException) {
+        return response()->json([
+            'status' => false,
+            'message' => 'The Request method is not allowed'
+        ], 405);
+    }
+
+    return parent::render($request, $exception);
+}
 }

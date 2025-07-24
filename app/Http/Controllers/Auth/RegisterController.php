@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Country;
 use App\User;
+use App\Country;
 use App\Settings;
 use App\UsersBio;
 use App\Events\WebMessage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Broadcasting\BroadcastException;
 
 class RegisterController extends Controller
 {
@@ -34,7 +36,7 @@ class RegisterController extends Controller
      * @var string
      */
 
-   protected $redirectTo = '/dashboard';
+    protected $redirectTo = '/dashboard';
 
     /**
      * Create a new controller instance.
@@ -57,8 +59,8 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'first_name_en' => ['required', 'string', 'max:255'],
             'last_name_en' => ['required', 'string', 'max:255'],
-         	'gender' => ['required'],
-            'phone' => ['required'],
+            'gender' => ['required'],
+            'phone' => 'required|unique:users,phone',
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -71,94 +73,105 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        
+
         $Settings = Settings::where('id', 1)->first();
 
-        if($Settings->VFEmail == 1){
-        $user = User::create([
-            'first_name_en' => $data['first_name_en'],
-            'last_name_en' => $data['last_name_en'],
-            'gender' =>  $data['gender'],
-            'phone' => $data['phone'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-        $user->assignRole($data['role']);
+        if ($Settings->VFEmail == 1) {
+            $user = User::create([
+                'first_name_en' => $data['first_name_en'],
+                'last_name_en' => $data['last_name_en'],
+                'first_name_ar' => $data['first_name_en'],
+                'last_name_ar' => $data['last_name_en'],
+                'title_ar' => $data['title_en'],
+                'title_en' => $data['title_en'],
+                'gender' =>  $data['gender'],
+                'phone' => $data['phone'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]);
+            $user->allotRole($data['role']);
 
 
-        if($data['role'] == "Mentor"){
-        $userbio = UsersBio::create([
-            'user_id' => $user->id,
-            'bio_en' => $data['userbio'],
-            'linkedin' => $data['Linkedin'],
-        ]);
+            if ($data['role'] == "Mentor") {
+                $userbio = UsersBio::create([
+                    'user_id' => $user->id,
+                    'bio_en' => $data['userbio'],
+                    'linkedin' => $data['Linkedin'],
+                ]);
 
-        // معالجة الخبرات كمصفوفة
-        $expertises = [];
-        foreach ($data['expertise'] as $expertiseId) {
-            $expertises[] = [
-                'expertise_id' => $expertiseId,
-                'mentor_id' => $user->id
-            ];
+                if (!empty($data['expertise'])) {
+
+
+                    // معالجة الخبرات كمصفوفة
+                    $expertises = [];
+                    foreach ($data['expertise'] as $expertiseId) {
+                        $expertises[] = [
+                            'expertise_id' => $expertiseId,
+                            'mentor_id' => $user->id
+                        ];
+                    }
+                }
+                $user->title_en = $data['title_en'];
+                $user->save();
+                if (!empty($data['expertise'])) {
+                    // إدراج الخبرات دفعة واحدة
+                    DB::table('mentor_expertise')->insert($expertises);
+                }
+            }
+        } else {
+
+            $user = User::create([
+                'first_name_en' => $data['first_name_en'],
+                'last_name_en' => $data['last_name_en'],
+                'first_name_ar' => $data['first_name_en'],
+                'last_name_ar' => $data['last_name_en'],
+                'title_ar' => $data['title_en'],
+                'title_en' => $data['title_en'],
+                'gender' =>  $data['gender'],
+                'phone' => $data['phone'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'email_verified_at' => now(),
+            ]);
+            $user->allotRole($data['role']);
+
+
+            if ($data['role'] == "Mentor") {
+                $userbio = UsersBio::create([
+                    'user_id' => $user->id,
+                    'bio_en' => $data['userbio'],
+                    'linkedin' => $data['Linkedin'],
+                ]);
+                if (!empty($data['expertise'])) {
+                    // معالجة الخبرات كمصفوفة
+                    $expertises = [];
+                    foreach ($data['expertise'] as $expertiseId) {
+                        $expertises[] = [
+                            'expertise_id' => $expertiseId,
+                            'mentor_id' => $user->id
+                        ];
+                    }
+
+                    // إدراج الخبرات دفعة واحدة
+                    DB::table('mentor_expertise')->insert($expertises);
+                }
+            }
         }
 
-        $user->title_en = $data['title_en'];
-        $user->save();
-        
-        // إدراج الخبرات دفعة واحدة
-        DB::table('mentor_expertise')->insert($expertises);
-    }
-    }else{
-
-$user = User::create([
-            'first_name_en' => $data['first_name_en'],
-            'last_name_en' => $data['last_name_en'],
-            'gender' =>  $data['gender'],
-            'phone' => $data['phone'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'email_verified_at' => now(),
-        ]);
-        $user->assignRole($data['role']);
 
 
-        if($data['role'] == "Mentor"){
-        $userbio = UsersBio::create([
-            'user_id' => $user->id,
-            'bio_en' => $data['userbio'],
-            'linkedin' => $data['Linkedin'],
-        ]);
 
-        // معالجة الخبرات كمصفوفة
-        $expertises = [];
-        foreach ($data['expertise'] as $expertiseId) {
-            $expertises[] = [
-                'expertise_id' => $expertiseId,
-                'mentor_id' => $user->id
-            ];
+
+
+
+
+
+        try {
+            event(new WebMessage('NewUser', $data['first_name_en'] . ' ' . $data['last_name_en']));
+        } catch (BroadcastException $e) {
+            Log::warning('Broadcast Error: ' . $e->getMessage());
         }
-        
-        // إدراج الخبرات دفعة واحدة
-        DB::table('mentor_expertise')->insert($expertises);
-    }
 
-
-
-
-    }
-        
-
-
-
-
-
-
-
-
-
-
-
-        event(new WebMessage('NewUser', $data['first_name_en'] .' '. $data['last_name_en']));
         return $user;
     }
 }

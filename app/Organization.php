@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Organization extends Model
 {
 	use Auditable;
+	public static $module = 'Organizations';
 	protected $fillable = [
 		'name_ar',
 		'name_en',
@@ -23,25 +24,28 @@ class Organization extends Model
 		'created_at',
 		'updated_at',
 	];
-    // ===========> Attributes <==============
-    public function getNameAttribute($key){
-
-        return $this->attributes['name_'.app()->getLocale()];
-    }
-    public function getImageUrlAttribute()
+	public static function image_handler( $img )
     {
-        $image = $this->img_url;
-        if (!$image) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return $image;
+        if( !$img ) { return '/app-assets/images/logo_placeholder.png'; }
+        return $img;
     }
-    // =============> Relations <=================
+	// ===========> Attributes <==============
+	public function getNameAttribute($key)
+	{
+
+		return $this->attributes['name_' . app()->getLocale()];
+	}
+	public function getImageUrlAttribute()
+	{
+		$image = $this->img_url;
+		return self::image_handler( $image );
+	}
+	// =============> Relations <=================
 	/**
 	 * @return BelongsTo
 	 **/
 
-    public function user()
+	public function user()
 	{
 		return $this->belongsTo(User::class, 'user_id', 'id');
 	}
@@ -51,4 +55,13 @@ class Organization extends Model
 		return $this->hasMany(QuestionCategories::class, 'organization_id', 'id');
 	}
 
+	public function cycles()
+	{
+		return $this->hasMany(Cycle::class);
+	}
+
+	public function questions()
+	{
+		return $this->belongsToMany(QuestionsBank::class, 'organization_question_bank', 'organization_id', 'question_id');
+	}
 }

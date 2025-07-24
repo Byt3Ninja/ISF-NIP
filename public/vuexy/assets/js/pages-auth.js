@@ -14,11 +14,11 @@ const translations = {
     },
     first_name_en: {
       notEmpty: 'Please enter first name',
-      stringOnly: 'This field accepts English or Arabic letters only.'
+      stringOnly: 'This field letters letters only.'
     },
     last_name_en: {
       notEmpty: 'Please enter last name',
-      stringOnly: 'This field accepts English or Arabic letters only.'
+      stringOnly: 'This field letters letters only.'
     },
     phone: {
       notEmpty: 'Please enter your phone',
@@ -34,14 +34,14 @@ const translations = {
     },
     password: {
       notEmpty: 'Please enter your password',
-      stringLength: 'Password must be more than or equal 8 characters',
-      strong: 'Password must be 8-20 characters long, including uppercase, lowercase, numbers, and special characters.'
+      stringLength: 'Password must be 8-20 characters long',
+      strong: "Password must be strong including uppercase, lowercase, numbers, and special characters"
     },
     password_confirmation: {
       notEmpty: 'Please confirm password',
       identical: 'The password and its confirm are not the same',
-      stringLength: 'Password must be more than or equal 8 characters',
-      strong: 'Password must be 8-20 characters long, including uppercase, lowercase, numbers, and special characters.'
+      stringLength: 'Password must be 8-20 characters long',
+      strong: "Password must be strong including uppercase, lowercase, numbers, and special characters"
     },
     terms: {
       notEmpty: 'Please agree terms & conditions'
@@ -51,7 +51,7 @@ const translations = {
     },
     jobTitle: {
       notEmpty: 'Please enter job title',
-      enOnly: 'Job title accepts english letters only'
+      enOnly: 'Job title accepts letters only'
     },
     expertise: {
       notEmpty: 'Please select expertise'
@@ -71,11 +71,11 @@ const translations = {
     },
     first_name_en: {
       notEmpty: 'يرجى إدخال الاسم الأول',
-      stringOnly: 'هذا الحقل يقبل الحروف الإنجليزية أو العربية فقط'
+      stringOnly: 'هذا الحقل يقبل الحروف فقط'
     },
     last_name_en: {
       notEmpty: 'يرجى إدخال الاسم الأخير',
-      stringOnly: 'هذا الحقل يقبل الحروف الإنجليزية أو العربية فقط'
+      stringOnly: 'هذا الحقل يقبل الحروف فقط'
     },
     phone: {
       notEmpty: 'يرجى إدخال رقم الهاتف',
@@ -91,14 +91,14 @@ const translations = {
     },
     password: {
       notEmpty: 'يرجى إدخال كلمة المرور الخاصة بك',
-      stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف',
-      strong: 'كلمة السر يجب أن تكون بين 8-20 حرفًا وتتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
+      stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
+      strong: "كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا",
     },
     password_confirmation: {
       notEmpty: 'يرجى تأكيد كلمة المرور',
       identical: 'كلمة المرور وتأكيدها غير متطابقين',
-      stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف',
-      strong: 'كلمة السر يجب أن تكون بين 8-20 حرفًا وتتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
+      stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
+      strong: "كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا",
     },
     terms: {
       notEmpty: 'يرجى الموافقة على الشروط والأحكام'
@@ -108,7 +108,7 @@ const translations = {
     },
     jobTitle: {
       notEmpty: 'يرجى ادخال التخصص',
-      enOnly: 'الرجاء إدخال الوظيفة باللغة الإنجليزية'
+      enOnly: 'الرجاء إدخال الوظيفة'
     },
     expertise: {
       notEmpty: 'يرجى تحديد الخبرة'
@@ -142,10 +142,10 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].first_name_en.notEmpty
           },
-          regexp: {
-            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
-            message: translations[lang].first_name_en.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
+          //   message: translations[lang].first_name_en.stringOnly
+          // }
         }
       },
       last_name_en: {
@@ -153,10 +153,10 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].last_name_en.notEmpty
           },
-          regexp: {
-            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
-            message: translations[lang].last_name_en.stringOnly
-          }
+          // regexp: {
+          //   regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
+          //   message: translations[lang].last_name_en.stringOnly
+          // }
         }
       },
       phone: {
@@ -164,10 +164,10 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].phone.notEmpty
           },
-          regexp: {
-            regexp: /^[0-9]+$/,
-            message: translations[lang].phone.phone
-          }
+          // regexp: {
+          //   regexp: /^[0-9]+$/,
+          //   message: translations[lang].phone.phone
+          // }
         }
       },
       email: {
@@ -188,10 +188,11 @@ function getValidationConfig(lang, isMentor) {
           },
           stringLength: {
             min: 8,
+            max: 20,
             message: translations[lang].password.stringLength
           },
           regexp: {
-            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
             message: translations[lang].password.strong
           }
         }
@@ -201,22 +202,30 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].password_confirmation.notEmpty
           },
+          identical: {
+            compare: function () {
+              return document.getElementById('registerForm').querySelector('[name="password"]').value;
+            },
+            message: translations[lang].password_confirmation.identical
+          },
           stringLength: {
             min: 8,
+            max: 20,
             message: translations[lang].password_confirmation.stringLength
           },
           regexp: {
-            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
             message: translations[lang].password_confirmation.strong
           },
-          identical: {
-            compare: function () {
-              return registerForm.querySelector('[name="password"]').value;
-            },
-            message: translations[lang].password_confirmation.identical
+        }
+      },
+      terms: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].terms.notEmpty
           }
         }
-      }
+      },
     },
     plugins: {
       trigger: new FormValidation.plugins.Trigger(),
@@ -249,7 +258,7 @@ function getValidationConfig(lang, isMentor) {
         }
       }
     };
-    config.fields.expertise = {
+    config.fields['expertise[]'] = {
       validators: {
         notEmpty: {
           message: translations[lang].expertise.notEmpty
@@ -269,7 +278,7 @@ function getValidationConfig(lang, isMentor) {
           message: translations[lang].linkedin.notEmpty
         },
         regexp: {
-          regexp: /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/,
+          regexp: /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-_\u00C0-\u017F]+\/?$/,
           message: translations[lang].linkedin.uri
         }
       }
@@ -302,6 +311,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
           validationConfig = getValidationConfig(lang, true);
           initializeValidation(validationConfig);
           mentorInputsWrapper.style.display = 'block';
+          // Remove 'expertise[]' validation once a value is selected
+          const expertiseField = registerForm.querySelector('[name="expertise[]"]');
+          if (expertiseField) {
+            $(expertiseField).select2();
+            $(expertiseField).on('change', () => {
+            validationInstance.updateFieldStatus('expertise[]', 'NotValidated');
+          });
+          }
         }
       });
     }

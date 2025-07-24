@@ -3,8 +3,13 @@
       <div class="border-bottom border-light mb-6">
         <h5 class="card-title">{{ $tab['label'] }}</h5>
       </div>
-      <form method="post" action="{{ route('update_my_company') }}"
-        enctype="multipart/form-data">
+      @if($_user->hasAnyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('company.profile_update_mine', $client->company->id) }}"
+      enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('company.profile_update_mine') }}"
+  enctype="multipart/form-data">
+@endif
         {!! csrf_field() !!}
         <input type="hidden" value="13" name="CompanyN">
         <div class="row">
@@ -77,7 +82,7 @@ $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'S
                             </div>
                             <a class="btn btn-transparent"
                               href="{{ $client->company->business_plan }}" target="_blank"
-                              download>
+                              download="{{ basename($client->company->business_plan) }}">
                               <i class="ti ti-download fs-3 text-primary"></i>
                             </a>
                           </div>
@@ -86,16 +91,10 @@ $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'S
                     @endif
 
                 <div class="mt-3" style="display: grid; place-items: center;">
-                    <input id="business_plan" readonly
+                    <input id="business_plan"
                       class="form-control border-light light-shadow px-8"
-                      type="text" name="business_plan" value="{{ old('business_plan') }}">
-                      <br>
-                    <a data-input="business_plan" data-preview="business_plan"
-                      href="#"
-                      class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
-                      <i
-                        class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
-                    </a>
+                      type="file" name="business_plan" value="{{ old('business_plan') }}">
+                      
                   </div>
 
                   

@@ -2,6 +2,11 @@
 @section('title', __('admin.Services Categories') )
 @section('index_url', route('serviceCategories.index') )
 @section('subTitle', __('admin.Add new service category'))
+@php
+    $user = auth()->user();
+    $isOrgMan = $user->hasRole('organizationManager');
+    $org_id = $user->organization_id ?? 0;
+@endphp
 @section('content')
 <!-- BEGIN: Content-->
   <div class="content-wrapper">
@@ -11,74 +16,61 @@
         <div class="content-body">
             <!-- BuilderForm start -->
             <section id="basic-input">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="card shadow-sm border-0">
                             <div class="card-header">
-                                <h4 class="card-title">{{__('admin.Add new service category')}}</h4>
+                                <h4 class="card-title mb-0">{{__('admin.Add new service category')}}</h4>
                             </div>
-                            <div class="card-content">
-                                <div class="card-body">
-                                    @if(session()->has('msg'))
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="ti ti-error"></i>
-                                                        <span>
-                                                            {{ __('admin.'.session()->get('msg')) }}
-                                                            {{ Session::forget('msg') }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                     <!-- Validation messages -->
-                                     @if(count($errors) >0)
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="alert alert-danger">
-                                                <ul>
-                                                    @foreach($errors->all() as $error)
-                                                    <li>{{ $error }} </li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        </div>
+                            <div class="card-body">
+                                @if(session()->has('msg'))
+                                    <div class="alert alert-warning alert-danger alert-dismissible fade show mb-3" role="alert">
+                                        <i class="ti ti-error me-2"></i>
+                                        <span>{{ __('admin.'.session()->get('msg')) }}</span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        {{ Session::forget('msg') }}
+                                    </div>
+                                @endif
+                                 <!-- Validation messages -->
+                                 @if(count($errors) >0)
+                                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                    <ul class="mb-0 ps-3">
+                                        @foreach($errors->all() as $error)
+                                        <li>{{ $error }} </li>
+                                        @endforeach
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                                @endif
+                                <form method="post" action="{{route('serviceCategories.store')}}">
+                                    {!! csrf_field() !!}
+                                    <div class="mb-3 {{ $isOrgMan ? 'd-none' : '' }}">
+                                        <label for="organization_id" class="form-label fw-bold">{{ __('cycles.Select_Organization')}}</label>
+                                        <select required class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
+                                            @if( !$isOrgMan ) <option selected disabled value="">{{ __('cycles.Select_Organization') }}</option>  @endif
+                                            @foreach( \App\Organization::all() as $org )
+                                                @php if( $isOrgMan && $org->id != $org_id ) { continue; } @endphp
+                                                <option {{ $isOrgMan && $org->id == $org_id ? 'selected' : '' }} value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="name_en" class="form-label fw-bold">{{ __('admin.English Name')}}</label>
+                                        <input style="direction: ltr;" type="text" class="form-control" id="name_en" name='name_en'
+                                            required placeholder="{{__('admin.English Name')}}"
+                                            value="{{ old('name_en') }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="name_ar" class="form-label fw-bold">{{__('admin.Arabic Name')}}</label>
+                                        <input style="direction: rtl;" type="text" class="form-control" id="name_ar" name='name_ar'
+                                            required placeholder="{{__('admin.Arabic Name')}}"
+                                            value="{{ old('name_ar') }}">
+                                    </div>
+                                    @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="submit" class="btn btn-primary px-4">{{__('admin.Save')}}</button>
                                     </div>
                                     @endif
-                                    <form method="post" action="{{route('serviceCategories.store')}}">
-                                        {!! csrf_field() !!}
-                                        <div class="row">
-                                            <div class="col-md-12">
-
-                                                <fieldset class="form-group">
-                                                    <label for="basicInput">{{ __('admin.English Name')}}</label>
-                                                    <input style="direction: ltr;" type="text" class="form-control" id="name_en" name='name_en'
-                                                        required placeholder="{{__('admin.English Name')}}"
-                                                        value="{{ old('name_en') }}">
-                                                </fieldset>
-                                                <fieldset class="form-group">
-                                                    <label for="basicInput">{{__('admin.Arabic Name')}}</label>
-                                                    <input style="direction: rtl;" type="text" class="form-control" id="name_ar" name='name_ar'
-                                                        required placeholder="{{__('admin.Arabic Name')}}"
-                                                        value="{{ old('name_ar') }}">
-                                                </fieldset>
-
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
-                                            </div>
-                                        </div>
-                                </div>
                                 </form>
                             </div>
                         </div>
@@ -90,7 +82,4 @@
     </div>
 </div>
 <!-- END: Content-->
-@stop
-@section('pagescripts')
-
 @stop

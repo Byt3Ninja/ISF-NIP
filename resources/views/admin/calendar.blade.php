@@ -73,29 +73,29 @@
           <!-- Calendar Sidebar -->
           <div class="col app-calendar-sidebar border-end" id="app-calendar-sidebar">
             <div class="border-bottom p-6 my-sm-0 mb-4">
-              <button class="btn btn-primary btn-toggle-sidebar w-100" data-bs-toggle="offcanvas"
+              {{-- <button class="btn btn-primary btn-toggle-sidebar w-100" data-bs-toggle="offcanvas"
                 data-bs-target="#addEventSidebar" aria-controls="addEventSidebar">
                 <i class="ti ti-plus ti-16px me-2"></i>
                 <span class="align-middle">Add Event</span>
-              </button>
+              </button> --}}
             </div>
             <div class="px-3 pt-2">
               <!-- inline calendar (flatpicker) -->
               <div class="inline-calendar"></div>
             </div>
             <hr class="mb-6 mx-n4 mt-3" />
-            <div class="px-6 pb-2">
+            {{-- <div class="px-6 pb-2"> --}}
               <!-- Filter -->
-              <div>
+              {{-- <div>
                 <h5>Event Filters</h5>
-              </div>
+              </div> --}}
 
-              <div class="form-check form-check-secondary mb-5 ms-2">
+              {{-- <div class="form-check form-check-secondary mb-5 ms-2">
                 <input class="form-check-input select-all" type="checkbox" id="selectAll" data-value="all" checked />
                 <label class="form-check-label" for="selectAll">View All</label>
-              </div>
+              </div> --}}
 
-              <div class="app-calendar-events-filter text-heading">
+              {{-- <div class="app-calendar-events-filter text-heading">
                 <div class="form-check form-check-danger mb-5 ms-2">
                   <input class="form-check-input input-filter" type="checkbox" id="select-personal" data-value="personal"
                     checked />
@@ -120,8 +120,8 @@
                   <input class="form-check-input input-filter" type="checkbox" id="select-etc" data-value="etc" checked />
                   <label class="form-check-label" for="select-etc">ETC</label>
                 </div>
-              </div>
-            </div>
+              </div> --}}
+            {{-- </div> --}}
           </div>
           <!-- /Calendar Sidebar -->
 
@@ -137,11 +137,11 @@
             <!-- FullCalendar Offcanvas -->
             <div class="offcanvas offcanvas-end event-sidebar" tabindex="-1" id="addEventSidebar"
               aria-labelledby="addEventSidebarLabel">
-              <div class="offcanvas-header border-bottom">
+              {{-- <div class="offcanvas-header border-bottom">
                 <h5 class="offcanvas-title" id="addEventSidebarLabel">Add Event</h5>
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
                   aria-label="Close"></button>
-              </div>
+              </div> --}}
               <div class="offcanvas-body">
                 <form class="event-form pt-0" id="eventForm" onsubmit="return false">
                   <div class="mb-5">
@@ -240,13 +240,14 @@
 @section('pagescripts')
   <script>
     // This siteUrl used in app-calendar.js
+    
     var siteUrlFromBlade = "{{ url('/') }}";
     /* customButtons: {
       google: {
           text: 'Sync With Google Calender',
           click: function () {
               /// add
-              window.open('{{ route('calender.login.google') }}','_Self')
+              window.open('{{ route('integrations.calendar_google_login') }}','_Self')
               //// end
           }
       },
@@ -254,12 +255,15 @@
           text: 'Sync With Microsoft Calender',
           click: function () {
               /// add
-              window.open('{{ route('calender.login.microsoft') }}','_Self')
+              window.open('{{ route('integrations.calendar_microsoft_login') }}','_Self')
               //// end
           }
       },
 
   } */
+
+
+
   </script>
   <script src="/vuexy/assets/js/app-calendar.js"></script>
   {{-- <script src="/vuexy/assets/js/app-calendar-events.js"></script> --}}

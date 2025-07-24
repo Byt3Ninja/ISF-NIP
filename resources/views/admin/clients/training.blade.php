@@ -33,6 +33,36 @@
       /* Progress color */
       transition: stroke-dasharray 0.3s ease;
     }
+    .content-container img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+    .content-container figure {
+      margin: 0;
+      max-width: 100%;
+    }
+    .content-container iframe,
+    .content-container video {
+      max-width: 100%;
+      width: 100%;
+      aspect-ratio: 16/9;
+    }
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .video-wrapper iframe,
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
   </style>
 @stop
 
@@ -44,6 +74,35 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="row">
         <div class="col-lg-8">
+          <div class="card shadow-sm mb-4" style="border-radius: 1rem;">
+            <div class="card-header">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title mb-0">{{ $training->title }}</h5>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-label-danger">{{ $training->CoursLevel }}</span>
+                  <span class="badge bg-label-primary"><i class="ti ti-calendar ti-16px"></i> {{ $training->start_date }}</span>
+                </div>
+              </div>
+              <p class="card-text text-muted mb-0">
+                {{ $training->dsc }}
+              </p>
+            </div>
+
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-2">{{ __('admin.Progress') }}</h6>
+                <div class="d-flex align-items-center">
+                  <span class="badge bg-label-primary me-2">{{ $progressPercentage }} %</span>
+                </div>
+              </div>
+              <div style="width: 100%; height: 7px;" class="progress rounded-pill">
+                <div class="progress-bar bg-primary" role="progressbar"
+                  style="width: {{ number_format($progressPercentage, 2) }}%;"
+                  aria-valuenow="{{ number_format($progressPercentage, 2) }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+
           <div class="card" style="border-radius: 1rem;">
             <div class="card-body">
               <div class="d-flex flex-column">
@@ -52,7 +111,7 @@
                     <h5 class="mb-0">{{ $ccontent->title }}</h5>
                   </div>
                   <div class="d-flex align-items-center">
-                    <span class="badge bg-label-danger">Course type</span>
+                    {{-- <span class="badge bg-label-danger">Course type</span> --}}
                     <button 
                       id="shareButton"
                       class="btn btn-transparent btn-icon btn-sm shadow-none ms-2"
@@ -76,8 +135,12 @@
               </div>
               <div class="card academy-content shadow-none border">
                 <div class="p-2">
-                  <div class="cursor-pointer" style="max-width: 100%;">
-                    {!! $ccontent->content !!}
+                  <div class="cursor-pointer content-container" style="max-width: 100%;">
+                    @php
+                      // Convert any standalone video tags to responsive containers
+                      $content = preg_replace('/<video(.*?)>(.*?)<\/video>/is', '<div class="video-wrapper"><video$1>$2</video></div>', $ccontent->content);
+                    @endphp
+                    {!! $content ?? $ccontent->content !!}
                   </div>
                 </div>
                 <div class="card-body pt-4">
@@ -89,16 +152,16 @@
                   @endif
                   <div id="instructorsContainer">
                     <hr class="my-6" />
-                    <h5>{{ $l == 'en' ? 'Instructor' : 'المدرب' }}</h5>
+                    <h5>{{ $l == 'en' ? 'Trainer' : 'المدرب' }}</h5>
                     <div class="d-flex justify-content-start align-items-center user-name">
                       <div class="avatar-wrapper">
                         <div class="avatar me-4">
-                          <img src="/icons/account.svg" alt="Avatar" class="rounded-circle" />
+                          <img src="{{ asset('/191014/'. $training->img_url) ?? '/images/placeholder.jpg' }}" alt="Avatar" class="rounded-circle" />
                         </div>
                       </div>
-                      <div class="d-flex flex-column mb-6">
-                        <h6 class="mb-1">Devonne Wallbridge</h6>
-                        <small>Web Developer, Designer, and Teacher</small>
+                      <div class="d-flex flex-column">
+                        <h6 class="mb-1">{{ $training->{'name_'.$l} }}</h6>
+                        <small>{{ $training->email }}</small>
                       </div>
                     </div>
                   </div>
@@ -128,13 +191,21 @@
                           <i class='ti ti-check ti-28px;'></i>
                         </span>
                       @else
+                        <span 
+                          class="w-px-30 h-px-30 bg-light rounded-circle text-white"
+                          style="display: grid; place-items: center;"
+                        >
+                          <i class='ti ti-check ti-28px;'></i>
+                        </span>
                         <!-- Circular Progress -->
-                        <div
+                        {{-- <div
                           class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center"
                           style="width: 40px; height: 40px;">
                           <span
                             class="position-absolute text-black fw-bold"
-                            style="font-size: 13px;">30%</span>
+                            style="font-size: 13px;">  {{ $progressPercentage }}%
+
+                             </span>
                           <svg class="position-absolute" width="54"
                             height="54" viewBox="0 0 36 36">
                             <path class="circle-bg"
@@ -148,9 +219,9 @@
                               a 15.9155 15.9155 0 0 1 0 -31.831"
                               fill="none" stroke="#007bff"
                               stroke-width="2.5"
-                              stroke-dasharray="30, 100" />
+                              stroke-dasharray="{{ $progressPercentage }}, 100" />
                           </svg>
-                        </div>
+                        </div> --}}
                         <!-- Circular Progress -->
                       @endif
                     </div>
@@ -194,9 +265,9 @@
 @stop
 
 @section('pagescripts')
-  <script>
+ {{-- <script>
     console.log(@json($ccontent))
-  </script>
+  </script> --}}
   <script>
     const url = window.location.href;
     const urlArr = url.split('/');

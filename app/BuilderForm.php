@@ -10,6 +10,7 @@ class BuilderForm extends Model
 {
     use Auditable;
     protected $guarded = [];
+    public static $module = 'Builder Form';
 
     public function fields()
     {

@@ -13,6 +13,7 @@ class QuizQuestions extends Model
 	public $timestamps = true;
 	protected $table = 'quiz_questions';
 	protected $primaryKey = 'id';
+	public static $module = 'Quiz Questions';
 
 	protected $fillable = [
 		'quiz_id',

@@ -101,6 +101,26 @@
                                   </div>
                                 </fieldset>
                               </li>
+
+                              <li class="d-inline-block mx-2 mb-1">
+                                <fieldset>
+                                  <div class="radio">
+                                    <input type="radio" name="type" value="mentorSurveys" id="rad5" class="type">
+                                    <label for="rad5">{{ __('admin.Surveys_Mentor') }}</label>
+                                  </div>
+                                </fieldset>
+                              </li>
+
+                              <li class="d-inline-block mx-2 mb-1">
+                                <fieldset>
+                                  <div class="radio">
+                                    <input type="radio" name="type" value="startupSurveys" id="rad6" class="type">
+                                    <label for="rad6">{{ __('admin.Surveys_Startup') }}</label>
+                                  </div>
+                                </fieldset>
+                              </li>
+
+
                             </ul>
                           </div>
                         </div>
@@ -179,35 +199,114 @@
       });
       $('#showReport').click(function() {
         var value = $('.type:checked').val();
+        
         if (value === 'cycles' || value === 'companies') {
           var selectValue = $('#' + value + 'SelectOptions').val();
           if (selectValue === '' || selectValue === undefined) {
             alert('برجاء اختيار القيمة اولا');
           } else {
+            
             getAjaxReport(value, selectValue);
           }
 
         } else {
-
+          
           getAjaxReport(value)
         }
       });
     });
 
     function getAjaxReport(value, id = 0) {
+      
       $.ajax({
         url: "{{ route('reports.view.ajax') }}/" + value,
         data: {
           id: id
         },
         success: function(data) {
+        
           if (data['value'] === 1) {
             $('#reportContent').html(data['view']);
           }
         }
       });
     }
+
+
+
+var responses = @json($available_surveys)
+
+		$(document).on('click', '.open-responses', function() {
+			var id = $(this).data('id');
+			var responses = @json($available_surveys);
+			var response = responses.filter(function(oneResponse) {
+				return oneResponse.id == id;
+			});
+			var responses = response[0].responses;
+			var html = '';
+			responses.forEach(function(oneResponse) {
+				html += '<tr data-id="' + id + '" data-qid="' + oneResponse.id + '" class="cursor-pointer open-question-details">';
+				html += '<td>' + oneResponse.question + '</td>';
+				html += '<td class="text-center">' + ( oneResponse.type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : ( oneResponse.type == 'answers' ? "{{ __('admin.surveyQuestionAndAnswer') }}" : "{{ __('admin.surveyTypeStarRating') }}" ) ) + '</td>';
+				html += '</tr>';
+			});
+			$("#modelPreviewArea").html('<div class="text-center"> {{ __("admin.previewAreaPlaceholder") }} </div>');
+			$('#question-picker-tbody').html(html);
+			$('#questionsModal').modal('show');
+		});
+
+		$(document).on('click', '.open-question-details', function() {
+			var id = $(this).data('id');
+			var question_id = $(this).data('qid');
+			var responses = @json($available_surveys);
+			var response = responses.filter(function(oneResponse) {
+				return oneResponse.id == id;
+			});
+			var responses = response[0].responses;
+			var question = responses.filter(function(oneResponse) {
+				return oneResponse.id == question_id;
+			});
+			var question = question[0];
+			var html = '';
+			if( question.type == 'radio' )
+			{
+				question.answers.forEach( function(item, key) {
+					var count = key + 1;
+					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
+					html += '<div class="custom-py-1"> <button class="w-100 text-left btn ' + checked + '">' + count + '. ' + item.text + '</button> </div>';
+				});
+			}
+			else if( question.type == 'answers' )
+			{
+				question.answers.forEach( function(item, key) {
+					var count = key + 1;
+					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
+					html += '<div class="custom-py-1"> '+ question.answer +' </div>';
+				});
+			}
+			else if( question.type == 'stars' )
+			{
+				var answer = parseInt( question.answer );
+				html += '<ul class="custom-star-rating text-center p-0 my-1">';
+					for( var i = 0; i < question.answers.length; i++ )
+					{
+						if( i < answer )
+						{
+							html += '<li><i class="ti ti-star text-warning"></i> </li>';
+						}
+						else
+						{
+							html += '<li><i class="ti ti-star text-warning"></i> </li>';
+						}
+					}
+				html += '</ul>';
+			}
+			$("#modelPreviewArea").html(html);
+		});
+
+
+
   </script>
 
-  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+  {{-- <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script> --}}
 @stop

@@ -2,59 +2,79 @@
 
 namespace App\Http\Controllers;
 
-use App\BuilderField;
-use App\Company;
-use App\FinalData;
-use App\Finalscreening;
-use App\Formdata;
-use App\Formfield;
-use App\Jobs\ExportCycleCompData;
-use App\Screening;
-use App\TrainingSession;
-use Carbon\Carbon;
-use http\Env\Response;
-use Illuminate\Http\Request;
-
-use App\Cycle;
-use App\Step;
 use App\Form;
+use App\Step;
+use App\User;
+use App\Cycle;
+use App\Company;
+use App\Message;
+use App\Formdata;
+use App\FinalData;
+use App\Formfield;
+use App\Messenger;
+use App\Screening;
+use Carbon\Carbon;
 use App\BuilderForm;
+
+use App\BuilderField;
+use http\Env\Response;
+use App\Finalscreening;
+use App\TrainingSession;
+use Illuminate\Http\Request;
+use App\Events\StartupJoining;
+use Illuminate\Validation\Rule;
+use App\Jobs\ExportCycleCompData;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
+use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
 {
 
+    protected $whatsAppService;
+    public function __construct(WhatsAppService $whatsAppService)
+    {
+        $this->whatsAppService = $whatsAppService;
+    }
+
     public function exportcyclesComp(Request $request)
     {
         // تحقق من أن البريد الإلكتروني موجود
-       
+
         $data2 = [
             'step' => $request->input('step'),
             'userEmail' => auth()->user()->email
         ];
 
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
-        ExportCycleCompData::dispatch($data2)   ;
+        ExportCycleCompData::dispatch($data2);
 
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
 
 
-    public function changAll(Request $request ){
+    public function changAll(Request $request)
+    {
 
-        
+
 
         $this->validate($request, [
-            
+
             'checkget' => 'required|integer',
             'compid' => 'required|array',
             'compid.*' => 'required|integer',
-            
+
         ]);
         $checkget = $request->input('checkget');
         $compid = $request->input('compid');
@@ -67,293 +87,564 @@ class CyclesController extends Controller
         }
         return response()->json(['state' => 'success'], 200);
     }
-    public function index($id=0)
+    public function index($id = 0)
     {
-        $this->preProcessingCheck('edit_cycles');
+        $organization_id = auth()->user()->organization_id;
 
-        $organization_id=auth()->user()->organization_id;
-
-        $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->where('organization_id',$organization_id);
-        })->orderBy('start','DESC')->get();
-        $steps=null;
-        if( count( $cycles ) > 0 )
-        {
-            if( $id == 0 )
-            {
+        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->orderBy('start', 'DESC')->get();
+        $steps = null;
+        if (count($cycles) > 0) {
+            if ($id == 0) {
                 $id = $cycles->pluck('id')[0];
                 $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
-            } else { $steps = Step::where('cycle_id', $id)->orderBy('arr')->get(); }
+            } else {
+                $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
+            }
         }
-        $svgs = ['notebook','search','idea','comments','trophy'];
-        return view('admin.settings.cycles.index',compact('cycles','steps','id','svgs'));
+        $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+        return view('admin.settings.cycles.index', compact('cycles', 'steps', 'id', 'svgs'));
     }
 
-    public function users($id)
+    public function users(Request $request, $id)
     {
-        $this->preProcessingCheck('edit_cycles');
-        $organization_id=auth()->user()->organization_id;
+        $organization_id = auth()->user()->organization_id;
 
-        if( $id == 0 )
-        {
-            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->where('organization_id',$organization_id);
-            })->orderBy('id','DESC')->get();
-            if (!empty($cycles->toArray())){
+        if ($id == 0) {
+            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->where('organization_id', $organization_id);
+            })->orderBy('id', 'DESC')->get();
+            if (!empty($cycles->toArray())) {
                 $id = $cycles->pluck('id')[0];
             }
         } else {
-            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->where('organization_id',$organization_id);
-        })->get();
+            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->where('organization_id', $organization_id);
+            })->get();
         }
-        $companies = Company::where('cycle',$id)->get();
+        $companies = Company::where('cycle', $id);
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-        return view('admin.settings.cycles.users',compact('cycles','id','companies','steps'));
+        if ($request->step_id != 0) {
+            $companies = $companies->where('step', $request->step_id);
+        }
+        if ($request->country_id != 0) {
+            $companies = $companies->where('country_id', $request->country_id);
+        }
+        if ($request->sector_id != 0) {
+            $companies = $companies->where('sector', $request->sector_id);
+        }
+        if ($request->Dstage_id != 0) {
+            $companies = $companies->where('stage', $request->Dstage_id);
+        }
+        if ($request->funding_stage != 0) {
+            $companies = $companies->where('development_stage', $request->funding_stage);
+        }
+        if ($request->targeted_market != 0) {
+            $companies = $companies->where(function ($query) use ($request) {
+                foreach ($request->targeted_market as $market) {
+                    $query->orWhereJsonContains('targeted_market', $market);
+                }
+            });
+        }
+        if ($request->BType != 0) {
+            $companies = $companies->where('business_type', $request->BType);
+        }
+
+
+        $companies = $companies->get();
+        return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
     }
 
     public function modify(Request $request)
     {
-        $this->preProcessingCheck('edit_cycles');
-        $id = $request->cycleid;
-        $type = $request->type;
-        if( $type == 1 )
-        {
-            /// Edit Cycle
-            $private = null;
-            if ($request->private) {$private=sha1(now());}
-            Cycle::where('id',$id)->update([
-                'organization_id'=>$request->organization_id,
-                'title'=>$request->title,
-                'description'=>$request->description,
-                'start'=>Carbon::parse($request->start),
-                'end'=>Carbon::parse($request->end),
-                'private'=>$private
-            ]);
-            return redirect()->back()->with('message', 'Saved');
+
+        if ($request->cycleid == null && isset($request->typeedit)) {
+            $id = $request->id;
+            $type = $request->typeedit;
+        } else {
+            $id = $request->cycleid;
+            $type = $request->type;
         }
-        elseif( $type == 2 )
-        {
-            /// Save Cycle
-            $private = null;
-            if ($request->private) {$private=sha1(now());}
-            $createdCycle = Cycle::create([
-                'organization_id'=>$request->organization_id,
-                'title'=>$request->title,
-                'description'=>$request->description,
-                'start'=>Carbon::parse($request->start),
-                'end'=>Carbon::parse($request->end),
-                'private'=>$private
+
+        if ($request->has('date_range')) {
+
+            $dates = explode(' - ', $request->date_range);
+            $request->merge([
+                'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
+                'end' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
+                'fromDate' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
+                'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
+
+            ]);
+        }
+
+        if ($type == 1) {
+
+
+            /// Edit Cycle
+            $request->validate([
+                'organization_id2' => 'required|exists:organizations,id',
+                'title' => 'required|string|max:250|unique:cycles,title,' . $id,
+                'description' => 'required|string|max:2000',
+                'start' => 'required|date',
+                'end' => 'required|date',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
 
+
+
+            $cycle = Cycle::find($id);
+
+            $private = null;
+            if ($request->private) {
+                $private = sha1(now());
+            }
+
+            // Check if file is uploaded
+
+            $cycle->organization_id = $request->organization_id2;
+            $cycle->title = $request->title;
+            $cycle->description = $request->description;
+            $cycle->start = Carbon::parse($request->start);
+            $cycle->end = Carbon::parse($request->end);
+            $cycle->private = $private;
+            $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+
+            $cycle->program_guideline = $request->program_guideline;
+            if ($request->hasFile('program-guideline-pdf')) {
+                $originalName = $request->file('program-guideline-pdf')->getClientOriginalName();
+                $cycle->program_guideline_file = $request->file('program-guideline-pdf')->storeAs('programs', $originalName, 'public_uploads');
+            }
+            $cycle->budget_allocation = $request->budget_allocation;
+            $cycle->currency_type = $request->currency_type;
+            $cycle->financial_guideline = $request->financial_policy;
+            if ($request->hasFile('financial_policy_pdf')) {
+                $originalName = $request->file('financial_policy_pdf')->getClientOriginalName();
+                $cycle->financial_guideline_file = $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+            }
+            $cycle->legal_guideline = $request->legal_policy;
+            if ($request->hasFile('legal_policy_pdf')) {
+                $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
+                $cycle->legal_guideline_file =  $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+            }
+            if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
+                $originalName = $request->file('delegation_pdf')->getClientOriginalName();
+                $cycle->delegation_file =  $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+               
+            }
+            $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
+
+            if ($request->hasFile('img_url')) {
+                    $image = $request->file('img_url');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('programs/'), $imageName);
+                    $cycle->img_url = 'programs/' . $imageName;
+                }
+
+            $cycle->save();
             return redirect()->back()->with('message', 'Saved');
-        }
-        elseif( $type == 3 )
-        {
+        } elseif ($type == 2) {
+
+            /// Save Cycle
+
+
+
+            return redirect()->back()->with('message', 'Saved');
+        } elseif ($type == 3) {
             /// Delete Cycle steps contents
-            $delsteps = Step::where('cycle_id',$id)->get();
+            $delsteps = Step::where('cycle_id', $id)->get();
             foreach ($delsteps as $onestep) {
-                Formfield::where('step_id',$onestep->id)->delete();
-                Screening::where('step_id',$onestep->id)->delete();
-                Formdata::where('form_id',$onestep->id)->delete();
-                Finalscreening::where('step_id',$onestep->id)->delete();
-                FinalData::where('step_id',$onestep->id)->delete();
-                TrainingSession::where('step_id',$onestep->id)->delete();
+                Formfield::where('step_id', $onestep->id)->delete();
+                Screening::where('step_id', $onestep->id)->delete();
+                Formdata::where('form_id', $onestep->id)->delete();
+                Finalscreening::where('step_id', $onestep->id)->delete();
+                FinalData::where('step_id', $onestep->id)->delete();
+                TrainingSession::where('step_id', $onestep->id)->delete();
             }
             /// Delete Step
-            Step::where('cycle_id',$id)->delete();
+            Step::where('cycle_id', $id)->delete();
             /// Delete Cycle
             Cycle::destroy($id);
             return Response()->json('Cycle deleted');
-        }
-        elseif( $type == 4 )
-        {
+        } elseif ($type == 4) {
             /// arrange steps
             $i = 1;
             foreach ($request->steps as $id) {
-                Step::where('id',$id)->update(['arr'=>$i++]);
-                }
+                Step::where('id', $id)->update(['arr' => $i++]);
+            }
             return Response()->json('Arranged ');
-        }
-        elseif( $type == 5 )
-        {
-            if (is_null($request->fromDate)||is_null($request->toDate)){
+        } elseif ($type == 5) {
+            if (is_null($request->fromDate) || is_null($request->toDate)) {
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
             /// add new step
             $stype = $request->stype;
             $data = null;
-            if ($stype==1) {
+            if ($stype == 1) {
                 $data = $request->FormSelect;
-                $id = Step::insertGetId(['cycle_id'=>$request->cid, 'title'=>$request->title, 'description'=>$request->description, 'stype'=>$stype, 'data'=>$data,
-                'arr'=>$request->arr, 'from'=>$request->fromDate, 'to'=>$request->toDate]);
+                $id = Step::insertGetId([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => $data,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
                 // make a copy of form fields
-                $new = BuilderField::where('builder_form_id',$data)->orderBy('id')->get();
-                if (count($new)>0) {
-                    foreach ($new as $n){
+                $new = BuilderField::where('builder_form_id', $data)->orderBy('id')->get();
+                if (count($new) > 0) {
+                    foreach ($new as $n) {
                         Formfield::insert([
-                            'step_id'=>$id,
-                            'field_id'=>$n->field_id,
-                            'options'=>json_encode($n->options)
+                            'step_id' => $id,
+                            'field_id' => $n->field_id,
+                            'options' => json_encode($n->options)
                         ]);
-                    }}
-            } elseif ($stype==2) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    }
+                }
+            } elseif ($stype == 2) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add Screening
-                Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $request->ScreeningSelect,
-                    'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
-            } elseif ($stype==3) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                Step::insert([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => $request->ScreeningSelect,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
+            } elseif ($stype == 3) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add step
-                Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => null,
-                    'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
-            } elseif ($stype==4) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                Step::insert([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => null,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
+            } elseif ($stype == 4) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add training
-                Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype,'list'=>$request->RecordedSelect, 'data' => null,
-                    'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
-            } elseif ($stype==5) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                Step::insert([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'list' => $request->RecordedSelect,
+                    'data' => null,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
+            } elseif ($stype == 5) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add service
-            $data = $request->FinalScreeningSelect;
-            $fform = $request->FormSelect;
-            if (!$fform) {return redirect()->back()->with('message2', 'You must add form first'); }
-            $id = Step::insertGetId(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $data,
-                'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
+                $data = $request->FinalScreeningSelect;
+                $fform = $request->FormSelect;
+                if (!$fform) {
+                    return redirect()->back()->with('message2', 'You must add form first');
+                }
+                $id = Step::insertGetId([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => $data,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
                 // make a copy of form fields
-                $new = BuilderField::where('builder_form_id',$fform)->orderBy('id')->get();
-                if (count($new)>0) {
-                    foreach ($new as $n){
+                $new = BuilderField::where('builder_form_id', $fform)->orderBy('id')->get();
+                if (count($new) > 0) {
+                    foreach ($new as $n) {
                         Formfield::insert([
-                            'step_id'=>$id,
-                            'field_id'=>$n->field_id,
-                            'options'=>json_encode($n->options)
+                            'step_id' => $id,
+                            'field_id' => $n->field_id,
+                            'options' => json_encode($n->options)
                         ]);
-                    }}
+                    }
+                }
+            }elseif ($stype == 6) {
+              if (is_null($request->fromDate) || is_null($request->toDate)) {
+                   return redirect()->back()->with(['message2' => __('admin.AddDateFirst'), 'class' => 'danger']);
+               }
+                $cycle = \App\Cycle::find($request->cid);
+                if (!$cycle || $cycle->type !== 'Hackathon') {
+                return redirect()->back()->with(['message2' => __('admin.HackathonAllowed'), 'class' => 'danger']);
+                }
+                Step::insert([
+                'cycle_id' => $request->cid,
+                'title' => $request->title,
+                'description' => $request->description,
+                'stype' => $stype,
+                'data' => null,
+                'arr' => $request->arr,
+                'from' => $request->fromDate,
+                'to' => $request->toDate,
+                'count_team_number' => $request->count_team_number,
+                ]);
             }
             return redirect()->back()->with('message', 'Saved');
-        }
-        elseif( $type == 6 )
-        {
+        } elseif ($type == 6) {
             /// Delete step
             $cid = $request->stepid;
-            if ($request->steps) {$steps = $request->steps;}
-            else {$steps=Step::where('cycle_id',Step::where('id',$cid)->pluck('cycle_id')->first())->pluck('id')->toArray();}
+            if ($request->steps) {
+                $steps = $request->steps;
+            } else {
+                $steps = Step::where('cycle_id', Step::where('id', $cid)->pluck('cycle_id')->first())->pluck('id')->toArray();
+            }
 
             //// Delete step contents
-            Formfield::where('step_id',$cid)->delete();
-            Screening::where('step_id',$cid)->delete();
-            Formdata::where('form_id',$cid)->delete();
-            Finalscreening::where('step_id',$cid)->delete();
-            FinalData::where('step_id',$cid)->delete();
-            TrainingSession::where('step_id',$cid)->delete();
+            Formfield::where('step_id', $cid)->delete();
+            Screening::where('step_id', $cid)->delete();
+            Formdata::where('form_id', $cid)->delete();
+            Finalscreening::where('step_id', $cid)->delete();
+            FinalData::where('step_id', $cid)->delete();
+            TrainingSession::where('step_id', $cid)->delete();
             Step::destroy($cid);
             // Arrange steps
             $i = 1;
             $steps = array_diff($steps, [$cid]);
             foreach ($steps as $id) {
-                        Step::where('id', $id)->update(['arr' => $i++]);
+                Step::where('id', $id)->update(['arr' => $i++]);
             }
-            return Response()->json('Step deleted' );
-        }
-        elseif( $type == 7 )
-        {
+            return Response()->json('Step deleted');
+        } elseif ($type == 7) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
             return response()->json($step);
-        }
-        elseif( $type == 8 )
-        {
+        } elseif ($type == 8) {
             /// deleted saved data if type changed
-            if ($request->ScreeningSelect!==null && Step::where('id',$request->sid)->pluck('data')->first()!=$request->ScreeningSelect) {Formdata::where('step_id',$request->sid)->update(['screening'=>null,'comments'=>null]);}
+            if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
+                Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
+            }
+            if($request->count_team_number !== null){
+                Step::where('id', $request->sid)->update(['count_team_number' => $request->count_team_number]);
+            }
             /// Save Modified step
             if ($request->ScreeningSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->ScreeningSelect,'list'=>null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->ScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->ServiceSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->ServiceSelect,'list'=>null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->ServiceSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->TrainingSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->TrainingSelect,'list'=>$request->RecordedSelect, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->TrainingSelect, 'list' => $request->RecordedSelect, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->FinalScreeningSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->FinalScreeningSelect,'list'=>null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
-            } elseif ( $request->has("mScreeningSelect") && $request->mScreeningSelect) {
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->FinalScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+            } elseif ($request->has("mScreeningSelect") && $request->mScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mScreeningSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
-            }  elseif ( $request->has("mFormSelect") && $request->mFormSelect) {
+            } elseif ($request->has("mFormSelect") && $request->mFormSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mFormSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } else {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'count_team_number' => $request->count_team_number, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
-        }
-        else
-        {
+        } elseif ($request->tab_id == 1) {
+            $request->validate([
+                'organization_id2' => 'required|exists:organizations,id',
+                'title' => 'required|string|max:250',
+                'description' => 'required|string|max:2000',
+                'start' => 'required|date|before:end',
+                'end' => 'required|date|after:start',
+                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'program_type' => ['required', Rule::in(Cycle::programTypes())],
+            ]);
+
+            $existTitle = Cycle::where('organization_id', $request->organization_id2)->where('title', $request->title)->first();
+                if ($existTitle) {
+                    return redirect()->back()->with('message2', 'Cycle_title_already_exist');
+                }
+
+            DB::transaction(function () use ($request) {
+                $private = null;
+                if ($request->private) {
+                    $private = sha1(now());
+                }
+                $cycle = new Cycle();
+                $cycle->organization_id = $request->organization_id2;
+                $cycle->type = $request->program_type;
+                $cycle->title = $request->title;
+                $cycle->description = $request->description;
+                $cycle->start = Carbon::parse($request->start);
+                $cycle->end = Carbon::parse($request->end);
+                $cycle->private = $private;
+                $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+                $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
+                // Check if file is uploaded
+
+                $cycle->program_guideline = $request->program_guideline;
+                if ($request->hasFile('program-guideline-pdf')) {
+                    $originalName = $request->file('program-guideline-pdf')->getClientOriginalName();
+                    $cycle->program_guideline_file = $request->file('program-guideline-pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
+
+
+                $cycle->budget_allocation = $request->budget_allocation;
+                $cycle->currency_type = $request->currency_type;
+                $cycle->financial_guideline = $request->financial_policy;
+                if ($request->hasFile('financial_policy_pdf')) {
+                    $originalName = $request->file('financial_policy_pdf')->getClientOriginalName();
+                    $cycle->financial_guideline_file =  $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
+
+
+                $cycle->legal_guideline = $request->legal_policy;
+                if ($request->hasFile('legal_policy_pdf')) {
+                    $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
+                    $cycle->legal_guideline_file = $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
+
+                if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
+                    $originalName = $request->file('delegation_pdf')->getClientOriginalName();
+                    $cycle->delegation_file = $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                }
+                if ($request->hasFile('img_url')) {
+                    $image = $request->file('img_url');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+                    $image->move(public_path('programs/'), $imageName);
+                    $cycle->img_url = 'programs/' . $imageName;
+                    
+                }
+                $cycle->save();
+
+                if (auth()->user()->hasRole('OrganizationManager')) {
+
+                    $admin = User::role('Admin')->orderBy('id')->first();
+
+                    if ($admin) {
+
+                        Mail::to($admin->email)->queue(new ProgramCreatedNotification($cycle, $admin));
+
+                        $messenger = new Messenger();
+                        $messenger->sender = auth()->id();
+                        $messenger->receiver = $admin->id;
+                        $messenger->subject = 'New Program Created';
+                        $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
+                        $messenger->read = 0;
+                        $messenger->save();
+                    }
+                }
+            });
+            return redirect()->route('programlist.index')->with('message', 'Saved');
+        } else {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
+
+            $cycles['basename_guideline'] = basename($cycles['program_guideline_file']);
+
             return response()->json($cycles);
         }
     }
 
-    function view ($c,Request $request)
+
+    function view($c, Request $request)
     {
-        $private = Cycle::where('private',$c)->first();
-        
-        if($private == null){
-            $private = Cycle::where('id',$c)->first();
+
+        // $cycle2 = Cycle::where('id', $c)->first();
+
+
+        $private = Cycle::where('private', $c)->first();
+
+        if ($private == null) {
+            $private = Cycle::where('id', $c)->first();
             $c = $private->id;
-        }else{
+        } else {
             $c = $private->id;
         }
-        
+        if ($private->allow_non_company == 1) {
+
+            if (!Auth::user()->HaveCompany) {
+                $user = Auth::user();
+                $result = new Company();
+                $result->name_en = $user->first_name_en . " " . $user->last_name_en;
+                $result->name_ar = $user->first_name_ar . " " . $user->last_name_ar;
+                $result->address_en = $user->address ?? 'Not Set';
+                $result->address_ar = $user->address ?? 'Not Set';
+                $result->save();
+                User::where('id', $user->id)->update(['company_id' => $result->id, 'HaveCompany' => 1]);
+            }
+        }
+
+        $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
-        if (!Auth::user()->HaveCompany) {return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);}
-        if (!Auth::user()->company) {return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);}
+        if (!$user->HaveCompany) {
+            return redirect()->route('user.profile_Edit')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+        }
+        if (!$user->company) {
+            return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+        }
         // Check enrolled in Cycle
-        if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);}
+        if ($user->company->cycle && $user->company->cycle != $c) {
+            return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);
+        }
         //Check private
         $private = Cycle::findOrFail($c);
-//         if ($private->private==null) {
-            
-//             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
-// //            abort(404);
-//         }
-        
+        //         if ($private->private==null) {
+
+        //             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
+        // //            abort(404);
+        //         }
+
         // Check STEPS
-        if (!Auth::user()->company->cycle || Auth::user()->company->cycle == $c) {
-                $step = Step::where('cycle_id',$c)->orderBy('arr')->first();
-                if ($step->stype!=1) {return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);}
-                if ($step->to<now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);}
-                
-                $id = $step->id;
-                $field_map_ids = Formfield::where('step_id',$id )->select('id')->pluck('id')->toArray();
-                $answers = [];
-                $data = [
-                    'title' => $step->title,
-                    'fields' => $step->fields()->orderBy('form_fields.id', 'asc')->get(),
-                    'form_id' => $step->id,
-                    'field_ids' => implode(",", $field_map_ids)
-                ];
-            if (Auth::user()->company->step==$id) {
-                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+        if (!$user->company->cycle || $user->company->cycle == $c) {
+            $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
+            if ($step?->stype != 1) {
+                return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
-                return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$c)->with('answers',$answers);
+            if ($step->to < now()->format('Y-m-d')) {
+                return redirect()->back()->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);
+            }
+
+            $id = $step->id;
+            $field_map_ids = Formfield::where('step_id', $id)->select('id')->pluck('id')->toArray();
+            $answers = [];
+            $data = [
+                'title' => $step->title,
+                'fields' => $step->fields()->orderBy('form_fields.id', 'asc')->get(),
+                'form_id' => $step->id,
+                'field_ids' => implode(",", $field_map_ids)
+            ];
+            if ($user->company->step == $id) {
+                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+            }
+            return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);
         }
     }
 
-    function my( $id )
+    function my($id)
     {
-        $step = Step::where('stype',1)->where('id',$id)->first();
-        if (!$step) {return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);}
-//        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
+        $step = Step::where('stype', 1)->where('id', $id)->first();
+        if (!$step) {
+            return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
+        }
+        //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
-        $field_map_ids = Formfield::where('step_id',$id )->select('id')->pluck('id')->toArray();
+        $field_map_ids = Formfield::where('step_id', $id)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data = [
             'title' => $step->title,
@@ -361,15 +652,16 @@ class CyclesController extends Controller
             'form_id' => $step->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
-//        if (Auth::user()->company->step==$id) {
-            $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
-//        }
-        return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$step->cycle_id)->with('answers',$answers);
+        //        if (Auth::user()->company->step==$id) {
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+        //        }
+        return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
     public function saveForm(Request $request)
     {
 
+       
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
@@ -379,17 +671,16 @@ class CyclesController extends Controller
 
         // generating validation rules based on dynamic field config data
         $field_map_ids = explode(",", $request->input('field_ids'));
-        $field_required_rules = collect($field_map_ids)->mapWithKeys(function($id){
+        $field_required_rules = collect($field_map_ids)->mapWithKeys(function ($id) {
             $field_options = Formfield::findOrFail($id)->options;
-            if($field_options->validation->required == 1) {
+            if ($field_options->validation->required == 1) {
                 $rules = ['required'];
-                if(isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
+                if (isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
                 return [
-                    'field_'. $id => implode("|", $rules)
+                    'field_' . $id => implode("|", $rules)
                 ];
-            }
-            else {
-                return ['field_'. $id => 'nullable'];
+            }else {
+                return ['field_' . $id => 'nullable'];
             }
         });
 
@@ -402,20 +693,30 @@ class CyclesController extends Controller
                 ->withErrors($dynamic_validator)
                 ->withInput();
         }
-//dd("ss");
+        //dd("ss");
         // gather the form data as field_name => [ label, data ]
-        foreach($field_map_ids as $fid){
+        foreach ($field_map_ids as $fid) {
 
             $field_options = Formfield::findOrFail($fid)->options;
-            $field_name = 'field_'. $fid;
+            $field_name = 'field_' . $fid;
 
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
-            // update cycle & step
-            Auth::user()->company->update(['cycle'=>$request->cycle,'step'=>$request->id]);
+          if ($request->hasFile($field_name)) {
+           $file = $request->file($field_name);
+        //    $originalName = $file->getClientOriginalName();
+        //    $file->storeAs('formsubmissions', $originalName, 'public_uploads');
+        //    $request->{$field_name} = 'formsubmissions/' . $originalName;
+         $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+             $file->move(public_path('formsubmissions/'), $imageName);
+			 $request->{$field_name} = 'formsubmissions/' . $imageName;
 
-            Formdata::where('field_id',$fid)->where('company_id',$cid)->delete();
+        }
+            // update cycle & step
+            Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
+
+            Formdata::where('field_id', $fid)->where('company_id', $cid)->delete();
             Formdata::updateOrInsert([
                 'field_id' => $fid,
                 'company_id' => $cid,
@@ -425,11 +726,108 @@ class CyclesController extends Controller
                 'question' => $field_options->label,
                 'answer' => $request->{$field_name},
                 'screening' => '{}',
-                'comments' => '{}'
+                'comments' => '{}',
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         }
 
+        $data = [];
+        $user = Auth::user();
+        $name = $user->first_name_en . ' ' . $user->last_name_en;
 
-        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully','class'=>'success']);
+        $data = [
+            'name' => $name,
+            'email' => $user->email,
+            'step' => $user->company->stepdata->title,
+            'cycle' => $user->company->cycledata->title,
+        ];
+
+        // إرسال الإشعار
+        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+            try {
+                broadcast(new StartupJoining($data));
+                $user->notify(new StartupJoiningNotification($data));
+                log::info('Sent notification to ' . $user->email);
+            } catch (\Throwable $th) {
+                throw $th;
+            }
+
+            $phoneNumber = $user->country_code_w_a . $user->whatsapp;
+            $Massage = "Dear " . $user->name . ",
+            Congratulations! You have successfully joined the" . $data['cycle'] . ", 
+            We are excited to have you on board and look forward to supporting your journey.
+            Thanks from " . env('APP_NAME');
+            $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+            Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+        }
+
+
+        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
+    }
+
+    public function testSend(Request $request)
+    {
+
+        $phone = $request->query('phone');
+        $message = $request->query('message', 'رسالة تجريبية من API');
+
+        if (!$phone) {
+            return response()->json(['error' => 'يرجى إدخال رقم الهاتف'], 400);
+        }
+
+        $result = $this->sendMessage($phone, $message);
+
+        return response()->json($result);
+    }
+
+    public function sendMessage($phoneNumber, $message)
+    {
+        try {
+            $sessionId = 'ehabwhats'; // اسم الجلسة في GrowthLabs
+            $apiKey = env('WAPI_KEY'); // مفتاح API من .env
+
+            // Step 1: Get chat ID
+            $response = Http::withHeaders([
+                'x-api-key' => $apiKey
+            ])->post("https://wapi.growthlabs.app/client/getNumberId/$sessionId", [
+                'number' => $phoneNumber
+            ]);
+
+            $chatId = $response->json('result._serialized');
+
+            if (!$chatId) {
+                Log::error("Failed to get chatId for number: {$phoneNumber}");
+                return false;
+            }
+
+            // Step 2: Send message
+            $sendResponse = Http::withHeaders([
+                'x-api-key' => $apiKey
+            ])->post("https://wapi.growthlabs.app/client/sendMessage/$sessionId", [
+                'chatId' => $chatId,
+                'contentType' => 'string',
+                'content' => $message
+            ]);
+
+            return $sendResponse->json();
+        } catch (\Exception $e) {
+            Log::error('Failed to send message via GrowthLabs WhatsApp API: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
+    {
+        if ($request->hasFile($inputName)) {
+            $file = $request->file($inputName);
+            $filename  = $file->getClientOriginalName();
+            $path = $subfolder ? "$subfolder/$filename" : $filename;
+
+            Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
+
+            return $path;
+        }
+        return null;
     }
 }

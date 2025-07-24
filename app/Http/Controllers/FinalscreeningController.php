@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Company;
-use App\Factories\OnlineMeetingFactory;
-use App\FinalData;
-use App\Finalscreening;
-use App\Formfield;
-use App\Notifications\TemplateEmail;
 use App\Step;
 use App\User;
+use App\Company;
+use App\FinalData;
+use App\Formfield;
+use Carbon\Carbon;
+use App\Finalscreening;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
+use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
+use App\Factories\OnlineMeetingFactory;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-
+use App\Notifications\WelcomeJudgerNotification;
 
 class FinalscreeningController extends Controller
 {
@@ -27,23 +28,37 @@ class FinalscreeningController extends Controller
         $this->meetingService =  OnlineMeetingFactory::create();
     }
 
-    public function index($id = 0)
+    public function index(Request $request, $id = 0)
     {
-        $this->preProcessingCheck('edit_cycles');
         $organization_id=auth()->user()->organization_id;
         $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
             return $q->whereHas('cycle',function ($query) use ($organization_id){
                 $query->where('organization_id',$organization_id);
             });
         })->where('stype', 5)->orderBy('from')->get();
-        $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
+        // $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
+		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+			->where('roles.default_for', 'judger')
+			->select('users.*')
+			->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
             $cstep = Step::where('stype', 5)->where('id', $id)->first();
         } else {
             $cstep = Step::where('stype', 5)->where('id', $id)->first();
         }
-        $companies = Company::where('step',$id)->get();
+        $companies = Company::where('step',$id);
+        if($request->judge_id != 0){
+            $list = Finalscreening::whereJsonContains('judges', (string) $request->judge_id)->get();
+            $companies = $companies->whereIn('id',$list->pluck('company_id'));
+        }
+        if($request->startup_id != 0){
+            $companies = $companies->where('id',$request->startup_id);
+        }
+
+        $companies = $companies->get();
+
         return view('admin.settings.final.index', compact('cstep', 'judges', 'steps', 'id','companies'));
     }
 
@@ -53,12 +68,40 @@ class FinalscreeningController extends Controller
             $list = $request->judges;
            // dd();
             $companies = $request->users;
+            
             if (!$companies or !$list) {return Redirect::back()->with('message2', 'You need to select judges and companies to update');}
             foreach ($companies as $company) {
                 Finalscreening::where('company_id',$company)->where('step_id', $request->step)->delete();
                 Finalscreening::insert(['company_id'=>$company,'step_id'=>$request->step, 'judges'=>json_encode($list)]);
+
             }
-            return Redirect::back()->with('message', 'saved');
+            foreach ($list as $judge) {
+                
+                $result = User::findOrFail($judge);
+                $name = $result->first_name_en . ' ' . $result->last_name_en;
+                $email = $result->email;
+                
+                $data = [
+                    'Type' => 'Final_Screening',
+                    'name' => $name,
+                    'email' => $email,
+                    'start_date' => '',
+                    'end_date' => '',
+                ];
+                // إرسال الإشعار
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    try {
+                        $result->notify(new WelcomeJudgerNotification($data));
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+                }
+            }
+            
+
+
+            return Redirect::back()->with('message', 'Saved');
         } else {
             return Redirect::back()->with('message2', 'error');
         }
@@ -132,6 +175,16 @@ class FinalscreeningController extends Controller
 
     public function addzoom(Request $request)
     {
+        $request->validate([
+            'date' => 'required|date',
+            'period' => 'required|integer|min:30'
+        ],[
+            'date.required' => __('admin.Date_is_required'),
+            'date.date' => __('admin.Date_must_be_a_valid_date'),
+            'period.required' => __('admin.Period_is_required'),
+            'period.integer' => __('admin.Period_must_be_an_integer'),
+            'period.min' => __('admin.Period_must_be_at_least_30_minutes'),
+        ]);
         if ($request->period) {
             $topic = "Final Screening (C" . $request->company . ')';
             $data = ['topic' => $topic,
@@ -150,7 +203,7 @@ class FinalscreeningController extends Controller
             
             $finalScreening->update([
                 'datetime' => $request->date,
-                'duration' => $request->duration,
+                'duration' => $request->period,
                 'zoom_id' => $onlineMeeting['data']['id'],
                 'start_url' =>  $onlineMeeting['data']['start_url'],
                 'join_url' =>  $onlineMeeting['data']['join_url']
@@ -158,22 +211,46 @@ class FinalscreeningController extends Controller
                 
             $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;
+                $start_date = $finalScreening->datetime;
+                $duration = $request->period;
+                $end_dateCarbon = Carbon::parse($start_date)->addMinutes($duration);
+                $end_date = $end_dateCarbon->toDateTimeString(); // Format: 2025-02-10 13:00:00
 
             $judges_names = '';
-            foreach ($finalScreening->evaluationJudgers as $judge) {
+            foreach ($finalScreening->judges as $judge) {
 
-                $judge_name = $judge->name;
-                $user = new User();
-                $user->email = $judge->email;
-                $user->id = $judge->id;
+                // $judge_name = $judge->name;
+                // $user = new User();
+                // $user->email = $judge->email;
+                // $user->id = $judge->id;
 
-                $MSG = new TemplateEmail;
-                $MSG->Message=["New Final Screen session - VI portal","Dear ".$judge_name.",","Kindly note you have a New Final Screen session with '".$startup_owner_name."', Session will start:".$request->date.
-                    ", Check your account to join the session ","/dashboard"];
+                // $MSG = new TemplateEmail;
+                // $MSG->Message=["New Final Screen session - VI portal","Dear ".$judge_name.",","Kindly note you have a New Final Screen session with '".$startup_owner_name."', Session will start:".$request->date.
+                //     ", Check your account to join the session ","/dashboard"];
 
-                $user->notify($MSG);
-                $judges_names .= $judge->name .', ';
+                // $user->notify($MSG);
+                // $judges_names .= $judge->name .', ';
 
+                $result = User::findOrFail($judge);
+                $name = $result->first_name_en . ' ' . $result->last_name_en;
+                $email = $result->email;
+                
+                $data = [
+                    'Type' => 'Final_Screening',
+                    'name' => $name,
+                    'email' => $email,
+                    'start_date' => $start_date,
+                    'end_date' => $end_date,
+                ];
+                // إرسال الإشعار
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    try {
+                        $result->notify(new WelcomeJudgerNotification($data));
+                    } catch (\Throwable $th) {
+                        // throw $th;
+                    }
+                }
             }
             
             
@@ -188,7 +265,14 @@ class FinalscreeningController extends Controller
             $MSG = new TemplateEmail;
             $MSG->Message=["New Final Screen session - VI portal","Dear ".$startup_owner_name.",","Kindly note you have a New Final Screen session with '".$judges_names."', Session will start:".$request->date.
                 ", Check your account to join the session ","/dashboard"];
-            $user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
             /// End of mail send
             
             return Redirect::back()->with('message', 'Meeting_added_successfully');
@@ -196,7 +280,6 @@ class FinalscreeningController extends Controller
     }
     public function results(Request $request,$id = 0)
     {
-        $this->preProcessingCheck('edit_cycles');
         $organization_id=auth()->user()->organization_id;
         $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
             return $q->whereHas('cycle',function ($query) use ($organization_id){
@@ -218,16 +301,16 @@ class FinalscreeningController extends Controller
         }
         return view('admin.settings.final.results', compact('cstep', 'steps', 'id','companies','c', 'cj'));
     }
-    public function delsession($id, Request $request){
-        $this->preProcessingCheck('edit_cycles');
-//        $zoomid = TrainingSession::findOrFail($id)->zoom_id;
-        if($request) {
-//            if ($zoomid) {
-//                $zoom = $this->delete($zoomid);
-//                if (!$zoom['success']) {
-//                    return response()->json(['state' => 'failed'], 500);
-//                }
-//            }
+    public function delsession($id, Request $request)
+    {
+        // $zoomid = TrainingSession::findOrFail($id)->zoom_id;
+        if($request)
+        {
+            // if ($zoomid)
+            // {
+            //     $zoom = $this->delete($zoomid);
+            //     if (!$zoom['success']) { return response()->json(['state' => 'failed'], 500); }
+            // }
             Finalscreening::findOrFail($id)->delete();
             return response()->json(['state' => 'success'], 200);
         } else {

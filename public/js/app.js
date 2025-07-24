@@ -59788,9 +59788,7 @@ Vue.component('example-component', __webpack_require__(/*! ./components/ExampleC
 var app = new Vue({
   el: '#app'
 });
-window.Echo.channel('step-changes').listen('ChangeStep', function (e) {
-  console.log("The step has been changed for ".concat(e.company_name, " from \"").concat(e.last_step, "\" to \"").concat(e.new_step, "\" by ").concat(e.organization_name, "."));
-});
+
 
 /***/ }),
 

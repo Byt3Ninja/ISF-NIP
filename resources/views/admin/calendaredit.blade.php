@@ -26,10 +26,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-error"></i>
                                                         <span>
@@ -81,7 +78,7 @@
                                                         </label>
                                                     </div>
                                                 </fieldset>
-                                                @can ('edit_calendar')
+                                                @if( $_user->ableTo('calendar.events_edit', $permissions) )
                                                 <fieldset class="form-group">
                                                     <div class="custom-control custom-switch custom-control-inline mb-1">
                                                         <span>{{__('admin.Private')}}</span>&nbsp;
@@ -93,7 +90,7 @@
                                                 <fieldset class="form-group">
                                                     <h6><b>{{__('admin.Last edited by')}}:</b> {{ $cal->user->first_name_en . " ". $cal->user->last_name_en }} </h6>
                                                 </fieldset>
-                                                @endcan
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="row">

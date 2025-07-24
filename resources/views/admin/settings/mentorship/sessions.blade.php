@@ -1,317 +1,345 @@
 @extends('layouts.admin')
 
-
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-  <style>
-    #mob-extract-button {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    @media screen and (max-width: 768px) {
-      #mob {
-        margin-top: 10px;
-      }
-      #mob-extract-button {
-        justify-content: flex-start;
-        width: 100%;
-      }
-    }
-  </style>
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-  <style>
-    #mob-extract-button {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    @media screen and (max-width: 768px) {
-      #mob {
-        margin-top: 10px;
-      }
-      #mob-extract-button {
-        justify-content: flex-start;
-        width: 100%;
-      }
-    }
-  </style>
-@stop
-
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-header row">
-        {{-- <div class="content-header-left col-12 mb-2 mt-1">
-          <div class="row breadcrumbs-top">
-            <div class="col-12">
-              <h5 class="content-header-title float-left pr-1 mb-0">{{ __('cycles.Mentorship requests') }}</h5>
-              <div class="breadcrumb-wrapper col-12">
-                <ol class="breadcrumb p-0 mb-0">
-                  <li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home-alt"></i></a>
-                  </li>
-                  <li class="breadcrumb-item active">
-
-                    @if (Request()->show == 'all')
-                      {{ __('cycles.All requests') }}
-                    @elseif(!Request()->show)
-                      {{ __('cycles.New requests only') }}
-                    @elseif(Request()->show == 'approved')
-                      {{ __('cycles.approved requests') }}
-                    @elseif(Request()->show == 'disapproved')
-                      {{ __('cycles.disapproved requests') }}
-                    @endif
-
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div> --}}
+      <div class="content-header">
+        <div class="col">
+          <h3 class="fw-bold">{{ __('cycles.Mentorship Sessions') }}</h3>
+        </div>
       </div>
       <div class="content-body">
-        <section id="multiple-column-form">
+        <section id="alerts">
           @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible" role="alert">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
               {{ __('admin.' . session()->get('message')) }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           @endif
           @if (session()->has('message2'))
-            <div class="alert alert-danger alert-dismissible" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
               {{ __('admin.' . session()->get('message2')) }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           @endif
         </section>
+
         <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
+          <div class="col-12">
             <div class="card">
-              <div class="card-header">
-                <div class="card-title">
-                  {{-- @if (Request()->show) --}}
-                  <!-- إدخال تاريخ النهاية -->
-
-                  <!-- الروابط المعدلة لإرسال التاريخ -->
-                  <div onclick="redirect('all')"
-                    class="btn btn-{{ request()->show == 'all' ? 'primary' : 'label-secondary' }}">
+              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom pb-3 mb-6">
+                <div class="mb-4 mb-md-0 d-flex flex-wrap gap-2">
+                  <button onclick="redirect('all')" class="btn btn-{{ request()->show == 'all' ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.All requests') }}
-                  </div>
-
-                  <div href="#" onclick="redirect('')"
-                    class="btn btn-{{ !request()->show ? 'primary' : 'label-secondary' }}">
+                  </button>
+                  <button onclick="redirect('')" class="btn btn-{{ !request()->show ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.New requests only') }}
-                  </div>
-
-                  <div href="#" onclick="redirect('approved')" id="mob"
-                    class="btn btn-{{ request()->show == 'approved' ? 'primary' : 'label-secondary' }}">
-
+                  </button>
+                  <button onclick="redirect('approved')" class="btn btn-{{ request()->show == 'approved' ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.approved requests') }}
-                  </div>
-
-                  <div href="#" onclick="redirect('disapproved')" id="mob"
-                    class="btn btn-{{ request()->show == 'disapproved' ? 'primary' : 'label-secondary' }}">
+                  </button>
+                  <button onclick="redirect('disapproved')" class="btn btn-{{ request()->show == 'disapproved' ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.disapproved requests') }}
-                  </div>
-                  {{-- @else --}}
-                  {{-- @endif --}}
+                  </button>
                 </div>
+                <button class="btn btn-light ExportExcelMentor">
+                  <i class="ti ti-file-arrow-right me-2 ti-16px"></i>{{ __('cycles.Export') }}
+                </button>
               </div>
 
               <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-
-                      <div class="d-flex align-items-center">
-                        <!-- إدخال تاريخ البداية -->
-                        <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                        <div class="col-md-2" style="display: inline-block">
-                          <input type="text" class="datewithouttime form-control" id="start_date"
-                            value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
-                        </div>
-                        <div class="col-md-2 mx-2" style="display: inline-block">
-                          <input type="text" class="datewithouttime form-control" id="end_date"
-                            value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
-                        </div>
-                        <div class="col-md-2 mx-2" style="display: inline-block">
-                          <select class="form-control " id="showValueSelect">
-                            <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>
-                              {{ __('cycles.All requests') }}</option>
-                            <option value="" {{ !request()->show ? 'selected' : '' }}>
-                              {{ __('cycles.New requests only') }}</option>
-                            <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>
-                              {{ __('cycles.approved requests') }}</option>
-                            <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>
-                              {{ __('cycles.disapproved requests') }}</option>
-                          </select>
-                        </div>
-                        @php
-                        
-                            $cycles = \App\Cycle::get();
-                        
-                        @endphp
-                        <div class="col-md-3 mx-2" style="display: inline-block">
-                          <select class="form-control " id="cycle_id">
-                            @foreach ($cycles as $cycle)
-                            <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
-                              {{ $cycle->title }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-
-                        <div class="btn btn-label-primary mx-3" id="searchBot">
-                          <i class="ti ti-search"></i>
-                          <span class="mx-2">{{ __('cycles.search') }} </span>
-                        </div>
+                <div class="row g-3 mb-4">
+                  <div class="col-12 col-md-10">
+                    <div class="row">
+                      <div class="col-12 col-md-6 col-lg-2">
+                        <input type="text" class="form-control datewithouttime" id="start_date" value="{{ request('start_date') }}" placeholder="Start Date">
                       </div>
-                      <div id="mob-extract-button">
-                        <div class="btn btn-label-secondary ExportExcelMentor mx-8" id="mob">{{ __('cycles.Export') }}</div>
+                      <div class="col-12 col-md-6 col-lg-2">
+                        <input type="text" class="form-control datewithouttime" id="end_date" value="{{ request('end_date') }}" placeholder="End Date">
+                      </div>
+                      <div class="col-12 col-md-6 col-lg-3">
+                        <select class="form-select select2" id="showValueSelect">
+                          <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>{{ __('cycles.All requests') }}</option>
+                          <option value="" {{ !request()->show ? 'selected' : '' }}>{{ __('cycles.New requests only') }}</option>
+                          <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>{{ __('cycles.approved requests') }}</option>
+                          <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6 col-lg-4">
+                        <select class="form-select select2" id="cycle_id">
+                          @php
+                          $user = auth()->user();
+                          if($user->hasAnyRole(['organizationManager'])) {
+                            $cycles = \App\Cycle::where('organization_id', $user->organization_id)->get();
+                          }else{
+                            $cycles = \App\Cycle::get();
+                          }
+                          @endphp
+                          <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
+                          @foreach ($cycles as $cycle)
+                            <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
+                              {{ $cycle->title }}
+                            </option>
+                          @endforeach
+                        </select>
                       </div>
                     </div>
-
-
-                    <input type="hidden" class="Request" value="{{ Request()->show }}">
-
-                    <table class="table mt-3" id="userstable">
-                      <thead class="bg-label-light">
-                        <tr>
-                          <th>{{ __('cycles.Company') }}</th>
-                          <th>{{ __('cycles.User/Title') }}</th>
-                          <th>{{ __('cycles.Mentor') }}</th>
-                          <th>{{ __('cycles.Rate/Comment') }}</th>
-                          <th>{{ __('cycles.Date/Time') }}</th>
-                          <th>{{ __('cycles.Approved') }}</th>
-                          <th>{{ __('cycles.Done') }}</th>
-                          <th>{{ __('cycles.Actions') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($sessions as $session)
-                          <tr>
-                            <td>
-                              <div class="d-flex align-items-center">
-                                <a class="media-left" href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                                  <img src="{{ $session->user->company->logo_url }}" alt="avatar"
-                                    class="rounded-circle" height="40" width="40">
-                                </a>
-                                <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                                  <div class="d-flex align-items-center">
-                                    {{ $session->user->company->{'name_' . $l} }}
-                                  </div>
-                                </a>
-                              </div>
-                            </td>
-                            <td>
-                              <div class="d-flex align-items-center">
-                                <a class="media-left mr-50"
-                                  href="/dashboard/users/{{ $session->user->company->user->id }}/edit">
-                                  <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
-                                    height="40" width="40">
-                                </a>
-                                <a href="/dashboard/users/{{ $session->user_id }}/edit">
-                                  <div class="mx-2">
-                                    <h6 class="media-heading mb-0">{{ $session->user->{'first_name_' . $l} }}
-                                      {{ $session->user->{'last_name_' . $l} }}</h6>
-                                    <span class="font-small-2">{{ $session->user->{'title_' . $l} }}</span>
-                                  </div>
-                                </a>
-                              </div>
-                            </td>
-                            <td>
-                              <div style="cursor: pointer;" class="chip mr-1"
-                                onclick="mentor({{ $session->mentor_id }},'{{ $session->mentor->{'first_name_' . $l} . ' ' . $session->mentor->{'last_name_' . $l} }}','{{ $session->mentor->mrating() }}')">
-                                <div class="d-flex align-items-center">
-                                  <div class="avatar">
-                                    <img src="{{ $session->mentor->image_url }}" alt="pic" class="rounded-circle"
-                                      height="40" width="40" />
-                                  </div>
-                                  <span class="mx-2">
-                                    {{ $session->mentor->name }}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div style="width: 60px;">
-                                <small>{!! $session->rate_comment
-                                  ? str_repeat('<i class="ti tis-star" style="color: #fc960f;"></i>', $session->rating) .
-                                      '<br>' .
-                                      $session->rate_comment
-                                  : $session->comment !!}
-                                </small>
-                              </div>
-                            </td>
-                            <td>
-                              <small>
-                                {{ $session->zoom_date }}
-                                {{-- <br> --}}
-                                ({{ $session->period }}M)
-                              </small>
-                            </td>
-                            <td>
-                              <div class="d-flex align-items-center" style="width: 30px;">
-                                {!! __($session->approved) ?? '<span class="warning">' . __('Waiting') . '</span>' !!}
-                              </div>
-                            </td>
-                            <td>
-                              <div style="width: 30px;">
-                                {{ $session->done ? __('Yes') : __('No') }}
-                              </div>
-                            </td>
-                            <td>
-                              <button title="Edit" onclick="edit({{ $session->id }})" type="button"
-                                class="btn btn-icon rounded-circle btn-label-info">
-                                <i class="ti ti-edit text-info"></i></button>
-                              <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
-                                class="btn btn-icon rounded-circle btn-label-danger">
-                                <i class="ti ti-trash text-danger"></i></button>
-                              @if (!$session->approved)
-                                <button title="Approve" onclick="approve({{ $session->id }},'Yes')" type="button"
-                                  class="btn btn-icon rounded-circle btn-label-success">
-                                  <i class="ti ti-check"></i></button>
-                                <button title="Dispprove" onclick="approve({{ $session->id }}, 'No')" type="button"
-                                  class="btn btn-icon rounded-circle btn-label-danger">
-                                  <i class="ti ti-x"></i></button>
-                              @endif
-                              @if ($session->join_url)
-                                <a href="{{ $session->start_url }}" target="_blank">
-                                  <button title="Start Meeting" type="button"
-                                    class="btn btn-icon rounded-circle btn-label-secondary">
-                                    <i class="ti ti-device-computer-camera"></i></button></a>
-                                <a href="{{ $session->join_url }}" target="_blank">
-                                  <button title="Join only" type="button"
-                                    class="btn btn-icon rounded-circle btn-label-primary">
-                                    <i class="ti ti-user"></i></button></a>
-                              @endif
-                              @if ($session->fileurl)
-                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank"
-                                  title="Download attched" class="btn btn-icon rounded-circle btn-label-primary">
-                                  <i class="ti ti-download text-secondary"></i></a>
-                              @endif
-                            </td>
-                          </tr>
-                        @endforeach
-
-                      </tbody>
-                    </table>
+                  </div>
+                  <div class="col-8 col-lg-2 d-flex gap-2">
+                    <button class="btn btn-primary btn-icon rounded-circle" id="searchBot">
+                      <i class="ti ti-filter"></i>
+                    </button>
+                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions{{ request()->show ? '?show=' . request()->show : '' }}'">
+                      <i class="ti ti-reload"></i> 
+                    </button>
                   </div>
                 </div>
 
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
-              <div id="mentors" style="display: none;">
-                <div class="card-header">
-                  <h4 class="card-title"><b id="name"></b> {{ __('cycles.Schedule') }}: </h4>
-                </div>
                 <div class="table-responsive">
-                  <table class="table" id="mentorstable">
+                  <table class="table" id="userstable">
+                    <thead class="table-light">
+                      <tr>
+                        <th>{{ __('cycles.Company') }}</th>
+                        <th>{{ __('cycles.User/Title') }}</th>
+                        <th>{{ __('cycles.Mentor') }}</th>
+                        <th>{{ __('cycles.Rate/Comment') }}</th>
+                        <th>{{ __('cycles.Date/Time') }}</th>
+                        <th>{{ __('cycles.Approved') }}</th>
+                        <th>{{ __('cycles.Done') }}</th>
+                        <th>{{ __('cycles.Actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($sessions as $session)
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center w-px-150">
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
+                                <img 
+                                  onerror="this.src='/images/logo-placeholder.png'"
+                                  src="{{ $session->user->company->logo_url ?? '' }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
+                              </a>
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
+                                {{ $session->user->company->{'name_' . $l} ?? '' }}
+                              </a>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              <a href="/dashboard/users/{{ $session->user_id }}/edit">
+                                @if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                                <img 
+                                  onerror="this.src='/icons/account.svg'"
+                                  src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                              @endif
+                                </a>
+                              <div>
+                                <h6 class="mb-0 text-nowrap">{{ $session->user->{'first_name_' . $l} }} {{ $session->user->{'last_name_' . $l} }}</h6>
+                                <small>{{ $session->user->{'title_' . $l} }}</small>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              @if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                              <img 
+                                onerror="this.src='/icons/account.svg'"
+                                src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                @endif
+                              {{ $session->mentor->name ?? '' }}
+                            </div>
+                          </td>
+                          <td>
+                            <small>{!! $session->rate_comment ? str_repeat('<i class="ti tis-star text-warning"></i>', $session->rating) . '<br>' . $session->rate_comment : $session->comment !!}</small>
+                          </td>
+                          <td>
+                            <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
+                          </td>
+                          <td>
+                              @if( $session->approved )
+                              @if( $session->approved == 'Yes' )
+                              <span class="badge bg-label-success" >
+                              {{ __('admin.Yes') }}
+                              </span>
+                              @else
+                              <span class="badge bg-label-danger" >
+                              {{ __('admin.No') }}
+                              </span>
+                              @endif
+                              @else
+                              <span class="badge bg-label-warning" >
+                              {{ __('admin.Waiting') }}
+                              </span>
+                              @endif
+                            
+                          </td>
+                          <td>
+                            <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
+                              {{ $session->done ? __('Yes') : __('No') }}
+                            </span>
+                          </td>
+                          <td>
+                            <div class="btn-group">
+                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-info" onclick="edit({{ $session->id }})" title="Edit">
+                                <i class="ti ti-edit"></i>
+                              </button>
+                              @if( $session->datetime >= now() )
+                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="deleteme({{ $session->id }})" title="Delete">
+                                <i class="ti ti-trash"></i>
+                              </button>
+                              @endif
+                              @if (!$session->approved)
+                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
+                                  <i class="ti ti-check"></i>
+                                </button>
+                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
+                                  <i class="ti ti-x"></i>
+                                </button>
+                              @endif
+                              @if ($session->join_url)
+                                <a href="{{ $session->start_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-secondary" title="Start Meeting">
+                                  <i class="ti ti-device-computer-camera"></i>
+                                </a>
+                                <a href="{{ $session->join_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-primary" title="Join only">
+                                  <i class="ti ti-user"></i>
+                                </a>
+                              @endif
+                              @if ($session->fileurl)
+                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
+                                  <i class="ti ti-download"></i>
+                                </a>
+                              @endif
+                              <button title="View Report" type="button" data-bs-toggle="modal" data-bs-target="#reportModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle waves-effect">
+                                 <i class="ti ti-file-text"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      @endforeach
+                    </tbody>
                   </table>
+                  @foreach ($sessions as $session)
+<!-- Modal for Session Reports and Recordings -->
+<div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Total Meeting Duration -->
+        <div class="mb-3">
+          <strong>{{ __('admin.total_meeting_duration') }}:</strong>
+          {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
+        </div>
+        <!-- Total Number of Participants -->
+        <div class="mb-3">
+          <strong>{{ __('admin.total_number_of_participants') }}:</strong>
+          {{ $session->reports->count() }}
+        </div>
+
+        <!-- Session Reports Section -->
+        @if ($session->reports->count() > 0)
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <h5>{{ __('admin.session_reports') }}</h5>
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
+            {{ __('admin.update_reports') }}
+          </a>
+        </div>
+        <table class="table table-bordered mt-2">
+          <thead>
+            <tr>
+              <th class="text-center">#</th>
+              <th class="text-center">{{ __('admin.participant_name') }}</th>
+              <th class="text-center">{{ __('admin.participant_email') }}</th>
+              <th class="text-center">{{ __('admin.join_time') }}</th>
+              <th class="text-center">{{ __('admin.leave_time') }}</th>
+              <th class="text-center">{{ __('admin.attendance_duration') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($session->reports as $key => $report)
+            <tr>
+              <td class="text-center">{{ $key + 1 }}</td>
+              <td class="text-center">{{ $report->participant_name }}</td>
+              <td class="text-center">{{ $report->participant_email }}</td>
+              <td class="text-center">{{ $report->participant_join_date }}</td>
+              <td class="text-center">{{ $report->participant_end_date }}</td>
+              <td class="text-center">{{ round($report->attendance_duration / 60, 2) }} {{ __('admin.minutes') }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @else
+        <!-- No Reports: Display Update Button -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <h5>{{ __('admin.session_reports') }}</h5>
+          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
+            {{ __('admin.update_reports') }}
+          </a>
+        </div>
+        @endif
+
+        <!-- Session Recordings Section -->
+        @if ($session->recordings->count() > 0)
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <h5>{{ __('admin.session_recordings') }}</h5>
+          <a href="{{ route('trainings.reports_recording', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
+            {{ __('admin.update_recordings') }}
+          </a>
+        </div>
+        <div class="mt-2">
+          <strong>{{ __('admin.recording_passcode') }}:</strong>
+          <span>{{ $session->recordings->first()->passcode ?? __('admin.not_available') }}</span>
+        </div>
+        <table class="table table-bordered mt-2">
+          <thead>
+            <tr>
+              <th class="text-center">#</th>
+              <th class="text-center">{{ __('admin.recording_type') }}</th>
+              <th class="text-center">{{ __('admin.recording_time') }}</th>
+              <th class="text-center">{{ __('admin.view_recording') }}</th>
+              <th class="text-center">{{ __('admin.download_recording') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($session->recordings as $key => $recording)
+            <tr>
+              <td class="text-center">{{ $key + 1 }}</td>
+              <td class="text-center">{{ $recording->recording_type }}</td>
+              <td class="text-center">{{ $recording->recording_time }}</td>
+              <td class="text-center">
+                <a href="{{ $recording->recording_view_url }}" target="_blank" class="btn btn-primary">
+                  {{ __('admin.View') }}
+                </a>
+              </td>
+              <td class="text-center">
+                <a href="{{ $recording->recording_download_url }}" target="_blank" class="btn btn-success">
+                  {{ __('admin.Download') }}
+                </a>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @else
+        <!-- No Recordings: Display Update Button -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <h5>{{ __('admin.session_recordings') }}</h5>
+          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
+            {{ __('admin.update_recordings') }}
+          </a>
+        </div>
+        @endif
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endforeach
                 </div>
               </div>
             </div>
@@ -334,6 +362,7 @@
             <input type="hidden" name="id" value="0" id="sid">
             <input type="hidden" name="mentorid" value="0" id="mentorid">
             <input type="hidden" name="userid" value="0" id="userid">
+            <input type="hidden" name="approved" value="Yes" >
             <div class="form-group mt-4" id="showdates">
               <label class="mb-2">{{ __('cycles.Date/Time') }}:</label>
               <input class='date width-200 form-control' type="text" id="sdate" name="date" value=""
@@ -361,74 +390,85 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn btn-label-secondary ml-1">
-              <i class="ti ti-check d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
-            </button>
+            <div class="btn btn-label-secondary ml-1" data-bs-dismiss="modal" aria-label="Close">
+              {{-- <i class="ti ti-check"></i> --}}
+              <span class="">{{ __('cycles.Close') }}</span>
+            </div>
             <button type="submit" class="btn btn-primary ml-1">
-              <i class="ti ti-check d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+              {{-- <i class="ti ti-check"></i> --}}
+              <span class="">{{ __('cycles.Submit') }}</span>
             </button>
           </div>
         </form>
       </div>
     </div>
   </div>
-
 @stop
+
 @section('pagescripts')
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script>
     $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
-        "columnDefs": [
-
-          {
-            "orderable": true,
-            "targets": 7
-          }, // تفعيل الفرز للعمود الأول فقط
-        ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
+    $('#userstable').DataTable().destroy();
+    $('#userstable').DataTable({
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [],
+    "columnDefs": [
+      {
+        "orderable": false,
+        "targets": [0, 1, 2, 3, 4, 5, 6, 7]
+      }
+    ],
+    @if ($l == 'ar')
+      "language": {
+        "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+        "sLoadingRecords": "جارٍ التحميل...",
+        "sProcessing": "جارٍ التحميل...",
+        "sLengthMenu": "أظهر _MENU_ مدخلات",
+        "sZeroRecords": "لم يعثر على أية سجلات",
+        "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+        "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+        "sInfoPostFix": "",
+        "sSearch": "ابحث:",
+        "sUrl": "",
+        "oPaginate": {
+          "sFirst": "الأول",
+          "sPrevious": "السابق",
+          "sNext": "التالي",
+          "sLast": "الأخير"
+        },
+        "oAria": {
+          "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+          "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+        }
+      }
+    @endif
+    });
     });
   </script>
   <script>
-    $('.date').datetimepicker({
-      timepicker: true,
-      format: 'Y-m-d H:i'
-    });
-    $('.datewithouttime').datetimepicker({
-      format: 'Y-m-d'
+    // $('#sdate').flatpickr({
+    //   enableTime: true,
+    //   dateFormat: "Y-m-d h:i K",
+    //   minDate: "today",
+    //   time_24hr: false,
+    //   allowInput: true,
+    //   onClose: function(selectedDates, dateStr, instance) {
+    //     // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+    //     if (selectedDates.length > 0) {
+    //       const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+    //       instance.setDate(formattedDate, true, "Y-m-d h:i K");
+    //     }
+    //   }
+    // });
+
+    $('.datewithouttime').flatpickr({
+      enableTime: false,
+      dateFormat: "Y-m-d",
     });
 
     function edit(id) {
@@ -447,7 +487,22 @@
           $('#sid').val(id);
           $('#mentorid').val(response.mentor_id);
           $('#userid').val(response.user_id);
-          $('#sdate').val(response.zoom_date);
+          // $('#sdate').val(response.zoom_date);
+          $('#sdate').flatpickr({
+            enableTime: true,
+            dateFormat: "Y-m-d h:i K",
+            // minDate: "today",
+            time_24hr: false,
+            allowInput: true,
+            defaultDate: response.zoom_date ? response.zoom_date : '',
+            onClose: function(selectedDates, dateStr, instance) {
+              // Ensure the date format matches what Carbon expects (Y-m-d h:i a)
+              if (selectedDates.length > 0) {
+                const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d h:i K");
+                instance.setDate(formattedDate, true, "Y-m-d h:i K");
+              }
+            }
+          });
           $('#period').val(response.period);
           $('#notes').val(response.notes);
           $('#ModifyRequest').modal('show');
@@ -481,7 +536,7 @@
         const formattedEndDate = formatDate(endDate);
         url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
       }
-      if(CycleId){
+      if (CycleId && CycleId !== 'all') {
         url += `&cycle_id=${CycleId}`;
       }
 
@@ -574,7 +629,11 @@
     }
 
     function approve(id, stat) {
-       alert('{{ __('admin.sending_request') }}')
+      if(stat == 'Yes'){
+      alert('{{ __('admin.Accepting_request') }}')
+      }else{
+        alert('{{ __('admin.Rejecting_request') }}')
+      }
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

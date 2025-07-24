@@ -65,16 +65,31 @@
 										</div>
 									</div>
 									@endif
-									<form method="post" action="{{ route('mentorship.store_survey', ['id' => $cycle->id]) }}">
+									<form method="post" action="{{ route('mentorships.surveys_store', ['id' => $cycle->id]) }}">
 										{!! csrf_field() !!}
 										<div class="row">
-											<div class="col-lg-12 col-md-12 col-sm-12">
+											<div class="col-lg-9 col-md-9 col-sm-9">
 												<fieldset class="form-group">
 													<label for="survey_id">{{ __('admin.Survey') }}</label>
 													<select class="form-control form-select" name="survey_id" id="survey_id" required>
+														<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
 														@foreach( $surveys as $survey )
 															<option value="{{ $survey->id }}">{{ $survey->title }}</option>
 														@endforeach
+													</select>
+												</fieldset>
+											</div>
+
+											<div class="col-lg-3 col-md-3 col-sm-3">
+												<fieldset class="form-group">
+													<label for="type">{{ __('admin.Type_Survey') }}</label>
+													<select class="form-control form-select" name="type" id="type" required>
+														
+															<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
+															<option value="mentor">{{ $l == 'ar' ? 'مرشد' : 'Mentor' }}</option>
+															<option value="startup">{{ $l == 'ar' ? 'مؤسس' : 'StartUp' }}</option>
+															<option value="both">{{ $l == 'ar' ? 'الاثنين' : 'Both' }}</option>
+														
 													</select>
 												</fieldset>
 											</div>
@@ -96,7 +111,7 @@
 											<div class="col-12 d-flex justify-content-end">
 												<input type="hidden" name="organization_id" value="{{ $cycle->organization_id }}">
 												<button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
-												<a href="{{ route('mentorship.surveys', ['id' => $cycle->id]) }}" class="btn btn-secondary mb-1 mx-2">{{__('admin.Cancel')}}</a>
+												<a href="{{ route('mentorships.surveys_list', ['id' => $cycle->id]) }}" class="btn btn-secondary mb-1 mx-2">{{__('admin.Cancel')}}</a>
 											</div>
 										</div>
 									</form>

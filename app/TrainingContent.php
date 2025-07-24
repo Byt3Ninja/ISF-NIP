@@ -12,7 +12,10 @@ class TrainingContent extends Model
     function user() {
         return $this->belongsTo(User::class);
     }
-    function done() {
-        return(TrainingCompleted::where('training_id',$this->id)->where('user_id',Auth::id())->pluck('updated_at')[0]??null);
+    public function done() 
+    {
+         return TrainingCompleted::where('training_id', $this->id)
+        ->where('user_id', Auth::id())
+        ->exists();
     }
 }

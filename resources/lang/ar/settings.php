@@ -6,6 +6,7 @@ return [
 	'ARABICWEBSITETITLE'   => 'عنوان الموقع باللغة العربية',
 	'ENGLISHWEBSITETITLE'   => 'عنوان الموقع باللغة الإنجليزية',
 	'SocialMediaLinks'   => 'روابط التواصل الاجتماعى',
+	'teamMembers' => 'فريق العمل',
 	'URLOF'   => 'رابط',
 	'HomeWelcomeImages'   => 'صور الترحيب الرئيسية',
 	'Chooseimagefile'   => 'اختر صورة',
@@ -123,4 +124,9 @@ return [
 	'ZOOM_ACCOUNT_ID'=>'ZOOM ACCOUNT ID',
 	'Choose'=>'اختر',
 	'SocialMediaLogin'=>' اعدادات الدخول ',
+	'MentorList'=>'قائمة المدربين',
+	'Assessment'=>'التقييم',
+	'whatsApp_URL_callback' => 'إعادة الاتصال عبر عنوان URL الخاص بـ WhatsApp',
+	'whatsapp_api_key' => 'معرف حالة الواتساب',
+	'whatsApp_ACCESS_TOKEN' => 'رمز الوصول إلى واتساب',
 ];

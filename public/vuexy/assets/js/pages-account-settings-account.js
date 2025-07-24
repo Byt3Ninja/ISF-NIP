@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
     const formAccSettings = document.querySelector('#formAccountSettings'),
       deactivateAcc = document.querySelector('#formAccountDeactivation'),
-      deactivateButton = deactivateAcc.querySelector('.deactivate-account');
+      deactivateButton = deactivateAcc ? deactivateAcc.querySelector('.deactivate-account') : null;
 
     // Form validation for Add new record
     if (formAccSettings) {
@@ -160,8 +160,27 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     if (accountUserImage) {
       const resetImage = accountUserImage.src;
+      const validExtensions = ['image/png', 'image/jpg', 'image/jpeg'];
+      // Max size is 2048 KB
+      const maxFileSize = 2048;
+
       fileInput.onchange = () => {
         if (fileInput.files[0]) {
+          if (validExtensions.indexOf(fileInput.files[0].type) === -1) {
+            const language = document.documentElement.lang;
+            alert(
+              language === 'en' ? "Image should be in PNG or JPG or JPEG format" : "الصورة يجب أن تكون بصيغة PNG أو JPG أو JPEG"
+            );
+            return;
+          }
+
+          if (fileInput.files[0].size > maxFileSize * 1024) {
+            const language = document.documentElement.lang;
+            alert(
+              language === 'en' ? `Image should be less than ${maxFileSize} KB` : `يجب أن تكون الصورة أقل من ${maxFileSize} كيلو بايت`
+            );
+            return;
+          }
           accountUserImage.src = window.URL.createObjectURL(fileInput.files[0]);
         }
       };

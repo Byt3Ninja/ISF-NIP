@@ -1,53 +1,57 @@
 [
   {
     "name": "Admin",
+    "default_for": "admin",
     "guard_name": "web"
   },
   {
-
     "name": "Editor",
+    "default_for": "editor",
     "guard_name": "web"
   },
   {
-
     "name": "Coordinator",
+    "default_for": "coordinator",
     "guard_name": "web"
   },
   {
-
     "name": "Page Manager",
+    "default_for": "page manager",
     "guard_name": "web"
   },
   {
-
     "name": "manager",
+    "default_for": "manager",
     "guard_name": "web"
   },
   {
-
     "name": "Mentor",
+    "default_for": "mentor",
     "guard_name": "web"
   },
   {
-
     "name": "Judger",
+    "default_for": "judger",
     "guard_name": "web"
   },
   {
-
     "name": "Registered",
+    "default_for": "registered",
     "guard_name": "web"
   },
   {
     "name": "Pages Editor",
+    "default_for": "pages editor",
     "guard_name": "web"
   },
   {
     "name": "organizationManager",
+    "default_for": "organizationmanager",
     "guard_name": "web"
   },
   {
     "name": "Trainer",
+    "default_for": "trainer",
     "guard_name": "web"
   }
 ]

@@ -1,37 +1,47 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Otp;
 use App\User;
 use App\Cycle;
 use App\Country;
 use App\Currency;
 use App\Schedule;
+use App\Settings;
 use App\UsersBio;
 use App\Expertise;
+use Carbon\Carbon;
 use App\CyclesMentors;
 use App\MentorshipTask;
 use App\MentorshipRequest;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ConfirmEmailUpdate;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\UpdateClientProfileRequest;
 use Intervention\Image\ImageManagerStatic as Image;
-use Storage, Hash, DB, Exception, Session, URL, File;
+use Storage, Hash, Exception, Session, URL, File;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use PragmaRX\Google2FA\Google2FA;
 
 class ClientProfileController extends Controller
 {
-     /**
+    protected $whatsAppService;
+    /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(){
+    public function __construct(WhatsAppService $whatsAppService)
+    {
         $this->middleware('auth');
+        $this->whatsAppService = $whatsAppService;
     }
-     /**
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\User  $Type
@@ -39,68 +49,84 @@ class ClientProfileController extends Controller
      */
     public function edit()
     {
-        try
-        {
+        try {
             $client = Auth::user();
             $countries = Country::all();
-            $expertises = Expertise::where('parent_id',null)->get();
-            $Currencies = Currency::all();
+            $expertises = Expertise::where('parent_id', null)->get();
+            $Currencies = Currency::where('enabled', 1)->get();
             $json = File::get(base_path('database/dbFiles/countries.json'));
             $_countries = json_decode($json, true);
-            $_countries = collect( $_countries )->map(function ($country) {
+            $_countries = collect($_countries)->map(function ($country) {
                 $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
                 return $country;
             });
-            $countries = $countries->map(function ( $country ) use ( $_countries ) {
+            $countries = $countries->map(function ($country) use ($_countries) {
                 $getCountry = $_countries->where('iso3', $country->iso3)->first();
-                $flag = null; $emoji = null;
-                if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+                $flag = null;
+                $emoji = null;
+                if (!empty($getCountry)) {
+                    $flag = $getCountry['flag'];
+                    $emoji = $getCountry['emoji'];
+                }
                 $country->flag = $flag;
                 $country->emoji = $emoji;
                 return $country;
             });
-            return view('admin/clients/editProfile', compact('client','Currencies', 'countries','expertises'));
-        }
-        catch (Exception $e)
-        {
+
+
+            $google2fa_url = "";
+            $secret_key = "";
+
+            if ($client->exists()) {
+                $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+                $google2fa_url = $google2fa->getQRCodeInline(
+                    env('APP_NAME'),
+                    $client->email,
+                    $client->google2fa_secret
+                );
+                $secret_key = $client->google2fa_secret;
+            }
+
+            $data = array(
+                'user' => $client,
+                'secret' => $secret_key,
+                'google2fa_url' => $google2fa_url
+            );
+
+
+
+
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data'));
+        } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
     }
 
-    public function show(){
-      $client = Auth::user();
-      $mentors = CyclesMentors::where('user_id',  Auth::user()->id ?? 0)->get();
+    public function show()
+    {
+        $client = Auth::user();
+        $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
 
-      if($client->hasRole('Admin')){
-      $mentorshipTasks = MentorshipTask::where('mentor_id',Auth::user()->id)->where('status','pending')->get();
-      }else{
-
-      
-        if ($client && $client->company) {
-            $companyId = $client->company->id;
-            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
-            
-        }else{
-            $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
+        if ($client->hasRole('Admin')) {
+            $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->where('status', 'pending')->get();
+        } else {
+            if ($client && $client->company) {
+                $companyId = $client->company->id;
+                $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
+            } else {
+                $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
+            }
         }
-    }
-      
-      $mentrequests =  MentorshipRequest::where('mentor_id', Auth::user()->id);
-
+        $mentrequests = MentorshipRequest::where('mentor_id', Auth::user()->id);
         $mentrequests_count = $mentrequests->count();
-        $mentrequests_period = $mentrequests->sum('period')/60;
-
-
+        $mentrequests_period = $mentrequests->sum('period') / 60;
         $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
-    ->where('approved', 'Yes')
-    ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
-    ->avg('rating'); 
-   
-
-      return view('admin/clients/profile', compact('client','mentors','mentorshipTasks','mentrequests_count','mentrequests_period','average_rating'));
+            ->where('approved', 'Yes')
+            ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
+            ->avg('rating');
+        return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -108,91 +134,133 @@ class ClientProfileController extends Controller
      * @param  \App\Type  $Type
      * @return \Illuminate\Http\Response
      */
+
+    public function Updatebio(Request $request)
+    {
+        $user = Auth::user();
+        // Mentor Bio section
+        if ($request->mentor_section) {
+            $data = [
+                'bio_ar' => $request->bio_ar,
+                'bio_en' => $request->bio_en,
+                'linkedin' => $request->linkedin,
+                'entrepreneurial_experience' => $request->entrepreneurial_experience,
+                'profile_privacy' => $request->profile_privacy,
+                'mentorship_approach' => json_encode($request->mentorship_approach),
+            ];
+            if ($request->entrepreneurial_experience == 1) {
+                $data['entrepreneurial_experience_brief'] = $request->entrepreneurial_experience_brief ?? 0;
+            } else {
+                $data['entrepreneurial_experience_brief'] = 0;
+            }
+            $user->bio()->updateOrCreate(['user_id' => $user->id], $data);
+            $user->mentorExpertises()->sync($request->expertises);
+        }
+        return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+    }
     public function update(UpdateClientProfileRequest $request)
-    {           
-        try{
-            
+    {
+        try {
+            $first_name_ar = substr($request->first_name_en, 0, 250);
+            $last_name_ar = substr($request->last_name_en, 0, 250);
             $user = Auth::user();
 
-            
-            // Mentor Bio section
-            if ($request->mentor_section){
-                $data =[
-                    'bio_ar'=>$request->bio_ar,
-                    'bio_en'=>$request->bio_en,
-                    'linkedIn'=>$request->linkedin,
-                    'entrepreneurial_experience'=>$request->entrepreneurial_experience,
-                    'profile_privacy'=>$request->profile_privacy,
-                    'mentorship_approach'=>json_encode($request->mentorship_approach),
-                ];
-                if ($request->entrepreneurial_experience){
-                    $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
-                }
-                $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
-                $user->mentorExpertises()->sync($request->expertises);
-            }
-            
+            // // Mentor Bio section
+            // if ($request->mentor_section){
+            //     $data =[
+            //         'bio_ar'=>$request->bio_ar,
+            //         'bio_en'=>$request->bio_en,
+            //         'linkedIn'=>$request->linkedin,
+            //         'entrepreneurial_experience'=>$request->entrepreneurial_experience,
+            //         'profile_privacy'=>$request->profile_privacy,
+            //         'mentorship_approach'=>json_encode($request->mentorship_approach),
+            //     ];
+            //     if ($request->entrepreneurial_experience){
+            //         $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
+            //     }
+            //     $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
+            //     $user->mentorExpertises()->sync($request->expertises);
+            // }
+
 
             if ($request->hasFile('img_url')) {
 
                 $getemail = User::where('id', $user->id)->first();
 
-                if($request->email == $getemail->email){
+                if ($request->email == $getemail->email) {
                     //store the image
-                $img_url = $request->file('img_url');
-                //get the path of the stores image
-                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                //resize
-                Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
-                //update
-                $result = $user->update($request->except(['img_url','password','email']) + ['img_url' => $img_url]);
-                }else{
+                    $img_url = $request->file('img_url');
+                    //get the path of the stores image
+                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                    //resize
+                    Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) {
+                        $con->aspectRatio(); })->save();
+                    //update
+
+                    $result = $user->update($request->except(['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar']) + ['img_url' => $img_url]);
+                    $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
+
+                    $user->save();
+                } else {
                     // if email changed send email verification
                     //store the image
-                $img_url = $request->file('img_url');
-                //get the path of the stores image
-                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                //resize
-                Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
-                //update
-                $result = $user->update($request->except(['img_url','password','email']) + ['img_url' => $img_url]);
+                    $img_url = $request->file('img_url');
+                    //get the path of the stores image
+                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                    //resize
+                    Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) {
+                        $con->aspectRatio(); })->save();
+                    //update
+                    $result = $user->update($request->except(['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar']) + ['img_url' => $img_url]);
+                    $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
 
                     $user->new_email = $request->email;
-                    $user->save();
-                     // إرسال رابط التحقق
-                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
-                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                    $user->save();
+                    // إرسال رابط التحقق
+                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
+
+                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+                    return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
 
-                
 
 
-            }else{
+
+            } else {
                 $getemail = User::where('id', $user->id)->first();
 
-                if($request->email == $getemail->email){
-                    $result = $user->update($request->except(['password','email']));
-                }else{
-                    $result = $user->update($request->except(['password','email']));
+                if ($request->email == $getemail->email) {
+
+                    $result = $user->update($request->except(['password', 'email', 'first_name_ar', 'last_name_ar']));
+                    $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
+
+                    $user->save();
+                } else {
+                    $result = $user->update($request->except(['password', 'email', 'first_name_ar', 'last_name_ar']));
+                    $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
+
                     $user->new_email = $request->email;
                     $user->save();
-                     // إرسال رابط التحقق
-                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+                    // إرسال رابط التحقق
+                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
-                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+                    return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
-            
-                
+
+
             }
-            
-            if($result)
-                return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+
+            if ($result)
+                return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             else
-                return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
-        }catch (Exception $e) {
+                return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+        } catch (Exception $e) {
             //log what happend
             dd($e);
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -200,14 +268,14 @@ class ClientProfileController extends Controller
         }
     }
 
-        public function confirmEmailUpdate($token)
+    public function confirmEmailUpdate($token)
     {
         try {
             $newEmail = decrypt($token);
-          
+
         } catch (\Exception $e) {
-           
-            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+
+            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
 
         }
 
@@ -215,7 +283,7 @@ class ClientProfileController extends Controller
 
         // تحقق من وجود البريد الجديد
         if ($user->new_email != $newEmail) {
-            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
         }
 
         // تحديث البريد الإلكتروني
@@ -223,7 +291,7 @@ class ClientProfileController extends Controller
         $user->new_email = null;
         $user->save();
 
-        return redirect()->route('my_profile')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
     }
     /**
      * Update the specified resource in storage.
@@ -234,126 +302,383 @@ class ClientProfileController extends Controller
      */
     public function updatePassword(UpdateClientProfilePasswordRequest $request)
     {
-        try{
+        try {
             $user = Auth::user();
             $password = Hash::make($request->password);
             $result = $user->where('id', $user->id)
-                            ->update(['password' => $password]);
-            if($result)
-                return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+                ->update(['password' => $password]);
+            if ($result)
+                return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             else
-                return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
-        }catch (Exception $e){
+                return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+        } catch (Exception $e) {
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
     }
 
-    public function showMintorprofile($id){
+    public function showMintorprofile($id)
+    {
 
-        
+
         $client = User::find($id);
-        if(!empty($client)){
-        // $exp = Expertise::where('parent_id',null)->get();
-        // $expertises = Expertise::where('parent_id',null)->get();
-        $mentrequests =  MentorshipRequest::where('mentor_id', $id);
+        if (!empty($client)) {
+            // $exp = Expertise::where('parent_id',null)->get();
+            // $expertises = Expertise::where('parent_id',null)->get();
+            $mentrequests = MentorshipRequest::where('mentor_id', $id);
 
-        $mentrequests_count = $mentrequests->count();
-        $mentrequests_period = $mentrequests->sum('period')/60;
-
-
-        $average_rating = MentorshipRequest::where('mentor_id', $id)
-    ->where('approved', 'Yes')
-    ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
-    ->avg('rating'); 
+            $mentrequests_count = $mentrequests->count();
+            $mentrequests_period = $mentrequests->sum('period') / 60;
 
 
-         
-        $mentors = User::find($id);
-        if ($mentors) {
-            $expertises = $mentors->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+            $average_rating = MentorshipRequest::where('mentor_id', $id)
+                ->where('approved', 'Yes')
+                ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
+                ->avg('rating');
+
+
+
+            $mentors = User::find($id);
+            if ($mentors) {
+                $expertises = $mentors->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+            } else {
+                // الموجه غير موجود
+                $expertises = [];
+            }
+            $mentors = CyclesMentors::where('user_id', $id ?? 0)->get();
+
+
+
+            $order = CyclesMentors::where('cycle_id', Auth::user()->company->cycle ?? 0)->where('user_id', $id ?? 0)->first();
+
+
+            $mentorshipTasks = MentorshipTask::where('mentor_id', $id)->where('status', 'pending')->get();
+
+
+            return view('admin/clients/UserProfile', compact(
+                'client',
+                'expertises',
+                'mentors',
+                'order',
+                'mentorshipTasks',
+                'mentrequests_count',
+                'mentrequests_period',
+                'average_rating'
+            ));
+
         } else {
-            // الموجه غير موجود
-            $expertises = [];
+            return redirect()->route('user.profile_view')->with(['msg' => 'FailedStore', 'class' => 'danger']);
         }
-        $mentors = CyclesMentors::where('user_id', $id ?? 0)->get();
-
-
-
-        $order = CyclesMentors::where('cycle_id', Auth::user()->company->cycle ?? 0)->where('user_id', $id ?? 0)->first();
-
-        
-        $mentorshipTasks = MentorshipTask::where('mentor_id',$id)->where('status','pending')->get();
-       
-
-            return view('admin/clients/UserProfile', compact('client',
-            'expertises',
-            'mentors',
-            'order',
-            'mentorshipTasks',
-            'mentrequests_count',
-            'mentrequests_period',
-            'average_rating'));
-
-    }else{
-        return redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
-    }
     }
 
-    public function showMintors(Request $request){
-
+    public function showMintors(Request $request)
+    {
+        $setting = Settings::where('id', 1)->first();
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
-        $ExpertiesSearch = $request->input('ExpertiesSearch');
+        $ExpertiesSearch = $request->input('expertises');
+        $linkedin = $request->input('linkedin');
+        if ($setting->mentor_list == 1) {
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
+                $l = app()->getLocale();
+                $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
+                $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
+                $mentors = User::role('mentor')
+                    ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+                if ($rateSearch > 0) {
+                    $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
+                        $q->where(function ($q2) {
+                            $q2->where('approved', 'Yes')
+                                ->orWhereNull('approved');
+                        })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
+                    });
+                }
+                if (!empty($ExpertiesSearch)) {
+                    $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
+                    if ($expertiesMentor) {
+                        $expid = $expertiesMentor->id;
+                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
+                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                        });
+                    }
+                }
+                if (!empty($linkedin)) {
+                    $mentors = $mentors->whereHas('bio', function ($query) use ($linkedin) {
+                        $query->whereNotNull('linkedin');
+                    });
+                }
+                if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
+                    $cycleId = Auth::user()->company->cycle;
+                    $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
+                        ->pluck('user_id')
+                        ->toArray();
+                    $mentors = $mentors->whereIn('id', $mentorIds);
+                }
 
-        
-        
-    $l = app()->getLocale();
-    
-    // إعداد الأعمدة الصحيحة بناءً على اللغة
-    $firstNameColumn = $l == 'ar' ? 'first_name_ar' : 'first_name_en';
-    $lastNameColumn = $l == 'ar' ? 'last_name_ar' : 'last_name_en';
+                $mentors = $mentors->get();
+             
+                // $mentors = User::role('mentor')->get();
+                return view('admin/clients/Mentors', compact('mentors'));
+            }
+        } else {
 
-    // البحث في الموجهين
-    $mentors = User::role('mentor')
-        ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+            if (Auth::user()->hasanyRole('Admin')) {
+                $l = app()->getLocale();
+                $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
+                $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
+                $mentors = User::role('mentor')
+                    ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+                if ($rateSearch > 0) {
+                    $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
+                        $q->where(function ($q2) {
+                            $q2->where('approved', 'Yes')
+                                ->orWhereNull('approved');
+                        })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
+                    });
+                }
+                if (!empty($ExpertiesSearch)) {
+                    $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
+                    if ($expertiesMentor) {
+                        $expid = $expertiesMentor->id;
+                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
+                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                        });
+                    }
+                }
+                $mentors = $mentors->get();
+                // $mentors = User::role('mentor')->get();
+                return view('admin/clients/Mentors', compact('mentors'));
+            } else {
+                return redirect()->route('core.dashboard_view');
+            }
 
-    if ($rateSearch > 0) {
-        $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
-            $q->where(function ($q2) {
-                $q2->where('approved', 'Yes')
-                   ->orWhereNull('approved');
-            })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
-        });
+        }
+
     }
-    
-    if (!empty($ExpertiesSearch)) {
-        // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
-        $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
 
-        if ($expertiesMentor) { // تأكد من وجود الخبرة
-            $expid = $expertiesMentor->id;
 
-            // تصفية الموجهين بناءً على الخبرة
-            $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
-                $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
-            });
+    public function savePhoneSession(Request $request)
+    {
+
+        $request->session()->forget('phone');
+        $request->session()->put('phone', $request->phone);
+        $request->session()->put('countryCode', $request->countryCode);
+
+        return response()->json(['message' => 'تم حفظ رقم الهاتف بنجاح.']);
+
+    }
+    public function sendCode(Request $request)
+    {
+        $userId = Auth::user()->id;
+
+        DB::table('otps')
+            ->where('created_at', '<', Carbon::now()->subHours(6))
+            ->where('bad', '0')
+            ->delete();
+
+        // جلب الـ OTPs السابقة التي تم إرسالها والتي هي "غير صالحة" (bad == 0)
+        $otpget = Otp::where('user_id', $userId)
+            ->where('bad', '0')
+            ->where('created_at', '>=', DB::raw('created_at - INTERVAL 6 HOUR')) // تحقق من المحاولات في آخر 6 ساعات
+            ->get();
+
+
+
+
+        // إذا كان عدد المحاولات أكثر من 2 خلال 6 ساعات، يجب الانتظار 6 ساعات
+        if ($otpget->count() >= 5) {
+            return response()->json(['error' => __('admin.OTP_limit_exceeded_wait_6_hours')]);
+        }
+
+        $request->session()->forget('otp');
+        $request->session()->forget('phone');
+        $request->session()->forget('countryCode');
+        $request->session()->put('phone', $request->phone);
+        $request->session()->put('countryCode', $request->countryCode);
+
+        $phoneNumber = $request->countryCode . $request->phone;
+
+        $otp = $this->generateOtp();
+
+        $otpsave = new Otp();
+        $otpsave->user_id = $userId;
+        $otpsave->phone = $phoneNumber;
+        $otpsave->otp_code = $otp;
+        $otpsave->expires_at = Carbon::now()->addMinutes(10);
+        $otpsave->save();
+
+        $result = $this->whatsAppService->sendOTP($phoneNumber, $otp);
+        dd($result);
+        if ($result) {
+            $otpsave->otp_sent = true;
+            $otpsave->save();
+            $request->session()->put('otp', $otp);
+            return response()->json(['success' => __('admin.OTP_sent_successfully')]);
+        } else {
+            return response()->json(['error' => __('admin.Failed_to_send_OTP')]);
+        }
+
+
+
+
+    }
+
+    public function verifyCode(Request $request)
+    {
+        $codeFromUser = $request->code;
+        $otpFromSession = session('otp');
+        $phone = session('phone');
+        $countryCode = session('countryCode');
+        $userId = Auth::user()->id;
+
+        if ($codeFromUser == $otpFromSession) {
+            // إذا كان الرمز صحيحًا
+            $otpget = Otp::where('user_id', $userId)
+                ->where('bad', '0')
+                ->where('expires_at', '>=', now()) // تأكد أن OTP لم تنته صلاحيته
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($otpget) {
+                // وضع علامة "سيء" على الـ OTP
+                $otpget->bad = 1;
+                $otpget->save();
+
+                $user = User::find($userId);
+                $user->country_code_w_a = $countryCode;
+                $user->whatsapp = $phone;
+                $user->whatsapp_verified = 1;
+                $user->save();
+
+                return response()->json(['success' => __('admin.OTP_verified_successfully')]);
+            } else {
+                return response()->json(['error' => __('admin.No_valid_OTP_found_or_OTP_expired')]);
+            }
+        } else {
+            // إذا كان الرمز غير صحيح
+            $otpget2 = Otp::where('user_id', $userId)
+                ->where('bad', '0')
+                ->where('expires_at', '>=', now()) // تأكد أن OTP لم تنته صلاحيته
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($otpget2) {
+                // زيادة المحاولات الخاطئة
+                $otpget2->wrong_attempts += 1;
+
+                if ($otpget2->wrong_attempts >= 3) {
+                    // قفل المحاولات لمدة 6 ساعات
+                    $otpget2->created_at = now()->addHours(6);
+                    $otpget2->save();
+
+                    return response()->json(['error' => __('admin.max_attempts_reached')]);
+                } else {
+                    $otpget2->save();
+
+                    return response()->json([
+                        'error' => __('admin.invalid_verification_code'),
+                        'remaining_attempts' => 3 - $otpget2->wrong_attempts,
+                    ]);
+                }
+            } else {
+                return response()->json(['error' => __('admin.No_valid_OTP_found_or_OTP_expired')]);
+            }
         }
     }
 
-
-    // جلب النتائج
-    $mentors = $mentors->get();
-        // $mentors = User::role('mentor')->get();
-        
-        
-
-            return view('admin/clients/Mentors', compact('mentors'));
-
-
+    private function generateOtp()
+    {
+        return mt_rand(100000, 999999);
     }
 
+    /**
+     * Show 2FA Setting form
+     */
+    public function show2faForm(Request $request)
+    {
+        $user = Auth::user();
+        $google2fa_url = "";
+        $secret_key = "";
+
+        if ($user->exists()) {
+            $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+            $google2fa_url = $google2fa->getQRCodeInline(
+                env('APP_NAME'),
+                $user->email,
+                $user->google2fa_secret
+            );
+            $secret_key = $user->google2fa_secret;
+        }
+
+        $data = array(
+            'user' => $user,
+            'secret' => $secret_key,
+            'google2fa_url' => $google2fa_url
+        );
+
+        return view('auth.2fa_settings')->with('data', $data);
+    }
+
+    /**
+     * Generate 2FA secret key
+     */
+    public function generate2faSecret(Request $request)
+    {
+
+        $user = Auth::user();
+        // Initialise the 2FA class
+        $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+
+        // Add the secret key to the registration data
+
+        $user->two_factor_enabled = 0;
+        $user->google2fa_secret = $google2fa->generateSecretKey();
+        $user->save();
+
+        return redirect('/dashboard/myProfile')->with('success', "Secret key is generated.");
+    }
+
+    /**
+     * Enable 2FA
+     */
+    public function enable2fa(Request $request)
+    {
+
+        $user = Auth::user();
+        $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+
+        $secret = $request->input('secret');
+        $valid = $google2fa->verifyKey($user->google2fa_secret, $secret);
+
+        if ($valid) {
+            $user->two_factor_enabled = 1;
+            $user->save();
+            return redirect('/dashboard/myProfile')->with('success', "2FA is enabled successfully.");
+        } else {
+            return redirect('/dashboard/myProfile')->with('error', "Invalid verification Code, Please try again.");
+        }
+    }
+
+    /**
+     * Disable 2FA
+     */
+    public function disable2fa(Request $request)
+    {
+        if (!(Hash::check($request->get('current-password'), Auth::user()->password))) {
+            // The passwords matches
+            return redirect()->back()->with("error", "Your password does not matches with your account password. Please try again.");
+        }
+
+        $validatedData = $request->validate([
+            'current-password' => 'required',
+        ]);
+        $user = Auth::user();
+        $user->two_factor_enabled = 0;
+        $user->google2fa_secret = null;
+        $user->save();
+        return redirect('/dashboard/myProfile')->with('success', "2FA is now disabled.");
+    }
 
 
 }

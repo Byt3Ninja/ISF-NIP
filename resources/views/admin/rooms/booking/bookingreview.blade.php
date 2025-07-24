@@ -31,10 +31,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                <button type="button" class="close" data-bs-dismiss="alert"
-                                        aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 <div class="d-flex align-items-center">
                                     <i class="ti ti-check"></i>
                                     <span>
@@ -85,11 +82,11 @@
                                                 <td style="font-size: small;">{{$booking_review->approved }}</td>
                                                 <td style="font-size: small;">{{($booking_review->User->{'first_name_'.$l} ?? null).' '.($booking_review->User->{'last_name_'.$l} ?? null)}}</td>
                                                 <td style="font-size: small;">
-                                                    @can('delete_user')
-                                                        <a href="{{route('bookingApprove', ['id' => $booking_review->id, 'action' => 1])}}" class="btn btn-outline-success btn-sm"><i class="bx bxs-plus-square"> </i></a>
+                                                    @if( $_user->ableTo('delete_user', $permissions) )
+                                                        <a href="{{route('bookings.approve', ['id' => $booking_review->id, 'action' => 1])}}" class="btn btn-outline-success btn-sm"><i class="bx bxs-plus-square"> </i></a>
 
-                                                        <a href="{{route('bookingApprove', ['id' => $booking_review->id, 'action' => 2])}}"class="btn btn-outline-danger btn-sm"><i class="bx bx-block"> </i></a>
-                                                    @endcan
+                                                        <a href="{{route('bookings.approve', ['id' => $booking_review->id, 'action' => 2])}}"class="btn btn-outline-danger btn-sm"><i class="bx bx-block"> </i></a>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @endforeach

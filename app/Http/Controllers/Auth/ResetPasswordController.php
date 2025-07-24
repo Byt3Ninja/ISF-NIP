@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class ResetPasswordController extends Controller
 {
@@ -51,7 +52,7 @@ class ResetPasswordController extends Controller
         $resetEntry = DB::table('password_resets')->where('email', $email)->orderBy('created_at', 'desc')->first();
 
         if (!$resetEntry || !Hash::check($token, $resetEntry->token)) {
-            return back()->withErrors(['email' => __('auth.expired_token')]);
+            return back()->withErrors(['forget' => __('auth.expired_token')]);
         }
 
         $response = $this->broker()->reset(
@@ -68,13 +69,23 @@ class ResetPasswordController extends Controller
 
     protected function sendResetResponse(Request $request, $response)
     {
-        return to_route('login')->with('status', trans($response));
+        // dd($response);
+        // return to_route('login')->with('status', trans($response));
+
+        Auth::logout();
+
+        // // إبطال الجلسة الحالية
+        $request->session()->invalidate();
+
+        // // تجديد توكن الحماية CSRF
+        $request->session()->regenerateToken();
+
+        // // إعادة التوجيه
+        return to_route('login')->with('Reset', __('auth.password_reset_success'));
     }
 
     protected function sendResetFailedResponse(Request $request, $response)
     {
         return back()->withErrors(['email' => trans($response)]);
     }
-
- 
 }

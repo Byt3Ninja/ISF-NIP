@@ -117,7 +117,7 @@
           <p><b>{{ __('messages.Message') }}:</b></p> <span id="message"></span>
         </div>
         <div class="modal-footer">
-          <a onclick="delme({{ $sent->id }})" href="javascript:void(0);">
+          <a onclick="delme()" href="javascript:void(0);" id="deleteMessageBtn">
             <button type="button" class="btn btn-label-danger">
               <i class="ti ti-x d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
@@ -196,46 +196,47 @@
     }
 
     function delme(id) {
-      var url = '/dashboard/messages/delete';
-      var id = id;
-      var token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
-            $.post(url, {
-                'id': id,
-                '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.FileDeleted') }}.',
-                  'success'
-                );
-                location.reload();
-              }
-            ).fail(
-              function(error) {
-                Swal.fire(
-                  'Error!',
-                  'Delete fail.',
-                  'error'
-                );
-                console.log(error);
-              }
-            );
-          } else {
-            console.log('Canceled')
-          }
-        })
+      alert(id);
+      // var url = '/dashboard/messages/delete';
+      // var id = id;
+      // var token = '{{ csrf_token() }}';
+      // Swal.fire({
+      //     title: "{{ __('admin.SureDelete') }}",
+      //     text: "{{ __('admin.Recover') }}",
+      //     type: "warning",
+      //     showCancelButton: true,
+      //     confirmButtonClass: "btn-danger",
+      //     confirmButtonText: "{{ __('admin.DYes') }}",
+      //     cancelButtonText: "{{ __('admin.No') }}!",
+      //   })
+      //   .then((result) => {
+      //     if (result.value) {
+      //       $.post(url, {
+      //           'id': id,
+      //           '_token': token
+      //         },
+      //         function(response) {
+      //           Swal.fire(
+      //             '{{ __('admin.Deleted') }}!',
+      //             '{{ __('admin.FileDeleted') }}.',
+      //             'success'
+      //           );
+      //           location.reload();
+      //         }
+      //       ).fail(
+      //         function(error) {
+      //           Swal.fire(
+      //             'Error!',
+      //             'Delete fail.',
+      //             'error'
+      //           );
+      //           console.log(error);
+      //         }
+      //       );
+      //     } else {
+      //       console.log('Canceled')
+      //     }
+      //   })
     }
   </script>
 @stop

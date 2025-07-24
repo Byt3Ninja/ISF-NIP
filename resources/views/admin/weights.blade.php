@@ -1,437 +1,561 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-@stop
-
 @section('content')
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-header mb-4">
-        <h4 class="card-title">{{ __('admin.all Weights') }}</h4>
-      </div>
-      <div class="content-body">
-        <section id="multiple-column-form">
-          @if (session()->has('message'))
-            <div 
-              class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" 
-              role="alert"
-            >
-              {{ __('admin.' . session()->get('message')) }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          @endif
-        </section>
+<div class="content-wrapper">
+	<div class="container-xxl flex-grow-1 container-p-y">
+		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-4">
+			<h3 class="mb-0 fw-bold">{{ __('admin.all Weights') }}</h3>
+			@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateWeights">
+				<i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
+			</button>
+			@endif
+		</div>
 
-        <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
-              <div class="card-header">
-                <button 
-                  class="btn btn-primary" 
-                  data-bs-toggle="modal" data-bs-target="#CreateWeights">
-                  {{ __('admin.Add new Weights') }}
-                  <i class="ti ti-plus mx-2"></i>
-                </button>
-              </div>
-              <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <table class="table mb-0" id="userstable">
-                      <thead class="thead-dark">
-                        <tr>
-                          <th>#</th>
-                          <th>{{ __('admin.StageName') }}</th>
-                          <th>{{ __('admin.Category') }}</th>
-                          <th>{{ __('admin.subCategory_Name') }}</th>
-                          <th>{{ __('admin.Weight') }}</th>
-                          <th>{{ __('admin.Created at') }}</th>
-                          <th>{{ __('cycles.Edit/Delete') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @php
-                        $c=1;
-                        @endphp
-                        @foreach ($weights as $weight)
-                        <tr>
-                          <td>{{$c++}}</td>
-                          <td>{{$weight->stage->{'name_'.$l} }}</td>
-                          <td>{{$weight->category->{'category_name_' . $l} }}</td>
-                          <td>{{$weight->subcategory->{'name_' . $l} }}</td>
-                          <td>{{$weight->weight}}</td>
-                          <td>{{$weight->created_at}}</td>
-                          <td>
-                            <div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowWeight{{ $weight->id }}" >{{__('admin.Show')}}</div>
-                            <div class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#EditWeight{{ $weight->id }}">{{__('admin.Edit')}}</div>
-                            <form action="{{ route('weights.destroy', $weight->id) }}" method="POST" style="display: inline-block;">
-                              @csrf
-                              @method('DELETE')
-                              <button class="btn btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete this post?')">{{__('admin.Delete')}}</button>
-                          </form>
+		<div class="content-body">
+			<section id="multiple-column-form">
+				@if (session()->has('message'))
+				<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" role="alert">
+					{{ __('admin.' . session()->get('message')) }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+				@endif
+			</section>
 
-                          </td>
-                        </tr>
-                        <!-- Edit Customer Modal -->
-                        <div class="modal fade" id="EditWeight{{ $weight->id }}" tabindex="-1" aria-hidden="true">
-                          <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-                              <div class="modal-content">
-                                  <div class="modal-body">
-                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      <div class="text-center mb-6">
-                                          <h4 class="mb-2">{{__('admin.Edit')}} ({{$weight->name}})</h4>
-                                      </div>
+			<section class="row">
+				<div class="col-xl-12 col-md-12 col-sm-12">
+					<div class="card">
+						<div class="card-body">
+							<div class="table-responsive">
+								<!-- Filter Controls -->
+								<div class="row mb-8">
+									<div class="col-md-1">
+										<label class="form-label">{{ __('admin.Show') }}</label>
+										<select id="showEntries" class="form-select form-select-sm">
+											<option value="10">10</option>
+											<option value="25">25</option>
+											<option value="50">50</option>
+											<option value="100">100</option>
+											<option value="-1">{{ __('admin.All') }}</option>
+										</select>
+									</div>
+									<div class="col-md-2">
+										<label class="form-label">{{ __('admin.StageName') }}</label>
+										<select id="stageFilter" class="form-select form-select-sm">
+											<option value="">{{ __('admin.All') }}</option>
+										</select>
+									</div>
+									<div class="col-md-2">
+										<label class="form-label">{{ __('admin.Category') }}</label>
+										<select id="categoryFilter" class="form-select form-select-sm">
+											<option value="">{{ __('admin.All') }}</option>
+										</select>
+									</div>
+									<div class="col-md-2">
+										<label class="form-label">{{ __('admin.subCategory_Name') }}</label>
+										<select id="subcategoryFilter" class="form-select form-select-sm">
+											<option value="">{{ __('admin.All') }}</option>
+										</select>
+									</div>
+									<div class="col-md-2">
+										<label class="form-label">{{ __('admin.Weight') }}</label>
+										<select id="weightFilter" class="form-select form-select-sm">
+											<option value="">{{ __('admin.All') }}</option>
+										</select>
+									</div>
+									<div class="col-md-3 ps-12">
+										<label class="form-label">{{ __('admin.Search') }}</label>
+										<div class="input-group input-group-sm">
+											<input type="text" id="globalSearch" class="form-control" placeholder="{{ __('admin.Search') }}...">
+										</div>
+									</div>
+								</div>
+								<table class="table mb-0" id="userstable">
+									<thead class="table-light">
+										<tr>
+											<th>#</th>
+											<th>{{ __('admin.StageName') }}</th>
+											<th>{{ __('admin.Category') }}</th>
+											<th>{{ __('admin.subCategory_Name') }}</th>
+											<th>{{ __('admin.Weight') }}</th>
+											<th>{{ __('admin.Created at') }}</th>
+											@if( $_user->ableToAny(['weights.show', 'weights.edit', 'weights.update', 'weights.destroy'],
+											$permissions) )<th>{{ __('admin.Actions') }}</th>@endif
+										</tr>
+									</thead>
+									<tbody>
+										@php $c = 1; @endphp
+										@foreach ($weights as $weight)
+										<tr>
+											<td>{{$c++}}</td>
+											<td>{{$weight->stage->{'name_'.$l} }}</td>
+											<td>{{$weight->category->{'category_name_' . $l} }}</td>
+											<td>{{$weight->subcategory->{'name_' . $l} }}</td>
+											<td>{{$weight->weight}}</td>
+											<td>{{$weight->created_at}}</td>
+											@if( $_user->ableToAny(['weights.show', 'weights.edit', 'weights.update', 'weights.destroy'],
+											$permissions) )
+											<td>
+												@if( $_user->ableTo('weights.show', $permissions) )
+												<button type="button" class="btn btn-icon btn-xm rounded-circle btn-label-info"
+													data-bs-placement="top" title="{{ __('admin.Show') }}" data-bs-toggle="modal"
+													data-bs-target="#ShowWeight{{ $weight->id }}">
+													<i class="ti ti-eye"></i>
+												</button>
+												@endif
+												@if( $_user->ableToAny(['weights.edit', 'weights.update'], $permissions) )
+												<button type="button" class="btn btn-icon btn-xm rounded-circle btn-label-primary"
+													data-bs-placement="top" title="{{ __('admin.Edit') }}" data-bs-toggle="modal"
+													data-bs-target="#EditWeight{{ $weight->id }}">
+													<i class="ti ti-edit"></i>
+												</button>
+												@endif
+												@if( $_user->ableTo('weights.destroy', $permissions) )
+												<button type="button" class="btn btn-icon btn-xm rounded-circle btn-label-danger delete-weight-action"
+													data-bs-placement="top" title="{{ __('admin.Delete') }}"
+													data-id="{{ $weight->id }}"
+													data-url="{{ route('weights.destroy', $weight->id) }}">
+													<i class="ti ti-trash"></i>
+												</button>
+												@endif
+											</td>
+											@endif
+										</tr>
+										@if( $_user->ableToAny(['weights.edit', 'weights.update'], $permissions) )
+										<!-- Edit Weight Modal -->
+										<div class="modal fade" id="EditWeight{{ $weight->id }}" tabindex="-1" aria-hidden="true">
+											<div class="modal-dialog modal-md">
+												<div class="modal-content">
+													<div class="modal-header">
+														<h4 class="modal-title mb-0">
+															{{__('admin.Edit')}} {{__('admin.Weight')}}
+														</h4>
+														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+													</div>
+													<div class="modal-body">
+														<form class="add-new-user pt-0" action="{{ route('weights.update', $weight->id) }}"
+															method="POST">
+															@csrf
+															@method('PUT')
+															<div class="form-group mb-4">
+																<label class="form-label" for="stage_id_{{ $weight->id }}">{{ __('admin.StageName')
+																	}}</label>
+																<select class="form-select" name="stage_id" id="stage_id_{{ $weight->id }}">
+																	<option value="" disabled>{{ $l == 'en' ? 'Choose Stage' : 'اختر المرحلة' }}
+																	</option>
+																	@foreach ($stages as $stage)
+																	<option value="{{ $stage->id }}" {{ $stage->id == $weight->stage_id ? 'selected' :
+																		'' }}>
+																		{{ $stage->{'name_'. $l} }}
+																	</option>
+																	@endforeach
+																</select>
+															</div>
+															<div class="form-group mb-4">
+																<label class="form-label" for="category_id_{{ $weight->id }}">{{ __('admin.Category')
+																	}}</label>
+																<select class="category_id form-select" name="category_id"
+																	id="category_id_{{ $weight->id }}">
+																	<option value="" disabled>{{ $l == 'en' ? 'Choose category' : 'اختر القسم' }}
+																	</option>
+																	@foreach ($categories as $category)
+																	<option value="{{ $category->id }}" {{ $category->id == $weight->category_id ?
+																		'selected' : '' }}>
+																		{{ $category->{'category_name_'. $l} }}
+																	</option>
+																	@endforeach
+																</select>
+															</div>
+															<div class="form-group mb-4">
+																<label class="form-label" for="subcategory_id_{{ $weight->id }}">{{
+																	__('admin.subCategory_Name')}}</label>
+																<select class="subcategory_id form-select" name="subcategory_id"
+																	id="subcategory_id_{{ $weight->id }}">
+																	<option value="" disabled>{{ $l == 'en' ? 'Choose subcategory' : 'اختر القسم
+																		الفرعي' }}</option>
+																	@foreach ($subcategories as $subcategory)
+																	<option value="{{ $subcategory->id }}" {{ $subcategory->id ==
+																		$weight->subcategory_id ? 'selected' : '' }}>
+																		{{ $subcategory->{'name_'. $l} }}
+																	</option>
+																	@endforeach
+																</select>
+															</div>
+															<div class="form-group mb-8">
+																<label class="form-label" for="weights_{{ $weight->id }}">{{__('admin.Weight')}}</label>
+																<input class="form-control" id="weights_{{ $weight->id }}" type="number" name="weights"
+																	value="{{ $weight->weight }}" placeholder="0" min="0" step="0.01" />
+															</div>
 
-                                      <form class="add-new-user pt-0" action="{{ route('weights.update', $weight->id) }}" method="POST">
-                                          @csrf
-                                          @method('PUT')
+															<div class="d-flex gap-2 w-100 justify-content-end">
+																<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+																	{{__('admin.Cancel')}}
+																</button>
+																@if( $_user->ableToAny(['weights.edit', 'weights.update'], $permissions) )
+																<button type="submit" class="btn btn-primary">
+																	{{__('admin.submit')}}
+																</button>
+																@endif
+															</div>
+														</form>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!--/ Edit JO Modal -->
+										@endif
+										@if( $_user->ableTo('weights.show', $permissions) )
+										<!-- Show Customer Modal -->
+										<div class="modal fade" id="ShowWeight{{ $weight->id }}" tabindex="-1" aria-hidden="true">
+											<div class="modal-dialog modal-md">
+												<div class="modal-content">
+													<div class="modal-header border-0 pb-0">
+														<h5 class="modal-title px-3">{{ __('admin.Weight Details') }}</h5>
+														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+													</div>
+													<div class="modal-body">
+														<ul class="list-group list-group-flush">
+															<li class="list-group-item d-flex justify-content-between align-items-center">
+																<span class="fw-semibold">{{ __('admin.StageName') }}</span>
+																<span>{{ $weight->stage->{'name_'.$l} }}</span>
+															</li>
+															<li class="list-group-item d-flex justify-content-between align-items-center">
+																<span class="fw-semibold">{{ __('admin.Category') }}</span>
+																<span>{{ $weight->category->{'category_name_' . $l} }}</span>
+															</li>
+															<li class="list-group-item d-flex justify-content-between align-items-center">
+																<span class="fw-semibold">{{ __('admin.subCategory_Name') }}</span>
+																<span>{{ $weight->subcategory->{'name_' . $l} }}</span>
+															</li>
+															<li class="list-group-item d-flex justify-content-between align-items-center">
+																<span class="fw-semibold">{{ __('admin.Weight') }}</span>
+																<span>{{ $weight->weight }}</span>
+															</li>
+															<li class="list-group-item d-flex justify-content-between align-items-center">
+																<span class="fw-semibold">{{ __('admin.Created At') }}</span>
+																<span>{{ $weight->created_at }}</span>
+															</li>
+														</ul>
+													</div>
+													<div class="modal-footer">
+														<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+															{{ __('admin.Close') }}
+														</button>
+													</div>
+												</div>
+											</div>
+										</div>
+										@endif
+										<!--/ Show Customer Modal -->
+										@endforeach
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                                          <div class="ecommerce-customer-add-basic mb-4" >
-
-                                              <div class="col-md-12">
-
-                                                <div class="mb-6 width49">
-                                                    <label class="form-label fs-6">
-                                                      {{ __('admin.StageName') }}
-                                                      
-                                                    </label>
-                                                    <select class=" form-select" name="stage_id">
-                                                      <option value="" disabled selected>
-                                                        {{ $l == 'en' ? 'Choose Stage' : 'اختر المرحلة' }}
-                                                      </option>
-                                                      @foreach ($stages as $stage)
-                                                        <option value="{{ $stage->id }}" {{ $stage->id == $weight->stage_id ? 'selected' : '' }} >{{ $stage->{'name_'. $l} }}</option>
-                                                      @endforeach
-                                                    </select>
-                                                  </div>
-                        
-                        
-                        
-                                                  <div class="mb-6 width49">
-                                                    <label class="form-label fs-6">
-                                                      {{ __('admin.Category') }}
-                                                      
-                                                    </label>
-                                                    <select class="category_id form-select" name="category_id">
-                                                      <option value="" disabled selected>
-                                                        {{ $l == 'en' ? 'Choose category' : 'اختر القسم' }}
-                                                      </option>
-                                                      @foreach ($categories as $category)
-                                                        <option value="{{ $category->id }}"  {{ $category->id == $weight->category_id ? 'selected' : '' }} >{{ $category->{'category_name_'. $l} }}</option>
-                                                      @endforeach
-                                                    </select>
-                                                  </div>
-                        
-                        
-                                                  <div class="mb-6 width49">
-                                                    <label class="form-label fs-6">
-                                                      {{ __('admin.subCategory_Name') }}
-                                                      
-                                                    </label>
-                                                    <select class="subcategory_id form-select" name="subcategory_id">
-                                                      <option value="" disabled selected>
-                                                        {{ $l == 'en' ? 'Choose subcategory' : 'اختر القسم الفرعي' }}
-                                                      </option>
-                                                      @foreach ($subcategories as $subcategory)
-                                                        <option value="{{ $subcategory->id }}" {{ $subcategory->id == $weight->subcategory_id ? 'selected' : '' }} >{{ $subcategory->{'name_'. $l} }}</option>
-                                                      @endforeach
-                                                    </select>
-                                                  </div>
-                        
-                                                  {{-- <div class="mb-6 width49">
-                                                    <label class="form-label fs-6">
-                                                      {{ __('admin.Question') }}
-                                                      
-                                                    </label>
-                                                    <select class=" form-select" name="question_id">
-                                                      <option value="" disabled selected>
-                                                        {{ $l == 'en' ? 'Choose Question' : 'اختر السؤال ' }}
-                                                      </option>
-                                                      @foreach ($questions as $question)
-                                                        <option value="{{ $question->id }}"  {{ $question->id == $weight->question_id ? 'selected' : '' }}  >{{ $question->question }}</option>
-                                                      @endforeach
-                                                    </select>
-                                                  </div> --}}
-                        
-                        
-                                                  <div class="mb-6 width49">
-                                                      <div>
-                                                          <label for="weights" class="form-label" >{{__('admin.Weight')}}</label>
-                                                      </div>
-                                                      <input
-                                                          id="weights"
-                                                          class="form-control"
-                                                          type="number"
-                                                          name="weights"
-                                                          autocomplete="off"
-                                                          value="{{ $weight->weight }}" />
-                                                  </div>
-
-
-
-                                              </div>
-                                          </div>
-
-                                          <div class="text-center">
-                                              <button type="submit" class="btn btn-primary me-3 data-submit">{{__('admin.submit')}}</button>
-                                              <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
-                                          </div>
-                                      </form>
-
-
-
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                      <!--/ Edit JO Modal -->
-                      <!-- Show Customer Modal -->
-                      <div class="modal fade" id="ShowWeight{{ $weight->id }}" tabindex="-1" aria-hidden="true">
-                      <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-                      <div class="modal-content" dir="ltr">
-                          <div class="modal-body">
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              <div class="text-center mb-6">
-                                  <h4 class="mb-2">{{__('admin.Show')}} ({{$weight->weight}})</h4>
-                              </div>
-
-
-                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                  <div class="d-flex gap-4 align-items-center">
-                                      <h6 class="m-0">{{ $weight->stage->{'name_'.$l} }}</h6>
-                                  </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.StageName')}}</p>
-                              </div>
-
-                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                <div class="d-flex gap-4 align-items-center">
-                                    <h6 class="m-0">{{ $weight->category->{'category_name_' . $l} }}</h6>
-                                </div>
-                                <p class="m-0 d-none d-sm-block">{{__('admin.Category')}}</p>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                              <div class="d-flex gap-4 align-items-center">
-                                  <h6 class="m-0">{{ $weight->subcategory->{'name_' . $l} }}</h6>
-                              </div>
-                              <p class="m-0 d-none d-sm-block">{{__('admin.subCategory_Name')}}</p>
-                          </div>
-
-                          <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                            <div class="d-flex gap-4 align-items-center">
-                                <h6 class="m-0">{{ $weight->weight }}</h6>
-                            </div>
-                            <p class="m-0 d-none d-sm-block">{{__('admin.Weight')}}</p>
-                        </div>
-
-                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                  <div class="d-flex gap-4 align-items-center">
-                                      <h6 class="m-0">{{ $weight->created_at}}</h6>
-                                  </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.Created At')}}</p>
-                              </div>
-
-                          </div>
-                      </div>
-                      </div>
-                      </div>
-                      <!--/ Show Customer Modal -->
-                        @endforeach
-
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </section>
-
- <!-- Create JobOrder Modal -->
- <div class="modal fade" id="CreateWeights" tabindex="-1" aria-hidden="true" dir="rtl">
-  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-      <div class="modal-content">
-          <div class="modal-body">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              <div class="text-center mb-6">
-                  <h4 class="mb-2">{{__('admin.Weight')}}</h4>
-              </div>
-
-              <form method="POST" action="{{route('weights.store')}}" class="pt-0" >
-                  @csrf
-
-                  <div class="ecommerce-customer-add-basic mb-4" >
-
-                      <div class="col-md-12">
-
-
-                        <div class="mb-6 width49">
-                            <label class="form-label fs-6">
-                              {{ __('admin.StageName') }}
-                              
-                            </label>
-                            <select class=" form-select" name="stage_id">
-                              <option value="" disabled selected>
-                                {{ $l == 'en' ? 'Choose Stage' : 'اختر المرحلة' }}
-                              </option>
-                              @foreach ($stages as $stage)
-                                <option value="{{ $stage->id }}" >{{ $stage->{'name_'. $l} }}</option>
-                              @endforeach
-                            </select>
-                          </div>
-
-
-
-                          <div class="mb-6 width49">
-                            <label class="form-label fs-6">
-                              {{ __('admin.Category') }}
-                              
-                            </label>
-                            <select class="category_id form-select" name="category_id">
-                              <option value="" disabled selected>
-                                {{ $l == 'en' ? 'Choose category' : 'اختر القسم' }}
-                              </option>
-                              @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" >{{ $category->{'category_name_'. $l} }}</option>
-                              @endforeach
-                            </select>
-                          </div>
-
-
-                          <div class="mb-6 width49">
-                            <label class="form-label fs-6">
-                              {{ __('admin.subCategory_Name') }}
-                              
-                            </label>
-                            <select class="subcategory_id form-select" name="subcategory_id">
-                              <option value="" disabled selected>
-                                {{ $l == 'en' ? 'Choose subcategory' : 'اختر القسم الفرعي' }}
-                              </option>
-                              @foreach ($subcategories as $subcategory)
-                                <option value="{{ $subcategory->id }}"  >{{ $subcategory->{'name_'. $l} }}</option>
-                              @endforeach
-                            </select>
-                          </div>
-
-                          {{-- <div class="mb-6 width49">
-                            <label class="form-label fs-6">
-                              {{ __('admin.Question') }}
-                              
-                            </label>
-                            <select class=" form-select" name="question_id">
-                              <option value="" disabled selected>
-                                {{ $l == 'en' ? 'Choose Question' : 'اختر السؤال ' }}
-                              </option>
-                              @foreach ($questions as $question)
-                                <option value="{{ $question->id }}"  >{{ $question->question }}</option>
-                              @endforeach
-                            </select>
-                          </div> --}}
-
-
-                          <div class="mb-6 width49">
-                              <div>
-                                  <label for="weights" class="form-label" >{{__('admin.Weight')}}</label>
-                              </div>
-                              <input
-                                  id="weights"
-                                  class="form-control"
-                                  type="number"
-                                  name="weights"
-                                  autocomplete="off" />
-                          </div>
-
-                      </div>
-                  </div>
-
-
-
-                  <div>
-                      <button type="submit" class="btn btn-primary me-sm-4 data-submit">{{__('admin.submit')}}</button>
-                      <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
-                  </div>
-              </form>
-
-          </div>
-      </div>
-  </div>
+				@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
+				<!-- Create weight Modal -->
+				<div class="modal fade" id="CreateWeights" tabindex="-1" aria-hidden="true">
+					<div class="modal-dialog modal-md">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title">{{__('admin.Add')}} {{__('admin.Weight')}}</h4>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<form method="POST" action="{{route('weights.store')}}" class="pt-0">
+									@csrf
+									<div class="mb-4">
+										<label class="form-label"> {{ __('admin.StageName') }} </label>
+										<select class=" form-select" name="stage_id">
+											<option value="" disabled selected> {{ $l == 'en' ? 'Choose Stage' : 'اختر المرحلة' }} </option>
+											@foreach ($stages as $stage)
+											<option value="{{ $stage->id }}">{{ $stage->{'name_'. $l} }}</option>
+											@endforeach
+										</select>
+									</div>
+									<div class="mb-4">
+										<label class="form-label"> {{ __('admin.Category') }} </label>
+										<select class="category_id form-select" name="category_id">
+											<option value="" disabled selected> {{ $l == 'en' ? 'Choose category' : 'اختر القسم' }}
+											</option>
+											@foreach ($categories as $category)
+											<option value="{{ $category->id }}">{{ $category->{'category_name_'. $l} }}</option>
+											@endforeach
+										</select>
+									</div>
+									<div class="mb-4">
+										<label class="form-label"> {{ __('admin.subCategory_Name') }} </label>
+										<select class="subcategory_id form-select" name="subcategory_id">
+											<option value="" disabled selected> {{ $l == 'en' ? 'Choose subcategory' : 'اختر القسم الفرعي'
+												}} </option>
+											@foreach ($subcategories as $subcategory)
+											<option value="{{ $subcategory->id }}">{{ $subcategory->{'name_'. $l} }}</option>
+											@endforeach
+										</select>
+									</div>
+									{{-- <div class="mb-4">
+										<label class="form-label"> {{ __('admin.Question') }} </label>
+										<select class=" form-select" name="question_id">
+											<option value="" disabled selected> {{ $l == 'en' ? 'Choose Question' : 'اختر السؤال ' }}
+											</option>
+											@foreach ($questions as $question)
+											<option value="{{ $question->id }}">{{ $question->question }}</option>
+											@endforeach
+										</select>
+									</div> --}}
+									<div class="mb-12">
+										<label for="weights" class="form-label">{{__('admin.Weight')}}</label>
+										<input class="form-control" id="weights" type="number" name="weights" autocomplete="off" />
+									</div>
+									<div class="d-flex justify-content-end align-items-center gap-2">
+										<button type="reset" class="btn btn-label-secondary"
+											data-bs-dismiss="modal">{{__('admin.Cancel')}}</button>
+										@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
+										<button type="submit" class="btn btn-primary data-submit">{{__('admin.submit')}}</button>
+										@endif
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--/ Create wight Modal -->
+				@endif
+		</div>
+	</div>
 </div>
-<!--/ Create JobOrder Modal -->
-
-
-      </div>
-    </div>
-  </div>
-  <!-- END: Content-->
-
-
+<!-- END: Content-->
 @stop
+
 @section('scripts')
-  <!-- Vendors JS -->
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script>
+	$(document).ready(function() {
+		// Initialize DataTable
+		var table = $('#userstable').DataTable({
+			"responsive": true,
+			"searching": true,
+			"lengthChange": false,
+			"paging": true,
+			"bInfo": true,
+			"pageLength": 10,
+			"order": [[5, "desc"]], // Sort by Created at column (newest to oldest)
+			"columnDefs": [
+				{"orderable": true, "targets": [1, 2, 3, 4, 5]},
+				{"orderable": false, "targets": [0, 6]}
+			],
+			"dom": '<"row"<"col-sm-12"t>><"row"<"col-sm-5"i><"col-sm-7"p>>',
+			@if ($l == 'ar')
+			"language": {
+				"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+				"sLoadingRecords": "جارٍ التحميل...",
+				"sProcessing": "جارٍ التحميل...",
+				"sLengthMenu": "أظهر _MENU_ مدخلات",
+				"sZeroRecords": "لم يعثر على أية سجلات",
+				"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+				"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+				"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+				"sInfoPostFix": "",
+				"sSearch": "ابحث:",
+				"sUrl": "",
+				"oPaginate": {
+					"sFirst": "الأول",
+					"sPrevious": "السابق",
+					"sNext": "التالي",
+					"sLast": "الأخير"
+				},
+				"oAria": {
+					"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+					"sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+				}
+			}
+			@endif
+		});
 
-<!-- Page JS -->
-<script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-@stop
-@section('pagescripts')
-    <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-    <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-    <script src="/js/jquery.datetimepicker.full.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#userstable').DataTable({
-                "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-                "columnDefs": [
-                    {"orderable": false, "targets":  [3]},
-                ],
-                @if ($l == 'ar')
-                "language": {
-                    "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                    "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-                    "sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-                    "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                    "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-                    "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
-                    "oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
-                    "oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}} @endif
-                });
+		// Populate filter dropdowns based on current table data
+		function populateFilters() {
+			var stageOptions = [];
+			var categoryOptions = [];
+			var subcategoryOptions = [];
+			var weightOptions = [];
 
+			// Get unique values from table
+			table.rows().every(function() {
+				var rowNode = this.node();
+				var stage = $(rowNode).find('td:eq(1)').text().trim();
+				var category = $(rowNode).find('td:eq(2)').text().trim();
+				var subcategory = $(rowNode).find('td:eq(3)').text().trim();
+				var weight = $(rowNode).find('td:eq(4)').text().trim();
 
-                $('.category_id').change(function() {
-	var category_id = $(this).val();
-	var $state = $('.subcategory_id');
-	$.ajax({
-		url: "{{ route('get_subcategory_by_category') }}",
-		method: 'GET', // إضافة طريقة الطلب
-		data: {
-			category_id: category_id
-		},
-		success: function(data) {
-			$state.html('<option value="">{{ __('admin.SubName') }}</option>'); // إعادة تعيين الخيارات
-
-			$.each(data, function(id, value) {
-				 // تعيين الخيار إذا كان مطابقًا
-				$state.append('<option value="' + id + '" >' + value + '</option>');
+				if (stage && stageOptions.indexOf(stage) === -1) {
+					stageOptions.push(stage);
+				}
+				if (category && categoryOptions.indexOf(category) === -1) {
+					categoryOptions.push(category);
+				}
+				if (subcategory && subcategoryOptions.indexOf(subcategory) === -1) {
+					subcategoryOptions.push(subcategory);
+				}
+				if (weight && weightOptions.indexOf(weight) === -1) {
+					weightOptions.push(weight);
+				}
 			});
 
-		},
-		error: function(xhr, status, error) {
-			console.error('Error:', error); // معالجة الأخطاء
+			// Sort options
+			stageOptions.sort();
+			categoryOptions.sort();
+			subcategoryOptions.sort();
+			weightOptions.sort(function(a, b) { return parseFloat(a) - parseFloat(b); });
+
+			// Populate dropdowns
+			var stageSelect = $('#stageFilter');
+			var categorySelect = $('#categoryFilter');
+			var subcategorySelect = $('#subcategoryFilter');
+			var weightSelect = $('#weightFilter');
+
+			stageSelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+			categorySelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+			subcategorySelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+			weightSelect.empty().append('<option value="">{{ __('admin.All') }}</option>');
+
+			$.each(stageOptions, function(index, value) {
+				stageSelect.append('<option value="' + value + '">' + value + '</option>');
+			});
+
+			$.each(categoryOptions, function(index, value) {
+				categorySelect.append('<option value="' + value + '">' + value + '</option>');
+			});
+
+			$.each(subcategoryOptions, function(index, value) {
+				subcategorySelect.append('<option value="' + value + '">' + value + '</option>');
+			});
+
+			$.each(weightOptions, function(index, value) {
+				weightSelect.append('<option value="' + value + '">' + value + '</option>');
+			});
 		}
+
+		// Initialize filters
+		populateFilters();
+
+		// Show entries change
+		$('#showEntries').on('change', function() {
+			var value = $(this).val();
+			table.page.len(value).draw();
+		});
+
+		// Filter functionality
+		$('#stageFilter').on('change', function() {
+			var value = $(this).val();
+			table.column(1).search(value).draw();
+		});
+
+		$('#categoryFilter').on('change', function() {
+			var value = $(this).val();
+			table.column(2).search(value).draw();
+		});
+
+		$('#subcategoryFilter').on('change', function() {
+			var value = $(this).val();
+			table.column(3).search(value).draw();
+		});
+
+		$('#weightFilter').on('change', function() {
+			var value = $(this).val();
+			table.column(4).search(value).draw();
+		});
+
+		// Clear all filters
+		$('#clearSearch').on('click', function() {
+			$('#globalSearch').val('');
+			table.search('').draw();
+		});
+
+		// Global search functionality
+		$('#globalSearch').on('keyup', function() {
+			table.search(this.value).draw();
+		});
+
+		// Existing subcategory functionality
+		$('.category_id').change(function() {
+			var category_id = $(this).val();
+			var $state = $('.subcategory_id');
+			$.ajax({
+				url: "{{ route('subcategories.list_by_category') }}",
+				method: 'GET',
+				data: {
+					category_id: category_id
+				},
+				success: function(data) {
+					$state.html('<option value="">{{ __('admin.SubName') }}</option>');
+					$.each(data, function(id, value) { $state.append('<option value="' + id + '" >' + value + '</option>'); });
+				},
+				error: function(xhr, status, error) { console.error('Error:', error); }
+			});
+		});
+
+		// Handle delete action with SweetAlert
+		$(document).on("click", ".delete-weight-action", function (e) {
+			e.preventDefault();
+			var url = $(this).data('url');
+			var id = $(this).data('id');
+			var token = '{{ csrf_token() }}';
+			
+			Swal.fire({
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+					confirmButton: 'btn btn-danger me-2',
+					cancelButton: 'btn btn-label-secondary',
+				},
+				buttonsStyling: false,
+			})
+			.then((result) => {
+				if (result.value) {
+					$.post(url, {'_method': 'DELETE' , '_token': token},
+						function(response) {
+							Swal.fire({
+								icon: 'success',
+								title: "{{ __('admin.Deleted') }}!",
+								html: "{{ __('admin.DeletedSuccessfully') }}.",
+								showCancelButton: false,
+								showConfirmButton: true,
+								confirmButtonText: "{{ __('admin.OK') }}",
+								customClass: {
+									confirmButton: 'btn btn-primary',
+								},
+								buttonsStyling: false,
+							});
+							// Remove the row from DataTable
+							table.row($(e.target).closest('tr')).remove().draw();
+							// Repopulate filters after row removal
+							populateFilters();
+						}
+					).fail(function(error) { 
+						console.log(error);
+						Swal.fire({
+							icon: 'error',
+							title: "{{ __('admin.Error') }}!",
+							text: "{{ __('admin.DeleteFailed') }}",
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					});
+				}
+			});
+		});
 	});
-});
-
-
-            });
-        </script>
-            
+</script>
 @stop

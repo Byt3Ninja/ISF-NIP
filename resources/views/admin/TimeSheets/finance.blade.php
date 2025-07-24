@@ -32,7 +32,7 @@
               <div class="card-body">
 
 
-                <form method="GET" action="{{ route('show_finance_time_sheet') }}">
+                <form method="GET" action="{{ route('time_sheets.reports.finance.view') }}">
 
 
                   <div class="mb-6 width20">
@@ -109,15 +109,15 @@
                         @hasanyrole('Admin')
                                           <div class="mb-6 width25">
                                             <label class="form-label fs-6">
-                                              {{ __('admin.Orgnizations') }}
+                                              {{ __('admin.organizations') }}
                                               
                                             </label>
                                             <select class="org_id form-select" name="org_id">
                                               <option value="" disabled selected>
-                                                {{ $l == 'en' ? 'Choose Orgnizations' : 'اختر المؤسسة' }}
+                                                {{ $l == 'en' ? 'Choose Organization' : 'اختر المؤسسة' }}
                                               </option>
                                               <option value="">{{ __('admin.SelectAll') }}</option>
-                                              @foreach ($orgnization as $org)
+                                              @foreach ($organization as $org)
                                                 <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? "selected" : "" }} >{{ $org->{'name_'. $l} }}</option>
                                               @endforeach
                                             </select>

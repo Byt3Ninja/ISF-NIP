@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Screening extends Model
 {
-//    use Auditable;
+    // use Auditable;
+    public static $module = 'Screening';
     protected $fillable = ['step_id','user_id','panel','users'];
     protected $casts = ['users' => 'array'];
 
@@ -19,4 +20,8 @@ class Screening extends Model
         return $this->morphMany(CalenderSync::class, 'calenderable');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

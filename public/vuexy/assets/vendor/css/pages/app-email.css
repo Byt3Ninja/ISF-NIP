@@ -152,7 +152,7 @@
 }
 .app-email .app-emails-list .email-list li.email-list-item {
   padding: 0.875rem 1rem;
-  min-height: 4.375rem;
+  /* min-height: 4.375rem; */
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   z-index: 1;
@@ -333,10 +333,11 @@
   min-width: 12rem;
 }
 .light-style .app-email .email-list li.email-list-item.email-marked-read {
-  background-color: rgba(47, 43, 61, 0.06);
+  background-color: var(--bs-white);
 }
 .light-style .app-email .email-list li.email-list-item:hover {
   box-shadow: 0 0.125rem 0.5rem 0 rgba(47, 43, 61, 0.12);
+  background-color: var(--bs-body-bg);
   border-bottom-color: transparent;
 }
 .light-style .app-email .email-list li.email-list-item .email-list-item-actions li {

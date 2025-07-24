@@ -3,9 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 class ChangeCycle extends Notification
 {
@@ -36,6 +37,8 @@ class ChangeCycle extends Notification
     public function toMail(object $notifiable): MailMessage
     {
 
+
+        Log::info('Mail data:', ['last_step' => $this->data['last_step']]);
         return (new MailMessage)
             ->subject('Your Startup Progress Update - Stage Transition Notification')
             ->markdown('emails.emailCycle', $this->data);
@@ -49,23 +52,10 @@ class ChangeCycle extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'company_name' => $this->data['company_name_en'] ?? 'Unknown Company',
-            'last_step' => $this->data['last_step'] ?? 'N/A',
-            'new_step' => $this->data['new_step'] ?? 'N/A',
-            'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
-        ];
-    }
-
-    /**
-     * Get the generic array representation of the notification.
-     */
-    public function toArray(object $notifiable): array
-    {
-        return [
-            'company_name' => $this->data['company_name_en'] ?? 'Unknown Company',
-            'last_step' => $this->data['last_step'] ?? 'N/A',
-            'new_step' => $this->data['new_step'] ?? 'N/A',
-            'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
+            'message' => 'The Step has been Changed For ' . ($this->data['company_name_en'] ?? 'N/A') .
+                ' from ' . ($this->data['last_step'] ?? 'Disappove') .
+                ' to ' . ($this->data['new_step'] ?? 'Disappove') .
+                ' by ' . ($this->data['organization_name_en'] ?? 'N/A'),
         ];
     }
 }
