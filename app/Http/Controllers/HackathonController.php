@@ -22,78 +22,67 @@ use Illuminate\Support\Facades\Notification;
 class HackathonController extends Controller
 {
     public function index()
-{
-    $hackathons_query = "
-        SELECT
-            c.id as c_id,
-            c.title as c_title,
-            c.description as c_description,
-            c.start as c_start_date,
-            c.end as c_end_date,
-            c.type as c_type,
-            c.created_at as c_created_at,
-            c.updated_at as c_updated_at,
-            o.id as o_id,
-            o.name_ar as o_name_ar,
-            o.name_en as o_name_en,
-            o.img_url as o_logo,
-            o.created_at as o_created_at,
-            o.updated_at as o_updated_at
+    {
+        $hackathons_query = "SELECT
+        c.id as 'c_id',
+        c.title as 'c_title',
+        c.description as 'c_description',
+        c.start as 'c_start_date',
+        c.end as 'c_end_date',
+        c.type as 'c_type',
+        c.created_at as 'c_created_at',
+        c.updated_at as 'c_updated_at',
+      
+        o.id as 'o_id',
+        o.name_ar as 'o_name_ar',
+        o.name_en as 'o_name_en',
+        o.img_url as 'o_logo',
+        o.created_at as 'o_created_at',
+        o.updated_at as 'o_updated_at'
         FROM 
-            cycles as c
-        LEFT JOIN 
-            organizations as o ON c.organization_id = o.id
-        WHERE 
-            c.type = 'Hackathon'
-        ORDER BY 
-            c.created_at DESC
-    ";
+        cycles as c
+        LEFT JOIN organizations as o ON c.organization_id = o.id
+        WHERE c.type = 'Hackathon'
+        AND `type` = 'Hackathon' ORDER BY c.created_at DESC";
+        $hackathons_raw = collect(DB::select($hackathons_query));
 
-    $hackathons_raw = collect(DB::select($hackathons_query));
-    $cycleIds = $hackathons_raw->pluck('c_id');
-
-    // Grouped by cycle_id for fast access
-    $steps = Step::where('stype', 1)->whereIn('cycle_id', $cycleIds)->get()->groupBy('cycle_id');
-    $teamFormations = TeamFormation::whereIn('cycle_id', $cycleIds)
-        ->where('user_id', Auth::id())
-        ->get()
-        ->groupBy('cycle_id');
-
-    $now = now();
-
-    $hackathons = $hackathons_raw->map(function ($item) use ($steps, $teamFormations, $now) {
+        $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
+        $team_formation = TeamFormation::whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->where('user_id', Auth::user()->id)->get();
+        $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
+        $now = now();
         $start = \Carbon\Carbon::parse($item->c_start_date);
         $end = \Carbon\Carbon::parse($item->c_end_date);
-
         $status = $now->lt($start)
             ? 'Upcoming'
             : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
 
-        $step = $steps[$item->c_id][0] ?? null;
-        $teamFormation = $teamFormations[$item->c_id][0] ?? null;
+            return [
+                'id' => $item->c_id,
+                'title' => $item->c_title,
+                'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
+                'location' => $item->o_name_en ?? 'Unknown',
+                'status' => $status,
+                'description' => $item->c_description,
+                'tags' => [],
+                'step_name' => $step->where('cycle_id', $item->c_id)->first()->title ?? 'N/A',
+                'step_id' => $step->where('cycle_id', $item->c_id)->first()->id ?? null,
+                'step_start' => $step->where('cycle_id', $item->c_id)->first()->from?->format('Y-m-d') ?? null,
+                'step_end' => $step->where('cycle_id', $item->c_id)->first()->to?->format('Y-m-d') ?? null,
+                'team_formation_id' => $team_formation->where('cycle_id', $item->c_id)->first()->id ?? null,
+            ];
+         });
 
-        return [
-            'id' => $item->c_id,
-            'title' => $item->c_title,
-            'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
-            'location' => $item->o_name_en ?? 'Unknown',
-            'status' => $status,
-            'description' => $item->c_description,
-            'tags' => [],
-            'step_name' => $step?->title ?? 'N/A',
-            'step_id' => $step?->id,
-            'step_start' => $step?->from?->format('Y-m-d'),
-            'step_end' => $step?->to?->format('Y-m-d'),
-            'team_formation_id' => $teamFormation?->id,
-        ];
-    });
-
-    // Separate past hackathons
-    $pastHackathons = $hackathons->where('status', 'Finished')->values();
-    $hackathons = $hackathons->where('status', '!=', 'Finished')->values();
-
-    return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'steps'));
-}
+            // استخراج الهاكاثونات المنتهية فقط
+            $pastHackathons = $hackathons->where('status', 'Finished')->values();
+            $hackathons = $hackathons->reject(function ($item) {
+                return $item['status'] === 'Finished';
+            })->values();
+        // dd($hackathons);
+           
+        
+        // return view('admin.hackathon.index', compact('hackathons'));
+        return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step'));
+    }
 
     public function manage($id)
     {
@@ -182,149 +171,193 @@ class HackathonController extends Controller
         return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
     }
 
-public function show($id)
-{
-    $user = Auth::user();
+    public function show($id) {
 
-    $hackathons_query = "SELECT
-        c.id as c_id,
-        c.title as c_title,
-        c.title_ar as c_title_ar,
-        c.description as c_description,
-        c.description_ar as c_description_ar,
-        c.start as c_start_date,
-        c.end as c_end_date,
-        o.name_en as o_name_en,
-        o.name_ar as o_name_ar,
-        com.step as Com_step
-    FROM cycles as c
-    LEFT JOIN companies as com ON c.id = com.cycle
-    LEFT JOIN organizations as o ON c.organization_id = o.id
-    WHERE c.type = 'Hackathon' AND c.id = ?
-    ORDER BY c.created_at DESC";
+        $user = Auth::user();
+        $hackathons_query = "SELECT
+        c.id as 'c_id',
+        c.title as 'c_title',
+        c.description as 'c_description',
+        c.start as 'c_start_date',
+        c.end as 'c_end_date',
+        c.type as 'c_type',
+        c.created_at as 'c_created_at',
+        c.updated_at as 'c_updated_at',
+        o.id as 'o_id',
+        o.name_ar as 'o_name_ar',
+        o.name_en as 'o_name_en',
+        o.img_url as 'o_logo',
+        o.created_at as 'o_created_at',
+        o.updated_at as 'o_updated_at',
+        u.id as 'U_id',
+        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+        u.email as 'u_email',
+        com.id as 'Com_id',
+        com.name_en as 'Com_name_en',
+        com.name_ar as 'Com_name_ar',
+        com.logo as 'Com_logo',
+        com.cycle as 'Com_cycle',
+        com.step as 'Com_step'
+        FROM 
+        cycles as c
+        LEFT JOIN companies as com ON c.id = com.cycle
+        LEFT JOIN users as u ON u.company_id = com.id
+        LEFT JOIN organizations as o ON c.organization_id = o.id
+        WHERE c.type = 'Hackathon'
+        AND c.id = ? ";
+        
+        $hackathons_query .= " ORDER BY c.created_at DESC";
+        $hackathons_raw = collect(DB::select($hackathons_query, [$id]));
+       
+       
+        if ($hackathons_raw->isNotEmpty()) {
+            $item = $hackathons_raw->first();
 
-    $hackathon_raw = collect(DB::select($hackathons_query, [$id]))->first();
+            $now = now();
+            $start = Carbon::parse($item->c_start_date);
+            $end = Carbon::parse($item->c_end_date);
 
-    if (!$hackathon_raw) {
-        abort(404, 'Hackathon not found');
+            $status = $now->lt($start)
+                ? 'Upcoming'
+                : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
+
+            $status_ar = match($status) {
+                'Upcoming' => 'قادم',
+                'Ongoing' => 'قائم',
+                'Finished' => 'منتهي',
+                default => '',
+            };
+                $step = Step::where('cycle_id', $id)->get();
+            $currentHackathon = [
+                'title' => $item->c_title,
+                'title_ar' => $item->c_title_ar ?? '',
+                'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
+                'date_ar' => $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.'.$end->format('m')) . ' ' . $end->format('Y'),
+                'location' => $item->o_name_en ?? 'Unknown',
+                'location_ar' => $item->o_name_ar ?? 'غير معروف',
+                'status' => $status,
+                'status_ar' => $status_ar,
+                'description' => $item->c_description,
+                'description_ar' => $item->c_description_ar ?? '',
+                'tags' => [],      // أضف التاجز هنا إذا عندك جدول مرتبط
+                'tags_ar' => [],   // نفس الشيء
+                'step_id' => $step->where('id', $item->Com_step)->first()->id ?? null,
+                'step_name' => $step->where('id', $item->Com_step)->first()->title ?? 'N/A',
+                'step_stype' => $step->where('id', $item->Com_step)->first()->stype ?? null,
+                'step_start' => $step->where('id', $item->Com_step)->first()->from?->format('Y-m-d') ?? null,
+                'step_end' => $step->where('id', $item->Com_step)->first()->to?->format('Y-m-d') ?? null,
+                'cycle_id' => $id,
+            ];
+        }
+          
+      
+
+
+        $data = [];
+      $l = app()->getLocale();
+      $forms = "SELECT 
+      FD.company_id as 'FD_company_id',
+      FD.user_id as 'FD_user_id',
+      FD.step_id as 'FD_step_id',
+      FD.question as 'FD_question',
+      FD.answer as 'FD_answer',
+      FD.created_at as 'FD_created_at',
+      FD.updated_at as 'FD_updated_at',
+      FD.deleted_at as 'FD_deleted_at',
+      C.name_en as 'C_name_en',
+      C.name_ar as 'C_name_ar',
+      C.id as 'C_id',
+      C.step as 'C_step',
+      Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+      Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+      U.id as 'U_id',
+      S.title as 'S_title',
+      S.id as 'S_id',
+      S.cycle_id as 'S_cycle_id',
+      S.data as 'S_data',
+      CYC.title as 'CYC_title',
+      CYC.id as 'CYC_id',
+      CYC.organization_id as 'CYC_organization_id',
+      O.name_en as 'O_name_en',
+      O.name_ar as 'O_name_ar',
+      O.id as 'O_id',
+      BF.id as 'BF_id',
+      BF.form_name as 'BF_form_name'
+      FROM form_data as FD 
+      LEFT JOIN companies as C ON C.id = FD.company_id
+      LEFT JOIN users as U ON U.id = FD.user_id
+      LEFT JOIN steps as S ON S.id = FD.step_id
+      LEFT JOIN builder_forms as BF ON BF.id = S.data
+      LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
+      LEFT JOIN organizations as O ON O.id = CYC.organization_id
+      WHERE FD.deleted_at IS NULL AND CYC.id = ? ";
+      $params = [];
+     
+      if($user->organization_id != null){
+        $forms .= " AND CYC.organization_id = ? ";
+        $forms = DB::select($forms, [$id, $user->organization_id]);
+      }else{
+        $forms = DB::select($forms, [$id]);
+      }
+      $forms = collect($forms);
+      
+      $C = 1;
+      // نبدأ بتجميع كل الأسئلة حسب step_id
+      $grouped = $forms->groupBy('FD_step_id');
+
+      $data = $grouped->map(function ($group, $stepId) use ($l) {
+          $first = $group->first();
+      
+          $submission = new stdClass;
+          $submission->company_id = $first->FD_company_id;
+          $submission->user_id = $first->FD_user_id;
+          $submission->cycle_id = $first->CYC_id;
+          $submission->submission_id = $first->C_step;
+          $submission->form_name = $first->BF_form_name;
+          $submission->startup_name = $first->{'C_name_' . $l};
+          $submission->submitted_by = $first->{'user_name_' . $l};
+          $submission->step_name = $first->S_title;
+          $submission->program_name = $first->CYC_title;
+          $submission->organization_name = $first->O_name_en;
+          $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
+      
+          // answers
+          $submission->answers = $group->map(function ($item) use ($l) {
+            $value = $item->FD_answer;
+            
+            // Check if the value is a file path
+            if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
+              // Extract filename from path
+              $filename = basename($value);
+              $value = [
+                'type' => 'file',
+                'path' => $value,
+                'file_name' => $filename,
+                'file_url' => asset($value)
+              ];
+            }
+            
+            return (object)[
+              'user_id' => $item->FD_user_id,
+              'company_id' => $item->FD_company_id,
+              'step_id' => $item->FD_step_id,
+              'company_step' => $item->C_step,
+              'name' => $item->{'user_name_' . $l},
+              'label' => $item->FD_question,
+              'value' => $value,
+            ];
+          })->groupBy('user_id')->values();
+
+          return $submission;
+      })->values()->all(); // remove collection keys (numeric indexing)
+      
+      $data = array_values($data);
+
+
+        // return view('admin.hackathon.show', compact('hackathon'));
+        return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id'));
     }
-
-    $start = Carbon::parse($hackathon_raw->c_start_date);
-    $end = Carbon::parse($hackathon_raw->c_end_date);
-    $now = now();
-
-    $status = $now->lt($start)
-        ? 'Upcoming'
-        : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
-
-    $status_ar = match($status) {
-        'Upcoming' => 'قادم',
-        'Ongoing' => 'قائم',
-        'Finished' => 'منتهي',
-        default => '',
-    };
-
-    $step = Step::where('cycle_id', $id)->get();
-    $matchedStep = $step->where('id', $hackathon_raw->Com_step)->first();
-
-    $currentHackathon = [
-        'title' => $hackathon_raw->c_title,
-        'title_ar' => $hackathon_raw->c_title_ar ?? '',
-        'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
-        'date_ar' => $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.' . $end->format('m')) . ' ' . $end->format('Y'),
-        'location' => $hackathon_raw->o_name_en ?? 'Unknown',
-        'location_ar' => $hackathon_raw->o_name_ar ?? 'غير معروف',
-        'status' => $status,
-        'status_ar' => $status_ar,
-        'description' => $hackathon_raw->c_description,
-        'description_ar' => $hackathon_raw->c_description_ar ?? '',
-        'tags' => [],
-        'tags_ar' => [],
-        'step_id' => $matchedStep?->id,
-        'step_name' => $matchedStep?->title ?? 'N/A',
-        'step_stype' => $matchedStep?->stype,
-        'step_start' => $matchedStep?->from?->format('Y-m-d'),
-        'step_end' => $matchedStep?->to?->format('Y-m-d'),
-        'cycle_id' => $id,
-    ];
-
-    // === Forms & Submission Data ===
-    $l = app()->getLocale();
-    $formQuery = "
-        SELECT 
-            FD.*,
-            C.name_en as C_name_en,
-            C.name_ar as C_name_ar,
-            C.step as C_step,
-            CONCAT(U.first_name_en, ' ', U.last_name_en) as user_name_en,
-            CONCAT(U.first_name_ar, ' ', U.last_name_ar) as user_name_ar,
-            S.title as S_title,
-            S.data as S_data,
-            CYC.title as CYC_title,
-            CYC.organization_id as CYC_organization_id,
-            O.name_en as O_name_en,
-            O.name_ar as O_name_ar,
-            BF.form_name as BF_form_name
-        FROM form_data FD
-        LEFT JOIN companies C ON C.id = FD.company_id
-        LEFT JOIN users U ON U.id = FD.user_id
-        LEFT JOIN steps S ON S.id = FD.step_id
-        LEFT JOIN builder_forms BF ON BF.id = S.data
-        LEFT JOIN cycles CYC ON CYC.id = S.cycle_id
-        LEFT JOIN organizations O ON O.id = CYC.organization_id
-        WHERE FD.deleted_at IS NULL AND CYC.id = ?
-    ";
-
-    $params = [$id];
-    if ($user->organization_id) {
-        $formQuery .= " AND CYC.organization_id = ?";
-        $params[] = $user->organization_id;
-    }
-
-    $forms = collect(DB::select($formQuery, $params));
-    $grouped = $forms->groupBy('FD_step_id');
-
-    $data = $grouped->map(function ($group) use ($l) {
-        $first = $group->first();
-        return (object)[
-            'company_id' => $first->company_id,
-            'user_id' => $first->user_id,
-            'cycle_id' => $first->CYC_id,
-            'submission_id' => $first->C_step,
-            'form_name' => $first->BF_form_name,
-            'startup_name' => $first->{'C_name_' . $l},
-            'submitted_by' => $first->{'user_name_' . $l},
-            'step_name' => $first->S_title,
-            'program_name' => $first->CYC_title,
-            'organization_name' => $first->O_name_en,
-            'submissionDate' => $first->created_at ?? $first->updated_at,
-            'answers' => $group->map(function ($item) use ($l) {
-                $value = $item->answer;
-                if (is_string($value) && (str_contains($value, '/') || str_contains($value, '\\'))) {
-                    $filename = basename($value);
-                    $value = [
-                        'type' => 'file',
-                        'path' => $value,
-                        'file_name' => $filename,
-                        'file_url' => asset($value)
-                    ];
-                }
-                return (object)[
-                    'user_id' => $item->user_id,
-                    'company_id' => $item->company_id,
-                    'step_id' => $item->step_id,
-                    'company_step' => $item->C_step,
-                    'name' => $item->{'user_name_' . $l},
-                    'label' => $item->question,
-                    'value' => $value
-                ];
-            })->groupBy('user_id')->values()
-        ];
-    })->values();
-
-    return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id'));
-}
-
 
     function applyHackathon($id)
     {
