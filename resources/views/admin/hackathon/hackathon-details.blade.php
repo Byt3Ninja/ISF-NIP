@@ -788,7 +788,7 @@
                                 {{ $l == 'en' ? 'Team Formation and Joining' : 'تكوين الفرق والانضمام إليها' }}
                             </h5>
                             <p>
-                                {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is 5.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو 5.' }}
+                                {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is '. $currentHackathon['max_team'] . '.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو'. $currentHackathon['max_team'] .'.' }}
                             </p>
                             @else
                             <h5 class="card-title">
@@ -864,10 +864,12 @@
 
                                     
                                     @else
+                                    @if($allteams->first()['tm_acceptInvition'] == null)
                                 <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createTeamModal">
                                     <i class="bi bi-plus-circle-fill me-2"></i>
                                     {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
                                 </button>
+                                @endif
                                 @endif
                                 @php
                                 
@@ -885,16 +887,25 @@
                                             ({{ $team['members_count'] }}/{{ $currentHackathon['max_team'] }} {{ $l == 'en' ? 'members' : 'أعضاء' }})
                                             <br>
                                             <small class="text-muted">
-                                                {{ $l == 'en' ? 'Looking for a developer and designer.' : 'يبحثون عن مطور ومصمم.' }}
+                                                {{ $team['tf_description'] }}
                                             </small>
                                         </div>
 
                                         @if($team['members_count'] < $currentHackathon['max_team'])
                                         @if($team['tm_user_id']!=Auth::user()->id)
+                                        
+                                        @if($team['tm_acceptInvition'] == null)
+                                        
                                         <button class="btn btn-outline-primary btn-sm" onclick="joinTeam('{{ $team['tf_id'] }}','{{ $team['tf_name'] }}')">
                                             {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
                                             <i class="bi bi-person-plus-fill ms-2"></i>
                                         </button>
+                                        @else
+                                        {{-- <button class="btn btn-outline-primary btn-sm" disabled>
+                                            {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button> --}}
+                                        @endif
                                         @endif
                                         @else
                                         <button class="btn btn-outline-primary btn-sm" disabled>
@@ -1555,14 +1566,35 @@
         // }
 
         function joinTeam(id, teamName) {
-            if (confirm(`{{ $l == "en" ? "Are you sure you want to request to join team" : "هل أنت متأكد أنك تريد طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+        if (confirm(`{{ $l == "en" ? "Are you sure you want to request to join team" : "هل أنت متأكد أنك تريد طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+            
+            fetch("{{ route('hackathon.RequestJoinTeam') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // أو response.text() حسب ما يرجع الـ controller
+            })
+            .then(data => {
                 alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
-                const url = new URL(window.location);
-                url.searchParams.set('teamCreated', 'true');
-                url.searchParams.set('joinedTeamName', teamName);
-                window.location.href = url.href;
-            }
+                // إعادة توجيه أو تحديث
+                window.location.href = window.location.href;
+            })
+            .catch(error => {
+                alert("{{ $l == 'en' ? 'There was an error sending the request.' : 'حدث خطأ أثناء إرسال الطلب.' }}");
+                console.error(error);
+            });
         }
+    }
 
         function leaveTeam() {
             if (confirm(`{{ $l == "en" ? "Are you sure you want to leave the current team?" : "هل أنت متأكد أنك تريد مغادرة الفريق الحالي؟" }}`)) {
