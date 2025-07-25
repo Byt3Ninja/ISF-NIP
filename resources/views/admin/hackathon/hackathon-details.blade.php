@@ -221,7 +221,7 @@
                                     {{ $l == 'en' ? 'My Profile' : 'ملفي الشخصي' }}
                                 </a>
                             </li>
-                            @if($currentHackathon['step_stype'] != 1)
+                            @if($companyStep?->stype != 1)
                             <li>
                                 <a class="dropdown-item" href="#">
                                     <i class="ti ti-users me-2"></i>
@@ -297,10 +297,12 @@
                                 </a>
                          
                         @else
-                        @if($currentHackathon['step_stype'] == 6)
+                          
+                     
+                        @if($companyStep?->stype == 6 OR $companyStep == null)
                          @if($teamJoin != null)
 
-                        <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" method="post">
+                        <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                             @csrf
                             @method('PATCH')
                                 <button class="btn btn-success btn-lg px-4 py-2 me-3"
@@ -309,7 +311,7 @@
                                     {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
                                 </button>
                         </form>
-                        <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" method="post">
+                        <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                             @csrf
                             @method('PATCH')
                                 <button class="btn btn-danger btn-lg px-4 py-2 me-3"
@@ -319,12 +321,21 @@
                                 </button>
                         </form>
                             @else
+                           
                         @if($teamaccept == null)
+                        @if($companyStep?->stype  != 6)
+                        <button type="button"  class="btn btn-primary" style="flex: 1;"
+                        onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'" >
+                        <i class="ti ti-send me-1"></i>
+                        {{__('admin.ApplyHackathon') }}
+                        </button>
+        @else
                         <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3"
                             style="border-radius: 50px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#createTeamModal">
                             <i class="ti ti-settings me-2 me-2"></i>
                             {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
                         </a>
+                        @endif
                         @else
                         <a href="/dashboard/hackathon/{{ $teamaccept->team_formation_id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
                             style="border-radius: 50px; font-weight: 600;">
@@ -426,7 +437,7 @@
                     </button>
                 </li>
                 
-                @if($currentHackathon['step_stype'] != 1)
+                @if($companyStep?->stype != 1)
                 <li class="nav-item me-1" role="presentation" id="teams-tab-li">
                     <button class="nav-link rounded" id="teams-tab-btn" data-bs-toggle="tab" data-bs-target="#teams"
                         type="button" role="tab" aria-controls="teams" aria-selected="false">
@@ -468,10 +479,10 @@
                             <p id="hackathon-description">
                                 {{ $l == 'en' ? $currentHackathon['description'] : $currentHackathon['description_ar'] }}
                             </p>
-                            <h6 class="mt-4">
+                            {{-- <h6 class="mt-4">
                                 {{ $l == 'en' ? 'Main Objectives:' : 'الأهداف الرئيسية:' }}
-                            </h6>
-                            <ul id="hackathon-objectives">
+                            </h6> --}}
+                            {{-- <ul id="hackathon-objectives">
                                 @if($l == 'en')
                                     <li>Encourage innovation in artificial intelligence.</li>
                                     <li>Provide a platform for collaboration and knowledge exchange.</li>
@@ -483,8 +494,8 @@
                                     <li>تطوير حلول عملية قابلة للتطبيق.</li>
                                     <li>دعم المشاريع الواعدة للانتقال إلى مراحل متقدمة.</li>
                                 @endif
-                            </ul>
-                            <h6 class="mt-4">
+                            </ul> --}}
+                            {{-- <h6 class="mt-4">
                                 {{ $l == 'en' ? 'Target Audience:' : 'الفئة المستهدفة:' }}
                             </h6>
                             <ul id="hackathon-audience">
@@ -499,7 +510,7 @@
                                     <li>المهتمون بتقنيات الذكاء الاصطناعي.</li>
                                     <li>الفرق المشاركة من خارج المسرعة (حسب شروط الهاكثون).</li>
                                 @endif
-                            </ul>
+                            </ul> --}}
                         </div>
                     </div>
                 </div>
@@ -777,7 +788,7 @@
                         </div>
                     </div>
                 </div>
-            @if($currentHackathon['step_stype'] != 1)
+            @if($companyStep?->stype  != 1)
                 <!-- Teams Tab (conditionally shown) -->
                 
                 <div class="tab-pane fade" id="teams" role="tabpanel" aria-labelledby="teams-tab-btn">
@@ -788,7 +799,7 @@
                                 {{ $l == 'en' ? 'Team Formation and Joining' : 'تكوين الفرق والانضمام إليها' }}
                             </h5>
                             <p>
-                                {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is '. $currentHackathon['max_team'] . '.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو'. $currentHackathon['max_team'] .'.' }}
+                                {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is '. $count_team . '.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو'. $count_team .'.' }}
                             </p>
                             @else
                             <h5 class="card-title">
@@ -829,45 +840,45 @@
                                         $isteamleader = $teams->where('tm_isTeamLeader', 1)->first();
                                         $teamsMembers = $teams->where('tm_isTeamLeader', 0);
                                         $teamUser = $teams->where('tm_user_id', Auth::user()->id);
-                                        $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
+                                        $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()?->tm_team_formation_id);
                                         $isleader = $teams_with_user->where('tm_isTeamLeader', 1)->first();
                                     @endphp
+                                   @if($teamUser->count() > 0)
+                                        @if($teams_with_user != null)
+                                        <h6 class="mt-4">{{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }} <span class="fw-bold">{{$teamUser->first()->tf_name}}</span></h6>
                                     
-                                    @if($teams_with_user != null)
-                                    <h6 class="mt-4">{{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }} <span class="fw-bold">{{$teams->first()->tf_name}}</span></h6>
-                                
-                                    <ul class="list-unstyled">
-                                        
-                                       
-                                        
-                                        <hr>
-                                        @foreach($teams_with_user as $team)
-                                            <li>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <a class="media-left" href="/dashboard/users/{{ $team->tm_user_id }}/edit">
-                                                        <img src="{{ $team->u_img_url }}" alt="avatar" class="rounded-circle me-3"
-                                                            height="40" width="40">
-                                                    </a>
-                                                    <a href="/dashboard/users/{{ $team->tm_user_id }}/edit">
-                                                        <div class="media-body">
-                                                            <h6 class="media-heading mb-0 text-nowrap">{{ $team->{'user_name_'.$l} }}</h6>
-                                                            <span class="font-small-2 text-nowrap">{{$team->tf_name }}</span>
-                                                        </div>
-                                                    </a>
-                                                    @if($team->tm_isTeamLeader == 1)
-                                                {{ $l == 'en' ? '(Team Leader)' : '(قائد الفريق)' }}
-                                                @endif
-                                                </div>
-                                                
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                    @endif
-                                    <a href="collaboration-space.html?hackathonId=1&teamId=123" class="btn btn-success btn-sm">
-                                        <i class="bi bi-chat-dots-fill me-2"></i>
-                                        {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
-                                    </a>
+                                        <ul class="list-unstyled">
+                                            
+                                            <hr>
+                                            @foreach($teams_with_user as $team)
+                                                <li>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="media-left" href="/dashboard/users/{{ $team->tm_user_id }}/edit">
+                                                            <img src="{{ $team->u_img_url }}" alt="avatar" class="rounded-circle me-3"
+                                                                height="40" width="40">
+                                                        </a>
+                                                        <a href="/dashboard/users/{{ $team->tm_user_id }}/edit">
+                                                            <div class="media-body">
+                                                                <h6 class="media-heading mb-0 text-nowrap">{{ $team->{'user_name_'.$l} }}</h6>
+                                                                <span class="font-small-2 text-nowrap">{{$team->tf_name }}</span>
+                                                            </div>
+                                                        </a>
+                                                        @if($team->tm_isTeamLeader == 1)
+                                                    {{ $l == 'en' ? '(Team Leader)' : '(قائد الفريق)' }}
+                                                    @endif
+                                                    </div>
+                                                    
+                                                </li>
+                                            @endforeach
+                                        </ul>
 
+                                        @endif
+
+                                        <a href="collaboration-space.html?hackathonId=1&teamId=123" class="btn btn-success btn-sm">
+                                            <i class="bi bi-chat-dots-fill me-2"></i>
+                                            {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
+                                        </a>
+                                    @endif
                                     
                                     @else
                                     @if($allteams->first()['tm_acceptInvition'] == null)
@@ -877,10 +888,7 @@
                                 </button>
                                 @endif
                                 @endif
-                                @php
                                 
-
-                                @endphp
                                 <h6 class="mt-4">{{ $l == 'en' ? 'Join Existing Team:' : 'الانضمام إلى فريق قائم:' }}</h6>
 
                                 <div class="list-group" id="available-teams-list">
@@ -890,14 +898,14 @@
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ $team['tf_name'] }}</strong>
-                                            ({{ $team['members_count'] }}/{{ $currentHackathon['max_team'] }} {{ $l == 'en' ? 'members' : 'أعضاء' }})
+                                            ({{ $team['members_count'] }}/{{ $count_team }} {{ $l == 'en' ? 'members' : 'أعضاء' }})
                                             <br>
                                             <small class="text-muted">
                                                 {{ $team['tf_description'] }}
                                             </small>
                                         </div>
 
-                                        @if($team['members_count'] < $currentHackathon['max_team'])
+                                        @if($team['members_count'] < $count_team)
                                         @if($team['tm_user_id']!=Auth::user()->id)
                                        @php
                                        $hasJoin = $team_invition->contains('tm_acceptInvition', 'join');
@@ -944,7 +952,7 @@
                                         </button>
                                     </div> --}}
                                 </div>
-
+                                
 
                             </div>
                         </div>
@@ -1138,36 +1146,36 @@
                            <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th scope="col">{{ $l == 'en' ? 'Company Name' : 'اسم الشركة' }}</th>
-                                        <th scope="col">{{ $l == 'en' ? 'Question' : 'السؤال' }}</th>
-                                        <th scope="col">{{ $l == 'en' ? 'Answer' : 'الجواب' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الاليكترونى' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيلs' }}</th>
                                         <th scope="col">{{ $l == 'en' ? 'Actions' : 'الإجراءات' }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($data as $submission)
-                                        @foreach ($submission->answers as $group)
-                                            @foreach ($group as $answer)
+                                       
                                                 <tr>
-                                                    <td>{{ $answer->name }}</td>
-                                                    <td>{{ $answer->label }}</td>
-                                                    <td>{{ $answer->value }}</td>
+                                                    <td>{{ $submission->user_name }}</td>
+                                                    <td>{{ $submission->email }}</td>
+                                                    <td>{{ $submission->submissionDate }}</td>
+                                                    <td><a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $submission->step_id }}/{{ $submission->user_id }}">{{ $l == 'en' ? 'View' : 'عرض' }} </a></td>
                                                     <td>
                                                         <div class="d-flex align-items-center gap-1">
                                                             <select id="cstep" class="select form-control"
-                                                                onchange="changestep({{ $answer->company_id }},this.options[this.selectedIndex].value)">
+                                                                onchange="changestep({{ $submission->company_id }},this.options[this.selectedIndex].value)">
                                                                 <option value="0">{{ __('cycles.Disapprove') }}</option>
                                                                 @foreach (\App\Step::where('cycle_id', $submission->cycle_id)->orderBy('arr')->get() as $step)
                                                                 <option value="{{ $step->id }}"
-                                                                    {{ $step->id == $answer->company_step ? 'selected' : '' }}>
+                                                                    {{ $step->id == $submission->company_step ? 'selected' : '' }}>
                                                                     {{ $step->title }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            @endforeach
-                                        @endforeach
+                                          
                                     @endforeach
                                 </tbody>
                             </table>
@@ -1182,7 +1190,7 @@
             </div>
         </div>
 
-        @if($currentHackathon['step_stype'] == 6)
+        @if($companyStep?->stype  == 6)
         <!-- Create Team Modal -->
         <div class="modal fade" id="createTeamModal" tabindex="-1" aria-labelledby="createTeamModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -1202,7 +1210,7 @@
                                 <label for="teamName" class="form-label">
                                     {{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}
                                 </label>
-                                <input type="text" class="form-control" name="team_name" value="{{ Auth::user()->company->{'name_' . $l} ?? '' }}" id="teamName" required>
+                                <input type="text" class="form-control" name="team_name" value="" id="teamName" required>
                             </div>
                             <div class="mb-3">
                                 <label for="teamDescription" class="form-label">
@@ -1213,20 +1221,20 @@
 
                             <hr>
 
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="Project_Name_en" class="form-label">
                                     {{ __('admin.Project_Name') ." " . __('admin.English') }}
                                 </label>
-                                <input type="text" class="form-control" name="Project_Name_en" value="" id="Project_Name_en" required>
+                                <input type="text" class="form-control" name="Project_Name_en" value="" id="Project_Name_en" >
                             </div>
                             <div class="mb-3">
                                 <label for="Project_Name_ar" class="form-label">
                                     {{__('admin.Project_Name') ." " . __('admin.Arabic') }}
                                 </label>
-                                <input type="text" class="form-control" name="Project_Name_ar" value="" id="Project_Name_ar" required>
-                            </div>
+                                <input type="text" class="form-control" name="Project_Name_ar" value="" id="Project_Name_ar" >
+                            </div> --}}
 
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="Project_Description_en" class="form-label">
                                     {{ __('admin.Project_Description') ." " . __('admin.English') }}
                                 </label>
@@ -1238,9 +1246,9 @@
                                     {{ __('admin.Project_Description') ." " .  __('admin.Arabic') }}
                                 </label>
                                 <textarea class="form-control" name="Project_Description_ar" id="Project_Description_ar" rows="2"></textarea>
-                            </div>
+                            </div> --}}
 
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="Target_Track" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
                                 <select class="form-select" id="Target_Track" name="Target_Track" >
                                     <option value="" >{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
@@ -1258,7 +1266,7 @@
                                         <option value="{{ $s }}" {{ old('Project_Status', $selected ?? '') == $s ? 'selected' : '' }}>{{ $s .'%' }}</option>
                                     @endfor
                                 </select>
-                            </div>
+                            </div> --}}
 
 
                        

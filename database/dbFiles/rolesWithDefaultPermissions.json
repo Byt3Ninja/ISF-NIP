@@ -2789,6 +2789,17 @@
                     "organizationmanager",
                     "registered"
                 ]
+            },
+            {
+                "name": "hackathon.ViewSubmission",
+                "description": " Edit Hackathon Project Idea ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                   
+                ]
             }
         ]
     },
