@@ -134,10 +134,14 @@ class HackathonController extends Controller
         LEFT JOIN cycles as cy ON cy.id = tf.cycle_id
         WHERE tm.team_formation_id = ? ";
         $team_Formation_raw = collect(DB::select($team_Formation, [$id]));
-        
+        $step = Step::where('cycle_id', $team_Formation_raw->first()->tf_cycle_id)
+            ->where('stype', '6')
+            ->first();
+            $count_team = $step ? $step->count_team_number : 0;
+       
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
        $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
-        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members'));
+        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team'));
     }
 
     public function myTeam()
@@ -228,7 +232,7 @@ class HackathonController extends Controller
                 'Finished' => 'منتهي',
                 default => '',
             };
-                $step = Step::where('cycle_id', $id)->get();
+                $step = Step::where('cycle_id', $item->Com_cycle)->get();
             $currentHackathon = [
                 'title' => $item->c_title,
                 'title_ar' => $item->c_title_ar ?? '',
@@ -248,13 +252,11 @@ class HackathonController extends Controller
                 'step_start' => $step->where('id', $item->Com_step)->first()?->from?->format('Y-m-d') ?? null,
                 'step_end' => $step->where('id', $item->Com_step)->first()?->to?->format('Y-m-d') ?? null,
                 'cycle_id' => $id,
+                'Company_id' => $item->Com_id,
                 'max_team' => $step->where('id', $item->Com_step)->first()?->count_team_number ?? 0,
                
             ];
         }
-          
-      
-
 
                 $data = [];
             $l = app()->getLocale();
@@ -274,6 +276,7 @@ class HackathonController extends Controller
             Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
             Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
             U.id as 'U_id',
+            U.email as 'U_email',
             S.title as 'S_title',
             S.id as 'S_id',
             S.cycle_id as 'S_cycle_id',
@@ -306,57 +309,33 @@ class HackathonController extends Controller
             
             $C = 1;
             // نبدأ بتجميع كل الأسئلة حسب step_id
-            $grouped = $forms->groupBy('FD_step_id');
+            $grouped = $forms->groupBy('FD_user_id');
 
             $data = $grouped->map(function ($group, $stepId) use ($l) {
                 $first = $group->first();
             
                 $submission = new stdClass;
                 $submission->company_id = $first->FD_company_id;
-                $submission->user_id = $first->FD_user_id;
+                // $submission->user_id = $first->FD_user_id;
+                $submission->user_name = $first->{'user_name_' . $l};
+                $submission->email = $first->U_email;
                 $submission->cycle_id = $first->CYC_id;
-                $submission->submission_id = $first->C_step;
-                $submission->form_name = $first->BF_form_name;
-                $submission->startup_name = $first->{'C_name_' . $l};
-                $submission->submitted_by = $first->{'user_name_' . $l};
-                $submission->step_name = $first->S_title;
-                $submission->program_name = $first->CYC_title;
-                $submission->organization_name = $first->O_name_en;
+                $submission->step_id = $first->FD_step_id;
+                $submission->user_id = $first->FD_user_id;
+                $submission->company_step = $first->C_step;
+                // $submission->form_name = $first->BF_form_name;
+                // $submission->startup_name = $first->{'C_name_' . $l};
+                // $submission->submitted_by = $first->{'user_name_' . $l};
+                // $submission->step_name = $first->S_title;
+                // $submission->program_name = $first->CYC_title;
+                // $submission->organization_name = $first->O_name_en;
                 $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
-      
-                // answers
-                $submission->answers = $group->map(function ($item) use ($l) {
-                    $value = $item->FD_answer;
-                    
-                    // Check if the value is a file path
-                    if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
-                    // Extract filename from path
-                    $filename = basename($value);
-                    $value = [
-                        'type' => 'file',
-                        'path' => $value,
-                        'file_name' => $filename,
-                        'file_url' => asset($value)
-                    ];
-                    }
-                    
-                    return (object)[
-                    'user_id' => $item->FD_user_id,
-                    'company_id' => $item->FD_company_id,
-                    'step_id' => $item->FD_step_id,
-                    'company_step' => $item->C_step,
-                    'name' => $item->{'user_name_' . $l},
-                    'label' => $item->FD_question,
-                    'value' => $value,
-                    ];
-                })->groupBy('user_id')->values();
-
                 return $submission;
             })->values()->all(); // remove collection keys (numeric indexing)
         
                 $data = array_values($data);
 
-                            
+                            // dd($data);
                             $teams_q = "SELECT 
                             tf.id as tf_id,
                             tf.name as tf_name,
@@ -427,11 +406,19 @@ class HackathonController extends Controller
                                         'members' => $group,
                                     ];
                                 });
-                                
+
+
+            $step = Step::where('cycle_id', $id)
+            ->where('stype', '6')
+            ->first();
+            $count_team = $step ? $step->count_team_number : 0;
+                              
 // dd($allteams->first()['tm_acceptInvition']);
 
+$companyStep = Step::where('id', Auth::user()->company->step)->first(); 
+
         // return view('admin.hackathon.show', compact('hackathon'));
-        return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id', 'teams', 'allteams', 'team_invition'));
+        return view('admin.hackathon.hackathon-details', compact('currentHackathon', 'data', 'l', 'id', 'teams', 'allteams', 'team_invition', 'companyStep', 'count_team'));
     }
 
     function applyHackathon($id)
@@ -876,5 +863,108 @@ class HackathonController extends Controller
                 // }
         return response()->json(['success' => true, 'message' => __("admin.Request_Approved_successfully.")]);
     }
+    public function ViewSubmission($step_id,$user_id)
+    {
+        
+        $user = Auth::user();
+      $data = [];
+      $l = app()->getLocale();
+      $forms = "SELECT 
+      FD.company_id as 'FD_company_id',
+      FD.user_id as 'FD_user_id',
+      FD.step_id as 'FD_step_id',
+      FD.question as 'FD_question',
+      FD.answer as 'FD_answer',
+      FD.created_at as 'FD_created_at',
+      FD.updated_at as 'FD_updated_at',
+      FD.deleted_at as 'FD_deleted_at',
+      C.name_en as 'C_name_en',
+      C.name_ar as 'C_name_ar',
+      C.id as 'C_id',
+      C.step as 'C_step',
+      Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+      Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+      U.id as 'U_id',
+      S.title as 'S_title',
+      S.id as 'S_id',
+      S.cycle_id as 'S_cycle_id',
+      S.data as 'S_data',
+      CYC.title as 'CYC_title',
+      CYC.id as 'CYC_id',
+      CYC.organization_id as 'CYC_organization_id',
+      O.name_en as 'O_name_en',
+      O.name_ar as 'O_name_ar',
+      O.id as 'O_id',
+      BF.id as 'BF_id',
+      BF.form_name as 'BF_form_name'
+      FROM form_data as FD 
+      LEFT JOIN companies as C ON C.id = FD.company_id
+      LEFT JOIN users as U ON U.id = FD.user_id
+      LEFT JOIN steps as S ON S.id = FD.step_id
+      LEFT JOIN builder_forms as BF ON BF.id = S.data
+      LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
+      LEFT JOIN organizations as O ON O.id = CYC.organization_id
+      WHERE FD.deleted_at IS NULL AND FD.step_id = ? AND FD.user_id = ? ";
+      $params = [];
+     
+      if($user->organization_id != null){
+        $forms .= " AND CYC.organization_id = ? ";
+        $forms = DB::select($forms, [$step_id, $user_id, $user->organization_id]);
+      }else{
+        $forms = DB::select($forms, [$step_id, $user_id]);
+      }
+      $forms = collect($forms);
+      $C = 1;
+      // نبدأ بتجميع كل الأسئلة حسب step_id
+      $grouped = $forms->groupBy('FD_step_id');
 
+      $data = $grouped->map(function ($group, $stepId) use ($l) {
+          $first = $group->first();
+      
+          $submission = new stdClass;
+          $submission->submission_id = $stepId;
+          $submission->form_name = $first->BF_form_name;
+          $submission->startup_name = $first->{'C_name_' . $l};
+          $submission->submitted_by = $first->{'user_name_' . $l};
+          $submission->step_name = $first->S_title;
+          $submission->program_name = $first->CYC_title;
+          $submission->organization_name = $first->O_name_en;
+          $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
+          $submission->cycle_id = $first->S_cycle_id;
+          $submission->company_id = $first->C_id;
+          $submission->company_step = $first->C_step;
+      
+          // answers
+          $submission->answers = $group->map(function ($item) use ($l) {
+            $value = $item->FD_answer;
+            
+            // Check if the value is a file path
+            if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
+              // Extract filename from path
+              $filename = basename($value);
+              $value = [
+                'type' => 'file',
+                'path' => $value,
+                'file_name' => $filename,
+                'file_url' => asset($value) // Generate accessible URL
+              ];
+            }
+            
+            return (object)[
+              'user_id' => $item->FD_user_id,
+              'name' => $item->{'user_name_' . $l},
+              'label' => $item->FD_question,
+              'value' => $value,
+            ];
+          })->groupBy('user_id')->values();
+
+          return $submission;
+      })->values()->all(); // remove collection keys (numeric indexing)
+      
+      $data = array_values($data);
+
+// dd($data);
+      return view('admin.hackathon.show', compact('data'));
+
+    }
 }

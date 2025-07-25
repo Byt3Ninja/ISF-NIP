@@ -107,7 +107,7 @@
 			@endif
 
             @php
-              $maxMembers = $team_Formation_raw->first()->s_count_team_number;
+              $maxMembers = $count_team;
               $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             @endphp
             <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
@@ -241,20 +241,37 @@
             <h5 class="mb-0"><i class="ti ti-target me-2"></i> {{ $l == 'en' ? 'Team Goal & Project' : 'هدف الفريق ومشروعه' }}</h5>
           </div>
           <div class="card-body">
-            <h6>{{ $l == 'en' ? 'Project Idea (Initial):' : 'فكرة المشروع (مبدئية):' }}</h6>
-            <p id="team-project-idea">{{ $l == 'en' ? $team_Formation_raw->first()->tf_projectDescription_en : $team_Formation_raw->first()->tf_projectDescription_ar }}</p>
+            <h6>{{ $l == 'en' ? 'Project Idea Name :' : 'اسم فكرة المشروع :' }} {{ $team_Formation_raw->first()->tf_projectName_en }}</h6>
+            <hr>
+            <p id="team-project-idea">{{ $l == 'en' ? 'Project Idea Description :' : 'وصف فكرة المشروع :' }} <br>{{ $team_Formation_raw->first()->tf_projectDescription_en }}</p>
             <button class="btn btn-sm btn-outline-secondary mb-3" data-bs-toggle="modal" data-bs-target="#editProjectIdeaModal">
               <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
             </button>
 
-            <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
-            <p id="team-target-track">{{ $l == 'en' ? $team_Formation_raw->first()->tf_targetTrack : $team_Formation_raw->first()->tf_targetTrack }}%</p>
+            {{-- <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
+            <p id="team-target-track">Idea + Team, Define the problem. Form your team. Agree on the project goal.
+Research, Validate the idea. Explore similar solutions. Finalize key features.
+Design, Sketch user flow. Draft UI. Pick your tools and tech stack.
+Build, Set up the repo. Develop core features. Test early and often.
+Ready for Pitch, Polish the demo. Prepare slides. Practice the story.</p> --}}
              
             <h6>{{ $l == 'en' ? 'Project Status:' : 'حالة المشروع:' }}</h6>
             <div class="progress mb-2" style="height: 20px;">
               <div class="progress-bar bg-success" role="progressbar" style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;" aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0" aria-valuemax="100">{{ $team_Formation_raw->first()->tf_projectStatus  }}% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}</div>
             </div>
-            <small class="text-muted">{{ $l == 'en' ? 'Current Phase: Idea development and initial prototype.' : 'المرحلة الحالية: تطوير الفكرة والنموذج الأولي.' }}</small>
+            <small class="text-muted">
+              @if($team_Formation_raw->first()->tf_projectStatus == 20)
+              {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
+              {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
+              {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
+              {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
+              {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete documentation. story.') }}
+              @endif
+            </small>
           </div>
         </div>
 
@@ -314,42 +331,44 @@
             <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
                             <div class="mb-3">
                                 <label for="Project_Name_en" class="form-label">
-                                    {{ __('admin.Project_Name') ." " . __('admin.English') }}
+                                    {{ __('admin.Project_Name') }}
                                 </label>
                                 <input type="text" class="form-control" name="Project_Name_en" value="{{ $team_Formation_raw->first()->tf_projectName_en }}" id="Project_Name_en" required>
                             </div>
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="Project_Name_ar" class="form-label">
                                     {{__('admin.Project_Name') ." " . __('admin.Arabic') }}
                                 </label>
                                 <input type="text" class="form-control" name="Project_Name_ar" value="{{ $team_Formation_raw->first()->tf_projectName_ar }}" id="Project_Name_ar" required>
-                            </div>
+                            </div> --}}
 
                             <div class="mb-3">
                                 <label for="Project_Description_en" class="form-label">
-                                    {{ __('admin.Project_Description') ." " . __('admin.English') }}
+                                    {{ __('admin.Project_Description')  }}
                                 </label>
                                 <textarea class="form-control" name="Project_Description_en" id="Project_Description_en" rows="2">{{ $team_Formation_raw->first()->tf_projectDescription_en }}</textarea>
                             </div>
 
-                             <div class="mb-3">
+                             {{-- <div class="mb-3">
                                 <label for="Project_Description_ar" class="form-label">
                                     {{ __('admin.Project_Description') ." " .  __('admin.Arabic') }}
                                 </label>
                                 <textarea class="form-control" name="Project_Description_ar" id="Project_Description_ar" rows="2">{{ $team_Formation_raw->first()->tf_projectDescription_ar }}</textarea>
-                            </div>
+                            </div> --}}
 
                             <div class="mb-3">
-                                <label for="Target_Track" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
-                                <select class="form-select" id="Target_Track" name="Target_Track" >
-                                    <option value="" >{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
-                                    @for ($i = 5; $i <= 100; $i += 5)
-                                        <option value="{{ $i }}" {{ $team_Formation_raw->first()->tf_targetTrack == $i ? 'selected' : '' }}>{{ $i  .'%'}}</option>
-                                    @endfor
+                                <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</label>
+                                <select class="form-select" id="Project_Status" name="Project_Status" >
+                                    <option value="" >{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
+                                        <option value="20" {{ $team_Formation_raw->first()->tf_projectStatus == '20' ? 'selected' : '' }} >{{ __('admin.Idea + Team') }}</option>
+                                        <option value="40" {{ $team_Formation_raw->first()->tf_projectStatus == '40' ? 'selected' : '' }} >{{ __('admin.Research') }}</option>
+                                        <option value="60" {{ $team_Formation_raw->first()->tf_projectStatus == '60' ? 'selected' : '' }} >{{ __('admin.Design & Build') }}</option>
+                                        <option value="80" {{ $team_Formation_raw->first()->tf_projectStatus == '80' ? 'selected' : '' }} >{{ __('admin.Ready for Pitch') }}</option>
+                                        <option value="100" {{ $team_Formation_raw->first()->tf_projectStatus == '100' ? 'selected' : '' }} >{{ __('admin.Project Submitted') }}</option>
                                 </select>
                             </div>
                             
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
                                 <select class="form-select" id="Project_Status" name="Project_Status">
                                     <option value="" >{{ $l == 'en' ? 'Choose Status...' : 'اختر الحالة...' }}</option>
@@ -360,7 +379,7 @@
                                         <option value="{{ $s }}" {{ $selectedStatus == $s ? 'selected' : '' }}>{{ $s .'%' }}</option>
                                     @endfor
                                 </select>
-                            </div>
+                            </div> --}}
 
 
                        

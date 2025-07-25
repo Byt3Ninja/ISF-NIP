@@ -2170,5 +2170,17 @@ return [
 	'CancelFailed' => 'فشل في الغاء.',
 	'Project_Name' => 'اسم المشروع',
 	'Project_Description' => 'وصف المشروع',
+	'Idea + Team' => 'فكرة + فريق',
+	'Research' => 'بحث',
+	'Design & Build' => 'تصميم وبناء',
+	'Ready for Pitch' => 'جاهز للبث',
+	'Project Submitted' => 'تم تقديم المشروع',
+	'Define the problem and form a team with clear roles.' => 'حدد المشكلة ووزّع الأدوار داخل الفريق.',
+	'Validate the idea, study users, and outline key features.' => 'تحقق من جدوى الفكرة، افهم المستخدم، وحدد الميزات الأساسية.',
+	'Sketch UI, set up the project, and develop core functionality.' => 'رسم واجهة المستخدم، ووضع المشروع، وتطوير الميزات الأساسية.',
+	'Prepare demo, finalize slides, and rehearse the presentation.' => 'جهّز العرض التوضيحي، صمّم الشرائح، وتدرّب على التقديم.',
+	'Submit code, share the demo, and complete documentation. story.' => 'ارفع الكود، شارك العرض، واستكمل المستندات المطلوبة.',\
+	'Project idea updated successfully' => 'تم تحديث فكرة المشروع بنجاح',
+	
 
 ];
