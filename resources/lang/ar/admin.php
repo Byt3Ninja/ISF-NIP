@@ -2179,7 +2179,7 @@ return [
 	'Validate the idea, study users, and outline key features.' => 'تحقق من جدوى الفكرة، افهم المستخدم، وحدد الميزات الأساسية.',
 	'Sketch UI, set up the project, and develop core functionality.' => 'رسم واجهة المستخدم، ووضع المشروع، وتطوير الميزات الأساسية.',
 	'Prepare demo, finalize slides, and rehearse the presentation.' => 'جهّز العرض التوضيحي، صمّم الشرائح، وتدرّب على التقديم.',
-	'Submit code, share the demo, and complete documentation. story.' => 'ارفع الكود، شارك العرض، واستكمل المستندات المطلوبة.',\
+	'Submit code, share the demo, and complete documentation. story.' => 'ارفع الكود، شارك العرض، واستكمل المستندات المطلوبة.',
 	'Project idea updated successfully' => 'تم تحديث فكرة المشروع بنجاح',
 	
 
