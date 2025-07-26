@@ -1391,7 +1391,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           <h6 class="mb-0">{{__('admin.Description')}}</span>
                         </div>
                         <div class="d-flex flex-wrap ps-7 text-muted">
-                          {{ $step->description }} Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem perspiciatis ab eaque repudiandae officia consequatur nobis. Provident, adipisci aliquid magnam ex beatae culpa consequatur! Numquam repudiandae dolore vero. Ea, rerum?
+                          {{ $step->description }} 
                         </div>
                       </div>
                     @endif
