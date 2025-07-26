@@ -881,7 +881,7 @@
                                     @endif
                                     
                                     @else
-                                    @if($allteams->first()['tm_acceptInvition'] == null)
+                                    @if(( $allteams->first() ? $allteams->first()['tm_acceptInvition'] : null ) == null)
                                 <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createTeamModal">
                                     <i class="bi bi-plus-circle-fill me-2"></i>
                                     {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
