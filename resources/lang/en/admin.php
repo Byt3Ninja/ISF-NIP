@@ -2126,4 +2126,5 @@ return [
 	'Prepare demo, finalize slides, and rehearse the presentation.' => 'Prepare demo, finalize slides, and rehearse the presentation.',
 	'Submit code, share the demo, and complete documentation. story.' => 'Submit code, share the demo, and complete documentation. story.',
 	'Project idea updated successfully' => 'Project idea updated successfully',
+	'You are not allowed to submit answers' => 'You are not allowed to submit answers',
 ];

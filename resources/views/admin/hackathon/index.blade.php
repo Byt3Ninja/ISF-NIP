@@ -142,6 +142,7 @@
     <div class="row g-4 mb-8">
       @foreach ($hackathons as $hackathon)
       @php
+      $user = Auth::user();
         $apply = "SELECT * FROM form_data WHERE user_id = ? AND step_id = ?";
             $apply = collect(DB::select($apply, [Auth::user()->id, $hackathon['step_id']]));
       $team = "SELECT * FROM team_formations WHERE user_id = ?";
@@ -159,7 +160,7 @@
        
       @endphp
         <div class="col-lg-4 col-md-6">
-          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply, 'team' => $team, 'stypeStep' => $stypeStep])
+          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply, 'team' => $team, 'stypeStep' => $stypeStep, 'user' => $user])
         </div>
       @endforeach
     </div>

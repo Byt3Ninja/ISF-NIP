@@ -2181,6 +2181,7 @@ return [
 	'Prepare demo, finalize slides, and rehearse the presentation.' => 'جهّز العرض التوضيحي، صمّم الشرائح، وتدرّب على التقديم.',
 	'Submit code, share the demo, and complete documentation. story.' => 'ارفع الكود، شارك العرض، واستكمل المستندات المطلوبة.',
 	'Project idea updated successfully' => 'تم تحديث فكرة المشروع بنجاح',
+	'You are not allowed to submit answers' => 'ليس لديك الصلاحية لتقديم الاجابات',
 	
 
 ];
