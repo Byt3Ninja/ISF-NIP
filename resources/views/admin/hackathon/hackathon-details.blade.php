@@ -165,20 +165,21 @@
 </head>
 
 @php
-    $currentHackathon = [
-        'title' => 'Future of AI Hackathon',
-        'title_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
-        'date' => 'March 15 - 17, 2024',
-        'date_ar' => '15 - 17 مارس 2024',
-        'location' => 'Virtual',
-        'location_ar' => 'افتراضي',
-        'status' => 'Upcoming',
-        'status_ar' => 'قادم',
-        'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
-        'description_ar' => 'هذا الهاكثون يهدف إلى جمع المبتكرين والمطورين لخلق حلول رائدة باستخدام تقنيات الذكاء الاصطناعي لمواجهة التحديات الحالية والمستقبلية في مختلف القطاعات.',
-        'tags' => ['AI', 'Big Data'],
-        'tags_ar' => ['الذكاء الاصطناعي', 'البيانات الضخمة'],
-    ];
+    // $currentHackathon = [
+    //     'title' => 'Future of AI Hackathon',
+    //     'title_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
+    //     'date' => 'March 15 - 17, 2024',
+    //     'date_ar' => '15 - 17 مارس 2024',
+    //     'location' => 'Virtual',
+    //     'location_ar' => 'افتراضي',
+    //     'status' => 'Upcoming',
+    //     'status_ar' => 'قادم',
+    //     'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
+    //     'description_ar' => 'هذا الهاكثون يهدف إلى جمع المبتكرين والمطورين لخلق حلول رائدة باستخدام تقنيات الذكاء الاصطناعي لمواجهة التحديات الحالية والمستقبلية في مختلف القطاعات.',
+    //     'tags' => ['AI', 'Big Data'],
+    //     'tags_ar' => ['الذكاء الاصطناعي', 'البيانات الضخمة'],
+    // ];
+    $user = Auth::user();
 @endphp
 
 <body>
@@ -221,12 +222,14 @@
                                     {{ $l == 'en' ? 'My Profile' : 'ملفي الشخصي' }}
                                 </a>
                             </li>
+                            @if($companyStep?->stype != 1)
                             <li>
                                 <a class="dropdown-item" href="#">
                                     <i class="ti ti-users me-2"></i>
                                     {{ $l == 'en' ? 'My Team' : 'فريقي' }}
                                 </a>
                             </li>
+                            @endif
                             <li>
                                 <a class="dropdown-item" href="/dashboard">
                                     <i class="ti ti-dashboard me-2"></i>
@@ -279,11 +282,77 @@
                     </div>
                     <div id="action-buttons-placeholder" class="mt-4">
                         <!-- Buttons will be injected by JS -->
-                        <a href="/dashboard/hackathon/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
-                            style="border-radius: 50px; font-weight: 600;">
+                        @php
+                            $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
+                            $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition', 'pending')->first();
+                            $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition', 'accepted')->first();
+                           
+                        @endphp
+                        @if($teamcreated != null)
+                           
+
+                                <a href="/dashboard/hackathon/{{ $teamcreated->id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
+                                    style="border-radius: 50px; font-weight: 600;">
+                                    <i class="ti ti-settings me-2 me-2"></i>
+                                    {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
+                                </a>
+                         
+                        @else
+                          
+                     
+                        @if($companyStep?->stype == 6 OR $companyStep == null)
+                         @if($teamJoin != null)
+
+                        <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                            @csrf
+                            @method('PATCH')
+                                <button class="btn btn-success btn-lg px-4 py-2 me-3"
+                                    style="border-radius: 50px; font-weight: 600;">
+                                    <i class="ti ti-users me-2 me-2"></i>
+                                    {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
+                                </button>
+                        </form>
+                        <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                            @csrf
+                            @method('PATCH')
+                                <button class="btn btn-danger btn-lg px-4 py-2 me-3"
+                                    style="border-radius: 50px; font-weight: 600;">
+                                    <i class="ti ti-users me-2 me-2"></i>
+                                    {{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
+                                </button>
+                        </form>
+                            @else
+                           
+                        @if($teamaccept == null)
+                        @if($companyStep?->stype  != 6)
+                        <button type="button"  class="btn btn-primary" style="flex: 1;"
+                        onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'" >
+                        <i class="ti ti-send me-1"></i>
+                        {{__('admin.ApplyHackathon') }}
+                        </button>
+        @else
+                        <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3"
+                            style="border-radius: 50px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#createTeamModal">
                             <i class="ti ti-settings me-2 me-2"></i>
-                            {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
+                            {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
                         </a>
+                        @endif
+                        @else
+                        <a href="/dashboard/hackathon/{{ $teamaccept->team_formation_id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
+                            style="border-radius: 50px; font-weight: 600;">
+                            <i class="ti ti-users me-2 me-2"></i>
+                            {{ $l == 'en' ? 'View My Team' : 'مشاهدة الفريق' }}
+                        </a>
+                        @endif
+                        @endif
+                        @else
+                        <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3"
+                            style="border-radius: 50px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#applyModal">
+                            <i class="ti ti-send me-2 me-2"></i>
+                            {{ $l == 'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}
+                        </a>
+                        @endif
+                        @endif
                         {{-- <button class="btn btn-light btn-lg px-4 py-2 me-3"
                             style="border-radius: 50px; font-weight: 600;">
                             <i class="ti ti-user-plus me-2 me-2"></i>
@@ -335,32 +404,32 @@
                         <i class="bi bi-card-text me-2"></i> {{ $l == 'en' ? 'Overview' : 'نظرة عامة' }}
                     </button>
                 </li>
-                <li class="nav-item me-1" role="presentation">
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="themes-tab" data-bs-toggle="tab" data-bs-target="#themes"
                         type="button" role="tab" aria-controls="themes" aria-selected="false">
                         <i class="bi bi-lightbulb-fill me-2"></i> {{ $l == 'en' ? 'Themes' : 'المحاور' }}
                     </button>
-                </li>
-                <li class="nav-item me-1" role="presentation">
+                </li> --}}
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule"
                         type="button" role="tab" aria-controls="schedule" aria-selected="false">
                         <i class="bi bi-calendar2-week-fill me-2"></i> {{ $l == 'en' ? 'Schedule' : 'جدول الأعمال' }}
                     </button>
-                </li>
-                <li class="nav-item me-1" role="presentation">
+                </li> --}}
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="prizes-tab" data-bs-toggle="tab" data-bs-target="#prizes"
                         type="button" role="tab" aria-controls="prizes" aria-selected="false">
                         <i class="bi bi-trophy-fill me-2"></i> {{ $l == 'en' ? 'Prizes' : 'الجوائز' }}
                     </button>
-                </li>
-                <li class="nav-item me-1" role="presentation">
+                </li> --}}
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="evaluation-tab" data-bs-toggle="tab"
                         data-bs-target="#evaluation" type="button" role="tab" aria-controls="evaluation"
                         aria-selected="false">
                         <i class="bi bi-clipboard-check-fill me-2"></i> {{ $l == 'en' ? 'Evaluation Criteria' : 'معايير
                         التقييم' }}
                     </button>
-                </li>
+                </li> --}}
                 <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="mentors-tab" data-bs-toggle="tab" data-bs-target="#mentors"
                         type="button" role="tab" aria-controls="mentors" aria-selected="false">
@@ -368,12 +437,15 @@
                         والمحكمون' }}
                     </button>
                 </li>
+                
+                @if($companyStep?->stype != 1)
                 <li class="nav-item me-1" role="presentation" id="teams-tab-li">
                     <button class="nav-link rounded" id="teams-tab-btn" data-bs-toggle="tab" data-bs-target="#teams"
                         type="button" role="tab" aria-controls="teams" aria-selected="false">
                         <i class="bi bi-people-fill me-2"></i> {{ $l == 'en' ? 'Team Formation' : 'تكوين الفرق' }}
                     </button>
                 </li>
+                @endif
                 <li class="nav-item me-1" role="presentation" id="submission-tab-li">
                     <button class="nav-link rounded" id="submission-tab-btn" data-bs-toggle="tab"
                         data-bs-target="#submission" type="button" role="tab" aria-controls="submission"
@@ -381,12 +453,21 @@
                         <i class="bi bi-upload me-2"></i> {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع' }}
                     </button>
                 </li>
-                <li class="nav-item me-1" role="presentation" id="results-tab-li">
+                {{-- <li class="nav-item me-1" role="presentation" id="results-tab-li">
                     <button class="nav-link rounded" id="results-tab-btn" data-bs-toggle="tab" data-bs-target="#results"
                         type="button" role="tab" aria-controls="results" aria-selected="false">
                         <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Results' : 'النتائج' }}
                     </button>
+                </li> --}}
+                @if($user->hasRole('admin'))
+                <li class="nav-item me-1" role="presentation" id="submissions-tab-li">
+                    <button class="nav-link rounded" id="submissions-tab-btn" data-bs-toggle="tab" data-bs-target="#submissions"
+                        type="button" role="tab" aria-controls="submissions" aria-selected="false">
+                        <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Submissions' : 'الاجابات' }}
+                    </button>
                 </li>
+                @endif
+
             </ul>
 
             <div class="tab-content p-0 mb-12" id="hackathonTabContent">
@@ -400,10 +481,10 @@
                             <p id="hackathon-description">
                                 {{ $l == 'en' ? $currentHackathon['description'] : $currentHackathon['description_ar'] }}
                             </p>
-                            <h6 class="mt-4">
+                            {{-- <h6 class="mt-4">
                                 {{ $l == 'en' ? 'Main Objectives:' : 'الأهداف الرئيسية:' }}
-                            </h6>
-                            <ul id="hackathon-objectives">
+                            </h6> --}}
+                            {{-- <ul id="hackathon-objectives">
                                 @if($l == 'en')
                                     <li>Encourage innovation in artificial intelligence.</li>
                                     <li>Provide a platform for collaboration and knowledge exchange.</li>
@@ -415,8 +496,8 @@
                                     <li>تطوير حلول عملية قابلة للتطبيق.</li>
                                     <li>دعم المشاريع الواعدة للانتقال إلى مراحل متقدمة.</li>
                                 @endif
-                            </ul>
-                            <h6 class="mt-4">
+                            </ul> --}}
+                            {{-- <h6 class="mt-4">
                                 {{ $l == 'en' ? 'Target Audience:' : 'الفئة المستهدفة:' }}
                             </h6>
                             <ul id="hackathon-audience">
@@ -431,7 +512,7 @@
                                     <li>المهتمون بتقنيات الذكاء الاصطناعي.</li>
                                     <li>الفرق المشاركة من خارج المسرعة (حسب شروط الهاكثون).</li>
                                 @endif
-                            </ul>
+                            </ul> --}}
                         </div>
                     </div>
                 </div>
@@ -668,59 +749,101 @@
                             <p>
                                 {{ $l == 'en' ? 'Participants will have the opportunity to receive guidance from experts in technology and entrepreneurship fields.' : 'سيتاح للمشاركين فرصة الحصول على إرشاد من خبراء في مجالات التكنولوجيا وريادة الأعمال.' }}
                             </p>
+
+                           
                             <div class="row" id="hackathon-mentors-list">
+                                @php
+                                    $M=1;    
+                                @endphp
+                                @if($mentors->isEmpty())
+                                <div class="alert alert-info">{{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}</div>
+                                @else
+                                 @foreach($mentors as $mentor)
                                 <div class="col-md-4 mb-3">
                                     <div class="card text-center">
-                                        <img src="https://via.placeholder.com/150.png?text=Mentor+1"
-                                            class="card-img-top rounded-circle mx-auto mt-3" alt="Mentor 1"
+                                        <img src="{{ $mentor->u_img_url }}"
+                                            class="card-img-top rounded-circle mx-auto mt-3" alt="Mentor {{ $M++ }}"
                                             style="width:100px; height:100px; object-fit: cover;">
                                         <div class="card-body">
                                             <h6 class="card-title">
-                                                {{ $l == 'en' ? 'Dr. Ahmed Abdullah' : 'د. أحمد عبدالله' }}
+                                                {{ $mentor->{'user_name_'. $l} }}
                                             </h6>
                                             <p class="card-text small text-muted">
-                                                {{ $l == 'en' ? 'AI Expert' : 'خبير في الذكاء الاصطناعي' }}
+                                                {{ $mentor->{'u_title_'. $l} }}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+                                @endforeach
+                                @endif
                             </div>
+
                             <h6 class="mt-4">{{ $l == 'en' ? 'Judging Panel' : 'لجنة التحكيم' }}</h6>
                             <p>
                                 {{ $l == 'en' ? 'The judging panel consists of industry leaders and investors to evaluate projects and select winners.' : 'تتكون لجنة التحكيم من قادة الصناعة والمستثمرين لتقييم المشاريع واختيار الفائزين.' }}
                             </p>
                             <div class="row" id="hackathon-judges-list">
+                                @php
+                                    $J=1;
+                                @endphp
+                                @if(count($judges_users) > 0)
+                                @foreach($judges_users as $judge)
                                 <div class="col-md-4 mb-3">
                                     <div class="card text-center">
-                                        <img src="https://via.placeholder.com/150.png?text=Judge+1"
+                                        <img src="{{ $judge->img_url }}"
                                             class="card-img-top rounded-circle mx-auto mt-3" alt="Judge 1"
                                             style="width:100px; height:100px; object-fit: cover;">
                                         <div class="card-body">
                                             <h6 class="card-title">
-                                                {{ $l == 'en' ? 'Ms. Sarah Mohammed' : 'أ. سارة محمد' }}
+                                                {{ $judge->{'user_name_'. $l} }}
                                             </h6>
                                             <p class="card-text small text-muted">
-                                                {{ $l == 'en' ? 'Investor and Entrepreneur' : 'مستثمرة ورائدة أعمال' }}
+                                                {{ $judge->{'title_'. $l} }}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+                                @endforeach
+                                @else
+                                <div class="col-md-4 mb-3">
+                                    <div class="card text-center">
+                                        <img src="/images/no-user.png"
+                                            class="card-img-top rounded-circle mx-auto mt-3" alt="Judge 1"
+                                            style="width:100px; height:100px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                {{ $l == 'en' ? 'No Judges' : 'لا يوجد حكام' }}
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+
                             </div>
                         </div>
                     </div>
                 </div>
-
+            @if($companyStep?->stype  != 1)
                 <!-- Teams Tab (conditionally shown) -->
+                
                 <div class="tab-pane fade" id="teams" role="tabpanel" aria-labelledby="teams-tab-btn">
                     <div class="card">
                         <div class="card-body">
+                            @if(count($teams) == 0)
                             <h5 class="card-title">
                                 {{ $l == 'en' ? 'Team Formation and Joining' : 'تكوين الفرق والانضمام إليها' }}
                             </h5>
                             <p>
-                                {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is 5.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو 5.' }}
+                                {{ $l == 'en' ? 'You can now create a new team or join an existing team. Maximum team members is '. $count_team . '.' : 'يمكنك الآن تكوين فريق جديد أو الانضمام إلى فريق قائم. الحد الأقصى لأعضاء الفريق هو'. $count_team .'.' }}
                             </p>
-
+                            @else
+                            <h5 class="card-title">
+                                {{ $l == 'en' ? 'Your Teams' : 'الفرق التي أنت فيها' }}
+                            </h5>
+                            <p>
+                                {{ $l == 'en' ? 'You are currently part of the following team(s). You can leave a team or join another one.' : 'أنت حالياً جزء من الفريق(الفرق) التالية. يمكنك مغادرة فريق أو الانضمام إلى آخر.' }}
+                            </p>
+                            @endif
                             <div id="my-current-team" class="mb-4 p-3 border rounded bg-light" style="display:none;">
                                 <h6>
                                     {{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }}
@@ -745,29 +868,111 @@
                                     {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
                                 </button>
                             </div>
-
+                           
                             <div id="team-actions">
+                                @if(count($teams) > 0)
+                                    @php
+                                        $isteamleader = $teams->where('tm_isTeamLeader', 1)->first();
+                                        $teamsMembers = $teams->where('tm_isTeamLeader', 0);
+                                        $teamUser = $teams->where('tm_user_id', Auth::user()->id);
+                                        $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()?->tm_team_formation_id);
+                                        $isleader = $teams_with_user->where('tm_isTeamLeader', 1)->first();
+                                    @endphp
+                                   @if($teamUser->count() > 0)
+                                        @if($teams_with_user != null)
+                                        <h6 class="mt-4">{{ $l == 'en' ? 'Your Current Team:' : 'فريقك الحالي:' }} <span class="fw-bold">{{$teamUser->first()->tf_name}}</span></h6>
+                                    
+                                        <ul class="list-unstyled">
+                                            
+                                            <hr>
+                                            @foreach($teams_with_user as $team)
+                                                <li>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="media-left" href="/dashboard/users/{{ $team->tm_user_id }}/edit">
+                                                            <img src="{{ $team->u_img_url }}" alt="avatar" class="rounded-circle me-3"
+                                                                height="40" width="40">
+                                                        </a>
+                                                        <a href="/dashboard/users/{{ $team->tm_user_id }}/edit">
+                                                            <div class="media-body">
+                                                                <h6 class="media-heading mb-0 text-nowrap">{{ $team->{'user_name_'.$l} }}</h6>
+                                                                <span class="font-small-2 text-nowrap">{{$team->tf_name }}</span>
+                                                            </div>
+                                                        </a>
+                                                        @if($team->tm_isTeamLeader == 1)
+                                                    {{ $l == 'en' ? '(Team Leader)' : '(قائد الفريق)' }}
+                                                    @endif
+                                                    </div>
+                                                    
+                                                </li>
+                                            @endforeach
+                                        </ul>
+
+                                        @endif
+
+                                        <a href="collaboration-space.html?hackathonId=1&teamId=123" class="btn btn-success btn-sm">
+                                            <i class="bi bi-chat-dots-fill me-2"></i>
+                                            {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
+                                        </a>
+                                    @endif
+                                    
+                                    @else
+                                    @if(( $allteams->first() ? $allteams->first()['tm_acceptInvition'] : null ) == null)
                                 <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createTeamModal">
                                     <i class="bi bi-plus-circle-fill me-2"></i>
                                     {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
                                 </button>
+                                @endif
+                                @endif
+                                
                                 <h6 class="mt-4">{{ $l == 'en' ? 'Join Existing Team:' : 'الانضمام إلى فريق قائم:' }}</h6>
+
                                 <div class="list-group" id="available-teams-list">
+
+                                    @foreach($allteams as $team)
+                                    
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>{{ $l == 'en' ? 'Team Innovators' : 'فريق المبتكرون' }}</strong>
-                                            (3/5 {{ $l == 'en' ? 'members' : 'أعضاء' }})
+                                            <strong>{{ $team['tf_name'] }}</strong>
+                                            ({{ $team['members_count'] }}/{{ $count_team }} {{ $l == 'en' ? 'members' : 'أعضاء' }})
                                             <br>
                                             <small class="text-muted">
-                                                {{ $l == 'en' ? 'Looking for a developer and designer.' : 'يبحثون عن مطور ومصمم.' }}
+                                                {{ $team['tf_description'] }}
                                             </small>
                                         </div>
-                                        <button class="btn btn-outline-primary btn-sm" onclick="joinTeam('{{ $l == 'en' ? 'Innovators' : 'المبتكرون' }}')">
+
+                                        @if($team['members_count'] < $count_team)
+                                        @if($team['tm_user_id']!=Auth::user()->id)
+                                       @php
+                                       $hasJoin = $team_invition->contains('tm_acceptInvition', 'join');
+                                        $hasAccepted = $team_invition->contains('tm_acceptInvition', 'accepted');
+                                        $allRejected = $team_invition->every(function($item) {
+                                            return $item->tm_acceptInvition === 'rejected';
+                                        });
+                                       @endphp
+                                        @if(!$hasJoin && !$hasAccepted && $allRejected)
+                                        
+                                        <button class="btn btn-outline-primary btn-sm" onclick="joinTeam('{{ $team['tf_id'] }}','{{ $team['tf_name'] }}')">
                                             {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
                                             <i class="bi bi-person-plus-fill ms-2"></i>
                                         </button>
+                                        @else
+                                        {{-- <button class="btn btn-outline-primary btn-sm" disabled>
+                                            {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button> --}}
+                                        @endif
+                                        @endif
+                                        @else
+                                        <button class="btn btn-outline-primary btn-sm" disabled>
+                                            {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button>
+                                        @endif
                                     </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    @endforeach
+
+
+                                    {{-- <div class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ $l == 'en' ? 'Team Stars' : 'فريق النجوم' }}</strong>
                                             (4/5 {{ $l == 'en' ? 'members' : 'أعضاء' }})
@@ -780,17 +985,21 @@
                                             {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
                                             <i class="bi bi-person-plus-fill me-2"></i>
                                         </button>
-                                    </div>
+                                    </div> --}}
                                 </div>
+                                
+
                             </div>
                         </div>
                     </div>
                 </div>
-
+           @endif
+           
                 <!-- Submission Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submission" role="tabpanel" aria-labelledby="submission-tab-btn">
                     <div class="card">
                         <div class="card-body">
+                            @if($data_evi['start'] < date('Y-m-d H:i:s') && $data_evi['end'] > date('Y-m-d H:i:s'))
                             <h5 class="card-title">
                                 {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع والحلول' }}
                             </h5>
@@ -798,9 +1007,9 @@
                                 {{ $l == 'en' ? 'Please upload your team\'s project before the hackathon deadline. Make sure to include all required files and a clear presentation.' : 'يرجى رفع مشروع فريقك قبل انتهاء وقت الهاكثون. تأكد من تضمين جميع الملفات المطلوبة وعرض تقديمي واضح.' }}
                             </p>
                             <div id="submission-status-message" class="alert alert-info">
-                                {{ $l == 'en' ? 'You can upload your project now. Deadline: March 17, 2024, 12:00 PM.' : 'يمكنك رفع مشروعك الآن. الموعد النهائي: 17 مارس 2024, 12:00 ظهراً.' }}
+                                {{ $l == 'en' ? 'You can upload your project now. Deadline: '. $data_evi['end']->format('F j, Y,') .'.' : 'يمكنك رفع مشروعك الآن. الموعد النهائي: 17 مارس 2024, 12:00 ظهراً.' }}
                             </div>
-                            <div id="already-submitted-message" class="alert alert-success" style="display:none;">
+                            {{-- <div id="already-submitted-message" class="alert alert-success" style="display:none;">
                                 <i class="bi bi-check-circle-fill me-2"></i>
                                 {{ $l == 'en' ? 'Your project has been uploaded successfully! You can update it until the deadline.' : 'تم رفع مشروعكم بنجاح! يمكنكم تحديثه حتى الموعد النهائي.' }}
                                 <p class="mt-2">
@@ -808,8 +1017,127 @@
                                     MyAwesomeSolution.zip (2.5MB) -
                                     {{ $l == 'en' ? 'Upload Date: March 16, 2024, 05:30 PM' : 'تاريخ الرفع: 16 مارس 2024, 05:30 مساءً' }}
                                 </p>
-                            </div>
-                            <form id="projectSubmissionForm" class="mt-3">
+                            </div> --}}
+                            @if($data_evi['stype'] == 5)
+                             @if(count($data_evi['fields'] ) > 0)
+                                        <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data">
+                                            {!! csrf_field() !!}
+                                            <input type="hidden" name="cycle" value="{{ $data_evi['cycle_id'] }}" />
+                                            <input type="hidden" name="id" value="{{ $data_evi['form_id'] }}" />
+                                            <input type="hidden" name="field_ids" value="{{ $data_evi['field_ids']  }}" />
+                                           
+                                            @foreach($data_evi['fields'] as $field)
+                                                @php
+                                                    $options = $field->pivot->options? json_decode($field->pivot->options) : null;
+                                                    $field_name = 'field_' . $field->pivot->id;
+                                                    $id_for = 'input-fld-'. $loop->iteration;
+                                                    $get_answer = $answers->where('field_id', $field->pivot->id)->first();
+                                                    $answer = $get_answer ? $get_answer->answer : null;
+                                                @endphp
+                                                
+                                                <div class="mb-3">
+                                                    @switch($field->field_type)
+                                                        @case("select")
+                                                        <div class="form-group mb-6">
+                                                            @if($options->label)
+                                                                <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                            @endif
+                                                            <select class="form-select @error($field_name) is-invalid @enderror" 
+                                                                    id="{{ $id_for }}" 
+                                                                    name='{{ $field_name }}' 
+                                                                    required>
+                                                                <option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>
+                                                                @foreach(explode(",", $options->values) as $value)
+                                                                    <option value="{{ trim($value) }}" 
+                                                                            {{ old($field_name) == trim($value)? "selected" : "" }} 
+                                                                            {{trim($value)==$answer?'selected':''}}>
+                                                                        {{ trim($value) }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error($field_name)
+                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        @break
+                                                        
+                                                        @case("textarea")
+                                                        <div class="form-group mb-6">
+                                                            @if($options->label)
+                                                                <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                            @endif
+                                                            <textarea class="form-control @error($field_name) is-invalid @enderror" 
+                                                                      id="{{ $id_for }}" 
+                                                                      name="{{ $field_name }}"
+                                                                      rows="{{ $options->rows ?? 4 }}">{{ old($field_name) }}{{$answer}}</textarea>
+                                                            @error($field_name)
+                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        @break
+                                                        
+                                                        @case("file")
+                                                        <div class="form-group mb-6">
+                                                            @if($options->label)
+                                                                <label class="form-label fw-bold">{{ $options->label }}</label>
+                                                            @endif
+                                                            <div class="d-flex flex-column">
+                                                                <input type="file" 
+                                                                       class="form-control @error($field_name) is-invalid @enderror" 
+                                                                       id="{{ $id_for }}" 
+                                                                       name="{{ $field_name }}"
+                                                                       accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                                                                @if($answer)
+                                                                    <div class="mt-4">
+                                                                        <a href="/{{ $answer }} " target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            @error($field_name)
+                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        @break
+                                                        
+                                                        @default
+                                                            <div class="form-group mb-6">
+                                                                @if($options->label)
+                                                                    <label for="{{$id_for}}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                                @endif
+                                                                <input type="{{$options->type=="date"?"text":$options->type}}" 
+                                                                       class="form-control {{ $options->type == "date"? "datepicker" : "" }} @error($field_name) is-invalid @enderror" 
+                                                                       id="{{$id_for}}" 
+                                                                       name="{{ $field_name }}" 
+                                                                       value="{{ !empty( $answer ) ? $answer : ( !empty( old($field_name) ) ? old($field_name) : '' ) }}" />
+                                                                @error($field_name)
+                                                                    <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                                @enderror
+                                                            </div>
+                                                    @endswitch
+                                                </div>
+                                            @endforeach
+                                            
+                                            <div class="d-flex justify-content-end mt-4">
+                                                <button type="submit" class="btn btn-primary">
+                                                    {{ __('admin.submit') }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                        
+                                    @else
+                                        <div class="text-center">
+                                            <h5 class="text-muted">{{ __('cycles.No Fields') }}</h5>
+                                        </div>
+                                    @endif
+                                    @else
+                                        <div class="text-center">
+                                            <h5 class="text-muted">{{ __('admin.You are not allowed to submit answers') }}</h5>
+                                        </div>
+                                        @endif
+
+                            {{-- <form id="projectSubmissionForm" class="mt-3">
                                 <div class="mb-3">
                                     <label for="projectName" class="form-label">
                                         {{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}
@@ -859,7 +1187,15 @@
                                 <button type="button" class="btn btn-outline-secondary ms-2" onclick="saveDraft()">
                                     {{ $l == 'en' ? 'Save as Draft' : 'حفظ كمسودة' }}
                                 </button>
-                            </form>
+                            </form> --}}
+                            @else
+                                <div class="text-center">
+                                    <h5 class="alert alert-danger">
+                                        {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }},
+                                        {{ $l == 'en' ? 'will be opening on '. $data_evi['start']->format('F j, Y') : 'سوف يتم فتحها' . $data_evi['start']->format('F j, Y')  }}
+                                    </h5>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -962,10 +1298,63 @@
                         </div>
                     </div>
                 </div>
+                @if($user->hasRole('admin'))
+                 <!-- Results Tab (conditionally shown) -->
+                <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab-btn">
+                    <div class="card">
 
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ $l == 'en' ? 'Former Submissions Requests' : 'طلبات تقديم الشركات' }}
+                            </h5>
+                           <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الاليكترونى' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيلs' }}</th>
+                                        <th scope="col">{{ $l == 'en' ? 'Actions' : 'الإجراءات' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($data as $submission)
+                                       
+                                                <tr>
+                                                    <td>{{ $submission->user_name }}</td>
+                                                    <td>{{ $submission->email }}</td>
+                                                    <td>{{ $submission->submissionDate }}</td>
+                                                    <td><a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $submission->step_id }}/{{ $submission->user_id }}">{{ $l == 'en' ? 'View' : 'عرض' }} </a></td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <select id="cstep" class="select form-control"
+                                                                onchange="changestep({{ $submission->company_id }},this.options[this.selectedIndex].value)">
+                                                                <option value="0">{{ __('cycles.Disapprove') }}</option>
+                                                                @foreach (\App\Step::where('cycle_id', $submission->cycle_id)->orderBy('arr')->get() as $step)
+                                                                <option value="{{ $step->id }}"
+                                                                    {{ $step->id == $submission->company_step ? 'selected' : '' }}>
+                                                                    {{ $step->title }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                          
+                                    @endforeach
+                                </tbody>
+                            </table>
+                           
+                    
+                            
+                        </div>
+                       
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
+        @if($companyStep?->stype  == 6)
         <!-- Create Team Modal -->
         <div class="modal fade" id="createTeamModal" tabindex="-1" aria-labelledby="createTeamModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -977,33 +1366,88 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="createTeamForm">
+                        <form method="POST" action="/dashboard/hackathon/createTeam">
+                            @csrf
+                            <input type="hidden" name="step_id" value="{{ $currentHackathon['step_id'] }}">
+                            <input type="hidden" name="cycle_id" value="{{ $id }}">
                             <div class="mb-3">
                                 <label for="teamName" class="form-label">
                                     {{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}
                                 </label>
-                                <input type="text" class="form-control" id="teamName" required>
+                                <input type="text" class="form-control" name="team_name" value="" id="teamName" required>
                             </div>
                             <div class="mb-3">
                                 <label for="teamDescription" class="form-label">
                                     {{ $l == 'en' ? 'Brief Team/Idea Description (Optional)' : 'وصف مختصر للفريق/الفكرة (اختياري)' }}
                                 </label>
-                                <textarea class="form-control" id="teamDescription" rows="2"></textarea>
+                                <textarea class="form-control" name="description" id="teamDescription" rows="2"></textarea>
                             </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                            {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="createTeam()">
-                            {{ $l == 'en' ? 'Create Team' : 'إنشاء الفريق' }}
-                        </button>
-                    </div>
+
+                            <hr>
+
+                            {{-- <div class="mb-3">
+                                <label for="Project_Name_en" class="form-label">
+                                    {{ __('admin.Project_Name') ." " . __('admin.English') }}
+                                </label>
+                                <input type="text" class="form-control" name="Project_Name_en" value="" id="Project_Name_en" >
+                            </div>
+                            <div class="mb-3">
+                                <label for="Project_Name_ar" class="form-label">
+                                    {{__('admin.Project_Name') ." " . __('admin.Arabic') }}
+                                </label>
+                                <input type="text" class="form-control" name="Project_Name_ar" value="" id="Project_Name_ar" >
+                            </div> --}}
+
+                            {{-- <div class="mb-3">
+                                <label for="Project_Description_en" class="form-label">
+                                    {{ __('admin.Project_Description') ." " . __('admin.English') }}
+                                </label>
+                                <textarea class="form-control" name="Project_Description_en" id="Project_Description_en" rows="2"></textarea>
+                            </div>
+
+                             <div class="mb-3">
+                                <label for="Project_Description_ar" class="form-label">
+                                    {{ __('admin.Project_Description') ." " .  __('admin.Arabic') }}
+                                </label>
+                                <textarea class="form-control" name="Project_Description_ar" id="Project_Description_ar" rows="2"></textarea>
+                            </div> --}}
+
+                            {{-- <div class="mb-3">
+                                <label for="Target_Track" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
+                                <select class="form-select" id="Target_Track" name="Target_Track" >
+                                    <option value="" >{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
+                                    @for ($i = 5; $i <= 100; $i += 5)
+                                        <option value="{{ $i }}" {{ old('TargetTrack', $selected ?? '') == $i ? 'selected' : '' }}>{{ $i  .'%'}}</option>
+                                    @endfor
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
+                                <select class="form-select" id="Project_Status" name="Project_Status">
+                                    <option value="" >{{ $l == 'en' ? 'Choose Status...' : 'اختر الحالة...' }}</option>
+                                    @for ($s = 0; $s <= 100; $s += 25)
+                                        <option value="{{ $s }}" {{ old('Project_Status', $selected ?? '') == $s ? 'selected' : '' }}>{{ $s .'%' }}</option>
+                                    @endfor
+                                </select>
+                            </div> --}}
+
+
+                       
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                                    {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+                                </button>
+                                <button type="submit"  class="btn btn-primary" >
+                                    {{ $l == 'en' ? 'Create Team' : 'إنشاء الفريق' }}
+                                </button>
+                            </div>
+                     </form>
                 </div>
             </div>
         </div>
-
+        @endif
         <!-- Solution Details Modal -->
         <div class="modal fade" id="solutionDetailsModal" tabindex="-1" aria-labelledby="solutionDetailsModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -1291,29 +1735,50 @@
             window.location.href = url.href;
         }
 
-        function createTeam() {
-            const teamName = document.getElementById('teamName').value;
-            if (!teamName.trim()) {
-                alert('{{ $l == "en" ? "Please enter a team name." : "يرجى إدخال اسم للفريق." }}');
-                return;
-            }
-            alert(`{{ $l == "en" ? "Team created successfully!" : "تم إنشاء فريق" }} "${teamName}" {{ $l == "en" ? "" : "بنجاح!" }}`);
-            var createTeamModal = bootstrap.Modal.getInstance(document.getElementById('createTeamModal'));
-            createTeamModal.hide();
-            const url = new URL(window.location);
-            url.searchParams.set('teamCreated', 'true');
-            window.location.href = url.href;
-        }
+        // function createTeam() {
+        //     const teamName = document.getElementById('teamName').value;
+        //     if (!teamName.trim()) {
+        //         alert('{{ $l == "en" ? "Please enter a team name." : "يرجى إدخال اسم للفريق." }}');
+        //         return;
+        //     }
+        //     alert(`{{ $l == "en" ? "Team created successfully!" : "تم إنشاء فريق" }} "${teamName}" {{ $l == "en" ? "" : "بنجاح!" }}`);
+        //     var createTeamModal = bootstrap.Modal.getInstance(document.getElementById('createTeamModal'));
+        //     createTeamModal.hide();
+        //     const url = new URL(window.location);
+        //     url.searchParams.set('teamCreated', 'true');
+        //     window.location.href = url.href;
+        // }
 
-        function joinTeam(teamName) {
-            if (confirm(`{{ $l == "en" ? "Are you sure you want to request to join team" : "هل أنت متأكد أنك تريد طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+        function joinTeam(id, teamName) {
+        if (confirm(`{{ $l == "en" ? "Are you sure you want to request to join team" : "هل أنت متأكد أنك تريد طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+            
+            fetch("{{ route('hackathon.RequestJoinTeam') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // أو response.text() حسب ما يرجع الـ controller
+            })
+            .then(data => {
                 alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
-                const url = new URL(window.location);
-                url.searchParams.set('teamCreated', 'true');
-                url.searchParams.set('joinedTeamName', teamName);
-                window.location.href = url.href;
-            }
+                // إعادة توجيه أو تحديث
+                window.location.href = window.location.href;
+            })
+            .catch(error => {
+                alert("{{ $l == 'en' ? 'There was an error sending the request.' : 'حدث خطأ أثناء إرسال الطلب.' }}");
+                console.error(error);
+            });
         }
+    }
 
         function leaveTeam() {
             if (confirm(`{{ $l == "en" ? "Are you sure you want to leave the current team?" : "هل أنت متأكد أنك تريد مغادرة الفريق الحالي؟" }}`)) {
@@ -1401,6 +1866,35 @@
                 countdownElement.innerHTML = `${days} {{ $l == 'en' ? 'days' : 'يوم' }} {{ $l == 'en' ? 'and' : 'و' }} ${hours} {{ $l == 'en' ? 'hours' : 'ساعة' }} {{ $l == 'en' ? 'and' : 'و' }} ${minutes} {{ $l == 'en' ? 'minutes' : 'دقيقة' }} {{ $l == 'en' ? 'and' : 'و' }} ${seconds} {{ $l == 'en' ? 'seconds' : 'ثانية' }}`;
             }, 1000);
         }
+
+        function changestep(company, step) {
+      if (confirm("{{ __('cycles.sure change step') }}")) {
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/screening/changestep",
+          data: {
+            "company": company,
+            "step": step,
+          },
+          success: function(response) {
+            // alert(response.ddddd);
+            console.log(response);
+            // location.href = '/dashboard/hackathon/details/{{ $id }}';
+            location.reload();
+          },
+          error: function(error) {
+            console.log("Error Occurred, arrange failed");
+          }
+        });
+      } else {
+        location.reload();
+      }
+    }
     </script>
 </body>
 

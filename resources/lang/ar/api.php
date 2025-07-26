@@ -23,4 +23,13 @@ return [
 	'MentorBioUpdated' => 'تم تحديث الملف الشخصي للمرشد بنجاح',
 	'inactive_user' => 'حسابك غير نشط. يرجى الاتصال بالدعم',
 	'ImageUpdated' => 'تم تحديث الصورة بنجاح',
+	'linkedin_required' => 'الرابط المركزي مطلوب للمرشدين',
+	'expertise_required' => 'التخصص مطلوب للمرشدين',
+	'OtherGovernorates' => 'المحافظات الأخرى',
+	'governorates' => 'المحافظات',
+	'OtherCountries' => 'الدول الأخرى',
+	'country_not_found' => 'الدولة غير موجودة',
+	'validation_error' => 'خطاء في التحقق من البيانات',
+	'programCreated' => 'تم إنشاء البرنامج بنجاح',
+	'programUpdated' => 'تم تحديث البرنامج بنجاح',
 ];

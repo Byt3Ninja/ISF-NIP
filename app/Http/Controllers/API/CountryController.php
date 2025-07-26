@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StateResource;
+use App\Http\Resources\CountryResource;
 
 class CountryController extends Controller
 {
+    use ApiResponder;
     /**
  * @OA\Get(
  *     path="/api/countries",
  *     summary="Get list of countries",
  *     description="Returns a list of all countries based on the current app locale (name_en or name_ar).",
  *     operationId="getCountries",
- *     tags={"Location"},
+ *     tags={"Countries"},
  *     @OA\Response(
  *         response=200,
  *         description="Countries retrieved successfully",
@@ -35,15 +39,9 @@ class CountryController extends Controller
  */
     public function index(Request $request)
 {
-    $locale = app()->getLocale(); 
-    $nameColumn = $locale === 'ar' ? 'name_ar' : 'name_en';
+    $countries = DB::table('countries')->get();
 
-    $countries = DB::table('countries')->select('id', "$nameColumn as title")->get();
-
-    return response()->json([
-        'success' => true,
-        'data' => $countries
-    ]);
+    return $this->success(CountryResource::collection($countries));
 }
 /**
  * @OA\Get(
@@ -51,7 +49,7 @@ class CountryController extends Controller
  *     summary="Get list of states for a country",
  *     description="Returns a list of states for a given country ID based on the current app locale.",
  *     operationId="getStates",
- *     tags={"Location"},
+ *     tags={"States"},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
@@ -79,17 +77,13 @@ class CountryController extends Controller
  */
 public function getStates($id)
 {
-    $locale = app()->getLocale(); 
-    $nameColumn = $locale === 'ar' ? 'name_ar' : 'name_en';
+    $country = DB::table('countries')->where('id', $id)->exists();
+    if (!$country) {
+        return $this->error(__('api.country_not_found'), 404, null);
+    }
 
-    $states = DB::table('states')->where('country_id', $id)
-                ->select('id', "$nameColumn as title")
-                ->get();
-
-    return response()->json([
-        'success' => true,
-        'data' => $states
-    ]);
+    $states = DB::table('states')->where('country_id', $id)->get();
+    return $this->success(StateResource::collection($states));
 }
 
 }

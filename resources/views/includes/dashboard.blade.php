@@ -348,7 +348,7 @@
 														$step->description ? $step->description : '...' }} </span>
 												</td>
 												<td>
-													@if( $step->stype == 1 )
+													@if( $step->stype == 1 or $step->stype == 5 )
 													@if( $step->status == 'Started' )
 													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
 														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
@@ -902,7 +902,7 @@
 																@if( $now <= $end_time )
 																<a href="{{ $session->start_url }}" target="_blank">
 																	<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																		<i class="ti ti-link"></i> Join Meeting
+																		<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
 																	</button>
 																</a>
 																@else

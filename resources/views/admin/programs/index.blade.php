@@ -148,8 +148,13 @@
             @endphp
             <div class="card mb-6" style="border-radius: 20px;">
               <div class="d-flex program-card py-4 py-md-5 px-0 px-md-4">
-                <div style="width: fit-content; 
+                <div class="position-relative" style="width: fit-content; 
                         {{ $l == 'ar' ? 'margin-left: 20px;' : 'margin-right: 20px' }}">
+                  <div class="position-absolute top-0 start-0">
+                    <div class="badge bg-{{ $cycle->type == 'General_Program' ? 'success' : 'warning  ' }} rounded-lg p-2">
+                      {{ __('cycles.' . $cycle->type) }}
+                    </div>
+                  </div>
                   <div class="border border-light align-items-center justify-content-center d-none d-md-flex h-100"
                     style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;">
 

@@ -33,13 +33,14 @@
                                             <input type="hidden" name="cycle" value="{{$c}}" />
                                             <input type="hidden" name="id" value="{{$step->id}}" />
                                             <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
-                                            
+                                           
                                             @foreach($fields as $field)
                                                 @php
                                                     $options = $field->pivot->options? json_decode($field->pivot->options) : null;
                                                     $field_name = 'field_' . $field->pivot->id;
                                                     $id_for = 'input-fld-'. $loop->iteration;
-                                                    $answer = $answers[$loop->iteration-1]??null;
+                                                    $get_answer = $answers->where('field_id', $field->pivot->id)->first();
+                                                    $answer = $get_answer ? $get_answer->answer : null;
                                                 @endphp
                                                 
                                                 <div class="mb-3">
@@ -117,7 +118,7 @@
                                                                        class="form-control {{ $options->type == "date"? "datepicker" : "" }} @error($field_name) is-invalid @enderror" 
                                                                        id="{{$id_for}}" 
                                                                        name="{{ $field_name }}" 
-                                                                       value="{{ old($field_name) }}{{$answer}}" />
+                                                                       value="{{ !empty( $answer ) ? $answer : ( !empty( old($field_name) ) ? old($field_name) : '' ) }}" />
                                                                 @error($field_name)
                                                                     <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
                                                                 @enderror

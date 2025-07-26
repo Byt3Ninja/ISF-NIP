@@ -10,9 +10,7 @@ class Cycle extends Model
     use Auditable;
     public static $module = 'Program';
     protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d',];
-    protected $fillable = [
-       'title', 'description', 'start', 'end', 'organization_id',
-    ];
+    protected $guarded = [];
 
     // =============> Attributes <======================
 
@@ -70,8 +68,11 @@ class Cycle extends Model
 
     public static function programTypes(): array
     {
-        // return ['Incubator', 'Accelerator', 'Hackathon'];
-        return ['General_Program', 'Hackathon'];
+      $types = ['General_Program', 'Hackathon'];
+
+      return collect($types)->mapWithKeys(function ($type) {
+        return [$type => __('cycles.' . $type)];
+    })->toArray();
     }
 
    

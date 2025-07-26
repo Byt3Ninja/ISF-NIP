@@ -419,5 +419,7 @@ return [
     'Active filters' => 'الفلاتر النشطة',
     'Status' => 'الحالة',
     'Score' => 'الدرجة',
+    'General_Program' => 'برنامج عام',
+    'Hackathon' => 'هاكاثون',
   ];
 

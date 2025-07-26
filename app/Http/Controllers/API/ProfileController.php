@@ -7,12 +7,9 @@ use App\MentorshipTask;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Mail\ConfirmEmailUpdate;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -25,7 +22,7 @@ class ProfileController extends Controller
  *     summary="Get authenticated user profile",
  *     description="Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
  *     operationId="getMe",
- *     tags={"User"},
+ *     tags={"Profile"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
  *         response=200,
@@ -227,7 +224,7 @@ class ProfileController extends Controller
  *     summary="Update user profile",
  *     description="Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
  *     operationId="updateProfile",
- *     tags={"User"},
+ *     tags={"Profile"},
  *     security={{"sanctum":{}}},
  *     @OA\RequestBody(
  *         required=true,
@@ -238,7 +235,7 @@ class ProfileController extends Controller
  *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
  *                 @OA\Property(property="gender", type="string", example="male"),
  *                 @OA\Property(property="countryCode", type="string", example="+20"),
- *                 @OA\Property(property="country_code_w_a", type="string", example="+20"),
+ *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
  *                 @OA\Property(property="phone", type="string", example="0100000000"),
  *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
  *                 @OA\Property(property="email", type="string", format="email", example="ahmed@example.com"),
@@ -418,13 +415,13 @@ class ProfileController extends Controller
      *     summary="Update user password",
      *     description="Change the authenticated user's password.",
      *     operationId="updatePassword",
-     *     tags={"User"},
+     *     tags={"Profile"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"current_password", "password", "password_confirmation"},
-     *             @OA\Property(property="current_password", type="string", example="oldpassword123"),
+     *             required={"currentPassword", "password", "password_confirmation"},
+     *             @OA\Property(property="currentPassword", type="string", example="oldpassword123"),
      *             @OA\Property(property="password", type="string", example="newpassword456"),
      *             @OA\Property(property="password_confirmation", type="string", example="newpassword456")
      *         )
@@ -444,13 +441,13 @@ public function updatePassword(Request $request)
     $user = Auth::user();
 
     $request->validate([
-        'current_password'      => ['required'],
+        'currentPassword'      => ['required'],
         'password'              => ['required', 'confirmed', 'min:8'],
     ]);
 
-    if (!Hash::check($request->current_password, $user->password)) {
+    if (!Hash::check($request->currentPassword, $user->password)) {
         throw ValidationException::withMessages([
-            'current_password' => [__('api.passwordIncorrect')],
+            'currentPassword' => [__('api.passwordIncorrect')],
         ]);
     }
 
@@ -468,7 +465,7 @@ public function updatePassword(Request $request)
      *     summary="Update mentor bio",
      *     description="Update mentor bio details such as specialization, experience, and mentorship approach.",
      *     operationId="updateBio",
-     *     tags={"User"},
+     *     tags={"Profile"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -476,10 +473,22 @@ public function updatePassword(Request $request)
      *             @OA\Property(property="bio", type="string"),
      *             @OA\Property(property="specialization", type="string"),
      *             @OA\Property(property="linkedin", type="string", format="url"),
-     *             @OA\Property(property="entrepreneurial_experience", type="boolean"),
-     *             @OA\Property(property="entrepreneurial_experience_brief", type="string"),
-     *             @OA\Property(property="profile_privacy", type="boolean"),
-     *             @OA\Property(property="mentorship_approach", type="array", @OA\Items(type="string")),
+     *                  @OA\Property(
+     *                 property="entrepreneurialExperience",
+     *                 type="integer",
+     *                 enum={0,1},
+     *                 description="1 for true, 0 for false",
+     *                 example=1
+     *             ),
+     *             @OA\Property(property="entrepreneurialExperienceBrief", type="string"),
+     *              @OA\Property(
+     *                 property="profilePrivacy",
+     *                 type="integer",
+     *                 enum={0,1},
+     *                 description="1 for true, 0 for false",
+     *                 example=1
+     *             ),
+     *             @OA\Property(property="mentorshipApproach", type="array", @OA\Items(type="string")),
      *             @OA\Property(property="expertise_ids", type="array", @OA\Items(type="integer"))
      *         )
      *     ),
@@ -511,16 +520,17 @@ public function updateBio(Request $request)
         'entrepreneurialExperience'    => 'nullable|boolean',
         'entrepreneurialExperienceBrief' => 'nullable|string',
         'profilePrivacy'               => 'nullable|boolean',
-        'expertise_ids'                 => 'nullable|array',
-        'expertise_ids.*'               => 'exists:expertises,id',
+        'expertiseIds'                 => 'nullable|array',
+        'expertiseIds.*'               => 'exists:expertises,id',
     ]);
 
-    $approachInput = $request->input('mentorshipApproach');
-    $allowedApproaches = ['E-mail', 'Phone Calls', 'Video Calls', 'In-Person Meetings'];
+    $bio = UsersBio::firstOrNew(['user_id' => $user->id]);
 
-    $mentorshipApproach = [];
+    if ($request->has('mentorshipApproach')) {
+        $approachInput = $request->input('mentorshipApproach');
+        $allowedApproaches = ['E-mail', 'Phone Calls', 'Video Calls', 'In-Person Meetings'];
+        $mentorshipApproach = [];
 
-    if ($approachInput) {
         if (is_array($approachInput)) {
             foreach ($approachInput as $value) {
                 if (in_array($value, $allowedApproaches)) {
@@ -530,30 +540,56 @@ public function updateBio(Request $request)
         } elseif (is_string($approachInput) && in_array($approachInput, $allowedApproaches)) {
             $mentorshipApproach[] = $approachInput;
         }
+
+        $bio->mentorship_approach = json_encode($mentorshipApproach);
     }
 
-    UsersBio::updateOrCreate(
-        ['user_id' => $user->id],
-        [
-            'bio_ar'                          => $validated['bio'] ?? null,
-            'bio_en'                          => $validated['bio'] ?? null,
-            'specialization_ar'              => $validated['specialization'] ?? null,
-            'specialization_en'              => $validated['specialization'] ?? null,
-            'linkedin'                       => $validated['linkedin'] ?? null,
-            'entrepreneurial_experience'     => $validated['entrepreneurialExperience'] ?? 0,
-            'entrepreneurial_experience_brief' => $validated['entrepreneurialExperienceBrief'] ?? '',
-            'profile_privacy'                => $validated['profilePrivacy'] ?? 1,
-            'mentorship_approach'            => json_encode($mentorshipApproach),
-        ]
-    );
+    if (array_key_exists('bio', $validated)) {
+        $bio->bio_en = $validated['bio'];
+        $bio->bio_ar = $validated['bio'];
+    }
 
-    if (isset($validated['expertise_ids'])) {
-        $user->mentorExpertises()->sync($validated['expertise_ids']);
+    if (array_key_exists('specialization', $validated)) {
+        $bio->specialization_en = $validated['specialization'];
+        $bio->specialization_ar = $validated['specialization'];
+    }
+
+    if (array_key_exists('linkedin', $validated)) {
+        $bio->linkedin = $validated['linkedin'];
+    }
+
+    if (array_key_exists('entrepreneurialExperience', $validated)) {
+        $bio->entrepreneurial_experience = $validated['entrepreneurialExperience'];
+    }
+
+    if (array_key_exists('entrepreneurialExperienceBrief', $validated)) {
+        $bio->entrepreneurial_experience_brief = $validated['entrepreneurialExperienceBrief'];
+    }
+
+    if (array_key_exists('profilePrivacy', $validated)) {
+        $bio->profile_privacy = $validated['profilePrivacy'];
+    }
+
+    $bio->save();
+    
+
+    if (isset($validated['expertiseIds'])) {
+        $user->mentorExpertises()->sync($validated['expertiseIds']);
     }
 
     return response()->json([
         'success' => true,
         'message' => __('api.MentorBioUpdated'),
+        'data' => [
+            'bio' => $bio->bio_en,
+            'specialization' => $bio->specialization_en,
+            'linkedin' => $bio->linkedin,
+            'entrepreneurialExperience' => (bool) $bio->entrepreneurial_experience,
+            'entrepreneurialExperienceBrief' => $bio->entrepreneurial_experience_brief,
+            'profilePrivacy' => (bool) $bio->profile_privacy,
+            'mentorshipApproach' => json_decode($bio->mentorship_approach, true),
+            'expertise_ids' => $user->mentorExpertises()->pluck('expertise_id')->toArray(),
+        ]
     ]);
 }
 

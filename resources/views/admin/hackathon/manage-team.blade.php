@@ -64,8 +64,8 @@
 
   <!-- Main Content -->
   <main class="overflow-x-hidden mx-auto mb-12 mt-6" style="width: 90%;">
-    <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span id="hackathon-title-team-page" class="text-primary">{{ $l == 'en' ? 'AI Hackathon' : 'هاكثون الذكاء الاصطناعي' }}</span></h2>
-
+    <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span  class="text-primary">{{ $l == 'en' ? $team_Formation_raw->first()->tf_name : $team_Formation_raw->first()->tf_name  }}</span></h2>
+              
     <!-- No Team Section -->
     <div id="no-team-section" class="card card-body text-center p-5" style="display:none;">
       <i class="ti ti-users ti-xl text-muted mb-3"></i>
@@ -81,47 +81,92 @@
       <div class="col-md-7">
         <div class="card">
           <div class="card-header">
-            <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l == 'en' ? 'Heroes Team' : 'فريق الأبطال' }}</span></h5>
+            <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l == 'en' ? $team_Formation_raw->first()->tf_name  : $team_Formation_raw->first()->tf_name  }}</span></h5>
           </div>
           <div class="card-body">
-            <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span id="member-count">2</span>/5):</h6>
+            
+            @if( session()->has('success') )
+			<div class="row">
+				<div class="col-md-12">
+					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+						{{ __('admin.'. session()->get('success')) }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+			</div>
+			@endif
+			@if( session()->has('error') )
+			<div class="row">
+				<div class="col-md-12">
+					<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+						{{ __('admin.'.session()->get('error')) }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+			</div>
+			@endif
+
+            @php
+              $maxMembers = $count_team;
+              $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
+            @endphp
+            <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
             <ul class="list-group mb-3" id="team-members-list">
+              @php
+                $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
+              @endphp
+              @if($team_leader)
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div class="avatar avatar-sm me-2">
-                    <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle">
+                    <img src="{{ $team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar" class="rounded-circle">
                   </div>
-                  <strong>{{ $l == 'en' ? 'You (Team Leader)' : 'أنت (قائد الفريق)' }}</strong>
+                  <strong>{{ $l == 'en' ? 'You ('.$team_leader->user_name_en .')' : 'انت ('.$team_leader->user_name_ar .')' }} </strong>
                 </div>
                 <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
               </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
+              @endif
+              
+              @foreach ($team_members as $member)
+              <li id="Member{{ $member->tm_id }}" class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div class="avatar avatar-sm me-2">
-                    <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle">
+                    <img src="{{ $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar" class="rounded-circle">
                   </div>
-                  {{ $l == 'en' ? 'Team Member 2 (username)' : 'عضو الفريق 2 (اسم المستخدم)' }}
+                  {{ $l == 'en' ? 'Team Member 2 ('. $member->tm_name .')' : 'عضو الفريق 2 ('. $member->tm_name . ')' }}
                 </div>
-                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}" onclick="confirmRemoveMember('{{ $l == 'en' ? 'Team Member 2 (username)' : 'عضو الفريق 2 (اسم المستخدم)' }}')">
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}" onclick="confirmRemoveMember({{ $member->tm_id }}, '{{ $member->tm_name }}')">
                   <i class="ti ti-user-minus"></i>
                 </button>
               </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+              @endforeach
+
+              
+              @foreach ($team_Pinding as $index => $pendingMember)
+             
+              <li id="pendingMember{{ $pendingMember->tm_id }}" class="list-group-item d-flex justify-content-between align-items-center text-muted">
                 <div>
                   <i class="ti ti-user-plus me-2"></i>
-                  {{ $l == 'en' ? 'Pending invitation to: user3@example.com' : 'دعوة معلقة لـ: user3@example.com' }}
+                  {{ $l == 'en' ? 'Pending invitation to: '. $pendingMember->tm_email.'' : 'دعوة معلقة لـ: user3@example.com' }}
                 </div>
-                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation('user3@example.com')">
+                <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}"><button class="btn btn-sm btn-outline-secondary" data-id="{{ $pendingMember->tm_id }}" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation({{ $pendingMember->tm_id, $pendingMember->tm_email }})">
                   <i class="ti ti-x"></i>
                 </button>
+                
               </li>
-            </ul>
+              @endforeach
 
+            </ul>
+            @php
+              $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+            @endphp
+            @if($leaderOrnot->count() > 0)
             <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
-            <form id="inviteMemberForm" class="row g-3 align-items-center">
+            <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
+              @csrf
               <div class="col-auto flex-grow-1">
-                <input type="email" class="form-control" id="memberEmail" 
-                       placeholder="{{ $l == 'en' ? 'Member email address' : 'بريد العضو الإلكتروني' }}" required>
+                <input type="email" name="memberEmail" class="form-control" id="memberEmail" 
+                       placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
               </div>
               <div class="col-auto">
                 <button type="submit" class="btn btn-success">
@@ -129,22 +174,63 @@
                 </button>
               </div>
             </form>
+            @endif
             <hr>
+           
+            @php
+                $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
+              @endphp
+       
+              
             <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:' }}</h6>
             <div id="join-requests-list">
+              @if($teamLeader->isEmpty())
               <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.' }}</div>
+              @else
+            
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ $teamLeader->first()->tm_name }}</strong>
+                                            
+                                        </div>
+
+                                        
+                                        <button class="btn btn-outline-primary btn-sm" onclick="ApprovedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                                            {{ $l == 'en' ? 'Approve' : ' موافقة ' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button>
+
+                                        <button class="btn btn-outline-danger btn-sm" onclick="RejectedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                                            {{ $l == 'en' ? 'Rejects' : ' رفض ' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button>
+                                       
+                                        {{-- <button class="btn btn-outline-primary btn-sm" disabled>
+                                            {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                                            <i class="bi bi-person-plus-fill ms-2"></i>
+                                        </button> --}}
+                                        
+                                        
+                                    </div>
+
+              @endif
             </div>
+          
           </div>
           <div class="card-footer">
-            <a href="/dashboard/hackathon/my-team" class="btn btn-info">
+            <a  href="/dashboard/hackathon/my-team" class="btn btn-info">
               <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
             </a>
+            @if($leaderOrnot->count() < 0)
             <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
               <i class="ti ti-logout me-1"></i> {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
             </button>
-            <button class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()" id="disbandTeamBtn" style="display:none;">
+            @endif
+             @if($leaderOrnot->count() > 0)
+            <button disabled class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()" id="disbandTeamBtn" style="display:none;">
               <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
             </button>
+            @endif
           </div>
         </div>
       </div>
@@ -155,20 +241,37 @@
             <h5 class="mb-0"><i class="ti ti-target me-2"></i> {{ $l == 'en' ? 'Team Goal & Project' : 'هدف الفريق ومشروعه' }}</h5>
           </div>
           <div class="card-body">
-            <h6>{{ $l == 'en' ? 'Project Idea (Initial):' : 'فكرة المشروع (مبدئية):' }}</h6>
-            <p id="team-project-idea">{{ $l == 'en' ? 'Smart system for real estate market data analysis using artificial intelligence.' : 'نظام ذكي لتحليل بيانات السوق العقاري باستخدام الذكاء الاصطناعي.' }}</p>
+            <h6>{{ $l == 'en' ? 'Project Idea Name :' : 'اسم فكرة المشروع :' }} {{ $team_Formation_raw->first()->tf_projectName_en }}</h6>
+            <hr>
+            <p id="team-project-idea">{{ $l == 'en' ? 'Project Idea Description :' : 'وصف فكرة المشروع :' }} <br>{{ $team_Formation_raw->first()->tf_projectDescription_en }}</p>
             <button class="btn btn-sm btn-outline-secondary mb-3" data-bs-toggle="modal" data-bs-target="#editProjectIdeaModal">
               <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
             </button>
 
-            <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
-            <p id="team-target-track">{{ $l == 'en' ? 'AI in Financial Services' : 'الذكاء الاصطناعي في الخدمات المالية' }}</p>
+            {{-- <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
+            <p id="team-target-track">Idea + Team, Define the problem. Form your team. Agree on the project goal.
+Research, Validate the idea. Explore similar solutions. Finalize key features.
+Design, Sketch user flow. Draft UI. Pick your tools and tech stack.
+Build, Set up the repo. Develop core features. Test early and often.
+Ready for Pitch, Polish the demo. Prepare slides. Practice the story.</p> --}}
              
             <h6>{{ $l == 'en' ? 'Project Status:' : 'حالة المشروع:' }}</h6>
             <div class="progress mb-2" style="height: 20px;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}</div>
+              <div class="progress-bar bg-success" role="progressbar" style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;" aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0" aria-valuemax="100">{{ $team_Formation_raw->first()->tf_projectStatus  }}% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}</div>
             </div>
-            <small class="text-muted">{{ $l == 'en' ? 'Current Phase: Idea development and initial prototype.' : 'المرحلة الحالية: تطوير الفكرة والنموذج الأولي.' }}</small>
+            <small class="text-muted">
+              @if($team_Formation_raw->first()->tf_projectStatus == 20)
+              {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
+              {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
+              {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
+              {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
+              {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete documentation. story.') }}
+              @endif
+            </small>
           </div>
         </div>
 
@@ -223,22 +326,73 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="projectIdeaForm">
-            <div class="mb-3">
-              <label for="projectIdeaText" class="form-label">{{ $l == 'en' ? 'Project Idea' : 'فكرة المشروع' }}</label>
-              <textarea class="form-control" id="projectIdeaText" rows="4"></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="targetTrackSelect" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
-              <select class="form-select" id="targetTrackSelect">
-                <option selected>{{ $l == 'en' ? 'Choose track...' : 'اختر المحور...' }}</option>
-                <option value="ai_health">{{ $l == 'en' ? 'AI in Healthcare' : 'الذكاء الاصطناعي في الرعاية الصحية' }}</option>
-                <option value="ai_finance">{{ $l == 'en' ? 'AI in Financial Services' : 'الذكاء الاصطناعي في الخدمات المالية' }}</option>
-                <option value="ai_smartcity">{{ $l == 'en' ? 'AI for Smart Cities' : 'الذكاء الاصطناعي للمدن الذكية' }}</option>
-                <option value="other">{{ $l == 'en' ? 'Other (please specify)' : 'آخر (يرجى التحديد)' }}</option>
-              </select>
-            </div>
-          </form>
+          <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
+                            @csrf
+            <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+                            <div class="mb-3">
+                                <label for="Project_Name_en" class="form-label">
+                                    {{ __('admin.Project_Name') }}
+                                </label>
+                                <input type="text" class="form-control" name="Project_Name_en" value="{{ $team_Formation_raw->first()->tf_projectName_en }}" id="Project_Name_en" required>
+                            </div>
+                            {{-- <div class="mb-3">
+                                <label for="Project_Name_ar" class="form-label">
+                                    {{__('admin.Project_Name') ." " . __('admin.Arabic') }}
+                                </label>
+                                <input type="text" class="form-control" name="Project_Name_ar" value="{{ $team_Formation_raw->first()->tf_projectName_ar }}" id="Project_Name_ar" required>
+                            </div> --}}
+
+                            <div class="mb-3">
+                                <label for="Project_Description_en" class="form-label">
+                                    {{ __('admin.Project_Description')  }}
+                                </label>
+                                <textarea class="form-control" name="Project_Description_en" id="Project_Description_en" rows="2">{{ $team_Formation_raw->first()->tf_projectDescription_en }}</textarea>
+                            </div>
+
+                             {{-- <div class="mb-3">
+                                <label for="Project_Description_ar" class="form-label">
+                                    {{ __('admin.Project_Description') ." " .  __('admin.Arabic') }}
+                                </label>
+                                <textarea class="form-control" name="Project_Description_ar" id="Project_Description_ar" rows="2">{{ $team_Formation_raw->first()->tf_projectDescription_ar }}</textarea>
+                            </div> --}}
+
+                            <div class="mb-3">
+                                <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</label>
+                                <select class="form-select" id="Project_Status" name="Project_Status" >
+                                    <option value="" >{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
+                                        <option value="20" {{ $team_Formation_raw->first()->tf_projectStatus == '20' ? 'selected' : '' }} >{{ __('admin.Idea + Team') }}</option>
+                                        <option value="40" {{ $team_Formation_raw->first()->tf_projectStatus == '40' ? 'selected' : '' }} >{{ __('admin.Research') }}</option>
+                                        <option value="60" {{ $team_Formation_raw->first()->tf_projectStatus == '60' ? 'selected' : '' }} >{{ __('admin.Design & Build') }}</option>
+                                        <option value="80" {{ $team_Formation_raw->first()->tf_projectStatus == '80' ? 'selected' : '' }} >{{ __('admin.Ready for Pitch') }}</option>
+                                        <option value="100" {{ $team_Formation_raw->first()->tf_projectStatus == '100' ? 'selected' : '' }} >{{ __('admin.Project Submitted') }}</option>
+                                </select>
+                            </div>
+                            
+                            {{-- <div class="mb-3">
+                                <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Target Track' : 'المحور المستهدف' }}</label>
+                                <select class="form-select" id="Project_Status" name="Project_Status">
+                                    <option value="" >{{ $l == 'en' ? 'Choose Status...' : 'اختر الحالة...' }}</option>
+                                    @php
+                                        $selectedStatus = (int) ($team_Formation_raw->first()->tf_projectStatus ?? 0);
+                                    @endphp
+                                    @for ($s = 0; $s <= 100; $s += 25)
+                                        <option value="{{ $s }}" {{ $selectedStatus == $s ? 'selected' : '' }}>{{ $s .'%' }}</option>
+                                    @endfor
+                                </select>
+                            </div> --}}
+
+
+                       
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                                    {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+                                </button>
+                                <button type="submit"  class="btn btn-primary" >
+                                    {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+                                </button>
+                            </div>
+                     </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}</button>
@@ -343,7 +497,7 @@
           const newItem = $(`
             <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
               <div><i class="ti ti-user-plus me-2"></i> {{ $l == 'en' ? 'Pending invitation to:' : 'دعوة معلقة لـ:' }} ${email}</div>
-              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" onclick="confirmCancelInvitation('${email}')">
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}" >
                 <i class="ti ti-x"></i>
               </button>
             </li>
@@ -417,7 +571,11 @@
       });
     }
 
-    function confirmRemoveMember(memberName) {
+    function confirmRemoveMember(id, memberName) {
+
+      var url = '{{ route('hackathon.getOutTeam') }}';
+		  var token = '{{ csrf_token() }}';
+
       Swal.fire({
         title: '{{ $l == 'en' ? 'Remove Team Member?' : 'إزالة عضو الفريق؟' }}',
         text: `{{ $l == 'en' ? 'Are you sure you want to remove' : 'هل أنت متأكد أنك تريد إزالة' }} ${memberName} {{ $l == 'en' ? 'from the team?' : 'من الفريق؟' }}`,
@@ -431,10 +589,12 @@
         },
         reverseButtons: true,
       }).then((result) => {
-        if (result.isConfirmed) {
-          // Here you would typically make an AJAX call to remove the member
-          // For now, we'll just show a success message and remove the element
-          Swal.fire({
+
+          if (result.isConfirmed) {
+         
+          $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
+						function(response) {
+							Swal.fire({
             icon: 'success',
             title: '{{ $l == 'en' ? 'Member Removed!' : 'تم إزالة العضو!' }}',
             text: `${memberName} {{ $l == 'en' ? 'has been removed from the team.' : 'تم إزالته من الفريق.' }}`,
@@ -446,17 +606,40 @@
             },
             buttonsStyling: false,
           }).then(() => {
-            // Remove the member from the list (in a real scenario, this would be handled by server response)
-            event.target.closest('li').remove();
-            // Update member count
+            // Remove the pending member from the list
+            $('#Member'+id).remove();
+              // Update member count
             const currentCount = parseInt($('#member-count').text());
             $('#member-count').text(currentCount - 1);
           });
-        }
+        }).fail(function(error) { 
+						console.log(error);
+						Swal.fire({
+							icon: 'error',
+							title: "{{ __('admin.Error') }}!",
+							text: "{{ __('admin.DeleteFailed') }}",
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					});
+						}
+          // Here you would typically make an AJAX call to remove the member
+          // For now, we'll just show a success message and remove the element
+          
+        
       });
     }
 
-    function confirmCancelInvitation(email) {
+    function confirmCancelInvitation(id, email) {
+
+      var url = '{{ route('hackathon.Cancelinvitation') }}';
+		  var token = '{{ csrf_token() }}';
+
       Swal.fire({
         title: '{{ $l == 'en' ? 'Cancel Invitation?' : 'إلغاء الدعوة؟' }}',
         text: `{{ $l == 'en' ? 'Are you sure you want to cancel the invitation sent to' : 'هل أنت متأكد أنك تريد إلغاء الدعوة المرسلة إلى' }} ${email}{{ $l == 'en' ? '?' : '؟' }}`,
@@ -471,9 +654,10 @@
         reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
-          // Here you would typically make an AJAX call to cancel the invitation
-          // For now, we'll just show a success message and remove the element
-          Swal.fire({
+         
+          $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
+						function(response) {
+							Swal.fire({
             icon: 'success',
             title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
             text: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
@@ -485,10 +669,28 @@
             },
             buttonsStyling: false,
           }).then(() => {
-            // Remove the invitation from the list (in a real scenario, this would be handled by server response)
-            event.target.closest('li').remove();
+            // Remove the pending member from the list
+            $('#pendingMember'+id).remove();
           });
-        }
+        }).fail(function(error) { 
+						console.log(error);
+						Swal.fire({
+							icon: 'error',
+							title: "{{ __('admin.Error') }}!",
+							text: "{{ __('admin.CancelFailed') }}",
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					});
+						}
+          // Here you would typically make an AJAX call to cancel the invitation
+          // For now, we'll just show a success message and remove the element
+          
       });
     }
 
@@ -526,6 +728,71 @@
         }
       });
     }
+
+    function ApprovedjoinTeam(id, teamName) {
+      
+        if (confirm(`{{ $l == "en" ? "Are you sure you want to Approved This request to join team" : "هل أنت متأكد أنك تريد الموافقة على  طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+            
+            fetch("{{ route('hackathon.ApprovedRequestJoinTeam') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // أو response.text() حسب ما يرجع الـ controller
+            })
+            .then(data => {
+                alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
+                // إعادة توجيه أو تحديث
+                window.location.href = window.location.href;
+            })
+            .catch(error => {
+                alert("{{ $l == 'en' ? 'There was an error sending the request.' : 'حدث خطأ أثناء إرسال الطلب.' }}");
+                console.error(error);
+            });
+        }
+    }
+
+    function RejectedjoinTeam(id, teamName) {
+      
+        if (confirm(`{{ $l == "en" ? "Are you sure you want to Reject This request to join team" : "هل أنت متأكد أنك تريد الرفض على  طلب الانضمام إلى فريق" }} "${teamName}"{{ $l == "en" ? "?" : "؟" }}`)) {
+            
+            fetch("{{ route('hackathon.RejectedRequestJoin') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    id: id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // أو response.text() حسب ما يرجع الـ controller
+            })
+            .then(data => {
+                alert(`{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`);
+                // إعادة توجيه أو تحديث
+                window.location.href = window.location.href;
+            })
+            .catch(error => {
+                alert("{{ $l == 'en' ? 'There was an error sending the request.' : 'حدث خطأ أثناء إرسال الطلب.' }}");
+                console.error(error);
+            });
+        }
+    }
+
   </script>
 </body>
 

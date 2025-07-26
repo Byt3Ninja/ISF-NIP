@@ -108,12 +108,12 @@ class MessengerController extends Controller
         {
             if( $user->company->approved )
             {
-                $users = Company::where('cycle', $user->company->cycle)
-                    ->where('id', '!=', $user->company->id)
-                    ->whereHas('user', function ( $query ) {
-                        $query->hasRole('registered');
-                    })->get();
-
+               $users = Company::where('cycle', $user->company->cycle)
+                ->where('id', '!=', $user->company->id)
+                ->whereHas('user.roles', function ($query) {
+                     $query->where('name', 'registered');
+                })
+             ->get();
                 $mentors = User::join('cycles_mentors', 'users.id', 'user_id')
                     ->where('cycle_id', $user->company->cycle)
                     ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);

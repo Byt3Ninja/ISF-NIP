@@ -295,7 +295,7 @@
         "/api/countries": {
             "get": {
                 "tags": [
-                    "Location"
+                    "Countries"
                 ],
                 "summary": "Get list of countries",
                 "description": "Returns a list of all countries based on the current app locale (name_en or name_ar).",
@@ -339,7 +339,7 @@
         "/api/countries/{id}/states": {
             "get": {
                 "tags": [
-                    "Location"
+                    "States"
                 ],
                 "summary": "Get list of states for a country",
                 "description": "Returns a list of states for a given country ID based on the current app locale.",
@@ -392,110 +392,739 @@
                 }
             }
         },
-        "/api/dashboard": {
+        "/api/currencies": {
             "get": {
                 "tags": [
-                    "Dashboard"
+                    "Currencies"
                 ],
-                "summary": "Get mentor dashboard data",
-                "operationId": "ed4235c7e3cd435fdad1da90707874d1",
+                "summary": "Get enabled currencies",
+                "description": "Returns a list of all enabled currencies with code, name, symbol, rate, and flag.",
+                "operationId": "getCurrencies",
                 "responses": {
                     "200": {
-                        "description": "Dashboard data returned successfully",
+                        "description": "Currencies retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "coming_sessions_count": {
-                                            "type": "integer",
-                                            "example": 2
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "current_schedule": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "days": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "type": "string"
-                                                        },
-                                                        "example": [
-                                                            "Monday",
-                                                            "Wednesday"
-                                                        ]
-                                                    },
-                                                    "tfrom": {
-                                                        "type": "string",
-                                                        "example": "09:00"
-                                                    },
-                                                    "tto": {
-                                                        "type": "string",
-                                                        "example": "17:00"
-                                                    },
-                                                    "notes": {
-                                                        "type": "string",
-                                                        "example": "Available for mentoring"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "next_sessions": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "company_logo": {
-                                                        "type": "string",
-                                                        "example": "https://example.com/logo.png"
-                                                    },
-                                                    "company": {
-                                                        "type": "string",
-                                                        "example": "TechCorp"
-                                                    },
-                                                    "user": {
-                                                        "type": "string",
-                                                        "example": "John Doe"
-                                                    },
-                                                    "date": {
-                                                        "type": "string",
-                                                        "example": "2025-07-01 14:00"
-                                                    },
-                                                    "admin_notes": {
-                                                        "type": "string",
-                                                        "example": "Important session"
-                                                    },
-                                                    "meeting_link": {
-                                                        "type": "string",
-                                                        "example": "https://zoom.us/j/123456789"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "completedTasks": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "nonCompletedTasks": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "sessionWithoutTasks": {
-                                            "type": "integer",
-                                            "example": 3
-                                        },
-                                        "startupAttendanceRate": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "85%"
+                                            "example": "Success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "currencyCode": {
+                                                        "type": "string",
+                                                        "example": "USD"
+                                                    },
+                                                    "currencyName": {
+                                                        "type": "string",
+                                                        "example": "US Dollar"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Retrieve dashboard data for Admin, Organization Manager, Judger, Mentor, or Startup",
+                "operationId": "ed4235c7e3cd435fdad1da90707874d1",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "title": "Admin Dashboard",
+                                            "properties": {
+                                                "totalUsers": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                },
+                                                "totalUsersChange": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 5.4
+                                                },
+                                                "totalSessions": {
+                                                    "type": "integer",
+                                                    "example": 200
+                                                },
+                                                "totalSessionsChange": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 3.1
+                                                },
+                                                "sessionsDuration": {
+                                                    "type": "string",
+                                                    "example": "540.5h"
+                                                },
+                                                "sessionsDurationChange": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 2.7
+                                                },
+                                                "startupAttendanceRate": {
+                                                    "properties": {
+                                                        "rate": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 85.5
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "completedTasks": {
+                                                    "properties": {
+                                                        "rate": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 60.3
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "screening": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "integer",
+                                                            "example": 40
+                                                        },
+                                                        "final": {
+                                                            "type": "integer",
+                                                            "example": 25
+                                                        },
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 65
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "userRoles": {
+                                                    "properties": {
+                                                        "mentors": {
+                                                            "type": "integer",
+                                                            "example": 20
+                                                        },
+                                                        "registered": {
+                                                            "type": "integer",
+                                                            "example": 100
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "userGender": {
+                                                    "properties": {
+                                                        "male": {
+                                                            "type": "integer",
+                                                            "example": 70
+                                                        },
+                                                        "female": {
+                                                            "type": "integer",
+                                                            "example": 80
+                                                        },
+                                                        "malePercentage": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 46.7
+                                                        },
+                                                        "femalePercentage": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 53.3
+                                                        },
+                                                        "change": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 10.5
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "metadata": {
+                                                    "properties": {
+                                                        "lastUpdated": {
+                                                            "type": "string",
+                                                            "example": "03:15:20 PM"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "title": "Mentor Dashboard",
+                                            "properties": {
+                                                "comingSessionsCount": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "currentSchedule": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "days": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "example": [
+                                                                    "Monday",
+                                                                    "Wednesday"
+                                                                ]
+                                                            },
+                                                            "tfrom": {
+                                                                "type": "string",
+                                                                "example": "09:00"
+                                                            },
+                                                            "tto": {
+                                                                "type": "string",
+                                                                "example": "17:00"
+                                                            },
+                                                            "notes": {
+                                                                "type": "string",
+                                                                "example": "Available for mentoring"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "nextSessions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "companyLogo": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/logo.png"
+                                                            },
+                                                            "company": {
+                                                                "type": "string",
+                                                                "example": "TechCorp"
+                                                            },
+                                                            "user": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2025-07-01 14:00"
+                                                            },
+                                                            "adminNotes": {
+                                                                "type": "string",
+                                                                "example": "Important session"
+                                                            },
+                                                            "meetingLink": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/j/123456789"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "completedTasks": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "nonCompletedTasks": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "sessionWithoutTasks": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "startupAttendanceRate": {
+                                                    "type": "string",
+                                                    "example": "85%"
+                                                },
+                                                "mentorAverageRating": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4.5
+                                                },
+                                                "totalMentorshipHours": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 42.5
+                                                },
+                                                "totalMentorshipSessions": {
+                                                    "type": "integer",
+                                                    "example": 18
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "title": "Judger Dashboard",
+                                            "properties": {
+                                                "screening": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "finalScreening": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "judgingList": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "stepTitle": {
+                                                                "type": "string",
+                                                                "example": "Initial Screening"
+                                                            },
+                                                            "stepFrom": {
+                                                                "type": "string",
+                                                                "example": "2025-06-01"
+                                                            },
+                                                            "stepTo": {
+                                                                "type": "string",
+                                                                "example": "2025-06-30"
+                                                            },
+                                                            "stepDesc": {
+                                                                "type": "string",
+                                                                "example": "Evaluate startups in the first round."
+                                                            },
+                                                            "cycleTitle": {
+                                                                "type": "string",
+                                                                "example": "Summer Accelerator 2025"
+                                                            },
+                                                            "cycleStart": {
+                                                                "type": "string",
+                                                                "example": "2025-05-01"
+                                                            },
+                                                            "cycleEnd": {
+                                                                "type": "string",
+                                                                "example": "2025-08-01"
+                                                            },
+                                                            "companies": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "startupLogo": {
+                                                                            "type": "string",
+                                                                            "example": "https://example.com/logo.png"
+                                                                        },
+                                                                        "startupName": {
+                                                                            "type": "string",
+                                                                            "example": "TechStart"
+                                                                        },
+                                                                        "imgUrl": {
+                                                                            "type": "string",
+                                                                            "example": "https://example.com/user.png"
+                                                                        },
+                                                                        "userName": {
+                                                                            "type": "string",
+                                                                            "example": "Sarah Johnson"
+                                                                        },
+                                                                        "userTitle": {
+                                                                            "type": "string",
+                                                                            "example": "CEO"
+                                                                        },
+                                                                        "evaluationStatus": {
+                                                                            "type": "string",
+                                                                            "example": "completed"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "title": "Startup Dashboard",
+                                            "properties": {
+                                                "program": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Summer Accelerator"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "A 3-month program for early-stage startups."
+                                                        },
+                                                        "startDate": {
+                                                            "type": "string",
+                                                            "example": "2025-05-01"
+                                                        },
+                                                        "endDate": {
+                                                            "type": "string",
+                                                            "example": "2025-08-01"
+                                                        },
+                                                        "currentStep": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "totalSteps": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "progress": {
+                                                            "type": "string",
+                                                            "example": "60%"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "programSteps": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Product Development"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Refining your MVP"
+                                                            },
+                                                            "dueDate": {
+                                                                "type": "string",
+                                                                "example": "20-07-2025"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "Started"
+                                                            },
+                                                            "completedDate": {
+                                                                "type": "string",
+                                                                "example": "15-07-2025"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "mentors": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Jane Smith"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "jane@example.com"
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Product Coach"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/jane.jpg"
+                                                            },
+                                                            "bio": {
+                                                                "type": "string",
+                                                                "example": "Experienced in agile and product."
+                                                            },
+                                                            "linkedin": {
+                                                                "type": "string",
+                                                                "example": "https://linkedin.com/in/janesmith"
+                                                            },
+                                                            "specialization": {
+                                                                "type": "string",
+                                                                "example": "Product Strategy"
+                                                            },
+                                                            "mentorExpertises": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "example": [
+                                                                    "Product",
+                                                                    "Agile"
+                                                                ]
+                                                            },
+                                                            "rating": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4.7
+                                                            },
+                                                            "programCount": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "programIds": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "example": [
+                                                                    1,
+                                                                    2,
+                                                                    3
+                                                                ]
+                                                            },
+                                                            "role": {
+                                                                "type": "string",
+                                                                "example": "mentor"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "availableSurveys": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "triggeredOn": {
+                                                                "type": "string",
+                                                                "example": "mentorship"
+                                                            },
+                                                            "triggeredBy": {
+                                                                "type": "string",
+                                                                "example": "session"
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Mentorship Session Feedback"
+                                                            },
+                                                            "mentorName": {
+                                                                "type": "string",
+                                                                "example": "Sarah Johnson"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "mentorshipSessions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "mentorId": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "mentorName": {
+                                                                "type": "string",
+                                                                "example": "Ahmed Farouk"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/ahmed.jpg"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2025-07-25"
+                                                            },
+                                                            "time": {
+                                                                "type": "string",
+                                                                "example": "14:30"
+                                                            },
+                                                            "duration": {
+                                                                "type": "integer",
+                                                                "example": 60
+                                                            },
+                                                            "adminNotes": {
+                                                                "type": "string",
+                                                                "example": "Discuss MVP goals"
+                                                            },
+                                                            "meetingLink": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/j/123456789"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "latestServices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "serviceId": {
+                                                                "type": "integer",
+                                                                "example": 7
+                                                            },
+                                                            "serviceName": {
+                                                                "type": "string",
+                                                                "example": "Legal Consultation"
+                                                            },
+                                                            "serviceType": {
+                                                                "type": "string",
+                                                                "example": "Legal"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "services": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "mentorCount": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "completedTasks": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "mentorAvailabilitySlots": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 22
+                                                            },
+                                                            "mentorId": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "mentorName": {
+                                                                "type": "string",
+                                                                "example": "Ahmed Farouk"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "https://example.com/ahmed.jpg"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "weekly"
+                                                            },
+                                                            "days": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "example": [
+                                                                    "Sunday",
+                                                                    "Tuesday"
+                                                                ]
+                                                            },
+                                                            "start": {
+                                                                "type": "string",
+                                                                "example": "10:00"
+                                                            },
+                                                            "end": {
+                                                                "type": "string",
+                                                                "example": "12:00"
+                                                            },
+                                                            "notes": {
+                                                                "type": "string",
+                                                                "example": "Available for UI/UX mentoring"
+                                                            },
+                                                            "availability": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "latestEvents": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 15
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Demo Day"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2025-07-30"
+                                                            },
+                                                            "time": {
+                                                                "type": "string",
+                                                                "example": "13:00:00"
+                                                            },
+                                                            "allDay": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "analytics": {
+                                                    "properties": {
+                                                        "programProgress": {
+                                                            "type": "string",
+                                                            "example": "60%"
+                                                        },
+                                                        "tasksCompleted": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "totalTasks": {
+                                                            "type": "integer",
+                                                            "example": 8
+                                                        },
+                                                        "mentorshipHours": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 9.5
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Unauthorized dashboard access"
                     }
                 },
                 "security": [
@@ -564,10 +1193,151 @@
                 }
             }
         },
+        "/api/organizations": {
+            "get": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Get list of all organizations with full details",
+                "operationId": "38539e67fb3c20065e66e337a5fc6a37",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter organizations by status (1 = active, 0 = inactive)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of organizations returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Tech Org"
+                                                    },
+                                                    "imgUrl": {
+                                                        "type": "string",
+                                                        "example": "/uploads/logo.png"
+                                                    },
+                                                    "status": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "startups": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "cycles": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Admin User"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "admin@org.com"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "01012345678"
+                                                            },
+                                                            "imgUrl": {
+                                                                "type": "string",
+                                                                "example": "/uploads/user.jpg"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "totalOrganizations": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "totalActiveOrganizations": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "totalInactiveOrganizations": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admins and org managers can access this endpoint",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/me": {
             "get": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Get authenticated user profile",
                 "description": "Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
@@ -788,7 +1558,7 @@
         "/api/profile": {
             "post": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Update user profile",
                 "description": "Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
@@ -815,7 +1585,7 @@
                                         "type": "string",
                                         "example": "+20"
                                     },
-                                    "country_code_w_a": {
+                                    "countryCodeWA": {
                                         "type": "string",
                                         "example": "+20"
                                     },
@@ -985,7 +1755,7 @@
         "/api/profile/password": {
             "put": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Update user password",
                 "description": "Change the authenticated user's password.",
@@ -996,12 +1766,12 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "current_password",
+                                    "currentPassword",
                                     "password",
                                     "password_confirmation"
                                 ],
                                 "properties": {
-                                    "current_password": {
+                                    "currentPassword": {
                                         "type": "string",
                                         "example": "oldpassword123"
                                     },
@@ -1051,7 +1821,7 @@
         "/api/profile/bio": {
             "put": {
                 "tags": [
-                    "User"
+                    "Profile"
                 ],
                 "summary": "Update mentor bio",
                 "description": "Update mentor bio details such as specialization, experience, and mentorship approach.",
@@ -1072,16 +1842,28 @@
                                         "type": "string",
                                         "format": "url"
                                     },
-                                    "entrepreneurial_experience": {
-                                        "type": "boolean"
+                                    "entrepreneurialExperience": {
+                                        "description": "1 for true, 0 for false",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
                                     },
-                                    "entrepreneurial_experience_brief": {
+                                    "entrepreneurialExperienceBrief": {
                                         "type": "string"
                                     },
-                                    "profile_privacy": {
-                                        "type": "boolean"
+                                    "profilePrivacy": {
+                                        "description": "1 for true, 0 for false",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
                                     },
-                                    "mentorship_approach": {
+                                    "mentorshipApproach": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
@@ -1128,10 +1910,333 @@
                 ]
             }
         },
+        "/api/programs": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Create a new program",
+                "operationId": "storeProgram",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "organization",
+                                    "type",
+                                    "title",
+                                    "start",
+                                    "end"
+                                ],
+                                "properties": {
+                                    "organization": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "incubation"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Startup Incubator 2025"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "A program for early-stage startups"
+                                    },
+                                    "start": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-08-01"
+                                    },
+                                    "end": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-01"
+                                    },
+                                    "private": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "allowNonCompany": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "budgetAllocation": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 10000
+                                    },
+                                    "currencyType": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "autoApproveMentorshipRequests": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "programGuideline": {
+                                        "type": "string",
+                                        "example": "Follow company policies."
+                                    },
+                                    "financialGuideline": {
+                                        "type": "string",
+                                        "example": "Financial rules and regulations."
+                                    },
+                                    "legalGuideline": {
+                                        "type": "string",
+                                        "example": "Legal instructions here."
+                                    },
+                                    "programGuidelineFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "financialPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "legalPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "delegationPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Program created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "title": "Startup Incubator 2025"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/programs/{id}": {
+            "post": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Update an existing program",
+                "operationId": "updateProgram",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "organization": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "acceleration"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Startup Acceleration 2025"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated program description"
+                                    },
+                                    "start": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-09-01"
+                                    },
+                                    "end": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-01-01"
+                                    },
+                                    "private": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "allowNonCompany": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "budgetAllocation": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15000
+                                    },
+                                    "currencyType": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "autoApproveMentorshipRequests": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "programGuideline": {
+                                        "type": "string",
+                                        "example": "Updated guideline..."
+                                    },
+                                    "financialGuideline": {
+                                        "type": "string",
+                                        "example": "Updated financial info..."
+                                    },
+                                    "legalGuideline": {
+                                        "type": "string",
+                                        "example": "Updated legal policy..."
+                                    },
+                                    "programGuidelineFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "financialPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "legalPolicyPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "delegationPdf": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Program updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "title": "Startup Acceleration 2025"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/roles": {
             "get": {
                 "tags": [
-                    "Role"
+                    "Roles"
                 ],
                 "summary": "Get list of available roles",
                 "description": "Returns a list of all roles. Only accessible by Admin users.",
@@ -1193,6 +2298,255 @@
                 "security": [
                     {
                         "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a specific user's information",
+                "description": "Returns the profile data of the specified user including their role",
+                "operationId": "getUserById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "firstName": {
+                                                    "type": "string"
+                                                },
+                                                "lastName": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
+                                                },
+                                                "gender": {
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/image.jpg"
+                                                },
+                                                "haveCompany": {
+                                                    "type": "boolean"
+                                                },
+                                                "createdAt": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update an existing user",
+                "description": "Admins can update a user's profile information and role.",
+                "operationId": "b166772cec9714067040e77cf14beeba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "Ahmed"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Ali"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "ahmed@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01012345678"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "role": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "haveCompany": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "example": "https://example.com/uploads/avatar.jpg"
+                                    },
+                                    "createdAt": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-15 09:30:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "active"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User updated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "firstName": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "lastName": {
+                                                    "type": "string",
+                                                    "example": "Ali"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "ahmed@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "01012345678"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "Manager"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admins can update users"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -1423,6 +2777,19 @@
                                     "role": {
                                         "type": "integer",
                                         "example": 2
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "example": "https://example.com/uploads/avatar.jpg"
+                                    },
+                                    "createdAt": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-15 09:30:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "active"
                                     }
                                 },
                                 "type": "object"
@@ -1470,6 +2837,23 @@
                                                 "role": {
                                                     "type": "string",
                                                     "example": "User"
+                                                },
+                                                "haveCompany": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "imgUrl": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/uploads/avatar.jpg"
+                                                },
+                                                "createdAt": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-07-15 09:30:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
                                                 }
                                             },
                                             "type": "object"
@@ -1485,238 +2869,6 @@
                     },
                     "422": {
                         "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get a specific user's information",
-                "description": "Returns the profile data of the specified user including their role",
-                "operationId": "getUserById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "firstName": {
-                                                    "type": "string"
-                                                },
-                                                "lastName": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": "string"
-                                                },
-                                                "role": {
-                                                    "type": "string"
-                                                },
-                                                "imgUrl": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/image.jpg"
-                                                },
-                                                "haveCompany": {
-                                                    "type": "boolean"
-                                                },
-                                                "createdAt": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update an existing user",
-                "description": "Admins can update a user's profile information and role.",
-                "operationId": "b166772cec9714067040e77cf14beeba",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID to update",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string",
-                                        "example": "Ahmed"
-                                    },
-                                    "lastName": {
-                                        "type": "string",
-                                        "example": "Ali"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "ahmed@example.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01012345678"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female"
-                                        ],
-                                        "example": "male"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "role": {
-                                        "type": "integer",
-                                        "example": 2
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "User updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User updated successfully."
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "firstName": {
-                                                    "type": "string",
-                                                    "example": "Ahmed"
-                                                },
-                                                "lastName": {
-                                                    "type": "string",
-                                                    "example": "Ali"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "ahmed@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "01012345678"
-                                                },
-                                                "role": {
-                                                    "type": "string",
-                                                    "example": "Manager"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only admins can update users"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    },
-                    "404": {
-                        "description": "User not found"
                     }
                 },
                 "security": [
@@ -1822,8 +2974,16 @@
             "description": "Authentication"
         },
         {
-            "name": "Location",
-            "description": "Location"
+            "name": "Countries",
+            "description": "Countries"
+        },
+        {
+            "name": "States",
+            "description": "States"
+        },
+        {
+            "name": "Currencies",
+            "description": "Currencies"
         },
         {
             "name": "Dashboard",
@@ -1834,12 +2994,20 @@
             "description": "Expertises"
         },
         {
-            "name": "User",
-            "description": "User"
+            "name": "Organizations",
+            "description": "Organizations"
         },
         {
-            "name": "Role",
-            "description": "Role"
+            "name": "Profile",
+            "description": "Profile"
+        },
+        {
+            "name": "Programs",
+            "description": "Programs"
+        },
+        {
+            "name": "Roles",
+            "description": "Roles"
         },
         {
             "name": "Users",

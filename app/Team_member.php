@@ -14,4 +14,13 @@ class Team_member extends Model
         return $this->belongsToMany(Project::class, 'project_team_member') ->withPivot(['role','created_at'])->withTimestamps();
     }
     use HasFactory;
+
+    public function teamFormation()
+    {
+        return $this->belongsTo(TeamFormation::class, 'team_formation_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

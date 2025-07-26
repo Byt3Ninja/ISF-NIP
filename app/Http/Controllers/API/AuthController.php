@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers\API;
 
-use App\User;
-use App\Settings;
-use App\UsersBio;
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
-use App\Mail\WelcomeUserMail;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
+use App\Services\AuthService;
+use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\AuthResource;
 use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    use ApiResponder;
+    protected AuthService $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
     /**
      * @OA\Post(
      *     path="/api/login",
@@ -57,39 +59,22 @@ class AuthController extends Controller
      *     )
      * )
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => [__('api.incorrect_credentials')],
-            ]);
+        try{
+            $user = $this->authService->attemptLogin($request->email, $request->password);
+            $token = $this->authService->generateToken($user);
+            return $this->responseWithToken($token,new AuthResource($user),__('api.login_success'), 200);
+        }catch(\Exception $e){
+            $data = json_decode($e->getMessage(), true);
+            if($data['type'] == 'credential'){ 
+                return $this->validationError($data['message']);
+            }elseif($data['type'] == 'inactive'){
+                return $this->forbidden($data['message']);
+            }
+            return $this->serverError(); 
         }
 
-        if ($user->status !== 'active') {
-         return response()->json(['success'  => false,'message' => __('api.inactive_user')], 403);
-        }
-
-        $l = app()->getLocale();
-        $token = $user->createToken('auth-login')->plainTextToken;
-        $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
-
-        return response()->json(['success'  => true, 'message' => __('api.login_success'), 'token'   => $token, 'data' => [
-                'id' => $user->id,
-                'firstName' => $user->{'first_name_' . $l},
-                'lastName' => $user->{'last_name_' . $l},
-                'email' => $user->email,
-                'phone' => $user->country_code . $user->phone,
-                'imgUrl' => $user->img_url,
-                'role'   => $user->getRoleNames()->first(),
-            ],
-        ],200);
     }
 
     /**
@@ -147,78 +132,13 @@ class AuthController extends Controller
      */
     public function register(RegisterUserRequest  $request)
     {
-        $data = $request->validated();
-        $settings = Settings::find(1);
-
-        $userData = [
-            'first_name_en' => $data['firstName'],
-            'last_name_en'  => $data['lastName'],
-            'first_name_ar' => $data['firstName'],
-            'last_name_ar'  => $data['lastName'],
-            'gender'        => $data['gender'],
-            'phone'         => $data['phone'],
-            'email'         => $data['email'],
-            'password'      => Hash::make($data['password']),
-            'title_en'      => $data['title'] ?? null,
-            'title_ar'      => $data['title'] ?? null,
-        ];
-
-        if ($settings && $settings->VFEmail != 1) {
-            $userData['email_verified_at'] = now();
-        }
-
-        $user = User::create($userData);
-        
-        $role = Role::where('name', $data['role'])->first();
-        if (!$role) {
-            return response()->json([
-                'status' => false,
-                'message' => __('api.role_not_found')
-            ], 404);
-        }
-
-        DB::table('model_has_roles')->insert([
-            'role_id'    => $role->id,
-            'model_type' => User::class,
-            'model_id'   => $user->id,
-        ]);
-
-        if ($data['role'] === 'Mentor') {
-            UsersBio::create([
-                'user_id'  => $user->id,
-                'bio_en'   => $data['userbio'] ?? null,
-                'linkedin' => $data['linkedin'] ?? null,
-            ]);
-
-            if (!empty($data['expertise'])) {
-                $expertiseInsert = collect($data['expertise'])->map(function ($expertiseId) use ($user) {
-                    return [
-                        'expertise_id' => $expertiseId,
-                        'mentor_id' => $user->id,
-                    ];
-                })->toArray();
-
-                DB::table('mentor_expertise')->insert($expertiseInsert);
-            }
-        }
-
-        $token = $user->createToken('auth-register')->plainTextToken;
-          
-        // Send welcome email
-        Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
-
-        return response()->json([
-            'success' => true,
-            'message' => __('api.registered_successfully'),
-            'token' => $token,
-            'data' => [
-                'firstName' => $user->first_name_en,
-                'lastName'  => $user->last_name_en,
-                'email'      => $user->email,
-                'phone'      => $user->phone,
-                'role'       => $data['role'],
-            ]
-        ],201);
+        try {
+        $result = $this->authService->register($request->validated());
+        return $this->created(new AuthResource($result['user']),__('api.registered_successfully'),['token' => $result['token']]);
+       } catch (\Throwable $e) {
+        report($e);
+        return $this->serverError();
+    }
     }
  /**
  * @OA\Post(
@@ -249,20 +169,6 @@ class AuthController extends Controller
  */
      public function logout(Request $request)
     {
-       $user = $request->user();
-
-       if (!$user || !$user->currentAccessToken()) {
-        return response()->json([
-            'status' => false,
-            'message' => __('api.unauthenticated')
-         ], 401);
-       }
-
-      $user->currentAccessToken()->delete();
-
-      return response()->json([
-        'success' => true,
-        'message' => __('api.logged_out')
-     ],200);
+        return $this->authService->logout($request, $request->user());
     }
 }
