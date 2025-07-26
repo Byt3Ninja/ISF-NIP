@@ -362,9 +362,9 @@ class HackathonController extends Controller
                             LEFT JOIN users as u ON tm.user_id = u.id
                             WHERE tm.acceptInvition = 'accepted'";
                             $teams = collect(DB::select($teams_q));
-// $teamUser = $teams->where('tm_user_id', Auth::user()->id);
-// $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
-// dd($teams_with_user);
+            // $teamUser = $teams->where('tm_user_id', Auth::user()->id);
+            // $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
+            // dd($teams_with_user);
 
 
                                 $allteams_q = "SELECT 
@@ -392,7 +392,7 @@ class HackathonController extends Controller
                                 WHERE cycle_id=?";
                                 $allteams_raw = collect(DB::select($allteams_q, [$id]));
                                 $team_invition = $allteams_raw->where('tm_user_id', $user->id);
-// dd($team_invition);
+                // dd($team_invition);
                                 $allteams = $allteams_raw->groupBy('tf_id')->map(function ($group) use ($user, $team_invition) {
                                    
                                     return [
@@ -407,14 +407,14 @@ class HackathonController extends Controller
                                         'members' => $group,
                                     ];
                                 });
-
+            // dd($allteams);
 
             $step = Step::where('cycle_id', $id)->get();
-            $count_team = $step ? $step->where('stype', '6')->first()->count_team_number : 0;
+            $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
                             
-// dd($allteams->first()['tm_acceptInvition']);
+        // dd($allteams->first()['tm_acceptInvition']);
 
-$companyStep = Step::where('id', Auth::user()->company->step)->first(); 
+        $companyStep = Step::where('id', Auth::user()->company->step)->first(); 
 
 		$mentors_q = "SELECT 
         u.id as u_id,
