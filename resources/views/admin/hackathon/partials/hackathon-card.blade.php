@@ -39,6 +39,17 @@
           <i class="ti ti-info-circle me-1"></i>
           {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
         </a>
+        @if($user->hasRole('admin'))
+       
+          <a href="hackathon/dashboard/{{$hackathon['id']}}"  class="btn btn-outline-success me-2" style="flex: 1;" >
+            <i class="ti ti-edit me-1"></i>
+            {{ $l == 'en' ? 'Manage Hackathon' : 'ادارة الهاكثون' }}
+          </a>
+          
+        
+
+
+        @else
           @if($apply && $apply->isEmpty())
         <button 
           type="button" 
@@ -68,6 +79,10 @@
         <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success" style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
         @endif
         @endif
+
+        @endif <!-- If with Admin Role  -->
+
+
       </div>
       @if (now()->isBefore($hackathon['step_end']))
         <small class="text-muted text-center d-block fw-medium mt-2">

@@ -674,7 +674,10 @@ class CyclesController extends Controller
 
     function my($id)
     {
-        $step = Step::where('stype', 1)->where('id', $id)->first();
+        $step = Step::where(function($query) {
+        $query->where('stype', 1)
+              ->orWhere('stype', 5);
+    })->where('id', $id)->first();
         if (!$step) {
             return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
         }

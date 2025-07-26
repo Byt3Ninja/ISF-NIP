@@ -348,7 +348,7 @@
 														$step->description ? $step->description : '...' }} </span>
 												</td>
 												<td>
-													@if( $step->stype == 1 )
+													@if( $step->stype == 1 or $step->stype == 5 )
 													@if( $step->status == 'Started' )
 													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
 														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>

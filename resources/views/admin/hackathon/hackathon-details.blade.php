@@ -179,6 +179,7 @@
     //     'tags' => ['AI', 'Big Data'],
     //     'tags_ar' => ['الذكاء الاصطناعي', 'البيانات الضخمة'],
     // ];
+    $user = Auth::user();
 @endphp
 
 <body>
@@ -403,32 +404,32 @@
                         <i class="bi bi-card-text me-2"></i> {{ $l == 'en' ? 'Overview' : 'نظرة عامة' }}
                     </button>
                 </li>
-                <li class="nav-item me-1" role="presentation">
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="themes-tab" data-bs-toggle="tab" data-bs-target="#themes"
                         type="button" role="tab" aria-controls="themes" aria-selected="false">
                         <i class="bi bi-lightbulb-fill me-2"></i> {{ $l == 'en' ? 'Themes' : 'المحاور' }}
                     </button>
-                </li>
-                <li class="nav-item me-1" role="presentation">
+                </li> --}}
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule"
                         type="button" role="tab" aria-controls="schedule" aria-selected="false">
                         <i class="bi bi-calendar2-week-fill me-2"></i> {{ $l == 'en' ? 'Schedule' : 'جدول الأعمال' }}
                     </button>
-                </li>
-                <li class="nav-item me-1" role="presentation">
+                </li> --}}
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="prizes-tab" data-bs-toggle="tab" data-bs-target="#prizes"
                         type="button" role="tab" aria-controls="prizes" aria-selected="false">
                         <i class="bi bi-trophy-fill me-2"></i> {{ $l == 'en' ? 'Prizes' : 'الجوائز' }}
                     </button>
-                </li>
-                <li class="nav-item me-1" role="presentation">
+                </li> --}}
+                {{-- <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="evaluation-tab" data-bs-toggle="tab"
                         data-bs-target="#evaluation" type="button" role="tab" aria-controls="evaluation"
                         aria-selected="false">
                         <i class="bi bi-clipboard-check-fill me-2"></i> {{ $l == 'en' ? 'Evaluation Criteria' : 'معايير
                         التقييم' }}
                     </button>
-                </li>
+                </li> --}}
                 <li class="nav-item me-1" role="presentation">
                     <button class="nav-link rounded" id="mentors-tab" data-bs-toggle="tab" data-bs-target="#mentors"
                         type="button" role="tab" aria-controls="mentors" aria-selected="false">
@@ -452,19 +453,20 @@
                         <i class="bi bi-upload me-2"></i> {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع' }}
                     </button>
                 </li>
-                <li class="nav-item me-1" role="presentation" id="results-tab-li">
+                {{-- <li class="nav-item me-1" role="presentation" id="results-tab-li">
                     <button class="nav-link rounded" id="results-tab-btn" data-bs-toggle="tab" data-bs-target="#results"
                         type="button" role="tab" aria-controls="results" aria-selected="false">
                         <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Results' : 'النتائج' }}
                     </button>
-                </li>
-
+                </li> --}}
+                @if($user->hasRole('admin'))
                 <li class="nav-item me-1" role="presentation" id="submissions-tab-li">
                     <button class="nav-link rounded" id="submissions-tab-btn" data-bs-toggle="tab" data-bs-target="#submissions"
                         type="button" role="tab" aria-controls="submissions" aria-selected="false">
                         <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Submissions' : 'الاجابات' }}
                     </button>
                 </li>
+                @endif
 
             </ul>
 
@@ -747,43 +749,76 @@
                             <p>
                                 {{ $l == 'en' ? 'Participants will have the opportunity to receive guidance from experts in technology and entrepreneurship fields.' : 'سيتاح للمشاركين فرصة الحصول على إرشاد من خبراء في مجالات التكنولوجيا وريادة الأعمال.' }}
                             </p>
+
+                           
                             <div class="row" id="hackathon-mentors-list">
+                                @php
+                                    $M=1;    
+                                @endphp
+                                @if($mentors->isEmpty())
+                                <div class="alert alert-info">{{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}</div>
+                                @else
+                                 @foreach($mentors as $mentor)
                                 <div class="col-md-4 mb-3">
                                     <div class="card text-center">
-                                        <img src="https://via.placeholder.com/150.png?text=Mentor+1"
-                                            class="card-img-top rounded-circle mx-auto mt-3" alt="Mentor 1"
+                                        <img src="{{ $mentor->u_img_url }}"
+                                            class="card-img-top rounded-circle mx-auto mt-3" alt="Mentor {{ $M++ }}"
                                             style="width:100px; height:100px; object-fit: cover;">
                                         <div class="card-body">
                                             <h6 class="card-title">
-                                                {{ $l == 'en' ? 'Dr. Ahmed Abdullah' : 'د. أحمد عبدالله' }}
+                                                {{ $mentor->{'user_name_'. $l} }}
                                             </h6>
                                             <p class="card-text small text-muted">
-                                                {{ $l == 'en' ? 'AI Expert' : 'خبير في الذكاء الاصطناعي' }}
+                                                {{ $mentor->{'u_title_'. $l} }}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+                                @endforeach
+                                @endif
                             </div>
+
                             <h6 class="mt-4">{{ $l == 'en' ? 'Judging Panel' : 'لجنة التحكيم' }}</h6>
                             <p>
                                 {{ $l == 'en' ? 'The judging panel consists of industry leaders and investors to evaluate projects and select winners.' : 'تتكون لجنة التحكيم من قادة الصناعة والمستثمرين لتقييم المشاريع واختيار الفائزين.' }}
                             </p>
                             <div class="row" id="hackathon-judges-list">
+                                @php
+                                    $J=1;
+                                @endphp
+                                @if(count($judges_users) > 0)
+                                @foreach($judges_users as $judge)
                                 <div class="col-md-4 mb-3">
                                     <div class="card text-center">
-                                        <img src="https://via.placeholder.com/150.png?text=Judge+1"
+                                        <img src="{{ $judge->img_url }}"
                                             class="card-img-top rounded-circle mx-auto mt-3" alt="Judge 1"
                                             style="width:100px; height:100px; object-fit: cover;">
                                         <div class="card-body">
                                             <h6 class="card-title">
-                                                {{ $l == 'en' ? 'Ms. Sarah Mohammed' : 'أ. سارة محمد' }}
+                                                {{ $judge->{'user_name_'. $l} }}
                                             </h6>
                                             <p class="card-text small text-muted">
-                                                {{ $l == 'en' ? 'Investor and Entrepreneur' : 'مستثمرة ورائدة أعمال' }}
+                                                {{ $judge->{'title_'. $l} }}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+                                @endforeach
+                                @else
+                                <div class="col-md-4 mb-3">
+                                    <div class="card text-center">
+                                        <img src="/images/no-user.png"
+                                            class="card-img-top rounded-circle mx-auto mt-3" alt="Judge 1"
+                                            style="width:100px; height:100px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                {{ $l == 'en' ? 'No Judges' : 'لا يوجد حكام' }}
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+
                             </div>
                         </div>
                     </div>
@@ -959,10 +994,12 @@
                     </div>
                 </div>
            @endif
+           
                 <!-- Submission Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submission" role="tabpanel" aria-labelledby="submission-tab-btn">
                     <div class="card">
                         <div class="card-body">
+                            @if($data_evi['start'] < date('Y-m-d H:i:s') && $data_evi['end'] > date('Y-m-d H:i:s'))
                             <h5 class="card-title">
                                 {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع والحلول' }}
                             </h5>
@@ -970,9 +1007,9 @@
                                 {{ $l == 'en' ? 'Please upload your team\'s project before the hackathon deadline. Make sure to include all required files and a clear presentation.' : 'يرجى رفع مشروع فريقك قبل انتهاء وقت الهاكثون. تأكد من تضمين جميع الملفات المطلوبة وعرض تقديمي واضح.' }}
                             </p>
                             <div id="submission-status-message" class="alert alert-info">
-                                {{ $l == 'en' ? 'You can upload your project now. Deadline: March 17, 2024, 12:00 PM.' : 'يمكنك رفع مشروعك الآن. الموعد النهائي: 17 مارس 2024, 12:00 ظهراً.' }}
+                                {{ $l == 'en' ? 'You can upload your project now. Deadline: '. $data_evi['end']->format('F j, Y,') .'.' : 'يمكنك رفع مشروعك الآن. الموعد النهائي: 17 مارس 2024, 12:00 ظهراً.' }}
                             </div>
-                            <div id="already-submitted-message" class="alert alert-success" style="display:none;">
+                            {{-- <div id="already-submitted-message" class="alert alert-success" style="display:none;">
                                 <i class="bi bi-check-circle-fill me-2"></i>
                                 {{ $l == 'en' ? 'Your project has been uploaded successfully! You can update it until the deadline.' : 'تم رفع مشروعكم بنجاح! يمكنكم تحديثه حتى الموعد النهائي.' }}
                                 <p class="mt-2">
@@ -980,8 +1017,127 @@
                                     MyAwesomeSolution.zip (2.5MB) -
                                     {{ $l == 'en' ? 'Upload Date: March 16, 2024, 05:30 PM' : 'تاريخ الرفع: 16 مارس 2024, 05:30 مساءً' }}
                                 </p>
-                            </div>
-                            <form id="projectSubmissionForm" class="mt-3">
+                            </div> --}}
+                            @if($data_evi['stype'] == 5)
+                             @if(count($data_evi['fields'] ) > 0)
+                                        <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data">
+                                            {!! csrf_field() !!}
+                                            <input type="hidden" name="cycle" value="{{ $data_evi['cycle_id'] }}" />
+                                            <input type="hidden" name="id" value="{{ $data_evi['form_id'] }}" />
+                                            <input type="hidden" name="field_ids" value="{{ $data_evi['field_ids']  }}" />
+                                           
+                                            @foreach($data_evi['fields'] as $field)
+                                                @php
+                                                    $options = $field->pivot->options? json_decode($field->pivot->options) : null;
+                                                    $field_name = 'field_' . $field->pivot->id;
+                                                    $id_for = 'input-fld-'. $loop->iteration;
+                                                    $get_answer = $answers->where('field_id', $field->pivot->id)->first();
+                                                    $answer = $get_answer ? $get_answer->answer : null;
+                                                @endphp
+                                                
+                                                <div class="mb-3">
+                                                    @switch($field->field_type)
+                                                        @case("select")
+                                                        <div class="form-group mb-6">
+                                                            @if($options->label)
+                                                                <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                            @endif
+                                                            <select class="form-select @error($field_name) is-invalid @enderror" 
+                                                                    id="{{ $id_for }}" 
+                                                                    name='{{ $field_name }}' 
+                                                                    required>
+                                                                <option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>
+                                                                @foreach(explode(",", $options->values) as $value)
+                                                                    <option value="{{ trim($value) }}" 
+                                                                            {{ old($field_name) == trim($value)? "selected" : "" }} 
+                                                                            {{trim($value)==$answer?'selected':''}}>
+                                                                        {{ trim($value) }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error($field_name)
+                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        @break
+                                                        
+                                                        @case("textarea")
+                                                        <div class="form-group mb-6">
+                                                            @if($options->label)
+                                                                <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                            @endif
+                                                            <textarea class="form-control @error($field_name) is-invalid @enderror" 
+                                                                      id="{{ $id_for }}" 
+                                                                      name="{{ $field_name }}"
+                                                                      rows="{{ $options->rows ?? 4 }}">{{ old($field_name) }}{{$answer}}</textarea>
+                                                            @error($field_name)
+                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        @break
+                                                        
+                                                        @case("file")
+                                                        <div class="form-group mb-6">
+                                                            @if($options->label)
+                                                                <label class="form-label fw-bold">{{ $options->label }}</label>
+                                                            @endif
+                                                            <div class="d-flex flex-column">
+                                                                <input type="file" 
+                                                                       class="form-control @error($field_name) is-invalid @enderror" 
+                                                                       id="{{ $id_for }}" 
+                                                                       name="{{ $field_name }}"
+                                                                       accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                                                                @if($answer)
+                                                                    <div class="mt-4">
+                                                                        <a href="/{{ $answer }} " target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            @error($field_name)
+                                                                <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        @break
+                                                        
+                                                        @default
+                                                            <div class="form-group mb-6">
+                                                                @if($options->label)
+                                                                    <label for="{{$id_for}}" class="form-label fw-bold">{{ $options->label }}</label>
+                                                                @endif
+                                                                <input type="{{$options->type=="date"?"text":$options->type}}" 
+                                                                       class="form-control {{ $options->type == "date"? "datepicker" : "" }} @error($field_name) is-invalid @enderror" 
+                                                                       id="{{$id_for}}" 
+                                                                       name="{{ $field_name }}" 
+                                                                       value="{{ !empty( $answer ) ? $answer : ( !empty( old($field_name) ) ? old($field_name) : '' ) }}" />
+                                                                @error($field_name)
+                                                                    <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
+                                                                @enderror
+                                                            </div>
+                                                    @endswitch
+                                                </div>
+                                            @endforeach
+                                            
+                                            <div class="d-flex justify-content-end mt-4">
+                                                <button type="submit" class="btn btn-primary">
+                                                    {{ __('admin.submit') }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                        
+                                    @else
+                                        <div class="text-center">
+                                            <h5 class="text-muted">{{ __('cycles.No Fields') }}</h5>
+                                        </div>
+                                    @endif
+                                    @else
+                                        <div class="text-center">
+                                            <h5 class="text-muted">{{ __('admin.You are not allowed to submit answers') }}</h5>
+                                        </div>
+                                        @endif
+
+                            {{-- <form id="projectSubmissionForm" class="mt-3">
                                 <div class="mb-3">
                                     <label for="projectName" class="form-label">
                                         {{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}
@@ -1031,7 +1187,15 @@
                                 <button type="button" class="btn btn-outline-secondary ms-2" onclick="saveDraft()">
                                     {{ $l == 'en' ? 'Save as Draft' : 'حفظ كمسودة' }}
                                 </button>
-                            </form>
+                            </form> --}}
+                            @else
+                                <div class="text-center">
+                                    <h5 class="alert alert-danger">
+                                        {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }},
+                                        {{ $l == 'en' ? 'will be opening on '. $data_evi['start']->format('F j, Y') : 'سوف يتم فتحها' . $data_evi['start']->format('F j, Y')  }}
+                                    </h5>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1134,7 +1298,7 @@
                         </div>
                     </div>
                 </div>
-
+                @if($user->hasRole('admin'))
                  <!-- Results Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab-btn">
                     <div class="card">
@@ -1186,7 +1350,7 @@
                        
                     </div>
                 </div>
-
+                @endif
             </div>
         </div>
 
