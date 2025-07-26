@@ -179,6 +179,11 @@ class HackathonController extends Controller
     public function show($id) {
 
         $user = Auth::user();
+         if(!$user->company->step){
+            return redirect()->back()->with('error', 'Program not ready.');
+            }
+
+        
         $hackathons_query = "SELECT
         c.id as 'c_id',
         c.title as 'c_title',
@@ -413,7 +418,7 @@ class HackathonController extends Controller
             $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
                             
         // dd($allteams->first()['tm_acceptInvition']);
-
+                               
         $companyStep = Step::where('id', Auth::user()->company->step)->first(); 
 
 		$mentors_q = "SELECT 
