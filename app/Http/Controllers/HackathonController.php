@@ -179,7 +179,8 @@ class HackathonController extends Controller
     public function show($id) {
 
         $user = Auth::user();
-         if(!$user->company->step){
+        $step = Step::where('cycle_id', $id)->get();
+         if(!$step){
             return redirect()->back()->with('error', 'Program not ready.');
             }
 
