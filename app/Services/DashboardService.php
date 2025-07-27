@@ -420,6 +420,23 @@ class DashboardService
         ->whereNotNull('zoom_date')
         ->count();
 
+        $sessionsSummary = DB::table('mentorship_requests')
+        ->selectRaw("MONTH(zoom_date) as month, COUNT(*) as sessions, SUM(period) as total_minutes")
+        ->where('mentor_id', $mentorId)
+        ->whereNotNull('zoom_date')
+        ->whereYear('zoom_date', now()->year)
+        ->groupBy(DB::raw('MONTH(zoom_date)'))
+        ->orderBy(DB::raw('MONTH(zoom_date)'))
+        ->get()
+        ->map(function ($item) {
+            return [
+                'month' => Carbon::create()->month($item->month)->format('M'),
+                'sessions' => (int) $item->sessions,
+                'hours' => round($item->total_minutes / 60, 2),
+            ];
+        });
+
+
         return [
             'comingSessionsCount' => $comingSessionsCount,
             'currentSchedule' => $schedules,
@@ -431,6 +448,7 @@ class DashboardService
             'mentorAverageRating' => $mentorRatingAverage,
             'totalMentorshipHours' => $totalHoursFormatted,
             'totalMentorshipSessions' => $totalSessions,
+            'sessionsSummary' => $sessionsSummary,
         ];
     }
 
@@ -1099,7 +1117,7 @@ public function startupDashboard($userId)
                 ? Storage::disk('public_uploads')->url($schedule->mentor_img)
                 : null,
             'type' => $schedule->type,
-            'days' => $schedule->days ? explode(',', $schedule->days) : [],
+            'days' => $schedule->days,
             'start' => $schedule->tfrom,
             'end' => $schedule->tto,
             'notes' => $schedule->notes,
