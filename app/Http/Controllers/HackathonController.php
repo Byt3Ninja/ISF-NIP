@@ -475,7 +475,9 @@ class HackathonController extends Controller
         $id_evi = $user->company->step;
        $step_evi = $step->where('id', $id_evi)->first();
        $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
-
+         if(!$step_evi){
+            return redirect()->back()->with('error', 'Program not ready.');
+            }
         $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi->data)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data_evi = [
