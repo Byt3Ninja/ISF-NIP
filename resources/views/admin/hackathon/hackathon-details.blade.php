@@ -459,7 +459,7 @@
                         <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Results' : 'النتائج' }}
                     </button>
                 </li> --}}
-                @if($user->hasRole('admin'))
+                @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
                 <li class="nav-item me-1" role="presentation" id="submissions-tab-li">
                     <button class="nav-link rounded" id="submissions-tab-btn" data-bs-toggle="tab" data-bs-target="#submissions"
                         type="button" role="tab" aria-controls="submissions" aria-selected="false">
@@ -1202,7 +1202,7 @@
                     @else
                         <div class="text-center">
                             <h5 class="alert alert-danger">
-                                @if($user->hasRole('Admin'))
+                                @if($user->hasRole('Admin') || $user->hasRole('organizationmanager'))
                                 {{ $l == 'en' ? 'Add Final Evaluation Step First' : ' لا يمكنك تقديم المشاريع الان' }}
                                 @else
                                 {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }}
@@ -1310,7 +1310,7 @@
                         </div>
                     </div>
                 </div>
-                @if($user->hasRole('admin'))
+                @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
                  <!-- Results Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab-btn">
                     <div class="card">
