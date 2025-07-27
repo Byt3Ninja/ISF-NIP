@@ -449,20 +449,24 @@ class HackathonController extends Controller
             LEFT JOIN steps as s ON FS.step_id = s.id
             WHERE s.stype = 5 AND s.cycle_id = ?";
             $judges = collect(DB::select($judges_q, [$id]));
-            $judges_ids = json_decode($judges->first()->judges);
-            $judges_ids = array_map('intval', $judges_ids);
-            $judges_users = DB::table('users as u')
-                            ->whereIn('u.id', $judges_ids)
-                            ->select(
-                                'u.id',
-                                DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
-                                DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
-                                'u.email',
-                                'u.img_url',
-                                'u.title_ar',
-                                'u.title_en'
-                            )
-                            ->get();
+            if($judges->isEmpty()){
+                $judges = collect([]);
+            }else{
+                $judges_ids = json_decode($judges->first()?->judges);
+                $judges_ids = array_map('intval', $judges_ids);
+                $judges_users = DB::table('users as u')
+                ->whereIn('u.id', $judges_ids)
+                ->select(
+                    'u.id',
+                    DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
+                    DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
+                    'u.email',
+                    'u.img_url',
+                    'u.title_ar',
+                    'u.title_en'
+                    )
+                    ->get();
+                }
 
         
    
