@@ -1463,6 +1463,83 @@
                 ]
             }
         },
+        "/api/v1/users/me/permissions": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Get current user's permissions grouped by module",
+                "description": "Returns the current authenticated user's roles and permissions grouped by module",
+                "operationId": "75dea8bbd84234cb54da0ffaef37a7a0",
+                "responses": {
+                    "200": {
+                        "description": "Grouped permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupedPermissions"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user_id}/permissions": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Get specified user's permissions (Admin only)",
+                "description": "Returns the specified user's roles and permissions grouped by module. Admin only.",
+                "operationId": "a23cfd278922d02379631675415c7cae",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "User ID to fetch permissions for",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grouped permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupedPermissions"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/me": {
             "get": {
                 "tags": [
@@ -3097,6 +3174,65 @@
             }
         }
     },
+    "components": {
+        "schemas": {
+            "GroupedPermissions": {
+                "title": "GroupedPermissions",
+                "properties": {
+                    "user_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Admin"
+                        }
+                    },
+                    "permissions": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "schema": "PermissionController",
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "view_program"
+                            }
+                        }
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "user_id": 12,
+                    "roles": [
+                        "Admin"
+                    ],
+                    "permissions": {
+                        "program": [
+                            "view_program",
+                            "join_program"
+                        ],
+                        "team": [
+                            "view_team_info",
+                            "edit_team_info"
+                        ],
+                        "sessions": [
+                            "view_sessions",
+                            "book_sessions"
+                        ]
+                    }
+                }
+            },
+            "PermissionController": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "example": "view_program"
+                }
+            }
+        }
+    },
     "tags": [
         {
             "name": "Authentication",
@@ -3129,6 +3265,10 @@
         {
             "name": "Organizations",
             "description": "Organizations"
+        },
+        {
+            "name": "Permissions",
+            "description": "Permissions"
         },
         {
             "name": "Profile",
