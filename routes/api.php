@@ -11,6 +11,7 @@ use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
+use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\Mentors\MentorController;
@@ -54,6 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('programs', [ProgramController::class, 'store']);
     Route::post('programs/{id}', [ProgramController::class, 'update']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
+    Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
+    Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
 });
 
 
