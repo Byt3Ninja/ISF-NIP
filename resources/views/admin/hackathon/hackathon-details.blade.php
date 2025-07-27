@@ -289,13 +289,21 @@
                            
                         @endphp
                         @if($teamcreated != null)
-                           
+                           @if($teamcreated->cycle_id == $currentHackathon['cycle_id'])
 
                                 <a href="/dashboard/hackathon/{{ $teamcreated->id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
                                     style="border-radius: 50px; font-weight: 600;">
                                     <i class="ti ti-settings me-2 me-2"></i>
                                     {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
                                 </a>
+                            @else
+                        <button type="button"  class="btn btn-primary" style="flex: 1;"
+                        onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'" >
+                        <i class="ti ti-send me-1"></i>
+                        {{__('admin.ApplyHackathon') }}
+                        </button>
+
+                            @endif
                          
                         @else
                           
