@@ -11,8 +11,11 @@ use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
+use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
+use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\Mentors\ScheduleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +55,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/currencies', [CurrencyController::class, 'index']);
     Route::post('programs', [ProgramController::class, 'store']);
     Route::post('programs/{id}', [ProgramController::class, 'update']);
-
+    Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
+    Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
+    Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::post('/v1/availability', [ScheduleController::class, 'store']);
+    Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
+    Route::get('/mentors/{mentor_id}/weekly-slots', [ScheduleController::class, 'index']);
+    Route::get('/slots/{id}', [ScheduleController::class, 'show']);
+    Route::get('/v1/mentors', [MentorController::class, 'index']);
 });
 
 

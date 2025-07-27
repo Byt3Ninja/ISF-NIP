@@ -86,6 +86,14 @@
   <!-- Main Content -->
   <main class="overflow-x-hidden mx-auto" style="width: 90%;">
 
+    <section id="multiple-column-form">
+					@if (session()->has('message'))
+						<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" role="alert">
+							{{ __('admin.' . session()->get('message')) }}
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+					@endif
+				</section>
     <!-- Filter Section -->
     <div class="row mb-8" id="upcoming-hackathons">
       <div class="col-12">

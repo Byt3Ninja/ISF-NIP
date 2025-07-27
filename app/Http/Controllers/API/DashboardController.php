@@ -81,7 +81,17 @@ use Illuminate\Support\Facades\Auth;
  *                     @OA\Property(property="startupAttendanceRate", type="string", example="85%"),
  *                     @OA\Property(property="mentorAverageRating", type="number", format="float", example=4.5),
  *                     @OA\Property(property="totalMentorshipHours", type="number", format="float", example=42.5),
- *                     @OA\Property(property="totalMentorshipSessions", type="integer", example=18)
+ *                     @OA\Property(property="totalMentorshipSessions", type="integer", example=18),
+ *  *                     @OA\Property(
+ *                         property="sessionsSummary",
+ *                         type="array",
+ *                         @OA\Items(
+ *                             type="object",
+ *                             @OA\Property(property="month", type="string", example="Jan"),
+ *                             @OA\Property(property="sessions", type="integer", example=3),
+ *                             @OA\Property(property="hours", type="number", format="float", example=5.5)
+ *                         )
+ *                     ),
  *                 ),
  *                 @OA\Schema(
  *                     title="Judger Dashboard",

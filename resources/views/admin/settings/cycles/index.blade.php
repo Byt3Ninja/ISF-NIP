@@ -339,8 +339,10 @@
 <div class="modal fade" id="stepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
-      <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" onsubmit="disableSubmitButton()">
+      <form id="addStepForm" class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
+        autocomplete="off" 
+        {{-- onsubmit="disableSubmitButton()" --}}
+        >
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.New step data') }} - <span id="formtitle">{{
@@ -382,7 +384,7 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Step Title') }}: </label>
             <input id='title' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
-              required>
+              >
           </div>
           {{-- <div class="form-group mt-3">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid from') }}: </label>
@@ -397,7 +399,7 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control" required></textarea>
+              class="form-control"></textarea>
           </div>
 
           <div class="form-group mb-4" id="team_number">
@@ -432,7 +434,7 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off">
+        autocomplete="off" id="editStepForm">
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Modify current step') }}</h4>
@@ -442,6 +444,7 @@
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
           <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
             <div class="form-group mb-4">
@@ -466,7 +469,7 @@
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Form title') }}: </label>
           <div class="mb-4">
             <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
-              required>
+              >
           </div>
           <div class="col-12 mb-4">
             <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
@@ -485,7 +488,7 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
-              class="form-control" required></textarea>
+              class="form-control"></textarea>
           </div>
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">
@@ -528,19 +531,137 @@
 <script src="/vuexy/assets/js/forms-selects.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
-<script>
 
-  $('#count_team_number, #mcount_team_number').on('input', function () {
-    let val = $(this).val();
-    if (val < 1) {
-      $(this).val(1);
-    }
+<script>
+  const currentLang = '{{ $l }}';
+
+  const errors = {
+    title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
+    description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
+    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.'
+  };
+
+ function validateStepForm(form, mode = 'add') {
+  const stepType = form.querySelector('#stype');
+  const stepTitle = form.querySelector(`${mode === 'add' ? '#title' : '#mtitle'}`);
+  const stepDescription = form.querySelector(`${mode === 'add' ? '#description' : '#mdescription'}`);
+  const teamNumberInput = form.querySelector(`${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`);
+
+  // Remove any previous error messages
+  const existingError = form.querySelector('.invalid-feedback');
+  if (existingError) existingError.remove();
+
+  // Helper function to show error
+  const showError = (element, message) => {
+    element.focus();
+    element.classList.add('is-invalid');
+
+    const errorSpan = document.createElement('span');
+    errorSpan.classList.add('invalid-feedback');
+    errorSpan.textContent = message;
+
+    element.insertAdjacentElement('afterend', errorSpan);
+  };
+
+  // Validation checks
+  if (!stepTitle.value.trim()) {
+    showError(stepTitle, errors.title);
+    return false;
+  }
+
+  if (!stepDescription.value.trim()) {
+    showError(stepDescription, errors.description);
+    return false;
+  }
+
+  if (stepType.value === '6' && (!teamNumberInput.value || teamNumberInput.value < 1)) {
+    showError(teamNumberInput, errors.teamNumber);
+    return false;
+  }
+
+  // Clear any invalid styling
+  [stepTitle, stepDescription, teamNumberInput].forEach(input => {
+    input.classList.remove('is-invalid');
   });
 
-  function disableSubmitButton() {
-    document.getElementById("submitBtn").disabled = true;
+  return true; // All validations passed
 }
-    console.log('loaded');
+
+function disableFormWithLoading(form) {
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+  }
+}
+
+const addStepForm = document.querySelector('#addStepForm');
+const editStepForm = document.querySelector('#editStepForm');
+
+if (addStepForm) {
+  addStepForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateStepForm(addStepForm, 'add')) {
+      disableFormWithLoading(addStepForm);
+      addStepForm.submit();
+    }
+  });
+}
+
+if (editStepForm) {
+  editStepForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateStepForm(editStepForm, 'edit')) {
+      disableFormWithLoading(editStepForm);
+      editStepForm.submit();
+    }
+  });
+}
+function clearValidationOnChange(form, mode = 'add') {
+  const fields = [
+    `${mode === 'add' ? '#title' : '#mtitle'}`,
+    `${mode === 'add' ? '#description' : '#mdescription'}`,
+    `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`
+  ];
+
+  fields.forEach(selector => {
+    const input = form.querySelector(selector);
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+      input.classList.remove('is-invalid');
+
+      // Remove the next sibling if it's an error message
+      const next = input.nextElementSibling;
+      if (next && next.classList.contains('invalid-feedback')) {
+        next.remove();
+      }
+    });
+  });
+}
+
+if (addStepForm) {
+  clearValidationOnChange(addStepForm, 'add');
+}
+
+if (editStepForm) {
+  clearValidationOnChange(editStepForm, 'edit');
+}
+</script>
+
+<script>
+
+  // $('#count_team_number, #mcount_team_number').on('input', function () {
+  //   let val = $(this).val();
+  //   if (val < 1) {
+  //     $(this).val(1);
+  //   }
+  // });
+
+//   function disableSubmitButton() {
+//     document.getElementById("submitBtn").disabled = true;
+// }
+    // console.log('loaded');
     const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
     // console.log('stepFormRamgePicker', stepFormRamgePicker);
 
@@ -762,6 +883,7 @@
             success: function(response) {
               step = response.stype;
               console.log(step);
+              $('#editStepForm #stype').val(step);
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
               if(step == 6){

@@ -676,6 +676,27 @@
                                                 "totalMentorshipSessions": {
                                                     "type": "integer",
                                                     "example": 18
+                                                },
+                                                "sessionsSummary": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "month": {
+                                                                "type": "string",
+                                                                "example": "Jan"
+                                                            },
+                                                            "sessions": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "hours": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 5.5
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -1193,6 +1214,580 @@
                 }
             }
         },
+        "/api/v1/mentors/{mentor_id}": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Get full profile of a mentor",
+                "operationId": "c0870df7c1051c4d138206340f74684a",
+                "parameters": [
+                    {
+                        "name": "mentor_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentor Profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 12
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Ahmed Mohamed"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "ahmed@example.com"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Senior Consultant"
+                                        },
+                                        "imgUrl": {
+                                            "type": "string",
+                                            "format": "url",
+                                            "example": "https://yourdomain.com/storage/uploads/mentor.jpg"
+                                        },
+                                        "bio": {
+                                            "type": "string",
+                                            "example": "An experienced mentor in business strategy."
+                                        },
+                                        "linkedin": {
+                                            "type": "string",
+                                            "format": "url",
+                                            "example": "https://linkedin.com/in/ahmedmentor"
+                                        },
+                                        "specialization": {
+                                            "type": "string",
+                                            "example": "Business Strategy"
+                                        },
+                                        "mentorExpertises": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "Marketing"
+                                            }
+                                        },
+                                        "rating": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 4.5
+                                        },
+                                        "programCount": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "programIds": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 15
+                                            }
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Mentor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Mentor not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/mentors": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Get a list of all mentors",
+                "operationId": "82e5c2fdad8eb36d5f5c18dd1a1b854e",
+                "responses": {
+                    "200": {
+                        "description": "List of mentors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Ahmed Mohamed"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "ahmed@example.com"
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Senior Consultant"
+                                                    },
+                                                    "imgUrl": {
+                                                        "type": "string",
+                                                        "format": "url",
+                                                        "example": "https://yourdomain.com/storage/uploads/mentor.jpg"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "An experienced mentor in business strategy."
+                                                    },
+                                                    "linkedin": {
+                                                        "type": "string",
+                                                        "format": "url",
+                                                        "example": "https://linkedin.com/in/ahmedmentor"
+                                                    },
+                                                    "specialization": {
+                                                        "type": "string",
+                                                        "example": "Business Strategy"
+                                                    },
+                                                    "mentorExpertises": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "Marketing"
+                                                        }
+                                                    },
+                                                    "rating": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 4.5
+                                                    },
+                                                    "programCount": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "programIds": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        }
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "Mentor"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/mentors/{mentor_id}/weekly-slots": {
+            "get": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Get weekly schedule of a mentor",
+                "operationId": "430205da15b903a82b329b9d5b3b49ac",
+                "parameters": [
+                    {
+                        "name": "mentor_id",
+                        "in": "path",
+                        "description": "Mentor ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Start date for the schedule (Y-m-d)",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "End date for the schedule (Y-m-d)",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "timezone",
+                        "in": "query",
+                        "description": "Timezone for slot times",
+                        "schema": {
+                            "type": "string",
+                            "example": "Asia/Dubai"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule slots retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mentorId": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "timezone": {
+                                            "type": "string",
+                                            "example": "Asia/Dubai"
+                                        },
+                                        "slots": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "date": {
+                                                        "type": "string",
+                                                        "example": "2025-07-28"
+                                                    },
+                                                    "slots": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "start": {
+                                                                    "type": "string",
+                                                                    "example": "10:00:00"
+                                                                },
+                                                                "end": {
+                                                                    "type": "string",
+                                                                    "example": "11:00:00"
+                                                                },
+                                                                "status": {
+                                                                    "type": "string",
+                                                                    "example": "reserved"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/availability": {
+            "post": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Create new weekly schedule for mentor",
+                "operationId": "f3aa5c45a7655798166f37ee17b86518",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "days",
+                                    "type",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "days": {
+                                        "type": "string",
+                                        "example": "Monday,Tuesday"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Weekly"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "Available"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Morning slots"
+                                    },
+                                    "time_slots": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "start": {
+                                                    "type": "string",
+                                                    "example": "09:00:00"
+                                                },
+                                                "end": {
+                                                    "type": "string",
+                                                    "example": "10:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Schedule created successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "409": {
+                        "description": "Slot conflict"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/availability/{user_id}": {
+            "put": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Update an existing weekly schedule",
+                "operationId": "17f1ae08f1f3f9f7b5e42ac47c68afd9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Schedule ID to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "days",
+                                    "type",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "days": {
+                                        "type": "string",
+                                        "example": "Monday"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Weekly"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "Available"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Updated availability"
+                                    },
+                                    "time_slots": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "start": {
+                                                    "type": "string",
+                                                    "example": "13:00:00"
+                                                },
+                                                "end": {
+                                                    "type": "string",
+                                                    "example": "14:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Schedule updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "409": {
+                        "description": "Slot conflict"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/slots/{id}": {
+            "get": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Get a specific schedule slot",
+                "operationId": "c64db6ed0c79724049fc2900fcd5d57e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Schedule slot ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "timezone",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Asia/Dubai"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Slot retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "slotId": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "mentorId": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "day": {
+                                            "type": "string",
+                                            "example": "Tuesday"
+                                        },
+                                        "start": {
+                                            "type": "string",
+                                            "example": "09:00:00"
+                                        },
+                                        "end": {
+                                            "type": "string",
+                                            "example": "10:00:00"
+                                        },
+                                        "timezone": {
+                                            "type": "string",
+                                            "example": "Asia/Dubai"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "available"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Slot not found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/organizations": {
             "get": {
                 "tags": [
@@ -1325,6 +1920,83 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/me/permissions": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Get current user's permissions grouped by module",
+                "description": "Returns the current authenticated user's roles and permissions grouped by module",
+                "operationId": "75dea8bbd84234cb54da0ffaef37a7a0",
+                "responses": {
+                    "200": {
+                        "description": "Grouped permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupedPermissions"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user_id}/permissions": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Get specified user's permissions (Admin only)",
+                "description": "Returns the specified user's roles and permissions grouped by module. Admin only.",
+                "operationId": "a23cfd278922d02379631675415c7cae",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "User ID to fetch permissions for",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Grouped permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupedPermissions"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -2968,6 +3640,65 @@
             }
         }
     },
+    "components": {
+        "schemas": {
+            "GroupedPermissions": {
+                "title": "GroupedPermissions",
+                "properties": {
+                    "user_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Admin"
+                        }
+                    },
+                    "permissions": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "schema": "PermissionController",
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "view_program"
+                            }
+                        }
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "user_id": 12,
+                    "roles": [
+                        "Admin"
+                    ],
+                    "permissions": {
+                        "program": [
+                            "view_program",
+                            "join_program"
+                        ],
+                        "team": [
+                            "view_team_info",
+                            "edit_team_info"
+                        ],
+                        "sessions": [
+                            "view_sessions",
+                            "book_sessions"
+                        ]
+                    }
+                }
+            },
+            "PermissionController": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "example": "view_program"
+                }
+            }
+        }
+    },
     "tags": [
         {
             "name": "Authentication",
@@ -2994,8 +3725,20 @@
             "description": "Expertises"
         },
         {
+            "name": "Mentors",
+            "description": "Mentors"
+        },
+        {
+            "name": "Schedules",
+            "description": "Schedules"
+        },
+        {
             "name": "Organizations",
             "description": "Organizations"
+        },
+        {
+            "name": "Permissions",
+            "description": "Permissions"
         },
         {
             "name": "Profile",

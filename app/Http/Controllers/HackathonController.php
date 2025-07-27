@@ -179,8 +179,13 @@ class HackathonController extends Controller
     public function show($id) {
 
         $user = Auth::user();
-         if(!$user->company->step){
-            return redirect()->back()->with('error', 'Program not ready.');
+        $step = Step::where('cycle_id', $id)->get();
+         if(!$step){
+            if($user->hasRole('admin') || $user->hasRole('organizationmanager')){
+                 return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready. Add step first.']);
+            }else{
+            return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
+            }
             }
 
         
@@ -418,8 +423,13 @@ class HackathonController extends Controller
             $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
                             
         // dd($allteams->first()['tm_acceptInvition']);
-                               
-        $companyStep = Step::where('id', Auth::user()->company->step)->first(); 
+              
+        if(Auth::user()->company?->step != null){
+            
+            $companyStep = Step::where('id', Auth::user()->company->step)->first();
+        }else{
+            $companyStep = null;
+        }
 
 		$mentors_q = "SELECT 
         u.id as u_id,
@@ -448,44 +458,51 @@ class HackathonController extends Controller
             LEFT JOIN steps as s ON FS.step_id = s.id
             WHERE s.stype = 5 AND s.cycle_id = ?";
             $judges = collect(DB::select($judges_q, [$id]));
-            $judges_ids = json_decode($judges->first()->judges);
-            $judges_ids = array_map('intval', $judges_ids);
-            $judges_users = DB::table('users as u')
-                            ->whereIn('u.id', $judges_ids)
-                            ->select(
-                                'u.id',
-                                DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
-                                DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
-                                'u.email',
-                                'u.img_url',
-                                'u.title_ar',
-                                'u.title_en'
-                            )
-                            ->get();
+            if($judges->isEmpty()){
+                $judges = collect([]);
+                $judges_users = collect([]);
+            }else{
+                $judges_ids = json_decode($judges->first()?->judges);
+                $judges_ids = array_map('intval', $judges_ids);
+                $judges_users = DB::table('users as u')
+                ->whereIn('u.id', $judges_ids)
+                ->select(
+                    'u.id',
+                    DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
+                    DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
+                    'u.email',
+                    'u.img_url',
+                    'u.title_ar',
+                    'u.title_en'
+                    )
+                    ->get();
+                }
 
         
    
         //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         
-        $id_evi = $user->company->step;
+        $id_evi = $user->company?->step;
        $step_evi = $step->where('id', $id_evi)->first();
        $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
-
-        $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi->data)->select('id')->pluck('id')->toArray();
+        //  if(!$step_evi){
+        //     return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
+        //     }else{
+        $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi?->data)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data_evi = [
-            'start' => $step_evi_next->from,
-            'end' => $step_evi_next->to,
-            'stype' => $step_evi->stype,
+            'start' => $step_evi_next?->from,
+            'end' => $step_evi_next?->to,
+            'stype' => $step_evi?->stype,
             'cycle_id' => $id,
-            'title' => $step_evi->title,
-            'fields' => $step_evi->fields()->where('builder_forms_id', $step_evi->data)->orderBy('form_fields.id', 'asc')->get(),
-            'form_id' => $step_evi->id,
+            'title' => $step_evi?->title,
+            'fields' => $step_evi?->fields()->where('builder_forms_id', $step_evi?->data)->orderBy('form_fields.id', 'asc')->get(),
+            'form_id' => $step_evi?->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
         //        if (Auth::user()->company->step==$id) {
         $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
-
+    // }
 		
 
 
