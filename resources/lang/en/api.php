@@ -33,4 +33,5 @@ return [
 	'validation_error' => 'Validation Error',
 	'programCreated' => 'Program Created Successfully',
 	'programUpdated' => 'Program Updated Successfully',
+	'mentorNotFound' => 'Mentor Not Found',
 ];

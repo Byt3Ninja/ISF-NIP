@@ -13,6 +13,7 @@ use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
+use App\Http\Controllers\API\Mentors\MentorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/currencies', [CurrencyController::class, 'index']);
     Route::post('programs', [ProgramController::class, 'store']);
     Route::post('programs/{id}', [ProgramController::class, 'update']);
-
+    Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
 });
 
 
