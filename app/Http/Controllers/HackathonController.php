@@ -423,8 +423,13 @@ class HackathonController extends Controller
             $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
                             
         // dd($allteams->first()['tm_acceptInvition']);
-                               
-        $companyStep = Step::where('id', Auth::user()->company->step)->first(); 
+              
+        if(Auth::user()->company?->step != null){
+            
+            $companyStep = Step::where('id', Auth::user()->company->step)->first();
+        }else{
+            $companyStep = null;
+        }
 
 		$mentors_q = "SELECT 
         u.id as u_id,
@@ -477,7 +482,7 @@ class HackathonController extends Controller
    
         //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         
-        $id_evi = $user->company->step;
+        $id_evi = $user->company?->step;
        $step_evi = $step->where('id', $id_evi)->first();
        $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
         //  if(!$step_evi){
