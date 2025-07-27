@@ -450,7 +450,7 @@
                 <li class="nav-item me-1" role="presentation" id="teams-tab-li">
                     <button class="nav-link rounded" id="teams-tab-btn" data-bs-toggle="tab" data-bs-target="#teams"
                         type="button" role="tab" aria-controls="teams" aria-selected="false">
-                        <i class="bi bi-people-fill me-2"></i> {{ $l == 'en' ? 'Team Formation' : 'تكوين الفرق' }}
+                        <i class="bi bi-people-fill me-2"></i> {{ $l == 'en' ? 'Teams' : ' الفرق' }}
                     </button>
                 </li>
                 @endif
@@ -467,6 +467,12 @@
                         <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Results' : 'النتائج' }}
                     </button>
                 </li> --}}
+                <li class="nav-item me-1" role="presentation" id="mentorship-tab-li">
+                    <button class="nav-link rounded" id="mentorship-tab-btn" data-bs-toggle="tab" data-bs-target="#mentorship"
+                        type="button" role="tab" aria-controls="mentorship" aria-selected="false">
+                        <i class="bi bi-award-fill me-2"></i> {{ $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل' }}
+                    </button>
+                </li>
                 @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
                 <li class="nav-item me-1" role="presentation" id="submissions-tab-li">
                     <button class="nav-link rounded" id="submissions-tab-btn" data-bs-toggle="tab" data-bs-target="#submissions"
@@ -885,6 +891,7 @@
                                         $teamUser = $teams->where('tm_user_id', Auth::user()->id);
                                         $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()?->tm_team_formation_id);
                                         $isleader = $teams_with_user->where('tm_isTeamLeader', 1)->first();
+                                        $countMembers = $teams_with_user->count();
                                     @endphp
                                    @if($teamUser->count() > 0)
                                         @if($teams_with_user != null)
@@ -894,6 +901,19 @@
                                             
                                             <hr>
                                             @foreach($teams_with_user as $team)
+                                        <div>
+                                           <span>name: {{$team->tf_name}}</span><br>
+                                           <span>id: {{$team->tm_team_formation_id}}</span><br>
+                                           <span>is leader: {{$team->tm_isTeamLeader}}</span><br>
+                                           @foreach($users as $user)
+                                           <span>user id: {{$team->tm_user_id}}</span><br>
+                                           <span>user name: {{$team->user_name_en}}</span><br>
+                                           @endforeach
+                                           <span>count member : {{ $countMembers }}</span><br>
+                                           
+                                        </div>
+                                        <hr>
+
                                                 <li>
                                                     <div class="d-flex align-items-center gap-2">
                                                         <a class="media-left" href="/dashboard/users/{{ $team->tm_user_id }}/edit">
@@ -1318,6 +1338,192 @@
                         </div>
                     </div>
                 </div>
+
+<!-- mentorship Tab (conditionally shown) -->
+                <div class="tab-pane fade" id="mentorship" role="tabpanel" aria-labelledby="mentorship-tab-btn">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ $l == 'en' ? 'Mentorship & WorkShop' : 'الارشاد وورش العمل' }}
+                            </h5>
+        @if( $cType != 5 && array_intersect(['dashboard.widgets_tables_my_last_training_view'], $permissions) &&
+			$sessions->count() > 0 )
+			<div class="col-12">
+				<section>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card mt-10">
+								<div class="card-header border-bottom">
+									<h5 style="text-transform: capitalize">
+										<i class="ti ti-clipboard-list ti-28px"></i>
+										<span class="mx-2"> {{ __('dashboard.My Latest training') }} ::
+											<a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
+										</span>
+									</h5>
+								</div>
+								<div class="card-body">
+									<div class="table-responsive">
+										<table class="table mb-0" id="trainingtable">
+											<thead class="bg-label-light">
+												<tr>
+													<th>#</th>
+													<th>{{ __('cycles.Type') }}</th>
+													<th>{{ __('cycles.Title') }}</th>
+													<th>{{ __('cycles.Start') }}</th>
+													<th>{{ __('cycles.End') }}</th>
+													<th>{{ __('cycles.details') }}</th>
+												</tr>
+											</thead>
+											<tbody>
+												@foreach( $sessions as $key => $session )
+												<tr>
+													<td>{{ $key + 1 }}</td>
+													<td>{{ __('cycles.' . $session->type) }}</td>
+													<td>{{ $session->title }}</td>
+													<td>{{ $session->datetime }}</td>
+													<td>{{ $session->end_datetime ?? '-' }}</td>
+													<td>
+														@if( $session->type == 'sessions' )
+														{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+														<a href="{{ $session->join_url }}" target="_blank">
+															<button title="Join only" type="button"
+																class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i>
+															</button>
+														</a>
+														@elseif ($session->type == 'offline')
+														<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
+														<b>{{ __('cycles.training location') }}:</b>
+														{{ $session->location }} <br>
+														@else
+														<a href="/dashboard/training/my/{{ $session->location }}">{{ __('cycles.Display course
+															contents') }} </a>
+														@endif
+													</td>
+												</tr>
+												@endforeach
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+			@endif
+                      @if( array_intersect(['dashboard.widgets_tables_mentors_sessions_view'], $permissions) )
+			<div class="col-12">
+				<section>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card mt-10">
+								<div class="card-header border-bottom">
+									<div class="d-flex justify-content-between align-items-center">
+										<div class="d-flex align-items-center">
+											<i class='ti ti-calendar-event me-2'></i> 
+											<h5 class="card-title mb-0">
+												{{ __("dashboard.UpcomingMentorsSession") }}
+												{{-- @if($days!=14)
+												<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14
+													{{__('cycles.days')}}</div>
+												@else
+												<div onclick="redirectWithDays('14')" class="btn btn-label-warning" id="forteenDays"> 14
+													{{__('cycles.days')}}</div>
+												@endif
+												@if($days!=7)
+												<div onclick="redirectWithDays('7')" class="btn btn-label-success" id="sevenDays"> 7
+													{{__('cycles.days')}}</div>
+												@else
+												<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7
+													{{__('cycles.days')}}</div>
+												@endif --}}
+											</h5>
+										</div>
+										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
+											<i class="ti ti-eye me-2 ti-16px"></i>
+											{{__('cycles.showAll')}}
+										</a>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="table-responsive">
+										<table class="table mb-0 sessonsTable">
+											<thead class="bg-label-light">
+												<tr>
+													<th>{{__('cycles.User/Title')}}</th>
+													<th>{{__('cycles.Mentor')}}</th>
+													@if ($_user->hasRole('Admin'))<th>{{__('cycles.Rate/Comment')}}</th>@endif
+													<th>{{__('cycles.Date/Time')}}</th>
+													<th>{{__('cycles.Approved')}}</th>
+													<th>{{__('cycles.Done')}}</th>
+													<th>{{__('cycles.Actions')}}</th>
+												</tr>
+											</thead>
+											<tbody>
+												@foreach($nextSessions as $session)
+												<tr>
+													<td>
+														<div class="d-flex align-items-center gap-2">
+															<a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
+																<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
+																	height="40" width="40">
+															</a>
+															<a href="/dashboard/users/{{ $session->user_id }}/edit">
+																<div class="media-body">
+																	<h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
+																	<span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
+																</div>
+															</a>
+														</div>
+													</td>
+													<td>
+														<div style="cursor: pointer;" class="d-flex align-items-center"
+															onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
+															<div class="avatar">
+																<img 
+																	class="img-fluid rounded-circle me-3" 
+																	src="{{$session->mentor->image_url ?? '/icons/account.svg'}}"
+																	alt="image" height="20" width="20"
+																/>
+															</div>
+															<span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
+														</div>
+													</td>
+													@if ($_user->hasRole('Admin'))
+													<td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
+																style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment :
+															$session->comment !!} </small> </td>
+													@endif
+													<td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
+													<td>
+														<div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
+																class="warning">'.__('Waiting').'</span>' !!} </div>
+													</td>
+													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
+													<td> 
+														<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+															<i class="ti ti-brand-zoom me-2"></i>
+															{{ __('dashboard.Join now') }}
+														</a>
+													</td>
+												</tr>
+												@endforeach
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+			@endif
+                           
+                          
+                        </div>
+                    </div>
+                </div>
+
                 @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
                  <!-- Results Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab-btn">

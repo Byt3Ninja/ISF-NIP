@@ -2,7 +2,7 @@
   <div class="card-header p-0">
     @php($color = $hackathon['status'] == 'Upcoming' ? '696cff' : '28c76f')
     <img 
-      src="https://placehold.co/600x250/{{ $color }}/ffffff?text={{ $hackathon['title'] }}" 
+      src="{{ $hackathon['image'] ? $hackathon['image'] : 'https://placehold.co/600x250/' . $color . '/ffffff?text=' . urlencode($hackathon['title']) }}"
       class="card-img-top" 
       alt="{{ $hackathon['title'] }}"
       style="height: 200px; object-fit: cover;"
