@@ -676,6 +676,27 @@
                                                 "totalMentorshipSessions": {
                                                     "type": "integer",
                                                     "example": 18
+                                                },
+                                                "sessionsSummary": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "month": {
+                                                                "type": "string",
+                                                                "example": "Jan"
+                                                            },
+                                                            "sessions": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "hours": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 5.5
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
