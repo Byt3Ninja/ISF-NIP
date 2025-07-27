@@ -31,6 +31,7 @@ class HackathonController extends Controller
         c.start as 'c_start_date',
         c.end as 'c_end_date',
         c.type as 'c_type',
+        c.img_url as 'c_img_url',
         c.created_at as 'c_created_at',
         c.updated_at as 'c_updated_at',
       
@@ -60,6 +61,7 @@ class HackathonController extends Controller
             return [
                 'id' => $item->c_id,
                 'title' => $item->c_title,
+                'image' => $item->c_img_url,
                 'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
                 'location' => $item->o_name_en ?? 'Unknown',
                 'status' => $status,
@@ -375,8 +377,35 @@ class HackathonController extends Controller
             // $teamUser = $teams->where('tm_user_id', Auth::user()->id);
             // $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
             // dd($teams_with_user);
+            $teams = $teams->groupBy('tm_team_formation_id');
+
+          $teams = $teams->map(function ($group, $teamFormationId) {
+    $first = $group->first();
+
+    $team = new stdClass;
+    $team->id = $first->tf_id;
+    $team->name = $first->tf_name;
+    $team->description = $first->tf_description;
+    $team->cycle_id = $first->tf_cycle_id;
+    $team->step_id = $first->tf_step_id;
+
+    // المستخدمين في هذا الفريق
+    $team->users = $group->map(function ($member) {
+        $user = new stdClass;
+        $user->id = $member->u_id;
+        $user->name_en = $member->user_name_en;
+        $user->name_ar = $member->user_name_ar;
+        $user->email = $member->u_email;
+        $user->img_url = $member->u_img_url;
+        $user->is_leader = $member->tm_isTeamLeader;
+        return $user;
+    });
+
+    return $team;
+});
 
 
+// dd($teams);
                                 $allteams_q = "SELECT 
                                 tf.id as tf_id,
                                 tf.name as tf_name,
@@ -504,7 +533,181 @@ class HackathonController extends Controller
         $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
     // }
 		
+        $days = request()->query('days', 14);
+        $company = $user->company;
+        $stepData = $company?->stepdata;
+        $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
+        $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
+ if ($company && $company->cycledata) {
+        $sessions_q = "SELECT
+                    ts.id,
+                    ts.type,
+                    ts.title,
+                    ts.datetime,
+                    ts.enddatetime AS `end_datetime`,
+                    ts.duration,
+                    ts.join_url,
+                    ts.trainer_name,
+                    ts.training_location AS `location`
+                FROM
+                    training_sessions ts
+                WHERE
+                    ts.step_id = ?
+                ORDER BY
+                    ts.datetime ASC
+                LIMIT 5";
+            $sessions = collect(DB::select($sessions_q, [$company->step]));
+ }else{
+     $sessions = collect([]);
+ }
+        $steps_q = "SELECT
+                s.id,
+                s.title,
+                s.arr,
+                s.stype,
+                s.from,
+                s.to,
+                s.description,
+                s.data
+            FROM
+                steps s
+            WHERE
+                s.cycle_id = $id
+                AND s.cycle_id != 0
+                AND s.cycle_id IS NOT null
+            ORDER BY
+                s.arr asc
+        ";
 
+        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $id) {
+            $step->from = Carbon::parse($step->from)->format('d-m-Y');
+            $step->to = Carbon::parse($step->to)->format('d-m-Y');
+
+            $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
+            $color = 'label-light';
+            $textColor = 'light';
+            if (!empty($step) && !empty($stepData)) {
+
+                if ($stepData->arr > $step->arr) {
+                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                    $color = 'label-success';
+                    $textColor = 'success';
+                } elseif ($stepData->arr == $step->arr) {
+                    $status = $l == 'ar' ? 'بدأت' : 'Started';
+                    $color = 'label-primary';
+                    $textColor = 'primary';
+                }
+            }
+            $trType = $fLink = null;
+            if ($company->approved) {
+                $trType = 'my/' . $step->id;
+            } else {
+                $fLink = 'view/' . $id;
+            }
+
+            $step->status = $status;
+            $step->color = $color;
+            $step->textColor = $textColor;
+            $step->trType = $trType;
+            $step->fLink = $fLink;
+            return $step;
+        });
+    $nextSessions_q = "SELECT
+                mr.id,
+                mr.mentor_id,
+                mr.user_id,
+                mr.comment,
+                mr.approved,
+                mr.rating,
+                mr.join_url,
+                mr.zoom_date,
+                mr.period,
+                mr.rate_comment,
+                mr.done,
+                u.img_url AS `user_img_url`,
+                u.first_name_en AS `user_first_name_en`,
+                u.first_name_ar AS `user_first_name_ar`,
+                u.last_name_en AS `user_last_name_en`,
+                u.last_name_ar AS `user_last_name_ar`,
+                u.title_en AS `user_title_en`,
+                u.title_ar AS `user_title_ar`,
+                c.id AS `company_id`,
+                c.logo AS `company_logo`,
+                c.name_en AS `company_name_en`,
+                c.name_ar AS `company_name_ar`,
+                m.first_name_en AS `mentor_first_name_en`,
+                m.first_name_ar AS `mentor_first_name_ar`,
+                m.last_name_en AS `mentor_last_name_en`,
+                m.last_name_ar AS `mentor_last_name_ar`,
+                m.img_url AS `mentor_img_url`,
+                msr.rating AS `mentor_rating`
+            FROM
+                mentorship_requests mr
+            LEFT JOIN
+                users m ON m.id = mr.mentor_id
+            LEFT JOIN
+                users u ON u.id = mr.user_id
+            LEFT JOIN
+                companies c ON c.id = u.company_id
+            LEFT JOIN
+               mentorship_requests msr ON msr.mentor_id = m.id
+            WHERE
+                mr.user_id = $user->id
+                AND (
+                    mr.approved = 'Yes'
+                    OR mr.approved IS null
+                )
+                AND mr.zoom_date between '$start' AND '$end'
+            ORDER BY
+                mr.zoom_date ASC
+        ";
+        $nextSessions = collect(DB::select($nextSessions_q));
+        $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
+            $_session = $groupedSession->first();
+            $session = new stdClass;
+            $session->id = $_session->id;
+            $session->mentor_id = $_session->mentor_id;
+            $session->user_id = $_session->user_id;
+            $session->comment = $_session->comment;
+            $session->approved = $_session->approved;
+            $session->rating = $_session->rating;
+            $session->join_url = $_session->join_url;
+            $session->zoom_date = $_session->zoom_date;
+            $session->period = $_session->period;
+            $session->rate_comment = $_session->rate_comment;
+            $session->done = $_session->done;
+
+            $user = new stdClass;
+            $user->id = $_session->user_id;
+            $user->image_url = User::image_handler($_session->user_img_url);
+            $user->first_name = $_session->{'user_first_name_' . $l};
+            $user->last_name = $_session->{'user_last_name_' . $l};
+            $user->name = trim($user->first_name . ' ' . $user->last_name);
+            $user->title = $_session->{'user_title_' . $l};
+
+            $company = new stdClass;
+            $company->id = $_session->company_id;
+            $company->logo_url = Company::logo_handler($_session->company_logo);
+            $company->name = $_session->{'company_name_' . $l};
+            $user->company = $company;
+            $session->user = $user;
+
+            $mentor = new stdClass;
+            $mentor->id = $_session->mentor_id;
+            $mentor->first_name = $_session->{'mentor_first_name_' . $l};
+            $mentor->last_name = $_session->{'mentor_last_name_' . $l};
+            $mentor->name = trim($mentor->first_name . ' ' . $mentor->last_name);
+            $mentor->image_url = User::image_handler($_session->mentor_img_url);
+            $mentor->ratings = $groupedSession->sum('mentor_rating');
+            $session->mentor = $mentor;
+            return $session;
+        })->values();
+
+        if (!empty($stepData)) {
+                $cType = $stepData->stype;
+            }else{
+                $cType = 0;
+            }
 
         // return view('admin.hackathon.show', compact('hackathon'));
         return view('admin.hackathon.hackathon-details', compact('currentHackathon',
@@ -519,7 +722,10 @@ class HackathonController extends Controller
          'answers', 
          'data_evi', 
          'mentors', 
-         'judges_users'
+         'judges_users',
+         'nextSessions',
+         'sessions',
+         'cType'
         ));
     }
 
