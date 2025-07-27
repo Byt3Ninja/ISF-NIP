@@ -34,4 +34,8 @@ return [
 	'programCreated' => 'Program Created Successfully',
 	'programUpdated' => 'Program Updated Successfully',
 	'mentorNotFound' => 'Mentor Not Found',
+	'Slot overlaps with existing availability' => 'Slot overlaps with existing availability',
+	'schedule_created' => 'Schedule Created Successfully',
+	'schedule_updated' => 'Schedule Updated Successfully',
+	'slot_not_found' => 'Slot Not Found',
 ];
