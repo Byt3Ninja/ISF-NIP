@@ -33,4 +33,8 @@ return [
 	'programCreated' => 'تم إنشاء البرنامج بنجاح',
 	'programUpdated' => 'تم تحديث البرنامج بنجاح',
 	'mentorNotFound' => 'المرشد غير موجود',
+	'Slot overlaps with existing availability'=> 'الموقع المحدد موجود بالفعل',
+	'schedule_created' => 'تم إنشاء الجدول بنجاح',
+	'schedule_updated' => 'تم تحديث الجدول بنجاح',
+	'slot_not_found' => 'الموقع المحدد غير موجود',
 ];
