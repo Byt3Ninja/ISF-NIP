@@ -997,6 +997,7 @@
            
                 <!-- Submission Tab (conditionally shown) -->
                 <div class="tab-pane fade" id="submission" role="tabpanel" aria-labelledby="submission-tab-btn">
+                    @if($data_evi == null)
                     <div class="card">
                         <div class="card-body">
                             @if($data_evi['start'] < date('Y-m-d H:i:s') && $data_evi['end'] > date('Y-m-d H:i:s'))
@@ -1198,6 +1199,17 @@
                             @endif
                         </div>
                     </div>
+                    @else
+                        <div class="text-center">
+                            <h5 class="alert alert-danger">
+                                @if($user->hasRole('Admin'))
+                                {{ $l == 'en' ? 'Add Final Evaluation Step First' : ' لا يمكنك تقديم المشاريع الان' }}
+                                @else
+                                {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }}
+                                @endif
+                            </h5>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Results Tab (conditionally shown) -->
