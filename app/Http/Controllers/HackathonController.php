@@ -181,7 +181,11 @@ class HackathonController extends Controller
         $user = Auth::user();
         $step = Step::where('cycle_id', $id)->get();
          if(!$step){
-            return redirect()->back()->with('error', 'Program not ready.');
+            if($user->hasRole('admin')){
+                 return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready. Add step first.']);
+            }else{
+            return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
+            }
             }
 
         
@@ -451,6 +455,7 @@ class HackathonController extends Controller
             $judges = collect(DB::select($judges_q, [$id]));
             if($judges->isEmpty()){
                 $judges = collect([]);
+                $judges_users = collect([]);
             }else{
                 $judges_ids = json_decode($judges->first()?->judges);
                 $judges_ids = array_map('intval', $judges_ids);
@@ -475,24 +480,24 @@ class HackathonController extends Controller
         $id_evi = $user->company->step;
        $step_evi = $step->where('id', $id_evi)->first();
        $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
-         if(!$step_evi){
-            return redirect()->back()->with('error', 'Program not ready.');
-            }
-        $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi->data)->select('id')->pluck('id')->toArray();
+        //  if(!$step_evi){
+        //     return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
+        //     }else{
+        $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi?->data)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data_evi = [
-            'start' => $step_evi_next->from,
-            'end' => $step_evi_next->to,
-            'stype' => $step_evi->stype,
+            'start' => $step_evi_next?->from,
+            'end' => $step_evi_next?->to,
+            'stype' => $step_evi?->stype,
             'cycle_id' => $id,
-            'title' => $step_evi->title,
-            'fields' => $step_evi->fields()->where('builder_forms_id', $step_evi->data)->orderBy('form_fields.id', 'asc')->get(),
-            'form_id' => $step_evi->id,
+            'title' => $step_evi?->title,
+            'fields' => $step_evi?->fields()->where('builder_forms_id', $step_evi?->data)->orderBy('form_fields.id', 'asc')->get(),
+            'form_id' => $step_evi?->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
         //        if (Auth::user()->company->step==$id) {
         $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
-
+    // }
 		
 
 
