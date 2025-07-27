@@ -825,6 +825,7 @@ class HomeController extends Controller
                 c.description,
                 c.start,
                 c.organization_id,
+                c.type,
                 o.name_en AS `org_name_en`,
                 o.name_ar AS `org_name_ar`,
                 o.img_url AS `org_img_url`
@@ -833,7 +834,7 @@ class HomeController extends Controller
             LEFT JOIN
                 organizations o ON o.id = c.organization_id
             WHERE
-                c.private IS null
+                c.private IS null AND c.type = 'General_Program'
                 AND ? BETWEEN c.start AND c.end
         ";
         $workingCycles = collect(DB::select($working_cycles_q, [now()->format('Y-m-d')]))->map(function ($item) use ($l) {
@@ -846,6 +847,7 @@ class HomeController extends Controller
             $cycle->organization->id = $item->organization_id;
             $cycle->organization->name = $item->{'org_name_' . $l};
             $cycle->organization->image_url = Organization::image_handler($item->org_img_url);
+            $cycle->type = $item->type;
             return $cycle;
         });
         $myFinal = null;
