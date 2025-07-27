@@ -181,7 +181,7 @@ class HackathonController extends Controller
         $user = Auth::user();
         $step = Step::where('cycle_id', $id)->get();
          if(!$step){
-            if($user->hasRole('admin')){
+            if($user->hasRole('admin') || $user->hasRole('organizationmanager')){
                  return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready. Add step first.']);
             }else{
             return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
