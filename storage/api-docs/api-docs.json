@@ -1214,6 +1214,114 @@
                 }
             }
         },
+        "/api/v1/mentors/{mentor_id}": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Get full profile of a mentor",
+                "operationId": "c0870df7c1051c4d138206340f74684a",
+                "parameters": [
+                    {
+                        "name": "mentor_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentor Profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 12
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Ahmed Mohamed"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "ahmed@example.com"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Senior Consultant"
+                                        },
+                                        "imgUrl": {
+                                            "type": "string",
+                                            "format": "url",
+                                            "example": "https://yourdomain.com/storage/uploads/mentor.jpg"
+                                        },
+                                        "bio": {
+                                            "type": "string",
+                                            "example": "An experienced mentor in business strategy."
+                                        },
+                                        "linkedin": {
+                                            "type": "string",
+                                            "format": "url",
+                                            "example": "https://linkedin.com/in/ahmedmentor"
+                                        },
+                                        "specialization": {
+                                            "type": "string",
+                                            "example": "Business Strategy"
+                                        },
+                                        "mentorExpertises": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "Marketing"
+                                            }
+                                        },
+                                        "rating": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 4.5
+                                        },
+                                        "programCount": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "programIds": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 15
+                                            }
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Mentor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Mentor not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/organizations": {
             "get": {
                 "tags": [
@@ -3013,6 +3121,10 @@
         {
             "name": "Expertises",
             "description": "Expertises"
+        },
+        {
+            "name": "Mentors",
+            "description": "Mentors"
         },
         {
             "name": "Organizations",
