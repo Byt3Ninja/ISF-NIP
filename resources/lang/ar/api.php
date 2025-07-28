@@ -37,4 +37,10 @@ return [
 	'schedule_created' => 'تم إنشاء الجدول بنجاح',
 	'schedule_updated' => 'تم تحديث الجدول بنجاح',
 	'slot_not_found' => 'الموقع المحدد غير موجود',
+	'organizationCreated' => 'تم إنشاء المؤسسة بنجاح',
+	'organizationCreationFailed' => 'فشل في إنشاء المؤسسة',
+	'organizationUpdated' => 'تم تحديث المؤسسة بنجاح',
+	'organizationUpdateFailed' => 'فشل في تحديث المؤسسة',
+	'organizationDeleted' => 'تم حذف المؤسسة بنجاح',
+	'Organization cannot be deleted' => 'لا يمكن حذف المؤسسة لانها مرتبطة ببرامج او شركات نشطة',
 ];

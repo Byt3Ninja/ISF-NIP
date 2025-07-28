@@ -42,7 +42,6 @@ Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/countries', [CountryController::class, 'index']);
-    Route::get('/organizations', [OrganizationController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
@@ -63,6 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mentors/{mentor_id}/weekly-slots', [ScheduleController::class, 'index']);
     Route::get('/slots/{id}', [ScheduleController::class, 'show']);
     Route::get('/v1/mentors', [MentorController::class, 'index']);
+    Route::get('/organizations', [OrganizationController::class, 'index']);
+    Route::post('/organizations', [OrganizationController::class, 'store']);
+    Route::post('/organizations/{organization}', [OrganizationController::class, 'update']);
+    Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
 });
 
 
