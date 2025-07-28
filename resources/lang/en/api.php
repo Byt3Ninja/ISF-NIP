@@ -38,4 +38,10 @@ return [
 	'schedule_created' => 'Schedule Created Successfully',
 	'schedule_updated' => 'Schedule Updated Successfully',
 	'slot_not_found' => 'Slot Not Found',
+	'organizationCreated' => 'Organization Created Successfully',
+	'organizationCreationFailed' => 'Organization Creation Failed',
+	'organizationUpdated' => 'Organization Updated Successfully',
+	'organizationUpdateFailed' => 'Organization Update Failed',
+	'organizationDeleted' => 'Organization Deleted Successfully',
+	'Organization cannot be deleted' => 'Organization cannot be Deleted Because it is Linked to active Cycles or Startups',
 ];

@@ -1927,6 +1927,262 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Create a new organization",
+                "operationId": "705373d2182b3af62bdb4bed5c21fb1b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "phone",
+                                    "password",
+                                    "firstName",
+                                    "lastName",
+                                    "gender",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Tech Corp"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@techcorp.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01012345678"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "SecurePass123"
+                                    },
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "status": {
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Organization created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrganizationResource"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create organization"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/organizations/{id}": {
+            "post": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Update an existing organization",
+                "operationId": "2d125de70c322e5c89254463a9c6c3fa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Organization ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Org"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "newemail@org.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01123456789"
+                                    },
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "Jane"
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Smith"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "female"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "NewPassword123"
+                                    },
+                                    "status": {
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ],
+                                        "example": 1
+                                    },
+                                    "imgUrl": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Organization updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrganizationResource"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update organization"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Delete an organization (soft or force)",
+                "operationId": "8531218f3dc2419068485ce3c5f8e7f7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the organization to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization deleted permanently",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Organization deleted successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Organization has dependencies and was soft deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Organization cannot be deleted because it is linked to active cycles or startups."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/users/me/permissions": {
@@ -3642,6 +3898,61 @@
     },
     "components": {
         "schemas": {
+            "OrganizationResource": {
+                "title": "Organization Resource",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Tech Org"
+                    },
+                    "imgUrl": {
+                        "type": "string",
+                        "example": "/uploads/logo.png"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "startups": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "cycles": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "user": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Admin User"
+                            },
+                            "email": {
+                                "type": "string",
+                                "example": "admin@org.com"
+                            },
+                            "phone": {
+                                "type": "string",
+                                "example": "01012345678"
+                            },
+                            "imgUrl": {
+                                "type": "string",
+                                "example": "/uploads/user.jpg"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "GroupedPermissions": {
                 "title": "GroupedPermissions",
                 "properties": {
