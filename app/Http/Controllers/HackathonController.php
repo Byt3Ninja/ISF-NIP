@@ -66,6 +66,8 @@ class HackathonController extends Controller
                 'location' => $item->o_name_en ?? 'Unknown',
                 'status' => $status,
                 'description' => $item->c_description,
+                'cycle_id' => $item->c_id,
+                'cycle_end' => $end ,
                 'tags' => [],
                 'step_name' => $step->where('cycle_id', $item->c_id)->first()?->title ?? 'N/A',
                 'step_id' => $step->where('cycle_id', $item->c_id)->first()?->id ?? null,
