@@ -39,7 +39,7 @@
                                                     $options = $field->pivot->options? json_decode($field->pivot->options) : null;
                                                     $field_name = 'field_' . $field->pivot->id;
                                                     $id_for = 'input-fld-'. $loop->iteration;
-                                                    $get_answer = $answers->where('field_id', $field->pivot->id)->first();
+                                                    $get_answer = collect($answers)->where('field_id', $field->pivot->id)->first();
                                                     $answer = $get_answer ? $get_answer->answer : null;
                                                 @endphp
                                                 

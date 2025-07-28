@@ -399,8 +399,17 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
+    
+    Route::post('cycles/{id}/add_page', 'CycleCustomPagesController@add');
+    Route::post('cycles/{id}/show_page', 'CycleCustomPagesController@view');
+    Route::post('cycles/{id}/update_page', 'CycleCustomPagesController@update');
+    Route::post('cycles/{id}/pages_resort', 'CycleCustomPagesController@reorder');
+    Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status');
+    Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility');
+    Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
+    
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
-    Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
+    Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
     Route::post('cycles/save', 'CyclesController@saveForm');
     Route::get('cycles/my/{id}', 'CyclesController@my')->name('cycles.list_mine');
     Route::post('change/cyc', 'CyclesController@changAll');
@@ -689,6 +698,13 @@ Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('i
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
 Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('integrations.auth_linkedin_callback');
+
+Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
+Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');
+Route::get('/{org_slug}/program/{program_slug}/apply', 'ExternalCyclesController@publicProgramApply')->name('public.program_apply');
+Route::post('/{org_slug}/program/{program_slug}/validate_email', 'ExternalCyclesController@validateEmail');
+Route::post('/{org_slug}/program/{program_slug}/authenticate', 'ExternalCyclesController@authenticateUser');
+Route::post('/{org_slug}/program/{program_slug}/register', 'ExternalCyclesController@registerUser');
 
 if (request()->secure()) {
     URL::forceScheme("https");

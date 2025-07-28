@@ -191,6 +191,10 @@
     };
   </script>
   <script>
+    $(document).on('change', '#is_public', function() {
+        let _public = $(this).val();
+        if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
+    });
     // Handle image upload and reset
     document.querySelector('.upload-img').addEventListener('click', function () {
       document.querySelector('.program-image-input').click();
@@ -216,6 +220,10 @@
       uploadImage.style.display = 'none';
       uploadIcon.style.display = 'block';
       document.querySelector('.program-image-input').value = '';
+    });
+
+    $(document).ready(function() {
+      $('#is_public').trigger('change');
     });
 
     // Function to validate title and description fields

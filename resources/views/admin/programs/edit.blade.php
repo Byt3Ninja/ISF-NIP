@@ -1,6 +1,10 @@
 @extends('layouts.admin')
 
 @section('style')
+    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css">
+    <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
+    <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+    <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
@@ -9,11 +13,10 @@
 @stop
 
 @php
-    $id = request()->route('id');
-    $ccycle = \App\Cycle::findOrFail($id);
     $tabs = [
         ['id' => 'program_info', 'label' => 'Program Info', 'active' => true],
         ['id' => 'program_guideline', 'label' => 'Program Guideline', 'active' => false],
+        ['id' => 'custom_pages', 'label' => 'Custom Pages', 'active' => false],
         ['id' => 'financial_policy', 'label' => 'Financial Policy', 'active' => false],
         ['id' => 'legal_policy', 'label' => 'Legal Policy', 'active' => false],
         ['id' => 'mentorship_request', 'label' => 'Mentorship Request', 'active' => false],
@@ -288,7 +291,7 @@
                         @endif
                     @endforeach
                 </div>
-                <div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
+                <div id="submit_container" class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
                     <button type="submit" class="btn btn-primary w-px-120">
                         {{ __('cycles.Edit') }}
                         <i class="ti ti-edit ms-2"></i>
@@ -303,11 +306,21 @@
 @section('scripts')
     <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
     <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+    <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
+    <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop
 
 @section('pagescripts')
     <script>
+        alertify.defaults.transition = 'zoom';
+        alertify.defaults.theme.ok = 'btn btn-md btn-success';
+        alertify.defaults.theme.cancel = 'btn btn-md btn-danger';
+        alertify.defaults.theme.input = 'form-control';
+        $(document).on('change', '#is_public', function() {
+            let _public = $(this).val();
+            if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
+        });
         // Set Language
         const lang = '{{ $l }}';
 
@@ -324,7 +337,356 @@
         const editGuidelineEditor = new Quill('#guideline-editor', editorConfig);
         const editFinancialEditor = new Quill('#financial-editor', editorConfig);
         const editLegalEditor = new Quill('#legal-editor', editorConfig);
+        var createPageEditor = new Quill('#custom-page-content', editorConfig);;
+        var editPageEditor = new Quill('#edit-custom-page-content', editorConfig);
 
+        $(document).on('click', '#create_custom_page_btn', function(e) {
+            e.preventDefault();
+            $('#custom-page-name').val('');
+            $('#custom-page-visibility').val('public');
+            $('#custom-page-content').val('');
+            $("#createPageModal").modal('show');
+        })
+
+        $(document).on('click', '#pills-tab-edit .nav-item', function(e) {
+            if( $(this).find('.nav-link').attr('id') == 'pills-custom_pages-tab-edit' )
+            {
+                $("#submit_container").hide();
+                $("#submit_container").removeClass('d-flex');
+                $("#submit_container").addClass('d-none');
+            } else {
+                $("#submit_container").show();
+                $("#submit_container").removeClass('d-none');
+                $("#submit_container").addClass('d-flex');
+            }
+        });
+
+        $(document).on('click', '#save_custom_page_btn', function(e) {
+            e.preventDefault();
+            let program_id = '{{ $id }}';
+            if( program_id )
+            {
+                let name = $('#custom-page-name').val();
+                let content = $('#custom-page-content').val();
+                let visibility = $('#custom-page-visibility').val();
+                let data = {
+                    cycleId: program_id,
+                    title: name,
+                    content: content,
+                    visibility: visibility
+                };
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "/dashboard/cycles/" + program_id + "/add_page",
+                    data: data,
+                    success: function(response) {
+                        if( response.status )
+                        {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Page Created',
+                                html: response.message,
+                            });
+                            $('#createPageModal').modal('hide');
+                            $('#custom-page-name').val('');
+                            $('#custom-page-content').val('');
+                            $('#custom-page-visibility').val('public');
+                            populate_pages_table(response.pages);
+                        }
+                        else
+                        {
+                            alertify.alert(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alertify.alert("Error fetching cycle data. Please try again.");
+                    }
+                });
+            } else { alertify.alert('Please select a cycle first'); }
+        });
+
+        $(document).on('click', '#update_custom_page_btn', function(e) {
+            e.preventDefault();
+            let program_id = '{{ $id }}';
+            if( program_id )
+            {
+                let name = $('#edit-custom-page-name').val();
+                let content = $('#edit-custom-page-content').val();
+                let visibility = $('#edit-custom-page-visibility').val();
+                let custom_page_id = $('#edit-custom-page-id').val();
+                let data = {
+                    cycleId: program_id,
+                    page_id: custom_page_id,
+                    title: name,
+                    content: content,
+                    visibility: visibility
+                };
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    type: "POST",
+                    url: "/dashboard/cycles/" + program_id + "/update_page",
+                    data: data,
+                    success: function(response) {
+                        if( response.status )
+                        {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Page Updated',
+                                html: response.message,
+                            });
+                            $('#editPageModal').modal('hide');
+                            $('#edit-custom-page-name').val('');
+                            $('#edit-custom-page-content').val('');
+                            $('#edit-custom-page-visibility').val('public');
+                            populate_pages_table(response.pages);
+                        }
+                        else
+                        {
+                            alertify.alert(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alertify.alert("Error fetching cycle data. Please try again.");
+                    }
+                });
+            } else { alertify.alert('Please select a cycle first'); }
+        });
+
+        $(document).on('click', '.custom-page-edit', function(e) {
+            e.preventDefault();
+            let program_id = '{{ $id }}';
+            if( program_id )
+            {
+                let custom_page_id = $(this).data('page-id');
+                let data = {
+                    page_id: custom_page_id,
+                    cycleId: program_id
+                };
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                $.ajax({
+                    type: "POST",
+                    url: "/dashboard/cycles/" + program_id + "/show_page",
+                    data: data,
+                    success: function(response) {
+                        if( response.status )
+                        {
+                            $('#edit-custom-page-id').val(response.page.id);
+                            $('#edit-custom-page-name').val(response.page.title);
+                            $('#edit-custom-page-content').val(response.page.content);
+                            $('#edit-custom-page-visibility').val(response.page.visibility);
+                            editPageEditor.root.innerHTML = response.page.content ?? '';
+                            $("#editPageModal").modal('show');
+                        }
+                        else
+                        {
+                            alertify.alert(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alertify.alert("Error fetching cycle data. Please try again.");
+                    }
+                });
+            } else { alertify.alert('Please select a cycle first'); }
+        });
+        $(document).on('click', '.custom-page-toggle-status', function(e) {
+            e.preventDefault();
+            let program_id = '{{ $id }}';
+            var custom_page_id = $(this).data('page-id');
+            if( program_id )
+            {
+                alertify.confirm(
+                    'Confirm Toggle status',
+                    'Are you sure you want to toggle the status of this page ?',
+                    function() {
+                        let data = {
+                            page_id: custom_page_id,
+                            cycleId: program_id
+                        };
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            type: "POST",
+                            url: "/dashboard/cycles/" + program_id + "/toggle_status",
+                            data: data,
+                            success: function(response) {
+                                if( response.status )
+                                {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Page Status Updated',
+                                        html: response.message,
+                                    });
+                                    populate_pages_table(response.pages);
+                                }
+                                else
+                                {
+                                    alertify.alert(response.message);
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                                alertify.alert("Error fetching cycle data. Please try again.");
+                            }
+                        });
+                    },
+                    function() {}
+                ).set('labels', {ok: "<i class='fas fa-fw fa-sm fa-check mx-1'></i> Yes", cancel: "Cancel"});
+            } else { alertify.alert('Please select a cycle first'); }
+        });
+        $(document).on('change', '.custom-page-visibility-toggle', function(e) {
+            let program_id = '{{ $id }}';
+            var visibility = $(this).val();
+            var custom_page_id = $(this).data('page-id');
+            if( program_id )
+            {
+                alertify.confirm(
+                    'Confirm Toggle visibility',
+                    'Are you sure you want to toggle the visibility of this page ?',
+                    function() {
+                        let data = {
+                            page_id: custom_page_id,
+                            cycleId: program_id,
+                            visibility: visibility
+                        };
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            type: "POST",
+                            url: "/dashboard/cycles/" + program_id + "/toggle_visibility",
+                            data: data,
+                            success: function(response) {
+                                if( response.status )
+                                {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Page Status Updated',
+                                        html: response.message,
+                                    });
+                                    populate_pages_table(response.pages);
+                                }
+                                else
+                                {
+                                    alertify.alert(response.message);
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                                alertify.alert("Error fetching cycle data. Please try again.");
+                            }
+                        });
+                    },
+                    function() {}
+                ).set('labels', {ok: "<i class='fas fa-fw fa-sm fa-check mx-1'></i> Yes", cancel: "Cancel"});
+            } else { alertify.alert('Please select a cycle first'); }
+        });
+        $(document).on('click', '.custom-page-delete', function(e) {
+            e.preventDefault();
+            let program_id = '{{ $id }}';
+            if( program_id )
+            {
+                let custom_page_id = $(this).data('page-id');
+                alertify.confirm(
+                    'Confirm Delete Page',
+                    'Are you sure you want to delete this page ?',
+                    function() {
+                        let send_data = {
+                            page_id: custom_page_id,
+                            cycleId: program_id
+                        };
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            type: "POST",
+                            url: "/dashboard/cycles/" + program_id + "/delete_page",
+                            data: send_data,
+                            success: function(response) {
+                                if( response.status )
+                                {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Page Deleted',
+                                        html: response.message,
+                                    });
+                                    populate_pages_table(response.pages);
+                                }
+                                else
+                                {
+                                    alertify.alert(response.message);
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                                alertify.alert("Error fetching cycle data. Please try again.");
+                            }
+                        });
+                    },
+                    function() {}
+                ).set('labels', {ok: "<i class='fas fa-fw fa-sm fa-check mx-1'></i> Yes", cancel: "Cancel"});
+            } else { alertify.alert('Please select a cycle first'); }
+        });
+
+        function populate_pages_table(pages)
+        {
+            var data = '';
+            $.each(pages, function(index, page) {
+                data += `
+                    <tr data-index="${page.id}">
+                        <td>${page.title}</td>
+                        <td>
+                            <select class="form-select custom-page-visibility-toggle" data-page-id="${page.id}">
+                                <option value="public" ${page.visibility == 'public' ? 'selected' : ''}>Public</option>
+                                <option value="private" ${page.visibility == 'private' ? 'selected' : ''}>Participants</option>
+                                <option value="admins" ${page.visibility == 'admins' ? 'selected' : ''}>Admin Only</option>
+                            </select>
+                        </td>
+                        <td>
+                            ${page.is_active == 1 ? `<span class="text-success"> <i class="fas fa-fw fa-sm fa-circle mx-1"></i> Active</span>` : `<span class="text-danger"> <i class="fas fa-fw fa-sm fa-circle mx-1"></i> Inactive</span>`}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li data-page-id="${page.id}" class="custom-page-edit"><a class="dropdown-item" href="javascript:void(0);">Edit</a></li>
+                                <li data-page-id="${page.id}" class="custom-page-toggle-status"><a class="dropdown-item" href="javascript:void(0);">Toggle</a></li>
+                                <li data-page-id="${page.id}" class="custom-page-delete"><a class="dropdown-item" href="javascript:void(0);">Delete</a></li>
+                            </ul>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+            });
+            $("#custom_pages_list").html(data);
+        }
         // Set initial editor content
         editGuidelineEditor.root.innerHTML = @json($ccycle->program_guideline ?? '');
         editFinancialEditor.root.innerHTML = @json($ccycle->financial_guideline ?? '');
@@ -340,6 +702,8 @@
         handleEditorChange(editGuidelineEditor, '#program_guideline');
         handleEditorChange(editFinancialEditor, '#financial_policy');
         handleEditorChange(editLegalEditor, '#legal_policy');
+        handleEditorChange(createPageEditor, '#custom-page-content');
+        handleEditorChange(editPageEditor, '#edit-custom-page-content');
 
         // Handle Append File
         const appendFile = (mode, file, containerId) => {
@@ -361,6 +725,7 @@
         };
 
         $(document).ready(function() {
+            $('#is_public').trigger('change');
             @if($ccycle->program_guideline_file)
                 appendFile('edit', @json(basename($ccycle->program_guideline_file)), '#guideline-file-container');
             @endif
@@ -373,6 +738,48 @@
             @if($ccycle->delegation_file)
                 appendFile('edit', @json(basename($ccycle->delegation_file)), '#delegation-file-container');
             @endif
+
+            var custom_pages_drag = dragula([document.getElementById('custom_pages_list')]);
+            custom_pages_drag.on('drop', function(el) {
+                let rows = $(el).parent().children();
+                let sorting = [];
+                rows.each(function() {
+                    sorting.push($(this).attr('data-index'));
+                });
+                
+                let program_id = '{{ $id }}';
+                if( program_id )
+                {
+                    let data = {
+                        cycleId: program_id,
+                        sorting: sorting,
+                    };
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    $.ajax({
+                        type: "POST",
+                        url: "/dashboard/cycles/" + program_id + "/pages_resort",
+                        data: data,
+                        success: function(response) {
+                            if( response.status )
+                            {
+                                populate_pages_table(response.pages);
+                            }
+                            else
+                            {
+                                alertify.alert(response.message);
+                            }
+                        },
+                        error: function(error) {
+                            console.log(error);
+                            alertify.alert("Error fetching cycle data. Please try again.");
+                        }
+                    });
+                }
+            });
 
             // Handle Edit Program AJAX
             const cycleId = '{{ $id }}';
