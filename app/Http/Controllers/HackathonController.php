@@ -396,7 +396,7 @@ class HackathonController extends Controller
     $team->cycle_id = $first->tf_cycle_id;
     $team->step_id = $first->tf_step_id;
     $team->photo = $first->tf_img_team ?? null;
-    $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()->count_team_number;
+    $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
     $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
     $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join', 'accepted'])->first()? true : false; //is_user_requested
     $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
