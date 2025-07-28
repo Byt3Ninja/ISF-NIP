@@ -81,10 +81,11 @@
 
 
       </div>
-      @if (now()->isBefore($hackathon['step_end']))
+      
+      @if (now()->isBefore($hackathon['cycle_end']))
       <small class="text-muted text-center d-block fw-medium mt-2">
-        {{ $l == 'en' ? 'Applications open until ' . date('F j, Y', strtotime('+1 week')) : 'التقديم مفتوح حتى ' .
-        date('j F Y', strtotime('+1 week')) }}
+        {{ $l == 'en' ? 'Applications open until ' . $hackathon['cycle_end']->format('F j, Y') : 'التقديم مفتوح حتى ' .
+        $hackathon['cycle_end']->format('F j, Y') }}
       </small>
       @else
       <small class="text-warning text-center d-block fw-medium mt-2">

@@ -123,6 +123,22 @@
       <textarea class="form-control" id="description" name="description" placeholder="{{ __('cycles.Description') }}"
         oninput="this.value = this.value.trimStart()" rows="3" required></textarea>
     </div>
+
+    <div class="mb-6">
+      <div class="form-group public-data-form-fields">
+        <label class="form-label" for="is_public">{{ __('cycles.Program Visibility') }}: </label>
+        <select class="select form-control" id="is_public" name="is_public">
+          <option value="0" {{ $ccycle?->is_public == 0 ? 'selected' : '' }}>{{ __('cycles.Program Visible To Private') }}</option>
+          <option value="1" {{ $ccycle?->is_public == 1 ? 'selected' : '' }}>{{ __('cycles.Program Visible To Public') }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-6">
+      <div class="form-group public-data-form-fields" id="public_slug_div">
+        <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
+        <input type="text" id="public_slug" name="public_slug" class="form-control" value="{{ $ccycle?->public_slug }}" placeholder="{{ __('cycles.Public URL placeholder') }}" >
+      </div>
+    </div>
     <div class="mb-6">
       <div class="form-check form-switch mt-2">
         <label class="form-check-label" for="external-participation">

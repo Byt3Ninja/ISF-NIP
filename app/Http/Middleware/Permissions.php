@@ -21,7 +21,11 @@ class Permissions
 		'utils.locations_list_states_by_country',
         'subcategories.list_by_category',
 		'user.profile_email_confirm',
-        'verification*'
+        'verification*',
+        'cycles.view',
+        'public.join',
+        'public.program_join',
+        'public.program_apply',
     ];
 
     private $exceptControllers = [

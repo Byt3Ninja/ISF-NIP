@@ -214,11 +214,18 @@
                         </a>
                         @endif
                         @if($step->stype == 1 && $step->form)
-                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}" class="mx-1">
                           <span class="btn btn-icon btn-label-primary rounded-circle">
                             <i class="ti ti-eye" title="{{ __('cycles.view step results') }}"></i>
                           </span>
                         </a>
+                        @if( !empty( $step->join_url ) && !is_null( $step->join_url ) )
+                        <a href="javascript:void(0)" class="mx-1 copy-public-link" data-clipboard="{{ $step->join_url }}">
+                          <span class="btn btn-icon btn-label-dark rounded-circle">
+                            <i class="ti ti-copy" title="{{ __('cycles.copy public link') }}"></i>
+                          </span>
+                        </a>
+                        @endif
                       @endif
                         </div>
                       </div>
@@ -454,6 +461,17 @@
                 {{-- @endforeach --}}
               </select>
             </div>
+          </div>
+          <div class="form-group mb-4 public-data-form-fields">
+            <label class="form-label" for="is_public">{{ __('cycles.Step Visibility') }}: </label>
+            <select class="select form-control" id="is_public" name="is_public">
+              <option value="0">{{ __('cycles.Step Visible To Private') }}</option>
+              <option value="1">{{ __('cycles.Step Visible To Public') }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-4 public-data-form-fields" id="public_slug_div">
+            <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
+            <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
           </div>
           <div class="mb-4" id="mmenu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
@@ -886,18 +904,21 @@ if (editStepForm) {
               $('#editStepForm #stype').val(step);
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
-              if(step == 6){
-                $('#mteam_number').show();
-              }else{
-                $('#mteam_number').hide();
-              }
-              if (response.data !== null) {
-                if (step == 1 || step == 5) {
-                  $('#mFormSelect').val(response.data);
+              $('.public-data-form-fields').hide();
+              if( step == 6 ) { $('#mteam_number').show(); }
+              else { $('#mteam_number').hide(); }
+
+              if( response.data !== null )
+              {
+                if( step == 1 )
+                {
+                  $('.public-data-form-fields').show();
+                  $('#is_public').val(response.is_public);
+                  $('#public_slug').val(response.public_slug);
+                  if( response.is_public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
                 }
-                if (step == 2) {
-                  $('#mScreeningSelect').val(response.data);
-                }
+                if( step == 1 || step == 5 ) { $('#mFormSelect').val(response.data); }
+                if( step == 2 ) { $('#mScreeningSelect').val(response.data); }
               }
               if (menu !== null) {
                 $.ajax({
@@ -993,5 +1014,29 @@ if (editStepForm) {
         });
       }
     }
+    $(document).on('change', '#is_public', function() {
+      let _public = $(this).val();
+      if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
+    });
+
+    $(document).on('click', '.copy-public-link', function(e) {
+      e.preventDefault();
+      let url = $(this).data('clipboard');
+      const $tempInput = $("<input>");
+      $("body").append($tempInput);
+      $tempInput.val(url).select();
+      try {
+        const success = document.execCommand("copy");
+        if (success) {
+          alert("Public Link Copied!");
+        } else {
+          console.warn("Copy command failed.");
+        }
+      }
+      catch (err) {
+        console.error("Copy error: ", err);
+      }
+      $tempInput.remove();
+    });
 </script>
 @stop

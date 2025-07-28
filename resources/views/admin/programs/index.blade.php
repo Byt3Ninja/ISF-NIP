@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 
 <style>
   input[type="file"]::file-selector-button {
@@ -389,6 +391,13 @@
                             {{ __('cycles.Edit') }}
                           </button> --}}
                         </li>
+                        @if( !empty( $cycle->join_url ) && !is_null( $cycle->join_url ) )
+                          <li>
+                            <a href="javascript:void(0)" class="mx-1 copy-public-link" onclick="copyToClipboard('{{ $cycle->join_url }}');">
+                              <i class="ti ti-copy"></i> {{ __('cycles.copy public link') }}
+                            </a>
+                          </li>
+                        @endif
                         <li>
                           @if ($_user->ableTo('delete_user', $permissions))
                           <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
@@ -603,41 +612,42 @@
 @stop --}}
 
 @section('pagescripts')
-<script>
-  function copyToClipboard(text) {
-  // إنشاء عنصر مؤقت
-  const tempInput = document.createElement("input");
-  tempInput.value = text;
-  document.body.appendChild(tempInput);
-  tempInput.select();
-  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
-  document.execCommand("copy");
-  document.body.removeChild(tempInput);
-  alert("{{ __('admin.Copied') }}");
-}
-  // Initialize Date Picker
-  flatpickr(".datepicker", {
-    dateFormat: "Y-m-d", // تنسيق التاريخ المطلوب
-    allowInput: true, // السماح للمستخدم بكتابة التاريخ يدويًا
-    // locale: "ar", // دعم اللغة العربية (يمكنك تغييره)
-  });
-
-  $('#search-programs').on('keyup', function() {
-    var value = $(this).val().toLowerCase();
-    console.log('value', value)
-    $('#program-list .card').filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+  <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+  <script>
+    function copyToClipboard(text) {
+      // إنشاء عنصر مؤقت
+      const tempInput = document.createElement("input");
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      alertify.success("{{ __('admin.Copied') }}");
+    }
+    // Initialize Date Picker
+    flatpickr(".datepicker", {
+      dateFormat: "Y-m-d", // تنسيق التاريخ المطلوب
+      allowInput: true, // السماح للمستخدم بكتابة التاريخ يدويًا
+      // locale: "ar", // دعم اللغة العربية (يمكنك تغييره)
     });
-  });
 
-  $('#filter-programs-form .form-select').on('change', function() {
-    $('#filter-programs-form').submit();
-  });
+    $('#search-programs').on('keyup', function() {
+      var value = $(this).val().toLowerCase();
+      console.log('value', value)
+      $('#program-list .card').filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
 
-  $('#filter-programs-form .form-control').on('change', function() {
-    $('#filter-programs-form').submit();
-  });
-</script>
+    $('#filter-programs-form .form-select').on('change', function() {
+      $('#filter-programs-form').submit();
+    });
+
+    $('#filter-programs-form .form-control').on('change', function() {
+      $('#filter-programs-form').submit();
+    });
+  </script>
 
 {{-- @php($ccycle = \App\Cycle::find(0))
 <script>

@@ -15,6 +15,7 @@ use App\Messenger;
 use App\Screening;
 use Carbon\Carbon;
 use App\BuilderForm;
+use App\CycleCustomPages;
 
 use App\BuilderField;
 use http\Env\Response;
@@ -37,10 +38,10 @@ use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
+use URL, Str;
 
 class CyclesController extends Controller
 {
-
     protected $whatsAppService;
     public function __construct(WhatsAppService $whatsAppService)
     {
@@ -61,8 +62,6 @@ class CyclesController extends Controller
 
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
-
-
 
     public function changAll(Request $request)
     {
@@ -93,17 +92,42 @@ class CyclesController extends Controller
 
         $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
             return $q->where('organization_id', $organization_id);
-        })->orderBy('start', 'DESC')->get();
+        })->with(['organization'])->orderBy('start', 'DESC')->get();
+
         $steps = null;
-        if (count($cycles) > 0) {
-            if ($id == 0) {
-                $id = $cycles->pluck('id')[0];
-                $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
-            } else {
-                $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
-            }
+        if( count( $cycles ) > 0 )
+        {
+            if ($id == 0) { $id = $cycles->pluck('id')[0]; }
+            $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
         }
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+        $steps = $steps->map(function ( $step ) use ( $cycles ) {
+            $step->join_url = null;
+            if( $step->stype != 1 ) { return $step; }
+            else
+            {
+                if( $step->is_public == 0 ) { return $step; }
+                else
+                {
+                    $slug = $step->public_slug;
+                    if( !empty( $slug ) && trim( $slug ) )
+                    {
+                        $cycle_id = $step->cycle_id;
+                        $getCycle = $cycles->where('id', $cycle_id)->first();
+                        if( !empty( $getCycle ) )
+                        {
+                            $organization = $getCycle->organization;
+                            if( !empty( $organization ) )
+                            {
+                                $short_code = $organization->short_code;
+                                $step->join_url = URL::to("/$short_code/join/$slug");
+                            }
+                        }
+                    } else { return $step; }
+                }
+            }
+            return $step;
+        });
         return view('admin.settings.cycles.index', compact('cycles', 'steps', 'id', 'svgs'));
     }
 
@@ -181,13 +205,13 @@ class CyclesController extends Controller
         }
 
         if ($type == 1) {
-
-
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250|unique:cycles,title,' . $id,
                 'description' => 'required|string|max:2000',
+                'is_public' => 'required|boolean',
+                'public_slug' => 'required_if:is_public,1',
                 'start' => 'required|date',
                 'end' => 'required|date',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
@@ -196,9 +220,11 @@ class CyclesController extends Controller
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
             ]);
 
-
-
             $cycle = Cycle::find($id);
+
+            $organization_id = $cycle->organization_id;
+            $cycles = Cycle::where('organization_id', $organization_id)->get();
+            $slugs = $cycles->pluck('public_slug')->unique()->filter(function( $value ) { return !empty( $value ); })->values()->toArray();
 
             $private = null;
             if ($request->private) {
@@ -206,7 +232,29 @@ class CyclesController extends Controller
             }
 
             // Check if file is uploaded
+            $cycle->is_public = $request->has('is_public') ? ( intval( $request->is_public ) == 1 ? 1 : 0 ) : 0;
+            if( $cycle->is_public == 1 && ( empty( $request->public_slug ) || !trim( $request->public_slug ) ) )
+            {
+                return redirect()->back()->with(['message2' => __('cycles.Public URL required'), 'class' => 'danger']);
+            }
+            if( $request->public_slug != $cycle->public_slug )
+            {
+                $counter = 0;
+                do {
+                    if( $counter == 0 )
+                    {
+                        $public_slug = url_slugify( $request->public_slug );
+                        $counter++;
+                    }
+                    else
+                    {
+                        $public_slug = url_slugify( $request->public_slug ) . '-' . $counter++;
+                    }
+                    $check_slug = in_array( $public_slug, $slugs );
+                } while ( $check_slug );
+            } else { $public_slug = $cycle->public_slug; }
 
+            $cycle->public_slug = $public_slug;
             $cycle->organization_id = $request->organization_id2;
             $cycle->title = $request->title;
             $cycle->description = $request->description;
@@ -453,7 +501,6 @@ class CyclesController extends Controller
             $step = Step::where('id', $request->sid)->first()->toArray();
             return response()->json($step);
         } elseif ($type == 8) {
-            
             /// deleted saved data if type changed
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
@@ -472,9 +519,47 @@ class CyclesController extends Controller
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->FinalScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->has("mScreeningSelect") && $request->mScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mScreeningSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
-            } elseif ($request->has("mFormSelect") && $request->mFormSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mFormSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+            }
+            elseif ($request->has("mFormSelect") && $request->mFormSelect)
+            {
                 $step8 = Step::find($request->sid);
+                $updatedArray = [
+                    'title' => $request->title,
+                    'data' => $request->mFormSelect,
+                    'description' => $request->description,
+                    'from' => Carbon::parse($request->fromDate),
+                    'to' => Carbon::parse($request->toDate)
+                ];
+                if( $step8->stype == 1 )
+                {
+                    $counter = 0;
+                    $organization_id = $step8->cycle->organization_id;
+                    $cycles_ids = Cycle::where('organization_id', $organization_id)->pluck('id')->toArray();
+                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', 1)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
+
+                    $updatedArray['is_public'] = $request->is_public;
+                    if( $updatedArray['is_public'] == 1 && ( empty( $request->public_slug ) || !trim( $request->public_slug ) ) )
+                    {
+                        return redirect()->back()->with(['message2' => __('cycles.Public URL required'), 'class' => 'danger']);
+                    }
+                    if( $request->public_slug != $step8->public_slug )
+                    {
+                        do {
+                            if( $counter == 0 )
+                            {
+                                $public_slug = url_slugify( $request->public_slug );
+                                $counter++;
+                            }
+                            else
+                            {
+                                $public_slug = url_slugify( $request->public_slug ) . '-' . $counter++;
+                            }
+                            $check_file = in_array( $public_slug, $slugs );
+                        } while ( $check_file );
+                    }
+					$updatedArray['public_slug'] = url_slugify( $request->public_slug );
+                }
+                Step::where('id', $request->sid)->update($updatedArray);
                 $form_fields = FormField::where('step_id', $step8->id)->where('builder_forms_id', $step8->data)->get();
                 if ($form_fields->isEmpty()) {
                     $new = BuilderField::where('builder_form_id', $step8->data)->orderBy('id')->get();
@@ -501,6 +586,8 @@ class CyclesController extends Controller
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
+                'is_public' => 'required|boolean',
+                'public_slug' => 'required_if:is_public,1',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
@@ -510,17 +597,44 @@ class CyclesController extends Controller
                 'program_type' => ['required', Rule::in(Cycle::programTypes())],
             ]);
 
+            $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
+            $slugs = $cycles->pluck('public_slug')->unique()->filter(function( $value ) { return !empty( $value ); })->values()->toArray();
+
             $existTitle = Cycle::where('organization_id', $request->organization_id2)->where('title', $request->title)->first();
                 if ($existTitle) {
                     return redirect()->back()->with('message2', 'Cycle_title_already_exist');
                 }
 
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, $slugs) {
                 $private = null;
                 if ($request->private) {
                     $private = sha1(now());
                 }
                 $cycle = new Cycle();
+
+                $cycle->is_public = $request->has('is_public') ? ( intval( $request->is_public ) == 1 ? 1 : 0 ) : 0;
+                if( $cycle->is_public == 1 && ( empty( $request->public_slug ) || !trim( $request->public_slug ) ) )
+                {
+                    return redirect()->back()->with(['message2' => __('cycles.Public URL required'), 'class' => 'danger']);
+                }
+                if( $request->public_slug != $cycle->public_slug )
+                {
+                    $counter = 0;
+                    do {
+                        if( $counter == 0 )
+                        {
+                            $public_slug = url_slugify( $request->public_slug );
+                            $counter++;
+                        }
+                        else
+                        {
+                            $public_slug = url_slugify( $request->public_slug ) . '-' . $counter++;
+                        }
+                        $check_slug = in_array( $public_slug, $slugs );
+                    } while ( $check_slug );
+                } else { $public_slug = $cycle->public_slug; }
+
+                $cycle->public_slug = $public_slug;
                 $cycle->organization_id = $request->organization_id2;
                 $cycle->type = $request->program_type;
                 $cycle->title = $request->title;
@@ -600,60 +714,61 @@ class CyclesController extends Controller
 
     function view($c, Request $request)
     {
-
-        // $cycle2 = Cycle::where('id', $c)->first();
-
-
+        $user = auth()->user();
         $private = Cycle::where('private', $c)->first();
 
-        if ($private == null) {
-            $private = Cycle::where('id', $c)->first();
-            $c = $private->id;
-        } else {
-            $c = $private->id;
-        }
-        if ($private->allow_non_company == 1) {
-
-            if (!Auth::user()->HaveCompany) {
-                $user = Auth::user();
+        if( $private == null ) { $private = Cycle::where('id', $c)->first(); }
+        $c = $private->id;
+        if( $private->allow_non_company == 1 )
+        {
+            if( !$user->HaveCompany )
+            {
                 $result = new Company();
                 $result->name_en = $user->first_name_en . " " . $user->last_name_en;
                 $result->name_ar = $user->first_name_ar . " " . $user->last_name_ar;
                 $result->address_en = $user->address ?? 'Not Set';
                 $result->address_ar = $user->address ?? 'Not Set';
                 $result->save();
-                User::where('id', $user->id)->update(['company_id' => $result->id, 'HaveCompany' => 1]);
+
+                $update_user = User::find( $user->id );
+                $update_user->company_id = $result->id;
+                $update_user->HaveCompany = 1;
+                $update_user->save();
             }
         }
 
-        $user = User::where('id', Auth::user()->id)->first();
+        $user = User::where('id', $user->id)->first();
+
         // Check Company ---> forward to profile
-        if (!$user->HaveCompany) {
+        if( !$user->HaveCompany ) {
             return redirect()->route('user.profile_Edit')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
-        if (!$user->company) {
+        if( !$user->company ) {
             return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
-        // Check enrolled in Cycle
-        if ($user->company->cycle && $user->company->cycle != $c) {
-            return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);
-        }
-        //Check private
-        $private = Cycle::findOrFail($c);
-        //         if ($private->private==null) {
 
-        //             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
-        // //            abort(404);
-        //         }
+        // Check enrolled in Cycle
+        if( $user->company->cycle && $user->company->cycle != $c ) {
+            return redirect()->route('core.dashboard_view')->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);
+        }
+
+        // Check private
+        $private = Cycle::findOrFail($c);
+        /* if( $private->private == null )
+        {
+            return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
+            abort(404);
+        } */
 
         // Check STEPS
-        if (!$user->company->cycle || $user->company->cycle == $c) {
+        if( !$user->company->cycle || $user->company->cycle == $c )
+        {
             $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
-            if ($step?->stype != 1) {
-                return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
+            if( $step?->stype != 1 ) {
+                return redirect()->route('core.dashboard_view')->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
-            if ($step->to < now()->format('Y-m-d')) {
-                return redirect()->back()->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);
+            if( $step->to < now()->format('Y-m-d') ) {
+                return redirect()->route('core.dashboard_view')->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);
             }
 
             $id = $step->id;
@@ -665,7 +780,7 @@ class CyclesController extends Controller
                 'form_id' => $step->id,
                 'field_ids' => implode(",", $field_map_ids)
             ];
-            if ($user->company->step == $id) {
+            if( $user->company->step == $id ) {
                 $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
             }
             return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);

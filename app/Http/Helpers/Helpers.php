@@ -157,3 +157,32 @@ if (!function_exists('FormatDate')) {
 
     }
 }
+
+if (! function_exists('url_slugify'))
+{
+    function url_slugify( $url )
+    {
+        $url = strtolower($url);
+        $url = preg_replace('/[^\w\s-]/', '', $url);
+        $url = preg_replace('/[\s-]+/', ' ', $url);
+        $url = preg_replace('/[\s_]/', '-', $url);
+        return $url;
+    }
+}
+
+if( !function_exists('date_ranges') )
+{
+    function date_ranges( $start, $end )
+    {
+        $start = Carbon::parse( $start );
+        $end = Carbon::parse( $end );
+
+        if( $start->year !== $end->year ) { $formatted = $start->format('F j, Y') . ' – ' . $end->format('F j, Y'); }
+        elseif( $start->month !== $end->month ) { $formatted = $start->format('F j') . ' – ' . $end->format('F j, Y'); } 
+        elseif( $start->day !== $end->day ) { $formatted = $start->format('F j') . ' – ' . $end->format('j, Y'); }
+        else { $formatted = $start->format('F j, Y'); }
+
+        return $formatted;
+    }
+}
+
