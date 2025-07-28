@@ -292,6 +292,150 @@
                 ]
             }
         },
+        "/api/startups": {
+            "get": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "List all companies (startups)",
+                "description": "Returns a list of companies with optional filters. Admin can view all; Organization Managers see companies in their organization via cycle relation.",
+                "operationId": "getCompanies",
+                "parameters": [
+                    {
+                        "name": "sector",
+                        "in": "query",
+                        "description": "Filter by sector ID or name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "description": "Filter by country name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "description": "Filter by state name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by company name, sector, city, or team member",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of companies",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Company"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user does not have permission",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are not authorized to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/countries": {
             "get": {
                 "tags": [
@@ -3898,6 +4042,118 @@
     },
     "components": {
         "schemas": {
+            "Company": {
+                "title": "Company",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/logo.png"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Flick Tech"
+                    },
+                    "sector": {
+                        "type": "string",
+                        "example": "Technology"
+                    },
+                    "establishmentDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-01-15"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "Giza"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Cairo"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "Egypt"
+                    },
+                    "founders": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Ahmed Hassan"
+                                },
+                                "role": {
+                                    "type": "string",
+                                    "example": "Founder"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "sdgs": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "No Poverty"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "socialLinks": {
+                        "properties": {
+                            "website": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://company.com"
+                            },
+                            "linkedin": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://linkedin.com/company"
+                            },
+                            "x": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://x.com/company"
+                            },
+                            "facebook": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://facebook.com/company"
+                            },
+                            "youtube": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://youtube.com/company"
+                            },
+                            "instagram": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://instagram.com/company"
+                            },
+                            "tiktok": {
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://tiktok.com/@company"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "OrganizationResource": {
                 "title": "Organization Resource",
                 "properties": {
@@ -4014,6 +4270,10 @@
         {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Companies",
+            "description": "Companies"
         },
         {
             "name": "Countries",
