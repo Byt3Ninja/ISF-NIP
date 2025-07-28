@@ -51,7 +51,7 @@
     <div class="row">
       <div class="col-12">
         <table class="table table-bordered">
-          <thead class="table-light">
+          <thead class="">
             <tr>
               <th>{{ __('admin.Team Name') }}</th>
               <th>{{ __('admin.Project Name') }}</th>
