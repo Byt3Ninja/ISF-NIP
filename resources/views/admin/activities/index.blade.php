@@ -2,6 +2,21 @@
 
 @section('title', __('admin.Activities'))
 
+@section('styles')
+<style>
+  .chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+  }
+
+  /* Style for the colored top border on stat cards */
+  .stat-card-border-top {
+    border-top: 4px solid;
+  }
+</style>
+@endsection
+
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
@@ -23,115 +38,111 @@
 
     <h4 class="fw-bold mb-4">@lang('admin.Activities_Dashboard')</h4>
 
-    {{-- Statistics Cards --}}
+    {{-- Enhanced Statistics Cards --}}
     <div class="row g-3 mb-4">
       @foreach ([
-        ['label' => 'Total_Logins_Today', 'value' => $totalLoginsToday],
-        ['label' => 'Total_Logins_Week', 'value' => $totalLoginsWeek],
-        ['label' => 'Total_Logins_Month', 'value' => $totalLoginsMonth],
+        [
+            'label' => 'Total_Logins_Today', 
+            'value' => $totalLoginsToday, 
+            'color' => '#7367f0', // Blue
+            'icon' => 'ti-calendar-event'
+        ],
+        [
+            'label' => 'Total_Logins_Week', 
+            'value' => $totalLoginsWeek, 
+            'color' => '#10b981', // Green
+            'icon' => 'ti-calendar-time'
+        ],
+        [
+            'label' => 'Total_Logins_Month', 
+            'value' => $totalLoginsMonth, 
+            'color' => '#f59e0b', // Amber
+            'icon' => 'ti-calendar'
+        ],
       ] as $stat)
       <div class="col-md-4">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body text-center">
-            <h5 class="fw-bold">@lang('admin.' . $stat['label'])</h5>
-            <div class="display-4 fw-bold text-primary">{{ $stat['value'] }}</div>
+        <div class="card shadow-sm stat-card-border-top" style="border-color: {{ $stat['color'] }};">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="fw-bold mb-0">@lang('admin.' . $stat['label'])</h5>
+                <div class="display-4 fw-bold" style="color: {{ $stat['color'] }};">{{ $stat['value'] }}</div>
+              </div>
+              <div class="avatar avatar-lg d-flex align-items-center justify-content-center rounded" style="background-color: {{ $stat['color'] }}1a;">
+                <i class="ti {{ $stat['icon'] }} fs-2" style="color: {{ $stat['color'] }};"></i>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       @endforeach
     </div>
 
-    {{-- Device/Browser/Country Stats --}}
+    {{-- Charts for Device, Browser, Country Stats & Peak Hours --}}
     <div class="row g-4 mb-4">
-      <div class="col-md-4">
-        <div class="card h-100">
+      <div class="col-md-6">
+        <div class="card">
           <div class="card-body">
             <h6 class="mb-3 text-primary"><i class="ti ti-device-desktop me-1"></i> @lang('admin.Top_Devices')</h6>
-            @if ($topDevices->isNotEmpty())
-            <ul class="list-group list-group-flush">
-              @foreach ($topDevices as $device)
-                <li class="list-group-item">{{ $device->device }}: <strong>{{ $device->count }}</strong> @lang('admin.Logins')</li>
-              @endforeach
-            </ul>
-            @else
-            <p class="text-muted">@lang('admin.No_devices_logged')</p>
-            @endif
+            <div class="chart-container">
+              <canvas id="topDevicesChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card h-100">
+      <div class="col-md-6">
+        <div class="card">
           <div class="card-body">
             <h6 class="mb-3 text-primary"><i class="ti ti-world me-1"></i> @lang('admin.Top_Browsers')</h6>
-            @if ($topBrowsers->isNotEmpty())
-            <ul class="list-group list-group-flush">
-              @foreach ($topBrowsers as $browser)
-                <li class="list-group-item">{{ $browser->browser }}: <strong>{{ $browser->count }}</strong> @lang('admin.Logins')</li>
-              @endforeach
-            </ul>
-            @else
-            <p class="text-muted">@lang('admin.No_browsers_logged')</p>
-            @endif
+            <div class="chart-container">
+              <canvas id="topBrowsersChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card h-100">
+      <div class="col-md-6">
+        <div class="card">
           <div class="card-body">
             <h6 class="mb-3 text-primary"><i class="ti ti-flag me-1"></i> @lang('admin.Logins_by_Country')</h6>
-            @if ($loginsByCountry->isNotEmpty())
-            <ul class="list-group list-group-flush">
-              @foreach ($loginsByCountry as $country)
-                <li class="list-group-item">{{ $country->location }}: <strong>{{ $country->count }}</strong> @lang('admin.Logins')</li>
-              @endforeach
-            </ul>
-            @else
-            <p class="text-muted">@lang('admin.No_countries_logged')</p>
-            @endif
+            <div class="chart-container">
+              <canvas id="loginsByCountryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="mb-3 text-primary"><i class="ti ti-clock me-1"></i> @lang('admin.Peak_Login_Hours')</h6>
+            <div class="chart-container">
+              <canvas id="peakHoursChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    {{-- Peak Hours & Suspicious Logins --}}
+    {{-- Suspicious Logins --}}
     <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h6 class="mb-3 text-primary"><i class="ti ti-clock me-1"></i> @lang('admin.Peak_Login_Hours')</h6>
-            @if ($peakHours->isNotEmpty())
-            <ul class="list-group list-group-flush">
-              @foreach ($peakHours as $hour)
-                <li class="list-group-item">
-                  {{ sprintf('%02d:00', $hour->hour) }}: <strong>{{ $hour->count }}</strong> @lang('admin.Logins')
-                </li>
-              @endforeach
-            </ul>
-            @else
-            <p class="text-muted">@lang('admin.No_peak_hours_logged')</p>
-            @endif
-          </div>
+        <div class="col-md-12">
+            <div class="card h-100">
+              <div class="card-body">
+                <h6 class="mb-3 text-danger"><i class="ti ti-alert-triangle me-1"></i> @lang('admin.Suspicious_Logins')</h6>
+                @if ($suspiciousLogins->isNotEmpty())
+                <ul class="list-group list-group-flush">
+                  @foreach ($suspiciousLogins as $login)
+                    <li class="list-group-item">
+                      <strong>{{ $login->user->first_name_en ?? 'Unknown' }} {{ $login->user->last_name_en ?? 'Unknown' }}</strong><br>
+                      <small>@lang('admin.Logins'): {{ $login->login_count }}, @lang('admin.Locations'): {{ $login->locations ?? 'N/A' }}</small>
+                    </li>
+                  @endforeach
+                </ul>
+                @else
+                <p class="text-muted">@lang('admin.No_suspicious_logins')</p>
+                @endif
+              </div>
+            </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card h-100">
-          <div class="card-body">
-            <h6 class="mb-3 text-danger"><i class="ti ti-alert-triangle me-1"></i> @lang('admin.Suspicious_Logins')</h6>
-            @if ($suspiciousLogins->isNotEmpty())
-            <ul class="list-group list-group-flush">
-              @foreach ($suspiciousLogins as $login)
-                <li class="list-group-item">
-                  <strong>{{ $login->user->first_name_en ?? 'Unknown' }} {{ $login->user->last_name_en ?? 'Unknown' }}</strong><br>
-                  <small>@lang('admin.Logins'): {{ $login->login_count }}, @lang('admin.Locations'): {{ $login->locations ?? 'N/A' }}</small>
-                </li>
-              @endforeach
-            </ul>
-            @else
-            <p class="text-muted">@lang('admin.No_suspicious_logins')</p>
-            @endif
-          </div>
-        </div>
-      </div>
     </div>
 
     {{-- Filter Form --}}
@@ -207,9 +218,9 @@
                   <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="d-inline delete-form">
                     @csrf
                     @method('DELETE')
-                    <button 
-                      type="submit" 
-                      class="btn btn-sm btn-icon btn-label-danger" 
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-icon btn-label-danger"
                       title="@lang('admin.Delete')"
                     >
                       <i class="ti ti-trash"></i>
@@ -229,11 +240,12 @@
 
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // Initialize Date Picker
   flatpickr(".datepicker", {
-    dateFormat: "Y-m-d", 
-    allowInput: true, 
+    dateFormat: "Y-m-d",
+    allowInput: true,
   });
 
   $(document).ready(function() {
@@ -276,6 +288,98 @@
     $('#exportExcelBtn').on('click', function() {
       table.button('.buttons-excel').trigger();
     });
+
+    // Chart Data
+    const topDevicesData = @json($topDevices);
+    const topBrowsersData = @json($topBrowsers);
+    const loginsByCountryData = @json($loginsByCountry);
+    const peakHoursData = @json($peakHours);
+
+    // Top Devices Chart
+    if (topDevicesData.length > 0) {
+        new Chart(document.getElementById('topDevicesChart'), {
+            type: 'doughnut',
+            data: {
+                labels: topDevicesData.map(d => d.device),
+                datasets: [{
+                    data: topDevicesData.map(d => d.count),
+                    backgroundColor: ['#7c3aed', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+    }
+
+    // Top Browsers Chart
+    if (topBrowsersData.length > 0) {
+        new Chart(document.getElementById('topBrowsersChart'), {
+            type: 'pie',
+            data: {
+                labels: topBrowsersData.map(b => b.browser),
+                datasets: [{
+                    data: topBrowsersData.map(b => b.count),
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#7c3aed'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+    }
+
+    // Logins by Country Chart
+    if (loginsByCountryData.length > 0) {
+        new Chart(document.getElementById('loginsByCountryChart'), {
+            type: 'bar',
+            data: {
+                labels: loginsByCountryData.map(c => c.location),
+                datasets: [{
+                    label: 'Logins',
+                    data: loginsByCountryData.map(c => c.count),
+                    backgroundColor: '#10b981',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Peak Login Hours Chart
+    if (peakHoursData.length > 0) {
+        new Chart(document.getElementById('peakHoursChart'), {
+            type: 'line',
+            data: {
+                labels: peakHoursData.map(h => `${String(h.hour).padStart(2, '0')}:00`),
+                datasets: [{
+                    label: 'Logins',
+                    data: peakHoursData.map(h => h.count),
+                    borderColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
   });
 
   // Delete confirmation
