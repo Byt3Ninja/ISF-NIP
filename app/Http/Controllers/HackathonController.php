@@ -1287,4 +1287,10 @@ class HackathonController extends Controller
 
         return view('admin.hackathon.admin.winners');
     }
+   
+    public function hackathonLanding($id)
+    {
+
+        return view('admin.hackathon.landing');
+    }
 }
