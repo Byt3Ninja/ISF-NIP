@@ -1,135 +1,65 @@
 
-@php
-  static $winnersData = [
-    [
-      'team' => 'Team Alpha',
-      'project' => 'FinStart',
-      'score' => 94,
-      'rank' => 'first',
-    ],
-    [
-      'team' => 'Team Green',
-      'project' => 'GreenTech Revolution',
-      'score' => 90,
-      'rank' => 'second',
-    ],
-    [
-      'team' => 'Team Nova',
-      'project' => 'EduNext',
-      'score' => 87,
-      'rank' => 'third',
-    ],
-    [
-      'team' => 'Team Beta',
-      'project' => 'HealthAI',
-      'score' => 83,
-      'rank' => '',
-    ],
-    [
-      'team' => 'Team Spark',
-      'project' => 'SmartEnergy',
-      'score' => 81,
-      'rank' => '',
-    ],
-    [
-      'team' => 'Team Sky',
-      'project' => 'AgriBoost',
-      'score' => 78,
-      'rank' => '',
-    ],
-  ];
-@endphp
-
 <div class="card">
-  <div class="card-header">
-    <h5 class="card-title">
-      🏆 {{ $l == 'en' ? 'Judging Results & Winner Selection' : 'نتائج التحكيم واختيار الفائزين' }}
-    </h5>
-  </div>
-
   <div class="card-body">
-    <div class="row">
-      <div class="col-12">
-        <table class="table table-bordered">
-          <thead class="">
-            <tr>
-              <th>{{ __('admin.Team Name') }}</th>
-              <th>{{ __('admin.Project Name') }}</th>
-              <th>{{ __('admin.Score') }}</th>
-              <th>{{ __('admin.Winner Rank') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($winnersData as $winner)
-            <tr
-              @if($winner['rank'] === 'first') class="bg-label-warning"
-              @elseif($winner['rank'] === 'second') class="bg-label-secondary"
-              @elseif($winner['rank'] === 'third') class="bg-label-success"
-              @endif
-            >
-              <td class="px-4 py-2">{{ $winner['team'] }}</td>
-              <td class="px-4 py-2">{{ $winner['project'] }}</td>
-              <td class="px-4 py-2">{{ $winner['score'] }}</td>
-              <td class="px-4 py-2">
-                <select onchange="updateWinnerClass(this)" class="border px-2 py-1 rounded">
-                  <option value="" @if($winner['rank'] == '') selected @endif>
-                    {{ $l == 'en' ? 'None' : 'لا شيء' }}
-                  </option>
-                  <option value="first" @if($winner['rank'] == 'first') selected @endif>
-                    🥇 {{ $l == 'en' ? 'First Place' : 'المركز الأول' }}
-                  </option>
-                  <option value="second" @if($winner['rank'] == 'second') selected @endif>
-                    🥈 {{ $l == 'en' ? 'Second Place' : 'المركز الثاني' }}
-                  </option>
-                  <option value="third" @if($winner['rank'] == 'third') selected @endif>
-                    🥉 {{ $l == 'en' ? 'Third Place' : 'المركز الثالث' }}
-                  </option>
-                </select>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
+    <h5 class="card-title">
+      {{ $l == 'en' ? 'Prizes and Rewards' : 'الجوائز والمكافآت' }}
+    </h5>
+    <p>
+      {{ $l == 'en' ? 'Winning teams will be honored with valuable prizes, in addition to advanced support
+      opportunities from the incubator ecosystem.' : 'سيتم تكريم الفرق الفائزة بجوائز قيمة، بالإضافة إلى فرص دعم
+      متقدمة من منظومة المسرعة.' }}
+    </p>
+    <div class="row text-center" id="hackathon-prizes-list">
+      <div class="col-md-4 mb-3">
+        <div class="card h-100 border-warning">
+          <div class="card-body">
+            <i class="bi bi-award-fill display-3 text-warning me-2"></i>
+            <h6 class="card-title mt-2">
+              {{ $l == 'en' ? 'First Place' : 'المركز الأول' }}
+            </h6>
+            <p class="card-text">
+              {{ $l == 'en' ? 'Prize of 20,000 SAR + incubation opportunity in the accelerator.' : 'جائزة مالية
+              قدرها 20,000 ريال سعودي + فرصة احتضان في المسرعة.' }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card h-100 border-secondary">
+          <div class="card-body">
+            <i class="bi bi-award display-3 text-secondary me-2"></i>
+            <h6 class="card-title mt-2">
+              {{ $l == 'en' ? 'Second Place' : 'المركز الثاني' }}
+            </h6>
+            <p class="card-text">
+              {{ $l == 'en' ? 'Prize of 10,000 SAR + access to specialized mentoring programs.' : 'جائزة مالية
+              قدرها 10,000 ريال سعودي + وصول لبرامج إرشاد متخصصة.' }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card h-100 border-danger">
+          <div class="card-body">
+            <i class="bi bi-award display-3" style="color: #cd7f32; me-2"></i>
+            <h6 class="card-title mt-2">
+              {{ $l == 'en' ? 'Third Place' : 'المركز الثالث' }}
+            </h6>
+            <p class="card-text">
+              {{ $l == 'en' ? 'Prize of 5,000 SAR + invitations to exclusive events.' : 'جائزة مالية قدرها 5,000
+              ريال سعودي + دعوات لفعاليات حصرية.' }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="card-footer border">
-    <div class="text-center mt-6">
-      <button class="btn btn-success">✅ {{ $l == 'en' ? 'Publish Winners' : 'نشر الفائزين' }}</button>
-      <p class="text-sm text-muted mt-2">
-        {{ 
-          $l == 'en' 
-            ? 'Winners will be announced publicly and notified via email.' 
-            : 'سيتم الإعلان عن الفائزين علنًا وإخطارهم عبر البريد الإلكتروني.' 
-        }}
-      </p>
-    </div>
+    <p class="mt-3">
+      <strong>
+        {{ $l == 'en' ? 'Additional Prizes:' : 'جوائز إضافية:' }}
+      </strong>
+      {{ $l == 'en' ? 'There may be special prizes from sponsors for specific themes or outstanding solutions.'
+      : 'قد تكون هناك جوائز خاصة مقدمة من الرعاة لبعض المحاور أو الحلول المتميزة.' }}
+    </p>
   </div>
 </div>
 
-{{-- <script>
-  function updateWinnerClass(selectElement) {
-      const row = selectElement.closest("tr");
-      row.classList.remove("bg-label-warning", "bg-label-secondary", "bg-label-success");
-
-      switch (selectElement.value) {
-        case "first":
-          row.classList.add("bg-label-warning");
-          break;
-        case "second":
-          row.classList.add("bg-label-secondary");
-          break;
-        case "third":
-          row.classList.add("bg-label-success");
-          break;
-      }
-    }
-
-    // Pre-mark on load
-    window.onload = function () {
-      document.querySelectorAll("select").forEach(select => {
-        updateWinnerClass(select);
-      });
-    };
-</script> --}}
