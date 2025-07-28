@@ -161,4 +161,6 @@ return [
     'Click to select multiple dates for your sessions' => 'Click to select multiple dates for your sessions',
     'Select multiple dates' => 'Select multiple dates',
     'Hide schedule' => 'Hide schedule',
+    'No mentorship sessions found' => 'No mentorship sessions found',
+    'No training sessions found' => 'No training sessions found',
 ];

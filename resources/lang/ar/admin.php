@@ -2182,6 +2182,7 @@ return [
 	'Submit code, share the demo, and complete documentation. story.' => 'ارفع الكود، شارك العرض، واستكمل المستندات المطلوبة.',
 	'Project idea updated successfully' => 'تم تحديث فكرة المشروع بنجاح',
 	'You are not allowed to submit answers' => 'ليس لديك الصلاحية لتقديم الاجابات',
-	
-
+	'Team Name' => 'اسم الفريق',
+	'Project Name' => 'اسم المشروع',
+	'Winner Rank' => 'ترتيب الفائز',
 ];

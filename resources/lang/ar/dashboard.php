@@ -161,4 +161,6 @@ return [
     'Click to select multiple dates for your sessions' => 'اضغط لتحديد مواعيد متعددة لجلساتك',
     'Select multiple dates' => 'حدد مواعيد متعددة',
     'Hide schedule' => 'إخفاء المواعيد',
+    'No mentorship sessions found' => 'لا توجد جلسات توجيهية',
+    'No training sessions found' => 'لا توجد جلسات تدريبية',
 ];
