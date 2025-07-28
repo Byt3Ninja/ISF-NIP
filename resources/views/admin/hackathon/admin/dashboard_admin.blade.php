@@ -3,470 +3,461 @@
 @section('style')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 <style>
-    .stat-card {
-        text-align: center;
-    }
+  .stat-card {
+    text-align: center;
+  }
 
-    .stat-card .display-4 {
-        font-weight: bold;
-    }
+  .stat-card .display-4 {
+    font-weight: bold;
+  }
 
-    .chart-container {
-        position: relative;
-        margin: auto;
-        height: 350px;
-        width: 100%;
-        background-color: #fff;
-        padding: 1rem;
-        border-radius: .25rem;
-        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
-    }
+  .chart-container {
+    position: relative;
+    margin: auto;
+    height: 350px;
+    width: 100%;
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: .25rem;
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+  }
 
-    .tags-input-wrapper {
-        background: white;
-        padding: 0.5rem;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-    }
+  .tags-input-wrapper {
+    background: white;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-    .tag-item {
-        background-color: #0d6efd;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        margin: 0.25rem;
-        display: flex;
-        align-items: center;
-        font-size: 0.9em;
-    }
+  .tag-item {
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin: 0.25rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+  }
 
-    .tag-item .remove-tag {
-        background: none;
-        border: none;
-        color: white;
-        margin-left: 0.5rem;
-        cursor: pointer;
-        font-size: 1.1em;
-        line-height: 1;
-    }
+  .tag-item .remove-tag {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+  }
 
-    .tags-input-wrapper input[type="text"] {
-        border: none;
-        outline: none;
-        flex-grow: 1;
-        padding: 0.25rem;
-        min-width: 150px;
-    }
+  .tags-input-wrapper input[type="text"] {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    padding: 0.25rem;
+    min-width: 150px;
+  }
 
-    .dynamic-entry {
-        border: 1px dashed #ccc;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: .25rem;
-        position: relative;
-        background-color: #fff;
-        /* Explicit white background */
-    }
+  .dynamic-entry {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: .25rem;
+    position: relative;
+    background-color: #fff;
+    /* Explicit white background */
+  }
 
-    .total-weight {
-        font-weight: bold;
-        font-size: 1.1em;
-        margin-top: 0.5rem;
-    }
+  .total-weight {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-top: 0.5rem;
+  }
 </style>
 @stop
 
 @section('content')
 <div class="container mt-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold">{{ __('admin.management_dashboard') }}</h1>
-        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createHackathonModal">
-            <i class="bi bi-plus-circle-fill me-2"></i> {{ __('admin.create_new_hackathon') }}
-        </button>
-    </div>
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">{{ __('admin.management_dashboard') }}</h1>
+    <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createHackathonModal">
+      <i class="bi bi-plus-circle-fill me-2"></i> {{ __('admin.create_new_hackathon') }}
+    </button>
+  </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4 g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
-        <div class="col">
-            <div class="card stat-card border-primary shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-calendar3-event display-4 text-primary mb-2"></i>
-                    <h5 class="card-title">{{ __('admin.active_hackathons') }}</h5>
-                    <p class="card-text display-4">3</p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card stat-card border-success shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-person-check-fill display-4 text-success mb-2"></i>
-                    <h5 class="card-title">{{ __('admin.total_registrants') }}</h5>
-                    <p class="card-text display-4">1,250</p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card stat-card border-info shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-people-fill display-4 text-info mb-2"></i>
-                    <h5 class="card-title">{{ __('admin.teams_formed') }}</h5>
-                    <p class="card-text display-4">280</p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card stat-card border-secondary shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                    <i class="bi bi-person-video3 display-4 text-secondary mb-2"></i>
-                    <h5 class="card-title">{{ __('admin.mentorship_management') }}</h5>
-                    <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">5</span>
-                    </p>
-                    <div class="mt-auto">
-                        <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
-                            data-bs-target="#manageMentorsModal"><i class="bi bi-person-badge-fill me-1"></i> {{
-                            __('admin.manage_mentors') }}</button>
-                        <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
-                            data-bs-target="#viewMentorshipRequestsModal"><i class="bi bi-card-list me-1"></i> {{
-                            __('admin.mentorship_requests') }}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Section (Content is dynamic) -->
-    <div class="row mb-4 g-3">
-        <div class="col-md-6">
-            <div class="chart-container"><canvas id="registrationsChart"></canvas></div>
-        </div>
-        <div class="col-md-6">
-            <div class="chart-container"><canvas id="submissionsPerTrackChart"></canvas></div>
-        </div>
-    </div>
-    <div class="row mb-4 g-3">
-        <div class="col-md-6">
-            <div class="chart-container"><canvas id="teamsStatusChart"></canvas></div>
-        </div>
-        <div class="col-md-6">
-            <div class="chart-container"><canvas id="hackathonEngagementChart"></canvas></div>
-        </div>
-    </div>
-
-    <!-- Manage Hackathons Table -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="bi bi-list-task me-2"></i> {{ __('admin.manage_hackathons') }}</h4>
-        </div>
+  <!-- Stats Cards -->
+  <div class="row mb-4 g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
+    <div class="col">
+      <div class="card stat-card border-primary shadow-sm h-100">
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>{{ __('admin.hackathon_name') }}</th>
-                            <th>{{ __('admin.date') }}</th>
-                            <th>{{ __('admin.status') }}</th>
-                            <th>{{ __('admin.registrants') }}</th>
-                            <th>{{ __('admin.teams') }}</th>
-                            <th>{{ __('admin.projects') }}</th>
-                            <th>{{ __('admin.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- This is example data, should be populated from a loop in a real application -->
-                        <tr>
-                            <td>{{ __('admin.future_of_ai_hackathon') }}</td>
-                            <td>{{ __('admin.march_15_17_2024') }}</td>
-                            <td><span class="badge bg-warning text-dark">{{ __('admin.application_in_progress')
-                                    }}</span></td>
-                            <td>150</td>
-                            <td>30</td>
-                            <td>-</td>
-                            <td>
-                                <a href="hackathon-details.html?id=1" class="btn btn-sm btn-outline-info"
-                                    data-bs-toggle="tooltip" title="{{ __('admin.view_details') }}"><i
-                                        class="bi bi-eye-fill"></i></a>
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                    data-bs-target="#createHackathonModal" data-hackathon-id="1"
-                                    onclick="loadHackathonForEdit(this)" data-bs-toggle="tooltip"
-                                    title="{{ __('admin.edit') }}"><i class="bi bi-pencil-fill"></i></button>
-                                <a href="judging-portal.html?hackathonId=1" class="btn btn-sm btn-outline-success"
-                                    data-bs-toggle="tooltip" title="{{ __('admin.judging_portal') }}"><i
-                                        class="bi bi-clipboard2-check-fill"></i></a>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
-                                    title="{{ __('admin.delete') }}"><i class="bi bi-trash-fill"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          <i class="bi bi-calendar3-event display-4 text-primary mb-2"></i>
+          <h5 class="card-title">{{ __('admin.active_hackathons') }}</h5>
+          <p class="card-text display-4">3</p>
         </div>
+      </div>
     </div>
-
-    <!-- Manage Teams Table -->
-    <div class="card shadow-sm mb-4" id="manage-teams-section">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i> {{ __('admin.manage_participating_teams') }}</h4>
-        </div>
+    <div class="col">
+      <div class="card stat-card border-success shadow-sm h-100">
         <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <select class="form-select" id="filterTeamsByHackathon">
-                        <option selected value="">{{ __('admin.filter_by_hackathon') }}</option>
-                        <option value="1">{{ __('admin.future_of_ai_hackathon') }}</option>
-                        <option value="2">{{ __('admin.sustainability_solutions_hackathon') }}</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control" placeholder="{{ __('admin.search_for_team') }}">
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>{{ __('admin.team_name') }}</th>
-                            <th>{{ __('admin.hackathon') }}</th>
-                            <th>{{ __('admin.team_leader') }}</th>
-                            <th>{{ __('admin.number_of_members') }}</th>
-                            <th>{{ __('admin.creation_date') }}</th>
-                            <th>{{ __('admin.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- This is example data, should be populated from a loop in a real application -->
-                        <tr>
-                            <td>{{ __('admin.champions_team') }}</td>
-                            <td>{{ __('admin.future_of_ai_hackathon') }}</td>
-                            <td>أحمد محمد (ahmad@example.com)</td>
-                            <td>4/5</td>
-                            <td>05 مارس 2024</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
-                                    data-bs-target="#teamDetailsModal" data-team-id="t001"><i
-                                        class="bi bi-eye-fill me-2"></i> {{ __('admin.details') }}</button>
-                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
-                                    __('admin.message') }}</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          <i class="bi bi-person-check-fill display-4 text-success mb-2"></i>
+          <h5 class="card-title">{{ __('admin.total_registrants') }}</h5>
+          <p class="card-text display-4">1,250</p>
         </div>
+      </div>
     </div>
-
-    <div class="card shadow-sm mb-4" id="manage-users-section">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.manage_users') }}</h4>
-        </div>
+    <div class="col">
+      <div class="card stat-card border-info shadow-sm h-100">
         <div class="card-body">
-            <p class="text-muted">{{ __('admin.user_management_table_placeholder') }}</p>
+          <i class="bi bi-people-fill display-4 text-info mb-2"></i>
+          <h5 class="card-title">{{ __('admin.teams_formed') }}</h5>
+          <p class="card-text display-4">280</p>
         </div>
+      </div>
     </div>
+    <div class="col">
+      <div class="card stat-card border-secondary shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <i class="bi bi-person-video3 display-4 text-secondary mb-2"></i>
+          <h5 class="card-title">{{ __('admin.mentorship_management') }}</h5>
+          <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">5</span>
+          </p>
+          <div class="mt-auto">
+            <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
+              data-bs-target="#manageMentorsModal"><i class="bi bi-person-badge-fill me-1"></i> {{
+              __('admin.manage_mentors') }}</button>
+            <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
+              data-bs-target="#viewMentorshipRequestsModal"><i class="bi bi-card-list me-1"></i> {{
+              __('admin.mentorship_requests') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section (Content is dynamic) -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="registrationsChart"></canvas></div>
+    </div>
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="submissionsPerTrackChart"></canvas></div>
+    </div>
+  </div>
+  <div class="row mb-4 g-3">
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="teamsStatusChart"></canvas></div>
+    </div>
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="hackathonEngagementChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Manage Hackathons Table -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-list-task me-2"></i> {{ __('admin.manage_hackathons') }}</h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>{{ __('admin.hackathon_name') }}</th>
+              <th>{{ __('admin.date') }}</th>
+              <th>{{ __('admin.status') }}</th>
+              <th>{{ __('admin.registrants') }}</th>
+              <th>{{ __('admin.teams') }}</th>
+              <th>{{ __('admin.projects') }}</th>
+              <th>{{ __('admin.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            <tr>
+              <td>{{ __('admin.future_of_ai_hackathon') }}</td>
+              <td>{{ __('admin.march_15_17_2024') }}</td>
+              <td><span class="badge bg-warning text-dark">{{ __('admin.application_in_progress')
+                  }}</span></td>
+              <td>150</td>
+              <td>30</td>
+              <td>-</td>
+              <td>
+                <a href="hackathon-details.html?id=1" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip"
+                  title="{{ __('admin.view_details') }}"><i class="bi bi-eye-fill"></i></a>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                  data-bs-target="#createHackathonModal" data-hackathon-id="1" onclick="loadHackathonForEdit(this)"
+                  data-bs-toggle="tooltip" title="{{ __('admin.edit') }}"><i class="bi bi-pencil-fill"></i></button>
+                <a href="judging-portal.html?hackathonId=1" class="btn btn-sm btn-outline-success"
+                  data-bs-toggle="tooltip" title="{{ __('admin.judging_portal') }}"><i
+                    class="bi bi-clipboard2-check-fill"></i></a>
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
+                  title="{{ __('admin.delete') }}"><i class="bi bi-trash-fill"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Teams Table -->
+  <div class="card shadow-sm mb-4" id="manage-teams-section">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i> {{ __('admin.manage_participating_teams') }}</h4>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <select class="form-select" id="filterTeamsByHackathon">
+            <option selected value="">{{ __('admin.filter_by_hackathon') }}</option>
+            <option value="1">{{ __('admin.future_of_ai_hackathon') }}</option>
+            <option value="2">{{ __('admin.sustainability_solutions_hackathon') }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <input type="text" class="form-control" placeholder="{{ __('admin.search_for_team') }}">
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>{{ __('admin.team_name') }}</th>
+              <th>{{ __('admin.hackathon') }}</th>
+              <th>{{ __('admin.team_leader') }}</th>
+              <th>{{ __('admin.number_of_members') }}</th>
+              <th>{{ __('admin.creation_date') }}</th>
+              <th>{{ __('admin.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            <tr>
+              <td>{{ __('admin.champions_team') }}</td>
+              <td>{{ __('admin.future_of_ai_hackathon') }}</td>
+              <td>أحمد محمد (ahmad@example.com)</td>
+              <td>4/5</td>
+              <td>05 مارس 2024</td>
+              <td>
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
+                  data-team-id="t001"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details') }}</button>
+                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
+                  __('admin.message') }}</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4" id="manage-users-section">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.manage_users') }}</h4>
+    </div>
+    <div class="card-body">
+      <p class="text-muted">{{ __('admin.user_management_table_placeholder') }}</p>
+    </div>
+  </div>
 </div>
 
 
 <!-- Create/Edit Hackathon Modal -->
 <div class="modal fade" id="createHackathonModal" tabindex="-1" aria-labelledby="createHackathonModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createHackathonModalLabel">{{ __('admin.create_new_hackathon') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="{{ __('admin.close') }}"></button>
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createHackathonModalLabel">{{ __('admin.create_new_hackathon') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createHackathonForm">
+          <input type="hidden" id="hackathonEditId">
+
+          <!-- Basic Information -->
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="hackathonName" class="form-label">{{ __('admin.hackathon_name') }} <span
+                  class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="hackathonName" required>
             </div>
-            <div class="modal-body">
-                <form id="createHackathonForm">
-                    <input type="hidden" id="hackathonEditId">
-
-                    <!-- Basic Information -->
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="hackathonName" class="form-label">{{ __('admin.hackathon_name') }} <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="hackathonName" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="hackathonType" class="form-label">{{ __('admin.hackathon_type') }} <span
-                                    class="text-danger">*</span></label>
-                            <select class="form-select" id="hackathonType" required>
-                                <option value="virtual">{{ __('admin.virtual') }}</option>
-                                <option value="hybrid">{{ __('admin.hybrid') }}</option>
-                                <option value="physical">{{ __('admin.physical') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="teamCapacity" class="form-label">{{ __('admin.max_team_members') }} <span
-                                    class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="teamCapacity" min="1" max="10" value="5"
-                                required>
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mt-3">
-                        <label for="hackathonDescription" class="form-label">{{ __('admin.description') }} <span
-                                class="text-danger">*</span></label>
-                        <textarea class="form-control" id="hackathonDescription" rows="3" required></textarea>
-                    </div>
-
-                    <!-- Dates -->
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-4">
-                            <label for="hackathonStartDate" class="form-label">{{ __('admin.start_date') }} <span
-                                    class="text-danger">*</span></label>
-                            <input type="datetime-local" class="form-control" id="hackathonStartDate" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="hackathonEndDate" class="form-label">{{ __('admin.end_date') }} <span
-                                    class="text-danger">*</span></label>
-                            <input type="datetime-local" class="form-control" id="hackathonEndDate" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="registrationDeadline" class="form-label">{{ __('admin.registration_deadline') }}
-                                <span class="text-danger">*</span></label>
-                            <input type="datetime-local" class="form-control" id="registrationDeadline" required>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- Themes Section -->
-                    <div class="mb-3">
-                        <label for="hackathonThemesInput" class="form-label">{{ __('admin.themes_instruction')
-                            }}</label>
-                        <div class="tags-input-wrapper border p-2 rounded">
-                            <!-- JS will populate tags here -->
-                            <input type="text" id="hackathonThemesInput" class="form-control border-0"
-                                placeholder="{{ __('admin.add_theme') }}">
-                        </div>
-                        <input type="hidden" id="hackathonThemesActual" name="hackathonThemesActual">
-                    </div>
-
-                    <!-- Prizes Section -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{{ __('admin.prizes') }}</label>
-                        <div id="prizesContainer" class="vstack gap-3">
-                            <!-- Prize entries will be added here by JS -->
-                        </div>
-                        <button type="button" class="btn btn-outline-success btn-sm mt-2" id="addPrizeBtn">
-                            <i class="bi bi-plus-circle me-1"></i> {{ __('admin.add_prize') }}
-                        </button>
-                    </div>
-
-                    <!-- Evaluation Criteria Section -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{{ __('admin.evaluation_criteria') }}</label>
-                        <div id="evaluationCriteriaContainer" class="vstack gap-3">
-                            <!-- Evaluation criteria entries will be added here by JS -->
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <button type="button" class="btn btn-outline-info btn-sm" id="addCriterionBtn">
-                                <i class="bi bi-plus-circle me-1"></i> {{ __('admin.add_evaluation_criterion') }}
-                            </button>
-                            <div class="text-end fw-bold">{{ __('admin.total_weights') }} <span
-                                    id="totalCriteriaWeight">0</span>%</div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- File Upload & Options -->
-                    <div class="mb-3">
-                        <label for="hackathonBannerImage" class="form-label">{{ __('admin.hackathon_banner_image')
-                            }}</label>
-                        <input class="form-control" type="file" id="hackathonBannerImage" accept="image/*">
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="allowExternalTeams">
-                        <label class="form-check-label" for="allowExternalTeams">
-                            {{ __('admin.allow_external_teams') }}
-                        </label>
-                    </div>
-
-                </form>
+            <div class="col-md-3">
+              <label for="hackathonType" class="form-label">{{ __('admin.hackathon_type') }} <span
+                  class="text-danger">*</span></label>
+              <select class="form-select" id="hackathonType" required>
+                <option value="virtual">{{ __('admin.virtual') }}</option>
+                <option value="hybrid">{{ __('admin.hybrid') }}</option>
+                <option value="physical">{{ __('admin.physical') }}</option>
+              </select>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.cancel')
-                    }}</button>
-                <button type="button" class="btn btn-primary" onclick="saveHackathon()">{{ __('admin.save_hackathon')
-                    }}</button>
+            <div class="col-md-3">
+              <label for="teamCapacity" class="form-label">{{ __('admin.max_team_members') }} <span
+                  class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="teamCapacity" min="1" max="10" value="5" required>
             </div>
-        </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mt-3">
+            <label for="hackathonDescription" class="form-label">{{ __('admin.description') }} <span
+                class="text-danger">*</span></label>
+            <textarea class="form-control" id="hackathonDescription" rows="3" required></textarea>
+          </div>
+
+          <!-- Dates -->
+          <div class="row g-3 mt-2">
+            <div class="col-md-4">
+              <label for="hackathonStartDate" class="form-label">{{ __('admin.start_date') }} <span
+                  class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="hackathonStartDate" required>
+            </div>
+            <div class="col-md-4">
+              <label for="hackathonEndDate" class="form-label">{{ __('admin.end_date') }} <span
+                  class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="hackathonEndDate" required>
+            </div>
+            <div class="col-md-4">
+              <label for="registrationDeadline" class="form-label">{{ __('admin.registration_deadline') }}
+                <span class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="registrationDeadline" required>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+            <!-- Themes Section (Select2 Multiple Select) -->
+            <div class="mb-3">
+              <label class="form-label">{{ __('admin.themes_instruction') }}</label>
+              <div id="hackathonThemesWrapper" class="tags-input-wrapper">
+                <!-- Tag items will be rendered here by JS -->
+                <input type="text" id="hackathonThemesInput" class="form-control" placeholder="{{ __('admin.add_theme_placeholder') }}" autocomplete="off">
+                <input type="hidden" id="hackathonThemesActual" name="hackathonThemes">
+              </div>
+              {{-- <small class="form-text text-muted">{{ __('admin.themes_hint') }}</small> --}}
+            </div>
+
+          <!-- Prizes Section -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">{{ __('admin.prizes') }}</label>
+            <div id="prizesContainer" class="vstack gap-3">
+              <!-- Prize entries will be added here by JS -->
+            </div>
+            <button type="button" class="btn btn-outline-success btn-sm mt-2" id="addPrizeBtn">
+              <i class="bi bi-plus-circle me-1"></i> {{ __('admin.add_prize') }}
+            </button>
+          </div>
+
+          <!-- Evaluation Criteria Section -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">{{ __('admin.evaluation_criteria') }}</label>
+            <div id="evaluationCriteriaContainer" class="vstack gap-3">
+              <!-- Evaluation criteria entries will be added here by JS -->
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <button type="button" class="btn btn-outline-info btn-sm" id="addCriterionBtn">
+                <i class="bi bi-plus-circle me-1"></i> {{ __('admin.add_evaluation_criterion') }}
+              </button>
+              <div class="text-end fw-bold">{{ __('admin.total_weights') }} <span id="totalCriteriaWeight">0</span>%
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <!-- File Upload & Options -->
+          <div class="mb-3">
+            <label for="hackathonBannerImage" class="form-label">{{ __('admin.hackathon_banner_image')
+              }}</label>
+            <input class="form-control" type="file" id="hackathonBannerImage" accept="image/*">
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="allowExternalTeams">
+            <label class="form-check-label" for="allowExternalTeams">
+              {{ __('admin.allow_external_teams') }}
+            </label>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.cancel')
+          }}</button>
+        <button type="button" class="btn btn-primary" onclick="saveHackathon()">{{ __('admin.save_hackathon')
+          }}</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Manage Mentors Modal -->
 <div class="modal fade" id="manageMentorsModal" tabindex="-1" aria-labelledby="manageMentorsModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="manageMentorsModalLabel">{{ __('admin.manage_mentors') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="{{ __('admin.close') }}"></button>
-            </div>
-            <div class="modal-body">
-                <button class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-2"></i> {{
-                    __('admin.add_new_mentor') }}</button>
-                <p>{{ __('admin.current_mentors_table_placeholder') }}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-            </div>
-        </div>
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="manageMentorsModalLabel">{{ __('admin.manage_mentors') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
+      </div>
+      <div class="modal-body">
+        <button class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-2"></i> {{
+          __('admin.add_new_mentor') }}</button>
+        <p>{{ __('admin.current_mentors_table_placeholder') }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- View Mentorship Requests Modal -->
 <div class="modal fade" id="viewMentorshipRequestsModal" tabindex="-1"
-    aria-labelledby="viewMentorshipRequestsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewMentorshipRequestsModalLabel">{{ __('admin.mentorship_session_requests')
-                    }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="{{ __('admin.close') }}"></button>
-            </div>
-            <div class="modal-body">
-                <p>{{ __('admin.team_mentorship_requests_table_placeholder') }}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-            </div>
-        </div>
+  aria-labelledby="viewMentorshipRequestsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewMentorshipRequestsModalLabel">{{ __('admin.mentorship_session_requests')
+          }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{ __('admin.team_mentorship_requests_table_placeholder') }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Team Details Modal -->
 <div class="modal fade" id="teamDetailsModal" tabindex="-1" aria-labelledby="teamDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="teamDetailsModalLabel">{{ __('admin.team_details_title') }} <span
-                        id="modal-team-name-detail"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="{{ __('admin.close') }}"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>{{ __('admin.hackathon') }}:</strong> <span id="modal-team-hackathon"></span></p>
-                <p><strong>{{ __('admin.team_leader') }}:</strong> <span id="modal-team-leader"></span></p>
-                <h6>{{ __('admin.members') }}</h6>
-                <ul class="list-group" id="modal-team-members-list"></ul>
-                <h6 class="mt-3">{{ __('admin.project_idea_if_available') }}</h6>
-                <p id="modal-team-project-idea" class="text-muted">{{ __('admin.idea_not_specified_yet') }}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-                <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
-                    __('admin.message_team') }}</button>
-            </div>
-        </div>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="teamDetailsModalLabel">{{ __('admin.team_details_title') }} <span
+            id="modal-team-name-detail"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>{{ __('admin.hackathon') }}:</strong> <span id="modal-team-hackathon"></span></p>
+        <p><strong>{{ __('admin.team_leader') }}:</strong> <span id="modal-team-leader"></span></p>
+        <h6>{{ __('admin.members') }}</h6>
+        <ul class="list-group" id="modal-team-members-list"></ul>
+        <h6 class="mt-3">{{ __('admin.project_idea_if_available') }}</h6>
+        <p id="modal-team-project-idea" class="text-muted">{{ __('admin.idea_not_specified_yet') }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
+        <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
+          __('admin.message_team') }}</button>
+      </div>
     </div>
+  </div>
 </div>
 @stop
 
@@ -476,7 +467,7 @@
 
 @section('pagescripts')
 <script>
-    const mockHackathonDb = {
+  const mockHackathonDb = {
         "1": {
             name: "هاكثون مستقبل الذكاء الاصطناعي",
             type: "virtual",

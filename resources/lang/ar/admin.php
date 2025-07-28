@@ -2263,5 +2263,6 @@ return [
 	'criterion_weight_placeholder' => 'أدخل وزن المعيار',
 	'criterion_description' => 'وصف المعيار',
 	'criterion_description_placeholder' => 'أدخل وصف المعيار',
-	'remove_criterion' => 'إزالة المعيار'
+	'remove_criterion' => 'إزالة المعيار',
+	'add_theme_placeholder' => 'أضف محور...'
 ];

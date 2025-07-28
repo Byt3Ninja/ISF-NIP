@@ -2208,5 +2208,6 @@ return [
 	'criterion_weight_placeholder' => 'Enter criterion weight',
 	'criterion_description' => 'Criterion description',
 	'criterion_description_placeholder' => 'Enter criterion description',
-	'remove_criterion' => 'Remove Criterion'
+	'remove_criterion' => 'Remove Criterion',
+	'add_theme_placeholder' => 'Add a theme...'
 ];
