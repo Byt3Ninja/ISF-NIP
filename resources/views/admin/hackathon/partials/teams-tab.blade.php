@@ -74,6 +74,7 @@
  @php
     $authUser = auth()->user();
     $authUserInAnyTeam = false;
+    $member_ids = [];
     foreach ($teamsData as $team) {
         $member_ids = collect($team->members)->pluck('id')->toArray();
         if (in_array($authUser->id, $member_ids)) {
