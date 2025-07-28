@@ -48,7 +48,7 @@
 							@if( $quiz_status == 'passed' )
 								<span class="badge px-4 py-2 rounded-pill bg-label-success"> {{ __('admin.quizPassed') }} </span>
 							@elseif( $quiz_status == 'notTaken' )
-								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
+								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizNotTaken') }} </span>
 							@elseif( $quiz_status == 'failed' )
 								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
 							@elseif( $quiz_status == 'notStartedYet' )
