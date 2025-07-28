@@ -1308,6 +1308,12 @@ class HackathonController extends Controller
         return view('admin.hackathon.admin.winners');
     }
    
+    public function viewHackathonTeam($id)
+    {
+
+        return view('admin.hackathon.team');
+    }
+
     public function hackathonLanding($id)
     {
 

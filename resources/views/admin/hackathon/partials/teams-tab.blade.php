@@ -112,7 +112,7 @@
               @endif
             </div>
             <div class="d-flex justify-content-between">
-              <a href="#" class="btn btn-outline-primary btn-sm">
+              <a href="/dashboard/hackathon/team/{{ $team->id }}" class="btn btn-outline-primary btn-sm">
                 {{ $l == 'en' ? 'View Team' : 'عرض الفريق' }}
               </a>
               @php
