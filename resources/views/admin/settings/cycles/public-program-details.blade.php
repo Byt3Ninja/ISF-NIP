@@ -170,23 +170,6 @@
 	</style>
 </head>
 
-@php
-	$currentHackathon = [
-		'title' => 'Future of AI Hackathon',
-		'title_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
-		'date' => 'March 15 - 17, 2024',
-		'date_ar' => '15 - 17 مارس 2024',
-		'location' => 'Virtual',
-		'location_ar' => 'افتراضي',
-		'status' => 'Upcoming',
-		'status_ar' => 'قادم',
-		'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
-		'description_ar' => 'هذا الهاكثون يهدف إلى جمع المبتكرين والمطورين لخلق حلول رائدة باستخدام تقنيات الذكاء الاصطناعي لمواجهة التحديات الحالية والمستقبلية في مختلف القطاعات.',
-		'tags' => ['AI', 'Big Data'],
-		'tags_ar' => ['الذكاء الاصطناعي', 'البيانات الضخمة'],
- 	];
-@endphp
-
 <body>
 	<!-- Include original navbar -->
 	<nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm">
@@ -212,6 +195,7 @@
 			<div class="hackathon-banner text-center">
 				<div class="banner-content">
 					<h1 class="display-5 fw-bold" id="hackathon-main-title"> {{ $program->title }} </h1>
+					<p class="lead">{{ $program->description }}</p>
 					<p class="lead" id="hackathon-dates-location">
 						<i class="ti ti-calendar-event me-2"></i>
 						{{ $program->ranges }}
@@ -227,15 +211,11 @@
 				</div>
 			</div>
 
+			@if( $pages->count() > 0 )
 			<ul class="nav nav-tabs nav-fill mb-4 pb-4" id="hackathonTab" role="tablist">
-				<li class="nav-item me-1" role="presentation">
-					<button class="nav-link rounded active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
-						<i class="bi bi-card-text me-2"></i> {{ $l == 'en' ? 'Overview' : 'نظرة عامة' }}
-					</button>
-				</li>
 				@foreach( $pages as $tab )
 					<li class="nav-item me-1" role="presentation">
-						<button class="nav-link rounded" id="{{ $tab->code }}-tab" data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab" aria-controls="{{ $tab->code }}" aria-selected="false">
+						<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab" data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab" aria-controls="{{ $tab->code }}" aria-selected="false">
 							<i class="bi bi-list me-2"></i> {{ $tab->title }}
 						</button>
 					</li>
@@ -243,23 +223,9 @@
 			</ul>
 
 			<div class="tab-content p-0 mb-12" id="hackathonTabContent">
-				<!-- Overview Tab -->
-				<div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-					<div class="card">
-						<div class="card-body">
-							<h5 class="card-title">
-								{{ $l == 'en' ? 'About the Program' : 'عن البرنامج' }}
-							</h5>
-							<p id="program-description">
-								{{ $program->description }}
-							</p>
-						</div>
-					</div>
-				</div>
-
 				<!-- Pages Tab -->
 				@foreach( $pages as $tab )
-				<div class="tab-pane fade" id="{{ $tab->code }}" role="tabpanel" aria-labelledby="{{ $tab->code }}-tab">
+				<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}" role="tabpanel" aria-labelledby="{{ $tab->code }}-tab">
 					<div class="card">
 						<div class="card-body">
 							{!! $tab->content !!}
@@ -268,6 +234,7 @@
 				</div>
 				@endforeach
 			</div>
+			@endif
 		</div>
 	</main>
 

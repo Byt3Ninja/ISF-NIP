@@ -199,6 +199,7 @@
 			<div class="hackathon-banner text-center">
 				<div class="banner-content">
 					<h1 class="display-5 fw-bold" id="hackathon-main-title"> {{ $program->title }} </h1>
+					<p class="lead">{{ $program->description }}</p>
 					<p class="lead" id="hackathon-dates-location">
 						<i class="ti ti-calendar-event me-2"></i>
 						{{ $program->ranges }}
