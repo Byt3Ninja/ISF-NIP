@@ -21,9 +21,12 @@ $tabsData = [
   ['results-winners', 'bi-trophy-fill', $l == 'en' ? 'Results & winners' : 'النتائج والفائزون'],
   ['submission', 'bi-upload', $l == 'en' ? 'Project Submission' : 'رفع المشاريع'],
   // ['results', 'bi-award-fill', $l == 'en' ? 'Results' : 'النتائج'],
-  ['mentorship', 'bi-award-fill', $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل'],
-  ['submissions', 'bi-award-fill', $l == 'en' ? 'Submissions' : 'الاجابات'],
+  ['mentorship', 'bi-award-fill', $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل']
 ];
+if($user->hasRole('admin')) {
+  $tabsData[] = ['submissions', 'bi-award-fill', $l == 'en' ? 'Submissions' : 'الاجابات'];
+}
+
 
 $tabs = collect($tabsData)->map(function ($tab) {
   return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];

@@ -181,6 +181,7 @@ class HackathonController extends Controller
     public function show($id) {
 
         $user = Auth::user();
+        $l = app()->getLocale();
         $step = Step::where('cycle_id', $id)->get();
          if(!$step){
             if($user->hasRole('admin') || $user->hasRole('organizationmanager')){
@@ -355,6 +356,7 @@ class HackathonController extends Controller
                             tf.description as tf_description,
                             tf.cycle_id as tf_cycle_id,
                             tf.step_id as tf_step_id,
+                            tf.img_team as tf_img_team,
                             tm.id as tm_id,
                             tm.user_id as tm_user_id,
                             tm.acceptInvition as tm_acceptInvition,
@@ -372,38 +374,46 @@ class HackathonController extends Controller
                             team_members as tm
                             LEFT JOIN team_formations as tf ON tm.team_formation_id = tf.id
                             LEFT JOIN users as u ON tm.user_id = u.id
+                            
                             WHERE tm.acceptInvition = 'accepted'";
                             $teams = collect(DB::select($teams_q));
             // $teamUser = $teams->where('tm_user_id', Auth::user()->id);
             // $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
             // dd($teams_with_user);
+            
             $teams = $teams->groupBy('tm_team_formation_id');
 
-          $teams = $teams->map(function ($group, $teamFormationId) {
+          $teams = $teams->map(function ($group, $teamFormationId) use ($id, $step, $user) {
     $first = $group->first();
 
     $team = new stdClass;
     $team->id = $first->tf_id;
     $team->name = $first->tf_name;
-    $team->description = $first->tf_description;
+    $team->desc = $first->tf_description;
     $team->cycle_id = $first->tf_cycle_id;
     $team->step_id = $first->tf_step_id;
-
+    $team->photo = $first->tf_img_team ?? null;
+    $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()->count_team_number;
+    $team->your_team = $group->where('tm_user_id', $user->id)->first()? true : false;
+    $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['pending', 'accepted'])->first()? true : false; //is_user_requested
+    $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first()? true : false; //is_user_member
+    $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
+    $team->is_user_leader = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->first()? true : false;
+    $team->members_limit = $team->max_members - $group->where('tm_acceptInvition', 'accepted')->count();
     // المستخدمين في هذا الفريق
-    $team->users = $group->map(function ($member) {
+    $team->members = $group->map(function ($member) {
         $user = new stdClass;
         $user->id = $member->u_id;
-        $user->name_en = $member->user_name_en;
-        $user->name_ar = $member->user_name_ar;
+        $user->name = $member->user_name_en;
         $user->email = $member->u_email;
         $user->img_url = $member->u_img_url;
         $user->is_leader = $member->tm_isTeamLeader;
         return $user;
-    });
+    })->values()->all();
 
     return $team;
 });
-
+        $teamsData = $teams->values()->all();
 
 // dd($teams);
                                 $allteams_q = "SELECT 
@@ -599,7 +609,7 @@ class HackathonController extends Controller
                 }
             }
             $trType = $fLink = null;
-            if ($company->approved) {
+            if ($company?->approved) {
                 $trType = 'my/' . $step->id;
             } else {
                 $fLink = 'view/' . $id;
@@ -714,7 +724,7 @@ class HackathonController extends Controller
          'data', 
          'l', 
          'id', 
-         'teams', 
+         'teamsData', 
          'allteams', 
          'team_invition', 
          'companyStep', 
@@ -889,6 +899,8 @@ class HackathonController extends Controller
             return redirect()->back()->with('error', 'You already have a team.');
         }
 
+         
+
         $teamformation = new TeamFormation();
         $teamformation->name = $request->team_name;
         $teamformation->description = $request->description;
@@ -901,6 +913,14 @@ class HackathonController extends Controller
         $teamformation->project_description_en = $request->Project_Description_en;
         $teamformation->target_track = $request->Target_Track ?? 0;
         $teamformation->project_status = $request->Project_Status ?? 0;
+
+        if ($request->hasFile('img_team')) {
+                    $image = $request->file('img_team');
+                    $imageName = time() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('programs/teams/'), $imageName);
+                    $teamformation->img_team = 'programs/teams/' . $imageName;
+                }
+
         $teamformation->save();
 
         

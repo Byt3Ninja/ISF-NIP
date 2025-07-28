@@ -1,49 +1,51 @@
 @php 
-  $teamsData = [
-    [
-      'name' => 'Hoda Test',
-      'photo' => 'https://placehold.co/400x180?text=Team+Hello+world',
-      'desc' => 'We are testing our awesome idea together.',
-      'members' => [
-        ['img_url' => 'https://placehold.co/40', 'name' => 'Hoda M'],
-        ['img_url' => null, 'name' => 'Mohamed S'],
-        ['img_url' => null, 'name' => 'Mohamed S'],
-        ['img_url' => null, 'name' => 'Mohamed S'],
-        ['img_url' => null, 'name' => 'Mohamed S'],
-        ['img_url' => null, 'name' => 'Mohamed S'],
-      ],
-      'max_members' => 10,
-      'your_team' => false,
-      'request_sent' => false,
-    ],
-    [
-      'name' => 'Tech Builders',
-      'photo' => 'https://placehold.co/400x180?text=Tech+Builders',
-      'desc' => 'Building next-gen tools for the future.',
-      'members' => [
-        ['img_url' => null, 'name' => 'Ali K'],
-        ['img_url' => 'https://placehold.co/40', 'name' => 'Rana J'],
-        ['img_url' => null, 'name' => 'Sara T'],
-      ],
-      'max_members' => 4,
-      'your_team' => false,
-      'request_sent' => false,
-    ],
-    [
-      'name' => 'Future Hackers',
-      'photo' => 'https://placehold.co/400x180?text=Future+Hackers',
-      'desc' => 'Exploring AI, robotics, and edge tech.',
-      'members' => [
-        ['img_url' => null, 'name' => 'Mona A'],
-        ['img_url' => null, 'name' => 'Ziad A'],
-        ['img_url' => 'https://placehold.co/40', 'name' => 'Omar F'],
-        ['img_url' => 'https://placehold.co/40', 'name' => 'Lina W'],
-      ],
-      'max_members' => 4,
-      'your_team' => false,
-      'request_sent' => false,
-    ],
-  ];
+// dd($teamsData);
+  // $teamsData = $teams ?? [];
+  // [
+  //   [
+  //     'name' => 'Hoda Test',
+  //     'photo' => 'https://placehold.co/400x180?text=Team+Hello+world',
+  //     'desc' => 'We are testing our awesome idea together.',
+  //     'members' => [
+  //       ['img_url' => 'https://placehold.co/40', 'name' => 'Hoda M'],
+  //       ['img_url' => null, 'name' => 'Mohamed S'],
+  //       ['img_url' => null, 'name' => 'Mohamed S'],
+  //       ['img_url' => null, 'name' => 'Mohamed S'],
+  //       ['img_url' => null, 'name' => 'Mohamed S'],
+  //       ['img_url' => null, 'name' => 'Mohamed S'],
+  //     ],
+  //     'max_members' => 10,
+  //     'your_team' => false,
+  //     'request_sent' => false,
+  //   ],
+  //   [
+  //     'name' => 'Tech Builders',
+  //     'photo' => 'https://placehold.co/400x180?text=Tech+Builders',
+  //     'desc' => 'Building next-gen tools for the future.',
+  //     'members' => [
+  //       ['img_url' => null, 'name' => 'Ali K'],
+  //       ['img_url' => 'https://placehold.co/40', 'name' => 'Rana J'],
+  //       ['img_url' => null, 'name' => 'Sara T'],
+  //     ],
+  //     'max_members' => 4,
+  //     'your_team' => false,
+  //     'request_sent' => false,
+  //   ],
+  //   [
+  //     'name' => 'Future Hackers',
+  //     'photo' => 'https://placehold.co/400x180?text=Future+Hackers',
+  //     'desc' => 'Exploring AI, robotics, and edge tech.',
+  //     'members' => [
+  //       ['img_url' => null, 'name' => 'Mona A'],
+  //       ['img_url' => null, 'name' => 'Ziad A'],
+  //       ['img_url' => 'https://placehold.co/40', 'name' => 'Omar F'],
+  //       ['img_url' => 'https://placehold.co/40', 'name' => 'Lina W'],
+  //     ],
+  //     'max_members' => 4,
+  //     'your_team' => false,
+  //     'request_sent' => false,
+  //   ],
+  // ];
 @endphp
 
 <div class="card">
@@ -73,32 +75,33 @@
       @foreach($teamsData as $team)
       <div class="col-md-4">
         <div class="card shadow-sm">
-          <img src="{{ $team['photo'] }}" class="team-photo" alt="Team Photo">
+          <img src="{{ $team->photo ? asset($team->photo) : 'https://placehold.co/400x180?text='.$team->name }}" class="team-photo" alt="Team Photo">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="card-title mb-0">{{ $team['name'] }}</h5>
-              @if(!empty($team['your_team']))
+              <h5 class="card-title mb-0">{{ $team->name }}</h5>
+              @if(!empty($team->your_team))
                 <span class="badge bg-label-success text-sm">
                   {{ $l == 'en' ? 'Your Team' : 'فريقك' }}
                 </span>
               @endif
             </div>
-            <p class="card-text small">{{ $team['desc'] }}</p>
+            <p class="card-text small">{{ $team->desc }}</p>
             <p class="text-muted mb-2">
-              {{ count($team['members']) }} / {{ $team['max_members'] }} {{ $l == 'en' ? 'Members' : 'أعضاء' }}
+              {{ count($team->members) }} / {{ $team->max_members }} {{ $l == 'en' ? 'Members' : 'أعضاء' }}
             </p>
             <div class="d-flex align-items-center gap-2 mb-3">
               @php
               $maxAvatars = 4;
-              $memberCount = count($team['members']);
-              $displayMembers = array_slice($team['members'], 0, $maxAvatars);
+              $memberCount = count($team->members);
+              $displayMembers = array_slice($team->members, 0, $maxAvatars);
               @endphp
               @foreach($displayMembers as $member)
-              @if(!empty($member['img_url']))
-                <img src="{{ $member['img_url'] }}" class="w-px-40 h-px-40 rounded-circle" alt="{{ $member['name'] }}">
+              @if(!empty($member->img_url))
+                {{-- <img src="{{ $member->img_url }}" class="w-px-40 h-px-40 rounded-circle" alt="{{ $member->name }}"> --}}
+                <img src="{{ $member->img_url ?? '/images/user-placeholder.jpeg' }}" class="w-px-40 h-px-40 rounded-circle" alt="img" onerror="this.onerror=null; this.src='/images/user-placeholder.jpeg';" >
               @else
                 <div class="w-px-40 h-px-40 rounded-circle bg-light d-flex align-items-center justify-content-center">
-                {{ strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $member['name']), 0, 2)) }}
+                {{ strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $member->name), 0, 2)) }}
                 </div>
               @endif
               @endforeach
@@ -114,18 +117,29 @@
               </a>
               @php
                 // Simulate dynamic action logic as if from DB/user state
-                $isFull = count($team['members']) >= $team['max_members'];
-                $isYourTeam = !empty($team['your_team']);
-                $requestSent = !empty($team['request_sent']);
+                $isFull = count($team->members) >= $team->max_members;
+                $isYourTeam = !empty($team->your_team);
+                $requestSent = !empty($team->request_sent);
+                $alreadyJoined = !empty($team->already_joined);
               @endphp
-              @if($isYourTeam && $requestSent)
-                <button class="btn btn-outline-secondary btn-sm" disabled>
-                  {{ $l == 'en' ? 'Request Sent' : 'تم إرسال الطلب' }}
+              @if($isYourTeam)
+              <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
+                    {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
+                </a>
+              @elseif($requestSent)
+                 <button class="btn btn-outline-secondary btn-sm" disabled>
+                {{ $l == 'en' ? 'Request Sent' : 'تم إرسال الطلب' }}
                 </button>
               @elseif($isFull)
                 <button class="btn btn-secondary btn-sm" disabled>{{ $l == 'en' ? 'Full' : 'ممتلئ' }}</button>
               @else
-                <button class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>
+              
+              <form action="/dashboard/hackathon/RequestJoin" method="POST">
+                @csrf
+                <input type="hidden" name="id" value="{{ $team->id }}">
+                <button type="submit" class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>
+              </form>
+             
               @endif
             </div>
           </div>
