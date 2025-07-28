@@ -388,32 +388,45 @@ class HackathonController extends Controller
 
     $team = new stdClass;
     $team->id = $first->tf_id;
+    $team->user_id = $first->tm_user_id;
     $team->name = $first->tf_name;
     $team->desc = $first->tf_description;
     $team->cycle_id = $first->tf_cycle_id;
     $team->step_id = $first->tf_step_id;
     $team->photo = $first->tf_img_team ?? null;
+
     $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()->count_team_number;
-    $team->your_team = $group->where('tm_user_id', $user->id)->first()? true : false;
-    $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['pending', 'accepted'])->first()? true : false; //is_user_requested
-    $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first()? true : false; //is_user_member
-    $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
+
+    $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members;
     $team->is_user_leader = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->first()? true : false;
-    $team->members_limit = $team->max_members - $group->where('tm_acceptInvition', 'accepted')->count();
+    $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first()? true : false; //is_user_member
+    $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['pending', 'accepted'])->first()? true : false; //is_user_requested
+    $team->your_team = $group->where('tm_user_id', $user->id)->first()? true : false; //is_user_has_team
+    $team->can_request_to_join = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'pending')->first()? true : false;
+// 
     // المستخدمين في هذا الفريق
-    $team->members = $group->map(function ($member) {
+    $team->members = $group->map(function ($member) use ($id, $step) {
         $user = new stdClass;
         $user->id = $member->u_id;
         $user->name = $member->user_name_en;
         $user->email = $member->u_email;
         $user->img_url = $member->u_img_url;
         $user->is_leader = $member->tm_isTeamLeader;
+        $user->can_request_to_join = $member->tm_acceptInvition == 'pending' ? true : false;
+        $user->is_not_team = $member->tm_acceptInvition == null ? true : false;
+        $user->your_team = $member->tm_user_id == Auth::user()->id ? true : false;
+        $user->request_sent = $member->tm_acceptInvition == 'pending' ? true : false;
+        $user->already_joined = $member->tm_acceptInvition == 'accepted' ? true : false;
+        $user->is_user_leader = $member->tm_user_id == Auth::user()->id ? true : false;
+    
+
         return $user;
     })->values()->all();
 
     return $team;
 });
         $teamsData = $teams->values()->all();
+
 
 // dd($teams);
                                 $allteams_q = "SELECT 

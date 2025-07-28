@@ -115,13 +115,37 @@
               <a href="/dashboard/hackathon/team/{{ $team->id }}" class="btn btn-outline-primary btn-sm">
                 {{ $l == 'en' ? 'View Team' : 'عرض الفريق' }}
               </a>
+              {{-- @if ($team->is_full)
+                        <button class="btn btn-secondary w-100" disabled>Full</button>
+
+                    @elseif ($team->is_user_leader)
+                        <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-primary w-100">Manage My Team</a>
+
+                    @elseif ($team->already_joined)
+                        <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-primary w-100">View My Team</a>
+
+                    @elseif ($team->request_sent)
+                        <button class="btn btn-warning w-100" disabled>Pending Approval</button>
+
+                    @elseif ($team->is_not_team || $team->can_request_to_join)
+                        <form action="/dashboard/hackathon/RequestJoin" method="POST">
+                          @csrf
+                          <input type="hidden" name="id" value="{{ $team->id }}">
+                          <button type="submit" class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>
+                        </form>
+                    @endif --}}
+
               @php
                 // Simulate dynamic action logic as if from DB/user state
                 $isFull = count($team->members) >= $team->max_members;
                 $isYourTeam = !empty($team->your_team);
                 $requestSent = !empty($team->request_sent);
                 $alreadyJoined = !empty($team->already_joined);
+                $authUser = auth()->user();
+                $member_ids = collect($team->members)->pluck('id')->toArray();
+
               @endphp
+              {{-- {{ dd(in_array($authUser->id, $member_ids)) }}  --}}
               @if($isYourTeam)
               <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
                     {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
@@ -132,7 +156,7 @@
                 </button>
               @elseif($isFull)
                 <button class="btn btn-secondary btn-sm" disabled>{{ $l == 'en' ? 'Full' : 'ممتلئ' }}</button>
-              @else
+              @elseif(!in_array($authUser->id, $member_ids))
               
               <form action="/dashboard/hackathon/RequestJoin" method="POST">
                 @csrf
