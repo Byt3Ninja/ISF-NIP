@@ -29,7 +29,6 @@ class CompanyResource extends JsonResource
             foreach (json_decode($this->Sustainable_development) as $sdgKey) {
                 if (isset($sdgMap[$sdgKey])) {
                     $sdgs[] = [
-                        'id' => $sdgMap[$sdgKey]['id'],
                         'name' => $sdgMap[$sdgKey][$locale] ?? $sdgMap[$sdgKey]['en'],
                     ];
                 }

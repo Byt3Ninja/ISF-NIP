@@ -31,7 +31,6 @@ class CompanyProfileResource extends JsonResource
             foreach (json_decode($this->Sustainable_development) as $sdgKey) {
                 if (isset($sdgMap[$sdgKey])) {
                     $sdgs[] = [
-                        'id' => $sdgMap[$sdgKey]['id'],
                         'name' => $sdgMap[$sdgKey][$locale] ?? $sdgMap[$sdgKey]['en'],
                     ];
                 }
@@ -56,7 +55,6 @@ class CompanyProfileResource extends JsonResource
             'teamNum' => $this->team_num,
             'workingTeamSummary' => $this->working_team_summary,
             'stage' => [
-                'id' => $this->stagE?->id,
                 'name' => $this->stagE?->{"name_$locale"},
             ],
             'fundingStage' => $this->development_stage,
@@ -86,6 +84,7 @@ class CompanyProfileResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'address' => $this->address_en,
+            'productPhoto' => $this->product_photo,
             'pitchDeckSummary' => $this->pitch_deck_summary,
             'businessModelDescription' => $this->business_model_description,
             'SustainableDevelopment' => $sdgs,
