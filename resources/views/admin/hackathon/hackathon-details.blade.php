@@ -16,7 +16,7 @@ $tabsData = [
   // ['schedule', 'bi-calendar2-week-fill', $l == 'en' ? 'Schedule' : 'جدول الأعمال'],
   // ['prizes', 'bi-trophy-fill', $l == 'en' ? 'Prizes' : 'الجوائز'],
   // ['evaluation', 'bi-clipboard-check-fill', $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم'],
-  ['mentors', 'bi-person-video3', $l == 'en' ? 'Mentors & Judges' : 'المرشدون والمحكمون'],
+  ['mentors', 'bi-person-video3', $l == 'en' ? 'Mentors ' : 'المرشدون '],
   ['teams', 'bi-people-fill', $l == 'en' ? 'Teams' : ' الفرق'],
   ['results-winners', 'bi-trophy-fill', $l == 'en' ? 'Results & winners' : 'النتائج والفائزون'],
   ['submission', 'bi-upload', $l == 'en' ? 'Project Submission' : 'رفع المشاريع'],
@@ -111,6 +111,9 @@ $tabs = collect($tabsData)->map(function ($tab) {
 <!-- Terms Modal (nested for hackathon details page) -->
 @include('admin.hackathon.partials.terms-modal')
 
+<!-- Session Modal -->
+@include('admin.clients.startup.partials._session_modal')
+
 {{--
 <footer class="footer mt-auto py-3 bg-dark text-white">
   <div class="container text-center">
@@ -124,6 +127,7 @@ $tabs = collect($tabsData)->map(function ($tab) {
 @stop
 
 @section('scripts')
+<script src="/vuexy/assets/js/mentorship-session.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.jQuery && $.fn.DataTable) {
@@ -361,6 +365,25 @@ $tabs = collect($tabsData)->map(function ($tab) {
       location.reload();
     }
   }
+let urlParams = new URLSearchParams(window.location.search);
+    let tab = urlParams.get('tab');
+
+    if (typeof(tab) !== 'undefined' && tab !== null) {
+        $("#" + tab).trigger("click");
+    } else {
+        $("#overview-tab").trigger("click");
+    }
+
+    // عند الضغط على أي تبويب، أطبع الـ ID
+    $(".nav-tabs .nav-link").on("click", function() {
+        let tabId = $(this).attr("id");
+        console.log("تم الضغط على التاب:", tabId);
+
+        // لو عايز تحدث الرابط في المتصفح بدون تحديث الصفحة:
+        let newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('tab', tabId);
+        window.history.replaceState({}, '', newUrl);
+    });
 </script>
 @stop
 
