@@ -4,8 +4,8 @@
     <h5 class="card-title">
       {{ $l == 'en' ? 'Former Submissions Requests' : 'طلبات تقديم الشركات' }}
     </h5>
-    <table class="table table-striped">
-      <thead>
+    <table class="table">
+      <thead class="table-light">
         <tr>
           <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>
           <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الاليكترونى' }}</th>
