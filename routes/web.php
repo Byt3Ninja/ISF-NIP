@@ -125,6 +125,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/RejectedRequestJoin', 'HackathonController@RejectedRequestJoin')->name('hackathon.RejectedRequestJoin');
     Route::get('hackathon/viewSubmission/{step_id}/{user_id}', 'HackathonController@ViewSubmission')->name('hackathon.ViewSubmission');
     Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
+    // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
+    Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
 
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');

@@ -83,9 +83,15 @@
 <div class="container mt-4">
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
     <h1 class="fw-bold">{{ __('admin.management_dashboard') }}</h1>
-    <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createHackathonModal">
+    @php
+      $idParam = request()->route('id');
+    @endphp
+    <a class="btn btn-primary btn-lg" href="/dashboard/hackathon/dashboard/winners/{{ $idParam }}" role="button">
+      <i class="bi-trophy-fill me-2"></i> {{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
+    </a>
+    {{-- <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createHackathonModal">
       <i class="bi bi-plus-circle-fill me-2"></i> {{ __('admin.create_new_hackathon') }}
-    </button>
+    </button> --}}
   </div>
 
   <!-- Stats Cards -->

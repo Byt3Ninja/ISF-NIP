@@ -1281,4 +1281,10 @@ class HackathonController extends Controller
       
         return view('admin.hackathon.admin.dashboard_admin');
     }
+   
+    public function viewHackathonWinners($id)
+    {
+
+        return view('admin.hackathon.admin.winners');
+    }
 }
