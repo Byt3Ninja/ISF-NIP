@@ -541,8 +541,8 @@
 													<td>{{ $key + 1 }}</td>
 													<td>{{ __('cycles.' . $session->type) }}</td>
 													<td>{{ $session->title }}</td>
-													<td>{{ $session->datetime }}</td>
-													<td>{{ $session->end_datetime ?? '-' }}</td>
+													<td>{{ FormatDate($session->datetime, 'Y-m-d H:i A') ?? '-' }} </td>
+													<td>{{ FormatDate($session->end_datetime, 'Y-m-d H:i A') ?? '-' }}</td>
 													<td>
 														@if( $session->type == 'sessions' )
 														{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :

@@ -137,6 +137,9 @@ class HackathonController extends Controller
         LEFT JOIN cycles as cy ON cy.id = tf.cycle_id
         WHERE tm.team_formation_id = ? ";
         $team_Formation_raw = collect(DB::select($team_Formation, [$id]));
+        if($team_Formation_raw->isEmpty()){
+            return redirect()->back()->with('error', 'Team Formation not found');
+        }
         $step = Step::where('cycle_id', $team_Formation_raw->first()->tf_cycle_id)
             ->where('stype', '6')
             ->first();
