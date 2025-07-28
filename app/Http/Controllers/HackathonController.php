@@ -724,7 +724,8 @@ class HackathonController extends Controller
             }else{
                 $cType = 0;
             }
-
+            
+                
         // return view('admin.hackathon.show', compact('hackathon'));
         return view('admin.hackathon.hackathon-details', compact('currentHackathon',
          'data', 
@@ -737,7 +738,6 @@ class HackathonController extends Controller
          'count_team',
          'answers', 
          'data_evi', 
-         'mentors', 
          'judges_users',
          'nextSessions',
          'sessions',
