@@ -43,4 +43,6 @@ return [
 	'organizationUpdateFailed' => 'فشل في تحديث المؤسسة',
 	'organizationDeleted' => 'تم حذف المؤسسة بنجاح',
 	'Organization cannot be deleted' => 'لا يمكن حذف المؤسسة لانها مرتبطة ببرامج او شركات نشطة',
+	'company_not_found' => 'الشركة غير موجودة',
+	'organizationNotFound' => 'المؤسسة غير موجودة',
 ];

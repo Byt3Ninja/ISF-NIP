@@ -281,7 +281,10 @@ public function update(UpdateOrganizationRequest $request, $id)
     if (!$user->ableToAny(['organizations.edit', 'organizations.update'])) {
         return $this->forbidden(__('api.forbidden'));
     }
-    $organization = Organization::findOrFail($id);
+    $organization = Organization::find($id);
+    if (empty($organization)) {
+        return $this->error(__('api.organizationNotFound'), 404);
+    }
     $user = $organization->user;
 
     $data = $request->validated();
@@ -368,7 +371,10 @@ public function destroy($id)
         return $this->forbidden(__('api.forbidden'));
     }
 
-    $organization = Organization::with(['cycles', 'cycles.companies'])->findOrFail($id);
+    $organization = Organization::with(['cycles', 'cycles.companies'])->find($id);
+    if (!$organization) {
+        return $this->notFound(__('api.organizationNotFound'));
+    }
 
     $hasCycles = $organization->cycles()->exists();
     $hasCompanies = $organization->cycles->flatMap->companies->isNotEmpty();
