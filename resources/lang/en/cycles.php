@@ -424,5 +424,7 @@ return [
     'Score' => 'Score',
     'General_Program' => 'General_Program',
     'Hackathon' => 'Hackathon',
+    'Display course contents' => 'Display course contents',
+
 ];
 

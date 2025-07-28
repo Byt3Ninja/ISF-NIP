@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ProgramController;
@@ -42,7 +44,6 @@ Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/countries', [CountryController::class, 'index']);
-    Route::get('/organizations', [OrganizationController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
@@ -63,6 +64,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mentors/{mentor_id}/weekly-slots', [ScheduleController::class, 'index']);
     Route::get('/slots/{id}', [ScheduleController::class, 'show']);
     Route::get('/v1/mentors', [MentorController::class, 'index']);
+    Route::get('/organizations', [OrganizationController::class, 'index']);
+    Route::post('/organizations', [OrganizationController::class, 'store']);
+    Route::post('/organizations/{organization}', [OrganizationController::class, 'update']);
+    Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
+    Route::get('/startups', [CompanyController::class, 'index']);
+    Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
+    Route::get('/sectors', [SectorController::class, 'index']);
+    Route::get('/states', [SectorController::class, 'getStates']);
 });
 
 

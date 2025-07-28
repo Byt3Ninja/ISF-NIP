@@ -326,4 +326,9 @@ class Company extends Model
             '5' => 'Operating / Shipping',
         ];
     }
+
+    public function teamMembers()
+{
+    return $this->hasMany(Team_member::class, 'Company_id');
+}
 }

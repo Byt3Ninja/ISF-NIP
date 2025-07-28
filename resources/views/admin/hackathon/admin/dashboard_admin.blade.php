@@ -1,431 +1,440 @@
-<!DOCTYPE html>
-<html 
-  lang="{{ $l }}" 
-  dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" 
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-  class="light-style layout-navbar-fixed layout-compact" 
-  data-theme="theme-default" 
-  data-assets-path="/vuexy/assets/"
-  data-template="vertical-menu-template" 
-  data-style="light"
->
- <style>
-        body { font-family: 'Tajawal', sans-serif; background-color: #f8f9fa; }
-        .navbar { background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
-        .footer { background-color: #343a40; color: white; padding: 20px 0; text-align: center; }
-        .stat-card { text-align: center; }
-        .stat-card .display-4 { font-weight: bold; }
-        .chart-container { position: relative; margin: auto; height: 350px; width: 100%; background-color: #fff; padding: 1rem; border-radius: .25rem; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); }
-        
-        .tags-input-wrapper {
-            background: white;
-            padding: 0.5rem;
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .tag-item {
-            background-color: #0d6efd;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            margin: 0.25rem;
-            display: flex;
-            align-items: center;
-            font-size: 0.9em;
-        }
-        .tag-item .remove-tag {
-            background: none;
-            border: none;
-            color: white;
-            margin-left: 0.5rem; 
-            cursor: pointer;
-            font-size: 1.1em;
-            line-height: 1;
-        }
-        .tags-input-wrapper input[type="text"] {
-            border: none;
-            outline: none;
-            flex-grow: 1;
-            padding: 0.25rem;
-            min-width: 150px;
-        }
-        .dynamic-entry { 
-            border: 1px dashed #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: .25rem;
-            position: relative;
-            background-color: #fff; /* Explicit white background */
-        }
-        .remove-entry-btn { 
-            position: absolute;
-            top: 50%; /* Center vertically */
-            transform: translateY(-50%);
-            left: 10px; /* Adjusted for RTL and padding */
-        }
-        /* Specific adjustment for remove button column to align button nicely */
-        .dynamic-entry .col-md-2.remove-btn-col, .dynamic-entry .col-auto.remove-btn-col {
-            display: flex;
-            align-items: center; /* Vertically align button if entry uses align-items-start */
-            justify-content: center; /* Center button in its column */
-        }
-        .total-weight {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-top: 0.5rem;
-        }
-    </style>
-<head>
-  @include('admin.includes.head')
+@extends('layouts.hr-admin')
 
-  <!-- Additional Styles -->
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
-</head>
+@section('style')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+<style>
+  .stat-card {
+    text-align: center;
+  }
 
+  .stat-card .display-4 {
+    font-weight: bold;
+  }
 
+  .chart-container {
+    position: relative;
+    margin: auto;
+    height: 350px;
+    width: 100%;
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: .25rem;
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+  }
 
-<body>
+  .tags-input-wrapper {
+    background: white;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
+  .tag-item {
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin: 0.25rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+  }
 
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.html">
-            <i class="bi bi-lightning-charge-fill text-primary"></i> منصة الهاكثونات
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html"><i class="bi bi-house-door-fill"></i> الرئيسية (عرض المستخدم)</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle"></i> مرحباً، [اسم المدير]
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
-                        <li><a class="dropdown-item" href="admin-dashboard.html"><i class="bi bi-speedometer2"></i> لوحة التحكم الرئيسية</a></li>
-                        <li><a class="dropdown-item" href="#manage-users-section"><i class="bi bi-people-fill"></i> إدارة المستخدمين</a></li>
-                        <li><a class="dropdown-item" href="#manage-teams-section"><i class="bi bi-diagram-3-fill"></i> إدارة الفرق</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right"></i> تسجيل الخروج</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+  .tag-item .remove-tag {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+  }
 
+  .tags-input-wrapper input[type="text"] {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    padding: 0.25rem;
+    min-width: 150px;
+  }
+
+  .dynamic-entry {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: .25rem;
+    position: relative;
+    background-color: #fff;
+    /* Explicit white background */
+  }
+
+  .total-weight {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-top: 0.5rem;
+  }
+</style>
+@stop
+
+@section('content')
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold">لوحة تحكم الإدارة</h1>
-        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createHackathonModal">
-            <i class="bi bi-plus-circle-fill me-2"></i> إنشاء هاكثون جديد
-        </button>
-    </div>
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">{{ __('admin.management_dashboard') }}</h1>
+    @php
+      $idParam = request()->route('id');
+    @endphp
+    <a class="btn btn-primary btn-lg" href="/dashboard/hackathon/dashboard/winners/{{ $idParam }}" role="button">
+      <i class="bi-trophy-fill me-2"></i> {{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
+    </a>
+    {{-- <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createHackathonModal">
+      <i class="bi bi-plus-circle-fill me-2"></i> {{ __('admin.create_new_hackathon') }}
+    </button> --}}
+  </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4 g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
-        <div class="col">
-            <div class="card stat-card border-primary shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-calendar3-event display-4 text-primary mb-2"></i>
-                    <h5 class="card-title">الهاكثونات النشطة</h5>
-                    <p class="card-text display-4">3</p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card stat-card border-success shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-person-check-fill display-4 text-success mb-2"></i>
-                    <h5 class="card-title">إجمالي المسجلين</h5>
-                    <p class="card-text display-4">1,250</p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card stat-card border-info shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-people-fill display-4 text-info mb-2"></i>
-                    <h5 class="card-title">الفرق المتكونة</h5>
-                    <p class="card-text display-4">280</p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card stat-card border-secondary shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                    <i class="bi bi-person-video3 display-4 text-secondary mb-2"></i>
-                    <h5 class="card-title">إدارة الإرشاد</h5>
-                    <p class="mb-2">طلبات جديدة: <span class="badge bg-danger rounded-pill">5</span></p>
-                    <div class="mt-auto">
-                        <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal" data-bs-target="#manageMentorsModal"><i class="bi bi-person-badge-fill me-1"></i> إدارة المرشدين</button>
-                        <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal" data-bs-target="#viewMentorshipRequestsModal"><i class="bi bi-card-list me-1"></i> طلبات الإرشاد</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="row mb-4 g-3">
-        <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="registrationsChart"></canvas>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="submissionsPerTrackChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="row mb-4 g-3">
-        <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="teamsStatusChart"></canvas>
-            </div>
-        </div>
-         <div class="col-md-6">
-            <div class="chart-container">
-                <canvas id="hackathonEngagementChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Manage Hackathons Table -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="bi bi-list-task me-2"></i> إدارة الهاكثونات</h4>
-        </div>
+  <!-- Stats Cards -->
+  <div class="row mb-4 g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
+    <div class="col">
+      <div class="card stat-card border-primary shadow-sm h-100">
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>اسم الهاكثون</th>
-                            <th>التاريخ</th>
-                            <th>الحالة</th>
-                            <th>المسجلون</th>
-                            <th>الفرق</th>
-                            <th>المشاريع</th>
-                            <th>إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>هاكثون مستقبل الذكاء الاصطناعي</td>
-                            <td>15-17 مارس 2024</td>
-                            <td><span class="badge bg-warning text-dark">جاري التقديم</span></td>
-                            <td>150</td>
-                            <td>30</td>
-                            <td>-</td>
-                            <td>
-                                <a href="hackathon-details.html?id=1" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="عرض التفاصيل"><i class="bi bi-eye-fill"></i></a>
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createHackathonModal" data-hackathon-id="1" onclick="loadHackathonForEdit(this)" data-bs-toggle="tooltip" title="تعديل"><i class="bi bi-pencil-fill"></i></button>
-                                <a href="judging-portal.html?hackathonId=1" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="بوابة التحكيم"><i class="bi bi-clipboard2-check-fill"></i></a>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="حذف"><i class="bi bi-trash-fill"></i></button>
-                            </td>
-                        </tr>
-                        <!-- More hackathons -->
-                    </tbody>
-                </table>
-            </div>
+          <i class="bi bi-calendar3-event display-4 text-primary mb-2"></i>
+          <h5 class="card-title">{{ __('admin.active_hackathons') }}</h5>
+          <p class="card-text display-4">3</p>
         </div>
+      </div>
     </div>
-
-    <!-- Manage Teams Table -->
-    <div class="card shadow-sm mb-4" id="manage-teams-section">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i> إدارة الفرق المشاركة</h4>
-        </div>
+    <div class="col">
+      <div class="card stat-card border-success shadow-sm h-100">
         <div class="card-body">
-             <div class="row mb-3">
-                <div class="col-md-4">
-                    <select class="form-select" id="filterTeamsByHackathon">
-                        <option selected value="">فلترة حسب الهاكثون...</option>
-                        <option value="1">هاكثون مستقبل الذكاء الاصطناعي</option>
-                        <option value="2">هاكثون حلول الاستدامة</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control" placeholder="بحث عن فريق (اسم الفريق, اسم القائد)...">
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>اسم الفريق</th>
-                            <th>الهاكثون</th>
-                            <th>قائد الفريق</th>
-                            <th>عدد الأعضاء</th>
-                            <th>تاريخ الإنشاء</th>
-                            <th>إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>فريق الأبطال</td>
-                            <td>هاكثون مستقبل الذكاء الاصطناعي</td>
-                            <td>أحمد محمد (ahmad@example.com)</td>
-                            <td>4/5</td>
-                            <td>05 مارس 2024</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal" data-team-id="t001"><i class="bi bi-eye-fill"></i> تفاصيل</button>
-                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill"></i> مراسلة</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+          <i class="bi bi-person-check-fill display-4 text-success mb-2"></i>
+          <h5 class="card-title">{{ __('admin.total_registrants') }}</h5>
+          <p class="card-text display-4">1,250</p>
         </div>
+      </div>
     </div>
-    
-    <div class="card shadow-sm mb-4" id="manage-users-section">
-        <div class="card-header">
-            <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> إدارة المستخدمين</h4>
-        </div>
+    <div class="col">
+      <div class="card stat-card border-info shadow-sm h-100">
         <div class="card-body">
-            <p class="text-muted">سيتم هنا عرض جدول لإدارة المستخدمين...</p>
+          <i class="bi bi-people-fill display-4 text-info mb-2"></i>
+          <h5 class="card-title">{{ __('admin.teams_formed') }}</h5>
+          <p class="card-text display-4">280</p>
         </div>
+      </div>
     </div>
+    <div class="col">
+      <div class="card stat-card border-secondary shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <i class="bi bi-person-video3 display-4 text-secondary mb-2"></i>
+          <h5 class="card-title">{{ __('admin.mentorship_management') }}</h5>
+          <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">5</span>
+          </p>
+          <div class="mt-auto">
+            <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
+              data-bs-target="#manageMentorsModal"><i class="bi bi-person-badge-fill me-1"></i> {{
+              __('admin.manage_mentors') }}</button>
+            <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
+              data-bs-target="#viewMentorshipRequestsModal"><i class="bi bi-card-list me-1"></i> {{
+              __('admin.mentorship_requests') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Charts Section (Content is dynamic) -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="registrationsChart"></canvas></div>
+    </div>
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="submissionsPerTrackChart"></canvas></div>
+    </div>
+  </div>
+  <div class="row mb-4 g-3">
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="teamsStatusChart"></canvas></div>
+    </div>
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="hackathonEngagementChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Manage Hackathons Table -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-list-task me-2"></i> {{ __('admin.manage_hackathons') }}</h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>{{ __('admin.hackathon_name') }}</th>
+              <th>{{ __('admin.date') }}</th>
+              <th>{{ __('admin.status') }}</th>
+              <th>{{ __('admin.registrants') }}</th>
+              <th>{{ __('admin.teams') }}</th>
+              <th>{{ __('admin.projects') }}</th>
+              <th>{{ __('admin.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            <tr>
+              <td>{{ __('admin.future_of_ai_hackathon') }}</td>
+              <td>{{ __('admin.march_15_17_2024') }}</td>
+              <td><span class="badge bg-warning text-dark">{{ __('admin.application_in_progress')
+                  }}</span></td>
+              <td>150</td>
+              <td>30</td>
+              <td>-</td>
+              <td>
+                <a href="hackathon-details.html?id=1" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip"
+                  title="{{ __('admin.view_details') }}"><i class="bi bi-eye-fill"></i></a>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                  data-bs-target="#createHackathonModal" data-hackathon-id="1" onclick="loadHackathonForEdit(this)"
+                  data-bs-toggle="tooltip" title="{{ __('admin.edit') }}"><i class="bi bi-pencil-fill"></i></button>
+                <a href="judging-portal.html?hackathonId=1" class="btn btn-sm btn-outline-success"
+                  data-bs-toggle="tooltip" title="{{ __('admin.judging_portal') }}"><i
+                    class="bi bi-clipboard2-check-fill"></i></a>
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
+                  title="{{ __('admin.delete') }}"><i class="bi bi-trash-fill"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Teams Table -->
+  <div class="card shadow-sm mb-4" id="manage-teams-section">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i> {{ __('admin.manage_participating_teams') }}</h4>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <select class="form-select" id="filterTeamsByHackathon">
+            <option selected value="">{{ __('admin.filter_by_hackathon') }}</option>
+            <option value="1">{{ __('admin.future_of_ai_hackathon') }}</option>
+            <option value="2">{{ __('admin.sustainability_solutions_hackathon') }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <input type="text" class="form-control" placeholder="{{ __('admin.search_for_team') }}">
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>{{ __('admin.team_name') }}</th>
+              <th>{{ __('admin.hackathon') }}</th>
+              <th>{{ __('admin.team_leader') }}</th>
+              <th>{{ __('admin.number_of_members') }}</th>
+              <th>{{ __('admin.creation_date') }}</th>
+              <th>{{ __('admin.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            <tr>
+              <td>{{ __('admin.champions_team') }}</td>
+              <td>{{ __('admin.future_of_ai_hackathon') }}</td>
+              <td>أحمد محمد (ahmad@example.com)</td>
+              <td>4/5</td>
+              <td>05 مارس 2024</td>
+              <td>
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
+                  data-team-id="t001"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details') }}</button>
+                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
+                  __('admin.message') }}</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4" id="manage-users-section">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.manage_users') }}</h4>
+    </div>
+    <div class="card-body">
+      <p class="text-muted">{{ __('admin.user_management_table_placeholder') }}</p>
+    </div>
+  </div>
 </div>
 
 
 <!-- Create/Edit Hackathon Modal -->
-<div class="modal fade" id="createHackathonModal" tabindex="-1" aria-labelledby="createHackathonModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+<div class="modal fade" id="createHackathonModal" tabindex="-1" aria-labelledby="createHackathonModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="createHackathonModalLabel">إنشاء هاكثون جديد</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="createHackathonModalLabel">{{ __('admin.create_new_hackathon') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
         <form id="createHackathonForm">
-            <input type="hidden" id="hackathonEditId">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="hackathonName" class="form-label">اسم الهاكثون <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="hackathonName" required>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label for="hackathonType" class="form-label">نوع الهاكثون <span class="text-danger">*</span></label>
-                    <select class="form-select" id="hackathonType" required>
-                        <option value="virtual">افتراضي</option>
-                        <option value="hybrid">هجين</option>
-                        <option value="physical">حضوري</option>
-                    </select>
-                </div>
-                 <div class="col-md-3 mb-3">
-                    <label for="teamCapacity" class="form-label">الحد الأقصى لأعضاء الفريق <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="teamCapacity" min="1" max="10" value="5" required>
-                </div>
+          <input type="hidden" id="hackathonEditId">
+
+          <!-- Basic Information -->
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="hackathonName" class="form-label">{{ __('admin.hackathon_name') }} <span
+                  class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="hackathonName" required>
             </div>
+            <div class="col-md-3">
+              <label for="hackathonType" class="form-label">{{ __('admin.hackathon_type') }} <span
+                  class="text-danger">*</span></label>
+              <select class="form-select" id="hackathonType" required>
+                <option value="virtual">{{ __('admin.virtual') }}</option>
+                <option value="hybrid">{{ __('admin.hybrid') }}</option>
+                <option value="physical">{{ __('admin.physical') }}</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="teamCapacity" class="form-label">{{ __('admin.max_team_members') }} <span
+                  class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="teamCapacity" min="1" max="10" value="5" required>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mt-3">
+            <label for="hackathonDescription" class="form-label">{{ __('admin.description') }} <span
+                class="text-danger">*</span></label>
+            <textarea class="form-control" id="hackathonDescription" rows="3" required></textarea>
+          </div>
+
+          <!-- Dates -->
+          <div class="row g-3 mt-2">
+            <div class="col-md-4">
+              <label for="hackathonStartDate" class="form-label">{{ __('admin.start_date') }} <span
+                  class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="hackathonStartDate" required>
+            </div>
+            <div class="col-md-4">
+              <label for="hackathonEndDate" class="form-label">{{ __('admin.end_date') }} <span
+                  class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="hackathonEndDate" required>
+            </div>
+            <div class="col-md-4">
+              <label for="registrationDeadline" class="form-label">{{ __('admin.registration_deadline') }}
+                <span class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="registrationDeadline" required>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+            <!-- Themes Section (Select2 Multiple Select) -->
             <div class="mb-3">
-                <label for="hackathonDescription" class="form-label">الوصف <span class="text-danger">*</span></label>
-                <textarea class="form-control" id="hackathonDescription" rows="3" required></textarea>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="hackathonStartDate" class="form-label">تاريخ البدء <span class="text-danger">*</span></label>
-                    <input type="datetime-local" class="form-control" id="hackathonStartDate" required>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="hackathonEndDate" class="form-label">تاريخ الانتهاء <span class="text-danger">*</span></label>
-                    <input type="datetime-local" class="form-control" id="hackathonEndDate" required>
-                </div>
-                 <div class="col-md-4 mb-3">
-                    <label for="registrationDeadline" class="form-label">الموعد النهائي للتسجيل <span class="text-danger">*</span></label>
-                    <input type="datetime-local" class="form-control" id="registrationDeadline" required>
-                </div>
-            </div>
-            
-            <div class="mb-3">
-                <label for="hackathonThemesInput" class="form-label">المحاور (اضغط Enter أو فاصلة لإضافة محور)</label>
-                <div class="tags-input-wrapper" id="hackathonThemesWrapper">
-                    <input type="text" id="hackathonThemesInput" placeholder="أضف محور...">
-                </div>
-                <input type="hidden" id="hackathonThemesActual" name="hackathonThemesActual">
+              <label class="form-label">{{ __('admin.themes_instruction') }}</label>
+              <div id="hackathonThemesWrapper" class="tags-input-wrapper">
+                <!-- Tag items will be rendered here by JS -->
+                <input type="text" id="hackathonThemesInput" class="form-control" placeholder="{{ __('admin.add_theme_placeholder') }}" autocomplete="off">
+                <input type="hidden" id="hackathonThemesActual" name="hackathonThemes">
+              </div>
+              {{-- <small class="form-text text-muted">{{ __('admin.themes_hint') }}</small> --}}
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">الجوائز</label>
-                <div id="prizesContainer">
-                    <!-- Prize entries will be added here -->
-                </div>
-                <button type="button" class="btn btn-outline-success btn-sm mt-2" id="addPrizeBtn"><i class="bi bi-plus-circle"></i> إضافة جائزة</button>
+          <!-- Prizes Section -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">{{ __('admin.prizes') }}</label>
+            <div id="prizesContainer" class="vstack gap-3">
+              <!-- Prize entries will be added here by JS -->
             </div>
+            <button type="button" class="btn btn-outline-success btn-sm mt-2" id="addPrizeBtn">
+              <i class="bi bi-plus-circle me-1"></i> {{ __('admin.add_prize') }}
+            </button>
+          </div>
 
-            <div class="mb-3">
-                <label class="form-label">معايير التقييم</label>
-                <div id="evaluationCriteriaContainer">
-                    <!-- Evaluation criteria entries will be added here -->
-                </div>
-                <button type="button" class="btn btn-outline-info btn-sm mt-2" id="addCriterionBtn"><i class="bi bi-plus-circle"></i> إضافة معيار تقييم</button>
-                <div class="total-weight text-end">إجمالي الأوزان: <span id="totalCriteriaWeight">0</span>%</div>
+          <!-- Evaluation Criteria Section -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">{{ __('admin.evaluation_criteria') }}</label>
+            <div id="evaluationCriteriaContainer" class="vstack gap-3">
+              <!-- Evaluation criteria entries will be added here by JS -->
             </div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <button type="button" class="btn btn-outline-info btn-sm" id="addCriterionBtn">
+                <i class="bi bi-plus-circle me-1"></i> {{ __('admin.add_evaluation_criterion') }}
+              </button>
+              <div class="text-end fw-bold">{{ __('admin.total_weights') }} <span id="totalCriteriaWeight">0</span>%
+              </div>
+            </div>
+          </div>
 
-            <div class="mb-3">
-                <label for="hackathonBannerImage" class="form-label">صورة البانر للهاكثون</label>
-                <input class="form-control" type="file" id="hackathonBannerImage" accept="image/*">
-            </div>
-             <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" value="" id="allowExternalTeams">
-                <label class="form-check-label" for="allowExternalTeams">
-                    السماح للفرق من خارج المسرعة بالمشاركة
-                </label>
-            </div>
+          <hr class="my-4">
+
+          <!-- File Upload & Options -->
+          <div class="mb-3">
+            <label for="hackathonBannerImage" class="form-label">{{ __('admin.hackathon_banner_image')
+              }}</label>
+            <input class="form-control" type="file" id="hackathonBannerImage" accept="image/*">
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="allowExternalTeams">
+            <label class="form-check-label" for="allowExternalTeams">
+              {{ __('admin.allow_external_teams') }}
+            </label>
+          </div>
+
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-        <button type="button" class="btn btn-primary" onclick="saveHackathon()">حفظ الهاكثون</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.cancel')
+          }}</button>
+        <button type="button" class="btn btn-primary" onclick="saveHackathon()">{{ __('admin.save_hackathon')
+          }}</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Manage Mentors Modal -->
-<div class="modal fade" id="manageMentorsModal" tabindex="-1" aria-labelledby="manageMentorsModalLabel" aria-hidden="true">
+<div class="modal fade" id="manageMentorsModal" tabindex="-1" aria-labelledby="manageMentorsModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="manageMentorsModalLabel">إدارة المرشدين</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="manageMentorsModalLabel">{{ __('admin.manage_mentors') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-            <button class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-1"></i> إضافة مرشد جديد</button>
-            <p>جدول بالمرشدين الحاليين...</p>
+        <button class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-2"></i> {{
+          __('admin.add_new_mentor') }}</button>
+        <p>{{ __('admin.current_mentors_table_placeholder') }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- View Mentorship Requests Modal -->
-<div class="modal fade" id="viewMentorshipRequestsModal" tabindex="-1" aria-labelledby="viewMentorshipRequestsModalLabel" aria-hidden="true">
+<div class="modal fade" id="viewMentorshipRequestsModal" tabindex="-1"
+  aria-labelledby="viewMentorshipRequestsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="viewMentorshipRequestsModalLabel">طلبات جلسات الإرشاد</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="viewMentorshipRequestsModalLabel">{{ __('admin.mentorship_session_requests')
+          }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-           <p>جدول بطلبات الإرشاد من الفرق...</p>
+        <p>{{ __('admin.team_mentorship_requests_table_placeholder') }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
       </div>
     </div>
   </div>
@@ -436,34 +445,35 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="teamDetailsModalLabel">تفاصيل الفريق: <span id="modal-team-name-detail"></span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="teamDetailsModalLabel">{{ __('admin.team_details_title') }} <span
+            id="modal-team-name-detail"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-        <p><strong>الهاكثون:</strong> <span id="modal-team-hackathon"></span></p>
-        <p><strong>قائد الفريق:</strong> <span id="modal-team-leader"></span></p>
-        <h6>الأعضاء:</h6>
+        <p><strong>{{ __('admin.hackathon') }}:</strong> <span id="modal-team-hackathon"></span></p>
+        <p><strong>{{ __('admin.team_leader') }}:</strong> <span id="modal-team-leader"></span></p>
+        <h6>{{ __('admin.members') }}</h6>
         <ul class="list-group" id="modal-team-members-list"></ul>
-        <h6 class="mt-3">فكرة المشروع (إذا توفرت):</h6>
-        <p id="modal-team-project-idea" class="text-muted">لم يتم تحديد فكرة بعد.</p>
+        <h6 class="mt-3">{{ __('admin.project_idea_if_available') }}</h6>
+        <p id="modal-team-project-idea" class="text-muted">{{ __('admin.idea_not_specified_yet') }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-        <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill"></i> مراسلة الفريق</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
+        <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
+          __('admin.message_team') }}</button>
       </div>
     </div>
   </div>
 </div>
+@stop
 
-<footer class="footer mt-auto py-3 bg-dark text-white">
-    <div class="container text-center">
-        <span>© 2024 منصة المسرعة للهاكثونات. جميع الحقوق محفوظة.</span>
-    </div>
-</footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@stop
+
+@section('pagescripts')
 <script>
-    const mockHackathonDb = {
+  const mockHackathonDb = {
         "1": {
             name: "هاكثون مستقبل الذكاء الاصطناعي",
             type: "virtual",
@@ -536,19 +546,31 @@
     
     function createPrizeEntry(rankValue = '', descriptionValue = '') {
         const prizeDiv = document.createElement('div');
-        prizeDiv.classList.add('dynamic-entry', 'prize-entry', 'row', 'g-2'); // Removed 'align-items-center' to let button align with inputs by default in its col
+        
+        // Using .align-items-center for vertical alignment and .mb-3 for spacing.
+        prizeDiv.classList.add('dynamic-entry', 'prize-entry', 'row', 'g-3', 'align-items-center', 'my-3');
+
+        // For perfect accessibility, inputs should have unique IDs matching a label's 'for' attribute.
+        // The column layout is adjusted for better balance (4 + 7 + 1 = 12).
         prizeDiv.innerHTML = `
-            <div class="col-md-3">
-                <input type="text" class="form-control form-control-sm" name="prizeRank[]" placeholder="الترتيب (مثال: المركز الأول)" value="${rankValue}" required>
+            <div class="col-md-4">
+                <label class="form-label visually-hidden">{{ __('admin.prize_rank') }}</label>
+                <input type="text" class="form-control form-control-sm" name="prizeRank[]" placeholder="{{ __('admin.prize_rank_placeholder') }}" value="${rankValue}" required>
             </div>
             <div class="col-md-7">
-                <input type="text" class="form-control form-control-sm" name="prizeDescription[]" placeholder="وصف الجائزة" value="${descriptionValue}" required>
+                <label class="form-label visually-hidden">{{ __('admin.prize_description') }}</label>
+                <input type="text" class="form-control form-control-sm" name="prizeDescription[]" placeholder="{{ __('admin.prize_description_placeholder') }}" value="${descriptionValue}" required>
             </div>
-            <div class="col-md-2 remove-btn-col"> {/* Added class for specific styling if needed */}
-                <button type="button" class="btn btn-outline-danger btn-sm remove-entry-btn w-100"><i class="bi bi-trash"></i></button>
+            <div class="col-md-1 text-center">
+                <button type="button" class="btn btn-danger btn-sm remove-entry-btn" aria-label="{{ __('admin.remove_prize') }}">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
         `;
+
         prizesContainer.appendChild(prizeDiv);
+
+        // Attach event listener to the new remove button
         prizeDiv.querySelector('.remove-entry-btn').addEventListener('click', () => prizeDiv.remove());
     }
 
@@ -575,28 +597,44 @@
 
     function createCriterionEntry(nameVal = '', weightVal = '', descVal = '') {
         const criterionDiv = document.createElement('div');
-        criterionDiv.classList.add('dynamic-entry', 'criterion-entry', 'row', 'g-2'); // Using 'align-items-start' can be good if textareas are taller
+        
+        // Added .align-items-center for vertical alignment and .mb-3 for spacing between entries.
+        criterionDiv.classList.add('dynamic-entry', 'criterion-entry', 'row', 'align-items-center', 'my-3');
+
+        // For perfect accessibility, each input should have a unique ID that matches the label's 'for' attribute.
+        // This would typically involve passing a unique index or timestamp to this function.
+        // The column layout is adjusted to give the description more space (4 + 2 + 5 + 1 = 12).
         criterionDiv.innerHTML = `
             <div class="col-md-4">
-                <input type="text" class="form-control form-control-sm" name="criterionName[]" placeholder="اسم المعيار" value="${nameVal}" required>
+                <label class="form-label visually-hidden">{{ __('admin.criterion_name') }}</label>
+                <input type="text" class="form-control form-control-sm" name="criterionName[]" placeholder="{{ __('admin.criterion_name_placeholder') }}" value="${nameVal}" required>
             </div>
             <div class="col-md-2">
-                <input type="number" class="form-control form-control-sm criterion-weight-input" name="criterionWeight[]" placeholder="الوزن %" min="0" max="100" value="${weightVal}" required>
+                <label class="form-label visually-hidden">{{ __('admin.criterion_weight') }}</label>
+                <input type="number" class="form-control form-control-sm criterion-weight-input" name="criterionWeight[]" placeholder="{{ __('admin.criterion_weight_placeholder') }}" min="0" max="100" value="${weightVal}" required>
             </div>
-            <div class="col-md-4">
-                <textarea class="form-control form-control-sm" name="criterionDescription[]" rows="1" placeholder="وصف المعيار">${descVal}</textarea>
+            <div class="col-md-5">
+                <label class="form-label visually-hidden">{{ __('admin.criterion_description') }}</label>
+                <textarea class="form-control form-control-sm" name="criterionDescription[]" rows="1" placeholder="{{ __('admin.criterion_description_placeholder') }}">${descVal}</textarea>
             </div>
-            <div class="col-md-2 remove-btn-col"> {/* Added class for specific styling if needed */}
-                <button type="button" class="btn btn-outline-danger btn-sm remove-entry-btn w-100"><i class="bi bi-trash"></i></button>
+            <div class="col-md-1 text-center">
+                <button type="button" class="btn btn-danger btn-sm remove-entry-btn" aria-label="{{ __('admin.remove_criterion') }}">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
         `;
+
         criteriaContainer.appendChild(criterionDiv);
+
+        // Attach event listeners
         criterionDiv.querySelector('.remove-entry-btn').addEventListener('click', () => {
             criterionDiv.remove();
             calculateTotalWeight();
         });
+
         criterionDiv.querySelector('.criterion-weight-input').addEventListener('input', calculateTotalWeight);
     }
+
     if(addCriterionBtn) addCriterionBtn.addEventListener('click', () => {
         createCriterionEntry();
         calculateTotalWeight();
@@ -748,6 +786,4 @@
         });
     });
 </script>
-</body>
-
-</html>
+@stop
