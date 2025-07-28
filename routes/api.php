@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\SectorController;
 use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\ProfileController;
@@ -68,6 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/organizations/{organization}', [OrganizationController::class, 'update']);
     Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
     Route::get('/startups', [CompanyController::class, 'index']);
+    Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
+    Route::get('/sectors', [SectorController::class, 'index']);
+    Route::get('/states', [SectorController::class, 'getStates']);
 });
 
 

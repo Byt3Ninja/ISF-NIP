@@ -7,6 +7,7 @@ use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CompanyResource;
+use App\Http\Resources\CompanyProfileResource;
 
  /**
  * @OA\Schema(
@@ -198,5 +199,81 @@ class CompanyController extends Controller
                 ]
         ]
     );
+}
+/**
+ * @OA\Get(
+ *     path="/api/startups/{id}",
+ *     summary="Get startup (company) profile",
+ *     description="Returns detailed profile of a specific startup. Access controlled by role: Admin can access all, OrganizationManager startups under their org, Registered only their own.",
+ *     operationId="getStartupProfile",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the startup (company)",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=200,
+ *         description="Startup profile fetched successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="boolean", example=true),
+ *             @OA\Property(property="data", ref="#/components/schemas/Company")
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden - user not allowed to access this startup",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="You are not authorized to access this resource.")
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=404,
+ *         description="Company not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Company not found.")
+ *         )
+ *     )
+ * )
+ */
+public function show($id)
+{
+    $user = auth()->user();
+
+    $company = Company::with([
+        'country', 'state', 'city', 'teamMembers', 'sectoR'
+    ])->find($id);
+    
+    if (!$company) {
+        return $this->error(__('api.company_not_found'), 404);
+    }
+
+    if ($user->hasAnyRole(['Admin', 'organizationManager'])) {
+        return $this->success(new CompanyProfileResource($company));
+    }
+
+    elseif ($user->hasRole('Registered') && $user->company_id == $company->id) {
+        return $this->success(new CompanyProfileResource($company));
+    }
+
+     return $this->forbidden(__('api.forbidden'));
 }
 }

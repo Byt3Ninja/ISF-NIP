@@ -44,4 +44,6 @@ return [
 	'organizationUpdateFailed' => 'Organization Update Failed',
 	'organizationDeleted' => 'Organization Deleted Successfully',
 	'Organization cannot be deleted' => 'Organization cannot be Deleted Because it is Linked to active Cycles or Startups',
+	'company_not_found' => 'Company Not Found',
+	'organizationNotFound' => 'Organization Not Found',
 ];
