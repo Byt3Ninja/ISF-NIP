@@ -375,8 +375,8 @@ class HackathonController extends Controller
                             LEFT JOIN team_formations as tf ON tm.team_formation_id = tf.id
                             LEFT JOIN users as u ON tm.user_id = u.id
                             
-                            WHERE tm.acceptInvition = 'accepted'";
-                            $teams = collect(DB::select($teams_q));
+                            WHERE   tf.cycle_id = ?";
+                            $teams = collect(DB::select($teams_q, [$id]));
             // $teamUser = $teams->where('tm_user_id', Auth::user()->id);
             // $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
             // dd($teams_with_user);
@@ -394,20 +394,23 @@ class HackathonController extends Controller
     $team->step_id = $first->tf_step_id;
     $team->photo = $first->tf_img_team ?? null;
     $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()->count_team_number;
-    $team->your_team = $group->where('tm_user_id', $user->id)->first()? true : false;
-    $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['pending', 'accepted'])->first()? true : false; //is_user_requested
+    $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
+    $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join', 'accepted'])->first()? true : false; //is_user_requested
     $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
     $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
+    $team->status = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? 'Accepted' : 'join';
     
 
     // المستخدمين في هذا الفريق
-    $team->members = $group->map(function ($member) {
+    $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
         $user = new stdClass;
         $user->id = $member->u_id;
         $user->name = $member->user_name_en;
         $user->email = $member->u_email;
         $user->img_url = $member->u_img_url;
         $user->is_leader = $member->tm_isTeamLeader;
+        $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
+        $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
         return $user;
     })->values()->all();
 
