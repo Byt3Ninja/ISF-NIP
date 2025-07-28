@@ -53,17 +53,11 @@
         @else
         @if($apply && $apply->isEmpty())
         <button type="button"
-          class="btn btn-{{ now()->isBefore($hackathon['step_end']) == 'Upcoming' ? 'primary' : 'success'}}"
-          style="flex: 1;" data-bs-toggle="modal" @if(now()->isBefore($hackathon['step_end']))
-          {{-- data-bs-target="#applyModal{{ $loop->index + 1 }}" --}}
-          onclick="window.location.href='/dashboard/apply/{{ $hackathon['step_id'] }}/hackathon'"
-          @else
-          onclick="window.location.href='/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage'"
-          {{-- onclick="window.location.href='{{ route('admin.hackathon.manage', $hackathon['id']) }}'" --}}
-          @endif
-          >
-          <i class="ti ti-{{  now()->isBefore($hackathon['step_end']) == 'Upcoming' ? 'send' : 'users' }} me-1"></i>
-          {{ now()->isBefore($hackathon['step_end']) ? __('admin.ApplyHackathon') : __('admin.Manage Team') }}
+          class="btn btn-primary"
+          style="flex: 1;" data-bs-toggle="modal" 
+          onclick="window.location.href='/dashboard/apply/{{ $hackathon['step_id'] }}/hackathon'" >
+          <i class="ti ti-send me-1"></i>
+          {{ __('admin.ApplyHackathon') }}
         </button>
         @else
         @if($team && $team->isEmpty())

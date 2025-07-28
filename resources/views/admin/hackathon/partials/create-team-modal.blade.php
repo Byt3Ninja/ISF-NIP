@@ -8,10 +8,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form method="POST" action="/dashboard/hackathon/createTeam">
+        <form method="POST" action="/dashboard/hackathon/createTeam" enctype="multipart/form-data">
           @csrf
           <input type="hidden" name="step_id" value="{{ $currentHackathon['step_id'] }}">
           <input type="hidden" name="cycle_id" value="{{ $id }}">
+
+          <div class="mb-3">
+            <label for="img_team" class="form-label">
+              {{ $l == 'en' ? 'Team Logo' : 'شعار الفريق' }}
+            </label>
+            <input type="file" class="form-control" name="img_team" id="img_team">
+          </div>
+
           <div class="mb-3">
             <label for="teamName" class="form-label">
               {{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}
