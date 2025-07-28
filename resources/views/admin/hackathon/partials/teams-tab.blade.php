@@ -71,7 +71,19 @@
 
   <div class="card-body">
     <div class="row g-4">
-  
+ @php
+    $authUser = auth()->user();
+    $authUserInAnyTeam = false;
+    foreach ($teamsData as $team) {
+        $member_ids = collect($team->members)->pluck('id')->toArray();
+        if (in_array($authUser->id, $member_ids)) {
+            $authUserInAnyTeam = true;
+            break;
+        }
+    }
+   $isExistingTeam = in_array($authUser->id, $member_ids);
+@endphp
+ 
       @foreach($teamsData as $team)
       <div class="col-md-4">
         <div class="card shadow-sm">
@@ -141,11 +153,10 @@
                 $isYourTeam = !empty($team->your_team);
                 $requestSent = !empty($team->request_sent);
                 $alreadyJoined = !empty($team->already_joined);
-                $authUser = auth()->user();
-                $member_ids = collect($team->members)->pluck('id')->toArray();
+                
 
               @endphp
-              {{-- {{ dd(in_array($authUser->id, $member_ids)) }}  --}}
+               
               @if($isYourTeam)
               <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
                     {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
@@ -156,13 +167,13 @@
                 </button>
               @elseif($isFull)
                 <button class="btn btn-secondary btn-sm" disabled>{{ $l == 'en' ? 'Full' : 'ممتلئ' }}</button>
-              @elseif(!in_array($authUser->id, $member_ids))
-              
+              @elseif($isExistingTeam == false)
               <form action="/dashboard/hackathon/RequestJoin" method="POST">
                 @csrf
                 <input type="hidden" name="id" value="{{ $team->id }}">
                 <button type="submit" class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>
               </form>
+              
              
               @endif
             </div>
