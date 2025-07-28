@@ -68,15 +68,13 @@ class Cycle extends Model
 
     public static function programTypes(): array
     {
-      $types = ['General_Program', 'Hackathon'];
-
-      return collect($types)->mapWithKeys(function ($type) {
-        return [$type => __('cycles.' . $type)];
-    })->toArray();
+        $types = ['General_Program', 'Hackathon'];
+        return collect($types)->mapWithKeys(function ($type) {
+            return [$type => __('cycles.' . $type)];
+        })->toArray();
     }
-
-   
-    
-
-
+    public function custom_pages()
+    {
+        return $this->hasMany(CycleCustomPages::class);
+    }
 }
