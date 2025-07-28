@@ -363,8 +363,11 @@ class quizzesController extends Controller
 			$quizzes = $quizzes->map(function ( $quiz ) {
 				$in_progress = $quiz->myAttempts->where('status', false)->first() ? true : false;
 				$quiz->in_progress = $in_progress;
+				$quiz->questions = $quiz->questions;
 				return $quiz;
-			});
+			})->filter(function( $quiz ) {
+				return $quiz->questions->count() > 0;
+			})->values();
 			return view('admin/clients/quiz/dashboard', compact('quizzes'));
 		} else {
 			return abort(401);
