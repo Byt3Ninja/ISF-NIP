@@ -95,10 +95,10 @@
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
 						<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
-                                {{ __($card['text']) ?: $card['text'] }}
-                            @else
-                                {{ __('admin.' . $card['text']) ?: $card['text'] }}
-                            @endif</p>
+								{{ __($card['text']) ?: $card['text'] }}
+							@else
+								{{ __('admin.' . $card['text']) ?: $card['text'] }}
+							@endif</p>
 					</div>
 				</div>
 			</a>
@@ -1136,11 +1136,11 @@
 																			<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																				<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																			</a>
-																			@if( $_user->ableTo('screening.form_view', $permissions) )
+																			{{--  @if( $_user->ableTo('screening.form_view', $permissions) )
 																			<a href="/dashboard/final/{{ $step->id }}/{{ $company->id }}" target="_blank" class="btn btn-success btn-sm">
-                                    											<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
+																				<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
 																			</a>
-																			@endif
+																			@endif  --}}
 																		@else
 																			{{ __('dashboard.Not started') }}
 																		@endif
@@ -1582,6 +1582,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			  alert("Error Occurred, Try again!");
 			}
 		  });
-		});      
+		});
 </script>
 @stop
