@@ -50,5 +50,7 @@ return [
 	'mentorship_session_created' => 'Mentorship Session Request Submitted Successfully',
 	'session_already_exists' => 'You already have a Session at the Selected Time',
 	'invalid_time_not_in_schedule' => 'The Selected Time does not match the mentor’s Availability',
+	'session_feedback_already_submitted' => 'Session Feedback Already Submitted',
+	'session_feedback_submitted' => 'Session Feedback Submitted Successfully',
 
 ];

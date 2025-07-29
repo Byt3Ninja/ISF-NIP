@@ -3892,6 +3892,219 @@
                 ]
             }
         },
+        "/api/mentorship-sessions/submit-feedback": {
+            "post": {
+                "tags": [
+                    "Mentorship Sessions"
+                ],
+                "summary": "Submit session Rate and feedback",
+                "description": "Submit whether the user attended the session and optionally rate it if attended.",
+                "operationId": "submitMentorshipSessionFeedback",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "session_id",
+                                    "attended"
+                                ],
+                                "properties": {
+                                    "session_id": {
+                                        "description": "ID of the mentorship session",
+                                        "type": "integer",
+                                        "example": 1001
+                                    },
+                                    "attended": {
+                                        "description": "Whether the user attended the session",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "rating": {
+                                        "description": "Rating given to the mentor (1-5), required if attended is true",
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "example": 4,
+                                        "nullable": true
+                                    },
+                                    "comment": {
+                                        "description": "Optional comment about the session",
+                                        "type": "string",
+                                        "example": "The session was very helpful",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Feedback submitted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict (feedback already submitted)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Feedback already submitted for this session."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentorship-sessions/completed": {
+            "get": {
+                "tags": [
+                    "Mentorship Sessions"
+                ],
+                "summary": "View completed mentorship sessions",
+                "description": "Returns a paginated list of past mentorship sessions the startup has attended.",
+                "operationId": "getMyCompletedMentorshipSessions",
+                "responses": {
+                    "200": {
+                        "description": "List of completed sessions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MentorshipSessionResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lastPage": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 48
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users/{id}": {
             "get": {
                 "tags": [
@@ -4913,6 +5126,33 @@
                         "type": "string",
                         "format": "url",
                         "example": "https://example.com/policies/delegation.pdf"
+                    }
+                },
+                "type": "object"
+            },
+            "MentorshipSessionResource": {
+                "title": "Completed Mentorship Session",
+                "properties": {
+                    "sessionId": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "mentorId": {
+                        "type": "integer",
+                        "example": 34
+                    },
+                    "mentorName": {
+                        "type": "string",
+                        "example": "Ali Al-Mansouri"
+                    },
+                    "sessionDateTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-25 14:00:00"
+                    },
+                    "attended": {
+                        "type": "boolean",
+                        "example": true
                     }
                 },
                 "type": "object"
