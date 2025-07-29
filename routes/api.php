@@ -18,6 +18,7 @@ use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\Mentors\MentorController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
+use App\Http\Controllers\API\Startup\MentorshipSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('programs/{id}', [ProgramController::class, 'update']);
     Route::get('/v1/programs', [ProgramController::class, 'index']);
     Route::get('/v1/programs/{id}', [ProgramController::class, 'show']);
+    Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
 });
 
 

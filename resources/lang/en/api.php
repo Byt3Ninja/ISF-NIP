@@ -47,4 +47,8 @@ return [
 	'company_not_found' => 'Company Not Found',
 	'organizationNotFound' => 'Organization Not Found',
 	'program_not_found' => 'Program Not Found',
+	'mentorship_session_created' => 'Mentorship Session Request Submitted Successfully',
+	'session_already_exists' => 'You already have a Session at the Selected Time',
+	'invalid_time_not_in_schedule' => 'The Selected Time does not match the mentor’s Availability',
+
 ];
