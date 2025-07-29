@@ -70,7 +70,7 @@
         @else
         @if($team && $team->isEmpty())
 
-        @if($stypeStep->first()->stype != 6)
+        @if($stypeStep->first()->stype == 1)
 
         <button type="button" class="btn btn-warning" style="flex: 1;" disabled><i class="ti ti-users me-1"></i>{{ $l ==
           'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
