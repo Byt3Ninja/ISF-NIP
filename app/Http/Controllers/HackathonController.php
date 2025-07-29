@@ -189,60 +189,67 @@ class HackathonController extends Controller
         return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
     }
 
-    public function show($id) {
-
+    public function show($id)
+    {
         $user = Auth::user();
         $l = app()->getLocale();
         $step = Step::where('cycle_id', $id)->get();
-         if(!$step){
-            if($user->hasRole('admin') || $user->hasRole('organizationmanager')){
-                 return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready. Add step first.']);
-            }else{
-            return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
+        if( !$step )
+        {
+            if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
+            {
+                return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready. Add step first.']);
             }
+            else
+            {
+                return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
             }
-
+        }
         
         $hackathons_query = "SELECT
-        c.id as 'c_id',
-        c.title as 'c_title',
-        c.description as 'c_description',
-        c.start as 'c_start_date',
-        c.end as 'c_end_date',
-        c.type as 'c_type',
-        c.created_at as 'c_created_at',
-        c.updated_at as 'c_updated_at',
-        o.id as 'o_id',
-        o.name_ar as 'o_name_ar',
-        o.name_en as 'o_name_en',
-        o.img_url as 'o_logo',
-        o.created_at as 'o_created_at',
-        o.updated_at as 'o_updated_at',
-        u.id as 'U_id',
-        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
-        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
-        u.email as 'u_email',
-        com.id as 'Com_id',
-        com.name_en as 'Com_name_en',
-        com.name_ar as 'Com_name_ar',
-        com.logo as 'Com_logo',
-        com.cycle as 'Com_cycle',
-        com.step as 'Com_step'
-        FROM 
-        cycles as c
-        LEFT JOIN companies as com ON c.id = com.cycle
-        LEFT JOIN users as u ON u.company_id = com.id
-        LEFT JOIN organizations as o ON c.organization_id = o.id
-        WHERE c.type = 'Hackathon'
-        AND c.id = ? ";
-        
+                c.id as 'c_id',
+                c.title as 'c_title',
+                c.description as 'c_description',
+                c.start as 'c_start_date',
+                c.end as 'c_end_date',
+                c.type as 'c_type',
+                c.created_at as 'c_created_at',
+                c.updated_at as 'c_updated_at',
+                o.id as 'o_id',
+                o.name_ar as 'o_name_ar',
+                o.name_en as 'o_name_en',
+                o.img_url as 'o_logo',
+                o.created_at as 'o_created_at',
+                o.updated_at as 'o_updated_at',
+                u.id as 'U_id',
+                concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                u.email as 'u_email',
+                com.id as 'Com_id',
+                com.name_en as 'Com_name_en',
+                com.name_ar as 'Com_name_ar',
+                com.logo as 'Com_logo',
+                com.cycle as 'Com_cycle',
+                com.step as 'Com_step'
+            FROM 
+                cycles as c
+            LEFT JOIN
+                companies as com ON c.id = com.cycle
+            LEFT JOIN
+                users as u ON u.company_id = com.id
+            LEFT JOIN
+                organizations as o ON c.organization_id = o.id
+            WHERE
+                c.type = 'Hackathon'
+                AND c.id = ?
+        ";
+
         $hackathons_query .= " ORDER BY c.created_at DESC";
         $hackathons_raw = collect(DB::select($hackathons_query, [$id]));
-       
-       
-        if ($hackathons_raw->isNotEmpty()) {
-            $item = $hackathons_raw->first();
 
+        if( $hackathons_raw->isNotEmpty() )
+        {
+            $item = $hackathons_raw->first();
             $now = now();
             $start = Carbon::parse($item->c_start_date);
             $end = Carbon::parse($item->c_end_date);
@@ -257,7 +264,7 @@ class HackathonController extends Controller
                 'Finished' => 'منتهي',
                 default => '',
             };
-                $step = Step::where('cycle_id', $item->Com_cycle)->get();
+            $step = Step::where('cycle_id', $item->Com_cycle)->get();
             $currentHackathon = [
                 'title' => $item->c_title,
                 'title_ar' => $item->c_title_ar ?? '',
@@ -283,264 +290,273 @@ class HackathonController extends Controller
             ];
         }
 
-                $data = [];
-            $l = app()->getLocale();
-            $forms = "SELECT 
-            FD.company_id as 'FD_company_id',
-            FD.user_id as 'FD_user_id',
-            FD.step_id as 'FD_step_id',
-            FD.question as 'FD_question',
-            FD.answer as 'FD_answer',
-            FD.created_at as 'FD_created_at',
-            FD.updated_at as 'FD_updated_at',
-            FD.deleted_at as 'FD_deleted_at',
-            C.name_en as 'C_name_en',
-            C.name_ar as 'C_name_ar',
-            C.id as 'C_id',
-            C.step as 'C_step',
-            Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
-            Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
-            U.id as 'U_id',
-            U.email as 'U_email',
-            S.title as 'S_title',
-            S.id as 'S_id',
-            S.cycle_id as 'S_cycle_id',
-            S.data as 'S_data',
-            CYC.title as 'CYC_title',
-            CYC.id as 'CYC_id',
-            CYC.organization_id as 'CYC_organization_id',
-            O.name_en as 'O_name_en',
-            O.name_ar as 'O_name_ar',
-            O.id as 'O_id',
-            BF.id as 'BF_id',
-            BF.form_name as 'BF_form_name'
-            FROM form_data as FD 
-            LEFT JOIN companies as C ON C.id = FD.company_id
-            LEFT JOIN users as U ON U.id = FD.user_id
-            LEFT JOIN steps as S ON S.id = FD.step_id
-            LEFT JOIN builder_forms as BF ON BF.id = S.data
-            LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
-            LEFT JOIN organizations as O ON O.id = CYC.organization_id
-            WHERE FD.deleted_at IS NULL AND CYC.id = ? ";
-            $params = [];
+        $data = [];
+        $l = app()->getLocale();
+        $forms = "SELECT 
+                FD.company_id as 'FD_company_id',
+                FD.user_id as 'FD_user_id',
+                FD.step_id as 'FD_step_id',
+                FD.question as 'FD_question',
+                FD.answer as 'FD_answer',
+                FD.created_at as 'FD_created_at',
+                FD.updated_at as 'FD_updated_at',
+                FD.deleted_at as 'FD_deleted_at',
+                C.name_en as 'C_name_en',
+                C.name_ar as 'C_name_ar',
+                C.id as 'C_id',
+                C.step as 'C_step',
+                Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+                Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+                U.id as 'U_id',
+                U.email as 'U_email',
+                S.title as 'S_title',
+                S.id as 'S_id',
+                S.cycle_id as 'S_cycle_id',
+                S.data as 'S_data',
+                CYC.title as 'CYC_title',
+                CYC.id as 'CYC_id',
+                CYC.organization_id as 'CYC_organization_id',
+                O.name_en as 'O_name_en',
+                O.name_ar as 'O_name_ar',
+                O.id as 'O_id',
+                BF.id as 'BF_id',
+                BF.form_name as 'BF_form_name'
+            FROM
+                form_data as FD 
+            LEFT JOIN
+                companies as C ON C.id = FD.company_id
+            LEFT JOIN
+                users as U ON U.id = FD.user_id
+            LEFT JOIN
+                steps as S ON S.id = FD.step_id
+            LEFT JOIN
+                builder_forms as BF ON BF.id = S.data
+            LEFT JOIN
+                cycles as CYC ON CYC.id = S.cycle_id
+            LEFT JOIN
+                organizations as O ON O.id = CYC.organization_id
+            WHERE
+                FD.deleted_at IS NULL
+                AND CYC.id = ?
+        ";
             
-            if($user->organization_id != null){
-                $forms .= " AND CYC.organization_id = ? ";
-                $forms = DB::select($forms, [$id, $user->organization_id]);
-            }else{
-                $forms = DB::select($forms, [$id]);
-            }
-            $forms = collect($forms);
-            
-            $C = 1;
-            // نبدأ بتجميع كل الأسئلة حسب step_id
-            $grouped = $forms->groupBy('FD_user_id');
+        $params = [];
+        if( $user->organization_id != null )
+        {
+            $forms .= " AND CYC.organization_id = ? ";
+            $forms = DB::select($forms, [$id, $user->organization_id]);
+        }
+        else
+        {
+            $forms = DB::select($forms, [$id]);
+        }
+        $forms = collect($forms);
 
-            $data = $grouped->map(function ($group, $stepId) use ($l) {
-                $first = $group->first();
-            
-                $submission = new stdClass;
-                $submission->company_id = $first->FD_company_id;
-                // $submission->user_id = $first->FD_user_id;
-                $submission->user_name = $first->{'user_name_' . $l};
-                $submission->email = $first->U_email;
-                $submission->cycle_id = $first->CYC_id;
-                $submission->step_id = $first->FD_step_id;
-                $submission->user_id = $first->FD_user_id;
-                $submission->company_step = $first->C_step;
-                // $submission->form_name = $first->BF_form_name;
-                // $submission->startup_name = $first->{'C_name_' . $l};
-                // $submission->submitted_by = $first->{'user_name_' . $l};
-                // $submission->step_name = $first->S_title;
-                // $submission->program_name = $first->CYC_title;
-                // $submission->organization_name = $first->O_name_en;
-                $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
-                return $submission;
-            })->values()->all(); // remove collection keys (numeric indexing)
+        $C = 1;
+        // نبدأ بتجميع كل الأسئلة حسب step_id
+        $grouped = $forms->groupBy('FD_user_id');
+
+        $data = $grouped->map(function ($group, $stepId) use ($l) {
+            $first = $group->first();
+
+            $submission = new stdClass;
+            $submission->company_id = $first->FD_company_id;
+            // $submission->user_id = $first->FD_user_id;
+            $submission->user_name = $first->{'user_name_' . $l};
+            $submission->email = $first->U_email;
+            $submission->cycle_id = $first->CYC_id;
+            $submission->step_id = $first->FD_step_id;
+            $submission->user_id = $first->FD_user_id;
+            $submission->company_step = $first->C_step;
+            // $submission->form_name = $first->BF_form_name;
+            // $submission->startup_name = $first->{'C_name_' . $l};
+            // $submission->submitted_by = $first->{'user_name_' . $l};
+            // $submission->step_name = $first->S_title;
+            // $submission->program_name = $first->CYC_title;
+            // $submission->organization_name = $first->O_name_en;
+            $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
+            return $submission;
+        })->values()->all(); // remove collection keys (numeric indexing)
         
-                $data = array_values($data);
+        $data = array_values($data);
 
-                            // dd($data);
-                            $teams_q = "SELECT 
-                            tf.id as tf_id,
-                            tf.name as tf_name,
-                            tf.description as tf_description,
-                            tf.cycle_id as tf_cycle_id,
-                            tf.step_id as tf_step_id,
-                            tf.img_team as tf_img_team,
-                            tm.id as tm_id,
-                            tm.user_id as tm_user_id,
-                            tm.acceptInvition as tm_acceptInvition,
-                            tm.Name as tm_name,
-                            tm.Email as tm_email,
-                            tm.isTeamLeader as tm_isTeamLeader,
-                            tm.acceptInvition as tm_acceptInvition,
-                            tm.team_formation_id as tm_team_formation_id,
-                            u.id as u_id,
-                            concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
-                            concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
-                            u.email as u_email,
-                            u.img_url as u_img_url
-                            FROM 
-                            team_members as tm
-                            LEFT JOIN team_formations as tf ON tm.team_formation_id = tf.id
-                            LEFT JOIN users as u ON tm.user_id = u.id
-                            
-                            WHERE   tf.cycle_id = ?";
-                            $teams = collect(DB::select($teams_q, [$id]));
-            // $teamUser = $teams->where('tm_user_id', Auth::user()->id);
-            // $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
-            // dd($teams_with_user);
+        $teams_q = "SELECT 
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.description as tf_description,
+                tf.cycle_id as tf_cycle_id,
+                tf.step_id as tf_step_id,
+                tf.img_team as tf_img_team,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.Name as tm_name,
+                tm.Email as tm_email,
+                tm.isTeamLeader as tm_isTeamLeader,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.team_formation_id as tm_team_formation_id,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+                concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+                u.email as u_email,
+                u.img_url as u_img_url
+            FROM 
+                team_members as tm
+            LEFT JOIN
+                team_formations as tf ON tm.team_formation_id = tf.id
+            LEFT JOIN
+                users as u ON tm.user_id = u.id
+            WHERE
+                tf.cycle_id = ?
+        ";
+        $teams = collect(DB::select($teams_q, [$id]));
+
+        // $teamUser = $teams->where('tm_user_id', Auth::user()->id);
+        // $teams_with_user = $teams->where('tm_team_formation_id', $teamUser->first()->tm_team_formation_id);
             
-            $teams = $teams->groupBy('tm_team_formation_id');
+        $teams = $teams->groupBy('tm_team_formation_id');
 
-          $teams = $teams->map(function ($group, $teamFormationId) use ($id, $step, $user) {
-    $first = $group->first();
+        $teams = $teams->map(function ($group, $teamFormationId) use ($id, $step, $user) {
+            $first = $group->first();
 
-    $team = new stdClass;
-    $team->id = $first->tf_id;
-    $team->name = $first->tf_name;
-    $team->desc = $first->tf_description;
-    $team->cycle_id = $first->tf_cycle_id;
-    $team->step_id = $first->tf_step_id;
-    $team->photo = $first->tf_img_team ?? null;
-    $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
-    $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
-    $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join', 'accepted'])->first()? true : false; //is_user_requested
-    $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
-    $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
-    $team->status = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? 'Accepted' : 'join';
-    
+            $team = new stdClass;
+            $team->id = $first->tf_id;
+            $team->name = $first->tf_name;
+            $team->desc = $first->tf_description;
+            $team->cycle_id = $first->tf_cycle_id;
+            $team->step_id = $first->tf_step_id;
+            $team->photo = $first->tf_img_team ?? null;
+            $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
+            $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
+            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join', 'accepted'])->first()? true : false; //is_user_requested
+            $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
+            $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
+            $team->status = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? 'Accepted' : 'join';
+        
+            // المستخدمين في هذا الفريق
+            $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
+                $user = new stdClass;
+                $user->id = $member->u_id;
+                $user->name = $member->user_name_en;
+                $user->email = $member->u_email;
+                $user->img_url = $member->u_img_url;
+                $user->is_leader = $member->tm_isTeamLeader;
+                $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
+                $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
+                return $user;
+            })->values()->all();
 
-    // المستخدمين في هذا الفريق
-    $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
-        $user = new stdClass;
-        $user->id = $member->u_id;
-        $user->name = $member->user_name_en;
-        $user->email = $member->u_email;
-        $user->img_url = $member->u_img_url;
-        $user->is_leader = $member->tm_isTeamLeader;
-        $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
-        $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
-        return $user;
-    })->values()->all();
-
-    return $team;
-});
+            return $team;
+        });
         $teamsData = $teams->values()->all();
 
-// dd($teams);
-                                $allteams_q = "SELECT 
-                                tf.id as tf_id,
-                                tf.name as tf_name,
-                                tf.description as tf_description,
-                                tf.cycle_id as tf_cycle_id,
-                                tf.step_id as tf_step_id,
-                                tm.id as tm_id,
-                                tm.user_id as tm_user_id,
-                                tm.acceptInvition as tm_acceptInvition,
-                                tm.Name as tm_name,
-                                tm.Email as tm_email,
-                                tm.isTeamLeader as tm_isTeamLeader,
-                                tm.team_formation_id as tm_team_formation_id,
-                                u.id as u_id,
-                                concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
-                                concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
-                                u.email as u_email
-                                FROM 
-                                team_formations as tf
-                                LEFT JOIN team_members as tm ON tm.team_formation_id = tf.id
-                                LEFT JOIN users as u ON tm.user_id = u.id
+        $allteams_q = "SELECT
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.description as tf_description,
+                tf.cycle_id as tf_cycle_id,
+                tf.step_id as tf_step_id,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.Name as tm_name,
+                tm.Email as tm_email,
+                tm.isTeamLeader as tm_isTeamLeader,
+                tm.team_formation_id as tm_team_formation_id,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+                concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+                u.email as u_email
+            FROM
+                team_formations as tf
+            LEFT JOIN
+                team_members as tm ON tm.team_formation_id = tf.id
+            LEFT JOIN
+                users as u ON tm.user_id = u.id
+            WHERE
+                cycle_id = ?
+        ";
 
-                                WHERE cycle_id=?";
-                                $allteams_raw = collect(DB::select($allteams_q, [$id]));
-                                $team_invition = $allteams_raw->where('tm_user_id', $user->id);
-                // dd($team_invition);
-                                $allteams = $allteams_raw->groupBy('tf_id')->map(function ($group) use ($user, $team_invition) {
-                                   
-                                    return [
-                                        'tf_id' => $group->first()->tf_id,
-                                        'tf_name' => $group->first()->tf_name,
-                                        'tf_description' => $group->first()->tf_description,
-                                        'tf_cycle_id' => $group->first()->tf_cycle_id,
-                                        'tf_step_id' => $group->first()->tf_step_id,
-                                        'tm_user_id' => $group->first()->tm_user_id,
-                                        'tm_acceptInvition' => $team_invition->first()?->tm_acceptInvition,
-                                        'members_count' => $group->count(),
-                                        'members' => $group,
-                                    ];
-                                });
-            // dd($allteams);
+        $allteams_raw = collect(DB::select($allteams_q, [$id]));
+        $team_invition = $allteams_raw->where('tm_user_id', $user->id);
+        $allteams = $allteams_raw->groupBy('tf_id')->map(function ($group) use ($user, $team_invition) {
+            return [
+                'tf_id' => $group->first()->tf_id,
+                'tf_name' => $group->first()->tf_name,
+                'tf_description' => $group->first()->tf_description,
+                'tf_cycle_id' => $group->first()->tf_cycle_id,
+                'tf_step_id' => $group->first()->tf_step_id,
+                'tm_user_id' => $group->first()->tm_user_id,
+                'tm_acceptInvition' => $team_invition->first()?->tm_acceptInvition,
+                'members_count' => $group->count(),
+                'members' => $group,
+            ];
+        });
 
-            $step = Step::where('cycle_id', $id)->get();
-            $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
-                            
-        // dd($allteams->first()['tm_acceptInvition']);
-              
-        if(Auth::user()->company?->step != null){
-            
-            $companyStep = Step::where('id', Auth::user()->company->step)->first();
-        }else{
-            $companyStep = null;
-        }
+        $step = Step::where('cycle_id', $id)->get();
+        $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
+        $companyStep = null;
+        if( Auth::user()->company?->step != null ) { $companyStep = Step::where('id', Auth::user()->company->step)->first(); }
 
 		$mentors_q = "SELECT 
-        u.id as u_id,
-        concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
-        concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
-        u.email as u_email,
-        u.img_url as u_img_url,
-        u.title_ar as u_title_ar,
-        u.title_en as u_title_en,
-        cm.cycle_id as cm_cycle_id,
-        cm.user_id as cm_user_id,
-        c.id as c_id,
-        c.title as c_title,
-        c.description as c_description
-        FROM 
-        users as u
-        LEFT JOIN cycles_mentors as cm ON u.id = cm.user_id
-        LEFT JOIN cycles as c ON cm.cycle_id = c.id
-        WHERE c.id = ?";
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+                concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+                u.email as u_email,
+                u.img_url as u_img_url,
+                u.title_ar as u_title_ar,
+                u.title_en as u_title_en,
+                cm.cycle_id as cm_cycle_id,
+                cm.user_id as cm_user_id,
+                c.id as c_id,
+                c.title as c_title,
+                c.description as c_description
+            FROM 
+                users as u
+            LEFT JOIN
+                cycles_mentors as cm ON u.id = cm.user_id
+            LEFT JOIN
+                cycles as c ON cm.cycle_id = c.id
+            WHERE
+                c.id = ?
+        ";
         $mentors = collect(DB::select($mentors_q, [$id]));
-        
-        
-      
 
-            $judges_q = "SELECT * FROM finalscreenings as FS
-            LEFT JOIN steps as s ON FS.step_id = s.id
-            WHERE s.stype = 5 AND s.cycle_id = ?";
-            $judges = collect(DB::select($judges_q, [$id]));
-            if($judges->isEmpty()){
-                $judges = collect([]);
-                $judges_users = collect([]);
-            }else{
-                $judges_ids = json_decode($judges->first()?->judges);
-                $judges_ids = array_map('intval', $judges_ids);
-                $judges_users = DB::table('users as u')
-                ->whereIn('u.id', $judges_ids)
-                ->select(
-                    'u.id',
-                    DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
-                    DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
-                    'u.email',
-                    'u.img_url',
-                    'u.title_ar',
-                    'u.title_en'
-                    )
-                    ->get();
-                }
+        $judges_q = "SELECT
+                *
+            FROM
+                finalscreenings as FS
+            LEFT JOIN
+                steps as s ON FS.step_id = s.id
+            WHERE
+                s.stype = 5
+                AND s.cycle_id = ?
+        ";
+        $judges = collect(DB::select($judges_q, [$id]));
+        if( $judges->isEmpty() )
+        {
+            $judges = collect([]);
+            $judges_users = collect([]);
+        }
+        else
+        {
+            $judges_ids = json_decode($judges->first()?->judges);
+            $judges_ids = array_map('intval', $judges_ids);
+            $judges_users = DB::table('users as u')->whereIn('u.id', $judges_ids)->select(
+                'u.id',
+                DB::raw("CONCAT(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar"),
+                DB::raw("CONCAT(u.first_name_en, ' ', u.last_name_en) as user_name_en"),
+                'u.email',
+                'u.img_url',
+                'u.title_ar',
+                'u.title_en'
+            )->get();
+        }
 
-        
-   
-        //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
-        
         $id_evi = $user->company?->step;
-       $step_evi = $step->where('id', $id_evi)->first();
-       $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
-        //  if(!$step_evi){
-        //     return redirect()->back()->with(['class' => 'danger', 'message', 'Program not ready.']);
-        //     }else{
+        $step_evi = $step->where('id', $id_evi)->first();
+        $step_evi_next = $step->where('cycle_id', $id)->where('stype', 5)->first();
+
         $field_map_ids = Formfield::where('step_id', $id_evi)->where('builder_forms_id', $step_evi?->data)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data_evi = [
@@ -553,17 +569,16 @@ class HackathonController extends Controller
             'form_id' => $step_evi?->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
-        //        if (Auth::user()->company->step==$id) {
+
         $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
-    // }
-		
         $days = request()->query('days', 14);
         $company = $user->company;
         $stepData = $company?->stepdata;
         $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
         $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
- if ($company && $company->cycledata) {
-        $sessions_q = "SELECT
+        if( $company && $company->cycledata )
+        {
+            $sessions_q = "SELECT
                     ts.id,
                     ts.type,
                     ts.title,
@@ -579,11 +594,11 @@ class HackathonController extends Controller
                     ts.step_id = ?
                 ORDER BY
                     ts.datetime ASC
-                LIMIT 5";
+                LIMIT 5
+            ";
             $sessions = collect(DB::select($sessions_q, [$company->step]));
- }else{
-     $sessions = collect([]);
- }
+        } else { $sessions = collect([]); }
+
         $steps_q = "SELECT
                 s.id,
                 s.title,
@@ -610,24 +625,24 @@ class HackathonController extends Controller
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
-            if (!empty($step) && !empty($stepData)) {
-
-                if ($stepData->arr > $step->arr) {
+            if( !empty( $step ) && !empty( $stepData ) )
+            {
+                if( $stepData->arr > $step->arr )
+                {
                     $status = $l == 'ar' ? 'انتهت' : 'Completed';
                     $color = 'label-success';
                     $textColor = 'success';
-                } elseif ($stepData->arr == $step->arr) {
+                }
+                elseif( $stepData->arr == $step->arr )
+                {
                     $status = $l == 'ar' ? 'بدأت' : 'Started';
                     $color = 'label-primary';
                     $textColor = 'primary';
                 }
             }
             $trType = $fLink = null;
-            if ($company?->approved) {
-                $trType = 'my/' . $step->id;
-            } else {
-                $fLink = 'view/' . $id;
-            }
+            if( $company?->approved ) { $trType = 'my/' . $step->id; }
+            else { $fLink = 'view/' . $id; }
 
             $step->status = $status;
             $step->color = $color;
@@ -636,7 +651,7 @@ class HackathonController extends Controller
             $step->fLink = $fLink;
             return $step;
         });
-    $nextSessions_q = "SELECT
+        $nextSessions_q = "SELECT
                 mr.id,
                 mr.mentor_id,
                 mr.user_id,
@@ -727,29 +742,26 @@ class HackathonController extends Controller
             return $session;
         })->values();
 
-        if (!empty($stepData)) {
-                $cType = $stepData->stype;
-            }else{
-                $cType = 0;
-            }
-            
-                
+        $cType = 0;
+        if( !empty( $stepData ) ) { $cType = $stepData->stype; }
+
         // return view('admin.hackathon.show', compact('hackathon'));
-        return view('admin.hackathon.hackathon-details', compact('currentHackathon',
-         'data', 
-         'l', 
-         'id', 
-         'teamsData', 
-         'allteams', 
-         'team_invition', 
-         'companyStep', 
-         'count_team',
-         'answers', 
-         'data_evi', 
-         'judges_users',
-         'nextSessions',
-         'sessions',
-         'cType'
+        return view('admin.hackathon.hackathon-details', compact(
+            'currentHackathon',
+            'data', 
+            'l', 
+            'id', 
+            'teamsData', 
+            'allteams', 
+            'team_invition', 
+            'companyStep', 
+            'count_team',
+            'answers', 
+            'data_evi', 
+            'judges_users',
+            'nextSessions',
+            'sessions',
+            'cType'
         ));
     }
 
@@ -791,7 +803,7 @@ class HackathonController extends Controller
         return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
-     public function hackathonSubmissions($id) {
+    public function hackathonSubmissions($id) {
       $user = Auth::user();
       $data = [];
       $l = app()->getLocale();
@@ -1142,7 +1154,7 @@ class HackathonController extends Controller
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
 
-        public function RequestJoin(Request $request)
+    public function RequestJoin(Request $request)
     {
         $user = Auth::user();
         $teams = TeamFormation::where('id', $request->id)->first();
@@ -1162,10 +1174,9 @@ class HackathonController extends Controller
                 $teamMember->save();
                 
         return response()->json(['success' => true, 'message' => __("admin.Request_sent_successfully.")]);
-        
     }
 
-       public function ApprovedRequestJoin(Request $request)
+    public function ApprovedRequestJoin(Request $request)
     {
         
         $teamMember = Team_member::where('id', $request->id)
@@ -1185,6 +1196,7 @@ class HackathonController extends Controller
                 }
         return response()->json(['success' => true, 'message' => __("admin.Request_Approved_successfully.")]);
     }
+
     public function RejectedRequestJoin(Request $request)
     {
         
@@ -1205,186 +1217,188 @@ class HackathonController extends Controller
                 // }
         return response()->json(['success' => true, 'message' => __("admin.Request_Approved_successfully.")]);
     }
+
     public function ViewSubmission($step_id,$user_id)
     {
-        
         $user = Auth::user();
-      $data = [];
-      $l = app()->getLocale();
-      $forms = "SELECT 
-      FD.company_id as 'FD_company_id',
-      FD.user_id as 'FD_user_id',
-      FD.step_id as 'FD_step_id',
-      FD.question as 'FD_question',
-      FD.answer as 'FD_answer',
-      FD.created_at as 'FD_created_at',
-      FD.updated_at as 'FD_updated_at',
-      FD.deleted_at as 'FD_deleted_at',
-      C.name_en as 'C_name_en',
-      C.name_ar as 'C_name_ar',
-      C.id as 'C_id',
-      C.step as 'C_step',
-      Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
-      Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
-      U.id as 'U_id',
-      S.title as 'S_title',
-      S.id as 'S_id',
-      S.cycle_id as 'S_cycle_id',
-      S.data as 'S_data',
-      CYC.title as 'CYC_title',
-      CYC.id as 'CYC_id',
-      CYC.organization_id as 'CYC_organization_id',
-      O.name_en as 'O_name_en',
-      O.name_ar as 'O_name_ar',
-      O.id as 'O_id',
-      BF.id as 'BF_id',
-      BF.form_name as 'BF_form_name'
-      FROM form_data as FD 
-      LEFT JOIN companies as C ON C.id = FD.company_id
-      LEFT JOIN users as U ON U.id = FD.user_id
-      LEFT JOIN steps as S ON S.id = FD.step_id
-      LEFT JOIN builder_forms as BF ON BF.id = S.data
-      LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
-      LEFT JOIN organizations as O ON O.id = CYC.organization_id
-      WHERE FD.deleted_at IS NULL AND FD.step_id = ? AND FD.user_id = ? ";
-      $params = [];
-     
-      if($user->organization_id != null){
-        $forms .= " AND CYC.organization_id = ? ";
-        $forms = DB::select($forms, [$step_id, $user_id, $user->organization_id]);
-      }else{
-        $forms = DB::select($forms, [$step_id, $user_id]);
-      }
-      $forms = collect($forms);
-      $C = 1;
-      // نبدأ بتجميع كل الأسئلة حسب step_id
-      $grouped = $forms->groupBy('FD_step_id');
+        $data = [];
+        $l = app()->getLocale();
+        $forms = "SELECT 
+                FD.company_id as 'FD_company_id',
+                FD.user_id as 'FD_user_id',
+                FD.step_id as 'FD_step_id',
+                FD.question as 'FD_question',
+                FD.answer as 'FD_answer',
+                FD.created_at as 'FD_created_at',
+                FD.updated_at as 'FD_updated_at',
+                FD.deleted_at as 'FD_deleted_at',
+                C.name_en as 'C_name_en',
+                C.name_ar as 'C_name_ar',
+                C.id as 'C_id',
+                C.step as 'C_step',
+                Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+                Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+                U.id as 'U_id',
+                S.title as 'S_title',
+                S.id as 'S_id',
+                S.cycle_id as 'S_cycle_id',
+                S.data as 'S_data',
+                CYC.title as 'CYC_title',
+                CYC.id as 'CYC_id',
+                CYC.organization_id as 'CYC_organization_id',
+                O.name_en as 'O_name_en',
+                O.name_ar as 'O_name_ar',
+                O.id as 'O_id',
+                BF.id as 'BF_id',
+                BF.form_name as 'BF_form_name'
+            FROM
+                form_data as FD 
+            LEFT JOIN
+                companies as C ON C.id = FD.company_id
+            LEFT JOIN
+                users as U ON U.id = FD.user_id
+            LEFT JOIN
+                steps as S ON S.id = FD.step_id
+            LEFT JOIN
+                builder_forms as BF ON BF.id = S.data
+            LEFT JOIN
+                cycles as CYC ON CYC.id = S.cycle_id
+            LEFT JOIN
+                organizations as O ON O.id = CYC.organization_id
+            WHERE
+                FD.deleted_at IS NULL
+                AND FD.step_id = ?
+                AND FD.user_id = ?
+        ";
+        $params = [];
+        if( $user->organization_id != null )
+        {
+            $forms .= " AND CYC.organization_id = ? ";
+            $forms = DB::select($forms, [$step_id, $user_id, $user->organization_id]);
+        } else { $forms = DB::select($forms, [$step_id, $user_id]); }
+        $forms = collect($forms);
+        $C = 1;
 
-      $data = $grouped->map(function ($group, $stepId) use ($l) {
-          $first = $group->first();
-      
-          $submission = new stdClass;
-          $submission->submission_id = $stepId;
-          $submission->form_name = $first->BF_form_name;
-          $submission->startup_name = $first->{'C_name_' . $l};
-          $submission->submitted_by = $first->{'user_name_' . $l};
-          $submission->step_name = $first->S_title;
-          $submission->program_name = $first->CYC_title;
-          $submission->organization_name = $first->O_name_en;
-          $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
-          $submission->cycle_id = $first->S_cycle_id;
-          $submission->company_id = $first->C_id;
-          $submission->company_step = $first->C_step;
-      
-          // answers
-          $submission->answers = $group->map(function ($item) use ($l) {
-            $value = $item->FD_answer;
-            
-            // Check if the value is a file path
-            if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
-              // Extract filename from path
-              $filename = basename($value);
-              $value = [
-                'type' => 'file',
-                'path' => $value,
-                'file_name' => $filename,
-                'file_url' => asset($value) // Generate accessible URL
-              ];
-            }
-            
-            return (object)[
-              'user_id' => $item->FD_user_id,
-              'name' => $item->{'user_name_' . $l},
-              'label' => $item->FD_question,
-              'value' => $value,
-            ];
-          })->groupBy('user_id')->values();
+        // نبدأ بتجميع كل الأسئلة حسب step_id
+        $grouped = $forms->groupBy('FD_step_id');
 
-          return $submission;
-      })->values()->all(); // remove collection keys (numeric indexing)
+        $data = $grouped->map(function ($group, $stepId) use ($l) {
+            $first = $group->first();
+            $submission = new stdClass;
+            $submission->submission_id = $stepId;
+            $submission->form_name = $first->BF_form_name;
+            $submission->startup_name = $first->{'C_name_' . $l};
+            $submission->submitted_by = $first->{'user_name_' . $l};
+            $submission->step_name = $first->S_title;
+            $submission->program_name = $first->CYC_title;
+            $submission->organization_name = $first->O_name_en;
+            $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
+            $submission->cycle_id = $first->S_cycle_id;
+            $submission->company_id = $first->C_id;
+            $submission->company_step = $first->C_step;
       
+            // answers
+            $submission->answers = $group->map(function ($item) use ($l) {
+                $value = $item->FD_answer;
+                if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
+                    // Extract filename from path
+                    $filename = basename($value);
+                    $value = [
+                        'type' => 'file',
+                        'path' => $value,
+                        'file_name' => $filename,
+                        'file_url' => asset($value) // Generate accessible URL
+                    ];
+                }
+                return (object) [
+                    'user_id' => $item->FD_user_id,
+                    'name' => $item->{'user_name_' . $l},
+                    'label' => $item->FD_question,
+                    'value' => $value,
+                ];
+            })->groupBy('user_id')->values();
+
+            return $submission;
+        })->values()->all(); // remove collection keys (numeric indexing)
       $data = array_values($data);
-
-// dd($data);
       return view('admin.hackathon.show', compact('data'));
-
     }
 
-   public function viewHackathonTeam($id)
-{
-      $teams_q = "SELECT 
-                        tf.id as tf_id,
-                        tf.name as tf_name,
-                        tf.description as tf_description,
-                        tf.cycle_id as tf_cycle_id,
-                        tf.step_id as tf_step_id,
-                        tf.img_team as tf_img_team,
-                        tm.id as tm_id,
-                        tm.user_id as tm_user_id,
-                        tm.acceptInvition as tm_acceptInvition,
-                        tm.Name as tm_name,
-                        tm.Email as tm_email,
-                        tm.isTeamLeader as tm_isTeamLeader,
-                        tm.acceptInvition as tm_acceptInvition,
-                        tm.team_formation_id as tm_team_formation_id,
-                        u.id as u_id,
-                        concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
-                        concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
-                        u.email as u_email,
-                        u.img_url as u_img_url,
-                        u.title_ar as u_title_ar,
-                        u.title_en as u_title_en,
-                        ub.id as ub_id,
-                        ub.bio_ar as ub_bio_ar,
-                        ub.bio_en as ub_bio_en,
-                        ub.linkedin as ub_linkedin
-                        FROM 
-                        team_members as tm
-                        LEFT JOIN team_formations as tf ON tm.team_formation_id = tf.id
-                        LEFT JOIN users as u ON tm.user_id = u.id
-                        LEFT JOIN users_bio as ub ON u.id = ub.user_id
-                        
-                        WHERE   tm.team_formation_id = ?";
-                        $teams_data = collect(DB::select($teams_q, [$id]));
-  
-            $teams = $teams_data->groupBy('tm_team_formation_id');
+    public function viewHackathonTeam($id)
+    {
+        $teams_q = "SELECT 
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.description as tf_description,
+                tf.cycle_id as tf_cycle_id,
+                tf.step_id as tf_step_id,
+                tf.img_team as tf_img_team,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.Name as tm_name,
+                tm.Email as tm_email,
+                tm.isTeamLeader as tm_isTeamLeader,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.team_formation_id as tm_team_formation_id,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+                concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+                u.email as u_email,
+                u.img_url as u_img_url,
+                u.title_ar as u_title_ar,
+                u.title_en as u_title_en,
+                ub.id as ub_id,
+                ub.bio_ar as ub_bio_ar,
+                ub.bio_en as ub_bio_en,
+                ub.linkedin as ub_linkedin
+            FROM 
+                team_members as tm
+            LEFT JOIN
+                team_formations as tf ON tm.team_formation_id = tf.id
+            LEFT JOIN
+                users as u ON tm.user_id = u.id
+            LEFT JOIN
+                users_bio as ub ON u.id = ub.user_id
+            WHERE
+                tm.team_formation_id = ?
+        ";
 
-      $teams = $teams->map(function ($group) {
-        $first = $group->first();
+        $teams_data = collect(DB::select($teams_q, [$id]));
+        $teams = $teams_data->groupBy('tm_team_formation_id');
 
-        $team = new stdClass;
-        $team->id = $first->tf_id;
-        $team->name = $first->tf_name;
-        $team->desc = $first->tf_description;
-        $team->cycle_id = $first->tf_cycle_id;
-        $team->step_id = $first->tf_step_id;
-        $team->photo = $first->tf_img_team ?? null;
+        $teams = $teams->map(function ($group) {
+            $first = $group->first();
+            $team = new stdClass;
+            $team->id = $first->tf_id;
+            $team->name = $first->tf_name;
+            $team->desc = $first->tf_description;
+            $team->cycle_id = $first->tf_cycle_id;
+            $team->step_id = $first->tf_step_id;
+            $team->photo = $first->tf_img_team ?? null;
+
+            // Team Members
+            $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
+                $user = new stdClass;
+                $user->id = $member->u_id;
+                $user->name = $member->user_name_en;
+                $user->email = $member->u_email;
+                $user->img_url = $member->u_img_url;
+                $user->is_leader = $member->tm_isTeamLeader;
+                $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
+                $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
+                $user->linkedin = $member->ub_linkedin;
+                $user->title = $member->u_title_en;
+                return $user;
+            })->values()->all();
+            return $team;
+        });
         
-        // Team Members
-        $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
-            $user = new stdClass;
-            $user->id = $member->u_id;
-            $user->name = $member->user_name_en;
-            $user->email = $member->u_email;
-            $user->img_url = $member->u_img_url;
-            $user->is_leader = $member->tm_isTeamLeader;
-            $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
-            $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
-            $user->linkedin = $member->ub_linkedin;
-            $user->title = $member->u_title_en;
-            return $user;
-        })->values()->all();
-
-        return $team;
-    });
-    
-    // Get the first team from the collection, or null if it doesn't exist.
-    $team = $teams->values()->first();
-        
-    // If no team is found, you might want to abort or handle it gracefully.
-    if (!$team) {
-        abort(404, 'Team not found');
+        // Get the first team from the collection, or null if it doesn't exist.
+        $team = $teams->values()->first();
+            
+        // If no team is found, you might want to abort or handle it gracefully.
+        if (!$team) { abort(404, 'Team not found'); }
+        return view('admin.hackathon.team', compact('team'));
     }
-
-    return view('admin.hackathon.team', compact('team'));
-}}
+}
