@@ -183,7 +183,7 @@ class organizationsController extends Controller
 
 
 		//update
-		$organization->img_url = 'organizations/' . $imageName;
+		// $organization->img_url = 'organizations/' . $imageName;
 
 		$organization->save();
 		$user = $organization->user;
