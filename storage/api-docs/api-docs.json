@@ -3716,6 +3716,182 @@
                 }
             }
         },
+        "/api/mentorship-sessions": {
+            "post": {
+                "tags": [
+                    "Mentorship Sessions"
+                ],
+                "summary": "Request a mentorship session",
+                "description": "Submit a new mentorship session request with a mentor. Only users with the 'Registered' role can access this endpoint.",
+                "operationId": "addMentorshipSession",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "preferred_date_time",
+                                    "duration_minutes",
+                                    "notes",
+                                    "organization_id",
+                                    "cycle_id"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "description": "ID of the mentor",
+                                        "type": "integer",
+                                        "example": 128
+                                    },
+                                    "preferred_date_time": {
+                                        "description": "Preferred start time (ISO 8601 format)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-30T10:00:00"
+                                    },
+                                    "duration_minutes": {
+                                        "description": "Duration of the session in minutes",
+                                        "type": "integer",
+                                        "example": 45
+                                    },
+                                    "override_availability": {
+                                        "description": "Override mentor's availability",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "override_reason": {
+                                        "description": "Reason for override (required if override_availability is true)",
+                                        "type": "string",
+                                        "example": "Urgent meeting required",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "description": "Additional notes or discussion topic",
+                                        "type": "string",
+                                        "example": "أرغب في مناقشة استراتيجية التمويل."
+                                    },
+                                    "organization_id": {
+                                        "description": "User's organization ID",
+                                        "type": "integer",
+                                        "example": 7
+                                    },
+                                    "cycle_id": {
+                                        "description": "Associated cycle ID",
+                                        "type": "integer",
+                                        "example": 43
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Mentorship session successfully created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentorship Session Request Submitted Successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "integer",
+                                                    "example": 1001
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "approved",
+                                                        "pending"
+                                                    ],
+                                                    "example": "pending"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (not a startup)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict (session already exists)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A session already exists at the selected time."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid time or input)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The selected time does not match the mentor’s availability."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/users/{id}": {
             "get": {
                 "tags": [
@@ -4803,6 +4979,10 @@
         {
             "name": "Sectors",
             "description": "Sectors"
+        },
+        {
+            "name": "Mentorship Sessions",
+            "description": "Mentorship Sessions"
         },
         {
             "name": "Users",

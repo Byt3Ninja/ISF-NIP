@@ -46,4 +46,7 @@ return [
 	'company_not_found' => 'الشركة غير موجودة',
 	'organizationNotFound' => 'المؤسسة غير موجودة',
 	'program_not_found' => 'البرنامج غير موجود',
+	'mentorship_session_created' => 'تم إرسال طلب جلسة الإرشاد بنجاح.',
+    'session_already_exists' => 'لديك بالفعل جلسة في الوقت المحدد.',
+    'invalid_time_not_in_schedule' => 'الوقت المحدد لا يتوافق مع جدول توفر المرشد.',
 ];
