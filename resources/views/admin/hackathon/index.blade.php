@@ -32,16 +32,19 @@
     <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <form class="row g-3 align-items-end">
+
+          <form class="row g-3 align-items-end" action="/dashboard/hackathon" method="get">
+
             <div class="col-md-4">
               <label class="form-label fw-bold">{{ $l == 'en' ? 'Search' : 'البحث' }}</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="ti ti-search"></i></span>
-                <input type="text" class="form-control"
+                <input type="text" class="form-control" name="searchHackathon" value="{{ request('searchHackathon') }}"
                   placeholder="{{ $l == 'en' ? 'Search for hackathon...' : 'ابحث عن هاكثون...' }}">
               </div>
             </div>
-            <div class="col-md-3">
+
+            {{-- <div class="col-md-3">
               <label class="form-label fw-bold">{{ $l == 'en' ? 'Type' : 'النوع' }}</label>
               <select class="form-select select2">
                 <option selected>{{ $l == 'en' ? 'All Types' : 'جميع الأنواع' }}</option>
@@ -49,8 +52,8 @@
                 <option value="2">{{ $l == 'en' ? 'Hybrid' : 'هجين' }}</option>
                 <option value="3">{{ $l == 'en' ? 'In-Person' : 'حضوري' }}</option>
               </select>
-            </div>
-            <div class="col-md-3">
+            </div> --}}
+            {{-- <div class="col-md-3">
               <label class="form-label fw-bold">{{ $l == 'en' ? 'Theme' : 'المحور' }}</label>
               <select class="form-select select2">
                 <option selected>{{ $l == 'en' ? 'All Themes' : 'جميع المحاور' }}</option>
@@ -58,7 +61,8 @@
                 <option value="2">{{ $l == 'en' ? 'AI' : 'الذكاء الاصطناعي' }}</option>
                 <option value="3">{{ $l == 'en' ? 'Sustainability' : 'الاستدامة' }}</option>
               </select>
-            </div>
+            </div> --}}
+
             <div class="col-md-2">
               <button type="submit" class="btn btn-primary w-100">
                 <i class="ti ti-filter me-2"></i>
@@ -66,6 +70,7 @@
               </button>
             </div>
           </form>
+
         </div>
       </div>
     </div>

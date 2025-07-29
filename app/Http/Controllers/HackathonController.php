@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Notification;
 
 class HackathonController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $hackathons_query = "SELECT
         c.id as 'c_id',
@@ -45,7 +45,12 @@ class HackathonController extends Controller
         cycles as c
         LEFT JOIN organizations as o ON c.organization_id = o.id
         WHERE c.type = 'Hackathon'
-        AND `type` = 'Hackathon' ORDER BY c.start ASC";
+        AND `type` = 'Hackathon'
+        ";
+        if($request->searchHackathon != null){
+            $hackathons_query .= " AND c.title LIKE '%".$request->searchHackathon."%'";
+        }
+        $hackathons_query .= "  ORDER BY c.start ASC";
         $hackathons_raw = collect(DB::select($hackathons_query));
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
