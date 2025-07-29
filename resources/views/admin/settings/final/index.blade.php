@@ -11,10 +11,11 @@
 
 @php
   $types = [
-      'onetoall' => 'Assign One to all users',
-      'grouptoall' => 'Assign Group to all users',
-      'grouptogroup' => 'Assign Group to group of users',
+    'onetoall' => 'Assign One to all users',
+    'grouptoall' => 'Assign Group to all users',
+    'grouptogroup' => 'Assign Group to group of users',
   ];
+  $status = strtolower($evaluationForm?->status);
 @endphp
 
 @section('content')
@@ -306,6 +307,9 @@
             </div>
           @endif
         </section>
+        @if( $_user->ableTo('screening.evaluation_show', $permissions) )
+          @include('admin.settings.screening-evaluation')
+        @endif
       </div>
     </div>
     <div class="content-backdrop fade"></div>
