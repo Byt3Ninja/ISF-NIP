@@ -257,7 +257,9 @@ class CompanyController extends Controller
 public function show($id)
 {
     $user = auth()->user();
-
+     if (!$user->ableToAny(['company.profile_view', 'company.profile_view_mine'])) {
+        return $this->forbidden(__('api.forbidden'));
+    }
     $company = Company::with([
         'country', 'state', 'city', 'teamMembers', 'sectoR'
     ])->find($id);
@@ -270,7 +272,7 @@ public function show($id)
         return $this->success(new CompanyProfileResource($company));
     }
 
-    elseif ($user->hasRole('Registered') && $user->company_id == $company->id) {
+    if ($user->hasRole('Registered') && $user->company_id == $company->id) {
         return $this->success(new CompanyProfileResource($company));
     }
 

@@ -11,8 +11,21 @@ use App\Services\WhatsAppService;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
+use App\Http\Resources\MentorshipSessionResource;
+use App\Http\Requests\SubmitSessionFeedbackRequest;
 use App\Http\Requests\StoreMentorshipSessionRequest;
-
+/**
+ * @OA\Schema(
+ *     schema="MentorshipSessionResource",
+ *     type="object",
+ *     title="Completed Mentorship Session",
+ *     @OA\Property(property="sessionId", type="integer", example=101),
+ *     @OA\Property(property="mentorId", type="integer", example=34),
+ *     @OA\Property(property="mentorName", type="string", example="Ali Al-Mansouri"),
+ *     @OA\Property(property="sessionDateTime", type="string", format="date-time", example="2025-07-25 14:00:00"),
+ *     @OA\Property(property="attended", type="boolean", example=true)
+ * )
+ */
 class MentorshipSessionController extends Controller
 {
     use ApiResponder;
@@ -99,13 +112,13 @@ class MentorshipSessionController extends Controller
  * )
  */
 
-      public function addMentorshipSession(StoreMentorshipSessionRequest $request)
+    public function addMentorshipSession(StoreMentorshipSessionRequest $request)
     {
         $startup = auth()->user();
-
-        if(!$startup->hasRole('Registered')){
-           return $this->forbidden(__('api.forbidden'));
-        }
+         
+        if (!$startup->ableTo('mentors.settings_modify')) {
+          return $this->forbidden(__('api.forbidden'));
+      }
 
         $mentorId = $request->mentor_id;
         $userId = $startup->id;
@@ -179,5 +192,154 @@ class MentorshipSessionController extends Controller
              __('api.mentorship_session_created'),
              [],
             201);
+    }
+
+    /**
+ * @OA\Post(
+ *     path="/api/mentorship-sessions/submit-feedback",
+ *     tags={"Mentorship Sessions"},
+ *     summary="Submit session Rate and feedback",
+ *     description="Submit whether the user attended the session and optionally rate it if attended.",
+ *     operationId="submitMentorshipSessionFeedback",
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"session_id", "attended"},
+ *             @OA\Property(property="session_id", type="integer", example=1001, description="ID of the mentorship session"),
+ *             @OA\Property(property="attended", type="boolean", example=true, description="Whether the user attended the session"),
+ *             @OA\Property(property="rating", type="integer", nullable=true, minimum=1, maximum=5, example=4, description="Rating given to the mentor (1-5), required if attended is true"),
+ *             @OA\Property(property="comment", type="string", nullable=true, example="The session was very helpful", description="Optional comment about the session")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="Feedback submitted successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Feedback submitted successfully")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Access denied.")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=409,
+ *         description="Conflict (feedback already submitted)",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Feedback already submitted for this session.")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="The given data was invalid.")
+ *         )
+ *     )
+ * )
+ */
+     public function submitFeedback(SubmitSessionFeedbackRequest $request)
+    {
+        $data = $request->validated();
+        $user = auth()->user();
+         if (!$user->ableTo('mentorships.sessions_rate')) {
+         return $this->forbidden(__('api.forbidden'));
+      }
+
+        $session = MentorshipRequest::where('id', $data['session_id'])
+            ->where('user_id',$user->id)
+            ->firstOrFail();
+
+        if (!is_null($session->done)) {
+            return $this->conflict(__('api.session_feedback_already_submitted'));
+        }
+
+        $session->done = $data['attended'] ? 1 : 0;
+
+        if ($data['attended']) {
+            $session->rating = $data['rating'];
+            $session->rate_comment = $data['comment'] ?? null;
+        }
+
+        $session->save();
+
+        return $this->success(null, [], __('api.session_feedback_submitted'));
+    }
+
+    /**
+ * @OA\Get(
+ *     path="/api/mentorship-sessions/completed",
+ *     tags={"Mentorship Sessions"},
+ *     summary="View completed mentorship sessions",
+ *     description="Returns a paginated list of past mentorship sessions the startup has attended.",
+ *     operationId="getMyCompletedMentorshipSessions",
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of completed sessions",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="array",
+ *                 @OA\Items(ref="#/components/schemas/MentorshipSessionResource")
+ *             ),
+ *             @OA\Property(property="meta", type="object",
+ *                 @OA\Property(property="currentPage", type="integer", example=1),
+ *                 @OA\Property(property="lastPage", type="integer", example=5),
+ *                 @OA\Property(property="total", type="integer", example=48)
+ *             )
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Access denied.")
+ *         )
+ *     )
+ * )
+ */
+    public function myCompletedSessions(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->ableTo('mentorships.list_mine')) {
+         return $this->forbidden(__('api.forbidden'));
+      }
+
+        $sessions = MentorshipRequest::with('mentor')
+            ->where('user_id', $user->id)
+            ->whereNotNull('zoom_date')
+            ->where('zoom_date', '<', now())
+            ->where('done', 1)
+            ->orderByDesc('zoom_date')
+            ->paginate(10);
+
+       return $this->success(
+         MentorshipSessionResource::collection($sessions),
+        [
+            'meta' => [
+                'currentPage' => $sessions->currentPage(),
+                'lastPage' => $sessions->lastPage(),
+                'total' => $sessions->total(),
+            ]
+        ],
+     );
     }
 }
