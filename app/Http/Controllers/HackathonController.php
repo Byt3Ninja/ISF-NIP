@@ -1415,4 +1415,16 @@ class HackathonController extends Controller
         if (!$team) { abort(404, 'Team not found'); }
         return view('admin.hackathon.team', compact('team'));
     }
+
+    public function viewAdminHackaton($id)
+    {
+      
+        return view('admin.hackathon.admin.dashboard_admin');
+    }
+    public function viewHackathonWinners($id)
+    {
+      
+        return view('admin.hackathon.admin.winners');
+    }
+
 }
