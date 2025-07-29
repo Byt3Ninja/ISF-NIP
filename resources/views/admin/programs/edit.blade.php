@@ -1,25 +1,47 @@
 @extends('layouts.admin')
 
 @section('style')
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
+{{-- <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css"> --}}
+{{-- <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css"> --}}
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<!-- Summernote CSS -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
+
+<style>
+    button.close {
+        display: none;
+    }
+</style>
 @stop
 
 @php
+    $labels = [
+        'program_info' => $l == 'ar' ? 'معلومات البرنامج' : 'Program Info',
+        'program_guideline' => $l == 'ar' ? 'إرشادات البرنامج' : 'Program Guideline',
+        'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
+        'financial_policy' => $l == 'ar' ? 'السياسة المالية' : 'Financial Policy',
+        'legal_policy' => $l == 'ar' ? 'السياسة القانونية' : 'Legal Policy',
+        'mentorship_request' => $l == 'ar' ? 'طلب الإرشاد' : 'Mentorship Request',
+    ];
+
     $tabs = [
-        ['id' => 'program_info', 'label' => 'Program Info', 'active' => true],
-        ['id' => 'program_guideline', 'label' => 'Program Guideline', 'active' => false],
-        ['id' => 'custom_pages', 'label' => 'Custom Pages', 'active' => false],
-        ['id' => 'financial_policy', 'label' => 'Financial Policy', 'active' => false],
-        ['id' => 'legal_policy', 'label' => 'Legal Policy', 'active' => false],
-        ['id' => 'mentorship_request', 'label' => 'Mentorship Request', 'active' => false],
+        ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
+        ['id' => 'program_guideline', 'label' => $labels['program_guideline'], 'active' => false],
+        ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
+        ['id' => 'financial_policy', 'label' => $labels['financial_policy'], 'active' => false],
+        ['id' => 'legal_policy', 'label' => $labels['legal_policy'], 'active' => false],
+        ['id' => 'mentorship_request', 'label' => $labels['mentorship_request'], 'active' => false],
+    ];
+
+    $invalid_feedbacks = [
+        'page_name' => $l == 'ar' ? 'يرجى إدخال اسم الصفحة.' : 'Please enter a page name.',
+        'page_content' => $l == 'ar' ? 'يرجى إدخال محتوى الصفحة.' : 'Please enter page content.',
     ];
 @endphp
 
@@ -307,16 +329,17 @@
     <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
     <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
     <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
-    <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+    {{-- <script src="/app-assets/plugins/alertify/alertify.min.js"></script> --}}
     <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <!-- Summernote JS -->
+    {{-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> --}}
+    {{-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
+
 @stop
 
 @section('pagescripts')
     <script>
-        alertify.defaults.transition = 'zoom';
-        alertify.defaults.theme.ok = 'btn btn-md btn-success';
-        alertify.defaults.theme.cancel = 'btn btn-md btn-danger';
-        alertify.defaults.theme.input = 'form-control';
         $(document).on('change', '#is_public', function() {
             let _public = $(this).val();
             if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
@@ -344,7 +367,8 @@
             e.preventDefault();
             $('#custom-page-name').val('');
             $('#custom-page-visibility').val('public');
-            $('#custom-page-content').val('');
+            // $('#custom-page-content').val('');
+            $('#custom-page-content').summernote('code', '');
             $("#createPageModal").modal('show');
         })
 
@@ -363,6 +387,18 @@
 
         $(document).on('click', '#save_custom_page_btn', function(e) {
             e.preventDefault();
+
+            if (!$('#custom-page-name').val()) {
+                $('#custom-page-name').addClass('is-invalid').trigger('focus');
+                $('#custom-page-name').after('<div class="invalid-feedback d-block">{{ $invalid_feedbacks['page_name'] }}</div>');
+                return;
+            }
+
+            if (!$('#custom-page-content').val()) {
+                $('#custom-page-content').closest('.form-group').append('<div class="invalid-feedback d-block">{{ $invalid_feedbacks['page_content'] }}</div>');
+                return;
+            }
+
             let program_id = '{{ $id }}';
             if( program_id )
             {
@@ -390,30 +426,83 @@
                         {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Page Created',
-                                html: response.message,
+                                title: '{{ $l == 'ar' ? 'تم إنشاء الصفحة بنجاح' : 'Page Created Successfully' }}',
+                                showCancelButton: false,
+                                showConfirmButton: true,
+                                confirmButtonText: "{{ __('admin.OK') }}",
+                                customClass: {
+                                    confirmButton: 'btn btn-primary',
+                                },
+                                buttonsStyling: false,
                             });
                             $('#createPageModal').modal('hide');
                             $('#custom-page-name').val('');
                             $('#custom-page-content').val('');
                             $('#custom-page-visibility').val('public');
-                            populate_pages_table(response.pages);
+                            populate_pages_table(response.pages, '{{ $l }}');
                         }
                         else
                         {
-                            alertify.alert(response.message);
+                            Swal.fire({
+                                icon: 'error',
+                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                text: response.message,
+                                showCancelButton: false,
+                                showConfirmButton: true,
+                                confirmButtonText: "{{ __('admin.OK') }}",
+                                customClass: {
+                                    confirmButton: 'btn btn-primary',
+                                },
+                                buttonsStyling: false,
+                            });
                         }
                     },
                     error: function(error) {
                         console.log(error);
-                        alertify.alert("Error fetching cycle data. Please try again.");
+                        Swal.fire({
+                            icon: 'error',
+                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                            text: '{{ $l == 'ar' ? 'خطأ في إنشاء الصفحة. يرجى المحاولة مرة أخرى.' : 'Error creating page. Please try again.' }}',
+                            showCancelButton: false,
+                            showConfirmButton: true,
+                            confirmButtonText: "{{ __('admin.OK') }}",
+                            customClass: {
+                                confirmButton: 'btn btn-primary',
+                            },
+                            buttonsStyling: false,
+                        });
                     }
                 });
-            } else { alertify.alert('Please select a cycle first'); }
+            } else { 
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                    text: '{{ $l == 'ar' ? 'يرجى تحديد دورة أولاً' : 'Please select a cycle first' }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                    },
+                    buttonsStyling: false,
+                });
+            }
         });
 
         $(document).on('click', '#update_custom_page_btn', function(e) {
             e.preventDefault();
+
+            if (!$('#edit-custom-page-name').val()) {
+                $('#edit-custom-page-name').addClass('is-invalid').trigger('focus');
+                $('#edit-custom-page-name').after('<div class="invalid-feedback d-block">{{ $invalid_feedbacks['page_name'] }}</div>');
+                return;
+            }
+
+            if (!$('#edit-custom-page-content').val()) {
+                $('#edit-custom-page-content').closest('.form-group').append('<div class="invalid-feedback d-block">{{ $invalid_feedbacks['page_content'] }}</div>');
+                return;
+            }
+
             let program_id = '{{ $id }}';
             if( program_id )
             {
@@ -443,28 +532,80 @@
                         {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Page Updated',
-                                html: response.message,
+                                title: '{{ $l == 'ar' ? 'تم تحديث الصفحة بنجاح' : 'Page Updated Successfully' }}',
+                                showCancelButton: false,
+                                showConfirmButton: true,
+                                confirmButtonText: "{{ __('admin.OK') }}",
+                                customClass: {
+                                    confirmButton: 'btn btn-primary',
+                                },
+                                buttonsStyling: false,
                             });
                             $('#editPageModal').modal('hide');
                             $('#edit-custom-page-name').val('');
                             $('#edit-custom-page-content').val('');
                             $('#edit-custom-page-visibility').val('public');
-                            populate_pages_table(response.pages);
+                            populate_pages_table(response.pages, '{{ $l }}');
                         }
                         else
                         {
-                            alertify.alert(response.message);
+                            Swal.fire({
+                                icon: 'error',
+                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                text: response.message,
+                                showCancelButton: false,
+                                showConfirmButton: true,
+                                confirmButtonText: "{{ __('admin.OK') }}",
+                                customClass: {
+                                    confirmButton: 'btn btn-primary',
+                                },
+                                buttonsStyling: false,
+                            });
                         }
                     },
                     error: function(error) {
                         console.log(error);
-                        alertify.alert("Error fetching cycle data. Please try again.");
+                        Swal.fire({
+                            icon: 'error',
+                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                            text: '{{ $l == 'ar' ? 'خطأ في تحديث الصفحة. يرجى المحاولة مرة أخرى.' : 'Error updating page. Please try again.' }}',
+                            showCancelButton: false,
+                            showConfirmButton: true,
+                            confirmButtonText: "{{ __('admin.OK') }}",
+                            customClass: {
+                                confirmButton: 'btn btn-primary',
+                            },
+                            buttonsStyling: false,
+                        });
                     }
                 });
-            } else { alertify.alert('Please select a cycle first'); }
+            } else { 
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                    text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                    },
+                    buttonsStyling: false,
+                });
+            }
         });
 
+        // Hide errors on change
+        $(document).on('input', '#custom-page-name', function() {
+            $(this).removeClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+        });
+
+        $(document).on('input', '#edit-custom-page-name', function() {
+            $(this).removeClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+        });
+        
         $(document).on('click', '.custom-page-edit', function(e) {
             e.preventDefault();
             let program_id = '{{ $id }}';
@@ -489,22 +630,58 @@
                         {
                             $('#edit-custom-page-id').val(response.page.id);
                             $('#edit-custom-page-name').val(response.page.title);
-                            $('#edit-custom-page-content').val(response.page.content);
+                            $('#edit-custom-page-content').summernote('code', response.page.content ?? '');
                             $('#edit-custom-page-visibility').val(response.page.visibility);
                             editPageEditor.root.innerHTML = response.page.content ?? '';
                             $("#editPageModal").modal('show');
                         }
                         else
                         {
-                            alertify.alert(response.message);
+                            Swal.fire({
+                                icon: 'error',
+                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                text: response.message,
+                                showCancelButton: false,
+                                showConfirmButton: true,
+                                confirmButtonText: "{{ __('admin.OK') }}",
+                                customClass: {
+                                    confirmButton: 'btn btn-primary',
+                                },
+                                buttonsStyling: false,
+                            });
                         }
                     },
                     error: function(error) {
                         console.log(error);
-                        alertify.alert("Error fetching cycle data. Please try again.");
+                         Swal.fire({
+                            icon: 'error',
+                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                            text: '{{ $l == 'ar' ? 'خطأ في جلب بيانات الصفحة. يرجى المحاولة مرة أخرى.' : 'Error fetching page data. Please try again.' }}',
+                            showCancelButton: false,
+                            showConfirmButton: true,
+                            confirmButtonText: "{{ __('admin.OK') }}",
+                            customClass: {
+                                confirmButton: 'btn btn-primary',
+                            },
+                            buttonsStyling: false,
+                        });
                     }
                 });
-            } else { alertify.alert('Please select a cycle first'); }
+            } else { 
+                 Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                    text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                    },
+                    buttonsStyling: false,
+
+                });
+            }
         });
         $(document).on('click', '.custom-page-toggle-status', function(e) {
             e.preventDefault();
@@ -512,10 +689,20 @@
             var custom_page_id = $(this).data('page-id');
             if( program_id )
             {
-                alertify.confirm(
-                    'Confirm Toggle status',
-                    'Are you sure you want to toggle the status of this page ?',
-                    function() {
+                Swal.fire({
+                    title: '{{ $l == "ar" ? "تأكيد تغيير الحالة" : "Confirm Toggle Status" }}',
+                    text: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد تغيير حالة هذه الصفحة؟" : "Are you sure you want to toggle the status of this page?" }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '{{ $l == "ar" ? "نعم، قم بالتغيير" : "Yes, toggle it!" }}',
+                    cancelButtonText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                        cancelButton: 'btn btn-label-secondary ms-2'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
                         let data = {
                             page_id: custom_page_id,
                             cycleId: program_id
@@ -534,25 +721,65 @@
                                 {
                                     Swal.fire({
                                         icon: 'success',
-                                        title: 'Page Status Updated',
-                                        html: response.message,
+                                        title: '{{ $l == 'ar' ? 'تم تحديث حالة الصفحة بنجاح' : 'Page Status Updated Successfully' }}',
+                                        showCancelButton: false,
+                                        showConfirmButton: true,
+                                        confirmButtonText: "{{ __('admin.OK') }}",
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary',
+                                        },
+                                        buttonsStyling: false,
                                     });
-                                    populate_pages_table(response.pages);
+                                    populate_pages_table(response.pages, '{{ $l }}');
                                 }
                                 else
                                 {
-                                    alertify.alert(response.message);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                        text: response.message,
+                                        showCancelButton: false,
+                                        showConfirmButton: true,
+                                        confirmButtonText: "{{ __('admin.OK') }}",
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary',
+                                        },
+                                        buttonsStyling: false,
+                                    });
                                 }
                             },
                             error: function(error) {
                                 console.log(error);
-                                alertify.alert("Error fetching cycle data. Please try again.");
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                    text: '{{ $l == 'ar' ? 'خطأ في تغيير الحالة. يرجى المحاولة مرة أخرى.' : 'Error toggling status. Please try again.' }}',
+                                    showCancelButton: false,
+                                    showConfirmButton: true,
+                                    confirmButtonText: "{{ __('admin.OK') }}",
+                                    customClass: {
+                                        confirmButton: 'btn btn-primary',
+                                    },
+                                    buttonsStyling: false,
+                                });
                             }
                         });
+                    }
+                });
+            } else { 
+                 Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                    text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
                     },
-                    function() {}
-                ).set('labels', {ok: "<i class='fas fa-fw fa-sm fa-check mx-1'></i> Yes", cancel: "Cancel"});
-            } else { alertify.alert('Please select a cycle first'); }
+                    buttonsStyling: false,
+                });
+            }
         });
         $(document).on('change', '.custom-page-visibility-toggle', function(e) {
             let program_id = '{{ $id }}';
@@ -560,10 +787,20 @@
             var custom_page_id = $(this).data('page-id');
             if( program_id )
             {
-                alertify.confirm(
-                    'Confirm Toggle visibility',
-                    'Are you sure you want to toggle the visibility of this page ?',
-                    function() {
+                 Swal.fire({
+                    title: '{{ $l == "ar" ? "تأكيد تغيير الظهور" : "Confirm Toggle Visibility" }}',
+                    text: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد تغيير ظهور هذه الصفحة؟" : "Are you sure you want to toggle the visibility of this page?" }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '{{ $l == "ar" ? "نعم، قم بالتغيير" : "Yes, toggle it!" }}',
+                    cancelButtonText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                        cancelButton: 'btn btn-label-secondary ms-2'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if(result.isConfirmed) {
                         let data = {
                             page_id: custom_page_id,
                             cycleId: program_id,
@@ -583,25 +820,65 @@
                                 {
                                     Swal.fire({
                                         icon: 'success',
-                                        title: 'Page Status Updated',
-                                        html: response.message,
+                                        title: '{{ $l == 'ar' ? 'تم تحديث ظهور الصفحة بنجاح' : 'Page Visibility Updated Successfully' }}',
+                                        showCancelButton: false,
+                                        showConfirmButton: true,
+                                        confirmButtonText: "{{ __('admin.OK') }}",
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary',
+                                        },
+                                        buttonsStyling: false,
                                     });
-                                    populate_pages_table(response.pages);
+                                    populate_pages_table(response.pages, '{{ $l }}');
                                 }
                                 else
                                 {
-                                    alertify.alert(response.message);
+                                     Swal.fire({
+                                        icon: 'error',
+                                        title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                        text: response.message,
+                                        showCancelButton: false,
+                                        showConfirmButton: true,
+                                        confirmButtonText: "{{ __('admin.OK') }}",
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary',
+                                        },
+                                        buttonsStyling: false,
+                                    });
                                 }
                             },
                             error: function(error) {
                                 console.log(error);
-                                alertify.alert("Error fetching cycle data. Please try again.");
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                    text: '{{ $l == 'ar' ? 'خطأ في تغيير الظهور. يرجى المحاولة مرة أخرى.' : 'Error toggling visibility. Please try again.' }}',
+                                    showCancelButton: false,
+                                    showConfirmButton: true,
+                                    confirmButtonText: "{{ __('admin.OK') }}",
+                                    customClass: {
+                                        confirmButton: 'btn btn-primary',
+                                    },
+                                    buttonsStyling: false,
+                                });
                             }
                         });
+                    }
+                });
+            } else { 
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                    text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
                     },
-                    function() {}
-                ).set('labels', {ok: "<i class='fas fa-fw fa-sm fa-check mx-1'></i> Yes", cancel: "Cancel"});
-            } else { alertify.alert('Please select a cycle first'); }
+                    buttonsStyling: false,
+                });
+            }
         });
         $(document).on('click', '.custom-page-delete', function(e) {
             e.preventDefault();
@@ -609,10 +886,20 @@
             if( program_id )
             {
                 let custom_page_id = $(this).data('page-id');
-                alertify.confirm(
-                    'Confirm Delete Page',
-                    'Are you sure you want to delete this page ?',
-                    function() {
+                Swal.fire({
+                    title: '{{ $l == "ar" ? "تأكيد الحذف" : "Confirm Delete" }}',
+                    text: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد حذف هذه الصفحة؟" : "Are you sure you want to delete this page?" }}',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '{{ $l == "ar" ? "نعم، قم بالحذف" : "Yes, delete it!" }}',
+                    cancelButtonText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-label-secondary ms-2'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
                         let send_data = {
                             page_id: custom_page_id,
                             cycleId: program_id
@@ -630,63 +917,160 @@
                                 if( response.status )
                                 {
                                     Swal.fire({
-                                        icon: 'success',
-                                        title: 'Page Deleted',
-                                        html: response.message,
+                                       icon: 'success',
+                                        title: "{{ __('admin.Deleted') }}!",
+                                        html: "{{ __('admin.DeletedSuccessfully') }}.",
+                                        showCancelButton: false,
+                                        showConfirmButton: true,
+                                        confirmButtonText: "{{ __('admin.OK') }}",
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary',
+                                        },
+                                        buttonsStyling: false,
                                     });
-                                    populate_pages_table(response.pages);
+                                    populate_pages_table(response.pages, '{{ $l }}');
                                 }
                                 else
                                 {
-                                    alertify.alert(response.message);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                        text: response.message,
+                                        showCancelButton: false,
+                                        showConfirmButton: true,
+                                        confirmButtonText: "{{ __('admin.OK') }}",
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary',
+                                        },
+                                        buttonsStyling: false,
+                                    });
                                 }
                             },
                             error: function(error) {
                                 console.log(error);
-                                alertify.alert("Error fetching cycle data. Please try again.");
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                    text: '{{ $l == 'ar' ? 'خطأ في حذف الصفحة. يرجى المحاولة مرة أخرى.' : 'Error deleting page. Please try again.' }}',
+                                    showCancelButton: false,
+                                    showConfirmButton: true,
+                                    confirmButtonText: "{{ __('admin.OK') }}",
+                                    customClass: {
+                                        confirmButton: 'btn btn-primary',
+                                    },
+                                    buttonsStyling: false,
+                                });
                             }
                         });
+                    }
+                });
+            } else { 
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                    text: '{{ $l == 'ar' ? 'يرجى تحديد دورة أولاً' : 'Please select a cycle first' }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
                     },
-                    function() {}
-                ).set('labels', {ok: "<i class='fas fa-fw fa-sm fa-check mx-1'></i> Yes", cancel: "Cancel"});
-            } else { alertify.alert('Please select a cycle first'); }
+                    buttonsStyling: false,
+                });
+            }
         });
 
-        function populate_pages_table(pages)
-        {
-            var data = '';
-            $.each(pages, function(index, page) {
-                data += `
-                    <tr data-index="${page.id}">
-                        <td>${page.title}</td>
-                        <td>
-                            <select class="form-select custom-page-visibility-toggle" data-page-id="${page.id}">
-                                <option value="public" ${page.visibility == 'public' ? 'selected' : ''}>Public</option>
-                                <option value="private" ${page.visibility == 'private' ? 'selected' : ''}>Participants</option>
-                                <option value="admins" ${page.visibility == 'admins' ? 'selected' : ''}>Admin Only</option>
-                            </select>
-                        </td>
-                        <td>
-                            ${page.is_active == 1 ? `<span class="text-success"> <i class="fas fa-fw fa-sm fa-circle mx-1"></i> Active</span>` : `<span class="text-danger"> <i class="fas fa-fw fa-sm fa-circle mx-1"></i> Inactive</span>`}
-                        </td>
-                        <td>
-                            <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                Actions
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li data-page-id="${page.id}" class="custom-page-edit"><a class="dropdown-item" href="javascript:void(0);">Edit</a></li>
-                                <li data-page-id="${page.id}" class="custom-page-toggle-status"><a class="dropdown-item" href="javascript:void(0);">Toggle</a></li>
-                                <li data-page-id="${page.id}" class="custom-page-delete"><a class="dropdown-item" href="javascript:void(0);">Delete</a></li>
-                            </ul>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+        /**
+         * Populates the custom pages table with data.
+         * @param {Array} pages - An array of page objects.
+         * @param {string} l - The current language ('ar' for Arabic, 'en' for English).
+         */
+        function populate_pages_table(pages, l) {
+            // Define translations for easy access
+            const translations = {
+                ar: {
+                    public: 'عام',
+                    participants: 'المشاركين',
+                    adminOnly: 'الإدارة فقط',
+                    active: 'نشط',
+                    inactive: 'غير نشط',
+                    edit: 'تعديل',
+                    toggleStatus: 'تغيير الحالة',
+                    delete: 'حذف'
+                },
+                en: {
+                    public: 'Public',
+                    participants: 'Participants',
+                    adminOnly: 'Admin Only',
+                    active: 'Active',
+                    inactive: 'Inactive',
+                    edit: 'Edit',
+                    toggleStatus: 'Toggle Status',
+                    delete: 'Delete'
+                }
+            };
 
-            });
-            $("#custom_pages_list").html(data);
+            // Determine the current language, default to 'en'
+            const T = translations[l] || translations.en;
+
+            let tableRows = '';
+            if (pages.length === 0) {
+                // Optional: Handle the case where there are no pages
+                const colCount = 4; // Number of columns in your table
+                tableRows = `<tr><td colspan="${colCount}" class="text-center">No pages found.</td></tr>`;
+            } else {
+                $.each(pages, function(index, page) {
+                    const statusBadge = page.is_active == 1 ?
+                        `<span class="badge bg-label-success me-1"><i class="ti ti-circle-filled me-1"></i> ${T.active}</span>` :
+                        `<span class="badge bg-label-danger me-1"><i class="ti ti-circle-filled me-1"></i> ${T.inactive}</span>`;
+
+                    tableRows += `
+                        <tr data-index="${page.id}">
+                            <td><strong>${page.title}</strong></td>
+                            <td>
+                                <select class="form-select form-select-sm custom-page-visibility-toggle" data-page-id="${page.id}">
+                                    <option value="public" ${page.visibility == 'public' ? 'selected' : ''}>${T.public}</option>
+                                    <option value="private" ${page.visibility == 'private' ? 'selected' : ''}>${T.participants}</option>
+                                    <option value="admins" ${page.visibility == 'admins' ? 'selected' : ''}>${T.adminOnly}</option>
+                                </select>
+                            </td>
+                            <td>
+                                ${statusBadge}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="ti ti-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item custom-page-edit" href="javascript:void(0);"
+                                            data-page-id="${page.id}" data-bs-toggle="modal" data-bs-target="#editPageModal">
+                                            <i class="ti ti-pencil me-1"></i> ${T.edit}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item custom-page-toggle-status" href="javascript:void(0);"
+                                            data-page-id="${page.id}">
+                                            <i class="ti ti-toggle-left me-1"></i> ${T.toggleStatus}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item custom-page-delete" href="javascript:void(0);"
+                                            data-page-id="${page.id}">
+                                            <i class="ti ti-trash me-1"></i> ${T.delete}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            $("#custom_pages_list").html(tableRows);
         }
+
         // Set initial editor content
         editGuidelineEditor.root.innerHTML = @json($ccycle->program_guideline ?? '');
         editFinancialEditor.root.innerHTML = @json($ccycle->financial_guideline ?? '');
@@ -766,16 +1150,31 @@
                         success: function(response) {
                             if( response.status )
                             {
-                                populate_pages_table(response.pages);
+                                populate_pages_table(response.pages, '{{ $l }}');
                             }
                             else
                             {
-                                alertify.alert(response.message);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                    text: response.message
+                                });
                             }
                         },
                         error: function(error) {
                             console.log(error);
-                            alertify.alert("Error fetching cycle data. Please try again.");
+                            Swal.fire({
+                                icon: 'error',
+                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                text: '{{ $l == 'ar' ? 'خطأ في إعادة ترتيب الصفحات. يرجى المحاولة مرة أخرى.' : 'Error resorting pages. Please try again.' }}',
+                                showCancelButton: false,
+                                showConfirmButton: true,
+                                confirmButtonText: "{{ __('admin.OK') }}",
+                                customClass: {
+                                    confirmButton: 'btn btn-primary',
+                                },
+                                buttonsStyling: false,
+                            });
                         }
                     });
                 }
@@ -846,7 +1245,18 @@
                     },
                     error: function(error) {
                         console.log(error);
-                        alert("Error fetching cycle data. Please try again.");
+                        Swal.fire({
+                            icon: 'error',
+                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                            text: '{{ $l == 'ar' ? 'خطأ في جلب بيانات الدورة. يرجى المحاولة مرة أخرى.' : 'Error fetching cycle data. Please try again.' }}',
+                            showCancelButton: false,
+                            showConfirmButton: true,
+                            confirmButtonText: "{{ __('admin.OK') }}",
+                            customClass: {
+                                confirmButton: 'btn btn-primary',
+                            },
+                            buttonsStyling: false,
+                        });
                     }
                 });
             }
@@ -956,8 +1366,19 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Show alert or notification
-                alert('Please fill in the Program Title and Description before accessing other tabs.');
+                // Show SweetAlert notification
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ $l == "ar" ? "معلومات غير مكتملة" : "Incomplete Information" }}',
+                    text: '{{ $l == "ar" ? "يرجى ملء عنوان البرنامج ووصفه قبل الانتقال إلى علامات التبويب الأخرى." : "Please fill in the Program Title and Description before accessing other tabs." }}',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: "{{ __('admin.OK') }}",
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                    },
+                    buttonsStyling: false,
+                });
                 return false;
             }
         });
