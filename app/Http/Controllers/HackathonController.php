@@ -963,6 +963,10 @@ class HackathonController extends Controller
 
         $teamformation->save();
 
+        if($teamformation){
+            $getAllTeams = Team_member::where('user_id', $user->id)->whereIn('acceptInvition', ['join', 'pending'])->delete();
+        }
+
         
         $team_member = new Team_member();
         $team_member->user_id = $user->id; // Assuming the user creating the team is the authenticated user
