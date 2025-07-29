@@ -1,40 +1,41 @@
 @extends('layouts.hr-admin')
 
 @php
-$teams = [
-[
-'name' => 'Rafael Montano',
-'title' => 'Fullstack Developer',
-'img_url' =>
-'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
-'linkedin' => 'https://www.linkedin.com/in/rafael-monta%C3%B1o-8b0a4b1a6/',
-'email' => 'rafael.montano@example.com'
-],
-[
-'name' => 'Jesus Lanzarote Rodriguez',
-'title' => 'CTO',
-'img_url' =>
-'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
-'linkedin' => 'https://www.linkedin.com/in/jesus-lanzarote-rodriguez-123456789/',
-'email' => 'jesus.lanzarote@example.com'
-],
-[
-'name' => 'Maximiliano Garcia',
-'title' => 'Frontend Developer',
-'img_url' =>
-'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
-'linkedin' => 'https://www.linkedin.com/in/maximiliano-garcia-123456789/',
-'email' => 'maximiliano.garcia@example.com'
-],
-[
-'name' => 'Jorge Ordovas',
-'title' => 'PM Telefonica CEO of Kairos',
-'img_url' =>
-'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
-'linkedin' => 'https://www.linkedin.com/in/jorge-ordovas-123456789/',
-'email' => 'jorge.ordovas@example.com'
-],
-]
+// $teams = $teams->members
+// [
+// [
+// 'name' => 'Rafael Montano',
+// 'title' => 'Fullstack Developer',
+// 'img_url' =>
+// 'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
+// 'linkedin' => 'https://www.linkedin.com/in/rafael-monta%C3%B1o-8b0a4b1a6/',
+// 'email' => 'rafael.montano@example.com'
+// ],
+// [
+// 'name' => 'Jesus Lanzarote Rodriguez',
+// 'title' => 'CTO',
+// 'img_url' =>
+// 'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
+// 'linkedin' => 'https://www.linkedin.com/in/jesus-lanzarote-rodriguez-123456789/',
+// 'email' => 'jesus.lanzarote@example.com'
+// ],
+// [
+// 'name' => 'Maximiliano Garcia',
+// 'title' => 'Frontend Developer',
+// 'img_url' =>
+// 'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
+// 'linkedin' => 'https://www.linkedin.com/in/maximiliano-garcia-123456789/',
+// 'email' => 'maximiliano.garcia@example.com'
+// ],
+// [
+// 'name' => 'Jorge Ordovas',
+// 'title' => 'PM Telefonica CEO of Kairos',
+// 'img_url' =>
+// 'https://lablab.ai/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Flablab-static-eu%2Fimages%2Fusers%2Fcmchlf8v1006h4q0s8jelyion_picture_9v2hwm0wlz.jpg&w=256&q=75',
+// 'linkedin' => 'https://www.linkedin.com/in/jorge-ordovas-123456789/',
+// 'email' => 'jorge.ordovas@example.com'
+// ],
+// ]
 @endphp
 
 

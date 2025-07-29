@@ -45,7 +45,7 @@ class HackathonController extends Controller
         cycles as c
         LEFT JOIN organizations as o ON c.organization_id = o.id
         WHERE c.type = 'Hackathon'
-        AND `type` = 'Hackathon' ORDER BY c.created_at DESC";
+        AND `type` = 'Hackathon' ORDER BY c.start ASC";
         $hackathons_raw = collect(DB::select($hackathons_query));
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
@@ -1308,5 +1308,82 @@ class HackathonController extends Controller
     {
       
         return view('admin.hackathon.admin.dashboard_admin');
+    }
+
+    public function viewHackathonTeam($id)
+    {
+          $teams_q = "SELECT 
+                            tf.id as tf_id,
+                            tf.name as tf_name,
+                            tf.description as tf_description,
+                            tf.cycle_id as tf_cycle_id,
+                            tf.step_id as tf_step_id,
+                            tf.img_team as tf_img_team,
+                            tm.id as tm_id,
+                            tm.user_id as tm_user_id,
+                            tm.acceptInvition as tm_acceptInvition,
+                            tm.Name as tm_name,
+                            tm.Email as tm_email,
+                            tm.isTeamLeader as tm_isTeamLeader,
+                            tm.acceptInvition as tm_acceptInvition,
+                            tm.team_formation_id as tm_team_formation_id,
+                            u.id as u_id,
+                            concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+                            concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+                            u.email as u_email,
+                            u.img_url as u_img_url,
+                            u.title_ar as u_title_ar,
+                            u.title_en as u_title_en,
+                            ub.id as ub_id,
+                            ub.bio_ar as ub_bio_ar,
+                            ub.bio_en as ub_bio_en,
+                            ub.linkedin as ub_linkedin
+                            FROM 
+                            team_members as tm
+                            LEFT JOIN team_formations as tf ON tm.team_formation_id = tf.id
+                            LEFT JOIN users as u ON tm.user_id = u.id
+                            LEFT JOIN users_bio as ub ON u.id = ub.user_id
+                            
+                            WHERE   tm.team_formation_id = ?";
+                            $teams = collect(DB::select($teams_q, [$id]));
+      
+                $teams = $teams->groupBy('tm_team_formation_id');
+
+          $teams = $teams->map(function ($group, $teamFormationId) use ($id) {
+    $first = $group->first();
+
+    $team = new stdClass;
+    $team->id = $first->tf_id;
+    $team->name = $first->tf_name;
+    $team->desc = $first->tf_description;
+    $team->cycle_id = $first->tf_cycle_id;
+    $team->step_id = $first->tf_step_id;
+    $team->photo = $first->tf_img_team ?? null;
+    
+    
+
+    // المستخدمين في هذا الفريق
+    $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
+        $user = new stdClass;
+        $user->id = $member->u_id;
+        $user->name = $member->user_name_en;
+        $user->email = $member->u_email;
+        $user->img_url = $member->u_img_url;
+        $user->is_leader = $member->tm_isTeamLeader;
+        $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
+        $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
+        $user->linkedin = $member->ub_linkedin;
+        $user->title = $member->u_title_en;
+        return $user;
+    })->values()->all();
+
+    return $team;
+});
+        $teams = $teams->values()->all();
+            
+
+          
+// dd($teams);
+        return view('admin.hackathon.team', compact('teams'));
     }
 }
