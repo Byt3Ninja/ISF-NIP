@@ -9,6 +9,8 @@ use App\FinalData;
 use App\Formfield;
 use Carbon\Carbon;
 use App\Finalscreening;
+use App\ScreeningEvaluation;
+use App\ScreeningEvaluationResults;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -58,8 +60,16 @@ class FinalscreeningController extends Controller
         }
 
         $companies = $companies->get();
+        $check = ScreeningEvaluation::where('step_id', $id)->first();
+		if( empty( $check ) )
+		{
+			$evaluation = new ScreeningEvaluation();
+			$evaluation->step_id = $id;
+			$evaluation->save();
+		}
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 
-        return view('admin.settings.final.index', compact('cstep', 'judges', 'steps', 'id','companies'));
+        return view('admin.settings.final.index', compact('cstep', 'judges', 'steps', 'id', 'companies', 'evaluationForm'));
     }
 
     public function update(Request $request)
@@ -116,10 +126,10 @@ class FinalscreeningController extends Controller
         // Check step
         $step = Step::findOrFail($sid);
         if (!$step) {return Redirect::back()->with('message2', 'error');}
-        $field_map_ids = Formfield::where('step_id',$sid)->orderBy('id')->select('id')->pluck('id')->toArray();
+        $field_map_ids = Formfield::where('step_id',$sid)->where('builder_forms_id', $step->data)->orderBy('id')->select('id')->pluck('id')->toArray();
         $data = [
             'title' => $step->title,
-            'fields' => $step->fields()->orderBy('form_fields.id', 'asc')->get(),
+            'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
             'form_id' => $step->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
@@ -278,7 +288,7 @@ class FinalscreeningController extends Controller
             return Redirect::back()->with('message', 'Meeting_added_successfully');
         } else {return Redirect::back()->with('message2', 'Error');}
     }
-    public function results(Request $request,$id = 0)
+    public function results(Request $request, $id = 0)
     {
         $organization_id=auth()->user()->organization_id;
         $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
@@ -299,8 +309,25 @@ class FinalscreeningController extends Controller
             $c = Company::findOrFail($request->c);
             $cj = FinalData::where('company_id',$c->id)->where('step_id', $id)->distinct('judge_id')->get(['judge_id']);
         }
-        return view('admin.settings.final.results', compact('cstep', 'steps', 'id','companies','c', 'cj'));
+        $check = ScreeningEvaluation::where('step_id', $id)->first();
+		if( empty( $check ) )
+		{
+			$evaluation = new ScreeningEvaluation();
+			$evaluation->step_id = $id;
+			$evaluation->save();
+		}
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+        $metadata = ScreeningEvaluationResults::metadata( $id );
+        $companies = $metadata['companies']->where('step', $id)->values();
+		$_steps = $metadata['_steps'];
+		$judges = $metadata['judges'];
+		$evaluation = $metadata['evaluation'];
+		$results = $metadata['results'];
+		$_companies = $metadata['_companies']->where('step', $id)->values();
+
+        return view('admin.settings.final.results', compact('cstep', 'judges', 'steps', '_steps', 'id', '_companies', 'companies', 'evaluation', 'results', 'c', 'cj', ));
     }
+
     public function delsession($id, Request $request)
     {
         // $zoomid = TrainingSession::findOrFail($id)->zoom_id;
