@@ -6,6 +6,7 @@
   <h1 class="display-5 fw-bold" id="hackathon-main-title">
     {{ $l == 'en' ? $currentHackathon['title'] : $currentHackathon['title_ar'] }}
   </h1>
+  <p class="lead"> {{ $l == 'en' ? $currentHackathon['description'] : $currentHackathon['description_ar'] }} </p>
   <p class="lead" id="hackathon-dates-location">
     <i class="ti ti-calendar-event me-2"></i>
     {{ $l == 'en' ? $currentHackathon['date'] : $currentHackathon['date_ar'] }}

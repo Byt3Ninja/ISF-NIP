@@ -19,6 +19,7 @@ use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
+use Str;
 
 class HackathonController extends Controller
 {
@@ -194,6 +195,18 @@ class HackathonController extends Controller
         $user = Auth::user();
         $l = app()->getLocale();
         $step = Step::where('cycle_id', $id)->get();
+        $pages = DB::table('cycle_custom_pages')
+            ->where('cycle_id', $id)
+            ->where('is_active', 1)
+            ->whereIn('visibility', ['public', 'private'])
+            ->orderBy('row_no')
+            ->get();
+
+        $pages = $pages->map(function( $page ) {
+            $page->code = Str::random(5);
+            return $page;
+        });
+        
         if( !$step )
         {
             if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
@@ -747,6 +760,7 @@ class HackathonController extends Controller
 
         // return view('admin.hackathon.show', compact('hackathon'));
         return view('admin.hackathon.hackathon-details', compact(
+            'pages',
             'currentHackathon',
             'data', 
             'l', 
