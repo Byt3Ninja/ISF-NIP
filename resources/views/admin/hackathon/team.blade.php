@@ -8,7 +8,7 @@
     <div class="text-center mb-5">
       {{-- Access team properties directly --}}
       <h1 class="display-4 fw-bold">{{ $team->name }}</h1>
-      <p class="text-secondary fs-5 mb-2">Team Idea</p>
+      <p class="text-secondary fs-5 mb-2">{{ $l == 'ar' ? 'فكرة الفريق' : 'Team Idea' }}</p>
       <p class="text-muted fs-5 mx-auto" style="max-width: 64rem;">
         {{ $team->desc }}
       </p>
