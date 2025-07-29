@@ -8,29 +8,32 @@
 @stop
 
 @php
-$user = Auth::user();
+  $user = Auth::user();
+  $tabsData = [];
+  foreach( $pages as $page )
+  {
+    $tabsData[] = ['title' => $page->code, 'icon' => 'bi-list', 'label' => $page->title, 'type' => 'dynamic'];
+  }
+  $tabsData = array_merge($tabsData, [
+    // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
+    // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
+    // ['title' => 'schedule', 'icon' => 'bi-calendar2-week-fill', 'label' => $l == 'en' ? 'Schedule' : 'جدول الأعمال', 'type' => 'static'],
+    // ['title' => 'prizes', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Prizes' : 'الجوائز', 'type' => 'static'],
+    // ['title' => 'evaluation', 'icon' => 'bi-clipboard-check-fill', 'label' => $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم', 'type' => 'static'],
+    ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
+    ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
+    ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static'],
+    ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
+    // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
+    ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static']
+  ]);
 
-$tabsData = [
-  ['overview', 'bi-card-text', $l == 'en' ? 'Overview' : 'نظرة عامة'],
-  // ['themes', 'bi-lightbulb-fill', $l == 'en' ? 'Themes' : 'المحاور'],
-  // ['schedule', 'bi-calendar2-week-fill', $l == 'en' ? 'Schedule' : 'جدول الأعمال'],
-  // ['prizes', 'bi-trophy-fill', $l == 'en' ? 'Prizes' : 'الجوائز'],
-  // ['evaluation', 'bi-clipboard-check-fill', $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم'],
-  ['mentors', 'bi-person-video3', $l == 'en' ? 'Mentors ' : 'المرشدون '],
-  ['teams', 'bi-people-fill', $l == 'en' ? 'Teams' : ' الفرق'],
-  ['results-winners', 'bi-trophy-fill', $l == 'en' ? 'Results & winners' : 'النتائج والفائزون'],
-  ['submission', 'bi-upload', $l == 'en' ? 'Project Submission' : 'رفع المشاريع'],
-  // ['results', 'bi-award-fill', $l == 'en' ? 'Results' : 'النتائج'],
-  ['mentorship', 'bi-award-fill', $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل']
-];
-if($user->hasRole('admin')) {
-  $tabsData[] = ['submissions', 'bi-award-fill', $l == 'en' ? 'Submissions' : 'الاجابات'];
-}
-
-
-$tabs = collect($tabsData)->map(function ($tab) {
-  return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
-})->toArray();
+  if($user->hasRole('admin')) {
+    $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Submissions' : 'الاجابات', 'type' => 'static'];
+  }
+  $tabs = collect($tabsData)->map(function ($tab) {
+    return ['target' => $tab['title'], 'icon' => $tab['icon'], 'label' => $tab['label'], 'type' => $tab['type']];
+  })->toArray();
 @endphp
 
 @section('content')
@@ -61,35 +64,41 @@ $tabs = collect($tabsData)->map(function ($tab) {
     <!-- Tabs Content -->
     <div class="tab-content p-0 mb-12" id="hackathonTabContent">
       @foreach($tabs as $tab)
-      @php
-      // Map tab id to partial view
-      $partials = [
-      'overview' => 'admin.hackathon.partials.about-tab',
-      'themes' => 'admin.hackathon.partials.themes-tab',
-      'schedule' => 'admin.hackathon.partials.schedule-tab',
-      'prizes' => 'admin.hackathon.partials.prizes-tab',
-      'evaluation' => 'admin.hackathon.partials.evaluation-tab',
-      'mentors' => 'admin.hackathon.partials.mentors-tab',
-      'teams' => 'admin.hackathon.partials.teams-tab',
-      'results-winners' => 'admin.hackathon.partials.winners-tab',
-      'submission' => 'admin.hackathon.partials.projects-tab',
-      'results' => 'admin.hackathon.partials.results-tab',
-      'mentorship' => 'admin.hackathon.partials.mentorship-tab',
-      'submissions' => 'admin.hackathon.partials.submissions-tab',
-      ];
-      $partial = $partials[$tab['target']] ?? null;
-      // Tab visibility conditions
-      $showTab = true;
-      if ($tab['target'] === 'teams' && ($companyStep?->stype == 1)) $showTab = false;
-      if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
-      $showTab = false;
-      @endphp
-      @if($showTab && $partial)
-      <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel"
-        aria-labelledby="{{ $tab['target'] }}-tab">
-        @include($partial)
-      </div>
-      @endif
+        @if( $tab['type'] == 'dynamic' )
+          @php $get_page = $pages->where('code', $tab['target'])->first(); @endphp
+          <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
+            {!! $get_page->content !!}
+          </div>
+        @else
+          @php
+            // Map tab id to partial view
+            $partials = [
+              // 'overview' => 'admin.hackathon.partials.about-tab',
+              'themes' => 'admin.hackathon.partials.themes-tab',
+              'schedule' => 'admin.hackathon.partials.schedule-tab',
+              'prizes' => 'admin.hackathon.partials.prizes-tab',
+              'evaluation' => 'admin.hackathon.partials.evaluation-tab',
+              'mentors' => 'admin.hackathon.partials.mentors-tab',
+              'teams' => 'admin.hackathon.partials.teams-tab',
+              'results-winners' => 'admin.hackathon.partials.winners-tab',
+              'submission' => 'admin.hackathon.partials.projects-tab',
+              'results' => 'admin.hackathon.partials.results-tab',
+              'mentorship' => 'admin.hackathon.partials.mentorship-tab',
+              'submissions' => 'admin.hackathon.partials.submissions-tab',
+            ];
+            $partial = $partials[$tab['target']] ?? null;
+            // Tab visibility conditions
+            $showTab = true;
+            if ($tab['target'] === 'teams' && ($companyStep?->stype == 1)) $showTab = false;
+            if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
+            $showTab = false;
+          @endphp
+          @if($showTab && $partial)
+            <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
+              @include($partial)
+            </div>
+          @endif
+        @endif
       @endforeach
     </div>
     <!--/ Tabs Content -->
@@ -371,7 +380,7 @@ let urlParams = new URLSearchParams(window.location.search);
     if (typeof(tab) !== 'undefined' && tab !== null) {
         $("#" + tab).trigger("click");
     } else {
-        $("#overview-tab").trigger("click");
+        // $("#overview-tab").trigger("click");
     }
 
     // عند الضغط على أي تبويب، أطبع الـ ID
