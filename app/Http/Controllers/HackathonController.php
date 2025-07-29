@@ -79,6 +79,7 @@ class HackathonController extends Controller
                 'step_start' => $step->where('cycle_id', $item->c_id)->first()?->from?->format('Y-m-d') ?? null,
                 'step_end' => $step->where('cycle_id', $item->c_id)->first()?->to?->format('Y-m-d') ?? null,
                 'team_formation_id' => $team_formation->where('cycle_id', $item->c_id)->first()?->id ?? null,
+                'exist_step' => $step->where('cycle_id', $item->c_id)->where('stype', 1)->first() ? true : false
             ];
          });
 
