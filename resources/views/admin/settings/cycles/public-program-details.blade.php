@@ -17,6 +17,30 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
 	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+
+		/* Flex container for page layout */
+		.page-container {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+
+		/* Main content grows to fill space */
+		.content {
+			flex: 1;
+		}
+
+		/* Footer naturally stays at the bottom */
+		.footer {
+			background-color: #333;
+			color: white;
+			padding: 20px;
+			text-align: center;
+		}
 		.hackathon-banner {
 			background: linear-gradient(135deg, #7367f0 0%, #9c88ff 35%, #ffc107 100%);
 			background-size: 400% 400%;
@@ -84,12 +108,12 @@
 			text-transform: uppercase;
 			letter-spacing: 0.5px;
 		}
-		footer.footer
+		/* footer.footer
 		{
 			position: fixed;
 			bottom: 0;
 			width: 100%;
-		}
+		} */
 
 		@keyframes gradientShift {
 			0% {
@@ -127,6 +151,7 @@
 			margin: 0 0.25rem;
 			border: 2px solid transparent;
 			transition: all 0.3s ease;
+			width: fit-content;
 		}
 
 		.nav-tabs .nav-link:hover {
@@ -171,101 +196,106 @@
 </head>
 
 <body>
-	<!-- Include original navbar -->
-	<nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm">
+<!-- Enhanced Navbar -->
+	<nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm py-3">
 		<div class="container">
-			<a class="navbar-brand fw-bold" href="/dashboard/hackathon">
-				<i class="ti ti-tournament text-primary me-2 me-2"></i> {{ $l == 'en' ? 'Hackathon Platform' : 'منصة الهاكثونات' }}
+			<a class="navbar-brand fw-bold fs-4 mb-0 d-flex align-items-center" href="/dashboard/hackathon">
+				<i class="ti ti-planet ti-lg text-primary me-2"></i> 
+				<span>{{ $l == 'en' ? 'Hackathon Platform' : 'منصة الهاكثونات' }}</span>
 			</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-				aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
-				<div class="navbar-nav"></div>
+				<ul class="navbar-nav ms-auto align-items-center">
+					<li class="nav-item ms-3">
+						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" class="btn btn-primary">
+							<i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}
+						</a>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</nav>
 
 	<!-- Main Content -->
-	<main class="overflow-x-hidden mx-auto" style="width: 96%;">
+	<div class="page-container">
+		<main class="content">
 
-		<div class="container mt-4">
+			<div class="container mt-4">
 
-			<div class="hackathon-banner text-center">
-				<div class="banner-content">
-					<h1 class="display-5 fw-bold" id="hackathon-main-title"> {{ $program->title }} </h1>
-					<p class="lead">{{ $program->description }}</p>
-					<p class="lead" id="hackathon-dates-location">
-						<i class="ti ti-calendar-event me-2"></i>
-						{{ $program->ranges }}
-						<span class="mx-3">|</span>
-						<i class="ti ti-map-pin me-2"></i>
-						{{ $program->org }}
-					</p>
-					<div id="action-buttons-placeholder" class="mt-4">
-						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" type="button" class="btn btn-primary" style="flex: 1;">
-                        	<i class="ti ti-send me-1"></i> Apply
-                        </a>
-					</div>
-				</div>
-			</div>
-
-			@if( $pages->count() > 0 )
-			<ul class="nav nav-tabs nav-fill mb-4 pb-4" id="hackathonTab" role="tablist">
-				@foreach( $pages as $tab )
-					<li class="nav-item me-1" role="presentation">
-						<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab" data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab" aria-controls="{{ $tab->code }}" aria-selected="false">
-							<i class="bi bi-list me-2"></i> {{ $tab->title }}
-						</button>
-					</li>
-				@endforeach
-			</ul>
-
-			<div class="tab-content p-0 mb-12" id="hackathonTabContent">
-				<!-- Pages Tab -->
-				@foreach( $pages as $tab )
-				<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}" role="tabpanel" aria-labelledby="{{ $tab->code }}-tab">
-					<div class="card">
-						<div class="card-body">
-							{!! $tab->content !!}
+				<div class="hackathon-banner text-center">
+					<div class="banner-content">
+						<h1 class="display-5 fw-bold" id="hackathon-main-title"> {{ $program->title }} </h1>
+						<p class="lead">{{ $program->description }}</p>
+						<p class="lead" id="hackathon-dates-location">
+							<i class="ti ti-calendar-event me-2"></i>
+							{{ $program->ranges }}
+							<span class="mx-3">|</span>
+							<i class="ti ti-map-pin me-2"></i>
+							{{ $program->org }}
+						</p>
+						<div id="action-buttons-placeholder" class="mt-4">
+							<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" type="button" class="btn btn-light btn-lg" style="flex: 1;">
+								<i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}
+							</a>
 						</div>
 					</div>
 				</div>
-				@endforeach
-			</div>
-			@endif
-		</div>
-	</main>
 
+				@if( $pages->count() > 0 )
+				<ul class="nav nav-tabs mb-4 pb-4" id="hackathonTab" role="tablist">
+					@foreach( $pages as $tab )
+						<li class="nav-item me-3" role="presentation">
+							<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab" data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab" aria-controls="{{ $tab->code }}" aria-selected="false">
+								<i class="bi bi-list me-2"></i> {{ $tab->title }}
+							</button>
+						</li>
+					@endforeach
+				</ul>
+
+				<div class="tab-content p-0 mb-12" id="hackathonTabContent">
+					<!-- Pages Tab -->
+					@foreach( $pages as $tab )
+					<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}" role="tabpanel" aria-labelledby="{{ $tab->code }}-tab">
+						<div class="card">
+							<div class="card-body">
+								{!! $tab->content !!}
+							</div>
+						</div>
+					</div>
+					@endforeach
+				</div>
+				@endif
+			</div>
+		</main>
 	<!-- Include original footer -->
 	<footer class="footer mt-auto py-3 bg-dark text-white">
 		<div class="container text-center">
 			<span>
-				© 2024
+				© 2025
 				{{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع الحقوق محفوظة.' }}
 			</span>
 		</div>
 	</footer>
+	</div>
+
 	<!-- Core JS -->
 	<script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
 	<script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-	<script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-	<script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-	<script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-	<script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-	<script src="/vuexy/assets/vendor/js/menu.js"></script>
-	<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+	{{-- <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/js/menu.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script> --}}
 	<script src="/vuexy/assets/js/main.js"></script>
-	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+	{{-- <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script> --}}
+	{{-- <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script> --}}
 
 	<!-- Custom JS -->
-	<script src="/vuexy/assets/js/forms-selects.js"></script>
-	<script>
-		//
-	</script>
+	{{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
 </body>
 
 </html>
