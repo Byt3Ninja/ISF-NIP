@@ -92,6 +92,7 @@ class ClientCompanyController extends Controller
                     $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr)->first();
                 }
                 $formData = $form->formData;
+                if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
