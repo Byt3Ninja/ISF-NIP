@@ -3413,6 +3413,154 @@
                 ]
             }
         },
+        "/api/v1/programs": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get list of programs",
+                "description": "Retrieve all programs. Admin sees all, OrganizationManager sees only their organization programs.",
+                "operationId": "getAllPrograms",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status: Upcoming, In Progress, Completed",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "program_type",
+                        "in": "query",
+                        "description": "Filter by program type (e.g., incubation, acceleration)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "organization",
+                        "in": "query",
+                        "description": "Search organization by localized name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search in program title and description",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of records per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Program"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – user lacks permission"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{id}": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get a specific program by ID",
+                "description": "Returns program details including organization, mentors, steps, and related files.",
+                "operationId": "getProgramById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Program"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    },
+                    "403": {
+                        "description": "Forbidden – user lacks permission"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/roles": {
             "get": {
                 "tags": [
@@ -4457,6 +4605,141 @@
                     "type": "string",
                     "example": "view_program"
                 }
+            },
+            "Program": {
+                "title": "Program",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Startup Incubator 2025"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "A program for startups"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-08-01"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-12-01"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "incubation"
+                    },
+                    "organization": {
+                        "type": "string",
+                        "example": "Cairo Tech Hub"
+                    },
+                    "imgUrl": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/img.png"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "In Progress"
+                    },
+                    "progress": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 45.67
+                    },
+                    "startupCount": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "stepCount": {
+                        "type": "integer",
+                        "example": 6
+                    },
+                    "mentorCount": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "pendingCount": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "responsibleUsers": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "initials": {
+                                    "type": "string",
+                                    "example": "John D"
+                                },
+                                "userId": {
+                                    "type": "integer",
+                                    "example": 5
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "budgetAllocation": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10000
+                    },
+                    "currencyType": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "programGuideline": {
+                        "type": "string",
+                        "example": "Follow company policies."
+                    },
+                    "financialGuideline": {
+                        "type": "string",
+                        "example": "Budget rules"
+                    },
+                    "legalGuideline": {
+                        "type": "string",
+                        "example": "Legal compliance details"
+                    },
+                    "allowNonCompany": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "autoApproveMentorshipRequests": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "private": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "programGuidelineFile": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/program.pdf"
+                    },
+                    "financialPolicyPdf": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/finance.pdf"
+                    },
+                    "legalPolicyPdf": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/legal.pdf"
+                    },
+                    "delegationPdf": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/delegation.pdf"
+                    }
+                },
+                "type": "object"
             }
         }
     },

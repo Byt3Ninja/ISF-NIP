@@ -45,4 +45,5 @@ return [
 	'Organization cannot be deleted' => 'لا يمكن حذف المؤسسة لانها مرتبطة ببرامج او شركات نشطة',
 	'company_not_found' => 'الشركة غير موجودة',
 	'organizationNotFound' => 'المؤسسة غير موجودة',
+	'program_not_found' => 'البرنامج غير موجود',
 ];

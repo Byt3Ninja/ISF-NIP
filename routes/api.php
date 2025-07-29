@@ -54,8 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
     Route::get('/currencies', [CurrencyController::class, 'index']);
-    Route::post('programs', [ProgramController::class, 'store']);
-    Route::post('programs/{id}', [ProgramController::class, 'update']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
     Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
@@ -72,6 +70,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
     Route::get('/sectors', [SectorController::class, 'index']);
     Route::get('/states', [SectorController::class, 'getStates']);
+    Route::post('/programs', [ProgramController::class, 'store']);
+    Route::post('programs/{id}', [ProgramController::class, 'update']);
+    Route::get('/v1/programs', [ProgramController::class, 'index']);
+    Route::get('/v1/programs/{id}', [ProgramController::class, 'show']);
 });
 
 
