@@ -150,7 +150,8 @@ if (!function_exists('FormatDate')) {
                 // $mentors = User::role('mentor')->get();
                 return $mentorsLists;
             } else {
-                return redirect()->route('core.dashboard_view');
+                return collect();
+                // return redirect()->route('core.dashboard_view');
             }
 
         }
