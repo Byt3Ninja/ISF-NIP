@@ -39,6 +39,7 @@
       @endforeach --}}
 
        @foreach ($mentorsLists as $key => $mentor)
+         @if($mentor->id != null)
           <!-- Mentor Card -->
           <div class="col-md-4 radius-15 mb-3">
             <div class="border radius-15" style="background-image: url('{{ $mentor?->img_url ?? '/images/user-placeholder.jpeg' }}'); 
@@ -50,7 +51,7 @@
               <div
                 class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center mb-2"
                 style="height: 55px;">
-                <a target="_blank" href="{{ route('mentors.profile_view', $mentor->id) }}" class="d-flex flex-column">
+                <a target="_blank" href="{{ route('mentors.profile_view', $mentor->id ?? 0 ) }}" class="d-flex flex-column">
                   <span class="text-black fw-bold fs-6">{{ $mentor->name }}</span>
                   <small class="text-secondary">{{ $mentor->title }}</small>
                 </a>
@@ -163,7 +164,7 @@
             </div>
           </div>
           <!-- Mentor Card -->
-
+        @endif
           @endforeach
       @endif
     </div>

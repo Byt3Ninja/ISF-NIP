@@ -38,7 +38,7 @@ testing:
   script:
     - ssh -p22 -o StrictHostKeyChecking=no root@185.250.36.20 "cd /var/www/testing && git pull && php artisan migrate --force"
   only:
-    - beta
+    - testing
 
 
 dev:
