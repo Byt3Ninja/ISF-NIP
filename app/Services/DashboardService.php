@@ -1358,7 +1358,9 @@ public function startupDashboard($userId)
             'tasksCompleted' => $completedTasks,
             'totalTasks' => $total,
             'mentorshipHours' => $mentorshipHours,
-        ]
+        ],
+        'startupId' => $company->id,
+        'startupName' => $company->{'name_'.app()->getLocale()},
     ];
 }
 
