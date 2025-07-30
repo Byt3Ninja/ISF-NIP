@@ -39,7 +39,7 @@
       @endforeach --}}
 
        @foreach ($mentorsLists as $key => $mentor)
-         @if($mentor->id != null)
+         @if($mentor != null)
           <!-- Mentor Card -->
           <div class="col-md-4 radius-15 mb-3">
             <div class="border radius-15" style="background-image: url('{{ $mentor?->img_url ?? '/images/user-placeholder.jpeg' }}'); 
