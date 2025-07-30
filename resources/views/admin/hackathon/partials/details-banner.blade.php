@@ -32,78 +32,104 @@
     'accepted')->first();
 
     @endphp
-    @if(!auth()->user()->hasRole('admin'))
-      @if($teamcreated != null)
-      @if($teamcreated->cycle_id == $currentHackathon['cycle_id'])
+      @if(!auth()->user()->hasRole('admin'))
+        @if($teamcreated != null)
+          @if($teamcreated->cycle_id == $currentHackathon['cycle_id'])
+            <a href="/dashboard/hackathon/{{ $teamcreated->id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
+              style="border-radius: 50px; font-weight: 600;">
+              <i class="ti ti-settings me-2 me-2"></i>
+              {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
+            </a>
+          @else
+            <button type="button" class="btn btn-primary" style="flex: 1;"
+              onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
+              <i class="ti ti-send me-1"></i>
+              {{__('admin.ApplyHackathon') }}
+            </button>
+          @endif
 
-      <a href="/dashboard/hackathon/{{ $teamcreated->id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
-        style="border-radius: 50px; font-weight: 600;">
-        <i class="ti ti-settings me-2 me-2"></i>
-        {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
-      </a>
-      @else
-      <button type="button" class="btn btn-primary" style="flex: 1;"
-        onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
-        <i class="ti ti-send me-1"></i>
-        {{__('admin.ApplyHackathon') }}
-      </button>
-
-      @endif
-
-      @else
+        @else
 
 
-      @if($companyStep?->stype == 6 OR $companyStep == null)
-      @if($teamJoin != null)
+          @if($companyStep?->stype == 6 OR $companyStep == null)
+            @if($teamJoin != null)
+              <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                @csrf
+                @method('PATCH')
+                <button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+                  <i class="ti ti-users me-2 me-2"></i>
+                  {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
+                </button>
+              </form>
+              <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                @csrf
+                @method('PATCH')
+                <button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+                  <i class="ti ti-users me-2 me-2"></i>
+                  {{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
+                </button>
+              </form>
+            @else
 
-      <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
-        @csrf
-        @method('PATCH')
-        <button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-          <i class="ti ti-users me-2 me-2"></i>
-          {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
-        </button>
-      </form>
-      <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
-        @csrf
-        @method('PATCH')
-        <button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-          <i class="ti ti-users me-2 me-2"></i>
-          {{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
-        </button>
-      </form>
-      @else
+              @if($teamaccept == null)
+                @if($companyStep?->stype != 6)
+                  <button type="button" class="btn btn-primary" style="flex: 1;"
+                    onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
+                    <i class="ti ti-send me-1"></i>
+                    {{__('admin.ApplyHackathon') }}
+                  </button>
+                @else
+                  <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                    data-bs-toggle="modal" data-bs-target="#createTeamModal">
+                    <i class="ti ti-settings me-2 me-2"></i>
+                    {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
+                  </a>
+                @endif
+              @else
+                <a href="/dashboard/hackathon/{{ $teamaccept->team_formation_id }}/manage"
+                  class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+                  <i class="ti ti-users me-2 me-2"></i>
+                  {{ $l == 'en' ? 'View My Team' : 'مشاهدة الفريق' }}
+                </a>
+              @endif
+            @endif
+          @else
+            @if($companyStep->stype == 1)
+              <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                data-bs-toggle="modal" data-bs-target="#applyModal">
+                <i class="ti ti-send me-2 me-2"></i>
+                {{ $l == 'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}
+              </a>
+              @elseif($companyStep->stype == 2)
+              <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                data-bs-toggle="modal" data-bs-target="#applyModal">
+                <i class="ti ti-send me-2 me-2"></i>
+                {{ $l == 'en' ? ' Screening Step ' : ' خطة التقييم ' }}
+              </a>
+              @elseif($companyStep->stype == 3)
+              <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                data-bs-toggle="modal" data-bs-target="#applyModal">
+                <i class="ti ti-send me-2 me-2"></i>
+                {{ $l == 'en' ? ' MentorShip Step ' : ' خطة المشورة ' }}
+              </a>
+              @elseif($companyStep->stype == 4)
+              <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                data-bs-toggle="modal" data-bs-target="#applyModal">
+                <i class="ti ti-send me-2 me-2"></i>
+                {{ $l == 'en' ? ' Training Step ' : ' خطة التدريب ' }}
+              </a>
+              @elseif($companyStep->stype == 5)
+              <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                data-bs-toggle="modal" data-bs-target="#applyModal">
+                <i class="ti ti-send me-2 me-2"></i>
+                {{ $l == 'en' ? ' Final Evaluation Step ' : ' خطة التقييم النهاية ' }}
+              </a>
+              @else
+              
+            @endif
 
-      @if($teamaccept == null)
-      @if($companyStep?->stype != 6)
-      <button type="button" class="btn btn-primary" style="flex: 1;"
-        onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
-        <i class="ti ti-send me-1"></i>
-        {{__('admin.ApplyHackathon') }}
-      </button>
-      @else
-      <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
-        data-bs-toggle="modal" data-bs-target="#createTeamModal">
-        <i class="ti ti-settings me-2 me-2"></i>
-        {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
-      </a>
-      @endif
-      @else
-      <a href="/dashboard/hackathon/{{ $teamaccept->team_formation_id }}/manage"
-        class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-        <i class="ti ti-users me-2 me-2"></i>
-        {{ $l == 'en' ? 'View My Team' : 'مشاهدة الفريق' }}
-      </a>
-      @endif
-      @endif
-      @else
-      <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
-        data-bs-toggle="modal" data-bs-target="#applyModal">
-        <i class="ti ti-send me-2 me-2"></i>
-        {{ $l == 'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}
-      </a>
-      @endif
-      @endif
+          @endif
+        @endif
 
       @else
       

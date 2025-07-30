@@ -87,15 +87,39 @@
   </div>
 
   <div class="row g-4 mb-8">
-    @foreach ($hackathons as $hackathon)
     @php
     $user = Auth::user();
-    $apply = "SELECT * FROM form_data WHERE user_id = ? AND step_id = ?";
-    $apply = collect(DB::select($apply, [Auth::user()->id, $hackathon['step_id']]));
-    $team = "SELECT * FROM team_formations WHERE user_id = ?";
-    $team = collect(DB::select($team, [Auth::user()->id]));
+    $user_cycle_id = $user->company?->cycle;
+      
+      $isExistinghackathon = in_array($user_cycle_id, $hackathon_ids);
+    @endphp
+    
+    @foreach ($hackathons as $hackathon)
+    @php
+    
+    $user = Auth::user();
+    $step_id = $user->company?->step;
+    if($hackathon['step_id'] == $step_id){
+    $apply_q = "SELECT * FROM form_data WHERE user_id = ? ";
+    if($step_id != null){
+     $apply_q .= "AND step_id = ?";
+     $apply = collect(DB::select($apply_q, [$user->id, $step_id]));
+    }else{
+      $apply = collect(DB::select($apply_q, [$user->id]));
+    }
+  }else{
+    $apply = null;
+  }
+    
+    $team_q = "SELECT * FROM team_formations WHERE user_id = ? ";
+    if($step_id != null){
+      $team_q .= "AND step_id = ?";
+      $team = collect(DB::select($team_q, [$user->id, $step_id]));
+    }else{
+      $team = collect(DB::select($team_q, [$user->id]));
+    }
 
-    $step_id = Auth::user()->company?->step;
+    
 
     if($step_id != null){
     $stypeStep_q = "SELECT * FROM steps WHERE id = ?";
@@ -108,7 +132,7 @@
     @endphp
     <div class="col-lg-4 col-md-6">
       @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply,
-      'team' => $team, 'stypeStep' => $stypeStep, 'user' => $user])
+      'team' => $team, 'stypeStep' => $stypeStep, 'user' => $user, 'isExistinghackathon' => $isExistinghackathon])
     </div>
     @endforeach
   </div>

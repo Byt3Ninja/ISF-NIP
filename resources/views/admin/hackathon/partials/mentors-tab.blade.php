@@ -14,7 +14,7 @@
     </p>
 
     <div class="row" id="hackathon-mentors-list">
-      @if($mentorsLists->isEmpty())
+      @if($mentorsLists->isEmpty() || $mentorsLists == null)
       <div class="col-12">
         <div class="alert alert-info">{{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}
         </div>
