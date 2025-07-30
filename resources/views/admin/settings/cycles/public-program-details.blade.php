@@ -230,7 +230,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	<div class="page-container">
 		<main class="content">
 
-			<div class="container mt-8">
+			<div class="container mt-8" style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};">
 
 				<div class="hackathon-banner text-center shadow">
 					<div class="banner-content">
@@ -274,9 +274,9 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				</div>
 
 				@if( $pages->count() > 0 )
-				<ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0" role="tablist" id="hackathonTab">
+				<ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0 px-0" role="tablist" id="hackathonTab">
 					@foreach( $pages as $tab )
-					<li class="nav-item me-3" role="presentation">
+					<li class="nav-item {{ $l == 'en' ? 'me-3' : '' }}" role="presentation">
 							<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab"
 									data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab"
 									aria-controls="{{ $tab->code }}" aria-selected="false">
