@@ -31,7 +31,7 @@ testing:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-    - ssh-add "$TESTING_SSH_KEY"
+    - ssh-add <(echo "$TESTING_SSH_KEY")
     - ssh-keyscan -p22 185.250.36.20 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
