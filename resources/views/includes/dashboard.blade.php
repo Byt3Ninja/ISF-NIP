@@ -95,10 +95,10 @@
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
 						<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
-                                {{ __($card['text']) ?: $card['text'] }}
-                            @else
-                                {{ __('admin.' . $card['text']) ?: $card['text'] }}
-                            @endif</p>
+								{{ __($card['text']) ?: $card['text'] }}
+							@else
+								{{ __('admin.' . $card['text']) ?: $card['text'] }}
+							@endif</p>
 					</div>
 				</div>
 			</a>
@@ -1004,19 +1004,19 @@
 															<td>
 																@if( $company->evaluation_status == 'not_started' )
 																<span class="badge bg-label-warning">
-																	<i class="ti ti-clock me-2"></i> Not started
+																	<i class="ti ti-clock me-2"></i> {{ __('dashboard.evaluation_not_started') }}
 																</span>
 																@elseif( $company->evaluation_status == 'in_progress' )
 																<span class="badge bg-label-info">
-																	<i class="ti ti-clock-bolt me-2"></i> In progress
+																	<i class="ti ti-clock-bolt me-2"></i> {{ __('dashboard.evaluation_in_progress') }}
 																</span>
 																@elseif( $company->evaluation_status == 'evaluated' )
 																<span class="badge bg-label-success">
-																	<i class="ti ti-circle-check me-2"></i> Completed
+																	<i class="ti ti-circle-check me-2"></i> {{ __('dashboard.evaluation_completed') }}
 																</span>
 																@elseif( $company->evaluation_status == 'not_evaluated' )
 																<span class="badge bg-label-danger">
-																	<i class="ti ti-exclamation-circle me-2"></i> Not Evaluated
+																	<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
 																</span>
 																@endif
 															</td>
@@ -1043,9 +1043,123 @@
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
-			{{--  <div class="col-12">
-				// allowed to list final screening
-			</div>  --}}
+			<div class="col-12">
+				<div class="card mt-10">
+					<section>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="card">
+									<div class="card-header border-bottom mb-4">
+										<h5 class="card-title align-items-center">
+											<i class="ti ti-calendar-stats ti-24px"></i>
+											<span class="mx-2">{{ __('dashboard.Cycle final screening') }}</span>
+										</h5>
+									</div>
+									<div class="card-body">
+										@foreach( $final_screening_steps as $step )
+										<div class="card mt-4">
+											<div class="card-header bg-label-light p-3 mb-4">
+												<h5 class="mb-0">
+													<i class="ti ti-bell ti-24px"></i>
+													<span class="mx-2">
+														{{ $step->title }} - ({{ $step->cycle->title }}) - {{ __('dashboard.start from') }} {{ $step->start ?? '-' }} {{ __('dashboard.to') }} {{ $step->end ?? '-' }}
+													</span>
+												</h5>
+											</div>
+											<div class="card-body">
+												<div class="mb-4">
+													<p class="card-text">{{ $step->description }}</p>
+													<small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
+														{{ $step->cycle->start ?? '-' }} {{ __('dashboard.to') }}
+														{{ $step->cycle->end ?? '-' }}
+													</small>
+												</div>
+												<div class="table-responsive">
+													<table class="table">
+														<thead>
+															<tr>
+															<th>{{ __('dashboard.Company') }}</th>
+															<th>{{ __('dashboard.User/Title') }}</th>
+															<th>{{ __('dashboard.Screening completed') }}</th>
+															<th>{{ __('dashboard.Meeting') }}</th>
+															<th>{{ __('dashboard.Actions') }}</th>
+															</tr>
+														</thead>
+														<tbody>
+															@foreach( $step->companies as $company )
+																<tr>
+																	<td>
+																		<div class="d-flex align-items-center">
+																			<img src="{{ $company->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																			@if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+																			{{ $company->name }}
+																			@if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
+																		</div>
+																	</td>
+																	<td>
+																		<div class="d-flex align-items-center">
+																			@if( $company->users->count() )
+																				@foreach( $company->users as $company_user )
+																					<img src="{{ $company_user->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																					<div>
+																						<h6 class="mb-0">{{ $company_user->name }}</h6>
+																						<small class="text-muted">{{ $company_user->title }}</small>
+																					</div>
+																				@endforeach
+																			@else
+																			-
+																			@endif
+																		</div>
+																	</td>
+																	<td>
+																		@if( $company->evaluation_status == 'not_started' )
+																		<span class="badge bg-label-warning">
+																			<i class="ti ti-clock me-2"></i> {{ __('dashboard.evaluation_not_started') }}
+																		</span>
+																		@elseif( $company->evaluation_status == 'in_progress' )
+																		<span class="badge bg-label-info">
+																			<i class="ti ti-clock-bolt me-2"></i> {{ __('dashboard.evaluation_in_progress') }}
+																		</span>
+																		@elseif( $company->evaluation_status == 'evaluated' )
+																		<span class="badge bg-label-success">
+																			<i class="ti ti-circle-check me-2"></i> {{ __('dashboard.evaluation_completed') }}
+																		</span>
+																		@elseif( $company->evaluation_status == 'not_evaluated' )
+																		<span class="badge bg-label-danger">
+																			<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
+																		</span>
+																		@endif
+																	</td>
+																	<td> {{ $company->datetime ?? __('dashboard.Not added yet') }} </td>
+																	<td>
+																		@if( $company->join_url )
+																			<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
+																				<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
+																			</a>
+																			{{--  @if( $_user->ableTo('screening.form_view', $permissions) )
+																			<a href="/dashboard/final/{{ $step->id }}/{{ $company->id }}" target="_blank" class="btn btn-success btn-sm">
+																				<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
+																			</a>
+																			@endif  --}}
+																		@else
+																			{{ __('dashboard.Not started') }}
+																		@endif
+																	</td>
+																</tr>
+															@endforeach
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+										@endforeach
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
 			@endif
 		</div>
 		
@@ -1468,6 +1582,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			  alert("Error Occurred, Try again!");
 			}
 		  });
-		});      
+		});
 </script>
 @stop

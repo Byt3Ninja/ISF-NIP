@@ -3413,6 +3413,154 @@
                 ]
             }
         },
+        "/api/v1/programs": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get list of programs",
+                "description": "Retrieve all programs. Admin sees all, OrganizationManager sees only their organization programs.",
+                "operationId": "getAllPrograms",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status: Upcoming, In Progress, Completed",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "program_type",
+                        "in": "query",
+                        "description": "Filter by program type (e.g., incubation, acceleration)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "organization",
+                        "in": "query",
+                        "description": "Search organization by localized name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search in program title and description",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of records per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Program"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – user lacks permission"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{id}": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get a specific program by ID",
+                "description": "Returns program details including organization, mentors, steps, and related files.",
+                "operationId": "getProgramById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Program"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    },
+                    "403": {
+                        "description": "Forbidden – user lacks permission"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/roles": {
             "get": {
                 "tags": [
@@ -3566,6 +3714,395 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/mentorship-sessions": {
+            "post": {
+                "tags": [
+                    "Mentorship Sessions"
+                ],
+                "summary": "Request a mentorship session",
+                "description": "Submit a new mentorship session request with a mentor. Only users with the 'Registered' role can access this endpoint.",
+                "operationId": "addMentorshipSession",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "preferred_date_time",
+                                    "duration_minutes",
+                                    "notes",
+                                    "organization_id",
+                                    "cycle_id"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "description": "ID of the mentor",
+                                        "type": "integer",
+                                        "example": 128
+                                    },
+                                    "preferred_date_time": {
+                                        "description": "Preferred start time (ISO 8601 format)",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-30T10:00:00"
+                                    },
+                                    "duration_minutes": {
+                                        "description": "Duration of the session in minutes",
+                                        "type": "integer",
+                                        "example": 45
+                                    },
+                                    "override_availability": {
+                                        "description": "Override mentor's availability",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "override_reason": {
+                                        "description": "Reason for override (required if override_availability is true)",
+                                        "type": "string",
+                                        "example": "Urgent meeting required",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "description": "Additional notes or discussion topic",
+                                        "type": "string",
+                                        "example": "أرغب في مناقشة استراتيجية التمويل."
+                                    },
+                                    "organization_id": {
+                                        "description": "User's organization ID",
+                                        "type": "integer",
+                                        "example": 7
+                                    },
+                                    "cycle_id": {
+                                        "description": "Associated cycle ID",
+                                        "type": "integer",
+                                        "example": 43
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Mentorship session successfully created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentorship Session Request Submitted Successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "integer",
+                                                    "example": 1001
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "approved",
+                                                        "pending"
+                                                    ],
+                                                    "example": "pending"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (not a startup)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict (session already exists)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A session already exists at the selected time."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid time or input)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The selected time does not match the mentor’s availability."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentorship-sessions/submit-feedback": {
+            "post": {
+                "tags": [
+                    "Mentorship Sessions"
+                ],
+                "summary": "Submit session Rate and feedback",
+                "description": "Submit whether the user attended the session and optionally rate it if attended.",
+                "operationId": "submitMentorshipSessionFeedback",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "session_id",
+                                    "attended"
+                                ],
+                                "properties": {
+                                    "session_id": {
+                                        "description": "ID of the mentorship session",
+                                        "type": "integer",
+                                        "example": 1001
+                                    },
+                                    "attended": {
+                                        "description": "Whether the user attended the session",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "rating": {
+                                        "description": "Rating given to the mentor (1-5), required if attended is true",
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "example": 4,
+                                        "nullable": true
+                                    },
+                                    "comment": {
+                                        "description": "Optional comment about the session",
+                                        "type": "string",
+                                        "example": "The session was very helpful",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Feedback submitted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict (feedback already submitted)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Feedback already submitted for this session."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentorship-sessions/completed": {
+            "get": {
+                "tags": [
+                    "Mentorship Sessions"
+                ],
+                "summary": "View completed mentorship sessions",
+                "description": "Returns a paginated list of past mentorship sessions the startup has attended.",
+                "operationId": "getMyCompletedMentorshipSessions",
+                "responses": {
+                    "200": {
+                        "description": "List of completed sessions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MentorshipSessionResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lastPage": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 48
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Access denied."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/users/{id}": {
@@ -4457,6 +4994,164 @@
                     "type": "string",
                     "example": "view_program"
                 }
+            },
+            "Program": {
+                "title": "Program",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Startup Incubator 2025"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "A program for startups"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-08-01"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-12-01"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "incubation"
+                    },
+                    "organization": {
+                        "type": "string",
+                        "example": "Cairo Tech Hub"
+                    },
+                    "imgUrl": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/img.png"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "In Progress"
+                    },
+                    "progress": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 45.67
+                    },
+                    "startupCount": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "stepCount": {
+                        "type": "integer",
+                        "example": 6
+                    },
+                    "mentorCount": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "pendingCount": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "responsibleUsers": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "initials": {
+                                    "type": "string",
+                                    "example": "John D"
+                                },
+                                "userId": {
+                                    "type": "integer",
+                                    "example": 5
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "budgetAllocation": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10000
+                    },
+                    "currencyType": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "programGuideline": {
+                        "type": "string",
+                        "example": "Follow company policies."
+                    },
+                    "financialGuideline": {
+                        "type": "string",
+                        "example": "Budget rules"
+                    },
+                    "legalGuideline": {
+                        "type": "string",
+                        "example": "Legal compliance details"
+                    },
+                    "allowNonCompany": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "autoApproveMentorshipRequests": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "private": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "programGuidelineFile": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/program.pdf"
+                    },
+                    "financialPolicyPdf": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/finance.pdf"
+                    },
+                    "legalPolicyPdf": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/legal.pdf"
+                    },
+                    "delegationPdf": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/policies/delegation.pdf"
+                    }
+                },
+                "type": "object"
+            },
+            "MentorshipSessionResource": {
+                "title": "Completed Mentorship Session",
+                "properties": {
+                    "sessionId": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "mentorId": {
+                        "type": "integer",
+                        "example": 34
+                    },
+                    "mentorName": {
+                        "type": "string",
+                        "example": "Ali Al-Mansouri"
+                    },
+                    "sessionDateTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-25 14:00:00"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -4520,6 +5215,10 @@
         {
             "name": "Sectors",
             "description": "Sectors"
+        },
+        {
+            "name": "Mentorship Sessions",
+            "description": "Mentorship Sessions"
         },
         {
             "name": "Users",

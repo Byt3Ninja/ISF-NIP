@@ -46,4 +46,11 @@ return [
 	'Organization cannot be deleted' => 'Organization cannot be Deleted Because it is Linked to active Cycles or Startups',
 	'company_not_found' => 'Company Not Found',
 	'organizationNotFound' => 'Organization Not Found',
+	'program_not_found' => 'Program Not Found',
+	'mentorship_session_created' => 'Mentorship Session Request Submitted Successfully',
+	'session_already_exists' => 'You already have a Session at the Selected Time',
+	'invalid_time_not_in_schedule' => 'The Selected Time does not match the mentor’s Availability',
+	'session_feedback_already_submitted' => 'Session Feedback Already Submitted',
+	'session_feedback_submitted' => 'Session Feedback Submitted Successfully',
+
 ];

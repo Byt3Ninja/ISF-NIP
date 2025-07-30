@@ -393,8 +393,8 @@
                         </li>
                         @if( !empty( $cycle->join_url ) && !is_null( $cycle->join_url ) )
                           <li>
-                            <a href="javascript:void(0)" class="mx-1 copy-public-link" onclick="copyToClipboard('{{ $cycle->join_url }}');">
-                              <i class="ti ti-copy"></i> {{ __('cycles.copy public link') }}
+                            <a href="javascript:void(0)" class="dropdown-item copy-public-link" onclick="copyToClipboard('{{ $cycle->join_url }}');">
+                              <i class="ti ti-copy me-2"></i> {{ __('cycles.copy public link') }}
                             </a>
                           </li>
                         @endif

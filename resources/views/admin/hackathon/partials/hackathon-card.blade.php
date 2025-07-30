@@ -52,6 +52,8 @@
 
         @else
         @if($apply && $apply->isEmpty())
+        
+          @if($hackathon['exist_step'] == true)
         <button type="button"
           class="btn btn-primary"
           style="flex: 1;" data-bs-toggle="modal" 
@@ -59,10 +61,16 @@
           <i class="ti ti-send me-1"></i>
           {{ __('admin.ApplyHackathon') }}
         </button>
+          @else
+          <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
+            <i class="ti ti-send me-1"></i>
+            {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+          </button>
+          @endif
         @else
         @if($team && $team->isEmpty())
 
-        @if($stypeStep->first()->stype != 6)
+        @if($stypeStep->first()->stype == 1)
 
         <button type="button" class="btn btn-warning" style="flex: 1;" disabled><i class="ti ti-users me-1"></i>{{ $l ==
           'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
