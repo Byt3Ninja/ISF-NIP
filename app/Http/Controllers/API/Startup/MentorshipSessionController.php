@@ -22,8 +22,7 @@ use App\Http\Requests\StoreMentorshipSessionRequest;
  *     @OA\Property(property="sessionId", type="integer", example=101),
  *     @OA\Property(property="mentorId", type="integer", example=34),
  *     @OA\Property(property="mentorName", type="string", example="Ali Al-Mansouri"),
- *     @OA\Property(property="sessionDateTime", type="string", format="date-time", example="2025-07-25 14:00:00"),
- *     @OA\Property(property="attended", type="boolean", example=true)
+ *     @OA\Property(property="sessionDateTime", type="string", format="date-time", example="2025-07-25 14:00:00")
  * )
  */
 class MentorshipSessionController extends Controller
@@ -323,13 +322,13 @@ class MentorshipSessionController extends Controller
          return $this->forbidden(__('api.forbidden'));
       }
 
-        $sessions = MentorshipRequest::with('mentor')
-            ->where('user_id', $user->id)
-            ->whereNotNull('zoom_date')
-            ->where('zoom_date', '<', now())
-            ->where('done', 1)
-            ->orderByDesc('zoom_date')
-            ->paginate(10);
+       $sessions = MentorshipRequest::with('mentor')
+        ->where('user_id', $user->id)
+        ->where('approved', 'Yes')
+        ->whereNull('rating')
+        ->where('zoom_date', '<', now())
+        ->orderByDesc('zoom_date')
+        ->paginate(10);
 
        return $this->success(
          MentorshipSessionResource::collection($sessions),
@@ -338,6 +337,12 @@ class MentorshipSessionController extends Controller
                 'currentPage' => $sessions->currentPage(),
                 'lastPage' => $sessions->lastPage(),
                 'total' => $sessions->total(),
+                'links' => [
+                    'first' => $sessions->url(1),
+                    'last' => $sessions->url($sessions->lastPage()),
+                    'prev' => $sessions->previousPageUrl(),
+                    'next' => $sessions->nextPageUrl(),
+                ],
             ]
         ],
      );

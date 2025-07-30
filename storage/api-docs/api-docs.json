@@ -5149,10 +5149,6 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-07-25 14:00:00"
-                    },
-                    "attended": {
-                        "type": "boolean",
-                        "example": true
                     }
                 },
                 "type": "object"
