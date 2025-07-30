@@ -40,66 +40,85 @@
           <i class="ti ti-info-circle me-1"></i>
           {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
         </a>
-        @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
+          @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
 
-        <a href="hackathon/dashboard/{{$hackathon['id']}}" class="btn btn-outline-success me-2" style="flex: 1;">
-          <i class="ti ti-edit me-1"></i>
-          {{ $l == 'en' ? 'Manage Hackathon' : 'ادارة الهاكثون' }}
-        </a>
-
-
-
-
-        @else
-        @if($apply && $apply->isEmpty())
-        
-          @if($hackathon['exist_step'] == true)
-        <button type="button"
-          class="btn btn-primary"
-          style="flex: 1;" data-bs-toggle="modal" 
-          onclick="window.location.href='/dashboard/apply/{{ $hackathon['step_id'] }}/hackathon'" >
-          <i class="ti ti-send me-1"></i>
-          {{ __('admin.ApplyHackathon') }}
-        </button>
+            <a href="hackathon/dashboard/{{$hackathon['id']}}" class="btn btn-outline-success me-2" style="flex: 1;">
+              <i class="ti ti-edit me-1"></i>
+              {{ $l == 'en' ? 'Manage Hackathon' : 'ادارة الهاكثون' }}
+            </a>
           @else
-          <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
-            <i class="ti ti-send me-1"></i>
-            {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
-          </button>
+            
+             @if($isExistinghackathon == true )
+           
+                @if($apply && $apply->isEmpty())
+                
+                  @if($hackathon['exist_step'] == true)
+                    <button type="button"
+                      class="btn btn-primary"
+                      style="flex: 1;" data-bs-toggle="modal" 
+                      onclick="window.location.href='/dashboard/apply/{{ $hackathon['step_id'] }}/hackathon'" >
+                      <i class="ti ti-send me-1"></i>
+                      {{ __('admin.ApplyHackathon') }}
+                    </button>
+                  @else
+                    <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
+                      <i class="ti ti-send me-1"></i>
+                      {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                    </button>
+                  @endif
+                @else
+                  @if($team && $team->isEmpty() )
+                    
+                      @if($stypeStep?->first()->stype == 1 && $hackathon['cycle_id'] == $user_cycle_id )
+
+                        <button type="button" class="btn btn-warning" style="flex: 1;" disabled><i class="ti ti-users me-1"></i>{{ $l ==
+                          'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
+                      @else
+
+
+                      @endif
+                  @else
+                    <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success"
+                      style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
+                  @endif
+                @endif
+              @else
+
+                  @if($hackathon['exist_step'] == true)
+                    <button type="button"
+                      class="btn btn-primary"
+                      style="flex: 1;" data-bs-toggle="modal" 
+                      onclick="window.location.href='/dashboard/apply/{{ $hackathon['step_id'] }}/hackathon'" >
+                      <i class="ti ti-send me-1"></i>
+                      {{ __('admin.ApplyHackathon') }}
+                    </button>
+                  @else
+                    <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
+                      <i class="ti ti-send me-1"></i>
+                      {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                    </button>
+                  @endif
+
+                  
+              @endif
+
           @endif
-        @else
-        @if($team && $team->isEmpty())
-
-        @if($stypeStep->first()->stype == 1)
-
-        <button type="button" class="btn btn-warning" style="flex: 1;" disabled><i class="ti ti-users me-1"></i>{{ $l ==
-          'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
-        @else
-
-
-        @endif
-        @else
-        <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success"
-          style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
-        @endif
-        @endif
-
-        @endif
         <!-- If with Admin Role  -->
 
 
       </div>
       
       @if (now()->isBefore($hackathon['cycle_end']))
-      <small class="text-muted text-center d-block fw-medium mt-2">
-        {{ $l == 'en' ? 'Applications open until ' . $hackathon['cycle_end']->format('F j, Y') : 'التقديم مفتوح حتى ' .
-        $hackathon['cycle_end']->format('F j, Y') }}
-      </small>
+        <small class="text-muted text-center d-block fw-medium mt-2">
+          {{ $l == 'en' ? 'Applications open until ' . $hackathon['cycle_end']->format('F j, Y') : 'التقديم مفتوح حتى ' .
+          $hackathon['cycle_end']->format('F j, Y') }}
+        </small>
       @else
-      <small class="text-warning text-center d-block fw-medium mt-2">
-        {{ $l == 'en' ? 'Applications closed - Hackathon in progress' : 'التقديم مغلق - الهاكثون جاري' }}
-      </small>
+        <small class="text-warning text-center d-block fw-medium mt-2">
+          {{ $l == 'en' ? 'Applications closed - Hackathon in progress' : 'التقديم مغلق - الهاكثون جاري' }}
+        </small>
       @endif
+
     </div>
   </div>
 </div>
