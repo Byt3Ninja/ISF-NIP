@@ -41,7 +41,7 @@
        @foreach ($mentorsLists as $key => $mentor)
           <!-- Mentor Card -->
           <div class="col-md-4 radius-15 mb-3">
-            <div class="border radius-15" style="background-image: url('{{ $mentor->image_url }}'); 
+            <div class="border radius-15" style="background-image: url('{{ $mentor?->image_url }}'); 
                     height:293px; background-size: cover;
                     background-position: center;">
             </div>
