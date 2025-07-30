@@ -209,7 +209,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				@else 
 				<!-- Login Button -->
 				<li class="nav-item ms-8">
-					<a class="btn btn-outline-primary w-px-150" href="/register">
+					<a class="btn btn-outline-primary" href="/register">
 						<i class="ti ti-user-plus ti-md me-2"></i>
 						{{ $l == 'en' ? 'Register' : 'تسجيل' }}
 					</a>
