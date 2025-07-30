@@ -1125,9 +1125,15 @@ public function startupDashboard($userId)
         ])
         ->get()
         ->map(function ($mentor) use ($allMentorPrograms, $locale) {
-            $rating = MentorshipRequest::where('mentor_id', $mentor->id)
-                ->whereNotNull('rating')
-                ->avg('rating');
+           $requests = MentorshipRequest::where('mentor_id', $mentor->id)
+            ->whereNotNull('rating')->get(['rating', 'rate_comment']);
+
+         $rating = $requests->avg('rating');
+         $notes = $requests
+            ->whereNotNull('rate_comment')
+            ->pluck('rate_comment')
+            ->filter()
+            ->values();
 
             $programs = $allMentorPrograms[$mentor->id] ?? collect();
             $imgUrl = $mentor?->img_url 
@@ -1145,6 +1151,7 @@ public function startupDashboard($userId)
                 'specialization' => optional($mentor->bio)->{"specialization_" . $locale},
                 'mentorExpertises' => $mentor->mentorExpertises->map(fn ($exp) => $exp->{"title" . ($locale === 'ar' ? '_ar' : '')}),
                 'rating' => round($rating ?? 0, 2),
+                'notes' => $notes,
                 'programCount' => $programs->pluck('cycle_id')->unique()->count(),
                 'programIds' => $programs->pluck('cycle_id')->unique()->values(),
                 'role' => $mentor->getRoleNames()->first(),
