@@ -35,7 +35,7 @@ testing:
     - ssh-keyscan -p22 185.250.36.20 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p22 root@185.250.36.20 'cd /var/www/testing && git pull && php artisan migrate --force'
+    - ssh -p22 root@185.250.36.20 'cd /var/www/test && git pull && php artisan migrate --force'
   only:
     - testing
 
