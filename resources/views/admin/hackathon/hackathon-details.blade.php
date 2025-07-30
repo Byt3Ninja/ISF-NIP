@@ -14,19 +14,44 @@
   {
     $tabsData[] = ['title' => $page->code, 'icon' => 'bi-list', 'label' => $page->title, 'type' => 'dynamic'];
   }
-  $tabsData = array_merge($tabsData, [
-    // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
-    // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
-    // ['title' => 'schedule', 'icon' => 'bi-calendar2-week-fill', 'label' => $l == 'en' ? 'Schedule' : 'جدول الأعمال', 'type' => 'static'],
-    // ['title' => 'prizes', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Prizes' : 'الجوائز', 'type' => 'static'],
-    // ['title' => 'evaluation', 'icon' => 'bi-clipboard-check-fill', 'label' => $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم', 'type' => 'static'],
-    ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
-    ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
-    ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static'],
-    ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
-    // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
-    ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static']
-  ]);
+
+    if($currentHackathon['cycle_id'] == $user->company->cycle){
+      $tabsDatastatic =  [
+          // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
+          // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
+          // ['title' => 'schedule', 'icon' => 'bi-calendar2-week-fill', 'label' => $l == 'en' ? 'Schedule' : 'جدول الأعمال', 'type' => 'static'],
+          // ['title' => 'prizes', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Prizes' : 'الجوائز', 'type' => 'static'],
+          // ['title' => 'evaluation', 'icon' => 'bi-clipboard-check-fill', 'label' => $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم', 'type' => 'static'],
+
+          ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
+          ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
+          ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static'],
+          ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
+          // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
+          ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static']
+        ];
+    }else{
+      if($user->hasRole('admin')) {
+        $tabsDatastatic =  [
+          // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
+          // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
+          // ['title' => 'schedule', 'icon' => 'bi-calendar2-week-fill', 'label' => $l == 'en' ? 'Schedule' : 'جدول الأعمال', 'type' => 'static'],
+          // ['title' => 'prizes', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Prizes' : 'الجوائز', 'type' => 'static'],
+          // ['title' => 'evaluation', 'icon' => 'bi-clipboard-check-fill', 'label' => $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم', 'type' => 'static'],
+
+          ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
+          ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
+          ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static'],
+          ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
+          // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
+          ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static']
+        ];
+      }else{
+        $tabsDatastatic =  []; 
+      }
+    }
+
+  $tabsData = array_merge($tabsData, $tabsDatastatic);
 
   if($user->hasRole('admin')) {
     $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Submissions' : 'الاجابات', 'type' => 'static'];
@@ -34,6 +59,7 @@
   $tabs = collect($tabsData)->map(function ($tab) {
     return ['target' => $tab['title'], 'icon' => $tab['icon'], 'label' => $tab['label'], 'type' => $tab['type']];
   })->toArray();
+  
 @endphp
 
 @section('content')
