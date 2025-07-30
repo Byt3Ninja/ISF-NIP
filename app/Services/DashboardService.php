@@ -4,11 +4,11 @@ namespace App\Services;
 
 use App\Step;
 use App\User;
+use stdClass;
 use App\Cycle;
+use App\Company;
 use App\Service;
-use App\Screening;
 use Carbon\Carbon;
-use App\Finalscreening;
 use App\SurveyResponses;
 use App\MentorshipRequest;
 use Illuminate\Support\Facades\DB;
@@ -793,108 +793,268 @@ class DashboardService
 }
 public function judgerDashboard(): array
 {
-    $judgerId = auth()->id();
-
-    $screeningsCount = Screening::where('user_id', $judgerId)->count();
-    $finalScreeningsCount = FinalScreening::whereJsonContains('judges', (string) $judgerId)->count();
-
-    $stepIds = Screening::where('user_id', $judgerId)->pluck('step_id')->unique();
-
-    if ($stepIds->isEmpty()) {
-        return [
-            'screeningsCount' => $screeningsCount,
-            'finalScreeningsCount' => $finalScreeningsCount,
-            'judgingList' => [],
-        ];
-    }
+    $user = auth()->user();
+    $judgerId = $user->id;
+    $lang = app()->getLocale();
+    $hasOrg = $user->organization_id ? true : false;
+    $inputs = [now()->format('Y-m-d'), $judgerId];
 
     $getNotEvaluatedCompanies = collect(DB::select("
-        SELECT
-            results.id AS result_id,
-            results.evaluation_id,
-            eval.step_id AS step_id,
-            results.company_id AS company_id,
-            results.status
-        FROM
-            screening_evaluation_results as results
-        LEFT JOIN
-            screening_evaluation as eval ON eval.id = results.evaluation_id
-        WHERE
-            results.user_id = ?
-    ", [ $judgerId ]));
-
-    $establishedEvaluations = collect(DB::select("
-        SELECT
-            eval.id,
-            eval.step_id,
-            eval.status
-        FROM
-            screening_evaluation as eval
-        WHERE
-            eval.step_id IN (" . implode(',', $stepIds->toArray()) . ")
-    "));
-
-    $steps = Step::whereIn('id', $stepIds)
-        ->with([
-            'cycle:id,title,start,end',
-            'companies' => function ($q) {
-                $q->select('id', 'name_en','logo','step', 'cycle')
-                    ->with(['user:id,first_name_en,last_name_en,title_en,company_id,img_url']);
-            }
-        ])
-        ->get(['id', 'title', 'description', 'from', 'to', 'cycle_id']);
-
-    $judgingList = $steps->map(function ($step) use ($getNotEvaluatedCompanies, $establishedEvaluations) {
-        $stepEval = $establishedEvaluations->firstWhere('step_id', $step->id);
-        $isEvalEstablished = $stepEval && $stepEval->status != 0;
-
-        $companies = $step->companies->map(function ($company) use ($getNotEvaluatedCompanies, $isEvalEstablished, $step) {
-            $user = $company->user;
-            $userImg = $user?->img_url
-                ? Storage::disk('public_uploads')->url($user->img_url)
-                : null;
-
-            if (!$isEvalEstablished) {
-                $evaluationStatus = 'not_started';
-            } else {
-                $responds = $getNotEvaluatedCompanies->where('company_id', $company->id)
-                    ->where('step_id', $step->id);
-
-                if ($responds->isEmpty()) {
-                    $evaluationStatus = 'not_evaluated';
-                } else {
-                    $havePending = $responds->where('status', 0)->count();
-                    $evaluationStatus = $havePending > 0 ? 'in_progress' : 'evaluated';
-                }
-            }
-
-            return [
-                'startupLogo' => $company->logo_url,
-                'startupName'       => $company->name_en,
-                'imgUrl'           => $userImg,
-                'userName'          => optional($user)->first_name_en . ' ' . optional($user)->last_name_en,
-                'userTitle'         => optional($user)->title_en,
-                'evaluationStatus'  => $evaluationStatus,
+        SELECT results.id AS result_id, results.evaluation_id, eval.step_id, results.company_id, results.status
+        FROM screening_evaluation_results AS results
+        LEFT JOIN screening_evaluation AS eval ON eval.id = results.evaluation_id
+        WHERE results.user_id = ?", [ $judgerId ]
+    ));
+    $filtration_q = "
+    SELECT
+        s.id,
+        s.arr,
+        s.title,
+        s.from,
+        s.to,
+        s.description,
+        s.stype as `type`,
+        c.id AS cycle_id,
+        c.title AS `cycle_title`,
+        c.start AS `cycle_start`,
+        c.end AS `cycle_end`,
+        sc.user_id AS `screening_user_id`,
+        sc.users AS `screening_users`,
+        sc.panel AS `screening_panel`,
+        cp.id AS company_id,
+        cp.name_en AS `company_name_en`,
+        cp.name_ar AS `company_name_ar`,
+        cp.logo AS `company_logo`,
+        u.id AS company_user_id,
+        u.first_name_en AS company_user_first_name_en,
+        u.last_name_en AS company_user_last_name_en,
+        u.first_name_ar AS company_user_first_name_ar,
+        u.last_name_ar AS company_user_last_name_ar,
+        u.title_ar AS company_user_title_ar,
+        u.title_en AS company_user_title_en,
+        u.img_url AS company_user_img_url
+    FROM
+        steps s
+    LEFT JOIN
+        cycles c ON c.id = s.cycle_id
+    LEFT JOIN
+        screenings sc ON sc.step_id = s.id
+    LEFT JOIN
+        companies cp ON cp.step = sc.step_id
+    LEFT JOIN
+        users u ON u.company_id = cp.id AND u.HaveCompany = 1
+    WHERE
+        ? BETWEEN s.from AND s.to
+        AND s.deleted_at IS NULL
+        AND s.id IN (
+            SELECT
+                step_id
+            FROM
+                screenings
+            WHERE
+                deleted_at IS NULL
+                AND user_id = ?
+        )
+";
+  
+    if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
+        $filtration_q .= " AND user_id = ? ";
+        $inputs[] = $judgerId;
+    }
+    if ($hasOrg) {
+        $filtration_q .= " AND c.organization_id = " . $user->organization_id;
+    }
+    $filtration = collect(DB::select($filtration_q, $inputs));
+      $filtration = $filtration->groupBy('id')->map(function ($groupedSteps) use ($lang) {
+        $s = $groupedSteps->first();
+        $step = new stdClass;
+        $step->id = $s->id;
+        $step->title = $s->title;
+        $step->from = Carbon::parse($s->from)->format('Y-m-d');
+        $step->to = Carbon::parse($s->to)->format('Y-m-d');
+        $step->description = $s->description;
+        $step->cycle = (object)[
+            'id' => $s->cycle_id,
+            'title' => $s->cycle_title,
+            'start' => Carbon::parse($s->cycle_start)->format('Y-m-d'),
+            'end' => Carbon::parse($s->cycle_end)->format('Y-m-d')
+        ];
+        $step->companies = $groupedSteps->filter(fn($row) => $row->company_id)->groupBy('company_id')->map(function ($companyGroup) use ($lang) {
+            $c = $companyGroup->first();
+            return (object)[
+                'id' => $c->company_id,
+                'name' => $c->{"company_name_$lang"},
+                'logo' => Company::logo_handler($c->company_logo),
+                'users' => $companyGroup->map(function ($u) use ($lang) {
+                    return (object)[
+                        'id' => $u->company_user_id,
+                        'name' => $u->{"company_user_first_name_$lang"} . ' ' . $u->{"company_user_last_name_$lang"},
+                        'title' => $u->{"company_user_title_$lang"},
+                        'logo' => User::image_handler($u->company_user_img_url)
+                    ];
+                })->unique('id')->values()
             ];
+        })->values();
+
+        return $step;
+    })->values();
+
+      $evaluation_q = "SELECT
+                    fs.id,
+                    fs.company_id,
+                    c.name_en AS company_name_en,
+                    c.name_ar AS company_name_ar,
+                    c.logo AS company_logo,
+                    u.id AS company_user_id,
+                    u.img_url AS company_user_img_url,
+                    u.first_name_en AS company_user_first_name_en,
+                    u.last_name_en AS company_user_last_name_en,
+                    u.first_name_ar AS company_user_first_name_ar,
+                    u.last_name_ar AS company_user_last_name_ar,
+                    u.title_ar AS company_user_title_ar,
+                    u.title_en AS company_user_title_en,
+                    fs.step_id,
+                    s.title AS step_title,
+                    s.from AS step_start,
+                    s.to AS step_end,
+                    s.description AS step_description,
+                    cy.id AS cycle_id,
+                    cy.title AS cycle_title,
+                    cy.start AS cycle_start,
+                    cy.end AS cycle_end,
+                    fs.judges,
+                    fs.datetime,
+                    fs.duration,
+                    fs.zoom_id,
+                    fs.start_url,
+                    fs.join_url
+                FROM
+                    finalscreenings fs
+                LEFT JOIN
+                    companies c ON fs.company_id = c.id
+                LEFT JOIN
+                    users u ON c.id = u.company_id
+                LEFT JOIN
+                    steps s ON fs.step_id = s.id
+                LEFT JOIN
+                    cycles cy ON s.cycle_id = cy.id
+                WHERE   
+                    fs.deleted_at IS NULL
+            ";
+    if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
+        $evaluation_q .= " AND fs.judges LIKE '%\"{$judgerId}\"%'";
+    }
+    if ($hasOrg) {
+        $evaluation_q .= " AND cy.organization_id = " . $user->organization_id;
+    }
+
+    $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
+        $e->judges = array_map('intval', json_decode($e->judges, true));
+        return $e;
+    })->groupBy('step_id')->map(function ($group) use ($lang) {
+        $_step = $group->first();
+        $step = new stdClass;
+        $step->id = $_step->step_id;
+        $step->title = $_step->step_title;
+        $step->from = Carbon::parse($_step->step_start)->format('Y-m-d');
+        $step->to = Carbon::parse($_step->step_end)->format('Y-m-d');
+        $step->description = $_step->step_description;
+        $step->cycle = (object)[
+            'id' => $_step->cycle_id,
+            'title' => $_step->cycle_title,
+            'start' => Carbon::parse($_step->cycle_start)->format('Y-m-d'),
+            'end' => Carbon::parse($_step->cycle_end)->format('Y-m-d')
+        ];
+        $step->companies = $group->groupBy('company_id')->map(function ($compGroup) use ($lang) {
+            $_c = $compGroup->first();
+            return (object)[
+                'id' => $_c->company_id,
+                'name' => $_c->{"company_name_$lang"},
+                'logo' => Company::logo_handler($_c->company_logo),
+                'users' => $compGroup->map(function ($u) use ($lang) {
+                    return (object)[
+                        'id' => $u->company_user_id,
+                        'name' => $u->{"company_user_first_name_$lang"} . ' ' . $u->{"company_user_last_name_$lang"},
+                        'title' => $u->{"company_user_title_$lang"},
+                        'logo' => Storage::disk('public_uploads')->url($u->company_user_img_url),
+                    ];
+                }),
+                'judges' => $_c->judges,
+                'dateTime' => $_c->datetime,
+                'zoomId' => $_c->zoom_id,
+                'joinUrl' => $_c->join_url,
+            ];
+        })->values();
+
+        return $step;
+    })->values();
+
+      $steps_ids = array_merge(
+        $filtration->pluck('id')->toArray(),
+        $evaluation->pluck('id')->toArray()
+    );
+
+    $established_evaluations_q = "SELECT * FROM screening_evaluation WHERE status IS NOT NULL";
+    if (count($steps_ids) > 0) {
+        $placeholders = implode(',', array_fill(0, count($steps_ids), '?'));
+        $established_evaluations_q .= " AND step_id IN ($placeholders)";
+        $established_evaluations = collect(DB::select($established_evaluations_q, $steps_ids));
+    } else {
+        $established_evaluations = collect([]);
+    }
+    
+    $filtration = $filtration->map(function ($step) use ($getNotEvaluatedCompanies, $established_evaluations, $judgerId) {
+    $step->companies = $step->companies->map(function ($company) use ($step, $getNotEvaluatedCompanies, $established_evaluations, $judgerId) {
+        $status = __('dashboard.evaluation_not_started');
+
+        $result = $getNotEvaluatedCompanies->first(function ($r) use ($company, $step, $judgerId) {
+            return $r->company_id == $company->id && $r->step_id == $step->id && $r->user_id == $judgerId;
         });
 
-        return [
-            'stepTitle'     => $step->title,
-            'stepFrom'      => $step->from ? Carbon::parse($step->from)->format('Y-m-d') : null,
-            'stepTo'        => $step->to ? Carbon::parse($step->to)->format('Y-m-d') : null,
-            'stepDesc'      => $step->description,
-            'cycleTitle'    => optional($step->cycle)->title,
-            'cycleStart'    => optional($step->cycle)?->start ? Carbon::parse($step->cycle->start)->format('Y-m-d') : null,
-            'cycleEnd'      => optional($step->cycle)?->end ? Carbon::parse($step->cycle->end)->format('Y-m-d') : null,
-            'companies'     => $companies->toArray(),
-        ];
+        if ($result) {
+            $status = match ($result->status) {
+                'in_progress' => __('dashboard.evaluation_in_progress'),
+                'evaluated' => __('dashboard.evaluation_completed'),
+                default =>  __('dashboard.evaluation_not_evaluated')
+            };
+        }
+
+        $company->evaluation_status = $status;
+        return $company;
     });
 
-    return [
-        'screening'      => $screeningsCount,
-        'finalScreening' => $finalScreeningsCount,
-        'judgingList'    => $judgingList->toArray(),
+    return $step;
+});
+    $evaluation = $evaluation->map(function ($step) use ($getNotEvaluatedCompanies, $established_evaluations, $judgerId) {
+    $step->companies = $step->companies->map(function ($company) use ($step, $getNotEvaluatedCompanies, $established_evaluations, $judgerId) {
+        $status = __('dashboard.evaluation_not_started');
+
+        $result = $getNotEvaluatedCompanies->first(function ($r) use ($company, $step, $judgerId) {
+            return $r->company_id == $company->id && $r->step_id == $step->id && $r->user_id == $judgerId;
+        });
+
+        if ($result) {
+            $status = match ($result->status) {
+                'in_progress' => __('dashboard.evaluation_in_progress'),
+                'evaluated' => __('dashboard.evaluation_completed'),
+                default =>  __('dashboard.evaluation_not_evaluated')
+            };
+        }
+
+        $company->evaluation_status = $status;
+        return $company;
+    });
+
+    return $step;
+});
+
+      return [
+        'screening' => $filtration->count(),
+        'finalScreening' => $evaluation->flatMap(fn($e) => $e->companies)->count(),
+        'judgingList' => $filtration->toArray(),
+        'programFinalScreening' => $evaluation->toArray()
     ];
+   
 }
 public function startupDashboard($userId)
 {

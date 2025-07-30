@@ -19,7 +19,6 @@ class MentorshipSessionResource extends JsonResource
             'mentorId' => $this->mentor_id,
             'mentorName' => optional($this->mentor)->first_name_en . ' ' . optional($this->mentor)->last_name_en,
             'sessionDateTime' => optional($this->zoom_date)->toDateTimeString(),
-            'attended' => $this->done ? 'Yes' : 'No',
         ];
     }
 }
