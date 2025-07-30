@@ -54,6 +54,8 @@ class HackathonController extends Controller
         $hackathons_query .= "  ORDER BY c.start ASC";
         $hackathons_raw = collect(DB::select($hackathons_query));
 
+        $hackathon_ids = $hackathons_raw->pluck('c_id')->toArray();
+
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
         $team_formation = TeamFormation::whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->where('user_id', Auth::user()->id)->get();
         $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
@@ -93,7 +95,7 @@ class HackathonController extends Controller
            
         
         // return view('admin.hackathon.index', compact('hackathons'));
-        return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step'));
+        return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step', 'hackathon_ids'));
     }
 
     public function manage($id)
