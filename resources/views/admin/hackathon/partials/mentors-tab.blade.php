@@ -14,7 +14,8 @@
     </p>
 
     <div class="row" id="hackathon-mentors-list">
-      @if($mentorsLists->isEmpty())
+      {{ dd($mentorsLists) }}
+      @if(!$mentorsLists  || $mentorsLists->isEmpty())
       <div class="col-12">
         <div class="alert alert-info">{{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}
         </div>
@@ -37,7 +38,7 @@
         </div>
       </div>
       @endforeach --}}
-      @if(count($mentorsLists) > 0)
+      
           @foreach ($mentorsLists as $key => $mentor)
             
               <!-- Mentor Card -->
@@ -166,13 +167,7 @@
               <!-- Mentor Card -->
             
           @endforeach
-      @else
-        <div class="col-12">
-          <div class="alert alert-info">
-            {{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}
-          </div>
-        </div>
-      @endif
+      
     @endif
     </div>
 
