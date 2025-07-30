@@ -29,16 +29,17 @@ testing:
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
-    - ssh-add <(echo "$testing_ssh_key")
     - mkdir -p ~/.ssh
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - ssh-add "$TESTING_SSH_KEY"
     - ssh-keyscan -p22 185.250.36.20 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p22 -o StrictHostKeyChecking=no root@185.250.36.20 "cd /var/www/testing && git pull && php artisan migrate --force"
+    - ssh -p22 root@185.250.36.20 'cd /var/www/testing && git pull && php artisan migrate --force'
   only:
     - testing
+
 
 
 dev:
