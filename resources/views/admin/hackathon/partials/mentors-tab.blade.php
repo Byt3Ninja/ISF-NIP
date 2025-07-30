@@ -14,7 +14,7 @@
     </p>
 
     <div class="row" id="hackathon-mentors-list">
-      @if($mentorsLists->isEmpty() || $mentorsLists == null)
+      @if($mentorsLists->isEmpty())
       <div class="col-12">
         <div class="alert alert-info">{{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}
         </div>
@@ -37,136 +37,143 @@
         </div>
       </div>
       @endforeach --}}
+      @if(count($mentorsLists) > 0)
+          @foreach ($mentorsLists as $key => $mentor)
+            
+              <!-- Mentor Card -->
+              <div class="col-md-4 radius-15 mb-3">
+                <div class="border radius-15" style="background-image: url('{{ $mentor?->img_url ?? '/images/user-placeholder.jpeg' }}'); 
+                        height:293px; background-size: cover;
+                        background-position: center;">
+                </div>
+                <div class="card shadow-none mx-2 p-3"
+                  style="height: 350px; z-index: 1; margin-top: -25px; border-radius: 15px;">
+                  <div
+                    class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center mb-2"
+                    style="height: 55px;">
+                    <a target="_blank" href="{{ route('mentors.profile_view', $mentor->id ?? 0 ) }}" class="d-flex flex-column">
+                      <span class="text-black fw-bold fs-6">{{ $mentor?->name ?? '' }}</span>
+                      <small class="text-secondary">{{ $mentor?->title ?? '' }}</small>
+                    </a>
+                    @if ($mentor?->bio->linkedin ?? 0)
+                    <a title="Linkedin URL" target="_blank" href="{{ $mentor?->bio->linkedin ?? '' }}">
+                      <img src="/icons/linkedin.svg" width="30" height="30" />
+                    </a>
+                    {{-- @else
+                    <!-- Please Change this SVG To color #eee -->
+                    <a title="Linkedin URL" target="_blank" href="#">
+                      <img src="/icons/linkedin.svg" width="30" height="30" />
+                    </a> --}}
+                    @endif
+                  </div>
+                  <!-- Mentor Experience -->
+                  <div class="mb-3" style="max-height: 100px; overflow: auto;">
+                    <p class="fs-6 fw-bold text-black mb-2">{{ __('admin.Expertises') }}</p>
+                    <div class="d-flex flex-wrap" style="gap: 5px;">
+                      @php
+                      if ($mentor) {
+                      $expertises = $mentor?->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+                      } else {
+                      $expertises = [];
+                      }
+                      @endphp
+                      @if ($mentor?->mentorExpertises->isNotEmpty())
+                      @foreach ($expertises as $expert)
+                      <span class="btn btn-xs btn-outline-warning rounded-pill"> {{ $l === 'ar' ? $expert->title_ar : $expert->title }}</span>
+                      @endforeach
+                      @else
+                      <span class="btn btn-xs btn-outline-warning rounded-pill">{{ __('cycles.NA') }}</span>
+                      @endif
+                    </div>
+                  </div>
+                  <!-- / Mentor Experience -->
+                  <!-- Mentor Programs & Rating -->
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="bg-white custom-shadow px-2 py-1 border" style="border-radius: 15px;">
+                      <div class="d-flex flex-column justify-content-center align-items-center">
+                        <small class="text-info fw-bold">{{ __('cycles.ProgramCount') }}</small>
+                        <span class="text-black fw-bold fs-6">{{ $mentor?->mentorCycles->count() }}</span>
+                      </div>
+                    </div>
+                    @php
+                    $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor?->id)
+                    ->where(function ($query) {
+                    $query->where('approved', 'Yes')->orWhereNull('approved');
+                    })
+                    ->avg('rating');
+                    @endphp
+                    <div class="badge bg-label-light rounded rounded-pill">
+                      <div class="d-flex align-items-center justify-content-center">
 
-       @foreach ($mentorsLists as $key => $mentor)
-         @if($mentor != null)
-          <!-- Mentor Card -->
-          <div class="col-md-4 radius-15 mb-3">
-            <div class="border radius-15" style="background-image: url('{{ $mentor?->img_url ?? '/images/user-placeholder.jpeg' }}'); 
-                    height:293px; background-size: cover;
-                    background-position: center;">
-            </div>
-            <div class="card shadow-none mx-2 p-3"
-              style="height: 350px; z-index: 1; margin-top: -25px; border-radius: 15px;">
-              <div
-                class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center mb-2"
-                style="height: 55px;">
-                <a target="_blank" href="{{ route('mentors.profile_view', $mentor->id ?? 0 ) }}" class="d-flex flex-column">
-                  <span class="text-black fw-bold fs-6">{{ $mentor->name }}</span>
-                  <small class="text-secondary">{{ $mentor->title }}</small>
-                </a>
-                @if ($mentor->bio->linkedin ?? 0)
-                <a title="Linkedin URL" target="_blank" href="{{ $mentor->bio->linkedin }}">
-                  <img src="/icons/linkedin.svg" width="30" height="30" />
-                </a>
-                {{-- @else
-                <!-- Please Change this SVG To color #eee -->
-                <a title="Linkedin URL" target="_blank" href="#">
-                  <img src="/icons/linkedin.svg" width="30" height="30" />
-                </a> --}}
-                @endif
-              </div>
-              <!-- Mentor Experience -->
-              <div class="mb-3" style="max-height: 100px; overflow: auto;">
-                <p class="fs-6 fw-bold text-black mb-2">{{ __('admin.Expertises') }}</p>
-                <div class="d-flex flex-wrap" style="gap: 5px;">
-                  @php
-                  if ($mentor) {
-                  $expertises = $mentor->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
-                  } else {
-                  $expertises = [];
-                  }
-                  @endphp
-                  @if ($mentor->mentorExpertises->isNotEmpty())
-                  @foreach ($expertises as $expert)
-                  <span class="btn btn-xs btn-outline-warning rounded-pill"> {{ $l === 'ar' ? $expert->title_ar : $expert->title }}</span>
-                  @endforeach
+                        <span style="color: orange" class="fw-bold mt-1 mx-1">{{ number_format($rateMentorAVG, 2, '.', '')
+                          }}</span>
+                        <img src="/icons/star.svg" width="15" height="15" />
+                      </div>
+                    </div>
+                  </div>
+                  <!-- / Mentor Programs & Rating -->
+                  <!-- Mentor Bio -->
+                  @if ($mentor?->bio)
+                  <div class="mb-2 mt-auto">
+                    <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
+                    <small class="text-muted line-clamp-4">
+                      {{ $mentor?->bio->{'bio_' . $l} }}
+                    </small>
+                  </div>
                   @else
-                  <span class="btn btn-xs btn-outline-warning rounded-pill">{{ __('cycles.NA') }}</span>
+                  <div class="mb-2 mt-auto">
+                    <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
+                    <small class="text-muted line-clamp-4">
+                      {{ __('cycles.NA') }}
+                    </small>
+                  </div>
                   @endif
-                </div>
-              </div>
-              <!-- / Mentor Experience -->
-              <!-- Mentor Programs & Rating -->
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="bg-white custom-shadow px-2 py-1 border" style="border-radius: 15px;">
-                  <div class="d-flex flex-column justify-content-center align-items-center">
-                    <small class="text-info fw-bold">{{ __('cycles.ProgramCount') }}</small>
-                    <span class="text-black fw-bold fs-6">{{ $mentor->mentorCycles->count() }}</span>
+                  <!-- / Mentor Bio -->
+                  <div class="row px-4 mt-auto">
+                    @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
+                    @php
+                      $startup = auth()->user();
+                      $getCycle = $startup->company->cycledata;
+                    @endphp
+                    <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
+                      onclick="request({{$mentor?->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
+                      title="Add new request">
+                      {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
+                    </button>
+                    @else
+
+                    <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
+                    @endif
+                    @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin'))
+                    @php
+                    $startup = auth()->user();
+                    $getCycle = $startup->company->cycledata;
+                    @endphp
+                    <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow" data-bs-toggle="modal"
+                      data-bs-target="#SendRequest" title="Add new request" onclick="request({{ $mentor?->id }},
+                        {{ optional($startup)->first_nam }} 
+                        {{ optional($startup)->last_name }},
+                        {{ $getCycle->organization_id }},
+                        {{ $getCycle->id }})">
+                      {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
+                    </button>
+                    @endif
+
+
                   </div>
                 </div>
-                @php
-                $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor->id)
-                ->where(function ($query) {
-                $query->where('approved', 'Yes')->orWhereNull('approved');
-                })
-                ->avg('rating');
-                @endphp
-                <div class="badge bg-label-light rounded rounded-pill">
-                  <div class="d-flex align-items-center justify-content-center">
-
-                    <span style="color: orange" class="fw-bold mt-1 mx-1">{{ number_format($rateMentorAVG, 2, '.', '')
-                      }}</span>
-                    <img src="/icons/star.svg" width="15" height="15" />
-                  </div>
-                </div>
               </div>
-              <!-- / Mentor Programs & Rating -->
-              <!-- Mentor Bio -->
-              @if ($mentor->bio)
-              <div class="mb-2 mt-auto">
-                <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
-                <small class="text-muted line-clamp-4">
-                  {{ $mentor->bio->{'bio_' . $l} }}
-                </small>
-              </div>
-              @else
-              <div class="mb-2 mt-auto">
-                <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
-                <small class="text-muted line-clamp-4">
-                  {{ __('cycles.NA') }}
-                </small>
-              </div>
-              @endif
-              <!-- / Mentor Bio -->
-              <div class="row px-4 mt-auto">
-                @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
-                @php
-                  $startup = auth()->user();
-                  $getCycle = $startup->company->cycledata;
-                @endphp
-                <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
-                  onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
-                  title="Add new request">
-                  {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
-                </button>
-                @else
-
-                <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
-                @endif
-                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin'))
-                @php
-                $startup = auth()->user();
-                $getCycle = $startup->company->cycledata;
-                @endphp
-                <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow" data-bs-toggle="modal"
-                  data-bs-target="#SendRequest" title="Add new request" onclick="request({{ $mentor->id }},
-                    {{ optional($startup)->first_nam }} 
-                    {{ optional($startup)->last_name }},
-                    {{ $getCycle->organization_id }},
-                    {{ $getCycle->id }})">
-                  {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
-                </button>
-                @endif
-
-
-              </div>
-            </div>
-          </div>
-          <!-- Mentor Card -->
-        @endif
+              <!-- Mentor Card -->
+            
           @endforeach
+      @else
+        <div class="col-12">
+          <div class="alert alert-info">
+            {{ $l == 'en' ? 'No mentors currently.' : 'لا يوجد مرشدين حالياً.' }}
+          </div>
+        </div>
       @endif
+    @endif
     </div>
 
     {{-- <h3 class="h5 mt-5 mb-3">{{ $l == 'en' ? 'Judging Panel' : 'لجنة التحكيم' }}</h3>
