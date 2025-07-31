@@ -52,5 +52,6 @@ return [
 	'invalid_time_not_in_schedule' => 'The Selected Time does not match the mentor’s Availability',
 	'session_feedback_already_submitted' => 'Session Feedback Already Submitted',
 	'session_feedback_submitted' => 'Session Feedback Submitted Successfully',
-
+	'schedule_deleted' => 'Schedule Deleted Successfully',
+	'schedule_not_found' => 'Schedule Not Found',
 ];
