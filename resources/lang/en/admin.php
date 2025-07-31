@@ -2209,5 +2209,6 @@ return [
 	'criterion_description' => 'Criterion description',
 	'criterion_description_placeholder' => 'Enter criterion description',
 	'remove_criterion' => 'Remove Criterion',
-	'add_theme_placeholder' => 'Add a theme...'
+	'add_theme_placeholder' => 'Add a theme...',
+	'Project idea updated successfully.' => 'Project idea updated successfully.',
 ];
