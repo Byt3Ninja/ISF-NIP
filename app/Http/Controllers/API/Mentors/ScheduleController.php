@@ -76,7 +76,7 @@ class ScheduleController extends Controller
     public function index(Request $request, $mentor_id)
  {
      $user = auth()->user();
-     if (!$user->hasRole('Mentor') && !$user->hasRole('Registered')) {
+     if (!$user->hasRole('Mentor') && !$user->hasRole('Registered') && !$user->hasRole('Admin')) {
         return $this->forbidden(__('api.forbidden'));
     }
     

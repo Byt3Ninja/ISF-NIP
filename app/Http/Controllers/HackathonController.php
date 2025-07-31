@@ -151,7 +151,7 @@ class HackathonController extends Controller
         if($team_Formation_raw->isEmpty()){
             return redirect()->back()->with('error', 'Team Formation not found');
         }
-        $step = Step::where('cycle_id', $team_Formation_raw->first()->tf_cycle_id)
+        $step = Step::where('cycle_id', $id)
             ->where('stype', '6')
             ->first();
             $count_team = $step ? $step->count_team_number : 0;
@@ -997,10 +997,10 @@ class HackathonController extends Controller
             'Project_Status' => 'nullable|integer',
         ]);
         $user = Auth::user();
-        $team_q = TeamFormation::where('user_id', $user->id)->where('id', $request->team_formation_id)->first();
-        if (!$team_q) {
-            return redirect()->back()->with('error', 'You are not authorized to edit the project idea.');
-        }
+        $team_q = TeamFormation::where('id', $request->team_formation_id)->first();
+        // if (!$team_q) {
+        //     return redirect()->back()->with('error', 'You are not authorized to edit the project idea.');
+        // }
         $team_q->project_name_ar = $request->Project_Name_ar;
         $team_q->project_name_en = $request->Project_Name_en;
         $team_q->project_description_ar = $request->Project_Description_ar;
@@ -1424,8 +1424,58 @@ class HackathonController extends Controller
 
     public function viewAdminHackaton($id)
     {
-      
-        return view('admin.hackathon.admin.dashboard_admin');
+        $teams_q = "SELECT 
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.description as tf_description,
+                tf.cycle_id as tf_cycle_id,
+                tf.step_id as tf_step_id,
+                tf.img_team as tf_img_team,
+                tf.user_id as tf_user_id,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.Name as tm_name,
+                tm.Email as tm_email,
+                tm.isTeamLeader as tm_isTeamLeader,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.team_formation_id as tm_team_formation_id,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
+                concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
+                u.email as u_email,
+                u.img_url as u_img_url,
+                u.title_ar as u_title_ar,
+                u.title_en as u_title_en
+            FROM 
+                team_members as tm
+            LEFT JOIN
+                team_formations as tf ON tm.team_formation_id = tf.id
+            LEFT JOIN
+                users as u ON tf.user_id = u.id
+            WHERE
+                tf.cycle_id = ?
+        ";
+
+        $teams = collect(DB::select($teams_q, [$id]));
+        $step_q = "SELECT * FROM steps WHERE id = ? AND cycle_id = ?";
+        $step = collect(DB::select($step_q, [$id, $id]));
+
+        // $teams = $teams->map(function ($team) {
+        //    $first = $team->first();
+        //     $team = new stdClass;
+        //     $team->id = $first->tf_id;
+        //     $team->name = $first->tf_name;
+        //     $team->desc = $first->tf_description;
+        //     $team->cycle_id = $first->tf_cycle_id;
+        //     $team->step_id = $first->tf_step_id;
+        //     $team->photo = $first->tf_img_team ?? null;
+        //     $team->count_members = $first->where('tm_acceptInvition', 'accepted')->count();
+        //     $team->created_at = $first->tf_created_at;
+
+        // });
+
+        return view('admin.hackathon.admin.dashboard_admin', compact('teams'));
     }
     public function viewHackathonWinners($id)
     {
