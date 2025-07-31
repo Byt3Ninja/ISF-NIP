@@ -340,14 +340,14 @@ class DashboardService
         $schedules = DB::table('schedules')
             ->where('user_id', $mentorId)
             ->where('active', 1)
-            ->select('days', 'tfrom', 'tto', 'notes')
+            ->select('id','days', 'tfrom', 'tto')
             ->get()
             ->map(function ($schedule) {
                 return [
-                    'days' => json_decode($schedule->days, true) ?: $schedule->days,
+                    'id' => $schedule->id,
+                    'days' => $schedule->days,
                     'tfrom' => $schedule->tfrom,
                     'tto' => $schedule->tto,
-                    'notes' => $schedule->notes,
                 ];
             });
 
