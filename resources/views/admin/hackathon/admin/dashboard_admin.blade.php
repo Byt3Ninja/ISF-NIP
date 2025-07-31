@@ -241,10 +241,11 @@
           </thead>
           <tbody>
             <!-- This is example data, should be populated from a loop in a real application -->
+            @foreach ($teams as $team)
             <tr>
-              <td>{{ __('admin.champions_team') }}</td>
-              <td>{{ __('admin.future_of_ai_hackathon') }}</td>
-              <td>أحمد محمد (ahmad@example.com)</td>
+              <td>{{ $team->tf_name }}</td>
+              <td>{{ $team->tf_description }}</td>
+              <td> {{ $team->user_name_en }} ( {{ $team->u_email }} )</td>
               <td>4/5</td>
               <td>05 مارس 2024</td>
               <td>
@@ -254,6 +255,7 @@
                   __('admin.message') }}</button>
               </td>
             </tr>
+            @endforeach
           </tbody>
         </table>
       </div>

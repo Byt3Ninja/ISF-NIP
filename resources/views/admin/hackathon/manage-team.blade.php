@@ -60,11 +60,12 @@
             @php
             $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
             @endphp
+            
             @if($team_leader)
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <div class="avatar avatar-sm me-2">
-                  <img src="{{ $team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
+                  <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
                 <strong>{{ $l == 'en' ? 'You ('.$team_leader->user_name_en .')' : 'انت ('.$team_leader->user_name_ar
@@ -73,16 +74,19 @@
               <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
             </li>
             @endif
-
+@php
+$T=0;
+@endphp
             @foreach ($team_members as $member)
+            {{ $T++ }}
             <li id="Member{{ $member->tm_id }}"
               class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <div class="avatar avatar-sm me-2">
-                  <img src="{{ $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
+                  <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
-                {{ $l == 'en' ? 'Team Member 2 ('. $member->tm_name .')' : 'عضو الفريق 2 ('. $member->tm_name . ')' }}
+                {{ $l == 'en' ?  $member->tm_name .' (Team Member '.$T.')' : . $member->tm_name . '(عضو الفريق '.$T.' )' }}
               </div>
               <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
                 title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}"
