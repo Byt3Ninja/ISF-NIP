@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\User;
 use App\UsersBio;
 use App\MentorshipTask;
 use App\MentorshipRequest;
@@ -103,120 +104,13 @@ class ProfileController extends Controller
  */
      public function me(Request $request)
     {
-        $user = Auth::user();
-        
-        $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
-        $locale = app()->getLocale();
-
-        $data = [
-            'imgUrl'           => $user->img_url,
-            'firstName'        => $user->first_name_en,
-            'lastName'         => $user->last_name_en,
-            'gender'           => $user->gender,
-            'countryCode'      => $user->country_code,
-            'phone'            => $user->phone,
-            'countryCodeWA'    => $user->country_code_w_a,
-            'whatsapp'         => $user->whatsapp,
-            'whatsappVerified' => $user->whatsapp_verified,
-            'email'            => $user->email,
-            'zipCode'          => $user->zip_code,
-            'address'          => $user->address,
-            'title'            => $user->title_en,
-            'country'          => optional($user->country)->{'name_' . $locale},
-            'state'            => optional($user->state)->{'name_' . $locale},
-            'city'             => optional($user->city)->{'name_' . $locale}, 
-            'language'         => $user->language,
-            'haveCompany'      => (bool) $user->HaveCompany,
-            'timeZone'         => $user->timezone,
-            'currency'         => $user->currency,
-            'role'             => $user->getRoleNames()->first(),
-        ];
-
-    if ($user->hasRole('Mentor') || $user->hasRole('Registered')) {
-
-        $requestsQuery = MentorshipRequest::query();
-
-        $requestsQuery->where('mentor_id', $user->id);
-
-        $requests = $requestsQuery->get();
-
-        if ($user->hasRole('Mentor')) {
-            $data['mentorshipTotalRequests'] = $requests->count();
-            $data['mentorshipTotalHours'] = round($requests->sum('period') / 60, 2);
-            $data['mentorshipAverageRating'] = round($requests->whereNotNull('rating')->avg('rating'), 1);
-        }
-
-        $tasks = MentorshipTask::with(['user.company', 'mentorshipRequest'])->whereNotNull('title');
-
-        if ($user->hasRole('Mentor')) {
-            $tasks->where('mentor_id', $user->id)->where('status', 'pending');
-        } else {
-            $companyId = optional($user->company)->id;
-            if ($companyId) {
-                $tasks->where('company_id', $companyId);
-            } else {
-                $tasks->where('user_id', $user->id);
-            }
-        }
-
-        $tasks = $tasks->get();
-
-        $data['mentorshipSessions'] = $tasks->map(function ($task) use ($locale) {
-            $taskUser = $task->user;
-
-            $userImg = $taskUser?->img_url
-                ? Storage::disk('public_uploads')->url($taskUser->img_url)
-                : null;
-
-            $company = optional($taskUser->company);
-            $companyLogo = $company?->logo_url;
-
-            return [
-                'fullName'    => trim($taskUser?->first_name_en . ' ' . $taskUser?->last_name_en),
-                'imgUrl'      => $userImg,
-                'company'     => $company?->{"name_$locale"},
-                'companyLogo' => $companyLogo,
-                'done'        => optional($task->mentorshipRequest)->done,
-                'taskTitle'   => $task->title,
-            ];
-        })->filter()->values();
-    }
-
-    // === Mentor Bio Data ===
-  if ($user->hasRole('Mentor')) {
-    $bio = UsersBio::where('user_id', $user->id)->first();
-
-    $mentorBio = [];
-
-    if ($bio) {
-        $mentorBio = [
-            'bio'                             => $locale === 'ar' ? $bio->bio_ar : $bio->bio_en,
-            'specialization'                 => $locale === 'ar' ? $bio->specialization_ar : $bio->specialization_en,
-            'linkedin'                       => $bio->linkedin,
-            'entrepreneurialExperience'     => (bool) $bio->entrepreneurial_experience,
-            'entrepreneurialExperience_brief' => $bio->entrepreneurial_experience_brief,
-            'profilePrivacy'                => (bool) $bio->profile_privacy,
-            'mentorshipApproach'            => json_decode($bio->mentorship_approach, true) ?? [],
-        ];
-    }
-
-    $expertiseItems = $user->mentorExpertises()->get();
-
-    $mentorBio['expertises'] = $expertiseItems->map(function ($expertise) use ($locale) {
-        return [
-            'id'    => $expertise->id,
-            'title' => $locale === 'ar' ? $expertise->title_ar : $expertise->title,
-        ];
-    })->values();
-
-    $data['mentorBio'] = $mentorBio;
-}
-
+      $user = Auth::user();
+      $data = $this->getProfileData($user);
 
     return response()->json([
-            'success' => true,
-            'data'   => $data,
-        ],200);
+        'success' => true,
+        'data'    => $data,
+    ], 200);
     }
  /**
  * @OA\Post(
@@ -591,6 +485,120 @@ public function updateBio(Request $request)
             'expertise_ids' => $user->mentorExpertises()->pluck('expertise_id')->toArray(),
         ]
     ]);
+}
+
+public function showProfile($id)
+{
+    $user = User::with(['country', 'state', 'city', 'company'])->findOrFail($id);
+    $data = $this->getProfileData($user);
+
+    return response()->json([
+        'success' => true,
+        'data'    => $data,
+    ], 200);
+}
+
+
+private function getProfileData(User $user): array
+{
+    $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
+    $locale = app()->getLocale();
+
+    $data = [
+        'imgUrl'           => $user->img_url,
+        'firstName'        => $user->first_name_en,
+        'lastName'         => $user->last_name_en,
+        'gender'           => $user->gender,
+        'countryCode'      => $user->country_code,
+        'phone'            => $user->phone,
+        'countryCodeWA'    => $user->country_code_w_a,
+        'whatsapp'         => $user->whatsapp,
+        'whatsappVerified' => $user->whatsapp_verified,
+        'email'            => $user->email,
+        'zipCode'          => $user->zip_code,
+        'address'          => $user->address,
+        'title'            => $user->title_en,
+        'country'          => optional($user->country)->{"name_$locale"},
+        'state'            => optional($user->state)->{"name_$locale"},
+        'city'             => optional($user->city)->{"name_$locale"},
+        'language'         => $user->language,
+        'haveCompany'      => (bool) $user->HaveCompany,
+        'timeZone'         => $user->timezone,
+        'currency'         => $user->currency,
+        'role'             => $user->getRoleNames()->first(),
+    ];
+
+    if ($user->hasRole('Mentor') || $user->hasRole('Registered')) {
+        $requests = MentorshipRequest::where('mentor_id', $user->id)->get();
+
+        if ($user->hasRole('Mentor')) {
+            $data['mentorshipTotalRequests'] = $requests->count();
+            $data['mentorshipTotalHours'] = round($requests->sum('period') / 60, 2);
+            $data['mentorshipAverageRating'] = round($requests->whereNotNull('rating')->avg('rating'), 1);
+        }
+
+        $tasks = MentorshipTask::with(['user.company', 'mentorshipRequest'])
+            ->whereNotNull('title');
+
+        if ($user->hasRole('Mentor')) {
+            $tasks->where('mentor_id', $user->id)->where('status', 'pending');
+        } else {
+            $companyId = optional($user->company)->id;
+            if ($companyId) {
+                $tasks->where('company_id', $companyId);
+            } else {
+                $tasks->where('user_id', $user->id);
+            }
+        }
+
+        $data['mentorshipSessions'] = $tasks->get()->map(function ($task) use ($locale) {
+            $taskUser = $task->user;
+
+            $userImg = $taskUser?->img_url
+                ? Storage::disk('public_uploads')->url($taskUser->img_url)
+                : null;
+
+            $company = optional($taskUser->company);
+
+            return [
+                'fullName'    => trim($taskUser?->first_name_en . ' ' . $taskUser?->last_name_en),
+                'imgUrl'      => $userImg,
+                'company'     => $company?->{"name_$locale"},
+                'companyLogo' => $company?->logo_url,
+                'done' => optional($task->mentorshipRequest)->done == 1 ? 'Completed' : 'Uncompleted',
+                'taskTitle'   => $task->title,
+            ];
+        })->filter()->values();
+    }
+
+    if ($user->hasRole('Mentor')) {
+        $bio = UsersBio::where('user_id', $user->id)->first();
+        $mentorBio = [];
+
+        if ($bio) {
+            $mentorBio = [
+                'bio'                             => $locale === 'ar' ? $bio->bio_ar : $bio->bio_en,
+                'specialization'                  => $locale === 'ar' ? $bio->specialization_ar : $bio->specialization_en,
+                'linkedin'                        => $bio->linkedin,
+                'entrepreneurialExperience'       => (bool) $bio->entrepreneurial_experience,
+                'entrepreneurialExperience_brief' => $bio->entrepreneurial_experience_brief,
+                'profilePrivacy'                  => (bool) $bio->profile_privacy,
+                'mentorshipApproach'              => json_decode($bio->mentorship_approach, true) ?? [],
+            ];
+        }
+
+        $expertiseItems = $user->mentorExpertises()->get();
+        $mentorBio['expertises'] = $expertiseItems->map(function ($expertise) use ($locale) {
+            return [
+                'id'    => $expertise->id,
+                'title' => $locale === 'ar' ? $expertise->title_ar : $expertise->title,
+            ];
+        })->values();
+
+        $data['mentorBio'] = $mentorBio;
+    }
+
+    return $data;
 }
 
 
