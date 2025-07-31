@@ -76,7 +76,9 @@
             @endif
 @php
 $T=0;
-@endphp
+
+          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+          @endphp
             @foreach ($team_members as $member)
             {{ $T++ }}
             <li id="Member{{ $member->tm_id }}"
@@ -86,19 +88,19 @@ $T=0;
                   <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
-                {{ $l == 'en' ?  $member->tm_name .' (Team Member '.$T.')' : . $member->tm_name . '(عضو الفريق '.$T.' )' }}
+                {{ $l == 'en' ?  $member->tm_name .' (Team Member '.$T.')' : $member->tm_name . '(عضو الفريق '.$T.' )' }}
               </div>
+              @if($leaderOrnot->count() > 0)
               <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
                 title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}"
                 onclick="confirmRemoveMember({{ $member->tm_id }}, '{{ $member->tm_name }}')">
                 <i class="ti ti-user-minus"></i>
               </button>
+              @endif
             </li>
             @endforeach
 
-
             @foreach ($team_Pinding as $index => $pendingMember)
-
             <li id="pendingMember{{ $pendingMember->tm_id }}"
               class="list-group-item d-flex justify-content-between align-items-center text-muted">
               <div>
@@ -106,20 +108,22 @@ $T=0;
                 {{ $l == 'en' ? 'Pending invitation to: '. $pendingMember->tm_email.'' : 'دعوة معلقة لـ:
                 user3@example.com' }}
               </div>
-              <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}"><button
+
+              <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}">
+              @if($leaderOrnot->count() > 0)
+              <button
                 class="btn btn-sm btn-outline-secondary" data-id="{{ $pendingMember->tm_id }}" data-bs-toggle="tooltip"
                 title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}"
                 onclick="confirmCancelInvitation({{ $pendingMember->tm_id, $pendingMember->tm_email }})">
                 <i class="ti ti-x"></i>
               </button>
+              @endif
 
             </li>
             @endforeach
 
           </ul>
-          @php
-          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
-          @endphp
+          
           @if($leaderOrnot->count() > 0)
           <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
           <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
