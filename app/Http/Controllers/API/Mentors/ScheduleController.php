@@ -16,7 +16,7 @@ class ScheduleController extends Controller
     use ApiResponder;
     /**
  * @OA\Get(
- *     path="/api/v1/mentors/{mentor_id}/weekly-slots",
+ *     path="/mentors/{mentor_id}/weekly-slots",
  *     summary="Get weekly schedule of a mentor",
  *     tags={"Schedules"},
  *     security={{"sanctum":{}}},
@@ -493,6 +493,46 @@ public function show(Request $request, $id)
         'timezone' => $timezone,
         'status' => 'available'
     ]);
+}
+
+/**
+ * @OA\Delete(
+ *     path="/api/v1/availability/{id}",
+ *     summary="Delete a specific schedule slot",
+ *     tags={"Schedules"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Schedule slot ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(response=200, description="Schedule deleted successfully"),
+ *     @OA\Response(response=403, description="Forbidden"),
+ *     @OA\Response(response=404, description="Schedule not found")
+ * )
+ */
+public function destroy($id)
+{
+    $mentor = auth()->user();
+
+    if (!$mentor->hasRole('Mentor')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    $schedule = DB::table('schedules')
+        ->where('id', $id)
+        ->where('user_id', $mentor->id)
+        ->first();
+
+    if (!$schedule) {
+        return $this->notFound(__('api.schedule_not_found'));
+    }
+
+    DB::table('schedules')->where('id', $id)->delete();
+
+    return $this->success(null,[] ,__('api.schedule_deleted'));
 }
 
 }

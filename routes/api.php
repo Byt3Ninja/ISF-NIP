@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
     Route::post('/v1/availability', [ScheduleController::class, 'store']);
     Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
+    Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);
     Route::get('/mentors/{mentor_id}/weekly-slots', [ScheduleController::class, 'index']);
     Route::get('/slots/{id}', [ScheduleController::class, 'show']);
     Route::get('/v1/mentors', [MentorController::class, 'index']);

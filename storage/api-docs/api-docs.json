@@ -1681,13 +1681,13 @@
                 ]
             }
         },
-        "/api/v1/mentors/{mentor_id}/weekly-slots": {
+        "/mentors/{mentor_id}/weekly-slots": {
             "get": {
                 "tags": [
                     "Schedules"
                 ],
                 "summary": "Get weekly schedule of a mentor",
-                "operationId": "430205da15b903a82b329b9d5b3b49ac",
+                "operationId": "aa104dfe08f4989f53b8f55645dc6d2d",
                 "parameters": [
                     {
                         "name": "mentor_id",
@@ -2031,6 +2031,42 @@
                     },
                     "403": {
                         "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/availability/{id}": {
+            "delete": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Delete a specific schedule slot",
+                "operationId": "6b1a7a2d6923dfa46d40fa1863eb63d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Schedule slot ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule deleted successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Schedule not found"
                     }
                 },
                 "security": [

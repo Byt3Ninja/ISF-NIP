@@ -51,4 +51,6 @@ return [
     'invalid_time_not_in_schedule' => 'الوقت المحدد لا يتوافق مع جدول توفر المرشد',
 	'session_feedback_already_submitted' => 'تم تقديم تقييم الجلسة بالفعل',
 	'session_feedback_submitted' => 'تم تقديم تقييم الجلسة بنجاح',
+	'schedule_deleted' => 'تم حذف الجدول بنجاح',
+	'schedule_not_found' => 'الجدول غير موجود',
 ];
