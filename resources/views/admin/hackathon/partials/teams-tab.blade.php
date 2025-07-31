@@ -125,11 +125,12 @@
               </div>
               @endif
             </div>
+
             <div class="d-flex justify-content-between">
               <a href="/dashboard/hackathon/team/{{ $team->id }}" class="btn btn-outline-primary btn-sm">
                 {{ $l == 'en' ? 'View Team' : 'عرض الفريق' }}
               </a>
-              
+              @if(!auth()->user()->hasRole('Admin'))
               @php
                 // Simulate dynamic action logic as if from DB/user state
                 $isFull = count($team->members) >= $team->max_members;
@@ -141,19 +142,16 @@
               @endphp
               {{-- {{ var_dump($team->your_team) }} --}}
               @if($isYourTeam)
-              <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
+                <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
                     {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
                 </a>
-                
               @elseif($team->request_sent == true)
                  <button class="btn btn-outline-secondary btn-sm" disabled>
-                {{ $l == 'en' ? 'Request Sent' : 'تم إرسال الطلب' }}
+                  {{ $l == 'en' ? 'Request Sent' : 'تم إرسال الطلب' }}
                 </button>
               @elseif($team->request_sent == false)
               @if($isExistingTeam == false)
-              
                 <button onclick="joinTeam('{{ $team->id }}','{{ $team->name }}')" class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>
-             
               @endif
               @elseif($isFull)
                 <button class="btn btn-secondary btn-sm" disabled>{{ $l == 'en' ? 'Full' : 'ممتلئ' }}</button>
@@ -163,8 +161,7 @@
                 <input type="hidden" name="id" value="{{ $team->id }}">
                 <button type="submit" class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>
               </form>
-              
-             
+              @endif
               @endif
             </div>
           </div>
