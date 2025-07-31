@@ -130,7 +130,7 @@
               <a href="/dashboard/hackathon/team/{{ $team->id }}" class="btn btn-outline-primary btn-sm">
                 {{ $l == 'en' ? 'View Team' : 'عرض الفريق' }}
               </a>
-              @if(!auth()->user()->hasRole('Admin'))
+              @if(!auth()->user()->hasAnyRole('Admin|organizationManager'))
               @php
                 // Simulate dynamic action logic as if from DB/user state
                 $isFull = count($team->members) >= $team->max_members;
