@@ -15,7 +15,7 @@
     $tabsData[] = ['title' => $page->code, 'icon' => 'bi-list', 'label' => $page->title, 'type' => 'dynamic'];
   }
 
-    if($currentHackathon['cycle_id'] == $user->company->cycle){
+    if($currentHackathon['cycle_id'] == $user->company?->cycle){
       $tabsDatastatic =  [
           // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
           // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
