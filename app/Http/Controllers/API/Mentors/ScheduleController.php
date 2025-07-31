@@ -160,7 +160,7 @@ class ScheduleController extends Controller
 
         if (!empty($mergedSlots)) {
             $slots[] = [
-                'date' => $dateStr,
+                'day' => ucfirst($dayName),
                 'slots' => $mergedSlots,
             ];
         }
