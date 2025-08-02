@@ -151,9 +151,10 @@ class HackathonController extends Controller
         if($team_Formation_raw->isEmpty()){
             return redirect()->back()->with('error', 'Team Formation not found');
         }
-        $step = Step::where('cycle_id', $id)
+        $step = Step::whereIn('cycle_id', $team_Formation_raw->pluck('tf_cycle_id')->toArray())
             ->where('stype', '6')
             ->first();
+         
             $count_team = $step ? $step->count_team_number : 0;
        
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
@@ -509,7 +510,8 @@ class HackathonController extends Controller
         });
 
         $step = Step::where('cycle_id', $id)->get();
-        $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
+        $count_team = $step ? $step->where('stype', '6')->first()?->count_team_number : 0;
+       
         $companyStep = null;
         if( Auth::user()->company?->step != null ) { $companyStep = Step::where('id', Auth::user()->company->step)->first(); }
 
@@ -1182,6 +1184,13 @@ class HackathonController extends Controller
         if(!$teams){
             return redirect()->back()->with('error', 'Team not found.');
         }
+        $teamMember = Team_member::where('team_formation_id', $teams->id)->get();
+        $maxMembers = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first()->count_team_number;
+
+        if (count($teamMember) >= $maxMembers) {
+            return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+        }
+    
                 $teamMember = new Team_member;
                 $teamMember->acceptInvition = 'join';
                 $teamMember->Email = $user->email;

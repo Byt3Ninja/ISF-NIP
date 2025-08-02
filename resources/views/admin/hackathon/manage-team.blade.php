@@ -131,22 +131,26 @@
             @endforeach
 
           </ul>
-          
-          @if($leaderOrnot->count() > 0)
-          <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
-          <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
-            @csrf
-            <div class="col-auto flex-grow-1">
-              <input type="email" name="memberEmail" class="form-control" id="memberEmail"
-                placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
-            </div>
-            <div class="col-auto">
-              <button type="submit" class="btn btn-success">
-                <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
-              </button>
-            </div>
-          </form>
-          @endif
+          {{-- {{ dd($members, $maxMembers) }} --}}
+            @if($leaderOrnot->count() > 0)
+              @if($members <= $maxMembers)
+              <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
+              <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
+                @csrf
+                <div class="col-auto flex-grow-1">
+                  <input type="email" name="memberEmail" class="form-control" id="memberEmail"
+                    placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
+                </div>
+                <div class="col-auto">
+                  <button type="submit" class="btn btn-success">
+                    <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
+                  </button>
+                </div>
+              </form>
+              @else
+              <div class="alert alert-info">{{ $l == 'en' ? 'The team is full.' : 'الفريق مكتمل.' }}</div>
+              @endif
+            @endif
           <hr>
           @if($leaderOrnot->count() > 0)
             @php
