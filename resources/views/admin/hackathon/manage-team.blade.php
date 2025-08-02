@@ -53,14 +53,19 @@
           @php
           $maxMembers = $count_team;
           $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
+         
+          $T=0;
+          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+          
           @endphp
+          {{-- {{ dd($team_Formation_raw) }} --}}
           <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span
               id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
           <ul class="list-group mb-3" id="team-members-list">
             @php
             $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
             @endphp
-            
+            {{-- {{ dd($team_leader, $team_members) }} --}}
             @if($team_leader)
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
@@ -68,19 +73,22 @@
                   <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
-                <strong>{{ $l == 'en' ? 'You ('.$team_leader->user_name_en .')' : 'انت ('.$team_leader->user_name_ar
-                  .')' }} </strong>
+               <strong>
+                    @if($leaderOrnot)
+                        {{ $l == 'en' 
+                            ? "Leader ({$team_leader->user_name_en})" 
+                            : "قائد ({$team_leader->user_name_ar})" }}
+                    @else
+                        {{ $l == 'en' ? 'You' : 'انت' }}
+                    @endif
+                </strong>
               </div>
               <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
             </li>
             @endif
-@php
-$T=0;
-
-          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
-          @endphp
+          
             @foreach ($team_members as $member)
-            {{ $T++ }}
+          @php $T++ @endphp
             <li id="Member{{ $member->tm_id }}"
               class="list-group-item d-flex justify-content-between align-items-center">
               <div>
@@ -88,7 +96,7 @@ $T=0;
                   <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
-                {{ $l == 'en' ?  $member->tm_name .' (Team Member '.$T.')' : $member->tm_name . '(عضو الفريق '.$T.' )' }}
+                {{ $l == 'en' ?  $member->tm_name .' ( Team Member '.$T.')' : $member->tm_name . '( عضو الفريق '.$T.' )' }}
               </div>
               @if($leaderOrnot->count() > 0)
               <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
