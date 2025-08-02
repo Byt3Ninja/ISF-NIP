@@ -141,9 +141,9 @@ class HackathonController extends Controller
         s.stype as 's_stype'
         FROM 
         team_formations as tf
-        LEFT JOIN users as u ON u.id = tf.user_id
-        LEFT JOIN companies as c ON c.id = u.company_id
         LEFT JOIN team_members as tm ON tm.team_formation_id = tf.id
+        LEFT JOIN users as u ON u.id = tm.user_id
+        LEFT JOIN companies as c ON c.id = u.company_id
         LEFT JOIN steps as s ON s.id = tf.step_id
         LEFT JOIN cycles as cy ON cy.id = tf.cycle_id
         WHERE tm.team_formation_id = ? ";
@@ -443,7 +443,7 @@ class HackathonController extends Controller
             $team->photo = $first->tf_img_team ?? null;
             $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
             $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
-            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join', 'accepted'])->first()? true : false; //is_user_requested
+            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', 'join')->first()? true : false; //is_user_requested
             $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
             $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
             $team->status = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? 'Accepted' : 'join';
