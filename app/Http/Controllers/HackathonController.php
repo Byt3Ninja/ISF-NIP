@@ -193,7 +193,7 @@ class HackathonController extends Controller
         return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $user = Auth::user();
         $l = app()->getLocale();
@@ -355,19 +355,23 @@ class HackathonController extends Controller
                 FD.deleted_at IS NULL
                 AND CYC.id = ?
         ";
-            
-        $params = [];
-        if( $user->organization_id != null )
-        {
-            $forms .= " AND CYC.organization_id = ? ";
-            $forms = DB::select($forms, [$id, $user->organization_id]);
-        }
-        else
-        {
-            $forms = DB::select($forms, [$id]);
-        }
-        $forms = collect($forms);
+            $params = [$id];
 
+            // خطوة آمنة لـ step_id
+            if ($request->step_id !== null) {
+                $forms .= " AND C.step = ? ";
+                $params[] = intval($request->step_id);
+            }
+
+            // فلترة حسب organization إذا موجودة
+            if (!empty($user->organization_id)) {
+                $forms .= " AND CYC.organization_id = ? ";
+                $params[] = $user->organization_id;
+            }
+
+            $forms = DB::select($forms, $params);
+            $forms = collect($forms);
+            
         $C = 1;
         // نبدأ بتجميع كل الأسئلة حسب step_id
         $grouped = $forms->groupBy('FD_user_id');
@@ -779,7 +783,8 @@ class HackathonController extends Controller
             'judges_users',
             'nextSessions',
             'sessions',
-            'cType'
+            'cType',
+            'steps'
         ));
     }
 
