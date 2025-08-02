@@ -2211,4 +2211,5 @@ return [
 	'remove_criterion' => 'Remove Criterion',
 	'add_theme_placeholder' => 'Add a theme...',
 	'Project idea updated successfully.' => 'Project idea updated successfully.',
+	'Team_is_full.' => 'Team is full.',
 ];
