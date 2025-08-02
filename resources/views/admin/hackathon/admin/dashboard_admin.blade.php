@@ -100,8 +100,8 @@
       <div class="card stat-card border-primary shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-calendar3-event display-4 text-primary mb-2"></i>
-          <h5 class="card-title">{{ __('admin.active_hackathons') }}</h5>
-          <p class="card-text display-4">3</p>
+          <h5 class="card-title">{{ __('admin.Teams') }}</h5>
+          <p class="card-text display-4">{{ $data['count_teams'] }}</p>
         </div>
       </div>
     </div>
@@ -109,8 +109,8 @@
       <div class="card stat-card border-success shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-person-check-fill display-4 text-success mb-2"></i>
-          <h5 class="card-title">{{ __('admin.total_registrants') }}</h5>
-          <p class="card-text display-4">1,250</p>
+          <h5 class="card-title">{{ __('admin.Projects') }}</h5>
+          <p class="card-text display-4">{{ $data['count_projects'] }}</p>
         </div>
       </div>
     </div>
@@ -118,8 +118,8 @@
       <div class="card stat-card border-info shadow-sm h-100">
         <div class="card-body">
           <i class="bi bi-people-fill display-4 text-info mb-2"></i>
-          <h5 class="card-title">{{ __('admin.teams_formed') }}</h5>
-          <p class="card-text display-4">280</p>
+          <h5 class="card-title">{{ __('admin.Registered') }}</h5>
+          <p class="card-text display-4">{{ $data['count_members'] }}</p>
         </div>
       </div>
     </div>
@@ -162,7 +162,7 @@
   </div>
 
   <!-- Manage Hackathons Table -->
-  <div class="card shadow-sm mb-4">
+  {{-- <div class="card shadow-sm mb-4">
     <div class="card-header">
       <h4 class="mb-0"><i class="bi bi-list-task me-2"></i> {{ __('admin.manage_hackathons') }}</h4>
     </div>
@@ -207,7 +207,7 @@
         </table>
       </div>
     </div>
-  </div>
+  </div> --}}
 
   <!-- Manage Teams Table -->
   <div class="card shadow-sm mb-4" id="manage-teams-section">
@@ -215,7 +215,7 @@
       <h4 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i> {{ __('admin.manage_participating_teams') }}</h4>
     </div>
     <div class="card-body">
-      <div class="row mb-3">
+      {{-- <div class="row mb-3">
         <div class="col-md-4">
           <select class="form-select" id="filterTeamsByHackathon">
             <option selected value="">{{ __('admin.filter_by_hackathon') }}</option>
@@ -226,13 +226,13 @@
         <div class="col-md-4">
           <input type="text" class="form-control" placeholder="{{ __('admin.search_for_team') }}">
         </div>
-      </div>
+      </div> --}}
+
       <div class="table-responsive">
         <table class="table table-hover align-middle">
           <thead>
             <tr>
               <th>{{ __('admin.team_name') }}</th>
-              <th>{{ __('admin.hackathon') }}</th>
               <th>{{ __('admin.team_leader') }}</th>
               <th>{{ __('admin.number_of_members') }}</th>
               <th>{{ __('admin.creation_date') }}</th>
@@ -241,16 +241,16 @@
           </thead>
           <tbody>
             <!-- This is example data, should be populated from a loop in a real application -->
-            @foreach ($teams as $team)
+            @foreach ($data['all_teams'] as $team)
             <tr>
-              <td>{{ $team->tf_name }}</td>
-              <td>{{ $team->tf_description }}</td>
-              <td> {{ $team->user_name_en }} ( {{ $team->u_email }} )</td>
-              <td>4/5</td>
-              <td>05 مارس 2024</td>
+              <td>{{ $team->name }}</td>
+              <td> {{ $team->user_name }} ( {{ $team->email }} )</td>
+              <td>{{ $team->count_members }} / {{ $team->max_count_members }}</td>
+              <td>{{ $team->created_at }}</td>
               <td>
                 <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
-                  data-team-id="t001"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details') }}</button>
+                  data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details') }}</button>
+                
                 <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
                   __('admin.message') }}</button>
               </td>
@@ -259,6 +259,7 @@
           </tbody>
         </table>
       </div>
+
     </div>
   </div>
 
@@ -467,6 +468,19 @@
     </div>
   </div>
 </div>
+@php
+    
+    $teamsJson = $data['all_teams']->map(function($team) {
+        return [
+            'id' => $team->id,
+            'name' => $team->name,
+            'hackathon' => $team->name, 
+            'leader' => "{$team->name} ({$team->email})",
+            'members' => collect($team->members)->map(fn($m) => $m->name)->all(),
+            'projectIdea' => $team->project_name_en, 
+        ];
+    })->keyBy('id')->toJson(JSON_UNESCAPED_UNICODE);
+@endphp
 @stop
 
 @section('scripts')
@@ -474,6 +488,10 @@
 @stop
 
 @section('pagescripts')
+<script>
+   
+    const teamsData = {!! $teamsJson !!}; 
+</script>
 <script>
   const mockHackathonDb = {
         "1": {
@@ -733,28 +751,27 @@
     }
 
     const teamDetailsModalEl = document.getElementById('teamDetailsModal');
-    if(teamDetailsModalEl){
-        teamDetailsModalEl.addEventListener('show.bs.modal', function(event){
+    if (teamDetailsModalEl) {
+        teamDetailsModalEl.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
             const teamId = button.getAttribute('data-team-id');
-            const teamsMockData = {
-                "t001": { name: "فريق الأبطال", hackathon: "هاكثون مستقبل الذكاء الاصطناعي", leader: "أحمد محمد (ahmad@example.com)", members: ["أحمد محمد", "علي حسن", "فاطمة خالد", "نور ياسر"], projectIdea: "نظام ذكي لتحليل بيانات السوق."},
-                "t002": { name: "نجوم البرمجة", hackathon: "هاكثون مستقبل الذكاء الاصطناعي", leader: "سارة علي (sara@example.com)", members: ["سارة علي", "خالد عبدالله", "ريم فهد", "يوسف إبراهيم", "هند ماجد"], projectIdea: "تطبيق لتتبع اللياقة البدنية."}
-            };
-            const teamData = teamsMockData[teamId];
-            if(teamData){
+            const teamData = teamsData[teamId];
+            if (teamData) {
                 document.getElementById('modal-team-name-detail').textContent = teamData.name;
                 document.getElementById('modal-team-hackathon').textContent = teamData.hackathon;
                 document.getElementById('modal-team-leader').textContent = teamData.leader;
                 const membersList = document.getElementById('modal-team-members-list');
                 membersList.innerHTML = '';
-                teamData.members.forEach(member => {
+                (teamData.members || []).forEach(member => {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
                     li.textContent = member;
                     membersList.appendChild(li);
                 });
                 document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "لم يتم تحديد فكرة بعد.";
+            } else {
+                // حال وجود خطأ في ID
+                console.warn('لا توجد بيانات للفريق بالمعرّف:', teamId);
             }
         });
     }

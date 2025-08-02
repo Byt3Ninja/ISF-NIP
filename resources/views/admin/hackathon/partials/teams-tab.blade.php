@@ -130,7 +130,7 @@
               <a href="/dashboard/hackathon/team/{{ $team->id }}" class="btn btn-outline-primary btn-sm">
                 {{ $l == 'en' ? 'View Team' : 'عرض الفريق' }}
               </a>
-              @if(!auth()->user()->hasRole('Admin'))
+              @if(!auth()->user()->hasAnyRole('Admin|organizationManager'))
               @php
                 // Simulate dynamic action logic as if from DB/user state
                 $isFull = count($team->members) >= $team->max_members;
@@ -140,7 +140,7 @@
                 
 
               @endphp
-              {{-- {{ var_dump($team->your_team) }} --}}
+              {{-- {{ var_dump($team->already_joined) }} --}}
               @if($isYourTeam)
                 <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
                     {{ $l == 'en' ? 'Manage My Team' : 'إدارة فريقي' }}
@@ -149,6 +149,10 @@
                  <button class="btn btn-outline-secondary btn-sm" disabled>
                   {{ $l == 'en' ? 'Request Sent' : 'تم إرسال الطلب' }}
                 </button>
+              @elseif($team->already_joined == true)
+                 <a href="/dashboard/hackathon/{{ $team->id }}/manage" class="btn btn-outline-success " >
+                  {{ $l == 'en' ? 'View My Team' : 'مشاهدة فريقي' }}
+                </a>
               @elseif($team->request_sent == false)
               @if($isExistingTeam == false)
                 <button onclick="joinTeam('{{ $team->id }}','{{ $team->name }}')" class="btn btn-success btn-sm">{{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}</button>

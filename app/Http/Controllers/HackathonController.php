@@ -141,9 +141,9 @@ class HackathonController extends Controller
         s.stype as 's_stype'
         FROM 
         team_formations as tf
-        LEFT JOIN users as u ON u.id = tf.user_id
-        LEFT JOIN companies as c ON c.id = u.company_id
         LEFT JOIN team_members as tm ON tm.team_formation_id = tf.id
+        LEFT JOIN users as u ON u.id = tm.user_id
+        LEFT JOIN companies as c ON c.id = u.company_id
         LEFT JOIN steps as s ON s.id = tf.step_id
         LEFT JOIN cycles as cy ON cy.id = tf.cycle_id
         WHERE tm.team_formation_id = ? ";
@@ -151,9 +151,10 @@ class HackathonController extends Controller
         if($team_Formation_raw->isEmpty()){
             return redirect()->back()->with('error', 'Team Formation not found');
         }
-        $step = Step::where('cycle_id', $id)
+        $step = Step::whereIn('cycle_id', $team_Formation_raw->pluck('tf_cycle_id')->toArray())
             ->where('stype', '6')
             ->first();
+         
             $count_team = $step ? $step->count_team_number : 0;
        
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
@@ -192,7 +193,7 @@ class HackathonController extends Controller
         return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $user = Auth::user();
         $l = app()->getLocale();
@@ -354,19 +355,23 @@ class HackathonController extends Controller
                 FD.deleted_at IS NULL
                 AND CYC.id = ?
         ";
-            
-        $params = [];
-        if( $user->organization_id != null )
-        {
-            $forms .= " AND CYC.organization_id = ? ";
-            $forms = DB::select($forms, [$id, $user->organization_id]);
-        }
-        else
-        {
-            $forms = DB::select($forms, [$id]);
-        }
-        $forms = collect($forms);
+            $params = [$id];
 
+            // خطوة آمنة لـ step_id
+            if ($request->step_id !== null) {
+                $forms .= " AND C.step = ? ";
+                $params[] = intval($request->step_id);
+            }
+
+            // فلترة حسب organization إذا موجودة
+            if (!empty($user->organization_id)) {
+                $forms .= " AND CYC.organization_id = ? ";
+                $params[] = $user->organization_id;
+            }
+
+            $forms = DB::select($forms, $params);
+            $forms = collect($forms);
+            
         $C = 1;
         // نبدأ بتجميع كل الأسئلة حسب step_id
         $grouped = $forms->groupBy('FD_user_id');
@@ -443,7 +448,7 @@ class HackathonController extends Controller
             $team->photo = $first->tf_img_team ?? null;
             $team->max_members = $step->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
             $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
-            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join', 'accepted'])->first()? true : false; //is_user_requested
+            $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', 'join')->first()? true : false; //is_user_requested
             $team->already_joined = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? true : false; //is_user_member
             $team->is_full = $group->where('tm_acceptInvition', 'accepted')->count() >= $team->max_members; //members_count
             $team->status = $group->where('tm_user_id', $user->id)->where('tm_acceptInvition', 'accepted')->first() ? 'Accepted' : 'join';
@@ -509,7 +514,8 @@ class HackathonController extends Controller
         });
 
         $step = Step::where('cycle_id', $id)->get();
-        $count_team = $step ? $step?->where('stype', '6')->first()?->count_team_number : 0;
+        $count_team = $step ? $step->where('stype', '6')->first()?->count_team_number : 0;
+       
         $companyStep = null;
         if( Auth::user()->company?->step != null ) { $companyStep = Step::where('id', Auth::user()->company->step)->first(); }
 
@@ -777,7 +783,8 @@ class HackathonController extends Controller
             'judges_users',
             'nextSessions',
             'sessions',
-            'cType'
+            'cType',
+            'steps'
         ));
     }
 
@@ -1182,6 +1189,13 @@ class HackathonController extends Controller
         if(!$teams){
             return redirect()->back()->with('error', 'Team not found.');
         }
+        $teamMember = Team_member::where('team_formation_id', $teams->id)->get();
+        $maxMembers = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first()->count_team_number;
+
+        if (count($teamMember) >= $maxMembers) {
+            return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+        }
+    
                 $teamMember = new Team_member;
                 $teamMember->acceptInvition = 'join';
                 $teamMember->Email = $user->email;
@@ -1424,6 +1438,7 @@ class HackathonController extends Controller
 
     public function viewAdminHackaton($id)
     {
+        $l = app()->getLocale();
         $teams_q = "SELECT 
                 tf.id as tf_id,
                 tf.name as tf_name,
@@ -1432,6 +1447,12 @@ class HackathonController extends Controller
                 tf.step_id as tf_step_id,
                 tf.img_team as tf_img_team,
                 tf.user_id as tf_user_id,
+                tf.project_name_ar as tf_projectName_ar,
+                tf.project_name_en as tf_projectName_en,
+                tf.project_description_ar as tf_projectDescription_ar,
+                tf.project_description_en as tf_projectDescription_en,
+                tf.project_status as tf_projectStatus,
+                tf.created_at as tf_created_at,
                 tm.id as tm_id,
                 tm.user_id as tm_user_id,
                 tm.acceptInvition as tm_acceptInvition,
@@ -1452,15 +1473,57 @@ class HackathonController extends Controller
             LEFT JOIN
                 team_formations as tf ON tm.team_formation_id = tf.id
             LEFT JOIN
-                users as u ON tf.user_id = u.id
+                users as u ON tm.user_id = u.id
             WHERE
                 tf.cycle_id = ?
         ";
 
         $teams = collect(DB::select($teams_q, [$id]));
-        $step_q = "SELECT * FROM steps WHERE id = ? AND cycle_id = ?";
-        $step = collect(DB::select($step_q, [$id, $id]));
+        $step_q = "SELECT * FROM steps WHERE cycle_id = ?";
+        $step = collect(DB::select($step_q, [$id]));
 
+        $data = [];
+       
+        $data['count_teams'] = $teams->where('tm_isTeamLeader', 1)->count();
+        $data['count_projects'] = $teams->whereNotNull('tf_projectName_ar')->count();
+        $data['count_members'] = $teams->where('tm_acceptInvition', 'accepted')->count();
+        $data['all_teams'] = $teams->filter(fn($member) => $member->tm_isTeamLeader == 1)
+                                    ->map(function ($leader) use ($teams, $l, $step) {
+                                        $teamMembers = $teams->where('tf_id', $leader->tf_id);
+                                        $team = new stdClass;
+                                        $team->id = $leader->tf_id;
+                                        $team->name = $leader->tf_name;
+                                        $team->email = $leader->u_email;
+                                        $team->user_name = $leader->{'user_name_'.$l};
+                                        $team->desc = $leader->tf_description;
+                                        $team->cycle_id = $leader->tf_cycle_id;
+                                        $team->step_id = $leader->tf_step_id;
+                                        $team->photo = $leader->tf_img_team ?? null;
+                                        $team->count_members = $teamMembers->where('tm_acceptInvition', 'accepted')->count();
+                                        $team->created_at = $leader->tf_created_at;
+                                        $team->max_count_members = $step->where('stype', 6)->first()->count_team_number;
+                                        $team->project_name_en = $leader->tf_projectName_en;
+                                        $team->project_name_ar = $leader->tf_projectName_ar;
+                                        $team->project_description_en = $leader->tf_projectDescription_en;
+                                        $team->project_description_ar = $leader->tf_projectDescription_ar;
+                                        $team->project_status = $leader->tf_projectStatus;
+
+                                        $team->members = $teamMembers->map(function ($member) use ($l) {
+                                            $user = new stdClass;
+                                            $user->id = $member->u_id;
+                                            $user->name = $member->{'user_name_'.$l};
+                                            $user->email = $member->u_email;
+                                            $user->img_url = $member->u_img_url;
+                                            $user->is_leader = $member->tm_isTeamLeader;
+                                            $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
+                                            $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
+                                            $user->title = $member->u_title_en;
+                                            return $user;
+                                        })->values();
+                                        return $team;
+                                    })->unique('id')
+                                    ->values();
+                                    // dd($data['all_teams'][1]->members);
         // $teams = $teams->map(function ($team) {
         //    $first = $team->first();
         //     $team = new stdClass;
@@ -1475,7 +1538,7 @@ class HackathonController extends Controller
 
         // });
 
-        return view('admin.hackathon.admin.dashboard_admin', compact('teams'));
+        return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data'));
     }
     public function viewHackathonWinners($id)
     {

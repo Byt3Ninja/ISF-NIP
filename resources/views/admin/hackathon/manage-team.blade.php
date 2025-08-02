@@ -53,14 +53,19 @@
           @php
           $maxMembers = $count_team;
           $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
+         
+          $T=0;
+          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+          
           @endphp
+          {{-- {{ dd($team_Formation_raw) }} --}}
           <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span
               id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
           <ul class="list-group mb-3" id="team-members-list">
             @php
             $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
             @endphp
-            
+            {{-- {{ dd($team_leader, $team_members) }} --}}
             @if($team_leader)
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
@@ -68,19 +73,22 @@
                   <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
-                <strong>{{ $l == 'en' ? 'You ('.$team_leader->user_name_en .')' : 'انت ('.$team_leader->user_name_ar
-                  .')' }} </strong>
+               <strong>
+                    @if($leaderOrnot)
+                        {{ $l == 'en' 
+                            ? "Leader ({$team_leader->user_name_en})" 
+                            : "قائد ({$team_leader->user_name_ar})" }}
+                    @else
+                        {{ $l == 'en' ? 'You' : 'انت' }}
+                    @endif
+                </strong>
               </div>
               <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
             </li>
             @endif
-@php
-$T=0;
-
-          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
-          @endphp
+          
             @foreach ($team_members as $member)
-            {{ $T++ }}
+          @php $T++ @endphp
             <li id="Member{{ $member->tm_id }}"
               class="list-group-item d-flex justify-content-between align-items-center">
               <div>
@@ -88,7 +96,7 @@ $T=0;
                   <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
                     class="rounded-circle">
                 </div>
-                {{ $l == 'en' ?  $member->tm_name .' (Team Member '.$T.')' : $member->tm_name . '(عضو الفريق '.$T.' )' }}
+                {{ $l == 'en' ?  $member->tm_name .' ( Team Member '.$T.')' : $member->tm_name . '( عضو الفريق '.$T.' )' }}
               </div>
               @if($leaderOrnot->count() > 0)
               <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
@@ -123,68 +131,72 @@ $T=0;
             @endforeach
 
           </ul>
-          
-          @if($leaderOrnot->count() > 0)
-          <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
-          <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
-            @csrf
-            <div class="col-auto flex-grow-1">
-              <input type="email" name="memberEmail" class="form-control" id="memberEmail"
-                placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
-            </div>
-            <div class="col-auto">
-              <button type="submit" class="btn btn-success">
-                <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
-              </button>
-            </div>
-          </form>
-          @endif
+          {{-- {{ dd($members, $maxMembers) }} --}}
+            @if($leaderOrnot->count() > 0)
+              @if($members <= $maxMembers)
+              <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
+              <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
+                @csrf
+                <div class="col-auto flex-grow-1">
+                  <input type="email" name="memberEmail" class="form-control" id="memberEmail"
+                    placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
+                </div>
+                <div class="col-auto">
+                  <button type="submit" class="btn btn-success">
+                    <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
+                  </button>
+                </div>
+              </form>
+              @else
+              <div class="alert alert-info">{{ $l == 'en' ? 'The team is full.' : 'الفريق مكتمل.' }}</div>
+              @endif
+            @endif
           <hr>
+          @if($leaderOrnot->count() > 0)
+            @php
+            $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition',
+            'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
+            @endphp
 
-          @php
-          $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition',
-          'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
-          @endphp
+
+            <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:'
+              }}</h6>
+            <div id="join-requests-list">
+              @if($teamLeader->isEmpty())
+              <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.'
+                }}</div>
+              @else
+
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ $teamLeader->first()->tm_name }}</strong>
+
+                </div>
 
 
-          <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:'
-            }}</h6>
-          <div id="join-requests-list">
-            @if($teamLeader->isEmpty())
-            <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.'
-              }}</div>
-            @else
+                <button class="btn btn-outline-primary btn-sm"
+                  onclick="ApprovedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                  {{ $l == 'en' ? 'Approve' : ' موافقة ' }}
+                  <i class="bi bi-person-plus-fill ms-2"></i>
+                </button>
 
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>{{ $teamLeader->first()->tm_name }}</strong>
+                <button class="btn btn-outline-danger btn-sm"
+                  onclick="RejectedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                  {{ $l == 'en' ? 'Rejects' : ' رفض ' }}
+                  <i class="bi bi-person-plus-fill ms-2"></i>
+                </button>
+
+                {{-- <button class="btn btn-outline-primary btn-sm" disabled>
+                  {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                  <i class="bi bi-person-plus-fill ms-2"></i>
+                </button> --}}
+
 
               </div>
 
-
-              <button class="btn btn-outline-primary btn-sm"
-                onclick="ApprovedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
-                {{ $l == 'en' ? 'Approve' : ' موافقة ' }}
-                <i class="bi bi-person-plus-fill ms-2"></i>
-              </button>
-
-              <button class="btn btn-outline-danger btn-sm"
-                onclick="RejectedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
-                {{ $l == 'en' ? 'Rejects' : ' رفض ' }}
-                <i class="bi bi-person-plus-fill ms-2"></i>
-              </button>
-
-              {{-- <button class="btn btn-outline-primary btn-sm" disabled>
-                {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
-                <i class="bi bi-person-plus-fill ms-2"></i>
-              </button> --}}
-
-
+              @endif
             </div>
-
-            @endif
-          </div>
-
+          @endif
         </div>
         <div class="card-footer">
           <a href="/dashboard/hackathon/my-team" class="btn btn-info">
