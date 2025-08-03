@@ -2267,4 +2267,9 @@ return [
 	'add_theme_placeholder' => 'أضف محور...',
 	'Project idea updated successfully.' => 'تم تحديث فكرة المشروع بنجاح.',
 	'Team_is_full.' => 'الفريق مكتمل.',
+	'manage_Projects' => 'ادارة المشاريع',
+	'project_name' => 'اسم المشروع',
+	'project_description' => 'وصف المشروع',
+	'Progress' => 'التقدم',
+	
 ];
