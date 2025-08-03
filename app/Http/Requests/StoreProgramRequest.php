@@ -32,7 +32,7 @@ class StoreProgramRequest extends FormRequest
             'description' => 'required|string|max:200',
             'start' => 'required|date|before:end',
             'end' => 'required|date|after:start',
-            'type' => ['required', Rule::in(Cycle::programTypes())],
+            'type' => ['required', Rule::in(array_keys(Cycle::programTypes()))],
             'programGuidelineFile' => 'nullable|file|mimes:pdf|max:2048',
             'financialPolicyPdf' => 'nullable|file|mimes:pdf|max:2048',
             'legalPolicyPdf' => 'nullable|file|mimes:pdf|max:2048',
