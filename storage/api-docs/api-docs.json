@@ -1681,13 +1681,13 @@
                 ]
             }
         },
-        "/mentors/{mentor_id}/weekly-slots": {
+        "/api/mentors/{mentor_id}/weekly-slots": {
             "get": {
                 "tags": [
                     "Schedules"
                 ],
                 "summary": "Get weekly schedule of a mentor",
-                "operationId": "aa104dfe08f4989f53b8f55645dc6d2d",
+                "operationId": "88300bb094152b4d6da9f1a328243287",
                 "parameters": [
                     {
                         "name": "mentor_id",
@@ -3139,7 +3139,7 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "organization",
+                                    "organizationId",
                                     "type",
                                     "title",
                                     "start",
@@ -3308,7 +3308,7 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
-                                    "organization": {
+                                    "organizationId": {
                                         "type": "integer",
                                         "example": 1
                                     },
@@ -4846,6 +4846,19 @@
                         "type": "string",
                         "example": "Egypt"
                     },
+                    "organization": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 12
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Flat6Labs"
+                            }
+                        },
+                        "type": "object"
+                    },
                     "founders": {
                         "type": "array",
                         "items": {
@@ -5061,8 +5074,17 @@
                         "example": "incubation"
                     },
                     "organization": {
-                        "type": "string",
-                        "example": "Cairo Tech Hub"
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 3
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Cairo Tech Hub"
+                            }
+                        },
+                        "type": "object"
                     },
                     "imgUrl": {
                         "type": "string",

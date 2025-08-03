@@ -53,4 +53,6 @@ return [
 	'session_feedback_submitted' => 'تم تقديم تقييم الجلسة بنجاح',
 	'schedule_deleted' => 'تم حذف الجدول بنجاح',
 	'schedule_not_found' => 'الجدول غير موجود',
+	'date_range_limit' => 'يجب أن يكون تاريخ البداية قبل تاريخ النهاية وبحد أقصى 30 يومًا.',
+	'programs_not_found' => 'البرامج غير موجودة',
 ];

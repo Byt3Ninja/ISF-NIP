@@ -93,7 +93,11 @@
         @if( $tab['type'] == 'dynamic' )
           @php $get_page = $pages->where('code', $tab['target'])->first(); @endphp
           <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
-            {!! $get_page->content !!}
+            <div class="card">
+              <div class="card-body">
+                 {!! $get_page->content !!}
+              </div>
+            </div>
           </div>
         @else
           @php

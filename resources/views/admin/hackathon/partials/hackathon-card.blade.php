@@ -1,8 +1,9 @@
 <div class="card h-100">
   <div class="card-header p-0">
     @php($color = $hackathon['status'] == 'Upcoming' ? '696cff' : '28c76f')
+    {{-- {{ dd(asset($hackathon['image'])) }} --}}
     <img
-      src="{{ $hackathon['image'] ? $hackathon['image'] : 'https://placehold.co/600x250/' . $color . '/ffffff?text=' . urlencode($hackathon['title']) }}"
+      src="{{ $hackathon['image'] ? asset($hackathon['image']) : 'https://placehold.co/600x250/' . $color . '/ffffff?text=' . urlencode($hackathon['title']) }}"
       onerror="this.onerror=null;this.src='https://placehold.co/600x250/' + '{{ $color }}' + '/ffffff?text=' + '{{ $hackathon['title'] }}';"
       class="card-img-top" alt="{{ $hackathon['title'] }}" style="height: 200px; object-fit: cover;" />
     <div class="position-absolute top-0 end-0 m-3">

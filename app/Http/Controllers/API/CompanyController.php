@@ -24,6 +24,12 @@ use App\Http\Resources\CompanyProfileResource;
  *     @OA\Property(property="country", type="string", example="Egypt"),
  * 
  *     @OA\Property(
+ *         property="organization",
+ *         type="object",
+ *         @OA\Property(property="id", type="integer", example=12),
+ *         @OA\Property(property="name", type="string", example="Flat6Labs")
+ *     ),
+ *     @OA\Property(
  *         property="founders",
  *         type="array",
  *         @OA\Items(
@@ -146,7 +152,7 @@ class CompanyController extends Controller
     }
 
     $locale = app()->getLocale();
-    $query = Company::query()->with(['teamMembers', 'country', 'state', 'city']);
+    $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization']);
 
     if ($request->filled('sector')) {
         if (is_numeric($request->sector)) {
@@ -163,6 +169,16 @@ class CompanyController extends Controller
         $q->where("name_{$locale}", 'like', "%{$request->country}%");
     });
     }
+
+    if ($request->filled('organization')) {
+    $query->whereHas('cycleRelation.organization', function ($q) use ($request, $locale) {
+        if (is_numeric($request->organization)) {
+            $q->where('id', $request->organization);
+        } else {
+            $q->where("name_{$locale}", 'like', "%{$request->organization}%");
+        }
+    });
+}
 
     if ($request->filled('state')) {
             $query->whereHas('state', function ($q) use ($request, $locale) {
@@ -196,7 +212,13 @@ class CompanyController extends Controller
                 'total' => $companies->total(),
                 'page' => $companies->currentPage(),
                 'limit' => (int) $limit            
-                ]
+            ],
+            'links' => [
+            'first' => $companies->url(1),
+            'last' => $companies->url($companies->lastPage()),
+            'prev' => $companies->previousPageUrl(),
+            'next' => $companies->nextPageUrl(),
+        ],
         ]
     );
 }

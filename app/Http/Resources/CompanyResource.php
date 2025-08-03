@@ -57,7 +57,13 @@ class CompanyResource extends JsonResource
                 'youtube' => $this->youtube,
                 'instagram' => $this->instagram,
                 'tiktok' => $this->tiktok,
-            ]
+            ],
+            'organization' => $this->relationLoaded('cycleRelation') && $this->cycleRelation?->organization
+             ? [
+                'id' => $this->cycleRelation->organization->id,
+                'name' => $this->cycleRelation->organization->{"name_{$locale}"}
+               ]
+           : null,
         ];
     }
 }

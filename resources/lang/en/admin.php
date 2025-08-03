@@ -2212,4 +2212,8 @@ return [
 	'add_theme_placeholder' => 'Add a theme...',
 	'Project idea updated successfully.' => 'Project idea updated successfully.',
 	'Team_is_full.' => 'Team is full.',
+	'manage_Projects' => 'Manage Projects',
+	'project_name' => 'Project Name',
+	'project_description' => 'Project Description',
+	'Progress' => 'Progress',
 ];

@@ -115,6 +115,14 @@ if (!function_exists('FormatDate')) {
                         ->toArray();
                     $mentors = $mentors->whereIn('id', $mentorIds);
                 }
+                
+                if (!empty($request->cycleIdHackathon)) {
+                    $cycleId = $request->cycleIdHackathon;
+                    $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
+                        ->pluck('user_id')
+                        ->toArray();
+                    $mentors = $mentors->whereIn('id', $mentorIds);
+                }
 
                 $mentorsLists = $mentors->get();
              
@@ -145,6 +153,13 @@ if (!function_exists('FormatDate')) {
                             $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
                         });
                     }
+                }
+                if (!empty($request->cycleIdHackathon)) {
+                    $cycleId = $request->cycleIdHackathon;
+                    $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
+                        ->pluck('user_id')
+                        ->toArray();
+                    $mentors = $mentors->whereIn('id', $mentorIds);
                 }
                 $mentorsLists = $mentors->get();
                 // $mentors = User::role('mentor')->get();

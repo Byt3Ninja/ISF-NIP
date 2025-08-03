@@ -28,7 +28,12 @@ use App\Http\Requests\UpdateProgramRequest;
  *     @OA\Property(property="start", type="string", format="date", example="2025-08-01"),
  *     @OA\Property(property="end", type="string", format="date", example="2025-12-01"),
  *     @OA\Property(property="type", type="string", example="incubation"),
- *     @OA\Property(property="organization", type="string", example="Cairo Tech Hub"),
+ *     @OA\Property(
+ *         property="organization",
+ *         type="object",
+ *         @OA\Property(property="id", type="integer", example=3),
+ *         @OA\Property(property="name", type="string", example="Cairo Tech Hub")
+ *     ),
  *     @OA\Property(property="imgUrl", type="string", format="url", example="https://example.com/img.png"),
  *     @OA\Property(property="status", type="string", example="In Progress"),
  *     @OA\Property(property="progress", type="number", format="float", example=45.67),
@@ -70,7 +75,7 @@ class ProgramController extends Controller
  *         @OA\MediaType(
  *             mediaType="multipart/form-data",
  *             @OA\Schema(
- *                 required={"organization", "type", "title", "start", "end"},
+ *                 required={"organizationId", "type", "title", "start", "end"},
  *                 @OA\Property(property="organization", type="integer", example=1),
  *                 @OA\Property(property="type", type="string", example="incubation"),
  *                 @OA\Property(property="title", type="string", example="Startup Incubator 2025"),
@@ -126,7 +131,7 @@ class ProgramController extends Controller
        $validated = $request->validated();
        $response = DB::transaction(function () use ($request, $validated) {
             $cycle = new Cycle();
-            $cycle->organization_id = $validated['organization'];
+            $cycle->organization_id = $validated['organizationId'];
             $cycle->type = $validated['type'];
             $cycle->title = $validated['title'];
             $cycle->description = $validated['description'];
@@ -209,7 +214,7 @@ class ProgramController extends Controller
  *         @OA\MediaType(
  *             mediaType="multipart/form-data",
  *             @OA\Schema(
- *                 @OA\Property(property="organization", type="integer", example=1),
+ *                 @OA\Property(property="organizationId", type="integer", example=1),
  *                 @OA\Property(property="type", type="string", example="acceleration"),
  *                 @OA\Property(property="title", type="string", example="Startup Acceleration 2025"),
  *                 @OA\Property(property="description", type="string", example="Updated program description"),
@@ -268,8 +273,8 @@ class ProgramController extends Controller
 
     $cycle = Cycle::findOrFail($id);
 
-     if (isset($validated['organization'])) {
-        $cycle->organization_id = $validated['organization'];
+     if (isset($validated['organizationId'])) {
+        $cycle->organization_id = $validated['organizationId'];
     }
 
     if (isset($validated['title'])) {
@@ -459,13 +464,27 @@ public function index(Request $request)
         }
 
         $programs = $query->latest()->paginate($request->get('limit', 10));
+        // Check if there are no results
+        if ($programs->isEmpty()) {
+          return $this->notFound(__('api.programs_not_found'));
+        }
 
-        return $this->success(ProgramResource::collection($programs),[
+    return $this->success(
+    ProgramResource::collection($programs->items()),
+    [
+        'meta' => [
             'total' => $programs->total(),
             'page' => $programs->currentPage(),
             'limit' => $programs->perPage(),
-          ]
-       );
+        ],
+        'links' => [
+            'first' => $programs->url(1),
+            'last' => $programs->url($programs->lastPage()),
+            'prev' => $programs->previousPageUrl(),
+            'next' => $programs->nextPageUrl(),
+        ],
+    ]
+);
 }
 
 /**

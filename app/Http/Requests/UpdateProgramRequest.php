@@ -27,7 +27,7 @@ class UpdateProgramRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'organization' => 'nullable|exists:organizations,id',
+            'organizationId' => 'nullable|exists:organizations,id',
             'title' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:200',
             'start' => 'nullable|date|before:end',

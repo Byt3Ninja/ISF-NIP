@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 // use App\Hackathon;
 
+use Str;
 use App\Step;
 use App\User;
 use stdClass;
@@ -17,9 +18,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
-use Str;
 
 class HackathonController extends Controller
 {
@@ -229,6 +230,7 @@ class HackathonController extends Controller
                 c.start as 'c_start_date',
                 c.end as 'c_end_date',
                 c.type as 'c_type',
+                c.img_url as 'c_img_url',
                 c.created_at as 'c_created_at',
                 c.updated_at as 'c_updated_at',
                 o.id as 'o_id',
@@ -284,6 +286,7 @@ class HackathonController extends Controller
             $currentHackathon = [
                 'title' => $item->c_title,
                 'title_ar' => $item->c_title_ar ?? '',
+                'image' => $item->c_img_url,
                 'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
                 'date_ar' => $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.'.$end->format('m')) . ' ' . $end->format('Y'),
                 'location' => $item->o_name_en ?? 'Unknown',
@@ -672,96 +675,10 @@ class HackathonController extends Controller
             $step->fLink = $fLink;
             return $step;
         });
-        $nextSessions_q = "SELECT
-                mr.id,
-                mr.mentor_id,
-                mr.user_id,
-                mr.comment,
-                mr.approved,
-                mr.rating,
-                mr.join_url,
-                mr.zoom_date,
-                mr.period,
-                mr.rate_comment,
-                mr.done,
-                u.img_url AS `user_img_url`,
-                u.first_name_en AS `user_first_name_en`,
-                u.first_name_ar AS `user_first_name_ar`,
-                u.last_name_en AS `user_last_name_en`,
-                u.last_name_ar AS `user_last_name_ar`,
-                u.title_en AS `user_title_en`,
-                u.title_ar AS `user_title_ar`,
-                c.id AS `company_id`,
-                c.logo AS `company_logo`,
-                c.name_en AS `company_name_en`,
-                c.name_ar AS `company_name_ar`,
-                m.first_name_en AS `mentor_first_name_en`,
-                m.first_name_ar AS `mentor_first_name_ar`,
-                m.last_name_en AS `mentor_last_name_en`,
-                m.last_name_ar AS `mentor_last_name_ar`,
-                m.img_url AS `mentor_img_url`,
-                msr.rating AS `mentor_rating`
-            FROM
-                mentorship_requests mr
-            LEFT JOIN
-                users m ON m.id = mr.mentor_id
-            LEFT JOIN
-                users u ON u.id = mr.user_id
-            LEFT JOIN
-                companies c ON c.id = u.company_id
-            LEFT JOIN
-               mentorship_requests msr ON msr.mentor_id = m.id
-            WHERE
-                mr.user_id = $user->id
-                AND (
-                    mr.approved = 'Yes'
-                    OR mr.approved IS null
-                )
-                AND mr.zoom_date between '$start' AND '$end'
-            ORDER BY
-                mr.zoom_date ASC
-        ";
-        $nextSessions = collect(DB::select($nextSessions_q));
-        $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
-            $_session = $groupedSession->first();
-            $session = new stdClass;
-            $session->id = $_session->id;
-            $session->mentor_id = $_session->mentor_id;
-            $session->user_id = $_session->user_id;
-            $session->comment = $_session->comment;
-            $session->approved = $_session->approved;
-            $session->rating = $_session->rating;
-            $session->join_url = $_session->join_url;
-            $session->zoom_date = $_session->zoom_date;
-            $session->period = $_session->period;
-            $session->rate_comment = $_session->rate_comment;
-            $session->done = $_session->done;
 
-            $user = new stdClass;
-            $user->id = $_session->user_id;
-            $user->image_url = User::image_handler($_session->user_img_url);
-            $user->first_name = $_session->{'user_first_name_' . $l};
-            $user->last_name = $_session->{'user_last_name_' . $l};
-            $user->name = trim($user->first_name . ' ' . $user->last_name);
-            $user->title = $_session->{'user_title_' . $l};
-
-            $company = new stdClass;
-            $company->id = $_session->company_id;
-            $company->logo_url = Company::logo_handler($_session->company_logo);
-            $company->name = $_session->{'company_name_' . $l};
-            $user->company = $company;
-            $session->user = $user;
-
-            $mentor = new stdClass;
-            $mentor->id = $_session->mentor_id;
-            $mentor->first_name = $_session->{'mentor_first_name_' . $l};
-            $mentor->last_name = $_session->{'mentor_last_name_' . $l};
-            $mentor->name = trim($mentor->first_name . ' ' . $mentor->last_name);
-            $mentor->image_url = User::image_handler($_session->mentor_img_url);
-            $mentor->ratings = $groupedSession->sum('mentor_rating');
-            $session->mentor = $mentor;
-            return $session;
-        })->values();
+        $service = new \App\Services\NextSessionsService();
+            $nextSessions = $service->getUpcomingSessions((int)$days, $l, $user->id, $id);
+       
 
         $cType = 0;
         if( !empty( $stepData ) ) { $cType = $stepData->stype; }
@@ -1485,7 +1402,7 @@ class HackathonController extends Controller
         $data = [];
        
         $data['count_teams'] = $teams->where('tm_isTeamLeader', 1)->count();
-        $data['count_projects'] = $teams->whereNotNull('tf_projectName_ar')->count();
+        
         $data['count_members'] = $teams->where('tm_acceptInvition', 'accepted')->count();
         $data['all_teams'] = $teams->filter(fn($member) => $member->tm_isTeamLeader == 1)
                                     ->map(function ($leader) use ($teams, $l, $step) {
@@ -1523,22 +1440,84 @@ class HackathonController extends Controller
                                         return $team;
                                     })->unique('id')
                                     ->values();
-                                    // dd($data['all_teams'][1]->members);
-        // $teams = $teams->map(function ($team) {
-        //    $first = $team->first();
-        //     $team = new stdClass;
-        //     $team->id = $first->tf_id;
-        //     $team->name = $first->tf_name;
-        //     $team->desc = $first->tf_description;
-        //     $team->cycle_id = $first->tf_cycle_id;
-        //     $team->step_id = $first->tf_step_id;
-        //     $team->photo = $first->tf_img_team ?? null;
-        //     $team->count_members = $first->where('tm_acceptInvition', 'accepted')->count();
-        //     $team->created_at = $first->tf_created_at;
 
-        // });
+        $data['all_projects'] = $teams->whereNotNull('tf_projectName_en')
+                                    ->map(function ($project) use ($l) {
+                                        $team = new stdClass;
+                                        $team->id = $project->tf_id;
+                                        $team->project_name = $project->{'tf_projectName_'.$l};
+                                        $team->project_description = $project->{'tf_projectDescription_'.$l};
+                                        $team->project_status = $project->tf_projectStatus;
+                                        $team->created_at = $project->tf_created_at;
+                                        return $team;
+            })->values()->unique('id');
+            $data['count_projects'] = $data['all_projects']->count();
+            
+            $service = new \App\Services\NextSessionsService();
+            $days = request()->query('days', 14);
+            $l = app()->getLocale();
+            $nextSessions = $service->getUpcomingSessions((int)$days, $l, null, $id);
 
-        return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data'));
+            $data['CountNextSessions'] = $nextSessions->whereNull('approved')->count();
+
+        $cType = 0;
+        if( !empty( $stepData ) ) { $cType = $stepData->stype; }
+
+         // 2. نحدد آخر 7 شهور (من الشهر الحالي أو ممكن تعدل لو عايز فترة مختلفة)
+        $months = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $months->push(Carbon::now()->subMonths($i));
+        }
+
+        // 3. نجهز المصفوفات النهائية
+        $registrationMonths = [];
+        $registrationCounts = [];
+
+        foreach ($months as $dt) {
+            $monthLabel = strtolower($dt->format('F')); // 'january', 'february', ...
+            $start = $dt->copy()->startOfMonth();
+            $end = $dt->copy()->endOfMonth();
+
+            // نعدّ العناصر اللي tf_created_at داخل الشهر ده
+            $count = $teams->filter(function ($item) use ($start, $end) {
+                if (empty($item->tf_created_at)) {
+                    return false;
+                }
+                try {
+                    $created = Carbon::parse($item->tf_created_at);
+                } catch (\Exception $e) {
+                    return false;
+                }
+                return $created->between($start, $end);
+            })->count();
+
+            $registrationMonths[] = $monthLabel;
+            $registrationCounts[] = $count;
+        }
+        $data['registrationMonths'] = $registrationMonths;
+        $data['registrationCounts'] = $registrationCounts;
+        
+        $data['Count_per_status'] = $teams->groupBy('tf_projectStatus')->map(function ($item) {
+            return $item->count();
+        })->toArray();
+                $mapping = [
+                    0  => 'null',
+                    20 => __('admin.Idea + Team'),
+                    40 => __('admin.Research'),
+                    60 => __('admin.Design & Build'),
+                    80 => __('admin.Ready for Pitch'),
+                    100 => __('admin.Project Submitted'),
+                ];
+                $keys = array_keys($data['Count_per_status']);
+                $labels = array_map(function($k) use ($mapping) {
+                    return $mapping[$k] ?? $k;
+                }, $keys);
+                $values = array_values($data['Count_per_status']);
+        $data['submissionLabels'] = $labels;
+        $data['submissionCounts'] = $values;
+        
+
+        return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));
     }
     public function viewHackathonWinners($id)
     {
