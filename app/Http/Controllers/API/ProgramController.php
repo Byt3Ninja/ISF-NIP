@@ -469,12 +469,22 @@ public function index(Request $request)
           return $this->notFound(__('api.programs_not_found'));
         }
 
-        return $this->success(ProgramResource::collection($programs),[
+    return $this->success(
+    ProgramResource::collection($programs->items()),
+    [
+        'meta' => [
             'total' => $programs->total(),
             'page' => $programs->currentPage(),
             'limit' => $programs->perPage(),
-          ]
-       );
+        ],
+        'links' => [
+            'first' => $programs->url(1),
+            'last' => $programs->url($programs->lastPage()),
+            'prev' => $programs->previousPageUrl(),
+            'next' => $programs->nextPageUrl(),
+        ],
+    ]
+);
 }
 
 /**
