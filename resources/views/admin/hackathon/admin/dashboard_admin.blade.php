@@ -128,7 +128,7 @@
         <div class="card-body d-flex flex-column">
           <i class="bi bi-person-video3 display-4 text-secondary mb-2"></i>
           <h5 class="card-title">{{ __('admin.mentorship_management') }}</h5>
-          <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">5</span>
+          <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">{{ $data['CountNextSessions'] }}</span>
           </p>
           <div class="mt-auto">
             <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
@@ -265,13 +265,134 @@
 
   <div class="card shadow-sm mb-4" id="manage-users-section">
     <div class="card-header">
-      <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.manage_users') }}</h4>
+      <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.manage_Projects') }}</h4>
     </div>
     <div class="card-body">
-      <p class="text-muted">{{ __('admin.user_management_table_placeholder') }}</p>
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>{{ __('admin.project_name') }}</th>
+            <th>{{ __('admin.project_description') }}</th>
+            <th>{{ __('admin.Status') }}</th>
+            <th>{{ __('admin.Progress') }}</th>
+            <th>{{ __('admin.creation_date') }}</th>
+            {{-- <th>{{ __('admin.actions') }}</th> --}}
+          </tr>
+        </thead>
+        <tbody>
+          <!-- This is example data, should be populated from a loop in a real application -->
+          @foreach ($data['all_projects'] as $project)
+          <tr>
+            <td>{{ $project->project_name }}</td>
+            <td> {{ $project->project_description }}</td>
+            <td>
+              
+              @if($project->project_status == 20)
+            {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
+            @elseif($project->project_status == 40)
+            {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
+            @elseif($project->project_status == 60)
+            {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core
+            functionality.') }}
+            @elseif($project->project_status == 80)
+            {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the
+            presentation.') }}
+            @elseif($project->project_status == 100)
+            {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete documentation.
+            story.') }}
+            @endif
+          </td>
+            <td>
+              <div class="progress mb-2" style="height: 20px;">
+            <div class="progress-bar bg-success" role="progressbar"
+              style="width:{{ $project->project_status  }}%;"
+              aria-valuenow="{{ $project->project_status  }}" aria-valuemin="0"
+              aria-valuemax="100">{{ $project->project_status }}% {{ $l == 'en' ? 'Complete' :
+              'مكتمل' }}</div>
+          </div>
+        </td>
+            <td>{{ $project->created_at }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
+            data-bs-target="#editProjectIdeaModal{{ $project->id }}">
+            <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
+          </button>
+            </td>
+          </tr>
+          <!-- Edit Project Idea Modal -->
+<div class="modal fade" id="editProjectIdeaModal{{ $project->id }}" tabindex="-1" aria-labelledby="editProjectIdeaModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProjectIdeaModalLabel">{{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة
+          المشروع' }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
+          @csrf
+          <input type="hidden" name="team_formation_id" value="{{ $project->id }}">
+          <div class="mb-3">
+            <label for="Project_Name_en" class="form-label">
+              {{ __('admin.Project_Name') }}
+            </label>
+            <input type="text" class="form-control" name="Project_Name_en"
+              value="{{ $project->project_name }}" id="Project_Name_en" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="Project_Description_en" class="form-label">
+              {{ __('admin.Project_Description') }}
+            </label>
+            <textarea class="form-control" name="Project_Description_en" id="Project_Description_en"
+              rows="2">{{ $project->project_description }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</label>
+            <select class="form-select" id="Project_Status" name="Project_Status">
+              <option value="">{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
+              <option value="20" {{ $project->project_status == '20' ? 'selected' : '' }} >{{
+                __('admin.Idea + Team') }}</option>
+              <option value="40" {{ $project->project_status == '40' ? 'selected' : '' }} >{{
+                __('admin.Research') }}</option>
+              <option value="60" {{ $project->project_status == '60' ? 'selected' : '' }} >{{
+                __('admin.Design & Build') }}</option>
+              <option value="80" {{ $project->project_status == '80' ? 'selected' : '' }} >{{
+                __('admin.Ready for Pitch') }}</option>
+              <option value="100" {{ $project->project_status == '100' ? 'selected' : '' }} >{{
+                __('admin.Project Submitted') }}</option>
+            </select>
+          </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+        </button>
+        <button type="submit" class="btn btn-primary">
+          {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+        </button>
+      </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' : 'إلغاء'
+        }}</button>
+      <button type="button" class="btn btn-primary" onclick="saveProjectIdea()">{{ $l == 'en' ? 'Save Changes' : 'حفظ
+        التغييرات' }}</button>
     </div>
   </div>
 </div>
+          @endforeach
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
 
 
 <!-- Create/Edit Hackathon Modal -->
@@ -401,7 +522,13 @@
     </div>
   </div>
 </div>
+@php
 
+    $request = new \Illuminate\Http\Request([
+    'cycleIdHackathon' => $idParam
+]);
+    $mentorsLists = showMintors($request);
+@endphp
 <!-- Manage Mentors Modal -->
 <div class="modal fade" id="manageMentorsModal" tabindex="-1" aria-labelledby="manageMentorsModalLabel"
   aria-hidden="true">
@@ -412,9 +539,40 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-        <button class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-2"></i> {{
-          __('admin.add_new_mentor') }}</button>
+        <a href="/dashboard/mentorship/assign/{{ $idParam }}" class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-2"></i> {{
+          __('admin.Mentors') }}</a>
+          @if($mentorsLists->isNotEmpty())
+           @foreach ($mentorsLists as $key => $mentor)
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                  <div class="flex-shrink-0">
+                    
+                    <img src="{{ asset( $mentor->image_url ) }}" alt="Mentor Profile"
+                      class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h5 class="card-title mb-0">{{ $mentor->name }}</h5>
+                    <p class="card-text small text-muted mb-0">{{ $mentor->email }}</p>
+                  </div>
+                </div>
+              </div>
+              {{-- <div class="col-md-6">
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-primary me-2"><i class="bi bi-pencil-square me-1"></i> {{
+                    __('admin.edit') }}</button>
+                  <button class="btn btn-danger"><i class="bi bi-trash me-1"></i> {{ __('admin.delete') }}</button>
+                </div>
+              </div> --}}
+            </div>
+          </div>
+        </div>
+        @endforeach
+        @else
         <p>{{ __('admin.current_mentors_table_placeholder') }}</p>
+        @endif
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
@@ -434,6 +592,108 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
+        
+        
+    <div class="col-12">
+      <section>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="mt-10">
+              <div class="border-bottom pb-2 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class='ti ti-calendar-event me-2'></i>
+                    <h5 class="card-title mb-0">
+                      {{ __("dashboard.UpcomingMentorsSession") }}
+                      
+                    </h5>
+                  </div>
+                  <a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
+                    <i class="ti ti-eye me-2 ti-16px"></i>
+                    {{__('cycles.showAll')}}
+                  </a>
+                </div>
+              </div>
+              <div class="">
+                <div class="table-responsive">
+                  <table class="table mb-0 sessonsTable">
+                    <thead class="bg-label-light">
+                      <tr>
+                        <th>{{__('cycles.User/Title')}}</th>
+                        <th>{{__('cycles.Mentor')}}</th>
+                        @if ($_user->hasRole('Admin'))<th>{{__('cycles.Rate/Comment')}}</th>@endif
+                        <th>{{__('cycles.Date/Time')}}</th>
+                        <th>{{__('cycles.Approved')}}</th>
+                        <th>{{__('cycles.Done')}}</th>
+                        <th>{{__('cycles.Actions')}}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach($nextSessions as $session)
+                      <tr>
+                        <td>
+                          <div class="d-flex align-items-center gap-2">
+                            <a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
+                              <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
+                                height="40" width="40">
+                            </a>
+                            <a href="/dashboard/users/{{ $session->user_id }}/edit">
+                              <div class="media-body">
+                                <h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
+                                <span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
+                              </div>
+                            </a>
+                          </div>
+                        </td>
+                        <td>
+                          <div style="cursor: pointer;" class="d-flex align-items-center"
+                            onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
+                            <div class="avatar">
+                              <img class="img-fluid rounded-circle me-3"
+                                src="{{$session->mentor->image_url ?? '/icons/account.svg'}}" alt="image" height="20"
+                                width="20" />
+                            </div>
+                            <span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
+                          </div>
+                        </td>
+                        @if ($_user->hasRole('Admin'))
+                        <td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
+                              style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment
+                            :
+                            $session->comment !!} </small> </td>
+                        @endif
+                        <td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
+                        <td>
+                          <div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
+                              class="warning">'.__('Waiting').'</span>' !!} </div>
+                        </td>
+                        <td> {{ $session->done ?__('Yes') : __('No') }} </td>
+                        <td>
+                          <a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+                            <i class="ti ti-brand-zoom me-2"></i>
+                            {{ __('dashboard.Join now') }}
+                          </a>
+                          @if (!$session->approved)
+                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
+                                  <i class="ti ti-check"></i>
+                                </button>
+                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
+                                  <i class="ti ti-x"></i>
+                                </button>
+                              @endif
+                        </td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    
         <p>{{ __('admin.team_mentorship_requests_table_placeholder') }}</p>
       </div>
       <div class="modal-footer">
@@ -493,6 +753,34 @@
     const teamsData = {!! $teamsJson !!}; 
 </script>
 <script>
+  function approve(id, stat) {
+      if(stat == 'Yes'){
+      alert('{{ __('admin.Accepting_request') }}')
+      }else{
+        alert('{{ __('admin.Rejecting_request') }}')
+      }
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/mentors/modify",
+        data: {
+          "id": id,
+          "stat": stat,
+          'rtype': 6,
+        },
+        success: function(response) {
+          location.reload();
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
   const mockHackathonDb = {
         "1": {
             name: "هاكثون مستقبل الذكاء الاصطناعي",
