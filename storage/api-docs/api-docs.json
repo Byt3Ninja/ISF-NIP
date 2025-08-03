@@ -5074,8 +5074,17 @@
                         "example": "incubation"
                     },
                     "organization": {
-                        "type": "string",
-                        "example": "Cairo Tech Hub"
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 3
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Cairo Tech Hub"
+                            }
+                        },
+                        "type": "object"
                     },
                     "imgUrl": {
                         "type": "string",

@@ -28,7 +28,12 @@ use App\Http\Requests\UpdateProgramRequest;
  *     @OA\Property(property="start", type="string", format="date", example="2025-08-01"),
  *     @OA\Property(property="end", type="string", format="date", example="2025-12-01"),
  *     @OA\Property(property="type", type="string", example="incubation"),
- *     @OA\Property(property="organization", type="string", example="Cairo Tech Hub"),
+ *     @OA\Property(
+ *         property="organization",
+ *         type="object",
+ *         @OA\Property(property="id", type="integer", example=3),
+ *         @OA\Property(property="name", type="string", example="Cairo Tech Hub")
+ *     ),
  *     @OA\Property(property="imgUrl", type="string", format="url", example="https://example.com/img.png"),
  *     @OA\Property(property="status", type="string", example="In Progress"),
  *     @OA\Property(property="progress", type="number", format="float", example=45.67),
@@ -459,6 +464,10 @@ public function index(Request $request)
         }
 
         $programs = $query->latest()->paginate($request->get('limit', 10));
+        // Check if there are no results
+        if ($programs->isEmpty()) {
+          return $this->notFound(__('api.programs_not_found'));
+        }
 
         return $this->success(ProgramResource::collection($programs),[
             'total' => $programs->total(),
