@@ -81,12 +81,12 @@
 
 @php
   // Registration Chart Data
-  $registrationMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july'];
-  $registrationCounts = [65, 59, 80, 81, 156, 155, 30];
+  $registrationMonths = $data['registrationMonths'];
+  $registrationCounts = $data['registrationCounts'];
 
   // Projects By Theme Chart
-  $submissionLabels = ['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'];
-  $submissionCounts =  [120, 90, 75];
+  $submissionLabels = $data['submissionLabels']; //['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'];
+  $submissionCounts =  $data['submissionCounts']; //[120, 90, 75];
 
   // Program team status count
   $teamLabels = ['هاكثون AI', 'هاكثون الاستدامة'];
