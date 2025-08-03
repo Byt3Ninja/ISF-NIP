@@ -1463,6 +1463,60 @@ class HackathonController extends Controller
         $cType = 0;
         if( !empty( $stepData ) ) { $cType = $stepData->stype; }
 
+         // 2. نحدد آخر 7 شهور (من الشهر الحالي أو ممكن تعدل لو عايز فترة مختلفة)
+        $months = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $months->push(Carbon::now()->subMonths($i));
+        }
+
+        // 3. نجهز المصفوفات النهائية
+        $registrationMonths = [];
+        $registrationCounts = [];
+
+        foreach ($months as $dt) {
+            $monthLabel = strtolower($dt->format('F')); // 'january', 'february', ...
+            $start = $dt->copy()->startOfMonth();
+            $end = $dt->copy()->endOfMonth();
+
+            // نعدّ العناصر اللي tf_created_at داخل الشهر ده
+            $count = $teams->filter(function ($item) use ($start, $end) {
+                if (empty($item->tf_created_at)) {
+                    return false;
+                }
+                try {
+                    $created = Carbon::parse($item->tf_created_at);
+                } catch (\Exception $e) {
+                    return false;
+                }
+                return $created->between($start, $end);
+            })->count();
+
+            $registrationMonths[] = $monthLabel;
+            $registrationCounts[] = $count;
+        }
+        $data['registrationMonths'] = $registrationMonths;
+        $data['registrationCounts'] = $registrationCounts;
+        
+        $data['Count_per_status'] = $teams->groupBy('tf_projectStatus')->map(function ($item) {
+            return $item->count();
+        })->toArray();
+                $mapping = [
+                    0  => 'null',
+                    20 => __('admin.Idea + Team'),
+                    40 => __('admin.Research'),
+                    60 => __('admin.Design & Build'),
+                    80 => __('admin.Ready for Pitch'),
+                    100 => __('admin.Project Submitted'),
+                ];
+                $keys = array_keys($data['Count_per_status']);
+                $labels = array_map(function($k) use ($mapping) {
+                    return $mapping[$k] ?? $k;
+                }, $keys);
+                $values = array_values($data['Count_per_status']);
+        $data['submissionLabels'] = $labels;
+        $data['submissionCounts'] = $values;
+        
+
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));
     }
     public function viewHackathonWinners($id)
