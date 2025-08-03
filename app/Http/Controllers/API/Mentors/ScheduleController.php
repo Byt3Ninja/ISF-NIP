@@ -16,7 +16,7 @@ class ScheduleController extends Controller
     use ApiResponder;
     /**
  * @OA\Get(
- *     path="/mentors/{mentor_id}/weekly-slots",
+ *     path="/api/mentors/{mentor_id}/weekly-slots",
  *     summary="Get weekly schedule of a mentor",
  *     tags={"Schedules"},
  *     security={{"sanctum":{}}},
@@ -97,10 +97,9 @@ class ScheduleController extends Controller
         ->endOfDay();
 
     if ($endDate->diffInDays($startDate) > 30) {
-        return response()->json([
-            'message' => 'Validation error.',
-            'errors' => ['date_range' => ['Start date must be before end date and within 30 days.']]
-        ], 422);
+        return $this->unprocessable([
+            'date_range' => [__('api.date_range_limit')]
+        ]);
     }
 
     $availableSlots = DB::table('schedules')
@@ -147,6 +146,7 @@ class ScheduleController extends Controller
 
         $dayAvailable = $availableSlots->where('days', ucfirst($dayName))->map(function ($slot) use ($timezone, $dateStr) {
             return [
+                'id' => $slot->id,
                 'start' => Carbon::parse($dateStr . ' ' . $slot->tfrom, 'UTC')->setTimezone($timezone)->format('H:i:s'),
                 'end' => Carbon::parse($dateStr . ' ' . $slot->tto, 'UTC')->setTimezone($timezone)->format('H:i:s'),
                 'status' => 'available',
@@ -168,10 +168,10 @@ class ScheduleController extends Controller
         $current->addDay();
     }
 
-    return response()->json([
+     return $this->success([
         'mentorId' => (int) $mentor_id,
         'timezone' => $timezone,
-        'slots' => $slots
+        'slots' => $slots,
     ]);
 
  }

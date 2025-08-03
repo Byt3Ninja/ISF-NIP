@@ -293,6 +293,10 @@ class Company extends Model
     {
         return $this->belongsTo(Cycle::class, 'cycle', 'id');
     }
+     public function cycleRelation()
+{
+    return $this->belongsTo(Cycle::class, 'cycle');
+}
 
     public static function static_categories()
     {
