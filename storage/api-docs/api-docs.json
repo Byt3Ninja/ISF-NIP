@@ -3139,7 +3139,7 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "organization",
+                                    "organizationId",
                                     "type",
                                     "title",
                                     "start",
@@ -3308,7 +3308,7 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
-                                    "organization": {
+                                    "organizationId": {
                                         "type": "integer",
                                         "example": 1
                                     },

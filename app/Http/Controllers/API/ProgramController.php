@@ -75,7 +75,7 @@ class ProgramController extends Controller
  *         @OA\MediaType(
  *             mediaType="multipart/form-data",
  *             @OA\Schema(
- *                 required={"organization", "type", "title", "start", "end"},
+ *                 required={"organizationId", "type", "title", "start", "end"},
  *                 @OA\Property(property="organization", type="integer", example=1),
  *                 @OA\Property(property="type", type="string", example="incubation"),
  *                 @OA\Property(property="title", type="string", example="Startup Incubator 2025"),
@@ -131,7 +131,7 @@ class ProgramController extends Controller
        $validated = $request->validated();
        $response = DB::transaction(function () use ($request, $validated) {
             $cycle = new Cycle();
-            $cycle->organization_id = $validated['organization'];
+            $cycle->organization_id = $validated['organizationId'];
             $cycle->type = $validated['type'];
             $cycle->title = $validated['title'];
             $cycle->description = $validated['description'];
@@ -214,7 +214,7 @@ class ProgramController extends Controller
  *         @OA\MediaType(
  *             mediaType="multipart/form-data",
  *             @OA\Schema(
- *                 @OA\Property(property="organization", type="integer", example=1),
+ *                 @OA\Property(property="organizationId", type="integer", example=1),
  *                 @OA\Property(property="type", type="string", example="acceleration"),
  *                 @OA\Property(property="title", type="string", example="Startup Acceleration 2025"),
  *                 @OA\Property(property="description", type="string", example="Updated program description"),
@@ -273,8 +273,8 @@ class ProgramController extends Controller
 
     $cycle = Cycle::findOrFail($id);
 
-     if (isset($validated['organization'])) {
-        $cycle->organization_id = $validated['organization'];
+     if (isset($validated['organizationId'])) {
+        $cycle->organization_id = $validated['organizationId'];
     }
 
     if (isset($validated['title'])) {
