@@ -1,4 +1,4 @@
-<div class=" text-center">
+<div class="text-center hackathon-banner">
 <div class="banner-content">
   <div class="hackathon-status-badge">
     {{ $l == 'en' ? $currentHackathon['status'] : $currentHackathon['status_ar'] }}
