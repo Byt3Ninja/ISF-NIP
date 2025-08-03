@@ -79,6 +79,25 @@
 </style>
 @stop
 
+@php
+  // Registration Chart Data
+  $registrationMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july'];
+  $registrationCounts = [65, 59, 80, 81, 156, 155, 30];
+
+  // Projects By Theme Chart
+  $submissionLabels = ['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'];
+  $submissionCounts =  [120, 90, 75];
+
+  // Program team status count
+  $teamLabels = ['هاكثون AI', 'هاكثون الاستدامة'];
+  $completedTeamCount = [25, 18];
+  $uncompletedTeamCount = [5, 2];
+
+  // Program Engagement Chart
+  $engagementLabels = ['المسجلون', 'كونوا فرقاً', 'قدموا مشاريع', 'فائزون'];
+  $engagementCounts = [200, 150, 120, 5];
+@endphp
+
 @section('content')
 <div class="container mt-4">
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
@@ -1065,32 +1084,135 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const chartCanvases = ['registrationsChart', 'submissionsPerTrackChart', 'teamsStatusChart', 'hackathonEngagementChart'];
-        chartCanvases.forEach(canvasId => {
-            const ctx = document.getElementById(canvasId)?.getContext('2d');
-            if (ctx) {
-                if (canvasId === 'registrationsChart') {
-                     new Chart(ctx, {
-                        type: 'line', data: { labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'], datasets: [{ label: 'المسجلون الجدد شهرياً', data: [65, 59, 80, 81, 156, 155], borderColor: 'rgb(75, 192, 192)', tension: 0.1, fill: false }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'نمو التسجيلات' } } }
-                    });
-                }
-                 if (canvasId === 'submissionsPerTrackChart') {
-                     new Chart(ctx, {
-                        type: 'doughnut', data: { labels: ['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'], datasets: [{ data: [120, 90, 75], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'المشاريع حسب المحور' } } }
-                    });
-                }
-                if (canvasId === 'teamsStatusChart') {
-                    new Chart(ctx, {
-                        type: 'bar', data: { labels: ['هاكثون AI', 'هاكثون الاستدامة'], datasets: [{ label: 'فرق مكتملة', data: [25, 18], backgroundColor: 'rgba(75, 192, 192, 0.7)'},{ label: 'فرق غير مكتملة', data: [5, 7], backgroundColor: 'rgba(255, 159, 64, 0.7)'}] }, options: { responsive: true, maintainAspectRatio: false, scales: {x:{stacked:true}, y:{stacked:true}}, plugins: { title: { display: true, text: 'حالة تكوين الفرق' } } }
-                    });
-                }
-                if (canvasId === 'hackathonEngagementChart') {
-                    new Chart(ctx, {
-                        type: 'bar', data: { labels: ['المسجلون', 'كونوا فرقاً', 'قدموا مشاريع', 'فائزون'], datasets: [{ label: 'مراحل المشاركة', data: [200, 150, 120, 5], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'قمع المشاركة' } } }
-                    });
-                }
-            }
+      const chartCanvases = [
+        'registrationsChart',
+        'submissionsPerTrackChart',
+        'teamsStatusChart',
+        'hackathonEngagementChart',
+      ];
+
+      chartCanvases.forEach((canvasId) => {
+      const ctx = document.getElementById(canvasId)?.getContext('2d');
+      
+      if (ctx) {
+        if (canvasId === 'registrationsChart') {
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+          labels: @json($registrationMonths),
+          datasets: [
+            {
+            label: '{{ $l == 'ar' ? 'المسجلون الجدد شهرياً' : 'New Registrations Monthly' }}',
+            data: @json($registrationCounts),
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1,
+            fill: false,
+            },
+          ],
+          },
+          options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+            display: true,
+            text: '{{ $l == 'ar' ? 'نمو التسجيلات' : 'Registration Growth' }}'
+            },
+          },
+          },
         });
+        }
+        if (canvasId === 'submissionsPerTrackChart') {
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+          labels: @json($submissionLabels),
+          datasets: [
+            {
+            data: @json($submissionCounts),
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+            },
+          ],
+          },
+          options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+            display: true,
+            text: '{{ $l == 'ar' ? 'المشاريع حسب المحور' : 'Projects by Track' }}'
+            },
+          },
+          },
+        });
+        }
+        if (canvasId === 'teamsStatusChart') {
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+          labels: @json($teamLabels),
+          datasets: [
+            {
+            label: '{{ $l == 'ar' ? 'فرق مكتملة' : 'Completed Teams' }}',
+            data: @json($completedTeamCount),
+            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+            },
+            {
+            label: '{{ $l == 'ar' ? 'فرق غير مكتملة' : 'Incomplete Teams' }}',
+            data: @json($uncompletedTeamCount),
+            backgroundColor: 'rgba(255, 159, 64, 0.7)',
+            },
+          ],
+          },
+          options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true },
+          },
+          plugins: {
+            title: {
+            display: true,
+            text: '{{ $l == 'ar' ? 'حالة تكوين الفرق' : 'Team Formation Status' }}'
+            },
+          },
+          },
+        });
+        }
+        if (canvasId === 'hackathonEngagementChart') {
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+          labels: @json($engagementLabels),
+          datasets: [
+            {
+            label: '{{ $l == 'ar' ? 'مراحل المشاركة' : 'Participation Stages' }}',
+            data: @json($engagementCounts),
+            backgroundColor: [
+              '#FF6384',
+              '#36A2EB',
+              '#FFCE56',
+              '#4BC0C0',
+            ],
+            },
+          ],
+          },
+          options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+            display: true,
+            text: '{{ $l == 'ar' ? 'قمع المشاركة' : 'Participation Funnel' }}'
+            },
+          },
+          },
+        });
+        }
+      }
+      });
     });
 </script>
 @stop
