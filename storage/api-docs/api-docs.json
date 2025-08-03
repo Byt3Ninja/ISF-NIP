@@ -3139,7 +3139,7 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "organization",
+                                    "organizationId",
                                     "type",
                                     "title",
                                     "start",
@@ -3308,7 +3308,7 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
-                                    "organization": {
+                                    "organizationId": {
                                         "type": "integer",
                                         "example": 1
                                     },
@@ -5074,8 +5074,17 @@
                         "example": "incubation"
                     },
                     "organization": {
-                        "type": "string",
-                        "example": "Cairo Tech Hub"
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 3
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Cairo Tech Hub"
+                            }
+                        },
+                        "type": "object"
                     },
                     "imgUrl": {
                         "type": "string",

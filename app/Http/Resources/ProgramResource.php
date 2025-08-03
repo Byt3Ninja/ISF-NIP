@@ -45,7 +45,10 @@ class ProgramResource extends JsonResource
             'start' => optional($this->start)->format('Y-m-d'),
             'end' => optional($this->end)->format('Y-m-d'),
             'type' => $this->type,
-            'organization' => optional($this->organization)->localized_name,            
+            'organization' => $this->organization ? [
+                 'id' => $this->organization->id,
+                'name' => $this->organization->localized_name,
+            ] : null,          
             'imgUrl' => $this->img_url ?  Storage::disk('public_uploads')->url($this->img_url) : null,
             'status' => $this->getStatus(),
             'progress' => $this->getProgress(),
