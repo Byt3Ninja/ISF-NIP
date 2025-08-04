@@ -199,10 +199,10 @@
           @endif
         </div>
         <div class="card-footer">
-          <a href="/dashboard/hackathon/my-team" class="btn btn-info">
+          {{-- <a href="/dashboard/hackathon/my-team" class="btn btn-info">
             <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
-          </a>
-          @if($leaderOrnot->count() < 0) <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
+          </a> --}}
+          {{-- @if($leaderOrnot->count() < 0) <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
             <i class="ti ti-logout me-1"></i> {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
             </button>
             @endif
@@ -211,7 +211,7 @@
               id="disbandTeamBtn" style="display:none;">
               <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
             </button>
-            @endif
+            @endif --}}
         </div>
       </div>
     </div>
