@@ -222,7 +222,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">You have been invited to join the team: {{ $teamName->name }}</p>
                                                     <p style="margin: 0;">This link will expire in 24 hours</p>
                                                     <p style="margin: 0;">Please click the link below to accept or reject :</p>
-                                                    <a style="display:inline-block; padding:10px 20px; background-color:#198754; color:#ffffff; text-decoration:none; border-radius:5px; font-weight:bold;" href="{{ route('hackathon.view') }}"> View </a>
+                                                    <a style="display:inline-block; padding:10px 20px; background-color:#198754; color:#ffffff; text-decoration:none; border-radius:5px; font-weight:bold;" href="{{ url("dashboard/hackathon/details/{$teamName->cycle_id}") }}"> View </a>
                                                     
                                                     {{-- <p style="margin: 0;">Session will start at: {{ $date }}</p> --}}
                                                     <p style="margin: 0;">Best regards,</p>
@@ -244,7 +244,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">لقد تم دعوتك للفريق: {{ $teamName->name }}</p>
                                                     <p style="margin: 0;">سينتهى هذا الرابط بعد 24 ساعة</p>
                                                     <p style="margin: 0;">يرجى الضغط على اللينك التالي للمشاهدة :</p>
-                                                    <a style="display:inline-block; padding:10px 20px; background-color:#198754; color:#ffffff; text-decoration:none; border-radius:5px; font-weight:bold;" href="{{ route('hackathon.view') }}">مشاهدة </a>
+                                                    <a style="display:inline-block; padding:10px 20px; background-color:#198754; color:#ffffff; text-decoration:none; border-radius:5px; font-weight:bold;" href="{{ url("dashboard/hackathon/details/{$teamName->cycle_id}") }}"> مشاهدة </a>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
                                                     {{-- <p style="margin: 0;">{{ $organization_name_ar }}</p> --}}
                                                 </div>

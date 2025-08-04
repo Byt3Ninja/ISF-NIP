@@ -26,14 +26,14 @@
   @if($currentHackathon['cycle_id'] == $user->company?->cycle)
   <div id="action-buttons-placeholder" class="mt-4">
     <!-- Buttons will be injected by JS -->
-    @php
-    $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
-    $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-    'pending')->first();
-    $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-    'accepted')->first();
+      @php
+      $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
+      $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+      'pending')->first();
+      $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+      'accepted')->first();
 
-    @endphp
+      @endphp
       @if(!auth()->user()->hasRole('admin'))
         @if($teamcreated != null)
           @if($teamcreated->cycle_id == $currentHackathon['cycle_id'])
@@ -137,6 +137,32 @@
       @endif
   </div>
   @endif
-  
+              @php
+                $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+                'pending')->first();
+              @endphp
+            @if($teamJoin != null)
+              @php
+              $teamformation = App\TeamFormation::where('id', $teamJoin->team_formation_id)->first();
+              @endphp
+              @if($teamformation->cycle_id == $id)
+                <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                  @csrf
+                  @method('PATCH')
+                  <button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+                    <i class="ti ti-users me-2 me-2"></i>
+                    {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
+                  </button>
+                </form>
+                <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                  @csrf
+                  @method('PATCH')
+                  <button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+                    <i class="ti ti-users me-2 me-2"></i>
+                    {{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
+                  </button>
+                </form>
+              @endif
+            @endif
 </div>
 </div>
