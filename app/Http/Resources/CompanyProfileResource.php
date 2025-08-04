@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CompanyProfileResource extends JsonResource
@@ -36,6 +37,13 @@ class CompanyProfileResource extends JsonResource
                 }
             }
         }
+
+        $documents = [];
+        if ($this->documents && is_array(json_decode($this->documents, true))) {
+            foreach (json_decode($this->documents, true) as $docPath) {
+             $documents[] = Storage::disk('pitch_deck')->url($docPath);
+        }
+    }
 
         return [
             'id' => $this->id,
@@ -88,6 +96,19 @@ class CompanyProfileResource extends JsonResource
             'pitchDeckSummary' => $this->pitch_deck_summary,
             'businessModelDescription' => $this->business_model_description,
             'SustainableDevelopment' => $sdgs,
+           'pitchDeck' => $this->pitch_deck
+             ? Storage::disk('pitch_deck')->url(
+             ltrim(preg_replace('/^pitch_decks\//', '', $this->pitch_deck), '/')
+            ) : null,
+            'pitchDeckVideo' => $this->pitch_deck_video,
+            'documents' => collect(json_decode($this->documents, true))
+             ->filter()
+            ->map(function ($docPath) {
+            return Storage::disk('pitch_deck')->url(
+             ltrim(preg_replace('/^pitch_decks\//', '', $docPath), '/')
+            );
+            })
+             ->values(),       
         ];
     }
 }

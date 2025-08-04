@@ -80,22 +80,26 @@
 @stop
 
 @php
-  // Registration Chart Data
-  $registrationMonths = $data['registrationMonths'];
-  $registrationCounts = $data['registrationCounts'];
+// Registration Chart Data
+$registrationMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july'];
+$registrationCounts = [65, 59, 80, 81, 156, 155, 30];
 
-  // Projects By Theme Chart
-  $submissionLabels = $data['submissionLabels']; //['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'];
-  $submissionCounts =  $data['submissionCounts']; //[120, 90, 75];
+// Projects By Theme Chart
+$submissionLabels = ['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'];
+$submissionCounts = [120, 90, 75];
+// Original Data
+$completedTeamCount = [25, 18];
+$uncompletedTeamCount = [5, 2];
 
-  // Program team status count
-  $teamLabels = ['هاكثون AI', 'هاكثون الاستدامة'];
-  $completedTeamCount = [25, 18];
-  $uncompletedTeamCount = [5, 2];
+// --- New Data for Pie Chart ---
+// These labels will be for the pie slices themselves.
+$teamsStatusPieLabels = ['فرق مكتملة', 'فرق غير مكتملة'];
+// Sum the counts to get a total for each status.
+$teamsStatusPieData = [array_sum($completedTeamCount), array_sum($uncompletedTeamCount)]; // Result: [43, 7]
 
-  // Program Engagement Chart
-  $engagementLabels = ['المسجلون', 'كونوا فرقاً', 'قدموا مشاريع', 'فائزون'];
-  $engagementCounts = [200, 150, 120, 5];
+// Program Engagement Chart
+$engagementLabels = ['المسجلون', 'كونوا فرقاً', 'قدموا مشاريع', 'فائزون'];
+$engagementCounts = [200, 150, 120, 5];
 @endphp
 
 @section('content')
@@ -103,7 +107,7 @@
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
     <h1 class="fw-bold">{{ __('admin.management_dashboard') }}</h1>
     @php
-      $idParam = request()->route('id');
+    $idParam = request()->route('id');
     @endphp
     <a class="btn btn-primary btn-lg" href="/dashboard/hackathon/dashboard/winners/{{ $idParam }}" role="button">
       <i class="bi-trophy-fill me-2"></i> {{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
@@ -147,7 +151,8 @@
         <div class="card-body d-flex flex-column">
           <i class="bi bi-person-video3 display-4 text-secondary mb-2"></i>
           <h5 class="card-title">{{ __('admin.mentorship_management') }}</h5>
-          <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">{{ $data['CountNextSessions'] }}</span>
+          <p class="mb-2">{{ __('admin.new_requests') }}: <span class="badge bg-danger rounded-pill">{{
+              $data['CountNextSessions'] }}</span>
           </p>
           <div class="mt-auto">
             <button class="btn btn-sm btn-outline-secondary mt-1" data-bs-toggle="modal"
@@ -164,21 +169,24 @@
 
   <!-- Charts Section (Content is dynamic) -->
   <div class="row mb-4 g-3">
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="chart-container"><canvas id="registrationsChart"></canvas></div>
     </div>
     <div class="col-md-6">
       <div class="chart-container"><canvas id="submissionsPerTrackChart"></canvas></div>
     </div>
+    <div class="col-md-6">
+      <div class="chart-container"><canvas id="teamsStatusChart"></canvas></div>
+    </div>
   </div>
-  <div class="row mb-4 g-3">
+  {{-- <div class="row mb-4 g-3">
     <div class="col-md-6">
       <div class="chart-container"><canvas id="teamsStatusChart"></canvas></div>
     </div>
     <div class="col-md-6">
       <div class="chart-container"><canvas id="hackathonEngagementChart"></canvas></div>
     </div>
-  </div>
+  </div> --}}
 
   <!-- Manage Hackathons Table -->
   {{-- <div class="card shadow-sm mb-4">
@@ -269,7 +277,7 @@
               <td>
                 <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
                   data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details') }}</button>
-                
+
                 <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
                   __('admin.message') }}</button>
               </td>
@@ -305,105 +313,109 @@
             <td>{{ $project->project_name }}</td>
             <td> {{ $project->project_description }}</td>
             <td>
-              
+
               @if($project->project_status == 20)
-            {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
-            @elseif($project->project_status == 40)
-            {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
-            @elseif($project->project_status == 60)
-            {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core
-            functionality.') }}
-            @elseif($project->project_status == 80)
-            {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the
-            presentation.') }}
-            @elseif($project->project_status == 100)
-            {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete documentation.
-            story.') }}
-            @endif
-          </td>
+              {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
+              @elseif($project->project_status == 40)
+              {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
+              @elseif($project->project_status == 60)
+              {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core
+              functionality.') }}
+              @elseif($project->project_status == 80)
+              {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the
+              presentation.') }}
+              @elseif($project->project_status == 100)
+              {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete
+              documentation.
+              story.') }}
+              @endif
+            </td>
             <td>
               <div class="progress mb-2" style="height: 20px;">
-            <div class="progress-bar bg-success" role="progressbar"
-              style="width:{{ $project->project_status  }}%;"
-              aria-valuenow="{{ $project->project_status  }}" aria-valuemin="0"
-              aria-valuemax="100">{{ $project->project_status }}% {{ $l == 'en' ? 'Complete' :
-              'مكتمل' }}</div>
-          </div>
-        </td>
+                <div class="progress-bar bg-success" role="progressbar" style="width:{{ $project->project_status  }}%;"
+                  aria-valuenow="{{ $project->project_status  }}" aria-valuemin="0" aria-valuemax="100">{{
+                  $project->project_status }}% {{ $l == 'en' ? 'Complete' :
+                  'مكتمل' }}</div>
+              </div>
+            </td>
             <td>{{ $project->created_at }}</td>
             <td>
               <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
-            data-bs-target="#editProjectIdeaModal{{ $project->id }}">
-            <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
-          </button>
+                data-bs-target="#editProjectIdeaModal{{ $project->id }}">
+                <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
+              </button>
             </td>
           </tr>
           <!-- Edit Project Idea Modal -->
-<div class="modal fade" id="editProjectIdeaModal{{ $project->id }}" tabindex="-1" aria-labelledby="editProjectIdeaModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editProjectIdeaModalLabel">{{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة
-          المشروع' }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
-          @csrf
-          <input type="hidden" name="team_formation_id" value="{{ $project->id }}">
-          <div class="mb-3">
-            <label for="Project_Name_en" class="form-label">
-              {{ __('admin.Project_Name') }}
-            </label>
-            <input type="text" class="form-control" name="Project_Name_en"
-              value="{{ $project->project_name }}" id="Project_Name_en" required>
-          </div>
-          
-          <div class="mb-3">
-            <label for="Project_Description_en" class="form-label">
-              {{ __('admin.Project_Description') }}
-            </label>
-            <textarea class="form-control" name="Project_Description_en" id="Project_Description_en"
-              rows="2">{{ $project->project_description }}</textarea>
-          </div>
+          <div class="modal fade" id="editProjectIdeaModal{{ $project->id }}" tabindex="-1"
+            aria-labelledby="editProjectIdeaModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editProjectIdeaModalLabel">{{ $l == 'en' ? 'Edit Project Idea' : 'تعديل
+                    فكرة
+                    المشروع' }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
+                    @csrf
+                    <input type="hidden" name="team_formation_id" value="{{ $project->id }}">
+                    <div class="mb-3">
+                      <label for="Project_Name_en" class="form-label">
+                        {{ __('admin.Project_Name') }}
+                      </label>
+                      <input type="text" class="form-control" name="Project_Name_en"
+                        value="{{ $project->project_name }}" id="Project_Name_en" required>
+                    </div>
 
-          <div class="mb-3">
-            <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</label>
-            <select class="form-select" id="Project_Status" name="Project_Status">
-              <option value="">{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
-              <option value="20" {{ $project->project_status == '20' ? 'selected' : '' }} >{{
-                __('admin.Idea + Team') }}</option>
-              <option value="40" {{ $project->project_status == '40' ? 'selected' : '' }} >{{
-                __('admin.Research') }}</option>
-              <option value="60" {{ $project->project_status == '60' ? 'selected' : '' }} >{{
-                __('admin.Design & Build') }}</option>
-              <option value="80" {{ $project->project_status == '80' ? 'selected' : '' }} >{{
-                __('admin.Ready for Pitch') }}</option>
-              <option value="100" {{ $project->project_status == '100' ? 'selected' : '' }} >{{
-                __('admin.Project Submitted') }}</option>
-            </select>
-          </div>
+                    <div class="mb-3">
+                      <label for="Project_Description_en" class="form-label">
+                        {{ __('admin.Project_Description') }}
+                      </label>
+                      <textarea class="form-control" name="Project_Description_en" id="Project_Description_en"
+                        rows="2">{{ $project->project_description }}</textarea>
+                    </div>
 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-          {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
-        </button>
-        <button type="submit" class="btn btn-primary">
-          {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
-        </button>
-      </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' : 'إلغاء'
-        }}</button>
-      <button type="button" class="btn btn-primary" onclick="saveProjectIdea()">{{ $l == 'en' ? 'Save Changes' : 'حفظ
-        التغييرات' }}</button>
-    </div>
-  </div>
-</div>
+                    <div class="mb-3">
+                      <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع'
+                        }}</label>
+                      <select class="form-select" id="Project_Status" name="Project_Status">
+                        <option value="">{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
+                        <option value="20" {{ $project->project_status == '20' ? 'selected' : '' }} >{{
+                          __('admin.Idea + Team') }}</option>
+                        <option value="40" {{ $project->project_status == '40' ? 'selected' : '' }} >{{
+                          __('admin.Research') }}</option>
+                        <option value="60" {{ $project->project_status == '60' ? 'selected' : '' }} >{{
+                          __('admin.Design & Build') }}</option>
+                        <option value="80" {{ $project->project_status == '80' ? 'selected' : '' }} >{{
+                          __('admin.Ready for Pitch') }}</option>
+                        <option value="100" {{ $project->project_status == '100' ? 'selected' : '' }} >{{
+                          __('admin.Project Submitted') }}</option>
+                      </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                    {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+                  </button>
+                </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
+                  'إلغاء'
+                  }}</button>
+                <button type="button" class="btn btn-primary" onclick="saveProjectIdea()">{{ $l == 'en' ? 'Save Changes'
+                  : 'حفظ
+                  التغييرات' }}</button>
+              </div>
+            </div>
+          </div>
           @endforeach
         </tbody>
       </table>
@@ -478,16 +490,17 @@
 
           <hr class="my-4">
 
-            <!-- Themes Section (Select2 Multiple Select) -->
-            <div class="mb-3">
-              <label class="form-label">{{ __('admin.themes_instruction') }}</label>
-              <div id="hackathonThemesWrapper" class="tags-input-wrapper">
-                <!-- Tag items will be rendered here by JS -->
-                <input type="text" id="hackathonThemesInput" class="form-control" placeholder="{{ __('admin.add_theme_placeholder') }}" autocomplete="off">
-                <input type="hidden" id="hackathonThemesActual" name="hackathonThemes">
-              </div>
-              {{-- <small class="form-text text-muted">{{ __('admin.themes_hint') }}</small> --}}
+          <!-- Themes Section (Select2 Multiple Select) -->
+          <div class="mb-3">
+            <label class="form-label">{{ __('admin.themes_instruction') }}</label>
+            <div id="hackathonThemesWrapper" class="tags-input-wrapper">
+              <!-- Tag items will be rendered here by JS -->
+              <input type="text" id="hackathonThemesInput" class="form-control"
+                placeholder="{{ __('admin.add_theme_placeholder') }}" autocomplete="off">
+              <input type="hidden" id="hackathonThemesActual" name="hackathonThemes">
             </div>
+            {{-- <small class="form-text text-muted">{{ __('admin.themes_hint') }}</small> --}}
+          </div>
 
           <!-- Prizes Section -->
           <div class="mb-3">
@@ -543,10 +556,10 @@
 </div>
 @php
 
-    $request = new \Illuminate\Http\Request([
-    'cycleIdHackathon' => $idParam
+$request = new \Illuminate\Http\Request([
+'cycleIdHackathon' => $idParam
 ]);
-    $mentorsLists = showMintors($request);
+$mentorsLists = showMintors($request);
 @endphp
 <!-- Manage Mentors Modal -->
 <div class="modal fade" id="manageMentorsModal" tabindex="-1" aria-labelledby="manageMentorsModalLabel"
@@ -558,19 +571,20 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-        <a href="/dashboard/mentorship/assign/{{ $idParam }}" class="btn btn-success mb-3"><i class="bi bi-person-plus-fill me-2"></i> {{
+        <a href="/dashboard/mentorship/assign/{{ $idParam }}" class="btn btn-success mb-3"><i
+            class="bi bi-person-plus-fill me-2"></i> {{
           __('admin.Mentors') }}</a>
-          @if($mentorsLists->isNotEmpty())
-           @foreach ($mentorsLists as $key => $mentor)
+        @if($mentorsLists->isNotEmpty())
+        @foreach ($mentorsLists as $key => $mentor)
         <div class="card mb-3">
           <div class="card-body">
             <div class="row">
               <div class="col-md-6">
                 <div class="d-flex align-items-center">
                   <div class="flex-shrink-0">
-                    
-                    <img src="{{ asset( $mentor->image_url ) }}" alt="Mentor Profile"
-                      class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+
+                    <img src="{{ asset( $mentor->image_url ) }}" alt="Mentor Profile" class="rounded-circle"
+                      style="width: 50px; height: 50px; object-fit: cover;">
                   </div>
                   <div class="flex-grow-1 ms-3">
                     <h5 class="card-title mb-0">{{ $mentor->name }}</h5>
@@ -611,108 +625,110 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-        
-        
-    <div class="col-12">
-      <section>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="mt-10">
-              <div class="border-bottom pb-2 mb-4">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                    <i class='ti ti-calendar-event me-2'></i>
-                    <h5 class="card-title mb-0">
-                      {{ __("dashboard.UpcomingMentorsSession") }}
-                      
-                    </h5>
+
+
+        <div class="col-12">
+          <section>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="mt-10">
+                  <div class="border-bottom pb-2 mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="d-flex align-items-center">
+                        <i class='ti ti-calendar-event me-2'></i>
+                        <h5 class="card-title mb-0">
+                          {{ __("dashboard.UpcomingMentorsSession") }}
+
+                        </h5>
+                      </div>
+                      <a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
+                        <i class="ti ti-eye me-2 ti-16px"></i>
+                        {{__('cycles.showAll')}}
+                      </a>
+                    </div>
                   </div>
-                  <a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
-                    <i class="ti ti-eye me-2 ti-16px"></i>
-                    {{__('cycles.showAll')}}
-                  </a>
-                </div>
-              </div>
-              <div class="">
-                <div class="table-responsive">
-                  <table class="table mb-0 sessonsTable">
-                    <thead class="bg-label-light">
-                      <tr>
-                        <th>{{__('cycles.User/Title')}}</th>
-                        <th>{{__('cycles.Mentor')}}</th>
-                        @if ($_user->hasRole('Admin'))<th>{{__('cycles.Rate/Comment')}}</th>@endif
-                        <th>{{__('cycles.Date/Time')}}</th>
-                        <th>{{__('cycles.Approved')}}</th>
-                        <th>{{__('cycles.Done')}}</th>
-                        <th>{{__('cycles.Actions')}}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach($nextSessions as $session)
-                      <tr>
-                        <td>
-                          <div class="d-flex align-items-center gap-2">
-                            <a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
-                              <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
-                                height="40" width="40">
-                            </a>
-                            <a href="/dashboard/users/{{ $session->user_id }}/edit">
-                              <div class="media-body">
-                                <h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
-                                <span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
+                  <div class="">
+                    <div class="table-responsive">
+                      <table class="table mb-0 sessonsTable">
+                        <thead class="bg-label-light">
+                          <tr>
+                            <th>{{__('cycles.User/Title')}}</th>
+                            <th>{{__('cycles.Mentor')}}</th>
+                            @if ($_user->hasRole('Admin'))<th>{{__('cycles.Rate/Comment')}}</th>@endif
+                            <th>{{__('cycles.Date/Time')}}</th>
+                            <th>{{__('cycles.Approved')}}</th>
+                            <th>{{__('cycles.Done')}}</th>
+                            <th>{{__('cycles.Actions')}}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach($nextSessions as $session)
+                          <tr>
+                            <td>
+                              <div class="d-flex align-items-center gap-2">
+                                <a class="media-left" href="/dashboard/users/{{ $session->user_id }}/edit">
+                                  <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-3"
+                                    height="40" width="40">
+                                </a>
+                                <a href="/dashboard/users/{{ $session->user_id }}/edit">
+                                  <div class="media-body">
+                                    <h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
+                                    <span class="font-small-2 text-nowrap">{{$session->user->title }}</span>
+                                  </div>
+                                </a>
                               </div>
-                            </a>
-                          </div>
-                        </td>
-                        <td>
-                          <div style="cursor: pointer;" class="d-flex align-items-center"
-                            onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
-                            <div class="avatar">
-                              <img class="img-fluid rounded-circle me-3"
-                                src="{{$session->mentor->image_url ?? '/icons/account.svg'}}" alt="image" height="20"
-                                width="20" />
-                            </div>
-                            <span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
-                          </div>
-                        </td>
-                        @if ($_user->hasRole('Admin'))
-                        <td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
-                              style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment
-                            :
-                            $session->comment !!} </small> </td>
-                        @endif
-                        <td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
-                        <td>
-                          <div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
-                              class="warning">'.__('Waiting').'</span>' !!} </div>
-                        </td>
-                        <td> {{ $session->done ?__('Yes') : __('No') }} </td>
-                        <td>
-                          <a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
-                            <i class="ti ti-brand-zoom me-2"></i>
-                            {{ __('dashboard.Join now') }}
-                          </a>
-                          @if (!$session->approved)
-                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
-                                  <i class="ti ti-check"></i>
-                                </button>
-                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
-                                  <i class="ti ti-x"></i>
-                                </button>
+                            </td>
+                            <td>
+                              <div style="cursor: pointer;" class="d-flex align-items-center"
+                                onclick="mentor({{ $session->mentor_id }}, '{{ $session->mentor->name }}', '{{ $session->mentor->ratings }}')">
+                                <div class="avatar">
+                                  <img class="img-fluid rounded-circle me-3"
+                                    src="{{$session->mentor->image_url ?? '/icons/account.svg'}}" alt="image"
+                                    height="20" width="20" />
+                                </div>
+                                <span class="chip-text text-nowrap"> {{$session->mentor->name}} </span>
+                              </div>
+                            </td>
+                            @if ($_user->hasRole('Admin'))
+                            <td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
+                                  style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment
+                                :
+                                $session->comment !!} </small> </td>
+                            @endif
+                            <td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
+                            <td>
+                              <div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
+                                  class="warning">'.__('Waiting').'</span>' !!} </div>
+                            </td>
+                            <td> {{ $session->done ?__('Yes') : __('No') }} </td>
+                            <td>
+                              <a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+                                <i class="ti ti-brand-zoom me-2"></i>
+                                {{ __('dashboard.Join now') }}
+                              </a>
+                              @if (!$session->approved)
+                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success"
+                                onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
+                                <i class="ti ti-check"></i>
+                              </button>
+                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger"
+                                onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
+                                <i class="ti ti-x"></i>
+                              </button>
                               @endif
-                        </td>
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
+                            </td>
+                          </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
-    </div>
-    
+
         <p>{{ __('admin.team_mentorship_requests_table_placeholder') }}</p>
       </div>
       <div class="modal-footer">
@@ -748,17 +764,17 @@
   </div>
 </div>
 @php
-    
-    $teamsJson = $data['all_teams']->map(function($team) {
-        return [
-            'id' => $team->id,
-            'name' => $team->name,
-            'hackathon' => $team->name, 
-            'leader' => "{$team->name} ({$team->email})",
-            'members' => collect($team->members)->map(fn($m) => $m->name)->all(),
-            'projectIdea' => $team->project_name_en, 
-        ];
-    })->keyBy('id')->toJson(JSON_UNESCAPED_UNICODE);
+
+$teamsJson = $data['all_teams']->map(function($team) {
+return [
+'id' => $team->id,
+'name' => $team->name,
+'hackathon' => $team->name,
+'leader' => "{$team->name} ({$team->email})",
+'members' => collect($team->members)->map(fn($m) => $m->name)->all(),
+'projectIdea' => $team->project_name_en,
+];
+})->keyBy('id')->toJson(JSON_UNESCAPED_UNICODE);
 @endphp
 @stop
 
@@ -768,8 +784,7 @@
 
 @section('pagescripts')
 <script>
-   
-    const teamsData = {!! $teamsJson !!}; 
+  const teamsData = {!! $teamsJson !!}; 
 </script>
 <script>
   function approve(id, stat) {
@@ -1083,136 +1098,125 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const chartCanvases = [
+   document.addEventListener('DOMContentLoaded', function () {
+    const chartCanvases = [
         'registrationsChart',
         'submissionsPerTrackChart',
         'teamsStatusChart',
-        'hackathonEngagementChart',
-      ];
+        // 'hackathonEngagementChart', // Temporarily hidden
+    ];
 
-      chartCanvases.forEach((canvasId) => {
-      const ctx = document.getElementById(canvasId)?.getContext('2d');
-      
-      if (ctx) {
-        if (canvasId === 'registrationsChart') {
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-          labels: @json($registrationMonths),
-          datasets: [
-            {
-            label: '{{ $l == 'ar' ? 'المسجلون الجدد شهرياً' : 'New Registrations Monthly' }}',
-            data: @json($registrationCounts),
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1,
-            fill: false,
-            },
-          ],
-          },
-          options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-            display: true,
-            text: '{{ $l == 'ar' ? 'نمو التسجيلات' : 'Registration Growth' }}'
-            },
-          },
-          },
-        });
+    chartCanvases.forEach((canvasId) => {
+        const ctx = document.getElementById(canvasId)?.getContext('2d');
+
+        if (ctx) {
+            if (canvasId === 'registrationsChart') {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($registrationMonths),
+                        datasets: [{
+                            label: '{{ $l == 'ar' ? 'المسجلون الجدد شهرياً' : 'New Registrations Monthly' }}',
+                            data: @json($registrationCounts),
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1,
+                            fill: false,
+                        }, ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '{{ $l == 'ar' ? 'نمو التسجيلات' : 'Registration Growth' }}'
+                            },
+                        },
+                    },
+                });
+            }
+            if (canvasId === 'submissionsPerTrackChart') {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @json($submissionLabels),
+                        datasets: [{
+                            data: @json($submissionCounts),
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                        }, ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '{{ $l == 'ar' ? 'المشاريع حسب المحور' : 'Projects by Track' }}'
+                            },
+                        },
+                    },
+                });
+            }
+            if (canvasId === 'teamsStatusChart') {
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        // Assuming $teamsStatusPieLabels and $teamsStatusPieData are available and correctly formatted
+                        labels: @json($teamsStatusPieLabels), 
+                        datasets: [{
+                            label: '{{ $l == 'ar' ? 'حالة الفرق' : 'Teams Status' }}',
+                            data: @json($teamsStatusPieData),
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                            ],
+                        }, ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '{{ $l == 'ar' ? 'حالة تكوين الفرق' : 'Team Formation Status' }}'
+                            },
+                        },
+                    },
+                });
+            }
+            
+            // This entire block will be skipped when 'hackathonEngagementChart' is removed from the chartCanvases array
+            if (canvasId === 'hackathonEngagementChart') {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($engagementLabels),
+                        datasets: [{
+                            label: '{{ $l == 'ar' ? 'مراحل المشاركة' : 'Participation Stages' }}',
+                            data: @json($engagementCounts),
+                            backgroundColor: [
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#4BC0C0',
+                            ],
+                        }, ],
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '{{ $l == 'ar' ? 'قمع المشاركة' : 'Participation Funnel' }}'
+                            },
+                        },
+                    },
+                });
+            }
         }
-        if (canvasId === 'submissionsPerTrackChart') {
-        new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-          labels: @json($submissionLabels),
-          datasets: [
-            {
-            data: @json($submissionCounts),
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            },
-          ],
-          },
-          options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-            display: true,
-            text: '{{ $l == 'ar' ? 'المشاريع حسب المحور' : 'Projects by Track' }}'
-            },
-          },
-          },
-        });
-        }
-        if (canvasId === 'teamsStatusChart') {
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-          labels: @json($teamLabels),
-          datasets: [
-            {
-            label: '{{ $l == 'ar' ? 'فرق مكتملة' : 'Completed Teams' }}',
-            data: @json($completedTeamCount),
-            backgroundColor: 'rgba(75, 192, 192, 0.7)',
-            },
-            {
-            label: '{{ $l == 'ar' ? 'فرق غير مكتملة' : 'Incomplete Teams' }}',
-            data: @json($uncompletedTeamCount),
-            backgroundColor: 'rgba(255, 159, 64, 0.7)',
-            },
-          ],
-          },
-          options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { stacked: true },
-            y: { stacked: true },
-          },
-          plugins: {
-            title: {
-            display: true,
-            text: '{{ $l == 'ar' ? 'حالة تكوين الفرق' : 'Team Formation Status' }}'
-            },
-          },
-          },
-        });
-        }
-        if (canvasId === 'hackathonEngagementChart') {
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-          labels: @json($engagementLabels),
-          datasets: [
-            {
-            label: '{{ $l == 'ar' ? 'مراحل المشاركة' : 'Participation Stages' }}',
-            data: @json($engagementCounts),
-            backgroundColor: [
-              '#FF6384',
-              '#36A2EB',
-              '#FFCE56',
-              '#4BC0C0',
-            ],
-            },
-          ],
-          },
-          options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-            display: true,
-            text: '{{ $l == 'ar' ? 'قمع المشاركة' : 'Participation Funnel' }}'
-            },
-          },
-          },
-        });
-        }
-      }
-      });
     });
+});
 </script>
 @stop

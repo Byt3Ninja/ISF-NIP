@@ -271,7 +271,11 @@ class ProgramController extends Controller
         }
     $validated = $request->validated();
 
-    $cycle = Cycle::findOrFail($id);
+    $cycle = Cycle::find($id);
+
+    if (!$cycle) {
+        return $this->notFound(__('api.program_not_found'));
+    }
 
      if (isset($validated['organizationId'])) {
         $cycle->organization_id = $validated['organizationId'];

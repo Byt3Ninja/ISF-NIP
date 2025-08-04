@@ -55,4 +55,5 @@ return [
 	'schedule_not_found' => 'الجدول غير موجود',
 	'date_range_limit' => 'يجب أن يكون تاريخ البداية قبل تاريخ النهاية وبحد أقصى 30 يومًا.',
 	'programs_not_found' => 'البرامج غير موجودة',
+	'program_not_found' => 'البرنامج غير موجود',
 ];
