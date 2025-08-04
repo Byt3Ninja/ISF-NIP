@@ -79,8 +79,10 @@
 
                       @endif
                   @else
+                  @if($hackathon['team_formation_id'] != null)
                     <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success"
                       style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
+                      @endif
                   @endif
                 @endif
               @else
