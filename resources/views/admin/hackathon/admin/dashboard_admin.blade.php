@@ -574,7 +574,7 @@ $mentorsLists = showMintors($request);
         <a href="/dashboard/mentorship/assign/{{ $idParam }}" class="btn btn-success mb-3"><i
             class="bi bi-person-plus-fill me-2"></i> {{
           __('admin.Mentors') }}</a>
-        @if($mentorsLists->isNotEmpty())
+        @if($mentorsLists != null)
         @foreach ($mentorsLists as $key => $mentor)
         <div class="card mb-3">
           <div class="card-body">
