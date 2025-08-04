@@ -26,6 +26,7 @@ class HackathonController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
         $hackathons_query = "SELECT
         c.id as 'c_id',
         c.title as 'c_title',
@@ -47,11 +48,14 @@ class HackathonController extends Controller
         cycles as c
         LEFT JOIN organizations as o ON c.organization_id = o.id
         WHERE c.type = 'Hackathon'
-        AND `type` = 'Hackathon'
         ";
         if($request->searchHackathon != null){
             $hackathons_query .= " AND c.title LIKE '%".$request->searchHackathon."%'";
         }
+        if($user->organization_id != null){
+            $hackathons_query .= " AND c.organization_id = ".$user->organization_id;
+        }
+        
         $hackathons_query .= "  ORDER BY c.start ASC";
         $hackathons_raw = collect(DB::select($hackathons_query));
 
@@ -92,7 +96,6 @@ class HackathonController extends Controller
             $hackathons = $hackathons->reject(function ($item) {
                 return $item['status'] === 'Finished';
             })->values();
-        // dd($hackathons);
            
         
         // return view('admin.hackathon.index', compact('hackathons'));
