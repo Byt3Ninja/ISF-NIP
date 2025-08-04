@@ -2811,6 +2811,30 @@
                     "organizationmanager"
                    
                 ]
+            },
+            {
+                "name": "hackathon.addSharedFile",
+                "description": " Add Shared File Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
+            },
+            {
+                "name": "hackathon.deleteSharedFile",
+                "description": " Delete Shared File Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
             }
         ]
     },

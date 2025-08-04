@@ -38,17 +38,17 @@
 @stop
 
 @php
-$teamData = [
-'name' => 'Team Champions',
-'name_ar' => 'فريق الأبطال',
-'hackathon' => 'Future of AI Hackathon',
-'hackathon_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
-'members' => [
-['name' => 'Ahmed', 'name_ar' => 'أحمد'],
-['name' => 'Sara', 'name_ar' => 'سارة'],
-['name' => 'You', 'name_ar' => 'أنت'],
-]
-];
+// $teamData = [
+// 'name' => 'Team Champions',
+// 'name_ar' => 'فريق الأبطال',
+// 'hackathon' => 'Future of AI Hackathon',
+// 'hackathon_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
+// 'members' => [
+// ['name' => 'Ahmed', 'name_ar' => 'أحمد'],
+// ['name' => 'Sara', 'name_ar' => 'سارة'],
+// ['name' => 'You', 'name_ar' => 'أنت'],
+// ]
+// ];
 @endphp
 
 @section('content')
@@ -133,6 +133,7 @@ $teamData = [
                             </button>
                         </li>
                     </ul>
+
                     <div class="tab-content p-0 mt-4 border rounded shadow overflow-hidden" id="collabTabsContent">
                         <!-- Files Tab -->
                         <div class="tab-pane fade show active p-6 border-top-0 rounded-bottom bg-white" id="files"
@@ -145,70 +146,48 @@ $teamData = [
                                     جديد' }}
                                 </button>
                             </div>
+
                             <ul class="list-group list-group-flush" id="fileList">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="ti ti-file-type-ppt text-danger me-2"></i>
-                                        {{ $l == 'en' ? 'Initial Presentation.pptx' : 'عرض تقديمي أولي.pptx' }}
-                                        <small class="text-muted d-block">
-                                            (2.1MB - {{ $l == 'en' ? 'Uploaded by: Sara' : 'رفع بواسطة: سارة' }})
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <a href="#" class="btn btn-sm btn-outline-primary me-1"
-                                            onclick="downloadFile('{{ $l == 'en' ? 'Initial Presentation.pptx' : 'عرض تقديمي أولي.pptx' }}', 'Initial_Presentation.pptx')"
-                                            title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                            <i class="ti ti-download"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                            onclick="deleteFile(this, '{{ $l == 'en' ? 'Initial Presentation.pptx' : 'عرض تقديمي أولي.pptx' }}')"
-                                            title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="ti ti-file-zip text-warning me-2"></i>
-                                        {{ $l == 'en' ? 'Design Resources.zip' : 'موارد التصميم.zip' }}
-                                        <small class="text-muted d-block">
-                                            (5.7MB - {{ $l == 'en' ? 'Uploaded by: Ahmed' : 'رفع بواسطة: أحمد' }})
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <a href="#" class="btn btn-sm btn-outline-primary me-1"
-                                            onclick="downloadFile('{{ $l == 'en' ? 'Design Resources.zip' : 'موارد التصميم.zip' }}', 'Design_Resources.zip')"
-                                            title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                            <i class="ti ti-download"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                            onclick="deleteFile(this, '{{ $l == 'en' ? 'Design Resources.zip' : 'موارد التصميم.zip' }}')"
-                                            title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="ti ti-file-text text-info me-2"></i>
-                                        {{ $l == 'en' ? 'Meeting Notes.docx' : 'ملاحظات الاجتماع.docx' }}
-                                        <small class="text-muted d-block">
-                                            (150KB - {{ $l == 'en' ? 'Uploaded by: You' : 'رفع بواسطة: أنت' }})
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <a href="#" class="btn btn-sm btn-outline-primary me-1"
-                                            onclick="downloadFile('{{ $l == 'en' ? 'Meeting Notes.docx' : 'ملاحظات الاجتماع.docx' }}', 'Meeting_Notes.docx')"
-                                            title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                            <i class="ti ti-download"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                            onclick="deleteFile(this, '{{ $l == 'en' ? 'Meeting Notes.docx' : 'ملاحظات الاجتماع.docx' }}')"
-                                            title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </li>
+                                @foreach($sharedFile as $file)
+                                
+                                 @php
+                                    $fullPath = $file->sf_file;
+                                    $pathInfo = pathinfo($fullPath);
+                                    $filename = $pathInfo['filename'];
+                                    $extension = $pathInfo['extension'];
+                                    if (file_exists($fullPath)) {
+                                        $bytes = filesize($fullPath);
+                                        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                                        $factor = floor((strlen($bytes) - 1) / 3);
+                                        $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
+                                    } else {
+                                        $sizeReadable = 'الملف غير موجود';
+                                    }
+                                    
+                                 @endphp
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="ti ti-file-type-ppt text-danger me-2"></i>
+                                            {{ $filename.".".$extension }}
+                                            <small class="text-muted d-block">
+                                                ( {{ $sizeReadable }} - {{ $l == 'en' ? 'Uploaded by: ' . $file->{"user_name_". $l} : 'رفع بواسطة: ' . $file->{"user_name_". $l} }})
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <a href="{{ asset($file->sf_file) }}" 
+                                                download 
+                                                class="btn btn-sm btn-outline-primary me-1"
+                                                title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                                <i class="ti ti-download"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="deleteFile(this, {{ $file->sf_id }})"
+                                                title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
                         <!-- Tasks Tab -->
@@ -326,16 +305,16 @@ $teamData = [
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="fileUploadForm">
+                <form id="" method="POST" action="/dashboard/hackathon/addSharedFile" enctype="multipart/form-data" >
                     <div class="mb-3">
                         <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف'
                             }}</label>
-                        <input class="form-control" type="file" id="fileInput" required>
+                        <input class="form-control" name="file" type="file" id="fileInput" required>
                     </div>
                     <div class="mb-3">
                         <label for="fileDescription" class="form-label">{{ $l == 'en' ? 'File Description
                             (Optional)' : 'وصف الملف (اختياري)' }}</label>
-                        <input type="text" class="form-control" id="fileDescription"
+                        <input type="text" class="form-control" id="fileDescription" name="description"
                             placeholder="{{ $l == 'en' ? 'e.g., Initial logo design' : 'مثال: تصميم الشعار الأولي' }}">
                     </div>
                 </form>
@@ -343,7 +322,7 @@ $teamData = [
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
                     'إلغاء' }}</button>
-                <button type="button" class="btn btn-primary" onclick="uploadFile()">{{ $l == 'en' ? 'Upload' :
+                <button type="submit" class="btn btn-primary" onclick="uploadFile()">{{ $l == 'en' ? 'Upload' :
                     'رفع' }}</button>
             </div>
         </div>
@@ -582,35 +561,64 @@ $teamData = [
 
     function uploadFile() {
         const fileInput = document.getElementById('fileInput');
-        const fileDescription = document.getElementById('fileDescription').value;
-        
-        if (fileInput.files.length > 0) {
+        const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
+        const l = '{{ $l }}'; // "en" أو "ar"
+
+        if (fileInput && fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            
-            // Create FormData object for file upload
+
+            // بناء FormData
             const formData = new FormData();
             formData.append('file', file);
             formData.append('description', fileDescription);
-            
-            // Get URL parameters for context
+
+            // باراميترز من الـ URL
             const urlParams = new URLSearchParams(window.location.search);
             const hackathonId = urlParams.get('hackathonId') || '1';
             const teamId = urlParams.get('teamId') || '123';
             formData.append('hackathon_id', hackathonId);
             formData.append('team_id', teamId);
-            
-            // Show loading indicator
+
+            // إظهار loading
             Swal.fire({
-                title: '{{ $l == "en" ? "Uploading..." : "جاري الرفع..." }}',
-                text: '{{ $l == "en" ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف." }}',
+                title: l === 'en' ? "Uploading..." : "جاري الرفع...",
+                text: l === 'en' ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف.",
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
             });
-            
-            // Upload file to server
-            fetch('/dashboard/hackathon/team-workspace/upload', {
+
+            // دالة مساعدة لاختيار الأيقونة
+            const getIconClass = (name) => {
+                if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
+                if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
+                if (name.endsWith('.docx')) return 'ti-file-text text-info';
+                if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
+                if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
+                return 'ti-file-text';
+            };
+
+            const createListItem = (file) => {
+                const fileList = document.getElementById('fileList');
+                if (!fileList) return;
+                const newItem = document.createElement('li');
+                newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
+
+                const iconClass = getIconClass(file.name);
+                const uploadedByText = l === 'en' ? 'Uploaded by: You' : 'رفع بواسطة: أنت';
+
+                newItem.innerHTML = `
+                    <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - ${uploadedByText})</small></div>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}"><i class="ti ti-download"></i></a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}"><i class="ti ti-trash"></i></button>
+                    </div>`;
+                fileList.prepend(newItem);
+            };
+
+            // إرسال الطلب للراوت الجديد
+            fetch('/dashboard/hackathon/addSharedFile', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -618,125 +626,121 @@ $teamData = [
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                if (data.success) {
-                    // Use SweetAlert2 for success message
+                if (data.status === 'success') {
                     Swal.fire({
                         icon: 'success',
-                        title: '{{ $l == "en" ? "File Uploaded!" : "تم رفع الملف!" }}',
-                        text: `{{ $l == "en" ? "File uploaded: " : "تم رفع الملف: " }}${file.name} (${(file.size / 1024).toFixed(1)}KB)`,
-                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
+                        text: data.message,
+                        confirmButtonText: l === 'en' ? "OK" : "موافق"
                     });
-
-                    // Add to file list UI
-                    const fileList = document.getElementById('fileList');
-                    const newItem = document.createElement('li');
-                    newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
-                    
-                    // Simple icon logic based on extension
-                    let iconClass = 'ti-file-text';
-                    if (file.name.endsWith('.zip')) iconClass = 'ti-file-zip text-warning';
-                    else if (file.name.endsWith('.pptx')) iconClass = 'ti-file-type-ppt text-danger';
-                    else if (file.name.endsWith('.docx')) iconClass = 'ti-file-text text-info';
-                    else if (file.name.endsWith('.pdf')) iconClass = 'ti-file-type-pdf text-danger';
-                    else if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) iconClass = 'ti-photo text-success';
-
-                    newItem.innerHTML = `
-                        <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - {{ $l == "en" ? "Uploaded by: You" : "رفع بواسطة: أنت" }})</small></div>
-                        <div>
-                            <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="{{ $l == "en" ? "Download" : "تنزيل" }}"><i class="ti ti-download"></i></a>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="{{ $l == "en" ? "Delete" : "حذف" }}"><i class="ti ti-trash"></i></button>
-                        </div>`;
-                    fileList.prepend(newItem); // Add to top
-                    
-                    const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadFileModal'));
-                    uploadModal.hide();
-                    document.getElementById('fileUploadForm').reset();
+                    createListItem(file);
                 } else {
-                    throw new Error(data.message || 'Upload failed');
+                    Swal.fire({
+                        icon: 'error',
+                        title: l === 'en' ? "Error" : "خطأ",
+                        text: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+                        confirmButtonText: l === 'en' ? "OK" : "موافق"
+                    });
                 }
             })
             .catch(error => {
                 console.error('Upload error:', error);
-                
-                // For demo purposes, still add the file to UI but show warning
                 Swal.fire({
-                    icon: 'warning',
-                    title: '{{ $l == "en" ? "Demo Mode" : "وضع التجريبي" }}',
-                    text: `{{ $l == "en" ? "File added to demo list: " : "تم إضافة الملف للقائمة التجريبية: " }}${file.name}`,
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                    icon: 'error',
+                    title: l === 'en' ? "Error" : "خطأ",
+                    text: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+                    confirmButtonText: l === 'en' ? "OK" : "موافق"
                 });
+            })
+            .finally(() => {
+                const uploadModalEl = document.getElementById('uploadFileModal');
+                const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
+                if (uploadModal) uploadModal.hide();
 
-                // Add to file list UI (demo mode)
-                const fileList = document.getElementById('fileList');
-                const newItem = document.createElement('li');
-                newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
-                
-                let iconClass = 'ti-file-text';
-                if (file.name.endsWith('.zip')) iconClass = 'ti-file-zip text-warning';
-                else if (file.name.endsWith('.pptx')) iconClass = 'ti-file-type-ppt text-danger';
-                else if (file.name.endsWith('.docx')) iconClass = 'ti-file-text text-info';
-                else if (file.name.endsWith('.pdf')) iconClass = 'ti-file-type-pdf text-danger';
-                else if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) iconClass = 'ti-photo text-success';
-
-                newItem.innerHTML = `
-                    <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - {{ $l == "en" ? "Uploaded by: You (Demo)" : "رفع بواسطة: أنت (تجريبي)" }})</small></div>
-                    <div>
-                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="{{ $l == "en" ? "Download" : "تنزيل" }}"><i class="ti ti-download"></i></a>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="{{ $l == "en" ? "Delete" : "حذف" }}"><i class="ti ti-trash"></i></button>
-                    </div>`;
-                fileList.prepend(newItem);
-                
-                const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadFileModal'));
-                uploadModal.hide();
-                document.getElementById('fileUploadForm').reset();
+                const form = document.getElementById('fileUploadForm');
+                if (form && typeof form.reset === 'function') form.reset();
             });
         } else {
             Swal.fire({
                 icon: 'warning',
-                title: '{{ $l == "en" ? "No File Selected" : "لم يتم اختيار ملف" }}',
-                text: '{{ $l == "en" ? "Please choose a file first." : "يرجى اختيار ملف أولاً." }}',
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
+                text: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
+                confirmButtonText: l === 'en' ? "OK" : "موافق"
             });
         }
     }
 
-    function deleteFile(buttonElement, fileName) {
-        console.log('deleteFile called with:', buttonElement, fileName);
-        
-        if (typeof Swal === 'undefined') {
-            console.error('SweetAlert2 is not loaded!');
-            alert('Delete functionality not available - SweetAlert2 not loaded');
-            return;
-        }
-        
-        Swal.fire({
-            title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-            text: `{{ $l == "en" ? "Do you want to delete the file: " : "هل تريد حذف الملف: " }}"${fileName}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
-            cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Remove the file from the DOM
-                const fileElement = buttonElement.closest('li');
-                if (fileElement) {
-                    fileElement.remove();
-                }
-                
-                Swal.fire({
-                    title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                    text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
-                    icon: 'success',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-                });
-            }
-        });
+    function deleteFile(buttonElement, fileId) {
+    console.log('deleteFile called with:', buttonElement, fileId);
+
+    if (typeof Swal === 'undefined') {
+        console.error('SweetAlert2 is not loaded!');
+        alert('Delete functionality not available - SweetAlert2 not loaded');
+        return;
     }
+
+    Swal.fire({
+        title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+        text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
+        cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error deleting file");
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // إزالة العنصر من الصفحة
+                    const fileElement = buttonElement.closest('li');
+                    if (fileElement) fileElement.remove();
+
+                    Swal.fire({
+                        title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                        text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
+                        icon: 'success',
+                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                    });
+                } else {
+                    Swal.fire({
+                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                        text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                    text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+                    icon: 'error'
+                });
+            });
+        }
+    });
+}
+
 
     function deleteTask(taskId, taskTitle) {
         console.log('deleteTask called with:', taskId, taskTitle);
