@@ -527,6 +527,11 @@ private function getProfileData(User $user): array
         'currency'         => $user->currency,
         'role'             => $user->getRoleNames()->first(),
     ];
+    
+    if ((bool) $user->HaveCompany && $user->company) {
+        $data['startupId'] = $user->company->id;
+        $data['startupName'] = $user->company->{"name_$locale"};
+    }
 
     if ($user->hasRole('Mentor') || $user->hasRole('Registered')) {
         $requests = MentorshipRequest::where('mentor_id', $user->id)->get();
