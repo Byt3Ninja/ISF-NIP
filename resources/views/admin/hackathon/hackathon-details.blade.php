@@ -31,7 +31,7 @@
           ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static']
         ];
     }else{
-      if($user->hasRole('admin') || $user->hasRole('organizationManager')) {
+      if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
         $tabsDatastatic =  [
           // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
           // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
@@ -53,7 +53,7 @@
 
   $tabsData = array_merge($tabsData, $tabsDatastatic);
 
-  if($user->hasRole('admin') || $user->hasRole('organizationManager')) {
+  if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Submissions' : 'الاجابات', 'type' => 'static'];
   }
   $tabs = collect($tabsData)->map(function ($tab) {
