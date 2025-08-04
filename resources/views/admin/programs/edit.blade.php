@@ -17,6 +17,9 @@
     button.close {
         display: none;
     }
+    .bg-first { background-color: #fff0e1 !important; }
+    .bg-second { background-color: #ebebed !important; }
+    .bg-third { background-color: #ddf6e8 !important; }
 </style>
 @stop
 
@@ -28,6 +31,7 @@
         'financial_policy' => $l == 'ar' ? 'السياسة المالية' : 'Financial Policy',
         'legal_policy' => $l == 'ar' ? 'السياسة القانونية' : 'Legal Policy',
         'mentorship_request' => $l == 'ar' ? 'طلب الإرشاد' : 'Mentorship Request',
+        'winner_selection' => $l == 'ar' ? 'اختيار الفائزين' : 'Winner Selection',
     ];
 
     $tabs = [
@@ -43,6 +47,10 @@
         'page_name' => $l == 'ar' ? 'يرجى إدخال اسم الصفحة.' : 'Please enter a page name.',
         'page_content' => $l == 'ar' ? 'يرجى إدخال محتوى الصفحة.' : 'Please enter page content.',
     ];
+    if( $ccycle->type == 'Hackathon' )
+    {
+        $tabs[] = ['id' => 'winner_selection', 'label' => $labels['winner_selection'], 'active' => false];
+    }
 @endphp
 
 @section('content')
@@ -371,7 +379,8 @@
         })
 
         $(document).on('click', '#pills-tab-edit .nav-item', function(e) {
-            if( $(this).find('.nav-link').attr('id') == 'pills-custom_pages-tab-edit' )
+            var current_tab = $(this).find('.nav-link').attr('id');
+            if( current_tab == 'pills-custom_pages-tab-edit' || current_tab == 'pills-winner_selection-tab-edit' )
             {
                 $("#submit_container").hide();
                 $("#submit_container").removeClass('d-flex');

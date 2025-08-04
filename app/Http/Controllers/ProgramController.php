@@ -15,10 +15,11 @@ use App\SurveyResponses;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleData;
+use Illuminate\Support\Facades\DB;
 use App\ScreeningEvaluationResults;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Session;
-use URL;
+use URL, stdClass;
 
 class ProgramController extends Controller
 {
@@ -245,7 +246,110 @@ class ProgramController extends Controller
         $cycles = $cycles->with(['custom_pages'])->get();
         $id = request()->route('id');
         $ccycle = $cycles->where('id', $id)->first();
-        return view('admin.programs.edit', compact('cycles', 'ccycle', 'id'));
+        $final_step = $ccycle->steps->where('stype', 5)->values()->last();
+        $results = collect([]);
+        if( !empty( $final_step ) )
+        {
+            $step_id = $final_step->id;
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $step_id );
+            $metadata = ScreeningEvaluationResults::metadata( $step_id );
+
+            $judges = $metadata['judges'];
+            $evaluation = $metadata['evaluation'];
+            $_companies = $metadata['_companies'];
+            foreach( $_companies as $index => $company )
+            {
+                $totalScore = 0;
+                $averageScore = 0;
+                $hasDraft = false;
+                $hasPublished = false;
+                $hasNotEvaluated = false;
+                $evaluationStatuses = [];
+                $publishedEvaluations = 0;
+
+                $filterScore = 0;
+                $filterTotalScore = 0;
+                $filterEvaluationsCount = 0;
+                foreach( $judges as $judge )
+                {
+                    if( in_array($company->id, $judge->startups->toArray()) )
+                    {
+                        $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+                        if( $scoped_company )
+                        {
+                            $status = strtolower($scoped_company->status ?? 'not-evaluated');
+                            $evaluationStatuses[] = $status;
+
+                            if ($status === 'published') $hasPublished = true;
+                            elseif ($status === 'draft') $hasDraft = true;
+                            else $hasNotEvaluated = true;
+
+                            if( strtolower($status) === 'published' && isset( $scoped_company->score ) )
+                            {
+                                $totalScore += (float) $scoped_company->score;
+                                $publishedEvaluations++;
+                            }
+                            if( strtolower($status) === 'draft' && isset( $scoped_company->score ) )
+                            {
+                                $filterTotalScore += (float) $scoped_company->score;
+                                $filterEvaluationsCount++;
+                            }
+                        }
+                    }
+                }
+												
+                $primaryStatus = 'not-evaluated';
+                if ($hasPublished && !$hasDraft && !$hasNotEvaluated) {
+                    $primaryStatus = 'published';
+                } elseif ($hasDraft) {
+                    $primaryStatus = 'draft';
+                } elseif ($hasPublished && $hasNotEvaluated) {
+                    $primaryStatus = 'mixed'; // Has both published and not evaluated
+                }
+                if ($publishedEvaluations > 0) {
+                    $averageScore = round($totalScore / $publishedEvaluations, 1);
+                }
+                $_companies[$index]->totalScore = $averageScore;
+                $_companies[$index]->primaryStatus = $primaryStatus;
+                $_companies[$index]->filterTotalScore = $filterTotalScore;
+                $_companies[$index]->filterEvaluationsCount = $filterEvaluationsCount;
+                $_companies[$index]->users_ids = $company->users->pluck('id')->toArray();
+            }
+            $users_ids = $_companies->pluck('users_ids')->flatten()->unique()->toArray();
+            $teams = DB::table('team_formations')
+                ->whereIn('user_id', $users_ids)
+                ->select('id', 'name', 'user_id', 'project_name_ar', 'project_name_en')
+                ->get()
+                ->groupBy('company_id');
+
+
+            $l = app()->getLocale();
+            $ranks = $results = $_companies->map(function($company) {
+                $rank = new stdClass;
+                $rank->id = $company->id;
+                $rank->score = $company->average_score;
+                return $rank;
+            })->sortByDesc('score')->values()->map(function($rank, $index) {
+                $rank->rank = $index + 1;
+                return $rank;
+            })->keyBy('id')->toArray();
+            $results = $_companies->map(function ($company) use ( $teams, $l, $ranks ) {
+                $users_ids = $company->users_ids;
+                $matched_team = $teams->first(function ($team) use ($users_ids) {
+                    return in_array($team->user_id, $users_ids);
+                });
+                $team = new stdClass;
+                $team->id = $company->id;
+                $team->name =  $matched_team ? $matched_team->name : $company->{'name_' . $l};
+                $team->score = $company->average_score;
+                $team->status = $company->primaryStatus;                
+                $team->project = $matched_team ? $matched_team->{'project_name_' . $l} : '-';
+                $team->rank = isset($ranks[$company->id]) ? $ranks[$company->id]->rank : null;
+                if( $team->score == 0 ) { $team->rank = null; }
+                return $team;
+            });
+        }
+        return view('admin.programs.edit', compact('cycles', 'ccycle', 'id', 'results'));
     }
 
     /**
