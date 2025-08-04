@@ -602,6 +602,14 @@ private function getProfileData(User $user): array
 
         $data['mentorBio'] = $mentorBio;
     }
+   
+   if ($user->hasRole('Registered')) {
+    $company = optional($user->company);
+    $cycle   = optional($company->cycledata);
+
+    $data['organizationId'] = $cycle->organization_id;
+    $data['cycleId']        = $cycle->id;
+}
 
     return $data;
 }
