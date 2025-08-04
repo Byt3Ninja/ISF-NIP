@@ -1120,6 +1120,16 @@ class HackathonController extends Controller
                     $allteamMember->save();
                 }
 
+                
+                    $teamformation = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+                    $inviteduser = $teamformation->user_id;
+                    $userInv = User::where('id', $inviteduser)->first();
+                    $updatecompany =Company::where('id', $user->company_id)->first();
+                    $updatecompany->cycle = $userInv->company->cycle;
+                    $updatecompany->step = $userInv->company->step;
+                    $updatecompany->save();
+    
+
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
     }
 
