@@ -267,7 +267,7 @@
         </div>
       </div>
 
-      <div class="card mt-4">
+      {{-- <div class="card mt-4">
         <div class="card-header">
           <h5 class="mb-0"><i class="ti ti-video me-2"></i> {{ $l == 'en' ? 'Upcoming Mentorship Sessions for Your Team'
             : 'جلسات الإرشاد القادمة لفريقكم' }}</h5>
@@ -297,9 +297,9 @@
             'طلب جلسة إرشاد جديدة / عرض المرشدين' }}
           </a>
         </div>
-      </div>
+      </div> --}}
 
-      <div class="card mt-4">
+      {{-- <div class="card mt-4">
         <div class="card-header">
           <h5 class="mb-0"><i class="ti ti-link me-2"></i>{{ $l == 'en' ? 'Important Hackathon Links' : 'روابط مهمة
             للهاكثون' }}</h5>
@@ -315,7 +315,8 @@
                 وتعليمات الهاكثون' }}</a></li>
           </ul>
         </div>
-      </div>
+      </div> --}}
+      
     </div>
   </div>
 </div>
