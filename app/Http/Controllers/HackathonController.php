@@ -168,8 +168,21 @@ class HackathonController extends Controller
         // $hackathon = Hackathon::findOrFail($id);
         // return view('admin.hackathon.my-team', compact('hackathon'));
         $user = Auth::user();
+        $userTeam_q = "SELECT team_formation_id FROM team_members WHERE user_id = ? ";
+        $userTeam = collect(DB::select($userTeam_q, [$user->id]));
+        $TF_id = $userTeam->first()->team_formation_id;
         $team_Formation_q = "SELECT 
-        tf.*,
+        tf.id as 'tf_id',
+        tf.name as 'tf_name',
+        tf.description as 'tf_description',
+        tf.cycle_id as 'tf_cycle_id',
+        tf.step_id as 'tf_step_id',
+        tf.user_id as 'tf_user_id',
+        tf.project_name_en as 'tf_projectName',
+        tf.project_description_en as 'tf_projectDescription',
+        tf.project_status as 'tf_projectStatus',
+        tf.created_at as 'tf_created_at',
+        tf.updated_at as 'tf_updated_at',
         u.id as 'u_id',
         concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
         concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
@@ -181,17 +194,75 @@ class HackathonController extends Controller
         tm.Name as 'tm_name',
         tm.email as 'tm_email',
         tm.acceptInvition as 'tm_acceptInvition',
-        tm.isTeamLeader as 'tm_isTeamLeader' 
+        tm.isTeamLeader as 'tm_isTeamLeader',
+        cy.id as 'cy_id',
+        cy.title as 'cy_title'
         FROM 
         team_formations as tf
-        LEFT JOIN users as u ON u.id = tf.user_id
         LEFT JOIN team_members as tm ON tm.team_formation_id = tf.id
-        WHERE tf.user_id = ? AND tm.acceptInvition = 'accepted'";
-        $team_Formation_raw = collect(DB::select($team_Formation_q, [$user->id]));
+        LEFT JOIN users as u ON u.id = tm.user_id
+        LEFT JOIN cycles as cy ON cy.id = tf.cycle_id
+        WHERE tf.id = ? AND tm.acceptInvition = 'accepted'";
+        $team_Formation_raw = collect(DB::select($team_Formation_q, [$TF_id]));
 
+        if ($team_Formation_raw->isEmpty()) {
+            return null;
+        }
+
+        $first = $team_Formation_raw->first();
+
+        $members = $team_Formation_raw->map(function ($row) {
+                return [
+                    'name' => $row->user_name_en ?? $row->tm_name ?? null,
+                    'name_ar' => $row->user_name_ar ?? null,
+                ];
+            })->unique(function ($member) {
+                return strtolower(($member['name'] ?? '') . '|' . ($member['name_ar'] ?? ''));
+            })
+            ->values()
+            ->all();
+        $teamData = [
+            'name' => $first->tf_name,
+            'name_ar' => $first->tf_name,
+            'hackathon' => $first->cy_title,
+            'hackathon_ar' => $first->cy_title,
+            'members' => $members,
+        ];
+
+        $sharedFile_q = "SELECT 
+                            sf.id as sf_id,
+                            sf.file as sf_file,
+                            sf.description as sf_description,
+                            sf.created_at as sf_created_at,
+                            tf.id as tf_id,
+                            tf.name as tf_name,
+                            tf.description as tf_description,
+                            tm.id as tm_id,
+                            tm.user_id as tm_user_id,
+                            tm.team_formation_id as tm_team_formation_id,
+                            tm.Name as tm_name,
+                            tm.email as tm_email,
+                            tm.acceptInvition as tm_acceptInvition,
+                            tm.isTeamLeader as tm_isTeamLeader,
+                            u.id as u_id,
+                            concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                            concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                            u.email as 'u_email',
+                            u.img_url as 'u_img_url'
+                        FROM 
+                            shared_files as sf
+                        LEFT JOIN team_formations as tf ON tf.id = sf.team_formation_id
+                        LEFT JOIN team_members as tm ON tm.id = sf.team_member_id
+                        LEFT JOIN users as u ON u.id = sf.user_id
+                        WHERE sf.team_formation_id = ? 
+                        ";
+        
+        $sharedFile = collect(DB::select($sharedFile_q, [$TF_id]));
+
+       
 
         // dd($team_Forsmation_raw);
-        return view('admin.hackathon.team-workspace', compact('team_Formation_raw'));
+        return view('admin.hackathon.team-workspace', compact('teamData', 'sharedFile'));
     }
 
     public function show(Request $request, $id)
