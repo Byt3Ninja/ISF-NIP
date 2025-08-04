@@ -54,7 +54,7 @@
   $tabsData = array_merge($tabsData, $tabsDatastatic);
 
   if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
-    $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Submissions' : 'الاجابات', 'type' => 'static'];
+    $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 'type' => 'static'];
   }
   $tabs = collect($tabsData)->map(function ($tab) {
     return ['target' => $tab['title'], 'icon' => $tab['icon'], 'label' => $tab['label'], 'type' => $tab['type']];
