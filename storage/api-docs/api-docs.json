@@ -574,6 +574,10 @@
                                                     "title": {
                                                         "type": "string",
                                                         "example": "Egypt"
+                                                    },
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "example": 20
                                                     }
                                                 },
                                                 "type": "object"
