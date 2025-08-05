@@ -84,4 +84,17 @@ class Step extends Model
     {
         return $this->hasMany(Screening::class, 'step_id');
     }
+
+	public function getStypeLabelAttribute()
+{
+    return match ($this->stype) {
+        1 => __('cycles.Custom Form'),
+        2 => __('cycles.Screening'),
+        3 => __('cycles.Mentorship'),
+        4 => __('cycles.Training'),
+        5 => __('cycles.Final evaluation'),
+        6 => __('admin.Team Formation'),
+        default => null,
+    };
+}
 }
