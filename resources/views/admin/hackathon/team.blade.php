@@ -23,8 +23,8 @@
           <div class="mx-auto position-relative mb-3 w-px-150 h-px-150 rounded-circle shadow-sm border">
             {{-- member's image url, provide a default if it's null --}}
             <img 
-              src="{{ $member->img_url ?? '/icons/account.svg' }}"
-              onerror="this.onerror=null;this.src='/icons/account.svg';"
+              src="{{ '/191014/'. $member->img_url ?? '/vuexy/assets/img/avatars/3.png' }}"
+              onerror="this.onerror=null;this.src='/vuexy/assets/img/avatars/3.png';"
               alt="{{ $member->name }}" 
               class="h-100 w-100 rounded-circle img-fluid"
               style="width:96px;height:96px;object-fit:cover;"
