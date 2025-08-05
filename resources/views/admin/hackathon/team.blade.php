@@ -1,8 +1,9 @@
-@extends('layouts.hr-admin')
+@extends('layouts.admin')
 
 @section('content')
 <!-- Main Content -->
-<div class="container py-5">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
   {{-- Check if the team object exists --}}
   @if($team)
     <div class="text-center mb-5">
@@ -61,5 +62,6 @@
    @else
     @include('includes.no-result', ['message' => $l == 'ar' ? 'لا توجد معلومات متاحة عن الفريق.' : 'No team information available.'])
   @endif
+  </div>
 </div>
 @stop

@@ -1,322 +1,324 @@
-@extends('layouts.hr-admin')
+@extends('layouts.admin')
 
 @section('content')
 <!-- Main Content -->
-<div class="container mt-4">
-  <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span class="text-primary">{{ $l == 'en'
-      ? $team_Formation_raw->first()->tf_name : $team_Formation_raw->first()->tf_name }}</span></h2>
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <h2 class="mb-4">{{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }} <span class="text-primary">{{ $l == 'en'
+        ? $team_Formation_raw->first()->tf_name : $team_Formation_raw->first()->tf_name }}</span></h2>
 
-  <!-- No Team Section -->
-  <div id="no-team-section" class="card card-body text-center p-5" style="display:none;">
-    <i class="ti ti-users ti-xl text-muted mb-3"></i>
-    <h4>{{ $l == 'en' ? 'You haven\'t joined or created a team yet.' : 'لم تنضم إلى فريق بعد أو لم تقم بإنشاء فريق.' }}
-    </h4>
-    <p>{{ $l == 'en' ? 'You can create a new team or join an existing team from the hackathon details page.' : 'يمكنك
-      إنشاء فريق جديد أو الانضمام إلى فريق موجود من خلال صفحة تفاصيل الهاكثون.' }}</p>
-    <a href="#" class="btn btn-primary mt-3">
-      <i class="ti ti-arrow-left me-1"></i> {{ $l == 'en' ? 'Back to Hackathon & Setup Team' : 'العودة لصفحة الهاكثون
-      وتكوين فريق' }}
-    </a>
-  </div>
-
-  <!-- Team Management Section -->
-  <div id="team-management-section" class="row">
-    <div class="col-md-7">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l ==
-              'en' ? $team_Formation_raw->first()->tf_name : $team_Formation_raw->first()->tf_name }}</span></h5>
-        </div>
-        <div class="card-body">
-
-          @if( session()->has('success') )
-          <div class="row">
-            <div class="col-md-12">
-              <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
-                {{ __('admin.'. session()->get('success')) }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-          </div>
-          @endif
-          @if( session()->has('error') )
-          <div class="row">
-            <div class="col-md-12">
-              <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
-                {{ __('admin.'.session()->get('error')) }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-          </div>
-          @endif
-
-          @php
-          $maxMembers = $count_team;
-          $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
-         
-          $T=0;
-          $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
-          
-          @endphp
-          {{-- {{ dd($team_Formation_raw) }} --}}
-          <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span
-              id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
-          <ul class="list-group mb-3" id="team-members-list">
-            @php
-            $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
-            @endphp
-            {{-- {{ dd($team_leader, $team_members) }} --}}
-            @if($team_leader)
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <div class="avatar avatar-sm me-2">
-                  <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
-                    class="rounded-circle">
-                </div>
-               <strong>
-                    @if($leaderOrnot)
-                        {{ $l == 'en' 
-                            ? "Leader ({$team_leader->user_name_en})" 
-                            : "قائد ({$team_leader->user_name_ar})" }}
-                    @else
-                        {{ $l == 'en' ? 'You' : 'انت' }}
-                    @endif
-                </strong>
-              </div>
-              <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
-            </li>
-            @endif
-          
-            @foreach ($team_members as $member)
-          @php $T++ @endphp
-            <li id="Member{{ $member->tm_id }}"
-              class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <div class="avatar avatar-sm me-2">
-                  <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
-                    class="rounded-circle">
-                </div>
-                {{ $l == 'en' ?  $member->tm_name .' ( Team Member '.$T.')' : $member->tm_name . '( عضو الفريق '.$T.' )' }}
-              </div>
-              @if($leaderOrnot->count() > 0)
-              <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
-                title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}"
-                onclick="confirmRemoveMember({{ $member->tm_id }}, '{{ $member->tm_name }}')">
-                <i class="ti ti-user-minus"></i>
-              </button>
-              @endif
-            </li>
-            @endforeach
-
-            @foreach ($team_Pinding as $index => $pendingMember)
-            <li id="pendingMember{{ $pendingMember->tm_id }}"
-              class="list-group-item d-flex justify-content-between align-items-center text-muted">
-              <div>
-                <i class="ti ti-user-plus me-2"></i>
-                {{ $l == 'en' ? 'Pending invitation to: '. $pendingMember->tm_email.'' : 'دعوة معلقة لـ:
-                user3@example.com' }}
-              </div>
-
-              <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}">
-              @if($leaderOrnot->count() > 0)
-              <button
-                class="btn btn-sm btn-outline-secondary" data-id="{{ $pendingMember->tm_id }}" data-bs-toggle="tooltip"
-                title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}"
-                onclick="confirmCancelInvitation({{ $pendingMember->tm_id, $pendingMember->tm_email }})">
-                <i class="ti ti-x"></i>
-              </button>
-              @endif
-
-            </li>
-            @endforeach
-
-          </ul>
-          {{-- {{ dd($members, $maxMembers) }} --}}
-            @if($leaderOrnot->count() > 0)
-              @if($members <= $maxMembers)
-              <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
-              <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
-                @csrf
-                <div class="col-auto flex-grow-1">
-                  <input type="email" name="memberEmail" class="form-control" id="memberEmail"
-                    placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
-                </div>
-                <div class="col-auto">
-                  <button type="submit" class="btn btn-success">
-                    <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
-                  </button>
-                </div>
-              </form>
-              @else
-              <div class="alert alert-info">{{ $l == 'en' ? 'The team is full.' : 'الفريق مكتمل.' }}</div>
-              @endif
-            @endif
-          <hr>
-          @if($leaderOrnot->count() > 0)
-            @php
-            $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition',
-            'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
-            @endphp
-
-
-            <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:'
-              }}</h6>
-            <div id="join-requests-list">
-              @if($teamLeader->isEmpty())
-              <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.'
-                }}</div>
-              @else
-
-              <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>{{ $teamLeader->first()->tm_name }}</strong>
-
-                </div>
-
-
-                <button class="btn btn-outline-primary btn-sm"
-                  onclick="ApprovedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
-                  {{ $l == 'en' ? 'Approve' : ' موافقة ' }}
-                  <i class="bi bi-person-plus-fill ms-2"></i>
-                </button>
-
-                <button class="btn btn-outline-danger btn-sm"
-                  onclick="RejectedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
-                  {{ $l == 'en' ? 'Rejects' : ' رفض ' }}
-                  <i class="bi bi-person-plus-fill ms-2"></i>
-                </button>
-
-                {{-- <button class="btn btn-outline-primary btn-sm" disabled>
-                  {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
-                  <i class="bi bi-person-plus-fill ms-2"></i>
-                </button> --}}
-
-
-              </div>
-
-              @endif
-            </div>
-          @endif
-        </div>
-        <div class="card-footer">
-          {{-- <a href="/dashboard/hackathon/my-team" class="btn btn-info">
-            <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
-          </a> --}}
-          {{-- @if($leaderOrnot->count() < 0) <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
-            <i class="ti ti-logout me-1"></i> {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
-            </button>
-            @endif
-            @if($leaderOrnot->count() > 0)
-            <button disabled class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()"
-              id="disbandTeamBtn" style="display:none;">
-              <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
-            </button>
-            @endif --}}
-        </div>
-      </div>
+    <!-- No Team Section -->
+    <div id="no-team-section" class="card card-body text-center p-5" style="display:none;">
+      <i class="ti ti-users ti-xl text-muted mb-3"></i>
+      <h4>{{ $l == 'en' ? 'You haven\'t joined or created a team yet.' : 'لم تنضم إلى فريق بعد أو لم تقم بإنشاء فريق.' }}
+      </h4>
+      <p>{{ $l == 'en' ? 'You can create a new team or join an existing team from the hackathon details page.' : 'يمكنك
+        إنشاء فريق جديد أو الانضمام إلى فريق موجود من خلال صفحة تفاصيل الهاكثون.' }}</p>
+      <a href="#" class="btn btn-primary mt-3">
+        <i class="ti ti-arrow-left me-1"></i> {{ $l == 'en' ? 'Back to Hackathon & Setup Team' : 'العودة لصفحة الهاكثون
+        وتكوين فريق' }}
+      </a>
     </div>
 
-    <div class="col-md-5">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="ti ti-target me-2"></i> {{ $l == 'en' ? 'Team Goal & Project' : 'هدف الفريق
-            ومشروعه' }}</h5>
-        </div>
-        <div class="card-body">
-          <h6>{{ $l == 'en' ? 'Project Idea Name :' : 'اسم فكرة المشروع :' }} {{
-            $team_Formation_raw->first()->tf_projectName_en }}</h6>
-          <hr>
-          <p id="team-project-idea">{{ $l == 'en' ? 'Project Idea Description :' : 'وصف فكرة المشروع :' }} <br>{{
-            $team_Formation_raw->first()->tf_projectDescription_en }}</p>
-          <button class="btn btn-sm btn-outline-secondary mb-3" data-bs-toggle="modal"
-            data-bs-target="#editProjectIdeaModal">
-            <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
-          </button>
-
-          {{-- <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
-          <p id="team-target-track">Idea + Team, Define the problem. Form your team. Agree on the project goal.
-            Research, Validate the idea. Explore similar solutions. Finalize key features.
-            Design, Sketch user flow. Draft UI. Pick your tools and tech stack.
-            Build, Set up the repo. Develop core features. Test early and often.
-            Ready for Pitch, Polish the demo. Prepare slides. Practice the story.</p> --}}
-
-          <h6>{{ $l == 'en' ? 'Project Status:' : 'حالة المشروع:' }}</h6>
-          <div class="progress mb-2" style="height: 20px;">
-            <div class="progress-bar bg-success" role="progressbar"
-              style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;"
-              aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0"
-              aria-valuemax="100">{{ $team_Formation_raw->first()->tf_projectStatus }}% {{ $l == 'en' ? 'Complete' :
-              'مكتمل' }}</div>
+    <!-- Team Management Section -->
+    <div id="team-management-section" class="row">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">{{ $l == 'en' ? 'Team:' : 'فريق:' }} <span id="team-name-display" class="fw-bold">{{ $l ==
+                'en' ? $team_Formation_raw->first()->tf_name : $team_Formation_raw->first()->tf_name }}</span></h5>
           </div>
-          <small class="text-muted">
-            @if($team_Formation_raw->first()->tf_projectStatus == 20)
-            {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
-            @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
-            {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
-            @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
-            {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core
-            functionality.') }}
-            @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
-            {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the
-            presentation.') }}
-            @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
-            {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete documentation.
-            story.') }}
+          <div class="card-body">
+
+            @if( session()->has('success') )
+            <div class="row">
+              <div class="col-md-12">
+                <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+                  {{ __('admin.'. session()->get('success')) }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              </div>
+            </div>
             @endif
-          </small>
+            @if( session()->has('error') )
+            <div class="row">
+              <div class="col-md-12">
+                <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+                  {{ __('admin.'.session()->get('error')) }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              </div>
+            </div>
+            @endif
+
+            @php
+            $maxMembers = $count_team;
+            $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
+          
+            $T=0;
+            $leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
+            
+            @endphp
+            {{-- {{ dd($team_Formation_raw) }} --}}
+            <h6><i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }} (<span
+                id="member-count">{{ $members }}</span>/{{ $maxMembers }}):</h6>
+            <ul class="list-group mb-3" id="team-members-list">
+              @php
+              $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
+              @endphp
+              {{-- {{ dd($team_leader, $team_members) }} --}}
+              @if($team_leader)
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="avatar avatar-sm me-2">
+                    <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
+                      class="rounded-circle">
+                  </div>
+                <strong>
+                      @if($leaderOrnot)
+                          {{ $l == 'en' 
+                              ? "Leader ({$team_leader->user_name_en})" 
+                              : "قائد ({$team_leader->user_name_ar})" }}
+                      @else
+                          {{ $l == 'en' ? 'You' : 'انت' }}
+                      @endif
+                  </strong>
+                </div>
+                <span class="badge bg-primary rounded-pill">{{ $l == 'en' ? 'Leader' : 'قائد' }}</span>
+              </li>
+              @endif
+            
+              @foreach ($team_members as $member)
+            @php $T++ @endphp
+              <li id="Member{{ $member->tm_id }}"
+                class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="avatar avatar-sm me-2">
+                    <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
+                      class="rounded-circle">
+                  </div>
+                  {{ $l == 'en' ?  $member->tm_name .' ( Team Member '.$T.')' : $member->tm_name . '( عضو الفريق '.$T.' )' }}
+                </div>
+                @if($leaderOrnot->count() > 0)
+                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
+                  title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}"
+                  onclick="confirmRemoveMember({{ $member->tm_id }}, '{{ $member->tm_name }}')">
+                  <i class="ti ti-user-minus"></i>
+                </button>
+                @endif
+              </li>
+              @endforeach
+
+              @foreach ($team_Pinding as $index => $pendingMember)
+              <li id="pendingMember{{ $pendingMember->tm_id }}"
+                class="list-group-item d-flex justify-content-between align-items-center text-muted">
+                <div>
+                  <i class="ti ti-user-plus me-2"></i>
+                  {{ $l == 'en' ? 'Pending invitation to: '. $pendingMember->tm_email.'' : 'دعوة معلقة لـ:
+                  user3@example.com' }}
+                </div>
+
+                <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}">
+                @if($leaderOrnot->count() > 0)
+                <button
+                  class="btn btn-sm btn-outline-secondary" data-id="{{ $pendingMember->tm_id }}" data-bs-toggle="tooltip"
+                  title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}"
+                  onclick="confirmCancelInvitation({{ $pendingMember->tm_id, $pendingMember->tm_email }})">
+                  <i class="ti ti-x"></i>
+                </button>
+                @endif
+
+              </li>
+              @endforeach
+
+            </ul>
+            {{-- {{ dd($members, $maxMembers) }} --}}
+              @if($leaderOrnot->count() > 0)
+                @if($members <= $maxMembers)
+                <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
+                <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
+                  @csrf
+                  <div class="col-auto flex-grow-1">
+                    <input type="email" name="memberEmail" class="form-control" id="memberEmail"
+                      placeholder="{{ $l == 'en' ? 'Member email address' : ' بريد الإلكتروني للمستخدم ' }}" required>
+                  </div>
+                  <div class="col-auto">
+                    <button type="submit" class="btn btn-success">
+                      <i class="ti ti-send me-1"></i> {{ $l == 'en' ? 'Send Invitation' : 'إرسال دعوة' }}
+                    </button>
+                  </div>
+                </form>
+                @else
+                <div class="alert alert-info">{{ $l == 'en' ? 'The team is full.' : 'الفريق مكتمل.' }}</div>
+                @endif
+              @endif
+            <hr>
+            @if($leaderOrnot->count() > 0)
+              @php
+              $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition',
+              'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
+              @endphp
+
+
+              <h6><i class="ti ti-user-check me-2"></i>{{ $l == 'en' ? 'Pending Join Requests:' : 'طلبات الانضمام المعلقة:'
+                }}</h6>
+              <div id="join-requests-list">
+                @if($teamLeader->isEmpty())
+                <div class="alert alert-info">{{ $l == 'en' ? 'No join requests currently.' : 'لا توجد طلبات انضمام حالياً.'
+                  }}</div>
+                @else
+
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{{ $teamLeader->first()->tm_name }}</strong>
+
+                  </div>
+
+
+                  <button class="btn btn-outline-primary btn-sm"
+                    onclick="ApprovedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                    {{ $l == 'en' ? 'Approve' : ' موافقة ' }}
+                    <i class="bi bi-person-plus-fill ms-2"></i>
+                  </button>
+
+                  <button class="btn btn-outline-danger btn-sm"
+                    onclick="RejectedjoinTeam('{{ $teamLeader->first()->tm_id }}','{{ $teamLeader->first()->tm_email }}')">
+                    {{ $l == 'en' ? 'Rejects' : ' رفض ' }}
+                    <i class="bi bi-person-plus-fill ms-2"></i>
+                  </button>
+
+                  {{-- <button class="btn btn-outline-primary btn-sm" disabled>
+                    {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                    <i class="bi bi-person-plus-fill ms-2"></i>
+                  </button> --}}
+
+
+                </div>
+
+                @endif
+              </div>
+            @endif
+          </div>
+          <div class="card-footer">
+            {{-- <a href="/dashboard/hackathon/my-team" class="btn btn-info">
+              <i class="ti ti-message-circle me-1"></i> {{ $l == 'en' ? 'Team Workspace' : 'مساحة عمل الفريق' }}
+            </a> --}}
+            {{-- @if($leaderOrnot->count() < 0) <button class="btn btn-danger float-end" onclick="confirmLeaveTeam()">
+              <i class="ti ti-logout me-1"></i> {{ $l == 'en' ? 'Leave Team' : 'مغادرة الفريق' }}
+              </button>
+              @endif
+              @if($leaderOrnot->count() > 0)
+              <button disabled class="btn btn-outline-danger float-end me-2" onclick="confirmDisbandTeam()"
+                id="disbandTeamBtn" style="display:none;">
+                <i class="ti ti-trash me-1"></i> {{ $l == 'en' ? 'Disband Team (Leader)' : 'حل الفريق (للقائد)' }}
+              </button>
+              @endif --}}
+          </div>
         </div>
       </div>
 
-      {{-- <div class="card mt-4">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="ti ti-video me-2"></i> {{ $l == 'en' ? 'Upcoming Mentorship Sessions for Your Team'
-            : 'جلسات الإرشاد القادمة لفريقكم' }}</h5>
-        </div>
-        <div class="card-body" id="team-mentorship-sessions">
-          <div id="no-mentorship-sessions" class="text-muted">
-            <p>{{ $l == 'en' ? 'No mentorship sessions currently scheduled for your team.' : 'لا توجد جلسات إرشاد مجدولة
-              حالياً لفريقكم.' }}</p>
+      <div class="col-md-5">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ti ti-target me-2"></i> {{ $l == 'en' ? 'Team Goal & Project' : 'هدف الفريق
+              ومشروعه' }}</h5>
           </div>
-          <ul class="list-group list-group-flush" id="booked-sessions-list" style="display:none;">
-            <li class="list-group-item px-0">
-              <div class="d-flex w-100 justify-content-between">
-                <h6 class="mb-1">{{ $l == 'en' ? 'With' : 'مع' }} <strong>{{ $l == 'en' ? 'Dr. Ahmed Abdullah' : 'د.
-                    أحمد عبدالله' }}</strong> ({{ $l == 'en' ? 'AI Expert' : 'خبير ذكاء اصطناعي' }})</h6>
-                <small>{{ $l == 'en' ? 'Tomorrow, 02:00 PM' : 'غداً, 02:00 م' }}</small>
-              </div>
-              <p class="mb-1">{{ $l == 'en' ? 'Topic: Product development strategy and idea validation.' : 'الموضوع:
-                استراتيجية تطوير المنتج والتحقق من الفكرة.' }}</p>
-              <small class="text-success">
-                <i class="ti ti-video me-1"></i> {{ $l == 'en' ? 'Virtual meeting link:' : 'رابط الاجتماع الافتراضي:' }}
-                <a href="#" target="_blank">{{ $l == 'en' ? 'Click here to join' : 'اضغط هنا للانضمام' }}</a>
-              </small>
-            </li>
-          </ul>
-          <a href="#" class="btn btn-outline-primary btn-sm mt-3" id="link-to-book-mentorship">
-            <i class="ti ti-calendar-plus me-1"></i> {{ $l == 'en' ? 'Request New Mentorship Session / View Mentors' :
-            'طلب جلسة إرشاد جديدة / عرض المرشدين' }}
-          </a>
-        </div>
-      </div> --}}
+          <div class="card-body">
+            <h6>{{ $l == 'en' ? 'Project Idea Name :' : 'اسم فكرة المشروع :' }} {{
+              $team_Formation_raw->first()->tf_projectName_en }}</h6>
+            <hr>
+            <p id="team-project-idea">{{ $l == 'en' ? 'Project Idea Description :' : 'وصف فكرة المشروع :' }} <br>{{
+              $team_Formation_raw->first()->tf_projectDescription_en }}</p>
+            <button class="btn btn-sm btn-outline-secondary mb-3" data-bs-toggle="modal"
+              data-bs-target="#editProjectIdeaModal">
+              <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+            </button>
 
-      {{-- <div class="card mt-4">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="ti ti-link me-2"></i>{{ $l == 'en' ? 'Important Hackathon Links' : 'روابط مهمة
-            للهاكثون' }}</h5>
+            {{-- <h6>{{ $l == 'en' ? 'Target Track:' : 'المحور المستهدف:' }}</h6>
+            <p id="team-target-track">Idea + Team, Define the problem. Form your team. Agree on the project goal.
+              Research, Validate the idea. Explore similar solutions. Finalize key features.
+              Design, Sketch user flow. Draft UI. Pick your tools and tech stack.
+              Build, Set up the repo. Develop core features. Test early and often.
+              Ready for Pitch, Polish the demo. Prepare slides. Practice the story.</p> --}}
+
+            <h6>{{ $l == 'en' ? 'Project Status:' : 'حالة المشروع:' }}</h6>
+            <div class="progress mb-2" style="height: 20px;">
+              <div class="progress-bar bg-success" role="progressbar"
+                style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;"
+                aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0"
+                aria-valuemax="100">{{ $team_Formation_raw->first()->tf_projectStatus }}% {{ $l == 'en' ? 'Complete' :
+                'مكتمل' }}</div>
+            </div>
+            <small class="text-muted">
+              @if($team_Formation_raw->first()->tf_projectStatus == 20)
+              {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
+              {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
+              {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core
+              functionality.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
+              {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the
+              presentation.') }}
+              @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
+              {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete documentation.
+              story.') }}
+              @endif
+            </small>
+          </div>
         </div>
-        <div class="card-body">
-          <ul class="list-unstyled">
-            <li class="mb-2"><a href="#" id="link-hackathon-details"><i class="ti ti-info-circle me-1"></i> {{ $l ==
-                'en' ? 'Back to Hackathon Details' : 'العودة لصفحة تفاصيل الهاكثون' }}</a></li>
-            <li class="mb-2"><a href="#" id="link-submit-project" class="text-success fw-bold"><i
-                  class="ti ti-upload me-1"></i> {{ $l == 'en' ? 'Go to Project Submission Page' : 'الذهاب لصفحة رفع
-                المشروع' }}</a></li>
-            <li><a href="#"><i class="ti ti-file-text me-1"></i> {{ $l == 'en' ? 'Hackathon Rules & Guidelines' : 'قواعد
-                وتعليمات الهاكثون' }}</a></li>
-          </ul>
-        </div>
-      </div> --}}
-      
+
+        {{-- <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ti ti-video me-2"></i> {{ $l == 'en' ? 'Upcoming Mentorship Sessions for Your Team'
+              : 'جلسات الإرشاد القادمة لفريقكم' }}</h5>
+          </div>
+          <div class="card-body" id="team-mentorship-sessions">
+            <div id="no-mentorship-sessions" class="text-muted">
+              <p>{{ $l == 'en' ? 'No mentorship sessions currently scheduled for your team.' : 'لا توجد جلسات إرشاد مجدولة
+                حالياً لفريقكم.' }}</p>
+            </div>
+            <ul class="list-group list-group-flush" id="booked-sessions-list" style="display:none;">
+              <li class="list-group-item px-0">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">{{ $l == 'en' ? 'With' : 'مع' }} <strong>{{ $l == 'en' ? 'Dr. Ahmed Abdullah' : 'د.
+                      أحمد عبدالله' }}</strong> ({{ $l == 'en' ? 'AI Expert' : 'خبير ذكاء اصطناعي' }})</h6>
+                  <small>{{ $l == 'en' ? 'Tomorrow, 02:00 PM' : 'غداً, 02:00 م' }}</small>
+                </div>
+                <p class="mb-1">{{ $l == 'en' ? 'Topic: Product development strategy and idea validation.' : 'الموضوع:
+                  استراتيجية تطوير المنتج والتحقق من الفكرة.' }}</p>
+                <small class="text-success">
+                  <i class="ti ti-video me-1"></i> {{ $l == 'en' ? 'Virtual meeting link:' : 'رابط الاجتماع الافتراضي:' }}
+                  <a href="#" target="_blank">{{ $l == 'en' ? 'Click here to join' : 'اضغط هنا للانضمام' }}</a>
+                </small>
+              </li>
+            </ul>
+            <a href="#" class="btn btn-outline-primary btn-sm mt-3" id="link-to-book-mentorship">
+              <i class="ti ti-calendar-plus me-1"></i> {{ $l == 'en' ? 'Request New Mentorship Session / View Mentors' :
+              'طلب جلسة إرشاد جديدة / عرض المرشدين' }}
+            </a>
+          </div>
+        </div> --}}
+
+        {{-- <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ti ti-link me-2"></i>{{ $l == 'en' ? 'Important Hackathon Links' : 'روابط مهمة
+              للهاكثون' }}</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="#" id="link-hackathon-details"><i class="ti ti-info-circle me-1"></i> {{ $l ==
+                  'en' ? 'Back to Hackathon Details' : 'العودة لصفحة تفاصيل الهاكثون' }}</a></li>
+              <li class="mb-2"><a href="#" id="link-submit-project" class="text-success fw-bold"><i
+                    class="ti ti-upload me-1"></i> {{ $l == 'en' ? 'Go to Project Submission Page' : 'الذهاب لصفحة رفع
+                  المشروع' }}</a></li>
+              <li><a href="#"><i class="ti ti-file-text me-1"></i> {{ $l == 'en' ? 'Hackathon Rules & Guidelines' : 'قواعد
+                  وتعليمات الهاكثون' }}</a></li>
+            </ul>
+          </div>
+        </div> --}}
+        
+      </div>
     </div>
   </div>
 </div>

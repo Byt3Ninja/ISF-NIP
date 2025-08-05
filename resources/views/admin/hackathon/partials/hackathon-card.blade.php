@@ -45,7 +45,7 @@
 
             <a href="hackathon/dashboard/{{$hackathon['id']}}" class="btn btn-outline-success me-2" style="flex: 1;">
               <i class="ti ti-edit me-1"></i>
-              {{ $l == 'en' ? 'Manage Hackathon' : 'ادارة الهاكثون' }}
+              <span class="text-nowrap text-sm">{{ $l == 'en' ? 'Manage Hackathon' : 'ادارة الهاكثون' }}</span>
             </a>
           @else
             
@@ -64,7 +64,7 @@
                   @else
                     <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
                       <i class="ti ti-send me-1"></i>
-                      {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                      <span class="text-nowrap">{{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}</span>
                     </button>
                   @endif
                 @else
@@ -98,7 +98,9 @@
                   @else
                     <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
                       <i class="ti ti-send me-1"></i>
-                      {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                      <span class="text-nowrap">
+                        {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                      </span>
                     </button>
                   @endif
 
