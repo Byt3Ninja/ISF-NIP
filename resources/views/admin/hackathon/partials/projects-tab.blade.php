@@ -1,7 +1,11 @@
 
 @if($data_evi != null)
   @if($user->hasRole('Admin') || $user->hasRole('organizationmanager'))
-        {{ $l == 'en' ? 'You are Admin':  'انت مسئول' }}
+    <div class="text-center">
+      <h5 class="alert alert-danger">
+          {{ $l == 'en' ? 'You are Admin':  'انت مسئول' }}
+      </h5>
+    </div>
   @else
     <div class="card">
       <div class="card-body">
