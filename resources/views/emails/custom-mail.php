@@ -223,11 +223,10 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <a href="{{ $data['reset_url'] }}">إعادة تعيين كلمة المرور</a>
                                                     </p>
                                                     <br/><br/>
-                                                    <a href="https://drive.google.com/file/d/1U5iJWny9f4Oa23tWXb73qa_LCvXuRp7y/view?usp=drive_link">يرجي تحميل ملف الدليل الارشادي للمشارك من هنا</a>
+                                                    <a href="https://shorturl.at/9rdSu">يرجي تحميل ملف الدليل الارشادي للمشارك من هنا</a>
                                                     <br/><br/>
                                                     <p style="margin: 0;"><img src="https://incubation.sa/biac.png" alt="BIAC Logo" width="639" height="720"></p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
-                                                    {{-- <p style="margin: 0;">{{ $organization_name_ar }}</p> --}}
                                                 </div>
                                             </td>
                                         </tr>
