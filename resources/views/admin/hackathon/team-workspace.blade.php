@@ -763,64 +763,64 @@
 
 
     function deleteTask(taskId, taskTitle) {
-    console.log('deleteTask called with:', taskId, taskTitle);
+        console.log('deleteTask called with:', taskId, taskTitle);
 
-    if (typeof Swal === 'undefined') {
-        console.error('SweetAlert2 is not loaded!');
-        alert('Delete functionality not available - SweetAlert2 not loaded');
-        return;
-    }
+        if (typeof Swal === 'undefined') {
+            console.error('SweetAlert2 is not loaded!');
+            alert('Delete functionality not available - SweetAlert2 not loaded');
+            return;
+        }
 
-    Swal.fire({
-        title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-        text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
-        cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
-                    Swal.fire({
-                        title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                        text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
-                        icon: 'success',
-                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-                    }).then(() => {
-                        // Reload the page after pressing OK
-                        location.reload();
-                    });
-                } else {
+        Swal.fire({
+            title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+            text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+            cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
+                        Swal.fire({
+                            title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                            text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
+                            icon: 'success',
+                            confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        }).then(() => {
+                            // Reload the page after pressing OK
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                            text: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
                     Swal.fire({
                         title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                        text: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+                        text: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
                         icon: 'error'
                     });
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                Swal.fire({
-                    title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                    text: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
-                    icon: 'error'
                 });
-            });
-        }
-    });
-}
+            }
+        });
+    }
 
 
 

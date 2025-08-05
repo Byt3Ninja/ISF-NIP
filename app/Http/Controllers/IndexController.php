@@ -2,8 +2,11 @@
 namespace App\Http\Controllers;
 use App;
 use Closure;
+use App\User;
+use App\Company;
 use App\Messages;
 use App\Settings;
+use App\Mail\CustomEmail;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
@@ -13,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWhatsAppMessageJob;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Client\RequestException;
@@ -371,5 +375,20 @@ class IndexController extends Controller
     //             }
 
     // }
+
+    public function sendCustomerEmail(){
+        $companies = Company::where('cycle', 38)->get();
+        $users = User::whereIn('company_id', $companies->pluck('id')->toArray())->get();
+
+            // $users = User::where('email', 'ehabtarek86@gmail.com')->get(); 
+        // dd($users);
+            foreach ($users as $user) {
+                Mail::to($user->email)->queue(new CustomEmail($user));
+        }
+            return response()->json([
+                            'success' => true,
+                            'message' => 'Email sent successfully.']);
+
+    }
 
 }
