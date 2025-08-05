@@ -173,7 +173,7 @@ class HackathonController extends Controller
         $user = Auth::user();
         $userTeam_q = "SELECT team_formation_id FROM team_members WHERE user_id = ? ";
         $userTeam = collect(DB::select($userTeam_q, [$user->id]));
-        $TF_id = $userTeam->first()->team_formation_id;
+        $TF_id = $userTeam->first()?->team_formation_id;
         $team_Formation_q = "SELECT 
         tf.id as 'tf_id',
         tf.name as 'tf_name',
@@ -216,6 +216,7 @@ class HackathonController extends Controller
 
         $members = $team_Formation_raw->map(function ($row) {
                 return [
+                    'id' => $row->u_id,
                     'name' => $row->user_name_en ?? $row->tm_name ?? null,
                     'name_ar' => $row->user_name_ar ?? null,
                 ];
@@ -235,10 +236,12 @@ class HackathonController extends Controller
         $sharedFile_q = "SELECT 
                             sf.id as sf_id,
                             sf.file as sf_file,
+                            sf.user_id as sf_user_id,
                             sf.description as sf_description,
                             sf.created_at as sf_created_at,
                             tf.id as tf_id,
                             tf.name as tf_name,
+                            tf.user_id as tf_user_id,
                             tf.description as tf_description,
                             tm.id as tm_id,
                             tm.user_id as tm_user_id,
@@ -262,10 +265,52 @@ class HackathonController extends Controller
         
         $sharedFile = collect(DB::select($sharedFile_q, [$TF_id]));
 
+        $todoList_q = "SELECT 
+                            tl.id as tl_id,
+                            tl.title as tl_title,
+                            tl.description as tl_description,
+                            tl.created_at as tl_created_at,
+                            tl.due_date as tl_due_date,
+                            tl.status as tl_status,
+                            tl.assignee as tl_assignee_id,
+                            tf.id as tf_id,
+                            tf.name as tf_name,
+                            tf.user_id as tf_user_id,
+                            tf.description as tf_description,
+                            tm.id as tm_id,
+                            tm.user_id as tm_user_id,
+                            tm.team_formation_id as tm_team_formation_id,
+                            tm.Name as tm_name,
+                            tm.email as tm_email,
+                            tm.acceptInvition as tm_acceptInvition,
+                            tm.isTeamLeader as tm_isTeamLeader,
+                            u.id as u_id,
+                            concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                            concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                            u.email as 'u_email',
+                            u.img_url as 'u_img_url',
+                            us.id as us_id,
+                            concat(us.first_name_en, ' ', us.last_name_en) as 'assignee_name_en',
+                            concat(us.first_name_ar, ' ', us.last_name_ar) as 'assignee_name_ar',
+                            us.email as 'assignee_email',
+                            us.img_url as 'assignee_img_url'
+                        FROM 
+                            todo_lists as tl
+                        LEFT JOIN team_formations as tf ON tf.id = tl.team_formation_id
+                        LEFT JOIN team_members as tm ON tm.id = tl.team_member_id
+                        LEFT JOIN users as u ON u.id = tl.user_id
+                        LEFT JOIN users as us ON us.id = tl.assignee
+                        WHERE tl.team_formation_id = ? 
+                        ";
+
+        $todoList = collect(DB::select($todoList_q, [$TF_id]));
+        
+
+
        
 
         // dd($team_Forsmation_raw);
-        return view('admin.hackathon.team-workspace', compact('teamData', 'sharedFile'));
+        return view('admin.hackathon.team-workspace', compact('teamData', 'sharedFile', 'todoList'));
     }
 
     public function show(Request $request, $id)
