@@ -1610,7 +1610,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'danger',
-                'href' => '/dashboard/cycles',
+                'href' => '/dashboard/programlist',
                 'icon' => 'ti-circles',
                 'text' => 'Cycles',
                 'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
