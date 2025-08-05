@@ -1,4 +1,3 @@
-{{ dd($data_evi) }}
 @if($data_evi != null)
   <div class="card">
     <div class="card-body">
