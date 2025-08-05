@@ -1,4 +1,4 @@
-@extends('layouts.hr-admin')
+@extends('layouts.admin')
 
 @section('style')
 <style>
@@ -53,9 +53,8 @@
 
 @section('content')
 <!-- Main Content -->
-<div class="container-fluid mb-5 mb-md-12">
-
-    <div class="container-fluid mt-3 mt-md-4 px-3 px-md-4 team-workspace-container">
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Simple Header -->
         <div class="mb-4">
             <h3 class="mb-1">
