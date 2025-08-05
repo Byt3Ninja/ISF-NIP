@@ -1,7 +1,15 @@
 @extends('layouts.admin')
 
 @section('title', __('admin.Activities'))
-
+@section('vendorstyle')
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+@stop
 @section('styles')
 <style>
   .chart-container {
@@ -14,6 +22,16 @@
   .stat-card-border-top {
     border-top: 4px solid;
   }
+  /* Style for DataTables buttons */
+    .dt-buttons .btn-success {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: #fff !important;
+    }
+    .dt-buttons .btn-success:hover {
+        background-color: #218838 !important;
+        border-color: #1e7e34 !important;
+    }
 </style>
 @endsection
 
@@ -186,9 +204,6 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <h6 class="mb-0 text-primary"><i class="ti ti-list-details me-1"></i> @lang('admin.Users_Activities')</h6>
-          <button id="exportExcelBtn" class="btn btn-outline-success btn-sm">
-            <i class="ti ti-file-export me-1"></i> @lang('admin.Export_to_Excel')
-          </button>
         </div>
         <div class="table-responsive">
           <table id="activities-datatable" class="table align-middle">
@@ -241,6 +256,13 @@
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script>
   // Initialize Date Picker
   flatpickr(".datepicker", {
@@ -275,20 +297,25 @@
         }
     } : {};
 
-    const table = $('#activities-datatable').DataTable({
-      language: datatableLanguage,
-      order: [[4, 'desc']],
-      pageLength: 10,
-      lengthMenu: [10, 25, 50, 100],
-      searching: true,
-      dom: 'Bfrtip',
-      buttons: [],
-    });
-
-    $('#exportExcelBtn').on('click', function() {
-      table.button('.buttons-excel').trigger();
-    });
-
+   const table = $('#activities-datatable').DataTable({
+            language: datatableLanguage,
+            order: [[4, 'desc']],
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            searching: true,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="ti ti-file-export me-1"></i>@lang("admin.Export_to_Excel")',
+                    title: 'Activities_' + new Date().toISOString().slice(0, 10),
+                    className: 'btn btn-success',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6]
+                    }
+                }
+            ]
+        });
     // Chart Data
     const topDevicesData = @json($topDevices);
     const topBrowsersData = @json($topBrowsers);

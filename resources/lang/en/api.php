@@ -57,4 +57,5 @@ return [
 	'date_range_limit' => 'Start date must be before end date and within 30 days.',
 	'programs_not_found' => 'Programs Not Found',
 	'program_not_found' => 'Program Not Found',
+	'stepsNotFound' => 'Steps Not Found',
 ];
