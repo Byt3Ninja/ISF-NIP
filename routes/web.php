@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
-use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ImporterController;
+use App\Http\Controllers\ActivityControlller;
+use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
@@ -107,10 +108,36 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
 
     // Hackathon Routes
-    Route::get('hackathon', [HackathonController::class, 'index']);
-    Route::get('hackathon/manage', [HackathonController::class, 'manage']);
-    Route::get('hackathon/my-team', [HackathonController::class, 'myTeam']);
-    Route::get('hackathon/details', [HackathonController::class, 'show']);
+    Route::get('hackathon', 'HackathonController@index')->name('hackathon.view');
+    Route::get('hackathon/{id}/manage', 'HackathonController@manage')->name('hackathon.manageTeam');
+    Route::get('apply/{id}/hackathon', 'HackathonController@applyHackathon')->name('hackathon.apply');
+    Route::get('submission/{id}/hackathon', 'HackathonController@hackathonSubmissions')->name('hackathon.hackathonSubmissions');
+    Route::post('hackathon/createTeam', 'HackathonController@createTeam')->name('hackathon.createTeam');
+    Route::post('hackathon/invitation', 'HackathonController@invitation')->name('hackathon.invitation');
+    Route::post('hackathon/cancelinvitation', 'HackathonController@cancelInvitation')->name('hackathon.Cancelinvitation');
+    Route::patch('hackathon/acceptInvitation/{id}', 'HackathonController@acceptInvitation')->name('hackathon.acceptInvitation');
+    Route::patch('hackathon/rejectInvitation/{id}', 'HackathonController@rejectInvitation')->name('hackathon.rejectInvitation');
+    Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
+    Route::get('hackathon/my-team', 'HackathonController@myTeam')->name('hackathon.myTeam');
+    Route::post('hackathon/EditProjectIdea', 'HackathonController@EditProjectIdea')->name('hackathon.EditProjectIdea');
+    Route::post('hackathon/RequestJoin', 'HackathonController@RequestJoin')->name('hackathon.RequestJoinTeam');
+    Route::post('hackathon/ApprovedRequestJoin', 'HackathonController@ApprovedRequestJoin')->name('hackathon.ApprovedRequestJoinTeam');
+    Route::post('hackathon/RejectedRequestJoin', 'HackathonController@RejectedRequestJoin')->name('hackathon.RejectedRequestJoin');
+    Route::get('hackathon/viewSubmission/{step_id}/{user_id}', 'HackathonController@ViewSubmission')->name('hackathon.ViewSubmission');
+    Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
+    // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
+    Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
+    Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
+    Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
+
+    Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
+    Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
+
+    //waiting list
+    Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
+    // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
+    
+    Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -375,8 +402,17 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
+    
+    Route::post('cycles/{id}/add_page', 'CycleCustomPagesController@add');
+    Route::post('cycles/{id}/show_page', 'CycleCustomPagesController@view');
+    Route::post('cycles/{id}/update_page', 'CycleCustomPagesController@update');
+    Route::post('cycles/{id}/pages_resort', 'CycleCustomPagesController@reorder');
+    Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status');
+    Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility');
+    Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
+    
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
-    Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
+    Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
     Route::post('cycles/save', 'CyclesController@saveForm');
     Route::get('cycles/my/{id}', 'CyclesController@my')->name('cycles.list_mine');
     Route::post('change/cyc', 'CyclesController@changAll');
@@ -453,6 +489,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/my/{id}/quiz/{quiz_id}', 'quizzesController@doQuiz')->name('quizzes.take_start');
     Route::get('training/EditTR/{id}', 'TrainingController@editTR')->name('trainings.records_edit');
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
+    Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
+    Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
 
 
     Route::get('training/results/{id?}', 'TrainingController@results')->name('trainings.results_view');
@@ -594,11 +632,16 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/projects/{project}/add-team-members', 'ProjectController@addTeamMembers')->name('projects.team_add_member');
     Route::delete('/projects/{project}/remove-team-member/{teamMember}', 'ProjectController@removeTeamMember')->name('projects.team_remove_member');
     Route::resource('projects', 'ProjectController');
-    /* End of Projectss Routes */
+    /* End of Projects Routes */
 
     Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate_view_form');
     Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate_execute');
 
+     /* Start of Activities Routes */
+    Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
+    Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
+    Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
+    /* End of Activities Routes */
 
 
     // ===============> Reports <============
@@ -658,6 +701,13 @@ Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('i
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
 Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('integrations.auth_linkedin_callback');
+
+Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
+Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');
+Route::get('/{org_slug}/program/{program_slug}/apply', 'ExternalCyclesController@publicProgramApply')->name('public.program_apply');
+Route::post('/{org_slug}/program/{program_slug}/validate_email', 'ExternalCyclesController@validateEmail');
+Route::post('/{org_slug}/program/{program_slug}/authenticate', 'ExternalCyclesController@authenticateUser');
+Route::post('/{org_slug}/program/{program_slug}/register', 'ExternalCyclesController@registerUser');
 
 if (request()->secure()) {
     URL::forceScheme("https");

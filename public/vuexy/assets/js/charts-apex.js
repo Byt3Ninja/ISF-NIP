@@ -515,12 +515,12 @@
       },
       series: [
         {
-          data: seriesData,
+          data: seriesData?.slice(0, 10),
           name: seriesName
         }
       ],
       xaxis: {
-        categories: barChartCategories,
+        categories: barChartCategories?.slice(0, 10),
         axisBorder: {
           show: false
         },

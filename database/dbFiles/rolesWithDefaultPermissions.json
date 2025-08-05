@@ -2599,6 +2599,242 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "quizzes.quiz_Results_view",
+                "description": "View Quiz Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "quizzes.quiz_results_view_details",
+                "description": "View Quiz Results Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Hacathon",
+        "description": null,
+        "permissions": [
+            {
+                "name": "hackathon.view",
+                "description": "View All Hackathon",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.apply",
+                "description": " Apply for Hackathon",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.hackathonSubmissions",
+                "description": "View Hackathon Submissions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "hackathon.createTeam",
+                "description": "Create Hackathon Team",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.invitation",
+                "description": " Invite Hackathon Participants",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.acceptInvitation",
+                "description": " Accept Hackathon Invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.rejectInvitation",
+                "description": " Reject Hackathon Invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.Cancelinvitation",
+                "description": " Cancel Hackathon Invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.manageTeam",
+                "description": " Manage Hackathon Team Members ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.getOutTeam",
+                "description": " Remove Member from Hackathon Team ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.myTeam",
+                "description": " View My Hackathon Team Work Spice ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.EditProjectIdea",
+                "description": " Edit Hackathon Project Idea ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.RequestJoinTeam",
+                "description": " Edit Hackathon Project Idea ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.ApprovedRequestJoinTeam",
+                "description": " Edit Hackathon Project Idea ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.RejectedRequestJoin",
+                "description": " Edit Hackathon Project Idea ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.ViewSubmission",
+                "description": " Edit Hackathon Project Idea ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                   
+                ]
+            },
+            {
+                "name": "hackathon.viewAdminHackaton",
+                "description": " View Admin Dashboard Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                   
+                ]
+            },
+            {
+                "name": "hackathon.addSharedFile",
+                "description": " Add Shared File Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
+            },
+            {
+                "name": "hackathon.deleteSharedFile",
+                "description": " Delete Shared File Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
             }
         ]
     },
@@ -5820,9 +6056,7 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin",
-                    "judger",
-                    "organizationmanager"
+                    "judger"
                 ]
             },
             {
@@ -6269,7 +6503,10 @@
                 "description": "Show Programs Card - (Startup)",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             },
             {
                 "name": "dashboard.widgets_cards_rate_view",
@@ -6390,5 +6627,41 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Activity Log",
+        "description": null,
+        "permissions": [
+        {
+            "name": "activities.index",
+            "description": "View Activity Log Page",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        },
+        {
+            "name": "activity.log",
+            "description": "Create Activity Log",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        },
+        {
+            "name": "activities.destroy",
+            "description": "Delete Activity Log",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        }
+    ]
     }
 ]

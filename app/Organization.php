@@ -6,10 +6,11 @@ use App\Like;
 
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Organization extends Model
 {
-	use Auditable;
+	use Auditable,SoftDeletes;
 	public static $module = 'Organizations';
 	protected $fillable = [
 		'name_ar',
@@ -23,6 +24,7 @@ class Organization extends Model
 		'api_token',
 		'created_at',
 		'updated_at',
+		'img_url'
 	];
 	public static function image_handler( $img )
     {
@@ -64,4 +66,9 @@ class Organization extends Model
 	{
 		return $this->belongsToMany(QuestionsBank::class, 'organization_question_bank', 'organization_id', 'question_id');
 	}
+
+	public function getLocalizedNameAttribute(): string
+{
+    return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
+}
 }

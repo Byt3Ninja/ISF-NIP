@@ -56,6 +56,16 @@ return [
     'sure delete step' => 'Are you sure, Delete current Step and all its contents',
     'Add cycle steps' => 'Add program steps',
     'Choose form' => 'Choose form',
+    'Program Visibility' => 'Program Visibility',
+    'Program Visible To Private' => 'Program can be accessed only by registered users',
+    'Program Visible To Public' => 'Program can be accessed by any user',
+    'Step Visibility' => 'Step Visibility',
+    'Step Visible To Private' => 'Step can be accessed only by registered users',
+    'Step Visible To Public' => 'Step can be accessed by any user',
+    'Public URL' => 'Public URL',
+    'Public URL required' => 'Public URL required',
+    'Public URL placeholder' => 'only slug is required not the complete URL e.g. \'program-x-register\'',
+    'copy public link' => 'copy public link',
     'Title' => 'Title',
     'Save' => 'Save',
     'steps' => 'Steps',
@@ -422,5 +432,9 @@ return [
     'Active filters' => 'Active filters',
     'Status' => 'Status',
     'Score' => 'Score',
+    'General_Program' => 'General Program',
+    'Hackathon' => 'Hackathon',
+    'Display course contents' => 'Display course contents',
+
 ];
 

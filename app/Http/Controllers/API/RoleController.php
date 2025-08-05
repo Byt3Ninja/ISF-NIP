@@ -5,17 +5,20 @@ namespace App\Http\Controllers\API;
 use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RoleResource;
+use App\Traits\ApiResponder;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleController extends Controller
 {
+    use ApiResponder;
     /**
  * @OA\Get(
  *     path="/api/roles",
  *     summary="Get list of available roles",
  *     description="Returns a list of all roles. Only accessible by Admin users.",
  *     operationId="getRoles",
- *     tags={"Role"},
+ *     tags={"Roles"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
  *         response=200,
@@ -46,16 +49,10 @@ class RoleController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if (!$user->hasRole('Admin')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden')
-         ], Response::HTTP_FORBIDDEN);
+        if (!$user->ableTo('roles.index')) {
+            return $this->forbidden(__('api.forbidden'));
        }
         $roles = Role::select('id', 'name')->get();
-        return response()->json([
-            'success' => true,
-            'data' => $roles,
-        ]);
+        return $this->success(RoleResource::collection($roles));
     }
 }

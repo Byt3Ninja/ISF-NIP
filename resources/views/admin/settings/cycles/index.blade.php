@@ -98,6 +98,9 @@
                   </div>
                 </div>
                 <br />
+                @php
+                  $selectedCycle = \App\Cycle::find($id);
+                @endphp
                 <div class="row d-flex align-items-end">
                   <div class="col-12 col-md-6">
                     <div class="form-group">
@@ -108,6 +111,9 @@
                         <option value="3">{{ __('cycles.Mentorship') }}</option>
                         <option value="4">{{ __('cycles.Training') }}</option>
                         <option value="5">{{ __('cycles.Final evaluation') }}</option>
+                        @if ($selectedCycle && $selectedCycle->type === 'Hackathon' && $_user->hasAnyRole(['Admin', 'organizationManager']))
+                            <option value="6">{{ __('admin.Team Formation') }}</option>
+                        @endif
                       </select>
                     </div>
                   </div>
@@ -200,17 +206,26 @@
                                           $set = $step->id . '/final/';
                                       }
                                     @endphp
+                                    @if($step->stype != 6)
                            <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
                             <span class="btn btn-icon btn-label-warning rounded-circle">
                                 <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
                             </span>
                         </a>
+                        @endif
                         @if($step->stype == 1 && $step->form)
-                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}" class="mx-1">
                           <span class="btn btn-icon btn-label-primary rounded-circle">
                             <i class="ti ti-eye" title="{{ __('cycles.view step results') }}"></i>
                           </span>
                         </a>
+                        @if( !empty( $step->join_url ) && !is_null( $step->join_url ) )
+                        <a href="javascript:void(0)" class="mx-1 copy-public-link" data-clipboard="{{ $step->join_url }}">
+                          <span class="btn btn-icon btn-label-dark rounded-circle">
+                            <i class="ti ti-copy" title="{{ __('cycles.copy public link') }}"></i>
+                          </span>
+                        </a>
+                        @endif
                       @endif
                         </div>
                       </div>
@@ -331,8 +346,10 @@
 <div class="modal fade" id="stepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
-      <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" onsubmit="disableSubmitButton()">
+      <form id="addStepForm" class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
+        autocomplete="off" 
+        {{-- onsubmit="disableSubmitButton()" --}}
+        >
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.New step data') }} - <span id="formtitle">{{
@@ -374,7 +391,7 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Step Title') }}: </label>
             <input id='title' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
-              required>
+              >
           </div>
           {{-- <div class="form-group mt-3">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid from') }}: </label>
@@ -390,6 +407,17 @@
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
+          </div>
+
+          <div class="form-group mb-4" id="team_number">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
+             <input 
+                id='count_team_number' 
+                name='count_team_number' 
+                type="number" 
+                placeholder="{{ __('admin.maxInTeam') }}" 
+                class="form-control"
+              >
           </div>
         </div>
         <div class="modal-footer">
@@ -413,7 +441,7 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off">
+        autocomplete="off" id="editStepForm">
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Modify current step') }}</h4>
@@ -423,6 +451,7 @@
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
           <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
             <div class="form-group mb-4">
@@ -432,6 +461,17 @@
                 {{-- @endforeach --}}
               </select>
             </div>
+          </div>
+          <div class="form-group mb-4 public-data-form-fields">
+            <label class="form-label" for="is_public">{{ __('cycles.Step Visibility') }}: </label>
+            <select class="select form-control" id="is_public" name="is_public">
+              <option value="0">{{ __('cycles.Step Visible To Private') }}</option>
+              <option value="1">{{ __('cycles.Step Visible To Public') }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-4 public-data-form-fields" id="public_slug_div">
+            <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
+            <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
           </div>
           <div class="mb-4" id="mmenu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
@@ -447,7 +487,7 @@
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Form title') }}: </label>
           <div class="mb-4">
             <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
-              required>
+              >
           </div>
           <div class="col-12 mb-4">
             <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
@@ -463,11 +503,18 @@
           <div class="mb-4">
             <input id='mtoDate' name='toDate' type="text" class="form-control" required readonly>
           </div> --}}
-          <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
-          <div class="form-group mb-0">
+          <div class="form-group mb-4">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
           </div>
+
+          <div class="form-group mb-4" id="mteam_number" style="display: none;">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
+             <input id='mcount_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+          </div>
+
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
@@ -502,11 +549,137 @@
 <script src="/vuexy/assets/js/forms-selects.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
+
 <script>
-  function disableSubmitButton() {
-    document.getElementById("submitBtn").disabled = true;
+  const currentLang = '{{ $l }}';
+
+  const errors = {
+    title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
+    description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
+    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.'
+  };
+
+ function validateStepForm(form, mode = 'add') {
+  const stepType = form.querySelector('#stype');
+  const stepTitle = form.querySelector(`${mode === 'add' ? '#title' : '#mtitle'}`);
+  const stepDescription = form.querySelector(`${mode === 'add' ? '#description' : '#mdescription'}`);
+  const teamNumberInput = form.querySelector(`${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`);
+
+  // Remove any previous error messages
+  const existingError = form.querySelector('.invalid-feedback');
+  if (existingError) existingError.remove();
+
+  // Helper function to show error
+  const showError = (element, message) => {
+    element.focus();
+    element.classList.add('is-invalid');
+
+    const errorSpan = document.createElement('span');
+    errorSpan.classList.add('invalid-feedback');
+    errorSpan.textContent = message;
+
+    element.insertAdjacentElement('afterend', errorSpan);
+  };
+
+  // Validation checks
+  if (!stepTitle.value.trim()) {
+    showError(stepTitle, errors.title);
+    return false;
+  }
+
+  if (!stepDescription.value.trim()) {
+    showError(stepDescription, errors.description);
+    return false;
+  }
+
+  if (stepType.value === '6' && (!teamNumberInput.value || teamNumberInput.value < 1)) {
+    showError(teamNumberInput, errors.teamNumber);
+    return false;
+  }
+
+  // Clear any invalid styling
+  [stepTitle, stepDescription, teamNumberInput].forEach(input => {
+    input.classList.remove('is-invalid');
+  });
+
+  return true; // All validations passed
 }
-    console.log('loaded');
+
+function disableFormWithLoading(form) {
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+  }
+}
+
+const addStepForm = document.querySelector('#addStepForm');
+const editStepForm = document.querySelector('#editStepForm');
+
+if (addStepForm) {
+  addStepForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateStepForm(addStepForm, 'add')) {
+      disableFormWithLoading(addStepForm);
+      addStepForm.submit();
+    }
+  });
+}
+
+if (editStepForm) {
+  editStepForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateStepForm(editStepForm, 'edit')) {
+      disableFormWithLoading(editStepForm);
+      editStepForm.submit();
+    }
+  });
+}
+function clearValidationOnChange(form, mode = 'add') {
+  const fields = [
+    `${mode === 'add' ? '#title' : '#mtitle'}`,
+    `${mode === 'add' ? '#description' : '#mdescription'}`,
+    `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`
+  ];
+
+  fields.forEach(selector => {
+    const input = form.querySelector(selector);
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+      input.classList.remove('is-invalid');
+
+      // Remove the next sibling if it's an error message
+      const next = input.nextElementSibling;
+      if (next && next.classList.contains('invalid-feedback')) {
+        next.remove();
+      }
+    });
+  });
+}
+
+if (addStepForm) {
+  clearValidationOnChange(addStepForm, 'add');
+}
+
+if (editStepForm) {
+  clearValidationOnChange(editStepForm, 'edit');
+}
+</script>
+
+<script>
+
+  // $('#count_team_number, #mcount_team_number').on('input', function () {
+  //   let val = $(this).val();
+  //   if (val < 1) {
+  //     $(this).val(1);
+  //   }
+  // });
+
+//   function disableSubmitButton() {
+//     document.getElementById("submitBtn").disabled = true;
+// }
+    // console.log('loaded');
     const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
     // console.log('stepFormRamgePicker', stepFormRamgePicker);
 
@@ -660,7 +833,10 @@
           let step = $('#StepSelect').find(":selected").val();
           let steptxt = $('#StepSelect').find(":selected").text();
           let menu = $('#menu' + step);
-          $('#menu1,#menu2').hide();
+          $('#menu1,#menu2,#team_number').hide();
+          if(step === '6'){
+            $('#team_number').show();
+          }
           if (menu !== null) {
             $.ajax({
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
@@ -724,15 +900,25 @@
             },
             success: function(response) {
               step = response.stype;
+              console.log(step);
+              $('#editStepForm #stype').val(step);
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
-              if (response.data !== null) {
-                if (step == 1 || step == 5) {
-                  $('#mFormSelect').val(response.data);
+              $('.public-data-form-fields').hide();
+              if( step == 6 ) { $('#mteam_number').show(); }
+              else { $('#mteam_number').hide(); }
+
+              if( response.data !== null )
+              {
+                if( step == 1 )
+                {
+                  $('.public-data-form-fields').show();
+                  $('#is_public').val(response.is_public);
+                  $('#public_slug').val(response.public_slug);
+                  if( response.is_public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
                 }
-                if (step == 2) {
-                  $('#mScreeningSelect').val(response.data);
-                }
+                if( step == 1 || step == 5 ) { $('#mFormSelect').val(response.data); }
+                if( step == 2 ) { $('#mScreeningSelect').val(response.data); }
               }
               if (menu !== null) {
                 $.ajax({
@@ -770,6 +956,7 @@
               $('#sid').val(response.id);
               $('#mtitle').val(response.title);
               $('#mdescription').val(response.description);
+              $('#mcount_team_number').val(response.count_team_number);
               
               $('#step-range-picker').daterangepicker({
                 opens: isRtl ? 'left' : 'right',
@@ -827,5 +1014,29 @@
         });
       }
     }
+    $(document).on('change', '#is_public', function() {
+      let _public = $(this).val();
+      if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
+    });
+
+    $(document).on('click', '.copy-public-link', function(e) {
+      e.preventDefault();
+      let url = $(this).data('clipboard');
+      const $tempInput = $("<input>");
+      $("body").append($tempInput);
+      $tempInput.val(url).select();
+      try {
+        const success = document.execCommand("copy");
+        if (success) {
+          alert("Public Link Copied!");
+        } else {
+          console.warn("Copy command failed.");
+        }
+      }
+      catch (err) {
+        console.error("Copy error: ", err);
+      }
+      $tempInput.remove();
+    });
 </script>
 @stop

@@ -3,21 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\User;
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
-use App\Mail\WelcomeUserMail;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
+use App\Services\UserService;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreUserApiRequest;
 use App\Http\Requests\UpdateUserApiRequest;
-use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
+    use ApiResponder;
     /**
  * @OA\Get(
  *     path="/api/users",
@@ -87,92 +84,25 @@ class UserController extends Controller
  *     )
  * )
  */
+    protected $userService;
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
      public function index(Request $request)
     {
-        $user = Auth::user();
+       $user = Auth::user();
 
-        if (!$user->hasRole('Admin') && !$user->hasRole('OrganizationManager')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden')
-            ], Response::HTTP_FORBIDDEN);
-        }
-
-        $query = User::query();
-
-        if ($user->hasRole('OrganizationManager')) {
-            $query->where('organization_id', $user->organization_id);
-        }
-
-       if ($request->filled('gender')) {
-        $gender = strtolower($request->gender);
-        if (in_array($gender, ['male', 'female'])) {
-            $query->where('gender', $gender);
-        }
+     if (!$user->ableTo('users.index')) {
+        return $this->forbidden(__('api.forbidden'));
      }
 
-    if ($request->has('haveCompany')) {           
-        $value = filter_var(
-            $request->haveCompany,
-            FILTER_VALIDATE_BOOLEAN,
-            FILTER_NULL_ON_FAILURE
-        );
+    $result = $this->userService->index($request->all(), $user);
 
-        if (! is_null($value)) {
-            $query->where('HaveCompany', $value);
-        }
-      }
+    return $this->success($result['data'], [
+        'meta' => $result['meta']
+    ]);
 
-        if ($request->filled('role')) {
-            $query->whereHas('roles', function ($q) use ($request) {
-                $q->where('name', $request->role);
-            });
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name_en', 'like', "%$search%")
-                  ->orWhere('last_name_en', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
-            });
-        }
-
-        $query->orderBy('created_at', 'desc');
-
-        $users = $query->paginate(10);
-
-        $data = $users->map(function ($user) {
-            return [
-                'firstName' => $user->first_name_en,
-                'lastName' => $user->last_name_en,
-                'email' => $user->email,
-                'gender' => $user->gender,
-                'phone' => $user->phone,
-                'role' => $user->getRoleNames()->first(),
-                'haveCompany' => (bool)$user->HaveCompany,
-                'imgUrl' => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
-                'createdAt' => $user->created_at->toDateTimeString(),
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $data,
-            'meta' => [
-                'currentPage' => $users->currentPage(),
-                'lastPage' => $users->lastPage(),
-                'total' => $users->total(),
-                'path' => $users->path(),
-                'links' => [
-                    'first' => $users->url(1),
-                    'last' => $users->url($users->lastPage()),
-                    'prev' => $users->previousPageUrl(),
-                    'next' => $users->nextPageUrl(),
-                ]
-            ]
-        ]);
     }
 
     /**
@@ -222,35 +152,15 @@ public function show($id)
 {
     $user = User::find($id);
 
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => __('api.user_not_found'),
-        ], 404);
-    }
+     if (!$user->ableTo('users.show')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
 
-     if (!$user->hasRole('Admin') && !$user->hasRole('OrganizationManager')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden')
-            ], Response::HTTP_FORBIDDEN);
-    }
-    
-    $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'firstName' => $user->first_name_en,
-            'lastName' => $user->last_name_en,
-            'email' => $user->email,
-            'gender' => $user->gender,
-            'phone' => $user->phone,
-            'role' => $user->getRoleNames()->first(),
-            'imgUrl' => $user->img_url,
-            'haveCompany' => (bool)$user->haveCompany,
-            'createdAt' => $user->created_at->toDateTimeString(),
-        ]
-    ]);
+        $user = $this->userService->show($id);
+        if (!$user) {
+            return $this->notFound(__('api.user_not_found'));
+        }
+   return $this->success(new UserResource($user));
 }
 /**
  * @OA\Post(
@@ -270,7 +180,10 @@ public function show($id)
  *             @OA\Property(property="gender", type="string", enum={"male", "female"}, example="male"),
  *             @OA\Property(property="password", type="string", format="password", example="secret123"),
  *             @OA\Property(property="password_confirmation", type="string", format="password", example="secret123"),
- *             @OA\Property(property="role", type="integer", example=2)
+ *             @OA\Property(property="role", type="integer", example=2),
+ *             @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/avatar.jpg"),
+ *             @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-15 09:30:00"),
+ *             @OA\Property(property="status", type="string", example="active")
  *         )
  *     ),
  *     @OA\Response(
@@ -285,7 +198,11 @@ public function show($id)
  *                 @OA\Property(property="lastName", type="string", example="Ali"),
  *                 @OA\Property(property="email", type="string", example="ahmed@example.com"),
  *                 @OA\Property(property="phone", type="string", example="01012345678"),
- *                 @OA\Property(property="role", type="string", example="User")
+ *                 @OA\Property(property="role", type="string", example="User"),
+ *                 @OA\Property(property="haveCompany", type="boolean", example=false),
+ *                 @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/avatar.jpg"),
+ *                 @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-15 09:30:00"),
+ *                 @OA\Property(property="status", type="string", example="active")
  *             )
  *         )
  *     ),
@@ -302,72 +219,17 @@ public function show($id)
 
 public function store(StoreUserApiRequest $request)
 {
-    $user = auth()->user();
-    if (!$user->hasRole('Admin')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden')
-            ], Response::HTTP_FORBIDDEN);
+    $user = Auth::user();
+    if (!$user->ableToAny(['users.create', 'users.store'])) {
+            return $this->forbidden(__('api.forbidden'));
     }
 
-    $data = $request->validated();
-    DB::beginTransaction();
-    try {
-        $user = User::create([
-            'first_name_en' => $data['firstName'],
-            'last_name_en' => $data['lastName'],
-            'first_name_ar' => $data['firstName'],
-            'last_name_ar' => $data['lastName'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'gender' => $data['gender'],
-            'password' => Hash::make($data['password']),
-        ]);
+    $result = $this->userService->store($request->all());
+     if (!$result['success']) {
+        return $this->error($result['message'], $result['status'] ?? 500);
+     }
 
-        $role = Role::find($data['role']);
-
-        if (!$role) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => __('api.invalid_role'),
-            ], 422);
-        }
-
-        DB::table('model_has_roles')->insert([
-            'role_id'    => $role->id,
-            'model_type' => User::class,
-            'model_id'   => $user->id,
-        ]);
-
-        // Send welcome email
-        Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => __('api.user_created'),
-            'data' => [
-                'id' => $user->id,
-                'firstName' => $user->first_name_en,
-                'lastName' => $user->last_name_en,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'gender' => $user->gender,
-                'role' => $user->getRoleNames()->first(),
-            ]
-        ], 201);
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        report($e);
-
-        return response()->json([
-            'success' => false,
-            'message' => __('api.failed_to_create_user')
-        ], 500);
-    }
+   return $this->created(new UserResource($result['user']), __('api.user_created'), [], 201);
 }
 
 /**
@@ -394,7 +256,11 @@ public function store(StoreUserApiRequest $request)
  *             @OA\Property(property="gender", type="string", enum={"male", "female"}, example="male"),
  *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
  *             @OA\Property(property="password_confirmation", type="string", format="password", example="newpassword123"),
- *             @OA\Property(property="role", type="integer", example=2)
+ *             @OA\Property(property="role", type="integer", example=2),
+ *             @OA\Property(property="haveCompany", type="boolean", example=false),
+ *             @OA\Property(property="imgUrl", type="string", example="https://example.com/uploads/avatar.jpg"),
+ *             @OA\Property(property="createdAt", type="string", format="date-time", example="2025-07-15 09:30:00"),
+ *             @OA\Property(property="status", type="string", example="active")
  *         )
  *     ),
  *     @OA\Response(
@@ -430,88 +296,24 @@ public function store(StoreUserApiRequest $request)
 
 public function update(UpdateUserApiRequest $request,$id)
 {
-    $user = auth()->user();
-    
-    if (!$user->hasRole('Admin')) {
-            return response()->json([
-                'success' => false,
-                'message' => __('api.forbidden')
-            ], Response::HTTP_FORBIDDEN);
+  $auth = Auth::user();
+
+    if (!$auth->ableToAny(['users.edit', 'users.update'])) {
+        return $this->forbidden(__('api.forbidden'));
     }
 
-    $data = $request->validated();
-    DB::beginTransaction();
-    try {
-        $user = User::findOrFail($id);
-
-        if (isset($data['firstName'])) {
-            $user->first_name_en = $data['firstName'];
-            $user->first_name_ar = $data['firstName'];
-        }
-
-        if (isset($data['lastName'])) {
-            $user->last_name_en = $data['lastName'];
-            $user->last_name_ar = $data['lastName'];
-        }
-
-        if (isset($data['email'])) {
-            $user->email = $data['email'];
-        }
-
-        if (isset($data['phone'])) {
-            $user->phone = $data['phone'];
-        }
-
-        if (isset($data['gender'])) {
-            $user->gender = $data['gender'];
-        }
-
-        if (isset($data['password'])) {
-            $user->password = Hash::make($data['password']);
-        }
-
-        if (isset($data['status'])) {
-            $user->status = $data['status'];
-        }
-
-        $user->save();
-
-        // Update role if provided
-        if (isset($data['role'])) {
-            DB::table('model_has_roles')
-                ->where('model_type', User::class)
-                ->where('model_id', $user->id)
-                ->delete();
-
-            DB::table('model_has_roles')->insert([
-                'role_id'    => $data['role'],
-                'model_type' => User::class,
-                'model_id'   => $user->id,
-            ]);
-        }
-            DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => __('api.user_updated'),
-            'data' => [
-                'id' => $user->id,
-                'firstName' => $user->first_name_en,
-                'lastName' => $user->last_name_en,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'role' => $user->getRoleNames()->first(),
-            ]
-        ]);
-       }catch (\Throwable $e) {
-         DB::rollBack();
-         report($e);
-
-        return response()->json([
-            'success' => false,
-            'message' => __('api.failed_to_update_user')
-        ], 500);
+    $user = User::find($id);
+    if (!$user) {
+        return $this->notFound(__('api.user_not_found'));
     }
+
+    $result = $this->userService->update($user, $request->all());
+
+    if (!$result['success']) {
+        return $this->error($result['message'], $result['status'] ?? 500);
+    }
+
+    return $this->success(new UserResource($result['user']),[], __('api.user_updated'));
 }
 
 /**
@@ -558,38 +360,17 @@ public function update(UpdateUserApiRequest $request,$id)
 
 public function deactivate($id)
 {
-    $authUser = auth()->user();
+     $user = Auth::user();
+      if (!$user->ableToAny(['users.edit', 'users.update'])) {
+        return $this->forbidden();
+     }
 
-    if (!$authUser->hasRole('Admin')) {
-        return response()->json([
-            'success' => false,
-            'message' => __('api.forbidden'),
-        ], Response::HTTP_FORBIDDEN);
+    $result = $this->userService->deactivateUser($user, $id);
+    if (!$result['success']) {
+        return $this->error($result['message'], $result['status'] ?? 403);
     }
 
-    if ($authUser->id == $id) {
-        return response()->json([
-            'success' => false,
-            'message' => __('api.cannot_deactivate_self'),
-        ], Response::HTTP_FORBIDDEN);
-    }
-
-    $user = User::findOrFail($id);
-
-    if ($user->hasRole('super_admin')) {
-        return response()->json([
-            'success' => false,
-            'message' => __('api.cannot_deactivate_super_admin'),
-        ], Response::HTTP_FORBIDDEN);
-    }
-
-    $user->status = 'inactive';
-    $user->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => __('api.user_deactivated'),
-    ], Response::HTTP_OK);
+    return $this->success(null, [], __('api.user_deactivated'));
 }
 
 

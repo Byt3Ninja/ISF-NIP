@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use App\BuilderForm;
 use App\Organization;
 use App\SurveyScopes;
+use App\ScreeningEvaluation;
 
 use App\Documentation;
 use App\Finalscreening;
@@ -551,7 +552,26 @@ class HomeController extends Controller
             $evaluation_q = "SELECT
                     fs.id,
                     fs.company_id,
+                    c.name_en AS company_name_en,
+                    c.name_ar AS company_name_ar,
+                    c.logo AS company_logo,
+                    u.id AS company_user_id,
+                    u.img_url AS company_user_img_url,
+                    u.first_name_en AS company_user_first_name_en,
+                    u.last_name_en AS company_user_last_name_en,
+                    u.first_name_ar AS company_user_first_name_ar,
+                    u.last_name_ar AS company_user_last_name_ar,
+                    u.title_ar AS company_user_title_ar,
+                    u.title_en AS company_user_title_en,
                     fs.step_id,
+                    s.title AS step_title,
+                    s.from AS step_start,
+                    s.to AS step_end,
+                    s.description AS step_description,
+                    cy.id AS cycle_id,
+                    cy.title AS cycle_title,
+                    cy.start AS cycle_start,
+                    cy.end AS cycle_end,
                     fs.judges,
                     fs.datetime,
                     fs.duration,
@@ -562,6 +582,8 @@ class HomeController extends Controller
                     finalscreenings fs
                 LEFT JOIN
                     companies c ON fs.company_id = c.id
+                LEFT JOIN
+                    users u ON c.id = u.company_id
                 LEFT JOIN
                     steps s ON fs.step_id = s.id
                 LEFT JOIN
@@ -581,6 +603,43 @@ class HomeController extends Controller
                 }, json_decode($e->judges, true));
                 return $e;
             });
+            $evaluation = $evaluation->groupBy('step_id')->map(function( $groupedEvaluation ) use ( $l ) {
+                $_step = $groupedEvaluation->first();
+                $step = new stdClass;
+                $step->id = $_step->step_id;
+                $step->title = $_step->step_title;
+                $step->start = $_step->step_start;
+                $step->end = $_step->step_end;
+                $step->description = $_step->step_description;
+                $step->cycle = new stdClass;
+                $step->cycle->id = $_step->cycle_id;
+                $step->cycle->title = $_step->cycle_title;
+                $step->cycle->start = $_step->cycle_start;
+                $step->cycle->end = $_step->cycle_end;
+                $step->companies = $groupedEvaluation->groupBy('company_id')->map(function ( $groupedCompanies ) use ( $l ) {
+                    $_company = $groupedCompanies->first();
+                    $company = new stdClass;
+                    $company->id = $_company->company_id;
+                    $company->name = $_company->{'company_name_' . $l};
+                    $company->logo = Company::logo_handler( $_company->company_logo );
+                    $company->users = $groupedCompanies->map(function ( $u ) use ( $l ) {
+                        $user = new stdClass;
+                        $user->id = $u->company_user_id;
+                        $user->name = $u->{'company_user_first_name_' . $l} . ' ' . $u->{'company_user_last_name_' . $l};
+                        $user->title = $u->{'company_user_title_' . $l};
+                        $user->logo = User::image_handler( $u->company_user_img_url );
+                        return $user;
+                    })->values();
+                    $company->judges = $_company->judges;
+                    $company->datetime = $_company->datetime;
+                    $company->duration = $_company->duration;
+                    $company->zoom_id = $_company->zoom_id;
+                    $company->start_url = $_company->start_url;
+                    $company->join_url = $_company->join_url;
+                    return $company;
+                })->values();
+                return $step;
+            })->values();
         } else {
             $evaluation = collect([]);
         }
@@ -825,6 +884,7 @@ class HomeController extends Controller
                 c.description,
                 c.start,
                 c.organization_id,
+                c.type,
                 o.name_en AS `org_name_en`,
                 o.name_ar AS `org_name_ar`,
                 o.img_url AS `org_img_url`
@@ -833,7 +893,7 @@ class HomeController extends Controller
             LEFT JOIN
                 organizations o ON o.id = c.organization_id
             WHERE
-                c.private IS null
+                c.private IS null AND c.type = 'General_Program'
                 AND ? BETWEEN c.start AND c.end
         ";
         $workingCycles = collect(DB::select($working_cycles_q, [now()->format('Y-m-d')]))->map(function ($item) use ($l) {
@@ -846,6 +906,7 @@ class HomeController extends Controller
             $cycle->organization->id = $item->organization_id;
             $cycle->organization->name = $item->{'org_name_' . $l};
             $cycle->organization->image_url = Organization::image_handler($item->org_img_url);
+            $cycle->type = $item->type;
             return $cycle;
         });
         $myFinal = null;
@@ -1636,7 +1697,7 @@ class HomeController extends Controller
                 'icon' => 'ti ti-calendar',
                 'text' => 'Final screening',
                 'permissions' => ['dashboard.widgets_cards_evaluation_view'],
-                'count' => $evaluation->count(),
+                'count' => $evaluation->map(function($e) { return $e->companies; })->flatten()->count(),
                 'isRating' => false,
             ];
             $data['countCards'][] = [
@@ -2156,7 +2217,9 @@ class HomeController extends Controller
                 eval.id > 0
         ";
         $established_evaluations_inputs = [];
-        $steps_ids = $filtration->pluck('id')->unique()->toArray();
+        $initial_steps_ids = $filtration->pluck('id')->unique()->toArray();
+        $final_steps_ids = $evaluation->pluck('id')->unique()->toArray();
+        $steps_ids = array_merge($initial_steps_ids, $final_steps_ids);
         if( count( $steps_ids ) > 0 )
         {
             $steps_idsPlaceholders = implode(',', array_fill(0, count($steps_ids), '?'));
@@ -2164,34 +2227,14 @@ class HomeController extends Controller
             $established_evaluations_inputs = $steps_ids;
         }
         $established_evaluations = collect(DB::select($established_evaluations_q, $established_evaluations_inputs));
-        $filtration = $filtration->map(function ( $step ) use ( $getNotEvaluatedCompanies, $established_evaluations ) {
-            $is_established = $established_evaluations->where('step_id', $step->id)->first();
-            $companies = $step->companies->map(function( $company ) use ( $getNotEvaluatedCompanies, $is_established, $step ) {
-                $evaluation_status = '';
-                if( empty( $is_established ) || is_null( $is_established ) ) { $evaluation_status = 'not_started'; }
-                else
-                {
-                    if( $is_established->status == 0 ) { $evaluation_status = 'not_started'; }
-                    else
-                    {
-                        $responds = $getNotEvaluatedCompanies->where('company_id', $company->id)->where('step_id', $step->id)->values();
-                        if( $responds->count() > 0 )
-                        {
-                            $havePending = $responds->where('status', 0)->count();
-                            $evaluation_status = $havePending > 0 ? 'in_progress' : 'evaluated';
-                        } else { $evaluation_status = 'not_evaluated'; }
-                    }
-                }
-                $company->evaluation_status = $evaluation_status;
-                return $company;
-            });
-            $step->companies = $companies;
-            return $step;
-        });
+        $filtration = ScreeningEvaluation::getMyEvaluationStatus( $filtration, $getNotEvaluatedCompanies, $established_evaluations );
+        $evaluation = ScreeningEvaluation::getMyEvaluationStatus( $evaluation, $getNotEvaluatedCompanies, $established_evaluations );
+
         $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
         $notRated_men = collect($notRated_men);
         $data['notrated_mens'] = $notRated_men;
         $data['initial_screening_steps'] = $filtration;
+        $data['final_screening_steps'] = $evaluation;
 
         return view('includes.dashboard', $data);
     }

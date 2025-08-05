@@ -115,6 +115,36 @@ class ScreeningEvaluation extends Model
 
 		return $myComment;
 	}
+
+	public static function getMyEvaluationStatus( $evaluations, $notEvaluatedCompanies, $established_evaluations )
+	{
+		$evaluations = $evaluations->map(function ( $step ) use ( $notEvaluatedCompanies, $established_evaluations ) {
+            $is_established = $established_evaluations->where('step_id', $step->id)->first();
+            $companies = $step->companies->map(function( $company ) use ( $notEvaluatedCompanies, $is_established, $step ) {
+                $evaluation_status = '';
+                if( empty( $is_established ) || is_null( $is_established ) ) { $evaluation_status = 'not_started'; }
+                else
+                {
+                    if( $is_established->status == 0 ) { $evaluation_status = 'not_started'; }
+                    else
+                    {
+                        $responds = $notEvaluatedCompanies->where('company_id', $company->id)->where('step_id', $step->id)->values();
+                        if( $responds->count() > 0 )
+                        {
+                            $havePending = $responds->where('status', 0)->count();
+                            $evaluation_status = $havePending > 0 ? 'in_progress' : 'evaluated';
+                        } else { $evaluation_status = 'not_evaluated'; }
+                    }
+                }
+                $company->evaluation_status = $evaluation_status;
+                return $company;
+            });
+            $step->companies = $companies;
+            return $step;
+        });
+		return $evaluations;
+	}
+
 	public function customFields()
     {
         return $this->hasMany(ScreeningEvaluationCustomFields::class, 'evaluation_id');

@@ -88,7 +88,7 @@
 														<input type="radio" class="btn-check quiz-option" name="tfq_answer"
 															id="question_answer_true" value="true" autocomplete="off">
 														<label
-															class="btn btn-outline-success btn-lg w-100 text-start quiz-option-label d-flex align-items-center"
+															class="btn btn-outline-secondary btn-lg w-100 text-start quiz-option-label d-flex align-items-center"
 															for="question_answer_true">
 															<span class="option-number me-3">1</span>
 															<i class="fas fa-check-circle me-2"></i>
@@ -101,7 +101,7 @@
 														<input type="radio" class="btn-check quiz-option" name="tfq_answer"
 															id="question_answer_false" value="false" autocomplete="off">
 														<label
-															class="btn btn-outline-danger btn-lg w-100 text-start quiz-option-label d-flex align-items-center"
+															class="btn btn-outline-secondary btn-lg w-100 text-start quiz-option-label d-flex align-items-center"
 															for="question_answer_false">
 															<span class="option-number me-3">2</span>
 															<i class="fas fa-times-circle me-2"></i>

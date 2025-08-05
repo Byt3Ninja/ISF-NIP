@@ -5,11 +5,21 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\ProgramController;
+use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\ExpertiseController;
+use App\Http\Controllers\API\PermissionController;
+use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
+use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\Mentors\ScheduleController;
+use App\Http\Controllers\API\Startup\MentorshipSessionController;
+use App\Http\Controllers\API\StepController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,19 +41,48 @@ Route::get('company', [RegistrationController::class, 'getCompany']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/dashboard',[DashboardController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/expertises',[ExpertiseController::class, 'index']);
-Route::get('/me', [ProfileController::class, 'me'])->middleware('auth:sanctum');
-Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate'])->middleware('auth:sanctum');
-Route::apiResource('users', UserController::class)->middleware('auth:sanctum');
-Route::get('/roles', [RoleController::class, 'index'])->middleware('auth:sanctum');
-Route::put('/profile', [ProfileController::class, 'updateProfile'])->middleware('auth:sanctum');
-Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->middleware('auth:sanctum');
-Route::put('/profile/bio', [ProfileController::class, 'updateBio'])->middleware('auth:sanctum');
-Route::get('/countries', [CountryController::class, 'index'])->middleware('auth:sanctum');
-Route::get('countries/{id}/states', [CountryController::class, 'getStates']);
-Route::post('/profile/image', [ProfileController::class, 'uploadImage'])->middleware('auth:sanctum');
+Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/countries', [CountryController::class, 'index']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/dashboard',[DashboardController::class, 'index']);
+    Route::get('/me', [ProfileController::class, 'me']);
+    Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate']);
+    Route::apiResource('users', UserController::class);
+    Route::get('/roles', [RoleController::class, 'index']);
+    Route::post('/profile', [ProfileController::class, 'updateProfile']);
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
+    Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
+    Route::get('/currencies', [CurrencyController::class, 'index']);
+    Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
+    Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
+    Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::post('/v1/availability', [ScheduleController::class, 'store']);
+    Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
+    Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);
+    Route::get('/mentors/{mentor_id}/weekly-slots', [ScheduleController::class, 'index']);
+    Route::get('/slots/{id}', [ScheduleController::class, 'show']);
+    Route::get('/v1/mentors', [MentorController::class, 'index']);
+    Route::get('/organizations', [OrganizationController::class, 'index']);
+    Route::post('/organizations', [OrganizationController::class, 'store']);
+    Route::post('/organizations/{organization}', [OrganizationController::class, 'update']);
+    Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
+    Route::get('/startups', [CompanyController::class, 'index']);
+    Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
+    Route::get('/sectors', [SectorController::class, 'index']);
+    Route::get('/states', [SectorController::class, 'getStates']);
+    Route::post('/programs', [ProgramController::class, 'store']);
+    Route::post('programs/{id}', [ProgramController::class, 'update']);
+    Route::get('/v1/programs', [ProgramController::class, 'index']);
+    Route::get('/v1/programs/{id}', [ProgramController::class, 'show']);
+    Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
+    Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
+    Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
+    Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
+    Route::apiResource('steps', StepController::class);
+});
 
 
 

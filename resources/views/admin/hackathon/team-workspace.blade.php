@@ -1,149 +1,85 @@
-<!DOCTYPE html>
-<html lang="{{ $l }}" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-    class="light-style layout-navbar-fixed layout-compact" data-theme="theme-default" data-assets-path="/vuexy/assets/"
-    data-template="vertical-menu-template" data-style="light">
+@extends('layouts.hr-admin')
 
-<head>
-    @include('admin.includes.head')
-    
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@section('style')
+<style>
+    /* Responsive adjustments */
+    @media (max-width: 991.98px) {
+        .team-workspace-container {
+            padding: 1rem !important;
+        }
 
-    <!-- Additional Styles -->
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
-    <style>
-        /* Responsive adjustments */
-        @media (max-width: 991.98px) {
-            .team-workspace-container {
-                padding: 1rem !important;
-            }
-            
-            #chatForm .btn {
-                flex-shrink: 0;
-                min-width: auto;
-            }
-            
-            #chatForm input {
-                font-size: 16px; /* Prevent iOS zoom */
-            }
-            
-            .nav-pills .nav-link {
-                font-size: 0.875rem;
-                padding: 0.5rem 0.75rem;
-            }
+        #chatForm .btn {
+            flex-shrink: 0;
+            min-width: auto;
         }
-        
-        @media (max-width: 575.98px) {
-            .card.card-body {
-                padding: 1rem;
-            }
-            
-            .btn-group-sm > .btn, .btn-sm {
-                font-size: 0.75rem;
-            }
+
+        #chatForm input {
+            font-size: 16px;
+            /* Prevent iOS zoom */
         }
-    </style>
-</head>
+
+        .nav-pills .nav-link {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .card.card-body {
+            padding: 1rem;
+        }
+
+        .btn-group-sm>.btn,
+        .btn-sm {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+@stop
 
 @php
-$teamData = [
-'name' => 'Team Champions',
-'name_ar' => 'فريق الأبطال',
-'hackathon' => 'Future of AI Hackathon',
-'hackathon_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
-'members' => [
-['name' => 'Ahmed', 'name_ar' => 'أحمد'],
-['name' => 'Sara', 'name_ar' => 'سارة'],
-['name' => 'You', 'name_ar' => 'أنت'],
-]
-];
+// $teamData = [
+// 'name' => 'Team Champions',
+// 'name_ar' => 'فريق الأبطال',
+// 'hackathon' => 'Future of AI Hackathon',
+// 'hackathon_ar' => 'هاكثون مستقبل الذكاء الاصطناعي',
+// 'members' => [
+// ['name' => 'Ahmed', 'name_ar' => 'أحمد'],
+// ['name' => 'Sara', 'name_ar' => 'سارة'],
+// ['name' => 'You', 'name_ar' => 'أنت'],
+// ]
+// ];
 @endphp
 
-<body>
-    <!-- Include original navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/dashboard/hackathon">
-                <i class="ti ti-tournament text-primary me-2"></i> {{ $l == 'en' ? 'Hackathon Platform' : 'منصة
-                الهاكثونات' }}
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/hackathon">
-                            <i class="ti ti-home"></i>
-                            {{ $l == 'en' ? 'Home' : 'الرئيسية' }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/hackathon/manage" id="back-to-team-management">
-                            <i class="ti ti-arrow-left"></i> 
-                            {{ $l == 'en' ? 'Back to Team Management' : 'العودة لإدارة الفريق' }}
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-user-circle"></i> {{ $l == 'en' ? 'Hello, Entrepreneur' : 'مرحباً، رائد
-                            أعمال' }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
-                            <li><a class="dropdown-item" href="#"><i class="ti ti-user"></i> {{ $l == 'en' ? 'My
-                                    Profile' : 'ملفي
-                                    الشخصي' }}</a></li>
-                            <li><a class="dropdown-item"
-                                    href="/dashboard/hackathon/my-team"><i
-                                        class="ti ti-users"></i> {{ $l == 'en' ? 'My Team' : 'فريقي'
-                                    }}</a></li>
-                            <li><a class="dropdown-item" href="/dashboard"><i class="ti ti-dashboard"></i> {{ $l == 'en'
-                                    ? 'Admin
-                                    Dashboard' : 'لوحة تحكم الإدارة' }}</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="#"><i class="ti ti-logout"></i> {{ $l == 'en' ? 'Logout'
-                                    : 'تسجيل
-                                    الخروج' }}</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+@section('content')
+<!-- Main Content -->
+<div class="container-fluid mb-5 mb-md-12">
+
+    <div class="container-fluid mt-3 mt-md-4 px-3 px-md-4 team-workspace-container">
+        <!-- Simple Header -->
+        <div class="mb-4">
+            <h3 class="mb-1">
+                {{ $l == 'en' ? 'Team Workspace:' : 'مساحة عمل فريق:' }}
+                <span id="team-name-collab" class="text-primary">{{ $l == 'en' ? $teamData['name'] :
+                    $teamData['name_ar'] }}</span>
+            </h3>
+            <p class="text-muted mb-0">
+                {{ $l == 'en' ? 'Hackathon:' : 'هاكثون:' }}
+                <span id="hackathon-name-collab">{{ $l == 'en' ? $teamData['hackathon'] : $teamData['hackathon_ar']
+                    }}</span>
+            </p>
         </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="container-fluid mb-5 mb-md-12">
-
-        <div class="container-fluid mt-3 mt-md-4 px-3 px-md-4 team-workspace-container">
-            <!-- Simple Header -->
-            <div class="mb-4">
-                <h3 class="mb-1">
-                    {{ $l == 'en' ? 'Team Workspace:' : 'مساحة عمل فريق:' }}
-                    <span id="team-name-collab" class="text-primary">{{ $l == 'en' ? $teamData['name'] :
-                        $teamData['name_ar'] }}</span>
-                </h3>
-                <p class="text-muted mb-0">
-                    {{ $l == 'en' ? 'Hackathon:' : 'هاكثون:' }}
-                    <span id="hackathon-name-collab">{{ $l == 'en' ? $teamData['hackathon'] : $teamData['hackathon_ar']
-                        }}</span>
-                </p>
-            </div>
-
-            <div class="row g-4">
-                <!-- Chat Section -->
-                <div class="col-12 col-lg-5">
-                    <div class="card card-body h-100">
+        <div class="row g-4">
+            <!-- Chat Section -->
+            <div class="col-12 col-lg-5">
+                <div class="card card-body h-100">
                     <div class="mb-4">
                         <h5 class="mb-3"><i class="ti ti-message-dots me-2"></i> {{ $l == 'en' ? 'Team Chat' : 'محادثة
                             الفريق' }}</h5>
 
                         <div class="border rounded p-3 mb-3"
-                            style="height: 400px; overflow-y: auto; background-color: #f8f9fa;" id="chatWindow" 
+                            style="height: 400px; overflow-y: auto; background-color: #f8f9fa;" id="chatWindow"
                             data-mobile-height="300px">
                             <div class="mb-3 p-2 border-bottom">
                                 <div class="fw-bold small">{{ $l == 'en' ? 'Ahmed:' : 'أحمد:' }}</div>
@@ -180,9 +116,9 @@ $teamData = [
                 </div>
             </div>
 
-                <!-- Files & Tasks Section -->
-                <div class="col-12 col-lg-7">
-                    <div class="card card-body h-100">
+            <!-- Files & Tasks Section -->
+            <div class="col-12 col-lg-7">
+                <div class="card card-body h-100">
                     <ul class="nav nav-pills mb-4" id="collabTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="files-tab" data-bs-toggle="tab" data-bs-target="#files"
@@ -197,10 +133,11 @@ $teamData = [
                             </button>
                         </li>
                     </ul>
+
                     <div class="tab-content p-0 mt-4 border rounded shadow overflow-hidden" id="collabTabsContent">
                         <!-- Files Tab -->
-                        <div class="tab-pane fade show active p-6 border-top-0 rounded-bottom bg-white"
-                            id="files" role="tabpanel" aria-labelledby="files-tab">
+                        <div class="tab-pane fade show active p-6 border-top-0 rounded-bottom bg-white" id="files"
+                            role="tabpanel" aria-labelledby="files-tab">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6>{{ $l == 'en' ? 'Uploaded Files:' : 'الملفات المرفوعة:' }}</h6>
                                 <button class="btn btn-success btn-sm" data-bs-toggle="modal"
@@ -209,74 +146,53 @@ $teamData = [
                                     جديد' }}
                                 </button>
                             </div>
+
                             <ul class="list-group list-group-flush" id="fileList">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="ti ti-file-type-ppt text-danger me-2"></i>
-                                        {{ $l == 'en' ? 'Initial Presentation.pptx' : 'عرض تقديمي أولي.pptx' }}
-                                        <small class="text-muted d-block">
-                                            (2.1MB - {{ $l == 'en' ? 'Uploaded by: Sara' : 'رفع بواسطة: سارة' }})
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <a href="#" class="btn btn-sm btn-outline-primary me-1"
-                                            onclick="downloadFile('{{ $l == 'en' ? 'Initial Presentation.pptx' : 'عرض تقديمي أولي.pptx' }}', 'Initial_Presentation.pptx')"
-                                            title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                            <i class="ti ti-download"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                            onclick="deleteFile(this, '{{ $l == 'en' ? 'Initial Presentation.pptx' : 'عرض تقديمي أولي.pptx' }}')"
-                                            title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="ti ti-file-zip text-warning me-2"></i>
-                                        {{ $l == 'en' ? 'Design Resources.zip' : 'موارد التصميم.zip' }}
-                                        <small class="text-muted d-block">
-                                            (5.7MB - {{ $l == 'en' ? 'Uploaded by: Ahmed' : 'رفع بواسطة: أحمد' }})
-                                        </small>
-                                    </div>                                 <div>
-                                <a href="#" class="btn btn-sm btn-outline-primary me-1"
-                                    onclick="downloadFile('{{ $l == 'en' ? 'Design Resources.zip' : 'موارد التصميم.zip' }}', 'Design_Resources.zip')"
-                                    title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                    <i class="ti ti-download"></i>
-                                </a>
-                                <button class="btn btn-sm btn-outline-danger"
-                                    onclick="deleteFile(this, '{{ $l == 'en' ? 'Design Resources.zip' : 'موارد التصميم.zip' }}')"
-                                    title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                    <i class="ti ti-trash"></i>
-                                </button>
-                            </div>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="ti ti-file-text text-info me-2"></i>
-                                {{ $l == 'en' ? 'Meeting Notes.docx' : 'ملاحظات الاجتماع.docx' }}
-                                <small class="text-muted d-block">
-                                    (150KB - {{ $l == 'en' ? 'Uploaded by: You' : 'رفع بواسطة: أنت' }})
-                                </small>
-                            </div>
-                            <div>
-                                <a href="#" class="btn btn-sm btn-outline-primary me-1"
-                                    onclick="downloadFile('{{ $l == 'en' ? 'Meeting Notes.docx' : 'ملاحظات الاجتماع.docx' }}', 'Meeting_Notes.docx')"
-                                    title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                    <i class="ti ti-download"></i>
-                                </a>
-                                <button class="btn btn-sm btn-outline-danger"
-                                    onclick="deleteFile(this, '{{ $l == 'en' ? 'Meeting Notes.docx' : 'ملاحظات الاجتماع.docx' }}')"
-                                    title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                    <i class="ti ti-trash"></i>
-                                </button>
-                                    </div>
-                                </li>
+                                @foreach($sharedFile as $file)
+                                
+                                 @php
+                                    $fullPath = $file->sf_file;
+                                    $pathInfo = pathinfo($fullPath);
+                                    $filename = $pathInfo['filename'];
+                                    $extension = $pathInfo['extension'];
+                                    if (file_exists($fullPath)) {
+                                        $bytes = filesize($fullPath);
+                                        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                                        $factor = floor((strlen($bytes) - 1) / 3);
+                                        $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
+                                    } else {
+                                        $sizeReadable = 'الملف غير موجود';
+                                    }
+                                    
+                                 @endphp
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="ti ti-file-type-ppt text-danger me-2"></i>
+                                            {{ $filename.".".$extension }}
+                                            <small class="text-muted d-block">
+                                                ( {{ $sizeReadable }} - {{ $l == 'en' ? 'Uploaded by: ' . $file->{"user_name_". $l} : 'رفع بواسطة: ' . $file->{"user_name_". $l} }})
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <a href="{{ asset($file->sf_file) }}" 
+                                                download 
+                                                class="btn btn-sm btn-outline-primary me-1"
+                                                title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                                <i class="ti ti-download"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="deleteFile(this, {{ $file->sf_id }})"
+                                                title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
                         <!-- Tasks Tab -->
-                        <div class="tab-pane fade p-3 border-top-0 rounded-bottom bg-white" id="tasks"
-                            role="tabpanel" aria-labelledby="tasks-tab">
+                        <div class="tab-pane fade p-3 border-top-0 rounded-bottom bg-white" id="tasks" role="tabpanel"
+                            aria-labelledby="tasks-tab">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6>{{ $l == 'en' ? 'Current Tasks:' : 'المهام الحالية:' }}</h6>
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
@@ -302,12 +218,12 @@ $teamData = [
                                             </small>
                                         </div>
                                         <div>
-                                            <button class="btn btn-sm btn-outline-secondary me-1" 
+                                            <button class="btn btn-sm btn-outline-secondary me-1"
                                                 onclick="editTask('task1', '{{ $l == 'en' ? 'Design main interface for prototype' : 'تصميم الواجهة الرئيسية للنموذج الأولي' }}', '{{ $l == 'en' ? 'Ahmed' : 'أحمد' }}', '2024-03-15')"
                                                 title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                                 <i class="ti ti-edit"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger" 
+                                            <button class="btn btn-sm btn-outline-danger"
                                                 onclick="deleteTask('task1', '{{ $l == 'en' ? 'Design main interface for prototype' : 'تصميم الواجهة الرئيسية للنموذج الأولي' }}')"
                                                 title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
                                                 <i class="ti ti-trash"></i>
@@ -329,12 +245,12 @@ $teamData = [
                                             </small>
                                         </div>
                                         <div>
-                                            <button class="btn btn-sm btn-outline-secondary me-1" 
+                                            <button class="btn btn-sm btn-outline-secondary me-1"
                                                 onclick="editTask('task2', '{{ $l == 'en' ? 'Develop basic analysis algorithm' : 'تطوير خوارزمية التحليل الأساسية' }}', '{{ $l == 'en' ? 'Sara' : 'سارة' }}', '2024-03-16')"
                                                 title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                                 <i class="ti ti-edit"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger" 
+                                            <button class="btn btn-sm btn-outline-danger"
                                                 onclick="deleteTask('task2', '{{ $l == 'en' ? 'Develop basic analysis algorithm' : 'تطوير خوارزمية التحليل الأساسية' }}')"
                                                 title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
                                                 <i class="ti ti-trash"></i>
@@ -356,12 +272,12 @@ $teamData = [
                                             </small>
                                         </div>
                                         <div>
-                                            <button class="btn btn-sm btn-outline-secondary me-1" 
+                                            <button class="btn btn-sm btn-outline-secondary me-1"
                                                 onclick="editTask('task3', '{{ $l == 'en' ? 'Prepare final presentation' : 'إعداد العرض التقديمي النهائي' }}', '{{ $l == 'en' ? 'You' : 'أنت' }}', '2024-03-17')"
                                                 title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                                 <i class="ti ti-edit"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger" 
+                                            <button class="btn btn-sm btn-outline-danger"
                                                 onclick="deleteTask('task3', '{{ $l == 'en' ? 'Prepare final presentation' : 'إعداد العرض التقديمي النهائي' }}')"
                                                 title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
                                                 <i class="ti ti-trash"></i>
@@ -372,129 +288,105 @@ $teamData = [
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Upload File Modal -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadFileModalLabel">{{ $l == 'en' ? 'Upload New File' : 'رفع ملف جديد'
+                    }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="" method="POST" action="/dashboard/hackathon/addSharedFile" enctype="multipart/form-data" >
+                    <div class="mb-3">
+                        <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف'
+                            }}</label>
+                        <input class="form-control" name="file" type="file" id="fileInput" required>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label for="fileDescription" class="form-label">{{ $l == 'en' ? 'File Description
+                            (Optional)' : 'وصف الملف (اختياري)' }}</label>
+                        <input type="text" class="form-control" id="fileDescription" name="description"
+                            placeholder="{{ $l == 'en' ? 'e.g., Initial logo design' : 'مثال: تصميم الشعار الأولي' }}">
+                    </div>
+                </form>
             </div>
-        </div>
-    </main>
-
-
-    <!-- Upload File Modal -->
-    <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadFileModalLabel">{{ $l == 'en' ? 'Upload New File' : 'رفع ملف جديد'
-                        }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="fileUploadForm">
-                        <div class="mb-3">
-                            <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف'
-                                }}</label>
-                            <input class="form-control" type="file" id="fileInput" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="fileDescription" class="form-label">{{ $l == 'en' ? 'File Description
-                                (Optional)' : 'وصف الملف (اختياري)' }}</label>
-                            <input type="text" class="form-control" id="fileDescription"
-                                placeholder="{{ $l == 'en' ? 'e.g., Initial logo design' : 'مثال: تصميم الشعار الأولي' }}">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
-                        'إلغاء' }}</button>
-                    <button type="button" class="btn btn-primary" onclick="uploadFile()">{{ $l == 'en' ? 'Upload' :
-                        'رفع' }}</button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
+                    'إلغاء' }}</button>
+                <button type="submit" class="btn btn-primary" onclick="uploadFile()">{{ $l == 'en' ? 'Upload' :
+                    'رفع' }}</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Add Task Modal -->
-    <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addTaskModalLabel">{{ $l == 'en' ? 'Add New Task' : 'إضافة مهمة جديدة'
-                        }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="taskForm">
-                        <div class="mb-3">
-                            <label for="taskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة'
-                                }}</label>
-                            <input type="text" class="form-control" id="taskTitle" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول'
-                                }}</label>
-                            <select class="form-select" id="taskAssignee">
-                                <option selected value="{{ $l == 'en' ? 'You' : 'أنت' }}">{{ $l == 'en' ? 'You' : 'أنت'
-                                    }}</option>
-                                @foreach($teamData['members'] as $member)
-                                @if(($l == 'en' ? $member['name'] : $member['name_ar']) !== ($l == 'en' ? 'You' :
-                                'أنت'))
-                                <option value="{{ $l == 'en' ? $member['name'] : $member['name_ar'] }}">{{ $l == 'en' ?
-                                    $member['name'] : $member['name_ar'] }}</option>
-                                @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق'
-                                }}</label>
-                            <input type="date" class="form-control" id="taskDueDate">
-                        </div>
-                        <div class="mb-3">
-                            <label for="taskDescription" class="form-label">{{ $l == 'en' ? 'Task Description
-                                (Optional)' : 'وصف المهمة (اختياري)' }}</label>
-                            <textarea class="form-control" id="taskDescription" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
-                        'إلغاء' }}</button>
-                    <button type="button" class="btn btn-primary" onclick="addTask()">{{ $l == 'en' ? 'Add Task' :
-                        'إضافة المهمة' }}</button>
-                </div>
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">{{ $l == 'en' ? 'Add New Task' : 'إضافة مهمة جديدة'
+                    }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <div class="mb-3">
+                        <label for="taskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة'
+                            }}</label>
+                        <input type="text" class="form-control" id="taskTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول'
+                            }}</label>
+                        <select class="form-select" id="taskAssignee">
+                            <option selected value="{{ $l == 'en' ? 'You' : 'أنت' }}">{{ $l == 'en' ? 'You' : 'أنت'
+                                }}</option>
+                            @foreach($teamData['members'] as $member)
+                            @if(($l == 'en' ? $member['name'] : $member['name_ar']) !== ($l == 'en' ? 'You' :
+                            'أنت'))
+                            <option value="{{ $l == 'en' ? $member['name'] : $member['name_ar'] }}">{{ $l == 'en' ?
+                                $member['name'] : $member['name_ar'] }}</option>
+                            @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق'
+                            }}</label>
+                        <input type="date" class="form-control" id="taskDueDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">{{ $l == 'en' ? 'Task Description
+                            (Optional)' : 'وصف المهمة (اختياري)' }}</label>
+                        <textarea class="form-control" id="taskDescription" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
+                    'إلغاء' }}</button>
+                <button type="button" class="btn btn-primary" onclick="addTask()">{{ $l == 'en' ? 'Add Task' :
+                    'إضافة المهمة' }}</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Include original footer -->
-    <footer class="footer mt-auto py-3 bg-dark text-white">
-        <div class="container text-center">
-            <span>
-                © 2024 {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات.
-                جميع الحقوق محفوظة.' }}
-            </span>
-        </div>
-    </footer>
-    <!-- Core JS -->
-    <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-    <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-    <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-    <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-    <script src="/vuexy/assets/vendor/js/menu.js"></script>
-    <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-    <script src="/vuexy/assets/js/main.js"></script>
-    <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-    <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+@stop
 
-    <!-- Custom JS -->
-    <script src="/vuexy/assets/js/forms-selects.js"></script>
-
-    <script>
-        // Responsive adjustments
+@section('pagescripts')
+<script>
+    // Responsive adjustments
         function adjustForMobile() {
             const chatWindow = document.getElementById('chatWindow');
             if (window.innerWidth < 992) { // lg breakpoint
@@ -669,35 +561,64 @@ $teamData = [
 
     function uploadFile() {
         const fileInput = document.getElementById('fileInput');
-        const fileDescription = document.getElementById('fileDescription').value;
-        
-        if (fileInput.files.length > 0) {
+        const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
+        const l = '{{ $l }}'; // "en" أو "ar"
+
+        if (fileInput && fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            
-            // Create FormData object for file upload
+
+            // بناء FormData
             const formData = new FormData();
             formData.append('file', file);
             formData.append('description', fileDescription);
-            
-            // Get URL parameters for context
+
+            // باراميترز من الـ URL
             const urlParams = new URLSearchParams(window.location.search);
             const hackathonId = urlParams.get('hackathonId') || '1';
             const teamId = urlParams.get('teamId') || '123';
             formData.append('hackathon_id', hackathonId);
             formData.append('team_id', teamId);
-            
-            // Show loading indicator
+
+            // إظهار loading
             Swal.fire({
-                title: '{{ $l == "en" ? "Uploading..." : "جاري الرفع..." }}',
-                text: '{{ $l == "en" ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف." }}',
+                title: l === 'en' ? "Uploading..." : "جاري الرفع...",
+                text: l === 'en' ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف.",
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
             });
-            
-            // Upload file to server
-            fetch('/dashboard/hackathon/team-workspace/upload', {
+
+            // دالة مساعدة لاختيار الأيقونة
+            const getIconClass = (name) => {
+                if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
+                if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
+                if (name.endsWith('.docx')) return 'ti-file-text text-info';
+                if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
+                if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
+                return 'ti-file-text';
+            };
+
+            const createListItem = (file) => {
+                const fileList = document.getElementById('fileList');
+                if (!fileList) return;
+                const newItem = document.createElement('li');
+                newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
+
+                const iconClass = getIconClass(file.name);
+                const uploadedByText = l === 'en' ? 'Uploaded by: You' : 'رفع بواسطة: أنت';
+
+                newItem.innerHTML = `
+                    <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - ${uploadedByText})</small></div>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}"><i class="ti ti-download"></i></a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}"><i class="ti ti-trash"></i></button>
+                    </div>`;
+                fileList.prepend(newItem);
+            };
+
+            // إرسال الطلب للراوت الجديد
+            fetch('/dashboard/hackathon/addSharedFile', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -705,125 +626,121 @@ $teamData = [
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                if (data.success) {
-                    // Use SweetAlert2 for success message
+                if (data.status === 'success') {
                     Swal.fire({
                         icon: 'success',
-                        title: '{{ $l == "en" ? "File Uploaded!" : "تم رفع الملف!" }}',
-                        text: `{{ $l == "en" ? "File uploaded: " : "تم رفع الملف: " }}${file.name} (${(file.size / 1024).toFixed(1)}KB)`,
-                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
+                        text: data.message,
+                        confirmButtonText: l === 'en' ? "OK" : "موافق"
                     });
-
-                    // Add to file list UI
-                    const fileList = document.getElementById('fileList');
-                    const newItem = document.createElement('li');
-                    newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
-                    
-                    // Simple icon logic based on extension
-                    let iconClass = 'ti-file-text';
-                    if (file.name.endsWith('.zip')) iconClass = 'ti-file-zip text-warning';
-                    else if (file.name.endsWith('.pptx')) iconClass = 'ti-file-type-ppt text-danger';
-                    else if (file.name.endsWith('.docx')) iconClass = 'ti-file-text text-info';
-                    else if (file.name.endsWith('.pdf')) iconClass = 'ti-file-type-pdf text-danger';
-                    else if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) iconClass = 'ti-photo text-success';
-
-                    newItem.innerHTML = `
-                        <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - {{ $l == "en" ? "Uploaded by: You" : "رفع بواسطة: أنت" }})</small></div>
-                        <div>
-                            <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="{{ $l == "en" ? "Download" : "تنزيل" }}"><i class="ti ti-download"></i></a>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="{{ $l == "en" ? "Delete" : "حذف" }}"><i class="ti ti-trash"></i></button>
-                        </div>`;
-                    fileList.prepend(newItem); // Add to top
-                    
-                    const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadFileModal'));
-                    uploadModal.hide();
-                    document.getElementById('fileUploadForm').reset();
+                    createListItem(file);
                 } else {
-                    throw new Error(data.message || 'Upload failed');
+                    Swal.fire({
+                        icon: 'error',
+                        title: l === 'en' ? "Error" : "خطأ",
+                        text: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+                        confirmButtonText: l === 'en' ? "OK" : "موافق"
+                    });
                 }
             })
             .catch(error => {
                 console.error('Upload error:', error);
-                
-                // For demo purposes, still add the file to UI but show warning
                 Swal.fire({
-                    icon: 'warning',
-                    title: '{{ $l == "en" ? "Demo Mode" : "وضع التجريبي" }}',
-                    text: `{{ $l == "en" ? "File added to demo list: " : "تم إضافة الملف للقائمة التجريبية: " }}${file.name}`,
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                    icon: 'error',
+                    title: l === 'en' ? "Error" : "خطأ",
+                    text: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+                    confirmButtonText: l === 'en' ? "OK" : "موافق"
                 });
+            })
+            .finally(() => {
+                const uploadModalEl = document.getElementById('uploadFileModal');
+                const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
+                if (uploadModal) uploadModal.hide();
 
-                // Add to file list UI (demo mode)
-                const fileList = document.getElementById('fileList');
-                const newItem = document.createElement('li');
-                newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
-                
-                let iconClass = 'ti-file-text';
-                if (file.name.endsWith('.zip')) iconClass = 'ti-file-zip text-warning';
-                else if (file.name.endsWith('.pptx')) iconClass = 'ti-file-type-ppt text-danger';
-                else if (file.name.endsWith('.docx')) iconClass = 'ti-file-text text-info';
-                else if (file.name.endsWith('.pdf')) iconClass = 'ti-file-type-pdf text-danger';
-                else if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) iconClass = 'ti-photo text-success';
-
-                newItem.innerHTML = `
-                    <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - {{ $l == "en" ? "Uploaded by: You (Demo)" : "رفع بواسطة: أنت (تجريبي)" }})</small></div>
-                    <div>
-                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="{{ $l == "en" ? "Download" : "تنزيل" }}"><i class="ti ti-download"></i></a>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="{{ $l == "en" ? "Delete" : "حذف" }}"><i class="ti ti-trash"></i></button>
-                    </div>`;
-                fileList.prepend(newItem);
-                
-                const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadFileModal'));
-                uploadModal.hide();
-                document.getElementById('fileUploadForm').reset();
+                const form = document.getElementById('fileUploadForm');
+                if (form && typeof form.reset === 'function') form.reset();
             });
         } else {
             Swal.fire({
                 icon: 'warning',
-                title: '{{ $l == "en" ? "No File Selected" : "لم يتم اختيار ملف" }}',
-                text: '{{ $l == "en" ? "Please choose a file first." : "يرجى اختيار ملف أولاً." }}',
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
+                text: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
+                confirmButtonText: l === 'en' ? "OK" : "موافق"
             });
         }
     }
 
-    function deleteFile(buttonElement, fileName) {
-        console.log('deleteFile called with:', buttonElement, fileName);
-        
-        if (typeof Swal === 'undefined') {
-            console.error('SweetAlert2 is not loaded!');
-            alert('Delete functionality not available - SweetAlert2 not loaded');
-            return;
-        }
-        
-        Swal.fire({
-            title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-            text: `{{ $l == "en" ? "Do you want to delete the file: " : "هل تريد حذف الملف: " }}"${fileName}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
-            cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Remove the file from the DOM
-                const fileElement = buttonElement.closest('li');
-                if (fileElement) {
-                    fileElement.remove();
-                }
-                
-                Swal.fire({
-                    title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                    text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
-                    icon: 'success',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-                });
-            }
-        });
+    function deleteFile(buttonElement, fileId) {
+    console.log('deleteFile called with:', buttonElement, fileId);
+
+    if (typeof Swal === 'undefined') {
+        console.error('SweetAlert2 is not loaded!');
+        alert('Delete functionality not available - SweetAlert2 not loaded');
+        return;
     }
+
+    Swal.fire({
+        title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+        text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
+        cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error deleting file");
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // إزالة العنصر من الصفحة
+                    const fileElement = buttonElement.closest('li');
+                    if (fileElement) fileElement.remove();
+
+                    Swal.fire({
+                        title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                        text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
+                        icon: 'success',
+                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                    });
+                } else {
+                    Swal.fire({
+                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                        text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                    text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+                    icon: 'error'
+                });
+            });
+        }
+    });
+}
+
 
     function deleteTask(taskId, taskTitle) {
         console.log('deleteTask called with:', taskId, taskTitle);
@@ -962,7 +879,5 @@ $teamData = [
         addTaskModal.hide();
         document.getElementById('taskForm').reset();
     }
-    </script>
-</body>
-
-</html>
+</script>
+@stop

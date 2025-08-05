@@ -50,11 +50,31 @@
         @endforeach
       </select>
     </div>
-    <div class="mb-6">
+    <div class="form-group">
+    <label class="form-label fs-6 fw-semibold" for="program_type">{{ __('admin.Program_Type') }}</label>
+     @php
+        $selectedType = old('program_type', isset($ccycle) ? $ccycle->type : '');
+    @endphp
+    <select name="program_type"
+            id="program_type"
+            class="form-control"
+            {{ isset($ccycle) ? 'disabled' : 'required' }}>
+        @foreach(\App\Cycle::programTypes() as $value => $label)
+            <option value="{{ $value }}" {{ $selectedType == $value ? 'selected' : '' }}>
+                {{ $label }}
+            </option>
+        @endforeach
+    </select>
+
+    @if(isset($ccycle))
+        <input type="hidden" name="program_type" value="{{ $ccycle->type }}">
+    @endif
+</div>
+    <div class="mb-6 mt-3">
       <label for="program-title" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Cycle title') }}
       </label>
-      <input type="hidden" name="type" id="type">
+      {{-- <input type="hidden" name="type" id="type"> --}}
       <input type="hidden" name="cycleid" id="cycleid">
       <input type="hidden" name="start" id="start" />
       <input type="hidden" name="end" id="end" />
@@ -102,6 +122,22 @@
       </label>
       <textarea class="form-control" id="description" name="description" placeholder="{{ __('cycles.Description') }}"
         oninput="this.value = this.value.trimStart()" rows="3" required></textarea>
+    </div>
+
+    <div class="mb-6">
+      <div class="form-group public-data-form-fields">
+        <label class="form-label" for="is_public">{{ __('cycles.Program Visibility') }}: </label>
+        <select class="select form-control" id="is_public" name="is_public">
+          <option value="0" {{ $ccycle?->is_public == 0 ? 'selected' : '' }}>{{ __('cycles.Program Visible To Private') }}</option>
+          <option value="1" {{ $ccycle?->is_public == 1 ? 'selected' : '' }}>{{ __('cycles.Program Visible To Public') }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-6">
+      <div class="form-group public-data-form-fields" id="public_slug_div">
+        <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
+        <input type="text" id="public_slug" name="public_slug" class="form-control" value="{{ $ccycle?->public_slug }}" placeholder="{{ __('cycles.Public URL placeholder') }}" >
+      </div>
     </div>
     <div class="mb-6">
       <div class="form-check form-switch mt-2">

@@ -19,6 +19,11 @@ return [
     'AVG degree' => 'متوسط الدرجات',
     'No screening started yet' => 'لا يوجد مراجعات حالياً',
     'Cycle final screening' => 'التقييمات النهائية',
+    'Open form' => 'فتح النموذج',
+    'evaluation_not_started' => 'لم يبدأ',
+    'evaluation_in_progress' => 'في التقييم',
+    'evaluation_completed' => 'انتهت',
+    'evaluation_not_evaluated' => 'لم يتم التقييم',
     'start from' => 'تبدأ في',
     'to' => 'إلى',
     'Meeting' => 'موعد الاجتماع',
@@ -161,4 +166,6 @@ return [
     'Click to select multiple dates for your sessions' => 'اضغط لتحديد مواعيد متعددة لجلساتك',
     'Select multiple dates' => 'حدد مواعيد متعددة',
     'Hide schedule' => 'إخفاء المواعيد',
+    'No mentorship sessions found' => 'لا توجد جلسات توجيهية',
+    'No training sessions found' => 'لا توجد جلسات تدريبية',
 ];

@@ -351,7 +351,7 @@
                               <td>
                                 @php
                                 
-                                $formFieldsCount = App\Formfield::where('step_id', $step->id)->count();
+                                $formFieldsCount = App\Formfield::where('step_id', $step->id)->where('builder_forms_id', $step->data)->count();
                                 $finalDataCount =  App\FinalData::where('step_id', $step->id)->where('judge_id', Auth::id())->where('company_id', $fcompany->company_id)->whereNotNull('answer')->count();
                               
                                 $judgepercentage = $formFieldsCount > 0 ? ($finalDataCount / $formFieldsCount) * 100 : 0;

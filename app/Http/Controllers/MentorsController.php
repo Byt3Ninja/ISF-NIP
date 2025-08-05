@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
 use App\Events\MentorshipSessionUpdated;
+use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
@@ -344,6 +345,12 @@ class MentorsController extends Controller
 				$datefrom = $date . ' ' . $time_from;
 				$dateto = $date . ' ' . $time_to;
 
+				$mentorshipnotadded = MentorshipRequest::where('zoom_date', $datefrom)->where('mentor_id', $request->mentorid)->first();
+
+				if($mentorshipnotadded){
+					$errors[] = "Mentor already scheduled on $date from $time_from to $time_to";
+					continue;
+				}
 				$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 				$dayName = Carbon::parse($date)->format('l');
 

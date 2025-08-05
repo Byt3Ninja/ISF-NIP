@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\API;
 
+use App\User;
 use App\UsersBio;
 use App\MentorshipTask;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Mail\ConfirmEmailUpdate;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -24,7 +23,7 @@ class ProfileController extends Controller
  *     summary="Get authenticated user profile",
  *     description="Returns profile data of the authenticated user including mentorship statistics, sessions, and mentor bio if applicable.",
  *     operationId="getMe",
- *     tags={"User"},
+ *     tags={"Profile"},
  *     security={{"sanctum":{}}},
  *     @OA\Response(
  *         response=200,
@@ -105,174 +104,81 @@ class ProfileController extends Controller
  */
      public function me(Request $request)
     {
-        $user = Auth::user();
-        
-        $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
-        $locale = app()->getLocale();
-
-        $data = [
-            'imgUrl'           => $user->img_url,
-            'firstName'        => $user->first_name_en,
-            'lastName'         => $user->last_name_en,
-            'gender'           => $user->gender,
-            'countryCode'      => $user->country_code,
-            'phone'            => $user->phone,
-            'countryCodeWA'    => $user->country_code_w_a,
-            'whatsapp'         => $user->whatsapp,
-            'whatsappVerified' => $user->whatsapp_verified,
-            'email'            => $user->email,
-            'zipCode'          => $user->zip_code,
-            'address'          => $user->address,
-            'title'            => $user->title_en,
-            'country'          => optional($user->country)->{'name_' . $locale},
-            'state'            => optional($user->state)->{'name_' . $locale},
-            'city'             => optional($user->city)->{'name_' . $locale}, 
-            'language'         => $user->language,
-            'haveCompany'      => (bool) $user->HaveCompany,
-            'timeZone'         => $user->timezone,
-            'currency'         => $user->currency,
-            'role'             => $user->getRoleNames()->first(),
-        ];
-
-    if ($user->hasRole('Mentor') || $user->hasRole('Registered')) {
-
-        $requestsQuery = MentorshipRequest::query();
-
-        $requestsQuery->where('mentor_id', $user->id);
-
-        $requests = $requestsQuery->get();
-
-        if ($user->hasRole('Mentor')) {
-            $data['mentorshipTotalRequests'] = $requests->count();
-            $data['mentorshipTotalHours'] = round($requests->sum('period') / 60, 2);
-            $data['mentorshipAverageRating'] = round($requests->whereNotNull('rating')->avg('rating'), 1);
-        }
-
-        $tasks = MentorshipTask::with(['user.company', 'mentorshipRequest'])->whereNotNull('title');
-
-        if ($user->hasRole('Mentor')) {
-            $tasks->where('mentor_id', $user->id)->where('status', 'pending');
-        } else {
-            $companyId = optional($user->company)->id;
-            if ($companyId) {
-                $tasks->where('company_id', $companyId);
-            } else {
-                $tasks->where('user_id', $user->id);
-            }
-        }
-
-        $tasks = $tasks->get();
-
-        $data['mentorshipSessions'] = $tasks->map(function ($task) use ($locale) {
-            $taskUser = $task->user;
-
-            $userImg = $taskUser?->img_url
-                ? Storage::disk('public_uploads')->url($taskUser->img_url)
-                : null;
-
-            $company = optional($taskUser->company);
-            $companyLogo = $company?->logo_url;
-
-            return [
-                'fullName'    => trim($taskUser?->first_name_en . ' ' . $taskUser?->last_name_en),
-                'imgUrl'      => $userImg,
-                'company'     => $company?->{"name_$locale"},
-                'companyLogo' => $companyLogo,
-                'done'        => optional($task->mentorshipRequest)->done,
-                'taskTitle'   => $task->title,
-            ];
-        })->filter()->values();
-    }
-
-    // === Mentor Bio Data ===
-  if ($user->hasRole('Mentor')) {
-    $bio = UsersBio::where('user_id', $user->id)->first();
-
-    $mentorBio = [];
-
-    if ($bio) {
-        $mentorBio = [
-            'bio'                             => $locale === 'ar' ? $bio->bio_ar : $bio->bio_en,
-            'specialization'                 => $locale === 'ar' ? $bio->specialization_ar : $bio->specialization_en,
-            'linkedin'                       => $bio->linkedin,
-            'entrepreneurialExperience'     => (bool) $bio->entrepreneurial_experience,
-            'entrepreneurialExperience_brief' => $bio->entrepreneurial_experience_brief,
-            'profilePrivacy'                => (bool) $bio->profile_privacy,
-            'mentorshipApproach'            => json_decode($bio->mentorship_approach, true) ?? [],
-        ];
-    }
-
-    $expertiseItems = $user->mentorExpertises()->get();
-
-    $mentorBio['expertises'] = $expertiseItems->map(function ($expertise) use ($locale) {
-        return [
-            'id'    => $expertise->id,
-            'title' => $locale === 'ar' ? $expertise->title_ar : $expertise->title,
-        ];
-    })->values();
-
-    $data['mentorBio'] = $mentorBio;
-}
-
+      $user = Auth::user();
+      $data = $this->getProfileData($user);
 
     return response()->json([
-            'success' => true,
-            'data'   => $data,
-        ],200);
+        'success' => true,
+        'data'    => $data,
+    ], 200);
     }
  /**
-     * @OA\Put(
-     *     path="/api/profile",
-     *     summary="Update user profile",
-     *     description="Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
-     *     operationId="updateProfile",
-     *     tags={"User"},
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 required={},
-     *                 @OA\Property(property="firstName", type="string"),
-     *                 @OA\Property(property="lastName", type="string"),
-     *                 @OA\Property(property="countryCode", type="string"),
-     *                 @OA\Property(property="country_code_w_a", type="string"),
-     *                 @OA\Property(property="phone", type="string"),
-     *                 @OA\Property(property="whatsapp", type="string"),
-     *                 @OA\Property(property="email", type="string", format="email"),
-     *                 @OA\Property(property="zip_code", type="string"),
-     *                 @OA\Property(property="address", type="string"),
-     *                 @OA\Property(property="title", type="string"),
-     *                 @OA\Property(property="language", type="string"),
-     *                 @OA\Property(property="timezone", type="string"),
-     *                 @OA\Property(property="currency", type="string"),
-     *                 @OA\Property(property="country_id", type="integer"),
-     *                 @OA\Property(property="state_id", type="integer"),
-     *                 @OA\Property(property="imgUrl", type="string", format="binary")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Profile updated successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Profile updated successfully"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="firstName", type="string"),
-     *                 @OA\Property(property="lastName", type="string"),
-     *                 @OA\Property(property="email", type="string"),
-     *                 @OA\Property(property="phone", type="string"),
-     *                 @OA\Property(property="imgUrl", type="string")
-     *             )
-     *         )
-     *     )
-     * )
-     */
+ * @OA\Post(
+ *     path="/api/profile",
+ *     summary="Update user profile",
+ *     description="Update the authenticated user's profile information including contact info, language, timezone, and optionally image.",
+ *     operationId="updateProfile",
+ *     tags={"Profile"},
+ *     security={{"sanctum":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
+ *                 @OA\Property(property="gender", type="string", example="male"),
+ *                 @OA\Property(property="countryCode", type="string", example="+20"),
+ *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
+ *                 @OA\Property(property="phone", type="string", example="0100000000"),
+ *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
+ *                 @OA\Property(property="email", type="string", format="email", example="ahmed@example.com"),
+ *                 @OA\Property(property="zipCode", type="string", example="12345"),
+ *                 @OA\Property(property="address", type="string", example="123 Nile Street"),
+ *                 @OA\Property(property="title", type="string", example="Software Engineer"),
+ *                 @OA\Property(property="language", type="string", example="en"),
+ *                 @OA\Property(property="timezone", type="string", example="Africa/Cairo"),
+ *                 @OA\Property(property="currency", type="string", example="EGP"),
+ *                 @OA\Property(property="country_id", type="integer", example=1),
+ *                 @OA\Property(property="state_id", type="integer", example=10),
+ *                 @OA\Property(property="HaveCompany", type="boolean", example=1, description="1 = Yes, 0 = No"),
+ *                 @OA\Property(property="imgUrl", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Profile updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Profile updated successfully"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
+ *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
+ *                 @OA\Property(property="email", type="string", format="email", example="ahmed@example.com"),
+ *                 @OA\Property(property="phone", type="string", example="0100000000"),
+ *                 @OA\Property(property="gender", type="string", example="male"),
+ *                 @OA\Property(property="whatsapp", type="string", example="0100000000"),
+ *                 @OA\Property(property="countryCode", type="string", example="+20"),
+ *                 @OA\Property(property="countryCodeWA", type="string", example="+20"),
+ *                 @OA\Property(property="zipCode", type="string", example="12345"),
+ *                 @OA\Property(property="address", type="string", example="123 Nile Street"),
+ *                 @OA\Property(property="title", type="string", example="Software Engineer"),
+ *                 @OA\Property(property="language", type="string", example="en"),
+ *                 @OA\Property(property="timezone", type="string", example="Africa/Cairo"),
+ *                 @OA\Property(property="currency", type="string", example="EGP"),
+ *                 @OA\Property(property="country", type="string", example="Egypt"),
+ *                 @OA\Property(property="state", type="string", example="Cairo"),
+ *                 @OA\Property(property="imgUrl", type="string", example="https://yourapp.com/uploads/users/avatar.jpg")
+ *             )
+ *         )
+ *     )
+ * )
+ */
     public function updateProfile(Request $request)
 {
     $user = Auth::user();
+    $locale = app()->getLocale();
 
     $request->validate([
         'firstName'     => 'nullable|string|max:255',
@@ -282,7 +188,7 @@ class ProfileController extends Controller
         'phone'             => 'nullable|string|max:20',
         'whatsapp'          => 'nullable|string|max:20',
         'email'             => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
-        'zip_code'          => 'nullable|string|max:20',
+        'zipCode'          => 'nullable|string|max:20',
         'address'           => 'nullable|string|max:255',
         'title'          => 'nullable|string|max:255',
         'language'          => 'nullable|string|max:10',
@@ -290,32 +196,84 @@ class ProfileController extends Controller
         'currency'          => 'nullable|string|max:10',
         'country_id'        => 'nullable|exists:countries,id',
         'state_id'          => 'nullable|exists:states,id',
+        'imgUrl'            => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
     ]);
 
-    // === Email Change ===
-    if ($request->filled('email') && $request->email !== $user->email) {
-        $user->new_email = $request->email;
-        $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-        Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+    if ($request->filled('firstName')) {
+        $user->first_name_en = $request->input('firstName');
+        $user->first_name_ar = $request->input('firstName');
     }
 
-    $user->first_name_en = $request->input('firstName');
-    $user->last_name_en  = $request->input('lastName');
-    $user->first_name_ar = $request->input('firstName');
-    $user->last_name_ar  = $request->input('lastName');
-    $user->country_code  = $request->input('countryCode');
-    $user->country_code_w_a = $request->input('country_code_w_a');
-    $user->phone         = $request->input('phone');
-    $user->whatsapp      = $request->input('whatsapp');
-    $user->zip_code      = $request->input('zipCode');
-    $user->address       = $request->input('address');
-    $user->title_en      = $request->input('title');
-    $user->language      = $request->input('language');
-    $user->timezone      = $request->input('timezone');
-    $user->currency      = $request->input('currency');
-    $user->country_id    = $request->input('country_id');
-    $user->state_id      = $request->input('state_id');
-    $user->HaveCompany    = $request->input('HaveCompany');
+    if ($request->filled('lastName')) {
+        $user->last_name_en = $request->input('lastName');
+        $user->last_name_ar = $request->input('lastName');
+    }
+     if ($request->filled('email')) {
+        $user->email = $request->input('email');
+    }
+     if ($request->filled('gender')) {
+        $user->gender = $request->input('gender');
+    }
+    if ($request->has('countryCode')) {
+        $user->country_code = $request->input('countryCode');
+    }
+
+    if ($request->has('countryCodeWA')) {
+        $user->country_code_w_a = $request->input('countryCodeWA');
+    }
+
+    if ($request->has('phone')) {
+        $user->phone = $request->input('phone');
+    }
+
+    if ($request->has('whatsapp')) {
+        $user->whatsapp = $request->input('whatsapp');
+    }
+
+    if ($request->has('zipCode')) {
+        $user->zip_code = $request->input('zipCode');
+    }
+
+    if ($request->has('address')) {
+        $user->address = $request->input('address');
+    }
+    if ($request->filled('title')) {
+     $user->title_en    = $request->input('title');
+    }
+    if ($request->has('language')) {
+        $user->language = $request->input('language');
+    }
+    if ($request->filled('timezone')) {
+      $user->timezone      = $request->input('timezone');
+    }
+     if ($request->has('currency')) {
+        $user->currency = $request->input('currency');
+    }
+
+    if ($request->has('country_id')) {
+        $user->country_id = $request->input('country_id');
+    }
+
+    if ($request->has('state_id')) {
+        $user->state_id = $request->input('state_id');
+    }
+
+    if ($request->has('HaveCompany')) {
+        $user->HaveCompany = $request->input('HaveCompany');
+    }
+
+    if ($request->hasFile('imgUrl')) {
+        $img = $request->file('imgUrl');
+        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
+
+        // Resize image
+        Image::make(Storage::disk('public_uploads')->path($imgPath))
+            ->resize(null, 200, function ($con) {
+                $con->aspectRatio();
+            })->save();
+
+        $user->img_url = $imgPath;
+    }
 
     $user->save();
 
@@ -323,10 +281,24 @@ class ProfileController extends Controller
         'success' => true,
         'message' => __('api.ProfileUpdated'),
         'data' => [
-            'firstName' => $user->first_name_en,
-            'lastName'  => $user->last_name_en,
-            'email'     => $user->email,
-            'phone'     => $user->phone,
+           'firstName' => $user->first_name_en,
+           'lastName'  => $user->last_name_en,
+           'lastName'  => $user->last_name_en,
+            'email'         => $user->email,
+            'phone'          => $user->phone,
+            'gender'         => $user->gender,
+            'whatsapp'       => $user->whatsapp,
+            'countryCode'    => $user->country_code,
+            'countryCodeWA' => $user->country_code_w_a,
+            'zipCode'       => $user->zip_code,
+            'address'        => $user->address,
+            'title'          => $user->title_en,
+            'language'       => $user->language,
+            'timezone'       => $user->timezone,
+            'currency'       => $user->currency,
+            'country'          => optional($user->country)->{'name_' . $locale},
+            'state'            => optional($user->state)->{'name_' . $locale},
+            'HaveCompany'    => $user->HaveCompany,
             'imgUrl'    => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
         ]
     ]);
@@ -337,13 +309,13 @@ class ProfileController extends Controller
      *     summary="Update user password",
      *     description="Change the authenticated user's password.",
      *     operationId="updatePassword",
-     *     tags={"User"},
+     *     tags={"Profile"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"current_password", "password", "password_confirmation"},
-     *             @OA\Property(property="current_password", type="string", example="oldpassword123"),
+     *             required={"currentPassword", "password", "password_confirmation"},
+     *             @OA\Property(property="currentPassword", type="string", example="oldpassword123"),
      *             @OA\Property(property="password", type="string", example="newpassword456"),
      *             @OA\Property(property="password_confirmation", type="string", example="newpassword456")
      *         )
@@ -363,13 +335,13 @@ public function updatePassword(Request $request)
     $user = Auth::user();
 
     $request->validate([
-        'current_password'      => ['required'],
+        'currentPassword'      => ['required'],
         'password'              => ['required', 'confirmed', 'min:8'],
     ]);
 
-    if (!Hash::check($request->current_password, $user->password)) {
+    if (!Hash::check($request->currentPassword, $user->password)) {
         throw ValidationException::withMessages([
-            'current_password' => [__('api.passwordIncorrect')],
+            'currentPassword' => [__('api.passwordIncorrect')],
         ]);
     }
 
@@ -387,7 +359,7 @@ public function updatePassword(Request $request)
      *     summary="Update mentor bio",
      *     description="Update mentor bio details such as specialization, experience, and mentorship approach.",
      *     operationId="updateBio",
-     *     tags={"User"},
+     *     tags={"Profile"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -395,10 +367,22 @@ public function updatePassword(Request $request)
      *             @OA\Property(property="bio", type="string"),
      *             @OA\Property(property="specialization", type="string"),
      *             @OA\Property(property="linkedin", type="string", format="url"),
-     *             @OA\Property(property="entrepreneurial_experience", type="boolean"),
-     *             @OA\Property(property="entrepreneurial_experience_brief", type="string"),
-     *             @OA\Property(property="profile_privacy", type="boolean"),
-     *             @OA\Property(property="mentorship_approach", type="array", @OA\Items(type="string")),
+     *                  @OA\Property(
+     *                 property="entrepreneurialExperience",
+     *                 type="integer",
+     *                 enum={0,1},
+     *                 description="1 for true, 0 for false",
+     *                 example=1
+     *             ),
+     *             @OA\Property(property="entrepreneurialExperienceBrief", type="string"),
+     *              @OA\Property(
+     *                 property="profilePrivacy",
+     *                 type="integer",
+     *                 enum={0,1},
+     *                 description="1 for true, 0 for false",
+     *                 example=1
+     *             ),
+     *             @OA\Property(property="mentorshipApproach", type="array", @OA\Items(type="string")),
      *             @OA\Property(property="expertise_ids", type="array", @OA\Items(type="integer"))
      *         )
      *     ),
@@ -430,16 +414,17 @@ public function updateBio(Request $request)
         'entrepreneurialExperience'    => 'nullable|boolean',
         'entrepreneurialExperienceBrief' => 'nullable|string',
         'profilePrivacy'               => 'nullable|boolean',
-        'expertise_ids'                 => 'nullable|array',
-        'expertise_ids.*'               => 'exists:expertises,id',
+        'expertiseIds'                 => 'nullable|array',
+        'expertiseIds.*'               => 'exists:expertises,id',
     ]);
 
-    $approachInput = $request->input('mentorshipApproach');
-    $allowedApproaches = ['E-mail', 'Phone Calls', 'Video Calls', 'In-Person Meetings'];
+    $bio = UsersBio::firstOrNew(['user_id' => $user->id]);
 
-    $mentorshipApproach = [];
+    if ($request->has('mentorshipApproach')) {
+        $approachInput = $request->input('mentorshipApproach');
+        $allowedApproaches = ['E-mail', 'Phone Calls', 'Video Calls', 'In-Person Meetings'];
+        $mentorshipApproach = [];
 
-    if ($approachInput) {
         if (is_array($approachInput)) {
             foreach ($approachInput as $value) {
                 if (in_array($value, $allowedApproaches)) {
@@ -449,60 +434,185 @@ public function updateBio(Request $request)
         } elseif (is_string($approachInput) && in_array($approachInput, $allowedApproaches)) {
             $mentorshipApproach[] = $approachInput;
         }
+
+        $bio->mentorship_approach = json_encode($mentorshipApproach);
     }
 
-    UsersBio::updateOrCreate(
-        ['user_id' => $user->id],
-        [
-            'bio_ar'                          => $validated['bio'] ?? null,
-            'bio_en'                          => $validated['bio'] ?? null,
-            'specialization_ar'              => $validated['specialization'] ?? null,
-            'specialization_en'              => $validated['specialization'] ?? null,
-            'linkedin'                       => $validated['linkedin'] ?? null,
-            'entrepreneurial_experience'     => $validated['entrepreneurialExperience'] ?? 0,
-            'entrepreneurial_experience_brief' => $validated['entrepreneurialExperienceBrief'] ?? '',
-            'profile_privacy'                => $validated['profilePrivacy'] ?? 1,
-            'mentorship_approach'            => json_encode($mentorshipApproach),
-        ]
-    );
+    if (array_key_exists('bio', $validated)) {
+        $bio->bio_en = $validated['bio'];
+        $bio->bio_ar = $validated['bio'];
+    }
 
-    if (isset($validated['expertise_ids'])) {
-        $user->mentorExpertises()->sync($validated['expertise_ids']);
+    if (array_key_exists('specialization', $validated)) {
+        $bio->specialization_en = $validated['specialization'];
+        $bio->specialization_ar = $validated['specialization'];
+    }
+
+    if (array_key_exists('linkedin', $validated)) {
+        $bio->linkedin = $validated['linkedin'];
+    }
+
+    if (array_key_exists('entrepreneurialExperience', $validated)) {
+        $bio->entrepreneurial_experience = $validated['entrepreneurialExperience'];
+    }
+
+    if (array_key_exists('entrepreneurialExperienceBrief', $validated)) {
+        $bio->entrepreneurial_experience_brief = $validated['entrepreneurialExperienceBrief'];
+    }
+
+    if (array_key_exists('profilePrivacy', $validated)) {
+        $bio->profile_privacy = $validated['profilePrivacy'];
+    }
+
+    $bio->save();
+    
+
+    if (isset($validated['expertiseIds'])) {
+        $user->mentorExpertises()->sync($validated['expertiseIds']);
     }
 
     return response()->json([
         'success' => true,
         'message' => __('api.MentorBioUpdated'),
-    ]);
-}
-
-public function uploadImage(Request $request) 
-{
-    $user = auth()->user();
-    $validated = $request->validate([
-        'imgUrl' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    if ($request->hasFile('imgUrl')) {
-        $img = $request->file('imgUrl');
-        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
-
-        // Resize
-        Image::make(Storage::disk('public_uploads')->path($imgPath))
-            ->resize(null, 200, function ($con) {
-                $con->aspectRatio();
-            })->save();
-
-        $user->img_url = $imgPath;
-    }
-    $user->save();
-    return response()->json([
-        'success' => true,
-        'message' => __('api.ImageUpdated'),
         'data' => [
-            'imgUrl'    => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
+            'bio' => $bio->bio_en,
+            'specialization' => $bio->specialization_en,
+            'linkedin' => $bio->linkedin,
+            'entrepreneurialExperience' => (bool) $bio->entrepreneurial_experience,
+            'entrepreneurialExperienceBrief' => $bio->entrepreneurial_experience_brief,
+            'profilePrivacy' => (bool) $bio->profile_privacy,
+            'mentorshipApproach' => json_decode($bio->mentorship_approach, true),
+            'expertise_ids' => $user->mentorExpertises()->pluck('expertise_id')->toArray(),
         ]
     ]);
 }
+
+public function showProfile($id)
+{
+    $user = User::with(['country', 'state', 'city', 'company'])->findOrFail($id);
+    $data = $this->getProfileData($user);
+
+    return response()->json([
+        'success' => true,
+        'data'    => $data,
+    ], 200);
+}
+
+
+private function getProfileData(User $user): array
+{
+    $user->img_url = $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
+    $locale = app()->getLocale();
+
+    $data = [
+        'imgUrl'           => $user->img_url,
+        'firstName'        => $user->first_name_en,
+        'lastName'         => $user->last_name_en,
+        'gender'           => $user->gender,
+        'countryCode'      => $user->country_code,
+        'phone'            => $user->phone,
+        'countryCodeWA'    => $user->country_code_w_a,
+        'whatsapp'         => $user->whatsapp,
+        'whatsappVerified' => $user->whatsapp_verified,
+        'email'            => $user->email,
+        'zipCode'          => $user->zip_code,
+        'address'          => $user->address,
+        'title'            => $user->title_en,
+        'country'          => optional($user->country)->{"name_$locale"},
+        'state'            => optional($user->state)->{"name_$locale"},
+        'city'             => optional($user->city)->{"name_$locale"},
+        'language'         => $user->language,
+        'haveCompany'      => (bool) $user->HaveCompany,
+        'timeZone'         => $user->timezone,
+        'currency'         => $user->currency,
+        'role'             => $user->getRoleNames()->first(),
+    ];
+    
+    if ((bool) $user->HaveCompany && $user->company) {
+        $data['startupId'] = $user->company->id;
+        $data['startupName'] = $user->company->{"name_$locale"};
+    }
+
+    if ($user->hasRole('Mentor') || $user->hasRole('Registered')) {
+        $requests = MentorshipRequest::where('mentor_id', $user->id)->get();
+
+        if ($user->hasRole('Mentor')) {
+            $data['mentorshipTotalRequests'] = $requests->count();
+            $data['mentorshipTotalHours'] = round($requests->sum('period') / 60, 2);
+            $data['mentorshipAverageRating'] = round($requests->whereNotNull('rating')->avg('rating'), 1);
+        }
+
+        $tasks = MentorshipTask::with(['user.company', 'mentorshipRequest'])
+            ->whereNotNull('title');
+
+        if ($user->hasRole('Mentor')) {
+            $tasks->where('mentor_id', $user->id)->where('status', 'pending');
+        } else {
+            $companyId = optional($user->company)->id;
+            if ($companyId) {
+                $tasks->where('company_id', $companyId);
+            } else {
+                $tasks->where('user_id', $user->id);
+            }
+        }
+
+        $data['mentorshipSessions'] = $tasks->get()->map(function ($task) use ($locale) {
+            $taskUser = $task->user;
+
+            $userImg = $taskUser?->img_url
+                ? Storage::disk('public_uploads')->url($taskUser->img_url)
+                : null;
+
+            $company = optional($taskUser->company);
+
+            return [
+                'fullName'    => trim($taskUser?->first_name_en . ' ' . $taskUser?->last_name_en),
+                'imgUrl'      => $userImg,
+                'company'     => $company?->{"name_$locale"},
+                'companyLogo' => $company?->logo_url,
+                'done' => optional($task->mentorshipRequest)->done == 1 ? 'Completed' : 'Uncompleted',
+                'taskTitle'   => $task->title,
+            ];
+        })->filter()->values();
+    }
+
+    if ($user->hasRole('Mentor')) {
+        $bio = UsersBio::where('user_id', $user->id)->first();
+        $mentorBio = [];
+
+        if ($bio) {
+            $mentorBio = [
+                'bio'                             => $locale === 'ar' ? $bio->bio_ar : $bio->bio_en,
+                'specialization'                  => $locale === 'ar' ? $bio->specialization_ar : $bio->specialization_en,
+                'linkedin'                        => $bio->linkedin,
+                'entrepreneurialExperience'       => (bool) $bio->entrepreneurial_experience,
+                'entrepreneurialExperience_brief' => $bio->entrepreneurial_experience_brief,
+                'profilePrivacy'                  => (bool) $bio->profile_privacy,
+                'mentorshipApproach'              => json_decode($bio->mentorship_approach, true) ?? [],
+            ];
+        }
+
+        $expertiseItems = $user->mentorExpertises()->get();
+        $mentorBio['expertises'] = $expertiseItems->map(function ($expertise) use ($locale) {
+            return [
+                'id'    => $expertise->id,
+                'title' => $locale === 'ar' ? $expertise->title_ar : $expertise->title,
+            ];
+        })->values();
+
+        $data['mentorBio'] = $mentorBio;
+    }
+   
+   if ($user->hasRole('Registered')) {
+    $company = optional($user->company);
+    $cycle   = optional($company->cycledata);
+
+    $data['organizationId'] = $cycle->organization_id;
+    $data['cycleId']        = $cycle->id;
+}
+
+    return $data;
+}
+
 
 }

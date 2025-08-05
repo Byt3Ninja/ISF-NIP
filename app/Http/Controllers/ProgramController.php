@@ -18,6 +18,7 @@ use App\Jobs\ExportCycleData;
 use App\ScreeningEvaluationResults;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Session;
+use URL;
 
 class ProgramController extends Controller
 {
@@ -79,7 +80,25 @@ class ProgramController extends Controller
         if ($request->private == 'No') {
             $cycles = $cycles->whereNull('private');
         }
-        $cycles = $cycles->orderBy('id', 'desc')->get();
+        if ($request->filled('program_type')) {
+         $cycles->where('type', $request->program_type);
+        }
+        $cycles = $cycles->orderBy('id', 'desc')->with(['organization'])->get();
+        $cycles = $cycles->map(function( $cycle ) {
+            $cycle->join_url = null;
+            if( $cycle->is_public == 0 ) { return $cycle; }
+            else
+            {
+                $org = $cycle->organization;
+                $slug = $cycle->public_slug;
+                if( !empty( $slug ) && trim( $slug ) && !empty( $org ) )
+                {
+                    $short_code = $org->short_code;
+                    $cycle->join_url = URL::to("/$short_code/program/$slug");
+                }
+            }
+            return $cycle;
+        });
         return view('admin.programs.index', compact('cycles'));
     }
 
@@ -223,8 +242,10 @@ class ProgramController extends Controller
         if ($request->private == 'No') {
             $cycles = $cycles->whereNull('private');
         }
-        $cycles = $cycles->get();
-        return view('admin.programs.edit', compact('cycles'));
+        $cycles = $cycles->with(['custom_pages'])->get();
+        $id = request()->route('id');
+        $ccycle = $cycles->where('id', $id)->first();
+        return view('admin.programs.edit', compact('cycles', 'ccycle', 'id'));
     }
 
     /**

@@ -19,6 +19,11 @@ return [
     'AVG degree' => 'AVG degree',
     'No screening started yet' => 'No screening started yet',
     'Cycle final screening' => 'Program final screening',
+    'Open form' => 'Open form',
+    'evaluation_not_started' => 'Not started',
+    'evaluation_in_progress' => 'In progress',
+    'evaluation_completed' => 'Completed',
+    'evaluation_not_evaluated' => 'Not evaluated',
     'start from' => 'start from',
     'to' => 'to',
     'Meeting' => 'Meeting',
@@ -161,4 +166,6 @@ return [
     'Click to select multiple dates for your sessions' => 'Click to select multiple dates for your sessions',
     'Select multiple dates' => 'Select multiple dates',
     'Hide schedule' => 'Hide schedule',
+    'No mentorship sessions found' => 'No mentorship sessions found',
+    'No training sessions found' => 'No training sessions found',
 ];
