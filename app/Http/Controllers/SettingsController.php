@@ -477,12 +477,14 @@ class SettingsController extends Controller
 		$Mail = $request->input('Mail');
 		$Mailpassword = $request->input('Mailpassword');
 		$Port = $request->input('Port');
+		$encryption = $request->input('Encryption');
 
 		$updateSittings = Settings::where('id', $id)->first();
 		$updateSittings->host = $host;
 		$updateSittings->Mail = $Mail;
 		$updateSittings->Mailpassword = $Mailpassword;
 		$updateSittings->Port = $Port;
+		$updateSittings->encryption = $encryption;
 		$updateSittings->save();
 
 		return redirect()->back()->with('message', 'StoredSuccessfully');
