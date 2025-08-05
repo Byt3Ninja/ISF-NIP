@@ -19,7 +19,7 @@ Route::get('default-permissions', function () {
 });
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
 
-Route::get('sendCustomerEmail', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
+Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
