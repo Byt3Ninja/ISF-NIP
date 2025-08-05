@@ -1212,6 +1212,7 @@ public function startupDashboard($userId)
     ->where('mr.zoom_date', '>=', Carbon::now())
     ->orderBy('mr.zoom_date', 'asc')
     ->select(
+        'mr.id',
         'mr.zoom_date as zoom_date',
         'mr.period',
         'mr.mentor_id',
@@ -1225,6 +1226,7 @@ public function startupDashboard($userId)
         $zoomDate = Carbon::parse($session->zoom_date);
 
         return [
+            'sessionId' => $session->id,
             'mentorId' => $session->mentor_id,
             'mentorName' => $session->mentor_name,
             'imgUrl' => $session->mentor_img 

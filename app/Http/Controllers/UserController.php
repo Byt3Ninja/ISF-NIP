@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Cycle;
-use App\Role as R;
 use App\Company;
 use App\Country;
+use App\Role as R;
 use App\Team_member;
+use App\TeamFormation;
 use Illuminate\Http\Request;
 use App\Mail\WelcomeJudgerMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -64,6 +66,7 @@ class UserController extends Controller
 	 */
 	public function store(StoreUserRequest $request)
 	{
+
 		if ($request->hasFile('img_url')) {
 			//store the image
 			$img_url = $request->file('img_url');
@@ -257,9 +260,18 @@ class UserController extends Controller
 		if ($user->id == 1) {
 			return response()->json(['state' => 'failed'], 500);
 		}
+		$team_member = Team_member::where('email', $user->email)->first();
+		if ($team_member) {
+			$team_member->delete();
+		}
+		$team_formation = TeamFormation::where('user_id', $user->id)->first();
+		if ($team_formation) {
+			$team_formation->delete();
+		}
 		$user->roles()->detach();
 		$user->delete();
 		$user->company()->delete();
+
 		return response()->json(['state' => 'success'], 200);
 	}
 
