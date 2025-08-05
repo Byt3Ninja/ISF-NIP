@@ -122,4 +122,7 @@ class TodoListController extends Controller
         $todoList->delete();
         return response()->json(['success' => true, 'message' => __("admin.Task_deleted_successfully.")]);
     }
+
+
+    
 }

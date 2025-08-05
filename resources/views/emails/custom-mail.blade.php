@@ -92,9 +92,7 @@
         }
     </style>
 </head>
-@php
-$setting = \App\settings::where('id', 1)->first();
-@endphp
+
 <body class="body"
       style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
 <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation"
@@ -217,10 +215,10 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">مرحباً بك مستخدم فى منصتنا.</p>
                                                     <p style="margin: 0;"> </p>
                                                     
-                                                    <p style="margin: 0;">البريد الالكترونى : {{ $data['email'] }}</p>
+                                                    <p style="margin: 0;">البريد الالكترونى : {{ $user->email }}</p>
                                                     <p style="margin: 0;">
                                                     يمكنك تعيين كلمة المرور الخاصة بك من خلال الضغط على الرابط التالي:
-                                                    <a href="{{ $data['reset_url'] }}">إعادة تعيين كلمة المرور</a>
+                                                    <a href="{{ $resetUrl }}">إعادة تعيين كلمة المرور</a>
                                                     </p>
                                                     <br/><br/>
                                                     <a href="https://shorturl.at/9rdSu">يرجي تحميل ملف الدليل الارشادي للمشارك من هنا</a>

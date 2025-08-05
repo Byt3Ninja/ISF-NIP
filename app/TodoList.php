@@ -42,6 +42,6 @@ class TodoList extends Model
 
     public function teamMember()
     {
-        return $this->belongsTo(TeamMember::class);
+        return $this->belongsTo(Team_Member::class);
     }
 }
