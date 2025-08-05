@@ -1,4 +1,4 @@
-@extends('layouts.hr-admin')
+@extends('layouts.admin')
 
 @section('style')
 <!-- Additional Styles -->
@@ -63,8 +63,8 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 @endphp
 
 @section('content')
-<div class="row">
-  <div class="container mt-4">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Hackathon Details Banner -->
     @include('admin.hackathon.partials.details-banner')
     

@@ -35,11 +35,11 @@ class BroadcastConfigService
                     'GOOGLE_CALENDAR_CLIENT_SECRET' => '',
                     'GOOGLE_CALENDAR_REDIRECT' => '',
 
-                    'mail.mailers.smtp.host' => '',
-                    'mail.mailers.smtp.username' => '',
-                    'mail.mailers.smtp.password' => '',
-                    'mail.mailers.smtp.port' => '',
-                    'mail.from.address' => '',
+                    // 'mail.mailers.smtp.host' => '',
+                    // 'mail.mailers.smtp.username' => '',
+                    // 'mail.mailers.smtp.password' => '',
+                    // 'mail.mailers.smtp.port' => '',
+                    // 'mail.from.address' => '',
                    
 
                     'locale' => 'en',
@@ -76,11 +76,11 @@ class BroadcastConfigService
             'GOOGLE_CALENDAR_CLIENT_SECRET' => $settings->GOOGLE_CALENDAR_CLIENT_SECRET ?? '',
             'GOOGLE_CALENDAR_REDIRECT' => $settings->GOOGLE_CALENDAR_REDIRECT ?? '',
 
-            'host' => $settings->host ?? '',
-            'Mail' => $settings->Mail,
-            'Mailpassword' => $settings->Mailpassword,
-            'Port' => $settings->Port,
-            'encryption' => $settings->encryption,
+            // 'host' => $settings->host ?? '',
+            // 'Mail' => $settings->Mail ?? '',
+            // 'Mailpassword' => $settings->Mailcpassword ?? '',
+            // 'Port' => $settings->Port ?? '',
+            // 'encryption' => $settings->encryption ?? '',
 
             'locale' => $settings->Default_Language ?? 'en',
 
