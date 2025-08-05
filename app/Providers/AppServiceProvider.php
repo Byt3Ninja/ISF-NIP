@@ -77,9 +77,8 @@ class AppServiceProvider extends ServiceProvider
             'mail.mailers.smtp.username' => $pusherConfig['Mail'],
             'mail.mailers.smtp.password' => $pusherConfig['Mailpassword'],
             'mail.mailers.smtp.port' => $pusherConfig['Port'],
-            'mail.mailers.smtp.encryption' => 'tls',
+            'mail.mailers.smtp.encryption' => $pusherConfig['encryption'],
             'mail.from.address' => $pusherConfig['Mail'],
-            'mail.from.name' => 'Incubation',
 
 
             'app.locale' => $pusherConfig['locale'],

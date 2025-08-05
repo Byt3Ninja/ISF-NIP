@@ -2216,4 +2216,8 @@ return [
 	'project_name' => 'Project Name',
 	'project_description' => 'Project Description',
 	'Progress' => 'Progress',
+	'Task_added_successfully.' => 'Task added successfully.',
+	'Task_updated_successfully.' => 'Task updated successfully.',
+	'Task_deleted_successfully.' => 'Task deleted successfully.',
+	'Encryption' => 'Encryption',
 ];

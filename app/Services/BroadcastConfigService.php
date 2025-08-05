@@ -80,6 +80,7 @@ class BroadcastConfigService
             'Mail' => $settings->Mail,
             'Mailpassword' => $settings->Mailpassword,
             'Port' => $settings->Port,
+            'encryption' => $settings->encryption,
 
             'locale' => $settings->Default_Language ?? 'en',
 
