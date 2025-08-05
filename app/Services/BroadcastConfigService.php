@@ -77,10 +77,10 @@ class BroadcastConfigService
             'GOOGLE_CALENDAR_REDIRECT' => $settings->GOOGLE_CALENDAR_REDIRECT ?? '',
 
             'host' => $settings->host ?? '',
-            'Mail' => $settings->Mail,
-            'Mailpassword' => $settings->Mailpassword,
-            'Port' => $settings->Port,
-            'encryption' => $settings->encryption,
+            'Mail' => $settings->Mail ?? '',
+            'Mailpassword' => $settings->Mailcpassword ?? '',
+            'Port' => $settings->Port ?? '',
+            'encryption' => $settings->encryption ?? '',
 
             'locale' => $settings->Default_Language ?? 'en',
 
