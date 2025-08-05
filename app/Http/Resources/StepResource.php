@@ -13,7 +13,7 @@ class StepResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-          return [
+        $step = [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
@@ -27,8 +27,14 @@ class StepResource extends JsonResource
             'stepArrange' => $this->arr,
             'stepTypeId' => $this->stype,
             'stepType' => $this->stype_label,
-            'formId' =>  $this->form->id ?? null,
+            'formId' => $this->form->id ?? null,
             'formName' => $this->form->form_name ?? null,
         ];
+
+        if ((int) $this->stype === 2) {
+            $step['data'] = $this->data;
+        }
+
+        return $step;
     }
 }
