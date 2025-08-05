@@ -73,6 +73,15 @@ class AppServiceProvider extends ServiceProvider
             'services.linkedin.client_secret' => $pusherConfig['LINKEDIN_CLIENT_SECRET'],
             'services.linkedin.redirect' => $pusherConfig['LINKEDIN_REDIRECT_URI'],
 
+            'mail.mailers.smtp.host' => $pusherConfig['host'],
+            'mail.mailers.smtp.username' => $pusherConfig['Mail'],
+            'mail.mailers.smtp.password' => $pusherConfig['Mailpassword'],
+            'mail.mailers.smtp.port' => $pusherConfig['Port'],
+            'mail.mailers.smtp.encryption' => 'tls',
+            'mail.from.address' => $pusherConfig['Mail'],
+            'mail.from.name' => 'Incubation',
+
+
             'app.locale' => $pusherConfig['locale'],
 
             // 'broadcasting.connections.pusher.MICROSOFT_CLIENT_ID' => $pusherConfig['MICROSOFT_CLIENT_ID'],
