@@ -1768,6 +1768,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $C = 1;
         // نبدأ بتجميع كل الأسئلة حسب step_id
         $grouped = $forms->groupBy('FD_user_id');
+        
 
         $data['submitted_projects'] = $grouped->map(function ($group, $stepId) use ($l) {
             $first = $group->first();
@@ -1783,7 +1784,6 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
             $submission->step_id = $first->FD_step_id;
             $submission->user_id = $first->FD_user_id;
             $submission->company_step = $first->C_step;
-            // $submission->form_name = $first->BF_form_name;
             // $submission->startup_name = $first->{'C_name_' . $l};
             // $submission->submitted_by = $first->{'user_name_' . $l};
             // $submission->step_name = $first->S_title;
@@ -1794,6 +1794,30 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         })->values()->all(); // remove collection keys (numeric indexing)
         
         $data['submitted_projects'] = array_values($data['submitted_projects']);
+
+        $allUsers = DB::table('users')
+    ->join('team_formations', 'team_formations.user_id', '=', 'users.id')
+    ->join('steps', 'steps.cycle_id', '=', 'team_formations.cycle_id')
+    ->where('steps.cycle_id', $id)
+    ->select('users.id')
+    ->distinct()
+    ->pluck('users.id')
+    ->toArray();
+
+    $usersWithFormData = DB::table('form_data')
+    ->join('steps', 'steps.id', '=', 'form_data.step_id')
+    ->where('steps.cycle_id', $id)
+    ->where('steps.stype', 5)
+    ->whereNull('form_data.deleted_at')
+    ->distinct()
+    ->pluck('form_data.user_id')
+    ->toArray();
+
+    $data['totalUsers']= count($allUsers);
+    $data['usersWithFormDataCount'] = count($usersWithFormData);
+    $data['usersWithoutFormDataCount'] =$data['totalUsers']- $data['usersWithFormDataCount'];
+
+       
 
     // dd($data['submitted_projects']);
         
