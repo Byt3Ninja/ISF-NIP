@@ -426,6 +426,49 @@ $engagementCounts = [200, 150, 120, 5];
 
       </div>
     </div>
+
+    <div class="card shadow-sm mb-4" id="submitted-project-section">
+      <div class="card-header">
+        <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.Submitted_Projects') }}</h4>
+      </div>
+      <div class="card-body">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+                <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>
+                <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الاليكترونى' }}</th>
+                <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
+                <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
+                <th scope="col">{{ $l == 'en' ? 'Actions' : 'الإجراءات' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            @foreach ($data['submitted_projects'] as $project)
+            <tr>
+             <td>{{ $project->user_name }}</td>
+          <td>{{ $project->email }}</td>
+          <td>{{ $project->submissionDate }}</td>
+          <td>
+            <a target="_blank" title="view"
+              href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}"
+              class="btn btn-label-primary btn-sm">
+              {{ $l == 'en' ? 'View' : 'عرض' }}
+            </a>
+          </td>
+          <td>
+            
+          </td>
+            </tr>
+           
+            @endforeach
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+
   </div>
 </div>
 
