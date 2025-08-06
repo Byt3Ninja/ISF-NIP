@@ -5,22 +5,24 @@ namespace App\Http\Controllers;
 use App\Form;
 use App\Step;
 use App\User;
+use URL, Str;
 use App\Cycle;
 use App\Company;
 use App\Message;
 use App\Formdata;
+use App\Settings;
 use App\FinalData;
 use App\Formfield;
 use App\Messenger;
 use App\Screening;
 use Carbon\Carbon;
-use App\BuilderForm;
-use App\CycleCustomPages;
 
+use App\BuilderForm;
 use App\BuilderField;
 use http\Env\Response;
 use App\Finalscreening;
 use App\TrainingSession;
+use App\CycleCustomPages;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use Illuminate\Validation\Rule;
@@ -38,7 +40,6 @@ use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
-use URL, Str;
 
 class CyclesController extends Controller
 {
@@ -594,7 +595,7 @@ class CyclesController extends Controller
                 'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'program_type' => ['required', Rule::in(Cycle::programTypes())],
+                'program_type' => ['required', 'in:General_Program,Hackathon'],
             ]);
 
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
@@ -683,6 +684,23 @@ class CyclesController extends Controller
                 $cycle->save();
 
                 if (auth()->user()->hasRole('OrganizationManager')) {
+                    $requiredFields = ['host', 'mail', 'mailpassword', 'port', 'encryption'];
+                    $missing = [];
+
+                 $setting = Settings::first();
+
+             foreach ($requiredFields as $field) {
+                if (!$setting || is_null($setting->$field) || $setting->$field === '') {
+                    $missing[] = $field;
+                  }
+                }
+
+            if (!empty($missing)) {
+                 return redirect()->back()->with([
+                    'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
+                    'class' => 'danger'
+                ]);
+             }                   
 
                     $admin = User::role('Admin')->orderBy('id')->first();
 

@@ -2240,4 +2240,5 @@ return [
     'missing_startup_name' => 'Missing startup name',
     'missing_phone' => 'Phone is required',
 	'Program_Type *' => 'Program Type *',
+    'missing_mail_settings' => 'Missing or invalid mail settings , Please configure them properly and contact the administrator.',
 ];
