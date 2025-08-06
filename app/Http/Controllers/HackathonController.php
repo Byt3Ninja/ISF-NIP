@@ -105,6 +105,7 @@ class HackathonController extends Controller
     public function manage($id)
     {
         $user = Auth::user();
+        $l = app()->getLocale();
                  
         $team_Formation = "SELECT 
         tf.id as 'tf_id',
@@ -130,6 +131,7 @@ class HackathonController extends Controller
         c.name_en as 'c_name_en',
         c.name_ar as 'c_name_ar',
         c.logo as 'c_logo',
+        c.cycle as 'c_cycle',
         tm.id as 'tm_id',
         tm.user_id as 'tm_user_id',
         tm.team_formation_id as 'tm_team_formation_id',
@@ -163,7 +165,62 @@ class HackathonController extends Controller
        
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
        $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
-        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team'));
+
+        $existInTeam = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'accepted')->pluck('user_id')->toArray();
+        $pendingInvites = Team_member::where('TeamMember', 'hackathon')
+    ->where('acceptInvition', 'pending')
+    ->get();
+        $placeholders = implode(',', array_fill(0, count($existInTeam), '?'));
+        
+        $viewMember_q = "
+    SELECT u.id as 'u_id', 
+           concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+            concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+           u.email as 'u_email',
+           u.img_url as 'u_image',
+           co.name_ar as co_country_ar,
+           co.name_en as co_country_en,
+           ci.name_ar as ci_city_ar,
+           ci.name_en as ci_city_en,
+           s.name_ar as s_state_ar,
+           s.name_en as s_state_en,
+           u.title_ar as 'u_title_ar',
+           u.title_en as 'u_title_en'
+    FROM companies as c
+    LEFT JOIN users as u ON u.company_id = c.id
+    LEFT JOIN countries as co ON u.country_id = co.id
+    LEFT JOIN cities as ci ON u.city_id = ci.id
+    LEFT JOIN states as s ON u.state_id = s.id
+    WHERE c.cycle = ?
+";
+$params = [$user->company->cycle];
+if (count($existInTeam) > 0) {
+    $viewMember_q .= " AND u.id NOT IN ($placeholders)";
+    $params = array_merge($params, $existInTeam);
+}
+
+// تنفيذ الاستعلام
+$results = DB::select($viewMember_q, $params);
+
+       // تحويل النتائج إلى الشكل المطلوب
+$availableMembers = collect($results)->map(function ($member) use ($l, $pendingInvites, $user, $id) {
+    return [
+        'id'        => $member->u_id,
+        'name'      => $member->user_name_en,
+        'email'     => $member->u_email,
+        'image'     => $user->u_image ?? '/vuexy/assets/img/avatars/default.png',
+        'country'   => $user->{'co_country_'. $l} ?? 'N/A',
+        'city'      => $user->{'ci_city_'. $l} ?? 'N/A',
+        'state'     => $user->{'s_state_'. $l} ?? 'N/A',
+        'title'     => $user->{'u_title_'. $l} ?? '',
+        'isInvited' => $pendingInvites->where('user_id', $member->u_id)->where('team_formation_id', $id)->isNotEmpty() ? true : false,
+    ];
+})->toArray();
+
+
+        // dd($availableMembers);
+
+        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers'));
     }
 
     public function myTeam()
