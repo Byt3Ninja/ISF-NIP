@@ -93,6 +93,13 @@ class ClientCompanyController extends Controller
                 }
                 $formData = $form->formData;
                 if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
+                $formData = $formData->map(function ($item) {
+                    $field = $item->field()->first();
+                    $field_type = '';
+                    if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
+                    $item->field_type = $field_type;
+                    return $item;
+                });
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );

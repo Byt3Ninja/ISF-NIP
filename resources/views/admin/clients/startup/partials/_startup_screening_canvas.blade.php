@@ -195,7 +195,13 @@
                         @foreach( $formData as $dataEntry )
                         <tr>
                           <td> {{ $dataEntry->question }} </td>
-                          <td> {{ $dataEntry->answer }} </td>
+                          <td>
+                            @if( $dataEntry->field_type == 'file' )
+                              <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
+                            @else
+                              {{ $dataEntry->answer }}
+                            @endif
+                          </td>
                         </tr>
                         @endforeach
                       </tbody>
