@@ -6,6 +6,7 @@ use App\User;
 use App\Cycle;
 use App\Company;
 use App\Country;
+use App\Settings;
 use App\Role as R;
 use App\Team_member;
 use App\TeamFormation;
@@ -121,20 +122,23 @@ class UserController extends Controller
 			// إرسال الإشعار
 			// if( !in_array(env('APP_ENV', 'local'), ['local']) )
 			// {
+		$settings = Settings::first();
+		$emailSettingsOk = $settings && !empty($settings->Mail) && !empty($settings->Mailpassword) && !empty($settings->Port) && !empty($settings->encryption);
+        if ($emailSettingsOk && !in_array(env('APP_ENV'), ['local'])) {
 			try {
 				$result->notify(new WelcomeJudgerNotification($data));
-			} catch (\Throwable $th) {
-				throw $th;
-			}
-			// }
+		} catch (\Throwable $th) {
+			throw $th;
 		}
+	      return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
+       }else {
+		return redirect()->route('users.index')->with([
+			'msg' => 'StoredSuccessfully',
+			'message2' => 'email_settings_missing',
+		]);
+	}
+   }
 
-
-		if ($result) {
-			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
-		} else {
-			return back()->withInput()->with(['msg' => 'FailedStore']);
-		}
 	}
 
 	/**
