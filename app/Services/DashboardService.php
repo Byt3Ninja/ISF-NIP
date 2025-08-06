@@ -1218,7 +1218,7 @@ public function startupDashboard($userId)
         'mr.zoom_date as zoom_date',
         'mr.period',
         'mr.mentor_id',
-        'mr.admin_comment as admin_notes',
+        'mr.comment as notes',
         'mr.join_url as meeting_link',
         DB::raw("CONCAT(m.first_name_en, ' ', m.last_name_en) as mentor_name"),
         'm.img_url as mentor_img'
@@ -1237,7 +1237,7 @@ public function startupDashboard($userId)
             'date' => $zoomDate->format('Y-m-d'),
             'time' => $zoomDate->format('H:i'),
             'duration' => $session->period,
-            'adminNotes' => $session->admin_notes,
+            'notes' => $session->notes,
             'meetingLink' => $session->meeting_link,
         ];
     });
