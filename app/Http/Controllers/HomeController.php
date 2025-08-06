@@ -1038,17 +1038,29 @@ class HomeController extends Controller
             ORDER BY
                 s.arr asc
         ";
-
-        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id) {
+        $now = time();
+        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id, $now) {
             $step->from = Carbon::parse($step->from)->format('d-m-Y');
             $step->to = Carbon::parse($step->to)->format('d-m-Y');
 
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
-            if (!empty($step) && !empty($stepData)) {
-
-                if ($stepData->arr > $step->arr) {
+            if (!empty($step) && !empty($stepData))
+            {
+                if( $now > Carbon::parse($step->to)->timestamp )
+                {
+                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                    $color = 'label-success';
+                    $textColor = 'success';
+                }
+                if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
+                {
+                    $status = $l == 'ar' ? 'يحدث اﻵن' : 'On going';
+                    $color = 'label-primary';
+                    $textColor = 'primary';
+                }
+                /* if ($stepData->arr > $step->arr) {
                     $status = $l == 'ar' ? 'انتهت' : 'Completed';
                     $color = 'label-success';
                     $textColor = 'success';
@@ -1056,7 +1068,7 @@ class HomeController extends Controller
                     $status = $l == 'ar' ? 'بدأت' : 'Started';
                     $color = 'label-primary';
                     $textColor = 'primary';
-                }
+                } */
             }
             $trType = $fLink = null;
             if ($company->approved) {
