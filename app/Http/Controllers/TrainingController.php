@@ -591,8 +591,22 @@ class TrainingController extends Controller
 	{
 		try {
 			$sessions = [];
-			if (Auth::user()->company) {
-				$sessions = TrainingSession::where('step_id', Auth::user()->company->step)->orderBy('datetime', 'DESC')->get();
+			$company = Auth::user()->company;
+			if( $company )
+			{
+				$steps = $company?->cycledata?->steps;
+				if( !empty( $steps ) )
+				{
+					$now = time();
+					$steps_ids = $steps->filter(function ($step) use ($now) {
+						return $step->from->timestamp <= $now && $step->to->timestamp >= $now;
+					})->values()->pluck('id')->toArray();
+					$sessions = TrainingSession::where('id', '>', 0);
+					// where('step_id', Auth::user()->company->step)
+					$sessions = $sessions->whereIn('step_id', $steps_ids);
+					$sessions = $sessions->orderBy('datetime', 'DESC')->get();
+				}
+				
 			}
 			$sessions = $sessions->map(function ($session) {
 				if ($session->type == "online") {
