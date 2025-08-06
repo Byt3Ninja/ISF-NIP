@@ -518,7 +518,7 @@
             <div class="card h-100 border">
               <div class="card-body text-center">
                 <div class="avatar avatar-xl mx-auto mb-3">
-                  <img src="{{ $member['image'] }}" alt="{{ $member['name'] }}" class="rounded-circle w-100 h-100">
+                  <img src="{{ '/191014/'.$member['image'] }}" alt="{{ $member['name'] }}" class="rounded-circle w-100 h-100">
                 </div>
                 <h6 class="card-title mb-2">{{ $member['name'] }}</h6>
                 <p class="text-muted small mb-1">

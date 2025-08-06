@@ -2242,4 +2242,5 @@ return [
 	'Program_Type *' => 'Program Type *',
     'missing_mail_settings' => 'Missing or invalid mail settings , Please configure them properly and contact the Administrator.',
 	'email_settings_missing' => 'Email Settings are not Configured.',
+	'Submitted_Projects' => 'Submitted Projects',
 ];

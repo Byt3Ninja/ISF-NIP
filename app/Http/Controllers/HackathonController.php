@@ -215,7 +215,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         'title'     => $user->{'u_title_'. $l} ?? '',
         'isInvited' => $pendingInvites->where('user_id', $member->u_id)->where('team_formation_id', $id)->isNotEmpty() ? true : false,
     ];
-})->toArray();
+    })->toArray();
 
 
         // dd($availableMembers);
@@ -1701,6 +1701,93 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                 $values = array_values($data['Count_per_status']);
         $data['submissionLabels'] = $labels;
         $data['submissionCounts'] = $values;
+
+
+        
+        $l = app()->getLocale();
+        $forms = "SELECT 
+                FD.company_id as 'FD_company_id',
+                FD.user_id as 'FD_user_id',
+                FD.step_id as 'FD_step_id',
+                FD.question as 'FD_question',
+                FD.answer as 'FD_answer',
+                FD.created_at as 'FD_created_at',
+                FD.updated_at as 'FD_updated_at',
+                FD.deleted_at as 'FD_deleted_at',
+                C.name_en as 'C_name_en',
+                C.name_ar as 'C_name_ar',
+                C.id as 'C_id',
+                C.step as 'C_step',
+                Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+                Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+                U.id as 'U_id',
+                U.email as 'U_email',
+                S.title as 'S_title',
+                S.id as 'S_id',
+                S.cycle_id as 'S_cycle_id',
+                S.data as 'S_data',
+                CYC.title as 'CYC_title',
+                CYC.id as 'CYC_id',
+                CYC.organization_id as 'CYC_organization_id',
+                O.name_en as 'O_name_en',
+                O.name_ar as 'O_name_ar',
+                O.id as 'O_id',
+                BF.id as 'BF_id',
+                BF.form_name as 'BF_form_name'
+            FROM
+                form_data as FD 
+            LEFT JOIN
+                companies as C ON C.id = FD.company_id
+            LEFT JOIN
+                users as U ON U.id = FD.user_id
+            LEFT JOIN
+                steps as S ON S.id = FD.step_id
+            LEFT JOIN
+                builder_forms as BF ON BF.id = S.data
+            LEFT JOIN
+                cycles as CYC ON CYC.id = S.cycle_id
+            LEFT JOIN
+                organizations as O ON O.id = CYC.organization_id
+            WHERE
+                FD.deleted_at IS NULL
+                AND CYC.id = ? 
+                AND S.stype = 5
+        ";
+            $params = [$id];
+
+
+            $forms = DB::select($forms, $params);
+            $forms = collect($forms);
+            
+        $C = 1;
+        // نبدأ بتجميع كل الأسئلة حسب step_id
+        $grouped = $forms->groupBy('FD_user_id');
+
+        $data['submitted_projects'] = $grouped->map(function ($group, $stepId) use ($l) {
+            $first = $group->first();
+
+            $submission = new stdClass;
+            $submission->company_id = $first->FD_company_id;
+            // $submission->user_id = $first->FD_user_id;
+            $submission->user_name = $first->{'user_name_' . $l};
+            $submission->email = $first->U_email;
+            $submission->cycle_id = $first->CYC_id;
+            $submission->step_id = $first->FD_step_id;
+            $submission->user_id = $first->FD_user_id;
+            $submission->company_step = $first->C_step;
+            // $submission->form_name = $first->BF_form_name;
+            // $submission->startup_name = $first->{'C_name_' . $l};
+            // $submission->submitted_by = $first->{'user_name_' . $l};
+            // $submission->step_name = $first->S_title;
+            // $submission->program_name = $first->CYC_title;
+            // $submission->organization_name = $first->O_name_en;
+            $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
+            return $submission;
+        })->values()->all(); // remove collection keys (numeric indexing)
+        
+        $data['submitted_projects'] = array_values($data['submitted_projects']);
+
+    
         
 
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));

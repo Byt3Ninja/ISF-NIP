@@ -1281,14 +1281,13 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <!--/ Edit SP Modal -->
 
 <!-- Respond Invitation Modal -->
-<div
+{{-- <div
 	class="modal fade"
 	id="teamInvitationModal"
 	tabindex="-1"
 	aria-labelledby="teamInvitationLabel"
 	aria-modal="true"
-	role="dialog"
->
+	role="dialog">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content overflow-hidden position-relative">
 
@@ -1344,7 +1343,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			</div>
 		</div>
 	</div>
-</div>
+</div> --}}
 <!--/ Respond Invitation Modal -->
 @endif
 
