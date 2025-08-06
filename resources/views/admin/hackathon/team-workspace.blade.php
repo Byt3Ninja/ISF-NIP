@@ -150,6 +150,7 @@
                                 @foreach($sharedFile as $file)
                                 
                                  @php
+                                 $user = Auth::user();
                                     $fullPath = $file->sf_file;
                                     $pathInfo = pathinfo($fullPath);
                                     $filename = $pathInfo['filename'];
@@ -160,10 +161,11 @@
                                         $factor = floor((strlen($bytes) - 1) / 3);
                                         $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
                                     } else {
-                                        $sizeReadable = 'الملف غير موجود';
+                                        $sizeReadable = $l == 'en' ? 'File not found' : 'الملف غير موجود';
                                     }
-                                    
+                                  
                                  @endphp
+                                 
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <i class="ti ti-file-type-ppt text-danger me-2"></i>
@@ -179,11 +181,19 @@
                                                 title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
                                                 <i class="ti ti-download"></i>
                                             </a>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                onclick="deleteFile(this, {{ $file->sf_id }})"
-                                                title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
+                                            @if($file->sf_user_id == $user->id)
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="deleteFile(this, {{ $file->sf_id }})"
+                                                    title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            @elseif($file->tf_user_id == $user->id)
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="deleteFile(this, {{ $file->sf_id }})"
+                                                    title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            @endif
                                         </div>
                                     </li>
                                 @endforeach
@@ -201,89 +211,45 @@
                                 </button>
                             </div>
                             <ul class="list-group list-group-flush" id="taskList">
+                                @if($todoList->count() > 0)
+                            @foreach($todoList as $task)
                                 <li class="list-group-item">
                                     <div class="form-check d-flex justify-content-between align-items-center">
                                         <div>
                                             <input class="form-check-input me-2" type="checkbox" value="" id="task1"
-                                                checked>
+                                                 @if($task->tl_status == "Done")
+                                                checked
+                                                @endif>
                                             <label class="form-check-label" for="task1"
-                                                style="text-decoration: line-through;">
-                                                {{ $l == 'en' ? 'Design main interface for prototype' : 'تصميم الواجهة
-                                                الرئيسية للنموذج الأولي' }}
+                                                @if($task->tl_status == "Done")
+                                                style="text-decoration: line-through;" 
+                                                @endif
+                                                >
+                                                {{ $task->tl_title }}
                                             </label>
                                             <small class="d-block text-muted">
-                                                {{ $l == 'en' ? 'Responsible: Ahmed - Due: March 15' : 'المسؤول: أحمد -
-                                                تاريخ الاستحقاق: 15 مارس' }}
+                                                {{ $l == 'en' ? 'Responsible: '. $task->assignee_name_en .' - Due: ' . $task->tl_due_date : 'المسؤول: '. $task->assignee_name_en .' -
+                                                تاريخ الاستحقاق: ' . $task->tl_due_date }}
                                             </small>
                                         </div>
                                         <div>
                                             <button class="btn btn-sm btn-outline-secondary me-1"
-                                                onclick="editTask('task1', '{{ $l == 'en' ? 'Design main interface for prototype' : 'تصميم الواجهة الرئيسية للنموذج الأولي' }}', '{{ $l == 'en' ? 'Ahmed' : 'أحمد' }}', '2024-03-15')"
+                                                onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->assignee_name_en }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}')"
                                                 title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                                 <i class="ti ti-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger"
-                                                onclick="deleteTask('task1', '{{ $l == 'en' ? 'Design main interface for prototype' : 'تصميم الواجهة الرئيسية للنموذج الأولي' }}')"
+                                                onclick="deleteTask('{{ $task->tl_id }}', '{{ $task->tl_title }}')"
                                                 title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </li>
-                                <li class="list-group-item">
-                                    <div class="form-check d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <input class="form-check-input me-2" type="checkbox" value="" id="task2">
-                                            <label class="form-check-label" for="task2">
-                                                {{ $l == 'en' ? 'Develop basic analysis algorithm' : 'تطوير خوارزمية
-                                                التحليل الأساسية' }}
-                                            </label>
-                                            <small class="d-block text-muted">
-                                                {{ $l == 'en' ? 'Responsible: Sara - Due: March 16' : 'المسؤول: سارة -
-                                                تاريخ الاستحقاق: 16 مارس' }}
-                                            </small>
-                                        </div>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-secondary me-1"
-                                                onclick="editTask('task2', '{{ $l == 'en' ? 'Develop basic analysis algorithm' : 'تطوير خوارزمية التحليل الأساسية' }}', '{{ $l == 'en' ? 'Sara' : 'سارة' }}', '2024-03-16')"
-                                                title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
-                                                <i class="ti ti-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                onclick="deleteTask('task2', '{{ $l == 'en' ? 'Develop basic analysis algorithm' : 'تطوير خوارزمية التحليل الأساسية' }}')"
-                                                title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="form-check d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <input class="form-check-input me-2" type="checkbox" value="" id="task3">
-                                            <label class="form-check-label" for="task3">
-                                                {{ $l == 'en' ? 'Prepare final presentation' : 'إعداد العرض التقديمي
-                                                النهائي' }}
-                                            </label>
-                                            <small class="d-block text-muted">
-                                                {{ $l == 'en' ? 'Responsible: You - Due: March 17' : 'المسؤول: أنت -
-                                                تاريخ الاستحقاق: 17 مارس' }}
-                                            </small>
-                                        </div>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-secondary me-1"
-                                                onclick="editTask('task3', '{{ $l == 'en' ? 'Prepare final presentation' : 'إعداد العرض التقديمي النهائي' }}', '{{ $l == 'en' ? 'You' : 'أنت' }}', '2024-03-17')"
-                                                title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
-                                                <i class="ti ti-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                onclick="deleteTask('task3', '{{ $l == 'en' ? 'Prepare final presentation' : 'إعداد العرض التقديمي النهائي' }}')"
-                                                title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </li>
+                            @endforeach
+                                @endif
+
+
                             </ul>
                         </div>
                     </div>
@@ -338,36 +304,37 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="taskForm">
+                <form id="taskForm" method="POST" action="/dashboard/hackathon/AddtodoList">
                     <div class="mb-3">
                         <label for="taskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة'
                             }}</label>
-                        <input type="text" class="form-control" id="taskTitle" required>
+                        <input type="text" class="form-control" name="title" id="taskTitle" required>
                     </div>
                     <div class="mb-3">
                         <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول'
                             }}</label>
                         <select class="form-select" id="taskAssignee">
-                            <option selected value="{{ $l == 'en' ? 'You' : 'أنت' }}">{{ $l == 'en' ? 'You' : 'أنت'
-                                }}</option>
+                            <option selected  value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+
                             @foreach($teamData['members'] as $member)
-                            @if(($l == 'en' ? $member['name'] : $member['name_ar']) !== ($l == 'en' ? 'You' :
-                            'أنت'))
-                            <option value="{{ $l == 'en' ? $member['name'] : $member['name_ar'] }}">{{ $l == 'en' ?
+                            
+
+                            <option value="{{ $member['id'] }}">{{ $l == 'en' ?
                                 $member['name'] : $member['name_ar'] }}</option>
-                            @endif
+
+                           
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="taskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق'
                             }}</label>
-                        <input type="date" class="form-control" id="taskDueDate">
+                        <input type="date" name="due_date" class="form-control" id="taskDueDate">
                     </div>
                     <div class="mb-3">
                         <label for="taskDescription" class="form-label">{{ $l == 'en' ? 'Task Description
                             (Optional)' : 'وصف المهمة (اختياري)' }}</label>
-                        <textarea class="form-control" id="taskDescription" rows="2"></textarea>
+                        <textarea class="form-control" id="taskDescription" name="description" rows="2"></textarea>
                     </div>
                 </form>
             </div>
@@ -376,6 +343,60 @@
                     'إلغاء' }}</button>
                 <button type="button" class="btn btn-primary" onclick="addTask()">{{ $l == 'en' ? 'Add Task' :
                     'إضافة المهمة' }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="EditTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة'
+                    }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <div class="mb-3">
+                        <label for="EtaskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة'
+                            }}</label>
+                        <input type="text" class="form-control" name="title" id="EtaskTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول'
+                            }}</label>
+                        <select class="form-select" id="EtaskAssignee">
+                            <option selected  value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+
+                            @foreach($teamData['members'] as $member)
+                            
+
+                            <option value="{{ $member['id'] }}">{{ $l == 'en' ?
+                                $member['name'] : $member['name_ar'] }}</option>
+
+                           
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EtaskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق'
+                            }}</label>
+                        <input type="date" name="due_date" class="form-control" id="EtaskDueDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="EtaskDescription" class="form-label">{{ $l == 'en' ? 'Task Description
+                            (Optional)' : 'وصف المهمة (اختياري)' }}</label>
+                        <textarea class="form-control" id="EtaskDescription" name="description" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
+                    'إلغاء' }}</button>
+                <button type="button" class="btn btn-primary" onclick="updateTask()">{{ $l == 'en' ? 'Edit Task' :
+                    'تعديل المهمة' }}</button>
             </div>
         </div>
     </div>
@@ -677,79 +698,79 @@
     }
 
     function deleteFile(buttonElement, fileId) {
-    console.log('deleteFile called with:', buttonElement, fileId);
+        console.log('deleteFile called with:', buttonElement, fileId);
 
-    if (typeof Swal === 'undefined') {
-        console.error('SweetAlert2 is not loaded!');
-        alert('Delete functionality not available - SweetAlert2 not loaded');
-        return;
-    }
-
-    Swal.fire({
-        title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-        text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
-        cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Error deleting file");
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    // إزالة العنصر من الصفحة
-                    const fileElement = buttonElement.closest('li');
-                    if (fileElement) fileElement.remove();
-
-                    Swal.fire({
-                        title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                        text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
-                        icon: 'success',
-                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-                    });
-                } else {
-                    Swal.fire({
-                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                        text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
-                        icon: 'error'
-                    });
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire({
-                    title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                    text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
-                    icon: 'error'
-                });
-            });
-        }
-    });
-}
-
-
-    function deleteTask(taskId, taskTitle) {
-        console.log('deleteTask called with:', taskId, taskTitle);
-        
         if (typeof Swal === 'undefined') {
             console.error('SweetAlert2 is not loaded!');
             alert('Delete functionality not available - SweetAlert2 not loaded');
             return;
         }
-        
+
+        Swal.fire({
+            title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+            text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
+            cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error deleting file");
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // إزالة العنصر من الصفحة
+                        const fileElement = buttonElement.closest('li');
+                        if (fileElement) fileElement.remove();
+
+                        Swal.fire({
+                            title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                            text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
+                            icon: 'success',
+                            confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                            text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire({
+                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                        text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+                        icon: 'error'
+                    });
+                });
+            }
+        });
+    }
+
+
+    function deleteTask(taskId, taskTitle) {
+        console.log('deleteTask called with:', taskId, taskTitle);
+
+        if (typeof Swal === 'undefined') {
+            console.error('SweetAlert2 is not loaded!');
+            alert('Delete functionality not available - SweetAlert2 not loaded');
+            return;
+        }
+
         Swal.fire({
             title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
             text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
@@ -761,39 +782,65 @@
             cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Remove the task from the DOM
-                const taskElement = document.getElementById(taskId).closest('li');
-                if (taskElement) {
-                    taskElement.remove();
-                }
-                
-                Swal.fire({
-                    title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                    text: '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
-                    icon: 'success',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
+                        Swal.fire({
+                            title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                            text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
+                            icon: 'success',
+                            confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        }).then(() => {
+                            // Reload the page after pressing OK
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                            text: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire({
+                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                        text: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+                        icon: 'error'
+                    });
                 });
             }
         });
     }
 
-    function editTask(taskId, taskTitle, taskAssignee, taskDueDate) {
+
+
+
+    function editTask(taskId, taskTitle, taskAssignee, taskDueDate, taskDescription) {
         console.log('editTask called with:', taskId, taskTitle, taskAssignee, taskDueDate);
         
         try {
             // Pre-fill the modal with existing task data
-            document.getElementById('taskTitle').value = taskTitle;
-            document.getElementById('taskAssignee').value = taskAssignee;
-            document.getElementById('taskDueDate').value = taskDueDate || '';
+            document.getElementById('EtaskTitle').value = taskTitle;
+            document.getElementById('EtaskAssignee').onchange = taskAssignee;
+            document.getElementById('EtaskDueDate').value = taskDueDate || '';
+            document.getElementById('EtaskDescription').value = taskDescription || '';
             
-            // Change the modal title to indicate editing
-            document.getElementById('addTaskModalLabel').textContent = '{{ $l == "en" ? "Edit Task" : "تعديل المهمة" }}';
-            
+           
             // Store the task ID for updating
-            document.getElementById('addTaskModal').setAttribute('data-editing-task', taskId);
+            document.getElementById('EditTaskModal').setAttribute('data-editing-task', taskId);
             
             // Show the modal
-            const editModal = new bootstrap.Modal(document.getElementById('addTaskModal'));
+            const editModal = new bootstrap.Modal(document.getElementById('EditTaskModal'));
             editModal.show();
         } catch (error) {
             console.error('Error in editTask:', error);
@@ -805,9 +852,11 @@
         const taskTitle = document.getElementById('taskTitle').value;
         const taskAssignee = document.getElementById('taskAssignee').value;
         const taskDueDate = document.getElementById('taskDueDate').value;
+        const taskDescription = document.getElementById('taskDescription').value;
+
         const taskModal = document.getElementById('addTaskModal');
         const editingTaskId = taskModal.getAttribute('data-editing-task');
-        
+
         if (!taskTitle) {
             Swal.fire({
                 icon: 'warning',
@@ -818,65 +867,159 @@
             return;
         }
 
-        if (editingTaskId) {
-            // Update existing task
-            const taskElement = document.getElementById(editingTaskId);
-            const taskLabel = taskElement.nextElementSibling;
-            const taskDetails = taskLabel.nextElementSibling;
-            
-            taskLabel.textContent = taskTitle;
-            taskDetails.textContent = `{{ $l == "en" ? "Responsible: " : "المسؤول: " }}${taskAssignee} ${taskDueDate ? '{{ $l == "en" ? "- Due: " : "- تاريخ الاستحقاق: " }}' + new Date(taskDueDate).toLocaleDateString('{{ $l == "en" ? "en-US" : "ar-EG" }}') : ''}`;
-            
-            // Update the onclick attributes
-            const editButton = taskElement.closest('li').querySelector('.btn-outline-secondary');
-            const deleteButton = taskElement.closest('li').querySelector('.btn-outline-danger');
-            editButton.setAttribute('onclick', `editTask('${editingTaskId}', '${taskTitle}', '${taskAssignee}', '${taskDueDate}')`);
-            deleteButton.setAttribute('onclick', `deleteTask('${editingTaskId}', '${taskTitle}')`);
-            
-            Swal.fire({
-                icon: 'success',
-                title: '{{ $l == "en" ? "Task Updated!" : "تم تحديث المهمة!" }}',
-                text: `{{ $l == "en" ? "Task updated: " : "تم تحديث المهمة: " }}"${taskTitle}"`,
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-            });
-            
-            // Reset modal
-            taskModal.removeAttribute('data-editing-task');
-            document.getElementById('addTaskModalLabel').textContent = '{{ $l == "en" ? "Add New Task" : "إضافة مهمة جديدة" }}';
-        } else {
-            // Add new task
-            Swal.fire({
-                icon: 'success',
-                title: '{{ $l == "en" ? "Task Added!" : "تمت إضافة المهمة!" }}',
-                text: `{{ $l == "en" ? "Task added: " : "تمت إضافة المهمة: " }}"${taskTitle}"{{ $l == "en" ? "\nAssignee: " : "\nالمسؤول: " }}${taskAssignee}{{ $l == "en" ? "\nDue Date: " : "\nتاريخ الاستحقاق: " }}${taskDueDate || '{{ $l == "en" ? "Not specified" : "غير محدد" }}'}`,
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-            });
+        const formData = {
+            title: taskTitle,
+            assignee: taskAssignee,
+            due_date: taskDueDate,
+            description: taskDescription
+        };
 
-            // Add to task list UI
-            const taskList = document.getElementById('taskList');
-            const newItem = document.createElement('li');
-            newItem.className = 'list-group-item task-list-item';
-            const newTaskId = 'task' + (taskList.children.length + 1);
-            newItem.innerHTML = `
-                <div class="form-check d-flex justify-content-between align-items-center">
-                    <div>
-                        <input class="form-check-input me-2" type="checkbox" value="" id="${newTaskId}">
-                        <label class="form-check-label" for="${newTaskId}">
-                            ${taskTitle}
-                        </label>
-                        <small class="d-block text-muted">{{ $l == "en" ? "Responsible: " : "المسؤول: " }}${taskAssignee} ${taskDueDate ? '{{ $l == "en" ? "- Due: " : "- تاريخ الاستحقاق: " }}' + new Date(taskDueDate).toLocaleDateString('{{ $l == "en" ? "en-US" : "ar-EG" }}') : ''}</small>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-outline-secondary me-1" onclick="editTask('${newTaskId}', '${taskTitle}', '${taskAssignee}', '${taskDueDate}')" title="{{ $l == "en" ? "Edit Task" : "تعديل المهمة" }}"><i class="ti ti-edit"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${newTaskId}', '${taskTitle}')" title="{{ $l == "en" ? "Delete Task" : "حذف المهمة" }}"><i class="ti ti-trash"></i></button>
-                    </div>
-                </div>`;
-            taskList.appendChild(newItem);
-        }
-        
-        const addTaskModal = bootstrap.Modal.getInstance(document.getElementById('addTaskModal'));
-        addTaskModal.hide();
-        document.getElementById('taskForm').reset();
+        fetch('/dashboard/hackathon/AddtodoList', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === true) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '{{ $l == "en" ? "Task Added!" : "تمت إضافة المهمة!" }}',
+                    text: data.message || '{{ $l == "en" ? "Task added successfully." : "تمت إضافة المهمة بنجاح." }}',
+                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                });
+
+                const taskList = document.getElementById('taskList');
+                const newItem = document.createElement('li');
+                newItem.className = 'list-group-item task-list-item';
+                const newTaskId = 'task' + (taskList.children.length + 1);
+                newItem.innerHTML = `
+                    <div class="form-check d-flex justify-content-between align-items-center">
+                        <div>
+                            <input class="form-check-input me-2" type="checkbox" value="" id="${newTaskId}">
+                            <label class="form-check-label" for="${newTaskId}">
+                                ${taskTitle}
+                            </label>
+                            <small class="d-block text-muted">{{ $l == "en" ? "Responsible: " : "المسؤول: " }}${taskAssignee} ${taskDueDate ? '{{ $l == "en" ? "- Due: " : "- تاريخ الاستحقاق: " }}' + new Date(taskDueDate).toLocaleDateString('{{ $l == "en" ? "en-US" : "ar-EG" }}') : ''}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="editTask('${newTaskId}', '${taskTitle}', '${taskAssignee}', '${taskDueDate}')" title="{{ $l == "en" ? "Edit Task" : "تعديل المهمة" }}"><i class="ti ti-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${newTaskId}', '${taskTitle}')" title="{{ $l == "en" ? "Delete Task" : "حذف المهمة" }}"><i class="ti ti-trash"></i></button>
+                        </div>
+                    </div>`;
+                taskList.appendChild(newItem);
+
+                const addTaskModal = bootstrap.Modal.getInstance(document.getElementById('addTaskModal'));
+                addTaskModal.hide();
+                document.getElementById('taskForm').reset();
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                    text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            });
+        });
     }
+
+    function updateTask() {
+        const taskTitle = document.getElementById('EtaskTitle').value;
+        const taskAssignee = document.getElementById('EtaskAssignee').value;
+        const taskDueDate = document.getElementById('EtaskDueDate').value;
+        const taskDescription = document.getElementById('EtaskDescription').value;
+
+        const taskModal = document.getElementById('EditTaskModal');
+        const editingTaskId = taskModal.getAttribute('data-editing-task');
+
+        if (!taskTitle) {
+            Swal.fire({
+                icon: 'warning',
+                title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
+                text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            });
+            return;
+        }
+
+        const formData = {
+            id: editingTaskId,
+            title: taskTitle,
+            assignee: taskAssignee,
+            due_date: taskDueDate,
+            description: taskDescription
+        };
+
+        fetch('/dashboard/hackathon/EdittodoList', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === true) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '{{ $l == "en" ? "Task Updated!" : "تم تعديل المهمة!" }}',
+                    text: data.message || '{{ $l == "en" ? "Task updated successfully." : "تم تعديل المهمة بنجاح." }}',
+                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                }).then(() => {
+                    window.location.reload();
+                });
+
+                // تحديث اسم المهمة في العنصر الظاهر إن وجد
+                const taskElement = document.getElementById(editingTaskId);
+                if (taskElement) {
+                    const label = taskElement.querySelector('label');
+                    const small = taskElement.querySelector('small');
+
+                    if (label) label.textContent = taskTitle;
+                    if (small) {
+                        small.innerHTML = `{{ $l == "en" ? "Responsible: " : "المسؤول: " }}${taskAssignee} ${taskDueDate ? '{{ $l == "en" ? "- Due: " : "- تاريخ الاستحقاق: " }}' + new Date(taskDueDate).toLocaleDateString('{{ $l == "en" ? "en-US" : "ar-EG" }}') : ''}`;
+                    }
+                }
+
+                const editTaskModal = bootstrap.Modal.getInstance(document.getElementById('EditTaskModal'));
+                editTaskModal.hide();
+                document.getElementById('taskForm').reset();
+                taskModal.removeAttribute('data-editing-task');
+                
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                    text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            });
+        });
+    }
+
 </script>
 @stop

@@ -2835,6 +2835,42 @@
                     "registered"
                    
                 ]
+            },
+            {
+                "name": "hackathon.AddtodoList",
+                "description": " Add Todo List in Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
+            },
+            {
+                "name": "hackathon.EdittodoList",
+                "description": " Edit Todo List in Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
+            },
+            {
+                "name": "hackathon.deleteTodoList",
+                "description": " Delete Todo in Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
             }
         ]
     },
