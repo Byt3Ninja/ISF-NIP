@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Role;
 use App\User;
 use App\Cycle;
 use App\State;
@@ -159,9 +160,6 @@ class ImporterController extends Controller
                     'original_phone' => $row['Phone'],
                     'trimmed_phone' => $phone
                  ]);
-                if (!preg_match('/^\d{10,}$/', $phone)) {
-                  $rowErrors[] = "Phone must contain only numbers (at least 11 digits, no hyphens or special characters)";
-                }
               }
 
                 if (!empty($rowErrors)) {
@@ -334,6 +332,7 @@ class ImporterController extends Controller
                                     'organization_id' => $organizationId,
                                     'start' => $startDate,
                                     'end' => $endDate,
+                                    'type' => 'General_Program'
                                 ]
                             );
                             
@@ -468,6 +467,7 @@ class ImporterController extends Controller
                     'phone' => isset($mappings['phone']) && isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) . trim($row[$rowKeys[$mappings['phone']]]) : null,
                     'country_code' => isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) : null,
                     'HaveCompany' => 1,
+                    'email_verified_at' => now(),
                 ];
 
                 $existingUser = User::where('email', $email)->first();
@@ -475,16 +475,12 @@ class ImporterController extends Controller
                     $userData['password'] = bcrypt('password');
                 }
 
-                Log::info('Processing user', [
-                    'email' => $email,
-                    'company_id' => $company->id,
-                    'data' => $userData
-                ]);
-
-                User::updateOrCreate(
+                $user = User::updateOrCreate(
                     ['email' => $email],
                     $userData
                 );
+
+                $user->allotRole('Registered');
 
                 $results['imported']++;
             }
