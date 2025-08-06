@@ -79,7 +79,7 @@ class SendTrainingNotificationJob implements ShouldQueue
                 }
             }
 
-            $companies = Company::where('cycle', $step->cycle_id)
+            $companies = Company::where('cycle', $step->cycle_id)->where('step', $step->id)
                 ->with(['user', 'cycledata', 'stepdata'])
                 ->get();
 
@@ -117,7 +117,7 @@ class SendTrainingNotificationJob implements ShouldQueue
                 SendWhatsAppMessageJob::dispatch($phoneNumber, $message);
             }
         } elseif ($this->type == 'online') {
-            $companies = Company::where('cycle', $step->cycle_id)
+            $companies = Company::where('cycle', $step->cycle_id)->where('step', $step->id)
                 ->with(['user', 'cycledata', 'stepdata'])
                 ->get();
 
@@ -174,7 +174,7 @@ class SendTrainingNotificationJob implements ShouldQueue
                 }
             }
 
-            $companies = Company::where('cycle', $step->cycle_id)
+            $companies = Company::where('cycle', $step->cycle_id)->where('step', $step->id)
                 ->with(['user', 'cycledata', 'stepdata'])
                 ->get();
 
