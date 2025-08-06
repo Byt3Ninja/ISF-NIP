@@ -436,18 +436,17 @@ $engagementCounts = [200, 150, 120, 5];
           <thead>
             <tr>
                 <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>
-                <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الاليكترونى' }}</th>
+                <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
                 <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
                 <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
-                <th scope="col">{{ $l == 'en' ? 'Actions' : 'الإجراءات' }}</th>
             </tr>
           </thead>
           <tbody>
             <!-- This is example data, should be populated from a loop in a real application -->
             @foreach ($data['submitted_projects'] as $project)
             <tr>
-             <td>{{ $project->user_name }}</td>
-          <td>{{ $project->email }}</td>
+             <td>{{ $project->team_name }}</td>
+          <td>{{ $project->project_name }}</td>
           <td>{{ $project->submissionDate }}</td>
           <td>
             <a target="_blank" title="view"

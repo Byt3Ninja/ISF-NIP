@@ -1733,13 +1733,19 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                 O.name_ar as 'O_name_ar',
                 O.id as 'O_id',
                 BF.id as 'BF_id',
-                BF.form_name as 'BF_form_name'
+                BF.form_name as 'BF_form_name',
+                TF.id as 'TF_id',
+                TF.name as 'TF_name',
+                TF.user_id as 'TF_user_id',
+                TF.project_name_en as 'TF_project_name_en'
             FROM
                 form_data as FD 
             LEFT JOIN
                 companies as C ON C.id = FD.company_id
             LEFT JOIN
                 users as U ON U.id = FD.user_id
+            LEFT JOIN
+                team_formations as TF ON TF.user_id = U.id
             LEFT JOIN
                 steps as S ON S.id = FD.step_id
             LEFT JOIN
@@ -1770,6 +1776,8 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
             $submission->company_id = $first->FD_company_id;
             // $submission->user_id = $first->FD_user_id;
             $submission->user_name = $first->{'user_name_' . $l};
+            $submission->team_name = $first->TF_name;
+            $submission->project_name = $first->TF_project_name_en;
             $submission->email = $first->U_email;
             $submission->cycle_id = $first->CYC_id;
             $submission->step_id = $first->FD_step_id;
@@ -1787,7 +1795,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         
         $data['submitted_projects'] = array_values($data['submitted_projects']);
 
-    
+    // dd($data['submitted_projects']);
         
 
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));
