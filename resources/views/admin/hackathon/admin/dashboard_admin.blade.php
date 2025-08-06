@@ -429,13 +429,36 @@ $engagementCounts = [200, 150, 120, 5];
 
     <div class="card shadow-sm mb-4" id="submitted-project-section">
       <div class="card-header">
-        <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.Submitted_Projects') }}</h4>
+        @php
+          $total = $data['usersWithFormDataCount'] + $data['usersWithoutFormDataCount'];
+          $percent = ($total > 0) ? ($data['usersWithFormDataCount'] / $total) * 100 : 0;
+          if ($percent < 25) {
+              $color = 'bg-danger';
+          } elseif ($percent < 50) {
+              $color = 'bg-warning';
+          } elseif ($percent < 75) {
+              $color = 'bg-info'; 
+          } else {
+              $color = 'bg-success';
+          }
+      @endphp
+        <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.Submitted_Projects') }}
+          
+          <div class="progress" style="height: 30px;">
+            <div class="progress-bar {{ $color }}" role="progressbar"
+                style="width: {{ $percent }}%" aria-valuenow="{{ $percent }}"
+                aria-valuemin="0" aria-valuemax="100">
+                {{ round($percent, 2) }}%
+            </div>
+          </div> 
+
+        </h4>
       </div>
       <div class="card-body">
         <table class="table table-hover align-middle">
           <thead>
             <tr>
-                <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>
+                <th scope="col">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}</th>
                 <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
                 <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
                 <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
@@ -444,6 +467,7 @@ $engagementCounts = [200, 150, 120, 5];
           <tbody>
             <!-- This is example data, should be populated from a loop in a real application -->
             @foreach ($data['submitted_projects'] as $project)
+            
             <tr>
              <td>{{ $project->team_name }}</td>
           <td>{{ $project->project_name }}</td>
