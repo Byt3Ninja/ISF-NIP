@@ -183,9 +183,9 @@
 <script>
     const DESTINATION_FIELDS_STRUCTURED = [
         { entity: "Cycle", field: "title", label: "{{ __('admin.Program Name *') }}" },
+        { entity: "Cycle", field: "type", label: "{{ __('admin.Program_Type *') }}" },
         { entity: "Cycle", field: "start", label: "{{ __('admin.Program Start Date *') }}" },
         { entity: "Cycle", field: "end", label: "{{ __('admin.Program End Date *') }}" },
-        { entity: "Cycle", field: "type", label: "{{ __('admin.Program_Type *') }}" },
         { entity: "Company", field: "name_en", label: "{{ __('admin.Company Name (EN) *') }}" },
         { entity: "Company", field: "country_id", label: "{{ __('admin.Country') }}" },
         { entity: "Company", field: "state_id", label: "{{ __('admin.State/Governorate') }}" },
@@ -541,7 +541,8 @@
                 {label: '{{ __('admin.Last Name (EN) *') }}', value: 'last_name_en'},
                 {label: '{{ __('admin.Program Name *') }}', value: 'title'},
                 {label: '{{ __('admin.Program Start Date *') }}', value: 'start'},
-                {label: '{{ __('admin.Program End Date *') }}', value: 'end'}
+                {label: '{{ __('admin.Program End Date *') }}', value: 'end'},
+                {label: '{{ __('admin.Program_Type *') }}', value: 'type'},
             ];
             const missingRequired = requiredFields.filter(field => !columnMappings.hasOwnProperty(field.value));
             if (missingRequired.length > 0) {
