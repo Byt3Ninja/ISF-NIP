@@ -467,7 +467,6 @@ class ImporterController extends Controller
 
                 // Process Founder
                 $userData = [
-                    'organization_id' => $organizationId,
                     'company_id' => $company->id,
                     'email' => $email,
                     'first_name_en' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
