@@ -876,7 +876,7 @@ if (editStepForm) {
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 // Add required attribute only if this menu is shown
                 $('#FormSelect').attr('required', 'required');
                 menu.show();
@@ -894,7 +894,7 @@ if (editStepForm) {
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 // Add required attribute for step 5
                 $('#FormSelect').attr('required', 'required');
                 $('#menu1').show();
@@ -942,6 +942,7 @@ if (editStepForm) {
             },
             success: function(response) {
               step = response.stype;
+              sData = response.data;
               console.log(step);
               $('#editStepForm #stype').val(step);
               let menu = $('#mmenu' + step);
@@ -967,8 +968,12 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     menu.show();
                   },
                   error: function(error) {
@@ -983,8 +988,12 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     $('#mmenu1').show();
                   },
                   error: function(error) {
