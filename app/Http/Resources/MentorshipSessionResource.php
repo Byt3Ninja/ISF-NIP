@@ -24,8 +24,8 @@ class MentorshipSessionResource extends JsonResource
          return [
             'sessionId' => $this->id,
             'mentor' => [
-                'mentorId' => $this->mentor_id,
-                'mentorName' => optional($this->mentor)->first_name_en . ' ' . optional($this->mentor)->last_name_en,
+                'id' => $this->mentor_id,
+                'name' => optional($this->mentor)->first_name_en . ' ' . optional($this->mentor)->last_name_en,
                 'imgUrl' => $mentor && $mentor->img_url ? Storage::disk('public_uploads')->url($mentor->img_url): null,
                 'bio' => $bio->{"bio_$locale"},
                 'linkedin' => $bio->linkedin,
@@ -33,7 +33,7 @@ class MentorshipSessionResource extends JsonResource
                 'mentorExpertises' => $mentor->mentorExpertises->map(function ($exp) use ($locale) {
                 return $exp->{"title" . ($locale === 'ar' ? '_ar' : '')};
             }),
-            'avgRating' => round($avgRating, 1),
+            'rating' => round($avgRating, 1),
             'notes' => $this->comment,
          ],
             'sessionDateTime' => optional($this->zoom_date)->toDateTimeString(),
