@@ -1,5 +1,77 @@
 @extends('layouts.admin')
 
+@php
+// Static members data - replace with actual database query
+$availableMembers = [
+    [
+        'id' => 1,
+        'name' => 'Ahmed Ali',
+        'email' => 'ahmed.ali@example.com',
+        'image' => '/vuexy/assets/img/avatars/1.png',
+        'country' => 'Saudi Arabia',
+        'city' => 'Riyadh',
+        'state' => 'Riyadh',
+        'title' => 'Full Stack Developer',
+        'isInvited' => true,
+    ],
+    [
+        'id' => 2,
+        'name' => 'Sara Mohammed',
+        'email' => 'sara.mohammed@example.com',
+        'image' => '/vuexy/assets/img/avatars/2.png',
+        'country' => 'UAE',
+        'city' => 'Dubai',
+        'state' => 'Dubai',
+        'title' => 'UI/UX Designer',
+        'isInvited' => false,
+    ],
+    [
+        'id' => 3,
+        'name' => 'Omar Hassan',
+        'email' => 'omar.hassan@example.com',
+        'image' => '/vuexy/assets/img/avatars/3.png',
+        'country' => 'Egypt',
+        'city' => 'Cairo',
+        'state' => 'Cairo',
+        'title' => 'Data Scientist',
+        'isInvited' => false,
+    ],
+    [
+        'id' => 4,
+        'name' => 'Fatima Al-Zahra',
+        'email' => 'fatima.zahra@example.com',
+        'image' => '/vuexy/assets/img/avatars/4.png',
+        'country' => 'Morocco',
+        'city' => 'Casablanca',
+        'state' => 'Casablanca-Settat',
+        'title' => 'Mobile Developer',
+        'isInvited' => true,
+    ],
+    [
+        'id' => 5,
+        'name' => 'Khalid Ibrahim',
+        'email' => 'khalid.ibrahim@example.com',
+        'image' => '/vuexy/assets/img/avatars/5.png',
+        'country' => 'Jordan',
+        'city' => 'Amman',
+        'state' => 'Amman',
+        'title' => 'DevOps Engineer',
+        'isInvited' => false,
+    ],
+    [
+        'id' => 6,
+        'name' => 'Layla Abdel',
+        'email' => 'layla.abdel@example.com',
+        'image' => '/vuexy/assets/img/avatars/6.png',
+        'country' => 'Lebanon',
+        'city' => 'Beirut',
+        'state' => 'Beirut',
+        'title' => 'Product Manager',
+        'isInvited' => true,
+    ]
+];
+@endphp
+
 @section('content')
 <!-- Main Content -->
 <div class="content-wrapper">
@@ -71,7 +143,8 @@
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div class="avatar avatar-sm me-2">
-                    <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/vuexy/assets/img/avatars/1.png' }}" alt="Avatar"
+                    <img src="{{ '/191014/'.$team_leader->u_img_url ?? '/icons/account.svg' }}" alt="Avatar"
+                    onerror="this.onerror=null;this.src='/icons/account.svg';"
                       class="rounded-circle">
                   </div>
                 <strong>
@@ -94,7 +167,8 @@
                 class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div class="avatar avatar-sm me-2">
-                    <img src="{{ '/191014/'. $member->u_img_url ?? '/vuexy/assets/img/avatars/3.png' }}" alt="Avatar"
+                    <img src="{{ '/191014/'. $member->u_img_url ?? '/icons/account.svg' }}" alt="Avatar"
+                    onerror="this.onerror=null;this.src='/icons/account.svg';"
                       class="rounded-circle">
                   </div>
                   {{ $l == 'en' ?  $member->tm_name .' ( Team Member '.$T.')' : $member->tm_name . '( عضو الفريق '.$T.' )' }}
@@ -135,7 +209,14 @@
             {{-- {{ dd($members, $maxMembers) }} --}}
               @if($leaderOrnot->count() > 0)
                 @if($members <= $maxMembers)
-                <h6><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
+                <h6 class="mt-8"><i class="ti ti-user-plus me-2"></i>{{ $l == 'en' ? 'Invite New Members:' : 'دعوة أعضاء جدد:' }}</h6>
+                <div class="row g-3 mb-3">
+                  <div class="col-12">
+                    <button type="button" class="btn btn-primary btn-md" data-bs-toggle="modal" data-bs-target="#viewAllMembersModal">
+                      <i class="ti ti-users me-1"></i> {{ $l == 'en' ? 'View All Available Members' : 'عرض جميع الأعضاء المتاحين' }}
+                    </button>
+                  </div>
+                </div>
                 <form class="row g-3 align-items-center" method="POST" action="{{ route('hackathon.invitation') }}">
                   @csrf
                   <div class="col-auto flex-grow-1">
@@ -419,6 +500,69 @@
     </div>
   </div>
 </div>
+
+<!-- View All Members Modal -->
+<div class="modal fade" id="viewAllMembersModal" tabindex="-1" aria-labelledby="viewAllMembersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewAllMembersModalLabel">
+          <i class="ti ti-users me-2"></i>{{ $l == 'en' ? 'Available Members' : 'الأعضاء المتاحين' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          @foreach($availableMembers as $member)
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border">
+              <div class="card-body text-center">
+                <div class="avatar avatar-xl mx-auto mb-3">
+                  <img src="{{ $member['image'] }}" alt="{{ $member['name'] }}" class="rounded-circle w-100 h-100">
+                </div>
+                <h6 class="card-title mb-2">{{ $member['name'] }}</h6>
+                <p class="text-muted small mb-1">
+                  <i class="ti ti-briefcase me-1"></i>{{ $member['title'] }}
+                </p>
+                <p class="text-muted small mb-1">
+                  <i class="ti ti-mail me-1"></i>{{ $member['email'] }}
+                </p>
+                <p class="text-muted small mb-3">
+                  <i class="ti ti-map-pin me-1"></i>{{ $member['city'] }}, {{ $member['state'] }}, {{ $member['country'] }}
+                </p>
+                <button 
+                  type="button" 
+                  id="inviteMemberBtn{{ $member['id'] }}"
+                  class="btn btn-primary btn-sm" 
+                  onclick="sendInvitationToMember('{{ $member['email'] }}', '{{ $member['name'] }}', '{{ $member['id'] }}', {{ $member['isInvited'] ? 'true' : 'false' }})"
+                  @if($member['isInvited']) disabled @endif
+                >
+                  <i class="ti ti-send me-1"></i>
+                  @if($member['isInvited'])
+                    {{ $l == 'en' ? 'Invitation Sent' : 'تم إرسال الدعوة' }}
+                  @else
+                    {{ $l == 'en' ? 'Request to Join' : 'طلب انضمام' }}
+                  @endif
+                </button>
+              </div>
+            </div>
+          </div>
+          @endforeach
+        </div>
+        @if(empty($availableMembers))
+        <div class="text-center py-5">
+          <i class="ti ti-users-off ti-xl text-muted mb-3"></i>
+          <h6 class="text-muted">{{ $l == 'en' ? 'No available members found' : 'لا يوجد أعضاء متاحين' }}</h6>
+        </div>
+        @endif
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          {{ $l == 'en' ? 'Close' : 'إغلاق' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 @stop
 
@@ -786,6 +930,92 @@
                 console.error(error);
             });
         }
+    }
+
+    function sendInvitationToMember(email, name, id, isInvited = false) {
+        console.log('isInvited', isInvited)
+
+        if (isInvited) {
+            Swal.fire({
+                icon: 'info',
+                title: '{{ $l == 'en' ? 'Invitation Already Sent' : 'تم إرسال الدعوة بالفعل' }}',
+                text: `{{ $l == 'en' ? 'An invitation has already been sent to' : 'تم إرسال دعوة بالفعل إلى' }} ${name} (${email}).`,
+                confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                },
+                buttonsStyling: false,
+            });
+            return;
+        }
+
+
+        Swal.fire({
+            title: '{{ $l == 'en' ? 'Send Invitation?' : 'إرسال دعوة؟' }}',
+            text: `{{ $l == 'en' ? 'Send invitation to' : 'إرسال دعوة إلى' }} ${name} (${email}){{ $l == 'en' ? '?' : '؟' }}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{{ $l == 'en' ? 'Yes, send invitation' : 'نعم، إرسال دعوة' }}',
+            cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+            customClass: {
+                confirmButton: 'btn btn-primary me-2',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create form data to submit
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                formData.append('user_id', id);
+                formData.append('memberEmail', email);
+
+                // Submit to the same route as the manual form
+                fetch("{{ route('hackathon.invitation') }}", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '{{ $l == 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!' }}',
+                        text: `{{ $l == 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى' }} ${name}.`,
+                        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+                        showCancelButton: false,
+                        showConfirmButton: true,
+                        customClass: {
+                            confirmButton: 'btn btn-primary',
+                        },
+                        buttonsStyling: false,
+                    }).then(() => {
+                        // Close the modal and refresh the page
+                        // $('#viewAllMembersModal').modal('hide');
+                        $('#inviteMemberBtn' + id).prop('disabled', true);
+                        $('#inviteMemberBtn' + id).text('{{ $l == 'en' ? 'Invitation Sent' : 'تم إرسال الدعوة' }}');
+                        window.location.reload();
+                    });
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '{{ $l == 'en' ? 'Error!' : 'خطأ!' }}',
+                        text: '{{ $l == 'en' ? 'There was an error sending the invitation.' : 'حدث خطأ أثناء إرسال الدعوة.' }}',
+                        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+                        customClass: {
+                            confirmButton: 'btn btn-primary',
+                        },
+                        buttonsStyling: false,
+                    });
+                    console.error(error);
+                });
+            }
+        });
     }
 </script>
 @stop
