@@ -356,12 +356,13 @@ class DashboardService
             ->leftJoin('companies as c', 'c.id', '=', 'u.company_id')
             ->where('mr.mentor_id', $mentorId)
             ->whereNotNull('mr.zoom_date')
-            ->where('mr.approved', 'yes')
+            ->where('mr.approved', 'Yes')
             ->where('mr.zoom_date', '>=', Carbon::now())
             ->orderBy('mr.zoom_date', 'asc')
             ->select(
+                'mr.id',
                 'mr.zoom_date as date',
-                'mr.admin_comment as admin_notes',
+                'mr.comment as notes',
                 'mr.start_url as meeting_link',
                 'u.first_name_en',
                 'u.last_name_en',
@@ -371,11 +372,12 @@ class DashboardService
             ->get()
             ->map(function ($session) {
                 return [
+                    'id' => $session->id,
                     'companyLogo' => $session->company_logo,
                     'company' => $session->company,
                     'user' => trim($session->first_name_en . ' ' . $session->last_name_en),
                     'date' => Carbon::parse($session->date)->format('Y-m-d H:i'),
-                    'adminNotes' => $session->admin_notes,
+                    'notes' => $session->notes,
                     'meetingLink' => $session->meeting_link,
                 ];
             });
@@ -1126,12 +1128,12 @@ public function startupDashboard($userId)
         ->get()
         ->map(function ($mentor) use ($allMentorPrograms, $locale) {
            $requests = MentorshipRequest::where('mentor_id', $mentor->id)
-            ->whereNotNull('rating')->get(['rating', 'rate_comment']);
+            ->whereNotNull('rating')->get(['rating', 'comment']);
 
          $rating = $requests->avg('rating');
          $notes = $requests
-            ->whereNotNull('rate_comment')
-            ->pluck('rate_comment')
+            ->whereNotNull('comment')
+            ->pluck('comment')
             ->filter()
             ->values();
 
