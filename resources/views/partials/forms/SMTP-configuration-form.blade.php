@@ -21,6 +21,13 @@
       <label class="form-label mb-1" for="Port">{{ __('settings.Port') }}</label>
       <input type="text" class="form-control" value="{{ $Title->Port }}" name="Port" id="Port">
     </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="Port">{{ __('settings.Encryption') }}</label>
+      <select class="form-control" name="Encryption" id="Encryption">
+        <option value="tls" {{ $Title->Encryption == 'tls' ? 'selected' : '' }}>tls</option>
+        <option value="ssl" {{ $Title->Encryption == 'ssl' ? 'selected' : '' }}>ssl</option>
+      </select>
+    </div>
   </div>
 
   <div class="form-group d-flex justify-content-end mt-auto">

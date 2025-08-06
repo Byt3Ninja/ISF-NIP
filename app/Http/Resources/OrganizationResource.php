@@ -35,6 +35,7 @@ class OrganizationResource extends JsonResource
                 'name' => $this->user->name,
                 'email' => $this->user->email,
                 'phone' => $this->user->phone,
+                'countryCode' => $this->user->country_code,
                 'gender' => $this->user->gender,
                 'imgUrl' => $this->user->img_url ? Storage::disk('public_uploads')->url($this->user->img_url) : null,
             ] : null,

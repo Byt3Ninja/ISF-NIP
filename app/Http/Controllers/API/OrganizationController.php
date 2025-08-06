@@ -201,6 +201,7 @@ class OrganizationController extends Controller
                 'phone'         => $data['phone'],
                 'HaveCompany'   => 0,
                 'password'      => bcrypt($password),
+                'country_code' => $request->countryCode
             ]);
 
             $role = Role::firstOrCreate(
@@ -300,10 +301,10 @@ public function update(UpdateOrganizationRequest $request, $id)
 
         DB::transaction(function () use ($organization, $user, $data, $img_url) {
             $organization->update([
-                'name_en' => $data['name'],
-                'name_ar' => $data['name'],
+                'name_en' => $data['name'] ?? $organization->name_en,
+                'name_ar' => $data['name'] ?? $organization->name_ar,
                 'img_url' => $img_url,
-                'status' => $data['status'],
+                'status' => $data['status'] ?? $organization->status,
             ]);
 
             $user->first_name_en = $data['firstName'] ?? $user->first_name_en;
@@ -313,6 +314,7 @@ public function update(UpdateOrganizationRequest $request, $id)
             $user->gender        = $data['gender'] ?? $user->gender;
             $user->phone         = $data['phone'] ?? $user->phone;
             $user->organization_id = $organization->id;
+            $user->country_code   = $data['countryCode'] ?? $user->country_code;
 
             if (!empty($data['email']) && $data['email'] !== $user->email) {
                 $user->email = $data['email'];
@@ -382,7 +384,7 @@ public function destroy($id)
     if ($hasCycles || $hasCompanies) {
         $organization->delete();
 
-          Log::warning('Organization soft deleted due to active dependencies.', [
+        Log::warning('Organization soft deleted due to active dependencies.', [
             'organization_id' => $organization->id,
             'has_cycles' => $hasCycles,
             'has_companies' => $hasCompanies,

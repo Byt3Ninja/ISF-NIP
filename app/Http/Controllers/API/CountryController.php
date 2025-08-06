@@ -30,7 +30,8 @@ class CountryController extends Controller
  *                 @OA\Items(
  *                     type="object",
  *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="title", type="string", example="Egypt")
+ *                     @OA\Property(property="title", type="string", example="Egypt"),
+ *                     @OA\Property(property="code", type="integer", example=20),
  *                 )
  *             )
  *         )

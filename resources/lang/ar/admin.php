@@ -2271,5 +2271,9 @@ return [
 	'project_name' => 'اسم المشروع',
 	'project_description' => 'وصف المشروع',
 	'Progress' => 'التقدم',
+	'Task_added_successfully.' => 'تمت اضافة المهمة بنجاح.',
+	'Task_updated_successfully.' => 'تم تحديث المهمة بنجاح.',
+	'Task_deleted_successfully.' => 'تم حذف المهمة بنجاح.',
+	'Encryption' => 'تشفير',
 	
 ];

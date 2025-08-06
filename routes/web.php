@@ -18,6 +18,8 @@ Route::get('default-permissions', function () {
     App\Permission::default_permissions();
 });
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
+
+Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -132,6 +134,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
+    Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
+    Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
+    Route::delete('hackathon/deleteTodoList/{id}', 'TodoListController@destroy')->name('hackathon.deleteTodoList');
 
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');

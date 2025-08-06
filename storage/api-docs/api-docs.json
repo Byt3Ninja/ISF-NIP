@@ -574,6 +574,10 @@
                                                     "title": {
                                                         "type": "string",
                                                         "example": "Egypt"
+                                                    },
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "example": 20
                                                     }
                                                 },
                                                 "type": "object"
@@ -4141,6 +4145,117 @@
                 ]
             }
         },
+        "/api/steps": {
+            "get": {
+                "tags": [
+                    "Steps"
+                ],
+                "summary": "Get Steps by Cycle ID",
+                "operationId": "54ad6dfb39dfb452ff822a287008ee84",
+                "parameters": [
+                    {
+                        "name": "cycle_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of steps for the specified cycle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request successful"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Step"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/steps?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/steps?page=3"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/api/steps?page=2",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cycle ID not provided",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Steps not found for the given cycle"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/{id}": {
             "get": {
                 "tags": [
@@ -5210,6 +5325,73 @@
                     }
                 },
                 "type": "object"
+            },
+            "Step": {
+                "title": "Step",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Screening Phase"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Evaluate startups using a custom form"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-08-01"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-08-15"
+                    },
+                    "program": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 12
+                            },
+                            "title": {
+                                "type": "string",
+                                "example": "Cycle 1 - Pre-Incubation"
+                            },
+                            "description": {
+                                "type": "string",
+                                "example": "First round of incubation"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "stepArrange": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "stepTypeId": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "stepType": {
+                        "type": "string",
+                        "example": "Screening"
+                    },
+                    "formId": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "formName": {
+                        "type": "string",
+                        "example": "Evaluation Form 2025",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -5277,6 +5459,10 @@
         {
             "name": "Mentorship Sessions",
             "description": "Mentorship Sessions"
+        },
+        {
+            "name": "Steps",
+            "description": "Steps"
         },
         {
             "name": "Users",

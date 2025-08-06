@@ -322,7 +322,7 @@ class MentorshipSessionController extends Controller
          return $this->forbidden(__('api.forbidden'));
       }
 
-       $sessions = MentorshipRequest::with('mentor')
+       $sessions = MentorshipRequest::with(['mentor','mentor.bio','mentor.mentorExpertises'])
         ->where('user_id', $user->id)
         ->where('approved', 'Yes')
         ->whereNull('rating')
