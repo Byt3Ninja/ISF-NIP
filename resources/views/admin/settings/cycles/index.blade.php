@@ -364,7 +364,7 @@
           <div class="mb-4" id="menu1">
             <div class="form-group mb-0">
               <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
-              <select class="select form-control" name="FormSelect" id="FormSelect" required>
+              <select class="select form-control" name="FormSelect" id="FormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
                 {{-- @endforeach --}}
@@ -374,7 +374,7 @@
           <div class="mb-4" id="menu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div class="form-group mb-0">
-              <select class="select2 form-control" name="ScreeningSelect" required>
+              <select class="select2 form-control" name="ScreeningSelect">
                 <option selected disabled> {{ __('cycles.Select type') }}</option>
                 <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
                 <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
@@ -564,10 +564,12 @@
   const stepTitle = form.querySelector(`${mode === 'add' ? '#title' : '#mtitle'}`);
   const stepDescription = form.querySelector(`${mode === 'add' ? '#description' : '#mdescription'}`);
   const teamNumberInput = form.querySelector(`${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`);
+  const formSelect = form.querySelector(`${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`);
+  const screeningSelect = form.querySelector(`${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`);
 
   // Remove any previous error messages
-  const existingError = form.querySelector('.invalid-feedback');
-  if (existingError) existingError.remove();
+  const existingErrors = form.querySelectorAll('.invalid-feedback');
+  existingErrors.forEach(error => error.remove());
 
   // Helper function to show error
   const showError = (element, message) => {
@@ -592,14 +594,25 @@
     return false;
   }
 
+  // Check for conditional required fields based on step type
+  if ((stepType.value === '1' || stepType.value === '5') && formSelect.hasAttribute('required') && !formSelect.value) {
+    showError(formSelect, currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار نموذج.');
+    return false;
+  }
+
+  if (stepType.value === '2' && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
+    showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
+    return false;
+  }
+
   if (stepType.value === '6' && (!teamNumberInput.value || teamNumberInput.value < 1)) {
     showError(teamNumberInput, errors.teamNumber);
     return false;
   }
 
   // Clear any invalid styling
-  [stepTitle, stepDescription, teamNumberInput].forEach(input => {
-    input.classList.remove('is-invalid');
+  [stepTitle, stepDescription, teamNumberInput, formSelect, screeningSelect].forEach(input => {
+    if (input) input.classList.remove('is-invalid');
   });
 
   return true; // All validations passed
@@ -639,7 +652,9 @@ function clearValidationOnChange(form, mode = 'add') {
   const fields = [
     `${mode === 'add' ? '#title' : '#mtitle'}`,
     `${mode === 'add' ? '#description' : '#mdescription'}`,
-    `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`
+    `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`,
+    `${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`,
+    `${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`
   ];
 
   fields.forEach(selector => {
@@ -655,6 +670,19 @@ function clearValidationOnChange(form, mode = 'add') {
         next.remove();
       }
     });
+
+    // Also listen for change events on select elements
+    if (input.tagName === 'SELECT') {
+      input.addEventListener('change', () => {
+        input.classList.remove('is-invalid');
+
+        // Remove the next sibling if it's an error message
+        const next = input.nextElementSibling;
+        if (next && next.classList.contains('invalid-feedback')) {
+          next.remove();
+        }
+      });
+    }
   });
 }
 
@@ -834,6 +862,11 @@ if (editStepForm) {
           let steptxt = $('#StepSelect').find(":selected").text();
           let menu = $('#menu' + step);
           $('#menu1,#menu2,#team_number').hide();
+          
+          // Remove required attributes from all fields first
+          $('#FormSelect').removeAttr('required');
+          $('#ScreeningSelect').removeAttr('required');
+          
           if(step === '6'){
             $('#team_number').show();
           }
@@ -844,6 +877,8 @@ if (editStepForm) {
               success: function(response) {
                 $('#FormSelect').empty()
                 $('#FormSelect').append(response)
+                // Add required attribute only if this menu is shown
+                $('#FormSelect').attr('required', 'required');
                 menu.show();
               },
               error: function(error) {
@@ -860,6 +895,8 @@ if (editStepForm) {
               success: function(response) {
                 $('#FormSelect').empty()
                 $('#FormSelect').append(response)
+                // Add required attribute for step 5
+                $('#FormSelect').attr('required', 'required');
                 $('#menu1').show();
               },
               error: function(error) {
@@ -867,6 +904,11 @@ if (editStepForm) {
                 alert("Error Occurred, Try again!");
               }
             });
+          }
+          if (step === '2') {
+            // Add required attribute for screening select
+            $('#ScreeningSelect').attr('required', 'required');
+            $('#menu2').show();
           }
           $('#stype').val(step);
           $('#formtitle').text(steptxt);
