@@ -595,17 +595,17 @@
   }
 
   // Check for conditional required fields based on step type
-  if ((stepType.value === '1' || stepType.value === '5') && formSelect.hasAttribute('required') && !formSelect.value) {
+  if ((stepType.value === '1' || stepType.value === '5') && formSelect && formSelect.hasAttribute('required') && !formSelect.value) {
     showError(formSelect, currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار نموذج.');
     return false;
   }
 
-  if (stepType.value === '2' && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
+  if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
     return false;
   }
 
-  if (stepType.value === '6' && (!teamNumberInput.value || teamNumberInput.value < 1)) {
+  if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < 1)) {
     showError(teamNumberInput, errors.teamNumber);
     return false;
   }

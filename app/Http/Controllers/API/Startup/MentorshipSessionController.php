@@ -322,13 +322,17 @@ class MentorshipSessionController extends Controller
          return $this->forbidden(__('api.forbidden'));
       }
 
-       $sessions = MentorshipRequest::with(['mentor','mentor.bio','mentor.mentorExpertises'])
-        ->where('user_id', $user->id)
-        ->where('approved', 'Yes')
-        ->whereNull('rating')
-        ->where('zoom_date', '<', now())
-        ->orderByDesc('zoom_date')
-        ->paginate(10);
+       $sessions = MentorshipRequest::with([
+        'mentor', 
+        'mentor.bio', 
+        'mentor.mentorExpertises',
+    ])
+    ->where('user_id', $user->id)
+    ->where('approved', 'Yes')
+    ->whereNull('rating')
+    ->where('zoom_date', '<', now())
+    ->orderByDesc('zoom_date')
+    ->paginate(10);
 
        return $this->success(
          MentorshipSessionResource::collection($sessions),
