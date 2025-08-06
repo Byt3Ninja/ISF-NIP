@@ -336,10 +336,20 @@ class FormBuilderController extends Controller
 
     public function builderByOrganization($organization_id=0){
         $builders = BuilderForm::where('organization_id',$organization_id)->get();
+        $output = [];
         $appear = '';
-        foreach ($builders as $builder){
+        foreach( $builders as $builder )
+        {
+            $output[] = [
+                'id' => $builder->id,
+                'form_name' => $builder->form_name
+            ];
             $appear .= "<option value=".$builder->id." >".$builder->form_name."</option>";
         }
-        return $appear;
+        // return $appear;
+        return response()->json([
+            'data' => $output,
+            'appear' => $appear
+        ]);
     }
 }
