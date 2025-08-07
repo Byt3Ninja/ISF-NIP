@@ -18,8 +18,7 @@
               {{ $l == 'en' ? 'First Place' : 'المركز الأول' }}
             </h6>
             <p class="card-text">
-              {{ $l == 'en' ? 'Prize of 20,000 SAR + incubation opportunity in the accelerator.' : 'جائزة مالية
-              قدرها 20,000 ريال سعودي + فرصة احتضان في المسرعة.' }}
+              {{--  {{ $l == 'en' ? 'Prize of 20,000 SAR + incubation opportunity in the accelerator.' : 'جائزة مالية قدرها 20,000 ريال سعودي + فرصة احتضان في المسرعة.' }}  --}}
             </p>
           </div>
         </div>
@@ -32,8 +31,7 @@
               {{ $l == 'en' ? 'Second Place' : 'المركز الثاني' }}
             </h6>
             <p class="card-text">
-              {{ $l == 'en' ? 'Prize of 10,000 SAR + access to specialized mentoring programs.' : 'جائزة مالية
-              قدرها 10,000 ريال سعودي + وصول لبرامج إرشاد متخصصة.' }}
+              {{--  {{ $l == 'en' ? 'Prize of 10,000 SAR + access to specialized mentoring programs.' : 'جائزة مالية قدرها 10,000 ريال سعودي + وصول لبرامج إرشاد متخصصة.' }}  --}}
             </p>
           </div>
         </div>
@@ -46,8 +44,7 @@
               {{ $l == 'en' ? 'Third Place' : 'المركز الثالث' }}
             </h6>
             <p class="card-text">
-              {{ $l == 'en' ? 'Prize of 5,000 SAR + invitations to exclusive events.' : 'جائزة مالية قدرها 5,000
-              ريال سعودي + دعوات لفعاليات حصرية.' }}
+              {{--  {{ $l == 'en' ? 'Prize of 5,000 SAR + invitations to exclusive events.' : 'جائزة مالية قدرها 5,000 ريال سعودي + دعوات لفعاليات حصرية.' }}  --}}
             </p>
           </div>
         </div>
