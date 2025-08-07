@@ -1242,10 +1242,9 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $user = Auth::user();
         $isExpired = Team_member::where('id', $id)
             ->where('acceptInvition', 'pending')
-            ->where('created_at', '<', now()->subHours(24))
             ->first();
            
-            if($isExpired) {
+            if($isExpired->created_at < $isExpired->created_at->subHours(24)) {
                 $isExpired->acceptInvition = 'expired';
                 $isExpired->Name = $user->first_name . ' ' . $user->last_name;
                 $isExpired->TeamMember = 'hackathon';
@@ -1286,9 +1285,11 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                     $inviteduser = $teamformation->user_id;
                     $userInv = User::where('id', $inviteduser)->first();
                     $updatecompany =Company::where('id', $user->company_id)->first();
-                    $updatecompany->cycle = $userInv->company->cycle;
-                    $updatecompany->step = $userInv->company->step;
-                    $updatecompany->save();
+                    if($userInv->company->cycle != null){
+                        $updatecompany->cycle = $userInv->company->cycle;
+                        $updatecompany->step = $userInv->company->step;
+                        $updatecompany->save();
+                    }
     
 
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
