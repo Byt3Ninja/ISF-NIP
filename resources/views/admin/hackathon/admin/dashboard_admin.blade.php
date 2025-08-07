@@ -282,8 +282,8 @@ $engagementCounts = [200, 150, 120, 5];
                     data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details')
                     }}</button>
 
-                  <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
-                    __('admin.message') }}</button>
+                  {{-- <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
+                    __('admin.message') }}</button> --}}
                 </td>
               </tr>
               @endforeach
@@ -829,8 +829,8 @@ $mentorsLists = showMintors($request);
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-        <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
-          __('admin.message_team') }}</button>
+        {{-- <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
+          __('admin.message_team') }}</button> --}}
       </div>
     </div>
   </div>
