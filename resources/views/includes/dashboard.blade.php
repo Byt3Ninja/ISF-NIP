@@ -1329,23 +1329,24 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 				<!-- Buttons -->
 				<div class="d-flex flex-column flex-sm-row gap-2">
-					<button
-						type="button"
-						id="declineInvitationBtn"
-						class="btn btn-label-secondary d-flex align-items-center justify-content-center gap-2 w-100"
-						style="min-width: 140px;" >
-						<i class="ti ti-circle-x"></i>
-						{{ $l == 'en' ? 'Decline' : 'رفض' }}
-					</button>
 
-					<button
-						type="button"
-						id="acceptInvitationBtn"
-						class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100"
-						style="min-width: 140px;" >
-						<i class="ti ti-circle-check"></i>
-						{{ $l == 'en' ? 'Accept' : 'قبول' }}
-					</button>
+					<form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+						@csrf
+						@method('PATCH')
+						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+							<i class="ti ti-users me-2 me-2"></i>
+							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
+						</button>
+					</form>
+					<form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+						@csrf
+						@method('PATCH')
+						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+							<i class="ti ti-users me-2 me-2"></i>
+							{{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
+						</button>
+                	</form>
+
 				</div>
 				@endforeach
 			</div>
