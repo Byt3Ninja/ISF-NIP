@@ -24,16 +24,16 @@
   </div>
   
   @if($currentHackathon['cycle_id'] == $user->company?->cycle)
-  <div id="action-buttons-placeholder" class="mt-4">
-    <!-- Buttons will be injected by JS -->
-      @php
-      $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
-      $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-      'pending')->first();
-      $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-      'accepted')->first();
+    <div id="action-buttons-placeholder" class="mt-4">
+      <!-- Buttons will be injected by JS -->
+        @php
+        $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
+        $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+        'pending')->first();
+        $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+        'accepted')->first();
 
-      @endphp
+        @endphp
       @if(!auth()->user()->hasRole('admin'))
         @if($teamcreated != null)
           @if( $teamcreated->cycle_id == $currentHackathon['cycle_id'] || $showStep == true )
@@ -54,7 +54,7 @@
 
 
           @if( $companyStep?->stype == 6 || $companyStep == null || $showStep == true )
-            @if($teamJoin != null)
+            {{-- @if($teamJoin != null)
               <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                 @csrf
                 @method('PATCH')
@@ -71,7 +71,7 @@
                   {{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
                 </button>
               </form>
-            @else
+            @else --}}
 
               @if($teamaccept == null)
                 @if( $showStep == true )
@@ -100,7 +100,7 @@
                   {{ $l == 'en' ? 'View My Team' : 'مشاهدة الفريق' }}
                 </a>
               @endif
-            @endif
+            {{-- @endif --}}
           @else
             @if($companyStep->stype == 1)
               <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
@@ -141,20 +141,17 @@
       @else
       
       @endif
-  </div>
+    </div>
   @endif
-              @php
-                $teamJoins = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-                'pending')->get();
-              @endphp
+             
             @if($teamJoins->count() > 0)
             @foreach($teamJoins as $teamJoin)
-              @php
+              {{-- @php
               $teamformation = App\TeamFormation::where('id', $teamJoin->team_formation_id)->first();
-              @endphp
-              <div class="d-flex align-items-center">{{ $teamformation->name }}</div>
-              @if($teamformation->cycle_id == $id)
-                <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+              @endphp --}}
+              <div class="d-flex align-items-center">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }} {{ $teamJoin->tf_name }}</div>
+              @if($teamJoin->tf_cycle_id == $id)
+                <form action="{{ route('hackathon.acceptInvitation', $teamJoin->tm_id) }}" class="d-inline-block" method="post">
                   @csrf
                   @method('PATCH')
                   <button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
@@ -162,7 +159,7 @@
                     {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
                   </button>
                 </form>
-                <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                <form action="{{ route('hackathon.rejectInvitation', $teamJoin->tm_id) }}" class="d-inline-block" method="post">
                   @csrf
                   @method('PATCH')
                   <button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
@@ -171,6 +168,7 @@
                   </button>
                 </form>
               @endif
+              <br>
             @endforeach
             @endif
 </div>
