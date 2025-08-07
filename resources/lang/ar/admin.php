@@ -1452,6 +1452,7 @@ return [
 		'holiday' => 'العطلات',
 		'other' => 'أخرى',
 	],
+	'Company_Name' => 'اسم الشركة',
 	'Export_assessment_pdf' => 'تصدير التقييمات PDF',
 	'Export_assessment_all' => 'تصدير كل التقييمات',
 	'MessageSentSuccessfully' => 'تم ارسال الرسالة بنجاح',
