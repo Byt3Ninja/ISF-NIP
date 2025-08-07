@@ -1288,7 +1288,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <!--/ Edit SP Modal -->
 
 <!-- Respond Invitation Modal -->
-@if($data['team_member'] != null)
+@if($data['team_member']->count() > 0)
 <div
 	class="modal fade"
 	id="teamInvitationModal"
@@ -1330,7 +1330,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 				<!-- Buttons -->
 				<div class="d-flex flex-column flex-sm-row gap-2">
 
-					<form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+					<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
 						@csrf
 						@method('PATCH')
 						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
@@ -1338,7 +1338,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
 						</button>
 					</form>
-					<form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+					<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
 						@csrf
 						@method('PATCH')
 						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">

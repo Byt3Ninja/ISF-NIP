@@ -2284,6 +2284,7 @@ class HomeController extends Controller
                     AND tm.TeamMember = 'hackathon' 
                     AND tm.acceptInvition = 'pending' ";
         $team_member = DB::select($team_member_q, [Auth::id()]);
+        $team_member = collect($team_member);
         $data['team_member'] = $team_member;
 
         return view('includes.dashboard', $data, compact('data'));

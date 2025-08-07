@@ -1433,6 +1433,7 @@ return [
 		'holiday' => 'Holiday',
 		'other' => 'Other',
 	],
+	'Company_Name' => 'Company Name',
 	'MessageSentSuccessfully' => 'Message Sent Successfully',
 	'No sent Messages' => 'No Sent Messages',
 	'equal_to' => 'Equal to',
