@@ -31,7 +31,7 @@
 	<div class="container-xxl flex-grow-1 container-p-y">
 		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
-			@include('admin.includes.banner_header', ['newhackathon' => $data['newhackathon']])
+			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
 			<br>
 		@endif
 		<div class="content-body">
@@ -1288,7 +1288,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <!--/ Edit SP Modal -->
 
 <!-- Respond Invitation Modal -->
-@if($data['team_member']->count() > 0)
+@if($team_member->count() > 0)
 <div
 	class="modal fade"
 	id="teamInvitationModal"
@@ -1305,7 +1305,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			></div>
 
 			<div class="modal-body position-relative text-center py-12 px-12">
-				@foreach($data['team_member'] as $join)
+				@foreach($team_member as $join)
 				<!-- Team & Inviter Avatar -->
 				<div class="position-relative d-inline-block mb-4">
 					<img

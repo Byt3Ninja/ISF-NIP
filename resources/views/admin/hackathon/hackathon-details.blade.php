@@ -136,7 +136,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
   </div>
 </div>
 
-@if($companyStep?->stype == 6)
+@if($companyStep?->stype == 6 || $showStep == true)
 <!-- Create Team Modal -->
 @include('admin.hackathon.partials.create-team-modal')
 @endif

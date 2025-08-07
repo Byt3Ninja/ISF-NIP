@@ -2283,11 +2283,11 @@ class HomeController extends Controller
                     WHERE tm.user_id = ? 
                     AND tm.TeamMember = 'hackathon' 
                     AND tm.acceptInvition = 'pending' ";
-        $team_member = DB::select($team_member_q, [Auth::id()]);
+        $team_member = DB::select($team_member_q, [$user->id]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;
 
-        return view('includes.dashboard', $data, compact('data'));
+        return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
     {
