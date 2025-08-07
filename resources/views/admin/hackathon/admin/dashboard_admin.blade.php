@@ -446,8 +446,7 @@ $engagementCounts = [200, 150, 120, 5];
           }
       @endphp
         <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.Submitted_Projects') }}
-          
-          <div class="progress" style="height: 30px;">
+          <div class="progress mt-5" style="height: 12px;">
             <div class="progress-bar {{ $color }}" role="progressbar"
                 style="width: {{ $percent }}%" aria-valuenow="{{ $percent }}"
                 aria-valuemin="0" aria-valuemax="100">
@@ -461,30 +460,27 @@ $engagementCounts = [200, 150, 120, 5];
         <table class="table table-hover align-middle">
           <thead>
             <tr>
-                <th scope="col">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}</th>
-                <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
-                <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
-                <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Submitted On' : 'تم التقديم في' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
             </tr>
           </thead>
           <tbody>
             <!-- This is example data, should be populated from a loop in a real application -->
             @foreach ($data['submitted_projects'] as $project)
-            
-            <tr>
-             <td>{{ $project->team_name }}</td>
-          <td>{{ $project->project_name }}</td>
-          <td>{{ $project->submissionDate }}</td>
-          <td>
-            <a target="_blank" title="view"
-              href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}"
-              class="btn btn-label-primary btn-sm">
-              {{ $l == 'en' ? 'View' : 'عرض' }}
-            </a>
-          </td>
-          <td>
-            
-          </td>
+              <tr>
+                <td>{{ $project->team_name }}</td>
+                <td>{{ $project->step_name }}</td>
+                <td>{{ $project->project_name }}</td>
+                <td>{{ $project->submissionDate }}</td>
+                <td>
+                  <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
+                    {{ $l == 'en' ? 'View' : 'عرض' }}
+                  </a>
+                </td>
+                <td></td>
             </tr>
            
             @endforeach
