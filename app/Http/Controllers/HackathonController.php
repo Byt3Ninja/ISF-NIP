@@ -776,9 +776,9 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $stepData = $company?->stepdata;
         $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
         $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
+        $steps_ids = [];
         if( $company && $company->cycledata )
         {
-            $steps_ids = [];
             $steps = $company?->cycledata?->steps;
             if( !empty( $steps ) )
             {
@@ -885,6 +885,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $cType = 0;
         if( !empty( $stepData ) ) { $cType = $stepData->stype; }
 
+        $showStep = in_array( $companyStep?->id, $steps_ids );
         // return view('admin.hackathon.show', compact('hackathon'));
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
@@ -903,7 +904,9 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
             'nextSessions',
             'sessions',
             'cType',
-            'steps'
+            'steps',
+            'showStep',
+            'steps_ids'
         ));
     }
 
