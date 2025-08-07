@@ -803,6 +803,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                 ->orderBy('ts.datetime', 'ASC')
                 ->limit(5)
                 ->get();
+            $sessions = collect($sessions)->sortBy('datetime')->values();
             /* $sessions_q = "SELECT
                     ts.id,
                     ts.type,
