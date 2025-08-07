@@ -293,7 +293,7 @@
 
     <li class="{{ Request::is('dashboard/hackathon') ? 'active' : '' }} menu-item"><a
           href="/dashboard/hackathon" class="menu-link">
-          <i class="ti ti-file-text ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="ti ti-activity ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('admin.Hackathon') }}</div>
         </a>
       </li>
