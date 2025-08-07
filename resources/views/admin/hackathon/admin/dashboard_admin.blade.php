@@ -412,15 +412,6 @@ $engagementCounts = [200, 150, 120, 5];
                   </div>
                   </form>
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $l == 'en' ? 'Cancel' :
-                    'إلغاء'
-                    }}</button>
-                  <button type="button" class="btn btn-primary" onclick="saveProjectIdea()">{{ $l == 'en' ? 'Save
-                    Changes'
-                    : 'حفظ
-                    التغييرات' }}</button>
-                </div>
               </div>
             </div>
             @endforeach
