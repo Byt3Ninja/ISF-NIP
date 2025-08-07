@@ -192,7 +192,7 @@ $(document).ready(function () {
             },
             success: function(response) {
                 //  alert(response.message);
-                  window.location.href = `/dashboard/export-cyclesComp?step=${cycle}`;
+                  window.location.href = `/dashboard/export-cyclesComp?cycle=${cycle}`;
                   window.reload();
             },
 
