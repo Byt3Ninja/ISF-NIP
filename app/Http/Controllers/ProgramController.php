@@ -336,8 +336,9 @@ class ProgramController extends Controller
             $results = $_companies->map(function ($company) use ( $teams, $l, $ranks ) {
                 $users_ids = $company->users_ids;
                 $matched_team = $teams->first(function ($team) use ($users_ids) {
-                    return in_array($team->user_id, $users_ids);
+                    return in_array($team->first()->user_id, $users_ids);
                 });
+                if( $matched_team ) { $matched_team = $matched_team->first(); }
                 $team = new stdClass;
                 $team->id = $company->id;
                 $team->name =  $matched_team ? $matched_team->name : $company->{'name_' . $l};
