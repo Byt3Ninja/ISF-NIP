@@ -30,7 +30,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach ($data->sortByDesc('submissionDate') as $submission)
+        @foreach( collect($data)->sortByDesc('submissionDate') as $submission )
 
         <tr>
           <td>{{ $submission->user_name }}</td>
