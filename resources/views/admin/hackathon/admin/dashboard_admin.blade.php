@@ -85,17 +85,19 @@ $registrationMonths = ['january', 'february', 'march', 'april', 'may', 'june', '
 $registrationCounts = [65, 59, 80, 81, 156, 155, 30];
 
 // Projects By Theme Chart
-$submissionLabels = ['التقنية المالية', 'الذكاء الاصطناعي', 'الاستدامة'];
-$submissionCounts = [120, 90, 75];
+$submissionLabels = $data['submissionLabels'];
+$submissionCounts = $data['submissionCounts'];
 // Original Data
-$completedTeamCount = [25, 18];
-$uncompletedTeamCount = [5, 2];
+$completedTeamCount = $data['countInTeams'];
+$uncompletedTeamCount = $data['countNotInTeams'];
 
+$count_in_team = $l == 'en' ? 'In Team' : 'في فريق';
+$count_not_in_team = $l == 'en' ? 'Not in Team' : 'ليس في فريق';
 // --- New Data for Pie Chart ---
 // These labels will be for the pie slices themselves.
-$teamsStatusPieLabels = ['فرق مكتملة', 'فرق غير مكتملة'];
+$teamsStatusPieLabels = [$count_in_team, $count_not_in_team];
 // Sum the counts to get a total for each status.
-$teamsStatusPieData = [array_sum($completedTeamCount), array_sum($uncompletedTeamCount)]; // Result: [43, 7]
+$teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [43, 7]
 
 // Program Engagement Chart
 $engagementLabels = ['المسجلون', 'كونوا فرقاً', 'قدموا مشاريع', 'فائزون'];
@@ -106,7 +108,7 @@ $engagementCounts = [200, 150, 120, 5];
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
-      <h1 class="fw-bold">{{ __('admin.management_dashboard') }}</h1>
+      <h1 class="fw-bold">{{ __('admin.Hackathon_Dashboard') }}</h1>
       @php
       $idParam = request()->route('id');
       @endphp
@@ -133,8 +135,8 @@ $engagementCounts = [200, 150, 120, 5];
         <div class="card stat-card border-success shadow-sm h-100">
           <div class="card-body">
             <i class="bi bi-person-check-fill display-4 text-success mb-2"></i>
-            <h5 class="card-title">{{ __('admin.Projects') }}</h5>
-            <p class="card-text display-4">{{ $data['count_projects'] }}</p>
+            <h5 class="card-title">{{ __('admin.Submitted_Projects') }}</h5>
+            <p class="card-text display-4">{{ $data['Count_submitted_projects'] }}</p>
           </div>
         </div>
       </div>
@@ -142,7 +144,7 @@ $engagementCounts = [200, 150, 120, 5];
         <div class="card stat-card border-info shadow-sm h-100">
           <div class="card-body">
             <i class="bi bi-people-fill display-4 text-info mb-2"></i>
-            <h5 class="card-title">{{ __('admin.Registered') }}</h5>
+            <h5 class="card-title">{{ __('admin.Founders') }}</h5>
             <p class="card-text display-4">{{ $data['count_members'] }}</p>
           </div>
         </div>
@@ -280,8 +282,8 @@ $engagementCounts = [200, 150, 120, 5];
                     data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details')
                     }}</button>
 
-                  <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
-                    __('admin.message') }}</button>
+                  {{-- <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
+                    __('admin.message') }}</button> --}}
                 </td>
               </tr>
               @endforeach
@@ -317,19 +319,20 @@ $engagementCounts = [200, 150, 120, 5];
               <td>
 
                 @if($project->project_status == 20)
-                {{ __('admin.Idea + Team') }} : {{ __('admin.Define the problem and form a team with clear roles.') }}
+                {{ __('admin.Idea + Team') }} 
+                {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
                 @elseif($project->project_status == 40)
-                {{ __('admin.Research') }} : {{ __('admin.Validate the idea, study users, and outline key features.') }}
+                {{ __('admin.Research') }} 
+                {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
                 @elseif($project->project_status == 60)
-                {{ __('admin.Design & Build') }} : {{ __('admin.Sketch UI, set up the project, and develop core
-                functionality.') }}
+                {{ __('admin.Design & Build') }} 
+                {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
                 @elseif($project->project_status == 80)
-                {{ __('admin.Ready for Pitch') }} : {{ __('admin.Prepare demo, finalize slides, and rehearse the
-                presentation.') }}
+                {{ __('admin.Ready for Pitch') }} 
+                {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
                 @elseif($project->project_status == 100)
-                {{ __('admin.Project Submitted') }} : {{ __('admin.Submit code, share the demo, and complete
-                documentation.
-                story.') }}
+                {{ __('admin.Project Submitted') }} 
+                {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
                 @endif
               </td>
               <td>
@@ -826,8 +829,8 @@ $mentorsLists = showMintors($request);
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-        <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
-          __('admin.message_team') }}</button>
+        {{-- <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
+          __('admin.message_team') }}</button> --}}
       </div>
     </div>
   </div>
