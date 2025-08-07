@@ -36,7 +36,7 @@
       @endphp
       @if(!auth()->user()->hasRole('admin'))
         @if($teamcreated != null)
-          @if($teamcreated->cycle_id == $currentHackathon['cycle_id'])
+          @if( $teamcreated->cycle_id == $currentHackathon['cycle_id'] || $showStep == true )
             <a href="/dashboard/hackathon/{{ $teamcreated->id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
               style="border-radius: 50px; font-weight: 600;">
               <i class="ti ti-settings me-2 me-2"></i>
@@ -53,7 +53,7 @@
         @else
 
 
-          @if($companyStep?->stype == 6 OR $companyStep == null)
+          @if( $companyStep?->stype == 6 || $companyStep == null || $showStep == true || )
             @if($teamJoin != null)
               <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                 @csrf
