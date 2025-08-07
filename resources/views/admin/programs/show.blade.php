@@ -2329,7 +2329,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle").val(),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 menu.show();
               },
               error: function(error) {
@@ -2345,7 +2345,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 $('#menu1').show();
               },
               error: function(error) {
@@ -2381,6 +2381,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             success: function(response) {
               console.log('response', response)
               step = response.stype;
+              sData = response.data;
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
               $('.public-data-form-fields').hide();
@@ -2400,8 +2401,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     menu.show();
                   },
                   error: function(error) {
@@ -2415,8 +2420,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     $('#mmenu1').show();
                   },
                   error: function(error) {

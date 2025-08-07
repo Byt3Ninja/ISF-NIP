@@ -139,29 +139,32 @@ class ScreeningEvaluationResults extends Model
 		}
 		if( $getStep )
 		{
-			foreach( $evaluation->categories as $criteria )	
+			if( !empty( $evaluation->categories ) )
 			{
-				$subCriteria = $criteria->subCriteria;
-				foreach( $judges as $judges_key => $judge )
+				foreach( $evaluation->categories as $criteria )	
 				{
-					foreach( $judge->companies as $companies_key => $company )
+					$subCriteria = $criteria->subCriteria;
+					foreach( $judges as $judges_key => $judge )
 					{
-						foreach( $company->results as $results_key => $result )
+						foreach( $judge->companies as $companies_key => $company )
 						{
-							if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
-							if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
-							$getResult = $subCriteria->where('id', $result->criteria_id)->first();
-							if( !empty( $getResult ) )
+							foreach( $company->results as $results_key => $result )
 							{
-								$weight = $getResult->weight;
-								$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
-								$result->weighted_score = $weighted_score;
+								if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
+								if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
+								$getResult = $subCriteria->where('id', $result->criteria_id)->first();
+								if( !empty( $getResult ) )
+								{
+									$weight = $getResult->weight;
+									$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
+									$result->weighted_score = $weighted_score;
+								}
+								$company->results[$results_key] = $result;
 							}
-							$company->results[$results_key] = $result;
+							$judge->companies[$companies_key] = $company;
 						}
-						$judge->companies[$companies_key] = $company;
+						$judges[$judges_key] = $judge;
 					}
-					$judges[$judges_key] = $judge;
 				}
 			}
 		}

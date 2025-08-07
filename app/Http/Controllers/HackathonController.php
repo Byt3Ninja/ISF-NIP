@@ -105,6 +105,7 @@ class HackathonController extends Controller
     public function manage($id)
     {
         $user = Auth::user();
+        $l = app()->getLocale();
                  
         $team_Formation = "SELECT 
         tf.id as 'tf_id',
@@ -130,6 +131,7 @@ class HackathonController extends Controller
         c.name_en as 'c_name_en',
         c.name_ar as 'c_name_ar',
         c.logo as 'c_logo',
+        c.cycle as 'c_cycle',
         tm.id as 'tm_id',
         tm.user_id as 'tm_user_id',
         tm.team_formation_id as 'tm_team_formation_id',
@@ -163,7 +165,62 @@ class HackathonController extends Controller
        
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
        $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
-        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team'));
+
+        $existInTeam = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'accepted')->pluck('user_id')->toArray();
+        $pendingInvites = Team_member::where('TeamMember', 'hackathon')
+    ->where('acceptInvition', 'pending')
+    ->get();
+        $placeholders = implode(',', array_fill(0, count($existInTeam), '?'));
+        
+        $viewMember_q = "
+    SELECT u.id as 'u_id', 
+           concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+            concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+           u.email as 'u_email',
+           u.img_url as 'u_image',
+           co.name_ar as co_country_ar,
+           co.name_en as co_country_en,
+           ci.name_ar as ci_city_ar,
+           ci.name_en as ci_city_en,
+           s.name_ar as s_state_ar,
+           s.name_en as s_state_en,
+           u.title_ar as 'u_title_ar',
+           u.title_en as 'u_title_en'
+    FROM companies as c
+    LEFT JOIN users as u ON u.company_id = c.id
+    LEFT JOIN countries as co ON u.country_id = co.id
+    LEFT JOIN cities as ci ON u.city_id = ci.id
+    LEFT JOIN states as s ON u.state_id = s.id
+    WHERE c.cycle = ?
+";
+$params = [$user->company->cycle];
+if (count($existInTeam) > 0) {
+    $viewMember_q .= " AND u.id NOT IN ($placeholders)";
+    $params = array_merge($params, $existInTeam);
+}
+
+// تنفيذ الاستعلام
+$results = DB::select($viewMember_q, $params);
+
+       // تحويل النتائج إلى الشكل المطلوب
+$availableMembers = collect($results)->map(function ($member) use ($l, $pendingInvites, $user, $id) {
+    return [
+        'id'        => $member->u_id,
+        'name'      => $member->user_name_en,
+        'email'     => $member->u_email,
+        'image'     => $user->u_image ?? '/vuexy/assets/img/avatars/default.png',
+        'country'   => $user->{'co_country_'. $l} ?? 'N/A',
+        'city'      => $user->{'ci_city_'. $l} ?? 'N/A',
+        'state'     => $user->{'s_state_'. $l} ?? 'N/A',
+        'title'     => $user->{'u_title_'. $l} ?? '',
+        'isInvited' => $pendingInvites->where('user_id', $member->u_id)->where('team_formation_id', $id)->isNotEmpty() ? true : false,
+    ];
+    })->toArray();
+
+
+        // dd($availableMembers);
+
+        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers'));
     }
 
     public function myTeam()
@@ -1644,6 +1701,125 @@ class HackathonController extends Controller
                 $values = array_values($data['Count_per_status']);
         $data['submissionLabels'] = $labels;
         $data['submissionCounts'] = $values;
+
+
+        
+        $l = app()->getLocale();
+        $forms = "SELECT 
+                FD.company_id as 'FD_company_id',
+                FD.user_id as 'FD_user_id',
+                FD.step_id as 'FD_step_id',
+                FD.question as 'FD_question',
+                FD.answer as 'FD_answer',
+                FD.created_at as 'FD_created_at',
+                FD.updated_at as 'FD_updated_at',
+                FD.deleted_at as 'FD_deleted_at',
+                C.name_en as 'C_name_en',
+                C.name_ar as 'C_name_ar',
+                C.id as 'C_id',
+                C.step as 'C_step',
+                Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+                Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+                U.id as 'U_id',
+                U.email as 'U_email',
+                S.title as 'S_title',
+                S.id as 'S_id',
+                S.cycle_id as 'S_cycle_id',
+                S.data as 'S_data',
+                CYC.title as 'CYC_title',
+                CYC.id as 'CYC_id',
+                CYC.organization_id as 'CYC_organization_id',
+                O.name_en as 'O_name_en',
+                O.name_ar as 'O_name_ar',
+                O.id as 'O_id',
+                BF.id as 'BF_id',
+                BF.form_name as 'BF_form_name',
+                TF.id as 'TF_id',
+                TF.name as 'TF_name',
+                TF.user_id as 'TF_user_id',
+                TF.project_name_en as 'TF_project_name_en'
+            FROM
+                form_data as FD 
+            LEFT JOIN
+                companies as C ON C.id = FD.company_id
+            LEFT JOIN
+                users as U ON U.id = FD.user_id
+            LEFT JOIN
+                team_formations as TF ON TF.user_id = U.id
+            LEFT JOIN
+                steps as S ON S.id = FD.step_id
+            LEFT JOIN
+                builder_forms as BF ON BF.id = S.data
+            LEFT JOIN
+                cycles as CYC ON CYC.id = S.cycle_id
+            LEFT JOIN
+                organizations as O ON O.id = CYC.organization_id
+            WHERE
+                FD.deleted_at IS NULL
+                AND CYC.id = ? 
+                AND S.stype = 5
+        ";
+            $params = [$id];
+
+
+            $forms = DB::select($forms, $params);
+            $forms = collect($forms);
+            
+        $C = 1;
+        // نبدأ بتجميع كل الأسئلة حسب step_id
+        $grouped = $forms->groupBy('FD_user_id');
+        
+
+        $data['submitted_projects'] = $grouped->map(function ($group, $stepId) use ($l) {
+            $first = $group->first();
+
+            $submission = new stdClass;
+            $submission->company_id = $first->FD_company_id;
+            // $submission->user_id = $first->FD_user_id;
+            $submission->user_name = $first->{'user_name_' . $l};
+            $submission->team_name = $first->TF_name;
+            $submission->project_name = $first->TF_project_name_en;
+            $submission->email = $first->U_email;
+            $submission->cycle_id = $first->CYC_id;
+            $submission->step_id = $first->FD_step_id;
+            $submission->user_id = $first->FD_user_id;
+            $submission->company_step = $first->C_step;
+            // $submission->startup_name = $first->{'C_name_' . $l};
+            // $submission->submitted_by = $first->{'user_name_' . $l};
+            // $submission->step_name = $first->S_title;
+            // $submission->program_name = $first->CYC_title;
+            // $submission->organization_name = $first->O_name_en;
+            $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
+            return $submission;
+        })->values()->all(); // remove collection keys (numeric indexing)
+        
+        $data['submitted_projects'] = array_values($data['submitted_projects']);
+
+        $allUsers = DB::table('users')
+    ->join('team_formations', 'team_formations.user_id', '=', 'users.id')
+    ->join('steps', 'steps.cycle_id', '=', 'team_formations.cycle_id')
+    ->where('steps.cycle_id', $id)
+    ->select('users.id')
+    ->distinct()
+    ->pluck('users.id')
+    ->toArray();
+
+    $usersWithFormData = DB::table('form_data')
+    ->join('steps', 'steps.id', '=', 'form_data.step_id')
+    ->where('steps.cycle_id', $id)
+    ->where('steps.stype', 5)
+    ->whereNull('form_data.deleted_at')
+    ->distinct()
+    ->pluck('form_data.user_id')
+    ->toArray();
+
+    $data['totalUsers']= count($allUsers);
+    $data['usersWithFormDataCount'] = count($usersWithFormData);
+    $data['usersWithoutFormDataCount'] =$data['totalUsers']- $data['usersWithFormDataCount'];
+
+       
+
+    // dd($data['submitted_projects']);
         
 
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));

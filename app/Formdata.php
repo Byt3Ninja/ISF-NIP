@@ -15,5 +15,9 @@ class Formdata extends Model
         'comments' => 'array',
     ];
 
+    public function field()
+    {
+        return $this->belongsTo(Formfield::class, 'field_id', 'id');
+    }
 
 }

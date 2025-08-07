@@ -12,6 +12,9 @@
       @if (session()->has('msg'))
       <x-alert type="success" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
       @endif
+      @if (session()->has('message2'))
+        <x-alert type="danger" message="{{ __('admin.' . session()->get('message2')) }} {{ Session::forget('message2') }}" />
+      @endif
     </div>
 
     <div class="users-list-table">

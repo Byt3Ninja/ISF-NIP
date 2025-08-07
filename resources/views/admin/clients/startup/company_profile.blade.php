@@ -734,7 +734,7 @@
                 </tr>
               </tbody>
             </table>
-            @php($fdata = \App\Formdata::where('user_id', $company->user->id)->get())
+            @php($fdata = \App\Formdata::where('user_id', $company->user->id)->with(['field'])->get())
             <br /><br />
             <h5 class="mb-4 pb-3">
               {{ __('admin.Data collected through Cycle') }}
@@ -746,9 +746,13 @@
                 <tr>
                   <td class="width-200">{{ $field->question }}:</td>
                   <td>
-                    {!! strpos($field->answer, 'http') === 0
-                    ? '<a target="_blank" href="' . $field->answer . '"> ' . __('admin.Download File') . ' </a>'
-                    : $field->answer !!}
+                    @if( isset( $field?->field?->options?->type ) && $field?->field?->options?->type == 'file' )
+                      <a target="_blank" href="{{ URL::to('/'. $field->answer) }}"> {{ __('admin.Download File') }} </a>
+                    @else
+                      {!! strpos($field->answer, 'http') === 0
+                      ? '<a target="_blank" href="' . $field->answer . '"> ' . __('admin.Download File') . ' </a>'
+                      : $field->answer !!}
+                    @endif
                     @php(
                     $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id',
                     $company->id)->first(['comments'])->comments

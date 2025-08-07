@@ -68,16 +68,38 @@
 			@endif
 		</div>
 
-			@if( $_user->hasRole('Registered') )
-			@if($_user->company?->cycle == null)
-				<div class="col-md-12">
-					<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
-						{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
+		@if( $_user->hasRole('Registered') )
+		@if($_user->company?->cycle == null)
+			<div class="col-md-12">
+				<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
+					{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
+		@endif
+		@endif
+
+		<!-- Demo Invitation Notification -->
+		{{-- <div class="col-md-12">
+			<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+				<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex align-items-center">
+						<i class="ti ti-mail me-3 ti-24px"></i>
+						<div>
+							<h6 class="mb-1">{{ __('dashboard.New Invitation Received!') }}</h6>
+							<small class="text-muted">{{ __('dashboard.You have been invited to participate in the Startup Pitch Competition 2025') }}</small>
+						</div>
+					</div>
+					<div class="d-flex gap-2">
+						<button type="button" class="btn btn-sm btn-outline-primary" onclick="openInvitationModal()">
+							<i class="ti ti-eye me-1"></i>
+							{{ __('dashboard.View Details') }}
+						</button>
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 					</div>
 				</div>
-			@endif
-			@endif
+			</div>
+		</div> --}}
 		<div class="row g-6">
 			
 			<!-- Count cards -->
@@ -146,14 +168,14 @@
 								<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}">
 									<span class="widget-todo-title ml-50 text-secondary">
 										<i class="ti ti-link"></i>
-										{{ $service->{'name_' . $l}  }}</span>
+										{{ $service->{'name_' . $l} }}</span>
 								</a>
 							</div>
 							<div class="widget-todo-item-action d-flex align-items-center">
 								<div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-content-center"
 									style="width: 200px; height: 30px">
 									<a href="/dashboard/directory?type={{ $service->category->id }}">
-										{{ $service->category->{'name_' . $l}  }}
+										{{ $service->category->{'name_' . $l} }}
 									</a>
 								</div>
 							</div>
@@ -339,8 +361,7 @@
 													{{ $step->title }}
 													@endif
 												</td>
-												<td><span class="badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ __('admin.'.$step->status)
-														}}</span></td>
+												<td><span class="w-100 badge bg-{{ $step->color }} text-{{ $step->textColor }}">{{ $step->status }}</span></td>
 												<td>{{ $step->from }}</td>
 												<td>{{ $step->to }}</td>
 												<td style="height: 50px;">
@@ -349,26 +370,25 @@
 												</td>
 												<td>
 													@if( $step->stype == 1 or $step->stype == 5 )
-													@if( $step->status == 'Started' )
-													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
-														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
-													@endif
-													@endif
-													 @if($step->stype == 1 && isset($step->form) && $step->form)
-															<a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
-																<button class="btn btn-sm btn-label-primary">
-																	<i class="ti ti-eye me-2" title="{{ __('cycles.Show Form') }}"></i>
-																	<span class="fw-semibold">{{ __('cycles.Show Form') }}</span>
-																</button>
-															</a>
+														@if( $step->status == 'Started' )
+															<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary" title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
 														@endif
-														{{-- @if ($step->data && $step->status == 'Started')  --}}
-															{{-- <a href="/dashboard/show-form/{{ $step->data }}">
-																<span class="btn btn-icon btn-label-primary rounded-circle">
-																		<i class="ti ti-eye"></i>
-																</span>
-															</a> --}}
-														{{-- @endif --}}
+													@endif
+													@if($step->stype == 1 && isset($step->form) && $step->form)
+														<a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+															<button class="btn btn-sm btn-label-primary">
+																<i class="ti ti-eye me-2" title="{{ __('cycles.Show Form') }}"></i>
+																<span class="fw-semibold">{{ __('cycles.Show Form') }}</span>
+															</button>
+														</a>
+													@endif
+													{{-- @if ($step->data && $step->status == 'Started')  --}}
+														{{-- <a href="/dashboard/show-form/{{ $step->data }}">
+															<span class="btn btn-icon btn-label-primary rounded-circle">
+																	<i class="ti ti-eye"></i>
+															</span>
+														</a> --}}
+													{{-- @endif --}}
 												</td>
 											</tr>
 											@endforeach
@@ -952,11 +972,11 @@
 												<h5 class="mb-0">
 													<i class="ti ti-bell ti-24px"></i>
 													<span class="mx-2">
-													  {{ $step->title }} - ({{ $step->cycle->title }})
-													  - {{ __('dashboard.start from') }} {{ $step->from }}
-													  {{ __('dashboard.to') }} {{ $step->to }}
+														{{ $step->title }} - ({{ $step->cycle->title }})
+														- {{ __('dashboard.start from') }} {{ $step->from }}
+														{{ __('dashboard.to') }} {{ $step->to }}
 													</span>
-												  </h5>
+												</h5>
 											</div>
 											<div class="card-body">
 												<p class="card-text">{{ $step->description }}</p>
@@ -971,13 +991,13 @@
 												<table class="table">
 													<thead>
 														<tr>
-														  <th>{{ __('dashboard.Company') }}</th>
-														  <th>{{ __('dashboard.User/Title') }}</th>
-														  <th>{{ __('dashboard.Screening completed') }}</th>
-														  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
+															<th>{{ __('dashboard.Company') }}</th>
+															<th>{{ __('dashboard.User/Title') }}</th>
+															<th>{{ __('dashboard.Screening completed') }}</th>
+															{{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
 														</tr>
-													  </thead>
-													  <tbody>
+													</thead>
+													<tbody>
 														@foreach( $step->companies as $company )
 														<tr>
 															<td>
@@ -1022,7 +1042,7 @@
 															</td>
 														</tr>
 														@endforeach
-													  </tbody>
+													</tbody>
 												</table>
 											</div>
 										</div>
@@ -1256,16 +1276,121 @@
 </div>
 @if( $_user->ableTo('mentors.settings_modify', $permissions) &&
 array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null( $cycle_id ) )
-<!--  Edit SP Modal -->
+<!-- Edit SP Modal -->
 @include('admin.clients.startup.partials._session_modal')
 <!--/ Edit SP Modal -->
-@endif
 
+<!-- Respond Invitation Modal -->
+{{-- <div
+	class="modal fade"
+	id="teamInvitationModal"
+	tabindex="-1"
+	aria-labelledby="teamInvitationLabel"
+	aria-modal="true"
+	role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content overflow-hidden position-relative">
+
+			<!-- Optional Background Gradient Overlay -->
+			<div
+				style="position: absolute; inset: 0; background: linear-gradient(135deg, #f5f7fa, #c3cfe2); opacity: 0.3;"
+			></div>
+
+			<div class="modal-body position-relative text-center py-12 px-12">
+				<!-- Team & Inviter Avatar -->
+				<div class="position-relative d-inline-block mb-4">
+					<img
+						src="/vuexy/assets/img/avatars/1.png"
+						alt="Team Avatar"
+						class="rounded-circle border-4 shadow"
+						style="width: 64px; height: 64px; object-fit: cover;"
+					/>
+				</div>
+
+				<!-- Title -->
+				<h5 id="teamInvitationLabel" class="fw-bold mb-2">Join TeamName?</h5>
+
+				<!-- Description -->
+				<p class="mb-2">
+					<strong>Mahmoud</strong> invited you to join their team
+				</p>
+				<p class="fst-italic text-muted small">
+					Joining this team will allow you to collaborate on projects, share resources, and participate in discussions.
+				</p>
+
+				<!-- Buttons -->
+				<div class="d-flex flex-column flex-sm-row gap-2">
+					<button
+						type="button"
+						id="declineInvitationBtn"
+						class="btn btn-label-secondary d-flex align-items-center justify-content-center gap-2 w-100"
+						style="min-width: 140px;"
+					>
+						<i class="ti ti-circle-x"></i>
+						Decline
+					</button>
+
+					<button
+						type="button"
+						id="acceptInvitationBtn"
+						class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100"
+						style="min-width: 140px;"
+					>
+						<i class="ti ti-circle-check"></i>
+						Accept Invitation
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div> --}}
+<!--/ Respond Invitation Modal -->
+@endif
 
 @include('mentor.partials._availability_slots')
 <!-- / Content Wrapper -->
 @stop
 @section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	$('#teamInvitationModal').modal('show');
+
+	$('#acceptInvitationBtn').on('click', function() {
+		var btn = $(this);
+		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Accepting...');
+		// Simulate AJAX request
+		setTimeout(function() {
+			btn.prop('disabled', false).html('<i class="ti ti-circle-check"></i> Accept Invitation');
+			$('#teamInvitationModal').modal('hide');
+			$('body').prepend(`
+				<div class="alert alert-success alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
+					<i class="ti ti-check-circle me-2"></i>
+					Invitation accepted! You have joined the team.
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			`);
+		}, 1200);
+	});
+
+	$('#declineInvitationBtn').on('click', function() {
+		var btn = $(this);
+		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Declining...');
+		// Simulate AJAX request
+		setTimeout(function() {
+			btn.prop('disabled', false).html('<i class="ti ti-circle-x"></i> Decline');
+			$('#teamInvitationModal').modal('hide');
+			$('body').prepend(`
+				<div class="alert alert-warning alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
+					<i class="ti ti-info-circle me-2"></i>
+					Invitation declined. The team organizer has been notified.
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			`);
+		}, 1200);
+	});
+});
+</script>
+
 <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -1421,17 +1546,17 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 				"lengthChange": false,
 				"paging": false,
 				"bInfo": false,
-				"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
+				"columnDefs": [ {"orderable": false, "targets": [3]}, ],
 				@if( $l == 'ar' )
 				"language": {
 					"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
-					"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-					"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+					"sLoadingRecords": "جارٍ التحميل...", "sProcessing": "جارٍ التحميل...",
+					"sLengthMenu": "أظهر _MENU_ مدخلات", "sZeroRecords": "لم يعثر على أية سجلات",
 					"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
 					"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-					"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
+					"sInfoPostFix": "", "sSearch":	 "ابحث:", "sUrl": "",
 					"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
-					"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+					"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
 				}
 				@endif
 			});
@@ -1441,147 +1566,147 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 				"lengthChange": false,
 				"paging": false,
 				"bInfo": false,
-				"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
+				"columnDefs": [ {"orderable": false, "targets": [3]}, ],
 				@if( $l == 'ar' )
 				"language": {
 					"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
-					"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-					"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+					"sLoadingRecords": "جارٍ التحميل...", "sProcessing": "جارٍ التحميل...",
+					"sLengthMenu": "أظهر _MENU_ مدخلات", "sZeroRecords": "لم يعثر على أية سجلات",
 					"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
 					"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-					"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
+					"sInfoPostFix": "", "sSearch":	 "ابحث:", "sUrl": "",
 					"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
-					"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+					"oAria": {"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
 				}
 				@endif
 			});
 		});
 
 		function modify(type, id, stat) {
-		  $.ajaxSetup({
-			headers: {
-			  'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			}
-		  });
-		  if (type === 3) {
-			//delete
-			if (confirm("{{ __('dashboard.sure del schedule') }}")) {
-			  $.ajax({
-				type: "POST",
-				url: "/dashboard/mentors/modify",
-				data: {
-				  "id": id,
-				  "rtype": type,
-				},
-				success: function(response) {
-				  location.reload();
-				},
-				error: function(error) {
-				  console.log(error);
-				  alert("Error Occurred, Try again!");
+			$.ajaxSetup({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 				}
-			  });
-			}
-		  } else if (type === 2) {
-			//Enable-disable
-			$.ajax({
-			  type: "POST",
-			  url: "/dashboard/mentors/modify",
-			  data: {
-				"id": id,
-				"rtype": type,
-				"stat": stat
-			  },
-			  success: function(response) {
-				location.reload();
-			  },
-			  error: function(error) {
-				console.log(error);
-				alert("Error Occurred, Try again!");
-			  }
 			});
-		  } else if (type === 1) {
-			// Edit current
-			$.ajax({
-			  type: "POST",
-			  url: "/dashboard/mentors/modify",
-			  data: {
-				"id": id,
-				"rtype": type,
-			  },
-			  success: function(response) {
-				switchtypes(response.type);
-				$('#sid').val(response.id);
-				$('#rtype').val(4);
-				$('#type').val(response.type);
-				$('#days').val(response.days);
-				$('#dfrom').val(response.dfrom);
-				$('#dto').val(response.dto);
-				$('#tfrom').val(response.tfrom);
-				$('#tto').val(response.tto);
-				$('#notes').val(response.notes);
+			if (type === 3) {
+				//delete
+				if (confirm("{{ __('dashboard.sure del schedule') }}"))
+				{
+						$.ajax({
+							type: "POST",
+							url: "/dashboard/mentors/modify",
+							data: {
+								"id": id,
+								"rtype": type,
+							},
+							success: function(response) {
+								location.reload();
+							},
+							error: function(error) {
+								console.log(error);
+								alert("Error Occurred, Try again!");
+							}
+						});
+				}
+			} else if (type === 2) {
+				//Enable-disable
+				$.ajax({
+					type: "POST",
+					url: "/dashboard/mentors/modify",
+					data: {
+						"id": id,
+						"rtype": type,
+						"stat": stat
+					},
+					success: function(response) {
+						location.reload();
+					},
+					error: function(error) {
+						console.log(error);
+						alert("Error Occurred, Try again!");
+					}
+				});
+			} else if (type === 1) {
+				// Edit current
+				$.ajax({
+					type: "POST",
+					url: "/dashboard/mentors/modify",
+					data: {
+						"id": id,
+						"rtype": type,
+					},
+					success: function(response) {
+						switchtypes(response.type);
+						$('#sid').val(response.id);
+						$('#rtype').val(4);
+						$('#type').val(response.type);
+						$('#days').val(response.days);
+						$('#dfrom').val(response.dfrom);
+						$('#dto').val(response.dto);
+						$('#tfrom').val(response.tfrom);
+						$('#tto').val(response.tto);
+						$('#notes').val(response.notes);
+						$('#SendRequest').modal('show');
+					},
+					error: function(error) {
+						console.log(error);
+						alert("Error Occurred, Try again!");
+					}
+				});
+			} else {
+				//show from as new
+				$('#sid, #type, #days, #dfrom, #dto, #tfrom, #tto, #notes').val();
+				$('#rtype').val('0');
+				switchtypes(type);
 				$('#SendRequest').modal('show');
-			  },
-			  error: function(error) {
-				console.log(error);
-				alert("Error Occurred, Try again!");
-			  }
-			});
-		  } else {
-			//show from as new
-			$('#sid, #type, #days, #dfrom, #dto, #tfrom, #tto, #notes').val();
-			$('#rtype').val('0');
-			switchtypes(type);
-			$('#SendRequest').modal('show');
-		  }
+			}
 		}
 	
 		function SelectType(type) {
-		  switchtypes(type);
+			switchtypes(type);
 		}
 	
 		function switchtypes(type) {
-		  switch (type) {
-			case 'OneDay':
-			  $('#showdates').show();
-			  $('#showtto, #showdays').hide();
-			  $("#dfrom").prop('required', true);
-			  $("#days, #dto").prop('required', false);
-			  break;
-			case 'Weekly':
-			  $('#showdates').hide();
-			  $('#showdays').show();
-			  $("#days").prop('required', true);
-			  $("#dfrom, #dto").prop('required', false);
-			  break;
-			case 'WorkingDays':
-			  $('#showdates, #showdays').hide();
-			  $("#dfrom, #dto, #days").prop('required', false);
-			  break;
-			case 'Period':
-			  $('#showtto,#showdates').show();
-			  $('#showdays').hide();
-			  $("#dfrom, #dto").prop('required', true);
-			  $("#days").prop('required', false);
-			  break;
-		  }
+			switch (type) {
+				case 'OneDay':
+					$('#showdates').show();
+					$('#showtto, #showdays').hide();
+					$("#dfrom").prop('required', true);
+					$("#days, #dto").prop('required', false);
+				break;
+				case 'Weekly':
+					$('#showdates').hide();
+					$('#showdays').show();
+					$("#days").prop('required', true);
+					$("#dfrom, #dto").prop('required', false);
+				break;
+				case 'WorkingDays':
+					$('#showdates, #showdays').hide();
+					$("#dfrom, #dto, #days").prop('required', false);
+				break;
+				case 'Period':
+					$('#showtto,#showdates').show();
+					$('#showdays').hide();
+					$("#dfrom, #dto").prop('required', true);
+					$("#days").prop('required', false);
+				break;
+			}
 		}
 	
 		$('.start_meeting').click(function() {
-		  $.ajax({
-			type: "GET",
-			url: "/dashboard/mentor/meetingRedirect/" + $(this).data('value'),
-			success: function(response) {
-			  alert(response['message']);
-			  window.open(response['join_url'], '_blank');
-			  window.location.href = '{{ route('mentorshipTasks.index') }}' + '?mentorship_id=' + response[
-				'mentorship_id'];
-			},
-			error: function(error) {
-			  console.log(error);
-			  alert("Error Occurred, Try again!");
-			}
-		  });
+			$.ajax({
+				type: "GET",
+				url: "/dashboard/mentor/meetingRedirect/" + $(this).data('value'),
+				success: function(response) {
+					alert(response['message']);
+					window.open(response['join_url'], '_blank');
+					window.location.href = '{{ route('mentorshipTasks.index') }}' + '?mentorship_id=' + response['mentorship_id'];
+				},
+				error: function(error) {
+					console.log(error);
+					alert("Error Occurred, Try again!");
+				}
+			});
 		});
 </script>
 @stop
