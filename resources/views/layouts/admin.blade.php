@@ -25,19 +25,7 @@
           <!-- Navbar -->
           @include('admin.includes.header')
 
-          @php
-            $currentRoute = request()->route()->getName();
-            $isDashboard = $currentRoute === 'core.admin_access';
-            // dd($currentRoute)
-          @endphp
-
-          @if($isDashboard)
-            <div class="content-wrapper">
-              <div class="container-xxl flex-grow-1 container-p-y">
-                @include('admin.includes.banner_header')
-              </div>
-            </div>
-          @endif
+          
 
           <!-- Content -->
           @yield('content')

@@ -2248,7 +2248,13 @@ class HomeController extends Controller
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
 
-        return view('includes.dashboard', $data);
+        $newhackathon_q = "SELECT * FROM cycles WHERE `type` = 'hackathon' ORDER BY created_at DESC LIMIT 1";
+        $newhackathon = DB::select($newhackathon_q);
+        $newhackathon = collect($newhackathon)->first();
+        $data['newhackathon'] = $newhackathon;
+        
+
+        return view('includes.dashboard', $data, compact('data'));
     }
     protected function adminDashboard()
     {
