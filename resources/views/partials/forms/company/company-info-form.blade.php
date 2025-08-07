@@ -23,6 +23,7 @@
       @endif
       {!! csrf_field() !!}
       <input name="CompanyN" type="hidden" value="1">
+      <input name="locale" type="hidden" value="{{ app()->getLocale() }}">
       <div class="row">
         <div class="col-12 mb-3">
           <div class="form-group">
