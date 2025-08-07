@@ -327,7 +327,9 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-	
+		$request->validate([
+			'notes' => 'nullable|string|max:255',
+		]);
 		$user = auth()->user();
 		if($user->hasRole('admin') || $user->hasRole('organizationManager')){
 			

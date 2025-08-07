@@ -2254,6 +2254,38 @@ class HomeController extends Controller
         $data['newhackathon'] = $newhackathon;
         
 
+        $team_member_q = "SELECT 
+                        tm.id as 'tm_id',
+                        tm.user_id as 'tm_user_id',
+                        tm.team_formation_id as 'tm_team_formation_id',
+                        tm.Name as 'tm_name',
+                        tm.email as 'tm_email',
+                        tm.isTeamLeader as 'tm_isTeamLeader',
+                        tf.id as 'tf_id',
+                        tf.name as 'tf_name',
+                        tf.description as 'tf_description',
+                        tf.cycle_id as 'tf_cycle_id',
+                        tf.step_id as 'tf_step_id',
+                        tf.img_team as 'tf_img_team',
+                        tf.user_id as 'tf_user_id',
+                        tf.project_name_en as 'tf_projectName',
+                        u.id as 'u_id',
+                        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                        u.email as 'u_email',
+                        u.img_url as 'u_img_url'
+                    FROM
+                        team_members as tm
+                    LEFT JOIN
+                        team_formations as tf ON tf.id = tm.team_formation_id
+                    LEFT JOIN
+                        users as u ON u.id = tf.user_id
+                    WHERE tm.user_id = ? 
+                    AND tm.TeamMember = 'hackathon' 
+                    AND tm.acceptInvition = 'pending' ";
+        $team_member = DB::select($team_member_q, [Auth::id()]);
+        $data['team_member'] = $team_member;
+
         return view('includes.dashboard', $data, compact('data'));
     }
     protected function adminDashboard()
