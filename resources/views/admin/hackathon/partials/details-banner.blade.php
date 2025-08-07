@@ -78,7 +78,7 @@
                   <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
                     data-bs-toggle="modal" data-bs-target="#createTeamModal">
                     <i class="ti ti-settings me-2 me-2"></i>
-                    {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
+                    {{ $l == 'en' ? 'Create New Team' : 'كون فريقك' }}
                   </a>
                 @elseif($companyStep?->stype != 6)
                   <button type="button" class="btn btn-primary" style="flex: 1;"
@@ -90,7 +90,7 @@
                   <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
                     data-bs-toggle="modal" data-bs-target="#createTeamModal">
                     <i class="ti ti-settings me-2 me-2"></i>
-                    {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
+                    {{ $l == 'en' ? 'Create New Team' : 'كون فريقك' }}
                   </a>
                 @endif
               @else
