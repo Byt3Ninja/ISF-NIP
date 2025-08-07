@@ -2259,7 +2259,7 @@ class HomeController extends Controller
                         tm.user_id as 'tm_user_id',
                         tm.team_formation_id as 'tm_team_formation_id',
                         tm.Name as 'tm_name',
-                        tm.email as 'tm_email',
+                        tm.Email as 'tm_email',
                         tm.isTeamLeader as 'tm_isTeamLeader',
                         tf.id as 'tf_id',
                         tf.name as 'tf_name',
@@ -2280,10 +2280,10 @@ class HomeController extends Controller
                         team_formations as tf ON tf.id = tm.team_formation_id
                     LEFT JOIN
                         users as u ON u.id = tf.user_id
-                    WHERE tm.user_id = ? 
+                    WHERE tm.Email = ? 
                     AND tm.TeamMember = 'hackathon' 
                     AND tm.acceptInvition = 'pending' ";
-        $team_member = DB::select($team_member_q, [$user->id]);
+        $team_member = DB::select($team_member_q, [$user->email]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;
 
