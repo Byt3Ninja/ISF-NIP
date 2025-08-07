@@ -1309,7 +1309,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 				<!-- Team & Inviter Avatar -->
 				<div class="position-relative d-inline-block mb-4">
 					<img
-						src="/vuexy/assets/img/avatars/1.png"
+						src="{{ $join->tf_img_team ? asset($join->tf_img_team) : 'https://placehold.co/400x200?text='.$join->tf_name }}"
 						alt="Team Avatar"
 						class="rounded-circle border-4 shadow"
 						style="width: 64px; height: 64px; object-fit: cover;"
