@@ -53,7 +53,7 @@
         @else
 
 
-          @if( $companyStep?->stype == 6 || $companyStep == null || $showStep == true || )
+          @if( $companyStep?->stype == 6 || $companyStep == null || $showStep == true )
             @if($teamJoin != null)
               <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                 @csrf
