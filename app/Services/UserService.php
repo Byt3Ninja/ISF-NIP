@@ -16,6 +16,7 @@ class UserService
     public function index(array $filters, User $authUser): array
     {
         $query = User::query();
+        $query->where('id', '!=', $authUser->id);
 
         if ($authUser->hasRole('OrganizationManager')) {
             $query->where('organization_id', $authUser->organization_id);
@@ -26,14 +27,14 @@ class UserService
         }
 
        if (array_key_exists('haveCompany', $filters)) {
-    $value = $filters['haveCompany'];
+       $value = $filters['haveCompany'];
 
-    if (in_array($value, ['1', 1], true)) {
-        $query->where('HaveCompany', 1);
-    } elseif (in_array($value, ['0', 0], true)) {
-        $query->where('HaveCompany', 0);
+         if (in_array($value, ['1', 1], true)) {
+            $query->where('HaveCompany', 1);
+        } elseif (in_array($value, ['0', 0], true)) {
+            $query->where('HaveCompany', 0);
+        }
     }
-}
       
         if (!empty($filters['role'])) {
             $query->whereHas('roles', fn ($q) => $q->where('name', $filters['role']));
