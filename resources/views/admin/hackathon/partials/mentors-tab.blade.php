@@ -116,7 +116,7 @@
               @if ($mentor->bio)
               <div class="mb-2 mt-auto">
                 <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
-                <small class="text-muted line-clamp-4">
+                <small class="text-muted line-clamp-3">
                   {{ $mentor->bio->{'bio_' . $l} }}
                 </small>
               </div>

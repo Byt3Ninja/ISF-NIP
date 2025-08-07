@@ -178,21 +178,24 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '.ExportCycleComp', function() {
-        var step = $('.cyclesExcel').val();
+        var cycle = $('.cyclesExcel').val();
 
-        if(step==0) {
+        if(cycle==0) {
             alert(messages.exportNotSuccess);
             return;
         }
-        alert(messages.exportSuccess);
+        alert('Waiting for export to complete...');
         $.ajax({
             url: `/dashboard/export-cyclesComp`,
             type: 'GET',
-            data:{step:step
+            data:{cycle:cycle
             },
             success: function(response) {
                 //  alert(response.message);
+                  window.location.href = `/dashboard/export-cyclesComp?cycle=${cycle}`;
+                  window.reload();
             },
+
             error: function(error) {
                 console.error('Error:', error);
 

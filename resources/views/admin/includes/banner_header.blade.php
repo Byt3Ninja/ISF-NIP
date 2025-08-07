@@ -3,7 +3,11 @@
   {{-- <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10"
     style="background-image: url('/images/illustrations/pattern-2.svg'); background-size: cover; background-position: center; z-index: 0;">
   </div> --}}
+@php
 
+    //  dd($newhackathon);
+       
+@endphp
   <div class="row position-relative z-1">
     <!-- Text Content -->
     <div class="col-md-8 p-4 w-100">
@@ -12,7 +16,7 @@
         <div class="d-flex justify-content-between align-items-start w-100">
           <div class="d-flex align-items-center gap-2 mb-1">
             <h5 class="m-0 fw-bold text-white">
-              {{ $l == 'ar' ? 'هاكاثون الذكاء الاصطناعي مباشر!' : 'AI Hackathon is Live!' }}
+              {{ $newhackathon->title }}
             </h5>
             <div class="px-2 py-1 rounded-pill small text-black bg-light bg-opacity-25 backdrop-blur-sm">
               {{ $l == 'ar' ? 'جديد' : 'New' }}
@@ -20,20 +24,20 @@
           </div>
           
           <!-- Close Button -->
-           <button type="button" class="btn btn-sm btn-transparent text-white p-0" onclick="this.closest('.card').remove()">
+           {{-- <button type="button" class="btn btn-sm btn-transparent text-white p-0" onclick="this.closest('.card').remove()">
             <i class="ti ti-x"></i>
-          </button>
+          </button> --}}
         </div>
 
         <!-- Description -->
         <p class="text-white-90 mb-3">
-          {{ $l == 'ar' ? 'انضم إلى هاكاثون الذكاء الاصطناعي ونافس المبتكرين من جميع أنحاء العالم لبناء المستقبل باستخدام الذكاء الاصطناعي.' : 'Join our AI hackathon and compete with innovators from around the world to build the future with AI.' }}
+          {{ $l == 'ar' ? 'انضم إلى هاكاثون '.$newhackathon->title.' ونافس المبتكرين من جميع أنحاء العالم لبناء المستقبل باستخدام '.$newhackathon->title.' .' : 'Join our '.$newhackathon->title.' hackathon and compete with innovators from around the world to build the future with '.$newhackathon->title.'.' }}
         </p>
 
         <!-- Buttons -->
         <div class="d-flex gap-2">
-          <a href="/dashboard/hackathon" class="btn btn-sm btn-light text-primary shadow-sm">
-            {{ $l == 'ar' ? 'انضم الآن' : 'Join Now' }}
+          <a href="/dashboard/hackathon/details/{{ $newhackathon->id }}" class="btn btn-sm btn-light text-primary shadow-sm">
+            {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
           </a>
           <a href="/dashboard/hackathon" class="btn btn-sm btn-outline-light">
             {{ $l == 'ar' ? 'تعلم المزيد' : 'Learn More' }}
