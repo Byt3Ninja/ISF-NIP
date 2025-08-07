@@ -43,7 +43,7 @@ const translations = {
     },
     other_category: {
       notEmpty: "Please specify your business type in the 'Other' field.",
-      stringOnly: lang === 'en' ? 'Business type accepts english letters only' : 'نوع العمل يقبل الحروف الانجليزية فقط'
+      stringOnly: 'Business type accepts Arabic and English letters only'
     },
     Commercial_Register: {
       numeric: 'Commercial Register should contain numbers only'
@@ -92,7 +92,7 @@ const translations = {
     },
     other_category: {
       notEmpty: 'الرجاء تحديد نوع عملك في الحقل "آخر".',
-      stringOnly: lang === 'en' ? 'Business type accepts arabic letters only' : 'نوع العمل يقبل الحروف العربية فقط'
+      stringOnly: 'نوع العمل يقبل الحروف العربية والإنجليزية فقط'
     },
     Commercial_Register: {
       numeric: 'يجب أن يحتوي السجل التجاري على أرقام فقط'
@@ -147,7 +147,7 @@ const descTranslations = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('DOM loaded with JavaScript');
+  // console.log('DOM loaded with JavaScript');
 
   const editInfoForm = document.getElementById('edit-info-form');
   const editDescForm = document.getElementById('desc-form');
@@ -253,6 +253,17 @@ document.addEventListener('DOMContentLoaded', function () {
         validators: {
           notEmpty: {
             message: translations[lang]['business_categories[]'].notEmpty
+          }
+        }
+      },
+      other_category: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].other_category.notEmpty
+          },
+          regexp: {
+            regexp: /^[a-zA-Z\u0621-\u064A\s]*$/i,
+            message: translations[lang].other_category.stringOnly
           }
         }
       },
@@ -363,24 +374,55 @@ document.addEventListener('DOMContentLoaded', function () {
   if (editInfoForm) {
     const formValidation = FormValidation.formValidation(editInfoForm, validationConfig);
 
+    // Initial check for Other category visibility
+    const checkOtherCategoryVisibility = () => {
+      const isOtherSelected = Array.from(businessCategories).some(cat => (cat.value === 'Other' || cat.value === 'أخرى') && cat.checked);
+      const otherCategoryInput = document.getElementById('otherCategoryInput');
+      
+      if (otherCategoryInput) {
+        otherCategoryInput.style.display = isOtherSelected ? 'block' : 'none';
+      }
+      
+      // Enable or disable validation for other_category field
+      if (isOtherSelected) {
+        formValidation.enableValidator('other_category', 'notEmpty');
+        formValidation.enableValidator('other_category', 'regexp');
+      } else {
+        formValidation.disableValidator('other_category', 'notEmpty');
+        formValidation.disableValidator('other_category', 'regexp');
+      }
+    };
+
+    // Check initial state
+    checkOtherCategoryVisibility();
+
     // Add event listener to business categories checkboxes
     businessCategories.forEach(category => {
       category.addEventListener('change', function () {
-        const isOtherSelected = Array.from(businessCategories).some(cat => cat.value === 'Other' && cat.checked);
+        const isOtherSelected = Array.from(businessCategories).some(cat => (cat.value === 'Other' || cat.value === 'أخرى') && cat.checked);
+        const otherCategoryInput = document.getElementById('otherCategoryInput');
+        
         if (isOtherSelected) {
-          formValidation.addField('other_category', {
-            validators: {
-              notEmpty: {
-                message: translations[lang].other_category.notEmpty
-              },
-              regexp: {
-                regexp: language === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
-                message: translations[lang].other_category.stringOnly
-              }
-            }
-          });
+          // Show the other category input field
+          if (otherCategoryInput) {
+            otherCategoryInput.style.display = 'block';
+          }
+          
+          // Enable validation for other_category field
+          formValidation.enableValidator('other_category', 'notEmpty');
+          formValidation.enableValidator('other_category', 'regexp');
         } else {
-          formValidation.removeField('other_category');
+          // Hide the other category input field
+          if (otherCategoryInput) {
+            otherCategoryInput.style.display = 'none';
+          }
+          
+          // Disable validation for other_category field
+          formValidation.disableValidator('other_category', 'notEmpty');
+          formValidation.disableValidator('other_category', 'regexp');
+          
+          // Clear any existing validation errors
+          formValidation.resetField('other_category');
         }
       });
     });

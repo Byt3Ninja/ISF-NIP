@@ -1288,7 +1288,8 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <!--/ Edit SP Modal -->
 
 <!-- Respond Invitation Modal -->
-{{-- <div
+@if($data['team_member'] != null)
+<div
 	class="modal fade"
 	id="teamInvitationModal"
 	tabindex="-1"
@@ -1304,6 +1305,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			></div>
 
 			<div class="modal-body position-relative text-center py-12 px-12">
+				@foreach($data['team_member'] as $join)
 				<!-- Team & Inviter Avatar -->
 				<div class="position-relative d-inline-block mb-4">
 					<img
@@ -1313,44 +1315,45 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 						style="width: 64px; height: 64px; object-fit: cover;"
 					/>
 				</div>
-
+				
 				<!-- Title -->
-				<h5 id="teamInvitationLabel" class="fw-bold mb-2">Join TeamName?</h5>
+				<h5 id="teamInvitationLabel" class="fw-bold mb-2">{{ $join->tf_name }}</h5>
 
 				<!-- Description -->
 				<p class="mb-2">
-					<strong>Mahmoud</strong> invited you to join their team
+					<strong>{{ $join->{'user_name_' . $l} }}</strong> {{ $l == 'en' ? 'invited you to join their team' : 'تم دعوتك للانضمام لفريقه' }}
 				</p>
 				<p class="fst-italic text-muted small">
-					Joining this team will allow you to collaborate on projects, share resources, and participate in discussions.
+					{{ $l == 'en' ? 'Joining this team will allow you to collaborate on projects, share resources, and participate in discussions.' : 'الانضمام للفريق سوف تسمح لك بالتعاون في المشاريع، والمشاركة في الموارد، والتشارك في النقاشات.' }}
 				</p>
 
 				<!-- Buttons -->
 				<div class="d-flex flex-column flex-sm-row gap-2">
-					<button
-						type="button"
-						id="declineInvitationBtn"
-						class="btn btn-label-secondary d-flex align-items-center justify-content-center gap-2 w-100"
-						style="min-width: 140px;"
-					>
-						<i class="ti ti-circle-x"></i>
-						Decline
-					</button>
 
-					<button
-						type="button"
-						id="acceptInvitationBtn"
-						class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100"
-						style="min-width: 140px;"
-					>
-						<i class="ti ti-circle-check"></i>
-						Accept Invitation
-					</button>
+					<form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+						@csrf
+						@method('PATCH')
+						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+							<i class="ti ti-users me-2 me-2"></i>
+							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
+						</button>
+					</form>
+					<form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+						@csrf
+						@method('PATCH')
+						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+							<i class="ti ti-users me-2 me-2"></i>
+							{{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
+						</button>
+                	</form>
+
 				</div>
+				@endforeach
 			</div>
 		</div>
 	</div>
-</div> --}}
+</div>
+@endif
 <!--/ Respond Invitation Modal -->
 @endif
 

@@ -663,7 +663,7 @@ class TrainingController extends Controller
 			$duration = $start->diffInMinutes($end);
 
 			if ($type == 'sessions') {
-				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
+				$trainingSession = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 
 				if ($trainingSession == "Error") {
 					return back()->with([
@@ -696,7 +696,6 @@ class TrainingController extends Controller
 			Log::error('Error in TrainingController@addsession: ' . $e->getMessage());
 		}
 	}
-
 	public function editsession(Request $request, $id)
 	{
 		try {

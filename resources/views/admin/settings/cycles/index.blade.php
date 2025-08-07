@@ -374,7 +374,7 @@
           <div class="mb-4" id="menu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div class="form-group mb-0">
-              <select class="select2 form-control" name="ScreeningSelect">
+              <select class="form-select" name="ScreeningSelect">
                 <option selected disabled> {{ __('cycles.Select type') }}</option>
                 <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
                 <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
@@ -476,7 +476,7 @@
           <div class="mb-4" id="mmenu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div>
-              <select class="select2 form-control" id="mScreeningSelect" name="mScreeningSelect" required>
+              <select class="form-select" id="mScreeningSelect" name="mScreeningSelect" required>
                 <option selected disabled> {{ __('cycles.Select type') }}</option>
                 <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
                 <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>

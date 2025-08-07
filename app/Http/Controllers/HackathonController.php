@@ -778,7 +778,32 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
         if( $company && $company->cycledata )
         {
-            $sessions_q = "SELECT
+            $steps_ids = [];
+            $steps = $company?->cycledata?->steps;
+            if( !empty( $steps ) )
+            {
+                $now = time();
+                $steps_ids = $steps->filter(function ($step) use ($now) {
+					return $step->from->timestamp <= $now && $step->to->timestamp >= $now;
+				})->values()->pluck('id')->toArray();
+            }
+            $sessions = DB::table('training_sessions AS ts')
+                ->select([
+                    'ts.id',
+                    'ts.type',
+                    'ts.title',
+                    'ts.datetime',
+                    'ts.enddatetime AS end_datetime',
+                    'ts.duration',
+                    'ts.join_url',
+                    'ts.trainer_name',
+                    'ts.training_location AS location'
+                ])
+                ->whereIn('ts.step_id', $steps_ids)
+                ->orderBy('ts.datetime', 'ASC')
+                ->limit(5)
+                ->get();
+            /* $sessions_q = "SELECT
                     ts.id,
                     ts.type,
                     ts.title,
@@ -796,7 +821,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                     ts.datetime ASC
                 LIMIT 5
             ";
-            $sessions = collect(DB::select($sessions_q, [$company->step]));
+            $sessions = collect(DB::select($sessions_q, [$company->step])); */
         } else { $sessions = collect([]); }
 
         $steps_q = "SELECT
