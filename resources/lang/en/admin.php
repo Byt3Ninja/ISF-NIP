@@ -2243,4 +2243,7 @@ return [
     'missing_mail_settings' => 'Missing or invalid mail settings , Please configure them properly and contact the Administrator.',
 	'email_settings_missing' => 'Email Settings are not Configured.',
 	'Submitted_Projects' => 'Submitted Projects',
+	'Sketch UI, set up the project, and develop core functionality.' => 'Sketch UI, set up the project, and develop core functionality.',
+	'Submitted_Projects' => 'Submitted Projects',
+	'Hackathon_Dashboard' => 'Hackathon Dashboard',
 ];
