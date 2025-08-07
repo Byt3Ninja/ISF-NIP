@@ -209,7 +209,8 @@
           <table id="activities-datatable" class="table align-middle">
             <thead class="table-light">
               <tr>
-                <th>@lang('admin.user')</th>
+                <th>@lang('admin.Name')</th>
+                <th>@lang('admin.Email')</th>
                 <th>@lang('admin.browser')</th>
                 <th>@lang('admin.device')</th>
                 <th>@lang('admin.platform')</th>
@@ -223,6 +224,7 @@
               @foreach($activities as $activity)
               <tr>
                 <td>{{ $activity->user->first_name_en . ' ' . $activity->user->last_name_en }}</td>
+                <td>{{ $activity->user->email }}</td>
                 <td>{{ $activity->browser }}</td>
                 <td>{{ $activity->device }}</td>
                 <td>{{ $activity->platform }}</td>
