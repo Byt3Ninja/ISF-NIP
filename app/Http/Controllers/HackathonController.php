@@ -886,6 +886,35 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         if( !empty( $stepData ) ) { $cType = $stepData->stype; }
 
         $showStep = in_array( $companyStep?->id, $steps_ids );
+
+        
+                // $teamJoins = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+                // 'pending')->get();
+                $teamJoins_q = "SELECT 
+                  tm.id as tm_id,
+                  tm.team_formation_id as tm_team_formation_id,
+                  tm.user_id as tm_user_id,
+                  tm.Email as tm_Email,
+                  tm.acceptInvition as tm_acceptInvition,
+                  tf.id as tf_id,
+                  tf.name as tf_name,
+                  tf.cycle_id as tf_cycle_id,
+                  tf.created_at as tf_created_at,
+                  u.id as u_id,
+                  concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                  concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                  u.email as u_email
+                FROM 
+                team_members as tm
+                JOIN team_formations as tf ON tm.team_formation_id = tf.id
+                JOIN users as u ON tm.user_id = u.id
+                WHERE tm.acceptInvition = 'pending'
+                AND tm.Email = ? ORDER BY tf.created_at DESC";
+                $teamJoins = DB::select($teamJoins_q, [auth()->user()->email]);
+                $teamJoins = collect($teamJoins);
+              
+
+
         // return view('admin.hackathon.show', compact('hackathon'));
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
@@ -906,7 +935,8 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
             'cType',
             'steps',
             'showStep',
-            'steps_ids'
+            'steps_ids',
+            'teamJoins'
         ));
     }
 
