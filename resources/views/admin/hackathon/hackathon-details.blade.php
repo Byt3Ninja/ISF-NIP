@@ -174,6 +174,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
         paging: true,
         searching: true,
         ordering: true,
+        order: [[0, 'desc']],
         language: {
           @if($l == 'ar')
           "search": "{{ __('admin.Search') }}:",

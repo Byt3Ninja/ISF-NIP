@@ -590,7 +590,7 @@ class TrainingController extends Controller
 	public function mysessions()
 	{
 		try {
-			$sessions = [];
+			$sessions = collect([]);
 			$company = Auth::user()->company;
 			if( $company )
 			{
@@ -619,6 +619,7 @@ class TrainingController extends Controller
 
 				return $session;
 			});
+			$sessions = $sessions->sortBy('datetime1')->values();
 
 			return view('admin/settings/training/mysessions', compact('sessions'));
 		} catch (\Throwable $e) {
