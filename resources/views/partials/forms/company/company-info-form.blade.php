@@ -27,7 +27,7 @@
       <div class="row">
         <div class="col-12 mb-3">
           <div class="form-group">
-            <label class="form-label fs-6 fw-semibold mb-2" for="name_en">{{ __('admin.English Name') }} *</label>
+            <label class="form-label fs-6 fw-semibold mb-2" for="name_en">{{ __('admin.Company_Name') }} *</label>
             <input class="form-control" id="name_en" name="name_en" type="text" value="{{ $client->company ? $client->company->name_en : old('name_en') }}" style="direction: ltr;" placeholder="{{ __('admin.English Name') }} *" required autocomplete="name_en">
           </div>
         </div>
