@@ -1606,7 +1606,7 @@ $data['countNotInTeams'] = $usersNotInTeams->count();
        
         $data['count_teams'] = $teams->where('tm_isTeamLeader', 1)->count();
         
-        $data['count_members'] = $teams->where('tm_acceptInvition', 'accepted')->count();
+        $data['count_members'] = $allUsersInCycle->count();
         $data['all_teams'] = $teams->filter(fn($member) => $member->tm_isTeamLeader == 1)
                                     ->map(function ($leader) use ($teams, $l, $step) {
                                         $teamMembers = $teams->where('tf_id', $leader->tf_id);
