@@ -493,6 +493,35 @@
         '{{ route('company.profile_update_mine') }}');
     });
   </script>
+  
+
+   <!-- Get countries and phone codes -->
+  <script>
+    fetch('https://restcountries.com/v3.1/all?fields=idd,cca2')
+      .then(response => response.json())
+      .then(data => {
+        const select = document.getElementById('country_code');
+        if (Array.isArray(data)) {
+          data.forEach(country => {
+            const option = document.createElement('option');
+            const countryCode =
+              `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
+            option.value = countryCode;
+            option.text = `${countryCode} (${country.cca2})`;
+            option.style.fontSize = '12px';
+            if (country.cca2 === 'EG') {
+              option.selected = true;
+            }
+            select.appendChild(option);
+          });
+        } else {
+          console.error('Unexpected response format:', data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching countries:', error);
+      });
+  </script>
 
 {{-- <script>
 @if($client->company)

@@ -3,11 +3,15 @@
   $selectedCategories = old('business_categories', $client->company->business_categories ?? []);
   if (is_string($selectedCategories)) { $selectedCategories = json_decode($selectedCategories, true) ?? []; }
 
-  // البحث عن "Other" والحصول على القيمة التي تليها
+  // البحث عن "Other" أو "أخرى" والحصول على القيمة التي تليها
   $otherValue = '';
-  $otherIndex = array_search('Other', $selectedCategories);
-  if ($otherIndex !== false && isset($selectedCategories[$otherIndex + 1])) {
-      $otherValue = $selectedCategories[$otherIndex + 1];
+  $otherIndexEn = array_search('Other', $selectedCategories);
+  $otherIndexAr = array_search('أخرى', $selectedCategories);
+  
+  if ($otherIndexEn !== false && isset($selectedCategories[$otherIndexEn + 1])) {
+      $otherValue = $selectedCategories[$otherIndexEn + 1];
+  } elseif ($otherIndexAr !== false && isset($selectedCategories[$otherIndexAr + 1])) {
+      $otherValue = $selectedCategories[$otherIndexAr + 1];
   }
 @endphp
 
@@ -86,7 +90,14 @@
             @foreach ($categories as $category)
               <div class="col-md-4 col-6">
                 <div class="form-check">
-                  <input class="form-check-input" id="category_{{ $loop->index }}" name="business_categories[]" type="checkbox" value="{{ $category }}" {{ in_array($category, $selectedCategories) ? 'checked' : '' }} @if ($category === 'Other') onclick="toggleOtherCategoryInput(this)" @endif>
+                  <input 
+                    class="form-check-input" 
+                    id="category_{{ $loop->index }}" 
+                    name="business_categories[]" 
+                    type="checkbox" 
+                    value="{{ $category }}" 
+                    {{ in_array($category, $selectedCategories) ? 'checked' : '' }} 
+                  >
                   <label class="form-check-label" for="category_{{ $loop->index }}">
                     {{ $category }}
                   </label>
@@ -96,7 +107,7 @@
           </div>
         </div>
         <div class="mb-3">
-          <div class="mt-3" id="otherCategoryInput" style="display: {{ in_array('Other', $selectedCategories) ? 'block' : 'none' }};">
+          <div class="mt-3" id="otherCategoryInput" style="display: none;" >
             <label class="form-label fs-6 fw-semibold mb-2" for="other_category">{{ __('admin.other? Please Specify') }}</label>
             <div class="input-group input-group-merge">
               <input class="form-control" id="other_category" name="other_category" type="text" 
@@ -196,33 +207,3 @@
     </form>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.category-checkbox');
-    const otherCheckbox = document.querySelector('input[value="Other"]');
-    const otherCategoryInput = document.getElementById('otherCategoryInput');
-
-    if (otherCheckbox.checked) {
-      otherCategoryInput.style.display = 'block';
-    } else {
-      otherCategoryInput.style.display = 'none';
-    }
-
-    checkboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        toggleOtherCategoryInput(this);
-      });
-    });
-  });
-
-  function toggleOtherCategoryInput(checkbox) {
-    const otherInput = document.getElementById('otherCategoryInput');
-    if (checkbox.value === 'Other') {
-      otherInput.style.display = checkbox.checked ? 'block' : 'none';
-      if (!checkbox.checked) {
-        document.getElementById('other_category').value = '';
-      }
-    }
-  }
-</script>
