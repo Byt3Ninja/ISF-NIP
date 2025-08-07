@@ -43,7 +43,8 @@ class UserController extends Controller
 	 */
 	public function index()
 	{
-		$users = User::with('company')->with('roles')->orderBy('id', 'DESC')->get();
+		$user = auth()->id();
+		$users = User::with('company')->with('roles')->where('id', '!=', $user)->orderBy('id', 'DESC')->get();
 		return view('admin/users/index', compact('users'));
 	}
 

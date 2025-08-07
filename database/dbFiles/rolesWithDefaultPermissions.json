@@ -1955,7 +1955,8 @@
                 "default_for": [
                     "admin",
                     "mentor",
-                    "judger"
+                    "judger",
+                    "organizationmanager"
                 ]
             }
         ]

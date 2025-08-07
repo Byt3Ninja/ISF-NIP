@@ -1585,7 +1585,24 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $step_q = "SELECT * FROM steps WHERE cycle_id = ?";
         $step = collect(DB::select($step_q, [$id]));
 
-        $data = [];
+        $usersInTeams = $teams->pluck('u_id')->unique();
+
+// المستخدمين المرتبطين بشركات في نفس الـ cycle_id
+$allUsersInCycle = collect(DB::select("
+    SELECT u.id
+    FROM users as u
+    INNER JOIN companies as c ON c.id = u.company_id
+    WHERE c.cycle = ?
+", [$id]))->pluck('id');
+
+// المستخدمين الغير موجودين في الفريق
+$usersNotInTeams = $allUsersInCycle->diff($usersInTeams);
+
+// العدادات
+
+$data = [];
+$data['countInTeams'] = $usersInTeams->count();
+$data['countNotInTeams'] = $usersNotInTeams->count();
        
         $data['count_teams'] = $teams->where('tm_isTeamLeader', 1)->count();
         
@@ -1702,7 +1719,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $data['submissionLabels'] = $labels;
         $data['submissionCounts'] = $values;
 
-
+                
         
         $l = app()->getLocale();
         $forms = "SELECT 
@@ -1769,7 +1786,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         // نبدأ بتجميع كل الأسئلة حسب step_id
         $grouped = $forms->groupBy('FD_user_id');
         
-
+                $data['Count_submitted_projects'] = $grouped->count();
         $data['submitted_projects'] = $grouped->map(function ($group, $stepId) use ($l) {
             $first = $group->first();
 

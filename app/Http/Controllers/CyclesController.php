@@ -39,6 +39,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
@@ -53,15 +55,69 @@ class CyclesController extends Controller
     {
         // تحقق من أن البريد الإلكتروني موجود
 
-        $data2 = [
-            'step' => $request->input('step'),
-            'userEmail' => auth()->user()->email
-        ];
+        // $data2 = [
+        //     'step' => $request->input('step'),
+        //     'userEmail' => auth()->user()->email
+        // ];
 
+        $cycle = $request->cycle;
+        $companies = Company::where('cycle', $cycle)->get();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        // كتابة رؤوس الأعمدة
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Company');
+        $sheet->setCellValue('C1', 'Title');
+        $sheet->setCellValue('D1', 'User');
+        $sheet->setCellValue('E1', 'Mobile');
+        $sheet->setCellValue('F1', 'E-Mail');
+        $sheet->setCellValue('G1', 'Current Step');
+        $sheet->setCellValue('H1', 'Created_At');
+        $row = 2; 
+        if(auth()->user()->hasRole('Admin')) {
+            Company::where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row) {
+                foreach ($companies as $companie) {
+                    $sheet->setCellValue('A' . $row, $companie?->id);
+                    $sheet->setCellValue('B' . $row, $companie?->name);
+                    $sheet->setCellValue('C' . $row, $companie?->user?->title);
+                    $sheet->setCellValue('D' . $row, $companie?->user?->name);
+                    $sheet->setCellValue('E' . $row, $companie?->user?->phone);
+                    $sheet->setCellValue('F' . $row, $companie?->user?->email);
+                    foreach(\App\Step::where('cycle_id',$companie->cycle)->orderBy('arr')->get() as $step){
+                        $sheet->setCellValue('G' . $row, $step->title);
+                    }
+                    $sheet->setCellValue('H' . $row, $companie->created_at);
+                    $row++;
+                }
+            });
+        }else{
+        Company::where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row) {
+        foreach ($companies as $companie) {
+            
+            $sheet->setCellValue('A' . $row, $companie?->id);
+            $sheet->setCellValue('B' . $row, $companie?->name);
+            $sheet->setCellValue('C' . $row, $companie?->user?->title);
+            $sheet->setCellValue('D' . $row, $companie?->user?->name);
+            $sheet->setCellValue('E' . $row, $companie?->user?->phone);
+            $sheet->setCellValue('F' . $row, $companie?->user?->email);
+            foreach(\App\Step::where('cycle_id',$companie->cycle)->orderBy('arr')->get() as $step){
+                $sheet->setCellValue('G' . $row, $step->title);
+            }
+            $sheet->setCellValue('H' . $row, $companie->created_at);
+            $row++;
+        }
+    });
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Company_' . date('Y-m-d') . '.xlsx';
+        $tempFilePath = storage_path('app/' . $fileName);
+        $writer->save($tempFilePath);
+
+        return response()->download($tempFilePath)->deleteFileAfterSend(true);
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
-        ExportCycleCompData::dispatch($data2);
-
-        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+        // ExportCycleCompData::dispatch($data2);
+        // return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
     public function changAll(Request $request)

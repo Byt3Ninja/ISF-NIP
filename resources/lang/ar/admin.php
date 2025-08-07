@@ -2298,4 +2298,7 @@ return [
 	'missing_mail_settings' => 'إعدادات البريد الإلكتروني مفقودة أو غير صحيحة، يرجى ضبطها بشكل صحيح والتواصل مع المسؤول.',
 	'email_settings_missing' => 'إعدادات البريد الإلكتروني غير مكتملة.',
 	'Submitted_Projects' => 'المشاريع المقدمة',
+	'Sketch UI, set up the project, and develop core functionality.' => 'الواجهة المستخدمية المخططة، تحديد المشروع، وتطوير الوظائف الاساسية.',
+	'Submitted_Projects' => 'المشاريع المقدمة',
+	'Hackathon_Dashboard' => 'لوحة تحكم الهاكاثون',
 ];
