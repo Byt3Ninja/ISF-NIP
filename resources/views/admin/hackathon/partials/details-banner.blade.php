@@ -144,13 +144,15 @@
   </div>
   @endif
               @php
-                $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-                'pending')->first();
+                $teamJoins = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+                'pending')->get();
               @endphp
-            @if($teamJoin != null)
+            @if($teamJoins->count() > 0)
+            @foreach($teamJoins as $teamJoin)
               @php
               $teamformation = App\TeamFormation::where('id', $teamJoin->team_formation_id)->first();
               @endphp
+              <div class="d-flex align-items-center">{{ $teamformation->name }}</div>
               @if($teamformation->cycle_id == $id)
                 <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                   @csrf
@@ -169,6 +171,7 @@
                   </button>
                 </form>
               @endif
+            @endforeach
             @endif
 </div>
 </div>
