@@ -1333,6 +1333,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 					<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
 						@csrf
 						@method('PATCH')
+						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
 						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
 							<i class="ti ti-users me-2 me-2"></i>
 							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
@@ -1341,6 +1342,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 					<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
 						@csrf
 						@method('PATCH')
+						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
 						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
 							<i class="ti ti-users me-2 me-2"></i>
 							{{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
