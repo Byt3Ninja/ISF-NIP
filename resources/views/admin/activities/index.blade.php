@@ -187,7 +187,7 @@
                       @if($activity->user->img_url ?? false)
                         <img src="{{ asset("191014/{$activity->user->img_url}") }}" alt="{{ $activity->user->first_name_en }}" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
                       @else
-                        <div class="avatar-initial rounded-circle bg-label-primary">
+                        <div class="avatar avatar-sm avatar-initial rounded-circle bg-label-primary">
                           {{ strtoupper(substr($activity->user->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr($activity->user->last_name_en ?? 'U', 0, 1)) }}
                         </div>
                       @endif
