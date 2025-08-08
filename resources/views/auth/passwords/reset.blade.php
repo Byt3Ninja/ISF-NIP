@@ -74,10 +74,10 @@
   <div class="authentication-wrapper authentication-cover">
     <!-- Logo -->
     @php
-        $brandName = App\Settings::findorfail(1)->first();
+        $setting = App\Settings::findorfail(1)->first();
     @endphp
     <a class="app-brand auth-cover-brand bg-label-secondary p-4 rounded" href="/dashboard">
-      <img src="{{ asset('images/logo/' . $brandName->Logo) }} " alt="avatar" height="50" width="150">
+      <img src="{{ $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png') }} " alt="avatar" height="50" width="150">
     </a>
     <!-- /Logo -->
     <div class="authentication-inner row m-0">

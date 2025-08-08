@@ -9,7 +9,7 @@ class Finalscreening extends Model
 {
     // use Auditable;
     public static $module = 'Final Screening';
-    protected $fillable = [ 'company_id','step_id','judges','datetime','duration','zoom_id','start_url','join_url'];
+    protected $fillable = [ 'company_id','step_id','judges','datetime','duration','zoom_id', 'zoom_passcode','start_url','join_url'];
     protected $casts = ['judges' => 'array'];
 
     // ==========> Attributes <=====================

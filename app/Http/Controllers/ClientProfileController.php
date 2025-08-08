@@ -378,6 +378,8 @@ class ClientProfileController extends Controller
 
     public function showMintors(Request $request)
     {
+
+
         $setting = Settings::where('id', 1)->first();
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');

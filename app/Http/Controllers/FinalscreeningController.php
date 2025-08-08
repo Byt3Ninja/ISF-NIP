@@ -216,8 +216,9 @@ class FinalscreeningController extends Controller
                 'duration' => $request->period,
                 'zoom_id' => $onlineMeeting['data']['id'],
                 'start_url' =>  $onlineMeeting['data']['start_url'],
-                'join_url' =>  $onlineMeeting['data']['join_url']
-                ]);
+                'join_url' =>  $onlineMeeting['data']['join_url'],
+                'zoom_passcode' => $onlineMeeting['data']['passcode'] ?? null,
+            ]);
                 
             $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;

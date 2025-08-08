@@ -20,6 +20,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -932,6 +934,11 @@
 																		<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
 																	</button>
 																</a>
+																@if( !empty( $session->passcode ) )
+																	 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																		<i class="ti ti-key"></i>
+																	</button>
+																@endif
 																@else
 																	<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
 																@endif
@@ -1163,6 +1170,11 @@
 																			<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																				<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																			</a>
+																			@if( !empty( $company->passcode ) )
+																				 | <button title="Show Passcode" type="button" data-passcode="{{ $company->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																					<i class="ti ti-key"></i>
+																				</button>
+																			@endif
 																			{{--  @if( $_user->ableTo('screening.form_view', $permissions) )
 																			<a href="/dashboard/final/{{ $step->id }}/{{ $company->id }}" target="_blank" class="btn btn-success btn-sm">
 																				<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
@@ -1413,6 +1425,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 @section('pagescripts')
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
@@ -1420,6 +1433,16 @@ document.addEventListener('DOMContentLoaded', function() {
 @endif
 <script>
 	// Initialize DataTable with pagination configuration
+    $(document).on('click', '.show-passcode', function(e) {
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      alertify.defaults.transition = 'zoom';
+      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+      alertify.defaults.theme.input = 'form-control';
+
+      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
 	$(document).ready(function() {
 		$("#ratingsTable").DataTable({
 			"pageLength": 5,
