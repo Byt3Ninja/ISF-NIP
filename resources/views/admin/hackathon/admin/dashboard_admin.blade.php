@@ -299,7 +299,7 @@ $engagementCounts = [200, 150, 120, 5];
         <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.manage_Projects') }}</h4>
       </div>
       <div class="card-body">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle" >
           <thead>
             <tr>
               <th>{{ __('admin.project_name') }}</th>
@@ -866,6 +866,7 @@ return [
   const teamsData = {!! $teamsJson !!}; 
 </script>
 <script>
+ 
   function approve(id, stat) {
       if(stat == 'Yes'){
       alert('{{ __('admin.Accepting_request') }}')
