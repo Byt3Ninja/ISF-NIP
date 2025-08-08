@@ -2021,6 +2021,7 @@ return [
 	'Vendor Info' => 'Vendor Info',
 	'All_Trainings' => 'All Trainings',
 	'Company Data' => 'Company Data',
+	'Submissions' => 'Submissions',
 	'No Organizations' => 'No Organizations',
 	'total_evaluation_weight_not_exceed_100' => 'Total weight must not exceed 100%',
 	'total_evaluation_weight_be_100' => 'Total weight must be 100%',
