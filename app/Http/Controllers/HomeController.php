@@ -576,6 +576,7 @@ class HomeController extends Controller
                     fs.datetime,
                     fs.duration,
                     fs.zoom_id,
+                    fs.zoom_passcode,
                     fs.start_url,
                     fs.join_url
                 FROM
@@ -634,6 +635,7 @@ class HomeController extends Controller
                     $company->datetime = $_company->datetime;
                     $company->duration = $_company->duration;
                     $company->zoom_id = $_company->zoom_id;
+                    $company->passcode = $_company->zoom_passcode;
                     $company->start_url = $_company->start_url;
                     $company->join_url = $_company->join_url;
                     return $company;
@@ -651,6 +653,7 @@ class HomeController extends Controller
                     mr.admin_comment,
                     mr.zoom_date,
                     mr.start_url,
+                    mr.zoom_passcode,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_ar AS `first_name_ar`,
@@ -693,6 +696,7 @@ class HomeController extends Controller
                 $output->admin_comment = $session->admin_comment;
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
+                $output->passcode = $session->zoom_passcode;
 
                 $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
