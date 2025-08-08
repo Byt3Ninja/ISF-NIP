@@ -397,6 +397,7 @@ class MentorsController extends Controller
 				$meetingId = $onlineMeeting['data']['id'];
 				$startUrl = $onlineMeeting['data']['start_url'];
 				$joinUrl = $onlineMeeting['data']['join_url'];
+				$passcode = $onlineMeeting['data']['passcode'];
 
 				$createMentor = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
@@ -406,6 +407,7 @@ class MentorsController extends Controller
 					'start_url' => $startUrl,
 					'join_url' => $joinUrl,
 					'zoom_id' => $meetingId,
+					'zoom_passcode' => $passcode,
 					'zoom_date' => $datefrom,
 					'period' => $period,
 					'organization_id' => $request->organization_id,
@@ -475,6 +477,7 @@ class MentorsController extends Controller
 					$meetingId = $onlineMeeting['data']['id'];
 					$startUrl = $onlineMeeting['data']['start_url'];
 					$joinUrl = $onlineMeeting['data']['join_url'];
+					$passcode = $onlineMeeting['data']['passcode'];
 					if ($autoApprove == 1) {
 						$approved = 'Yes';
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
@@ -488,6 +491,7 @@ class MentorsController extends Controller
 							'start_url' => $startUrl,
 							'join_url' => $joinUrl,
 							'zoom_id' => $meetingId,
+							'zoom_passcode' => $passcode,
 							'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 							'period' => $period,
 							'organization_id' => $request->organization_id,
@@ -561,6 +565,7 @@ class MentorsController extends Controller
 					'start_url' => $onlineMeeting['data']['start_url'],
 					'join_url' => $onlineMeeting['data']['join_url'],
 					'zoom_id' => $onlineMeeting['data']['id'],
+					'zoom_passcode' => $onlineMeeting['data']['passcode'],
 					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 					'period' => $request->period,
 					'organization_id' => $request->organization_id,
@@ -679,8 +684,9 @@ class MentorsController extends Controller
 				$start = $onlineMeeting['data']['start_url'];
 				$join = $onlineMeeting['data']['join_url'];
 				$meetingId = $onlineMeeting['data']['id'];
+				$passcode = $onlineMeeting['data']['passcode'];
 			}
-			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
+			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'zoom_passcode' => $passcode, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
 
 			SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, null, 'modifySession');
 			/// Notify Mentor

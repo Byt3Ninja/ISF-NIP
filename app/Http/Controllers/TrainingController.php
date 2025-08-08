@@ -792,6 +792,7 @@ class TrainingController extends Controller
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
 			$join = $onlineMeeting['data']['join_url'];
+			$passcode = $onlineMeeting['data']['passcode'];
 
 			$data = [
 				'type' => $type,
@@ -799,6 +800,7 @@ class TrainingController extends Controller
 				'title' => $title,
 				'dsc' => $dsc,
 				'zoom_id' => $zoomid,
+				'zoom_passcode' => $passcode,
 				'datetime' => $datetimeStamp,
 				'enddatetime' => $end_datetimeStamp,
 				'duration' => $duration,
