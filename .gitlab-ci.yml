@@ -58,4 +58,4 @@ dev:
       - ssh -p22 -o StrictHostKeyChecking=no root@54.144.48.46 "cd /home/app/incubator && git pull && docker exec incubator-app php artisan migrate --force"
 
     only:
-      - dev
+      - beta
