@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 
 <style>
   .daterangepicker {
@@ -202,6 +204,11 @@
                             <button title="Join only" type="button"
                               class="btn btn-icon btn-label-info rounded-circle waves-effect">
                               <i class="ti ti-user"></i></button></a> |
+                          @if( !empty( $session->zoom_passcode ) )
+                            <button data-passcode="{{ $session->zoom_passcode }}" title="Show Passcode" type="button"
+                              class="btn btn-icon btn-label-warning rounded-circle waves-effect show-passcode">
+                              <i class="ti ti-key"></i></button></a> |
+                          @endif
                           <button title="View Report" type="button" data-bs-toggle="modal"
                             data-bs-target="#reportModal{{ $session->id }}"
                             class="btn btn-icon btn-label-warning rounded-circle waves-effect">
@@ -786,6 +793,7 @@
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 
 @section('pagescripts')
@@ -811,6 +819,16 @@
     //     toggleOnlineDropdown();
     //   });
     // });
+    $(document).on('click', '.show-passcode', function(e) {
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      alertify.defaults.transition = 'zoom';
+      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+      alertify.defaults.theme.input = 'form-control';
+
+      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
 
      $(`#addSessionForm .flatpickr-date`).on('change', function() {
       const dateValue = $(this).val();

@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @stop
 
 @php
@@ -253,34 +255,42 @@
                                   @endforeach
                                 </td>
                                 <td>
-                                  @if (!$company->fsession($cstep->id))
+                                  @php
+                                    $final_session = $company->fsession($cstep->id);
+                                  @endphp
+                                  @if (!$final_session)
                                     {{ __('cycles.Add Judges first') }}
-                                  @elseif($company->fsession($cstep->id)->join_url)
-                                    <button type="button" onclick="edit({{ $company->id }}, '{{ $company->fsession($cstep->id)->datetime }}', '{{ $company->fsession($cstep->id)->duration }}')"
+                                  @elseif($final_session->join_url)
+                                    <button type="button" onclick="edit({{ $company->id }}, '{{ $final_session->datetime }}', '{{ $final_session->duration }}')"
                                       class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                                       data-bs-target="#ModifyRequest">
                                       <i class="ti ti-edit text-info"></i>
                                     </button>
-                                    <button type="button" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
+                                    <button type="button" onclick="deleteme({{ $final_session->id }})"
                                       class="btn btn-icon rounded-circle btn-label-danger">
                                       <i class="ti ti-trash text-danger"></i></button>
-                                    <a href="{{ $company->fsession($cstep->id)->start_url }}" target="_blank">
+                                    <a href="{{ $final_session->start_url }}" target="_blank">
                                       <button type="button" title="Start Meeting"
                                         class="btn btn-icon rounded-circle btn-label-success">
                                         <i class="ti ti-brand-zoom"></i></button></a>
-                                    <a href="{{ $company->fsession($cstep->id)->join_url }}" target="_blank">
+                                    <a href="{{ $final_session->join_url }}" target="_blank">
                                       <button type="button" title="Join only"
                                         class="btn btn-icon rounded-circle btn-label-primary">
                                         <i class="ti ti-user"></i></button></a>
+                                    @if( !empty( $final_session ) )
+                                      <button title="Show Passcode" type="button" data-passcode="{{ $final_session->zoom_passcode }}" type="button" class="btn btn-icon rounded-circle btn-label-warning show-passcode">
+                                        <i class="ti ti-key"></i>
+                                      </button>
+                                    @endif
                                   @else
-                                    @if ($company->fsession($cstep->id)->join_url)
-                                      <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }}, '{{ $company->fsession($cstep->id)->datetime }}', '{{ $company->fsession($cstep->id)->duration }}')"
+                                    @if ($final_session->join_url)
+                                      <button type="button" onclick="edit({{ $final_session->id }}, '{{ $final_session->datetime }}', '{{ $final_session->duration }}')"
                                         class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                                         data-bs-target="#ModifyRequest">
                                         <i class="ti ti-edit text-info"></i>
                                       </button>
                                     @endif
-                                    <button type="button" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
+                                    <button type="button" onclick="deleteme({{ $final_session->id }})"
                                       class="btn btn-icon rounded-circle btn-label-danger">
                                       <i class="ti ti-trash text-danger"></i></button>
                                     <button type="button" onclick="addzoom({{ $company->id }})"
@@ -469,10 +479,21 @@
   <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 
 @section('pagescripts')
   <script>
+    $(document).on('click', '.show-passcode', function(e) {
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      alertify.defaults.transition = 'zoom';
+      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+      alertify.defaults.theme.input = 'form-control';
+
+      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
     // Date & TIme
     const dateTimePickr = $('.dateTime');
     if (dateTimePickr.length) {
