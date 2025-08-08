@@ -722,25 +722,23 @@ class MentorsController extends Controller
 				// 	->where('approved', 'Yes')
 				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
 				
-					$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
+					// $my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
 				// $sessions = MentorshipRequest::where('mentor_id', $request->id)
 				// 	->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
 				// 	->where('approved', 'Yes')
 				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
 
                     $sessions = MentorshipRequest::where('mentor_id', $request->id)
-    ->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
-    ->where('approved', 'Yes')
-    ->get([
-        DB::raw("DATE(zoom_date) AS date"),
-        DB::raw("TIME(zoom_date) AS tfrom"),
-        DB::raw("TIME(ADDTIME(zoom_date, SEC_TO_TIME(period * 60))) AS tto"),
-        DB::raw("(id + 1000000) AS id"),
-        DB::raw("'Session' AS type"),
-        DB::raw("'Mentorship session' AS notes")
-    ]);
-
-				$my = $my->merge($sessions);
+						->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
+						->where('approved', 'Yes')
+						->get([
+							DB::raw("DATE(zoom_date) AS date"),
+							DB::raw("TIME(zoom_date) AS tfrom"),
+							DB::raw("TIME(ADDTIME(zoom_date, SEC_TO_TIME(period * 60))) AS tto"),
+							DB::raw("(id + 1000000) AS id"),
+							DB::raw("'Session' AS type"),
+							DB::raw("'Mentorship session' AS notes")
+						]);
 			$my = $my->merge($sessions);
 				return response()->json($my);
 			} elseif ($type == 4) {
