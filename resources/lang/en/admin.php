@@ -2251,4 +2251,5 @@ return [
 	'Al_Ahsa' => 'Al Ahsa',
 	'Asir' => 'Asir',
 	'Region' => 'Region',
+	'On going' => 'On going',
 ];

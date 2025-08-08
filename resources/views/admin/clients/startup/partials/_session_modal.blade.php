@@ -26,10 +26,10 @@
                 <i class="ti ti-clock-hour-4 text-primary me-2 fs-5"></i>
                 <h5 class="text-dark mb-0 fw-semibold">{{__('dashboard.Mentor schedule')}}</h5>
               </div>
-              <button type="button" class="btn btn-sm btn-outline-info" id="close-schedule-btn"
+              {{-- <button type="button" class="btn btn-sm btn-outline-info" id="close-schedule-btn"
                 title="{{__('dashboard.Hide schedule')}}">
                 <i class="ti ti-x"></i>
-              </button>
+              </button> --}}
             </div>
             <div class="alert alert-info border-0 bg-light-primary">
               <ul class="mb-0 list-unstyled" id="schedule"></ul>
