@@ -115,6 +115,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <tr>
                 <th>{{ __('admin.team_name') }}</th>
                 <th>{{ __('admin.team_leader') }}</th>
+                <th>{{ __('admin.Email') }}</th>
                 <th>{{ __('admin.number_of_members') }}</th>
                 <th>{{ __('admin.creation_date') }}</th>
                 <th>{{ __('admin.actions') }}</th>
@@ -125,7 +126,8 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               @foreach ($data['all_teams'] as $team)
               <tr>
                 <td>{{ $team->name }}</td>
-                <td> {{ $team->user_name }} ( {{ $team->email }} )</td>
+                <td> {{ $team->user_name }} </td>
+                <td> {{ $team->email }} </td>
                 <td>{{ $team->count_members }} / {{ $team->max_count_members }}</td>
                 <td>{{ $team->created_at }}</td>
                 <td>
@@ -161,144 +163,152 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
         </div>
       </div>
       <div class="card-body">
-        <table class="table projects-table table-hover align-middle">
-          <thead>
-            <tr>
-              <th>{{ __('admin.project_name') }}</th>
-              <th>{{ __('admin.project_description') }}</th>
-              <th>{{ __('admin.Status') }}</th>
-              <th>{{ __('admin.Region') }}</th>
-              <th>{{ __('admin.Progress') }}</th>
-              <th>{{ __('admin.creation_date') }}</th>
-              <th>{{ __('admin.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-           
-            <!-- This is example data, should be populated from a loop in a real application -->
-            @foreach ($data['all_projects'] as $project)
-            <tr>
-              <td>{{ $project->project_name }}</td>
-              <td> {{ $project->project_description }}</td>
-              <td>
+        <div class="table-responsive">
+          <table class="table projects-table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>{{ __('admin.project_name') }}</th>
+                <th>{{ __('admin.project_description') }}</th>
+                <th>{{ __('admin.team_leader') }}</th>
+                <th>{{ __('admin.Email') }}</th>
+                <th>{{ __('admin.Phone') }}</th>
+                <th>{{ __('admin.Status') }}</th>
+                <th>{{ __('admin.Region') }}</th>
+                <th>{{ __('admin.Progress') }}</th>
+                <th>{{ __('admin.creation_date') }}</th>
+                <th>{{ __('admin.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+            
+              <!-- This is example data, should be populated from a loop in a real application -->
+              @foreach ($data['all_projects'] as $project)
+              <tr>
+                <td>{{ $project->project_name }}</td>
+                <td> {{ $project->project_description }}</td>
+                <td>{{ $project->leader->name }}</td>
+                <td>{{ $project->leader->email }}</td>
+                <td>{{ $project->leader->phone }}</td>
+                <td>
 
-                @if($project->project_status == 20)
-                {{ __('admin.Idea + Team') }} 
-                {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
-                @elseif($project->project_status == 40)
-                {{ __('admin.Research') }} 
-                {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
-                @elseif($project->project_status == 60)
-                {{ __('admin.Design & Build') }} 
-                {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
-                @elseif($project->project_status == 80)
-                {{ __('admin.Ready for Pitch') }} 
-                {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
-                @elseif($project->project_status == 100)
-                {{ __('admin.Project Submitted') }} 
-                {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
-                @endif
-              </td>
-              <td>{{ $project->region }}</td>
-              <td>
-                <div class="progress mb-2" style="height: 20px;">
-                  <div class="progress-bar bg-success" role="progressbar"
-                    style="width:{{ $project->project_status  }}%;" aria-valuenow="{{ $project->project_status  }}"
-                    aria-valuemin="0" aria-valuemax="100">{{
-                    $project->project_status }}% {{ $l == 'en' ? 'Complete' :
-                    'مكتمل' }}</div>
-                </div>
-              </td>
-              <td>{{ $project->created_at }}</td>
-              <td>
-                <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
-                  data-bs-target="#editProjectIdeaModal{{ $project->id }}">
-                  <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
-                </button>
-              </td>
-            </tr>
-            <!-- Edit Project Idea Modal -->
-            <div class="modal fade" id="editProjectIdeaModal{{ $project->id }}" tabindex="-1"
-              aria-labelledby="editProjectIdeaModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="editProjectIdeaModalLabel">{{ $l == 'en' ? 'Edit Project Idea' : 'تعديل
-                      فكرة
-                      المشروع' }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  @if($project->project_status == 20)
+                  {{ __('admin.Idea + Team') }} 
+                  {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
+                  @elseif($project->project_status == 40)
+                  {{ __('admin.Research') }} 
+                  {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
+                  @elseif($project->project_status == 60)
+                  {{ __('admin.Design & Build') }} 
+                  {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
+                  @elseif($project->project_status == 80)
+                  {{ __('admin.Ready for Pitch') }} 
+                  {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
+                  @elseif($project->project_status == 100)
+                  {{ __('admin.Project Submitted') }} 
+                  {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
+                  @endif
+                </td>
+                <td>{{ $project->region }}</td>
+                <td>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar"
+                      style="width:{{ $project->project_status  }}%;" aria-valuenow="{{ $project->project_status  }}"
+                      aria-valuemin="0" aria-valuemax="100">{{
+                      $project->project_status }}% {{ $l == 'en' ? 'Complete' :
+                      'مكتمل' }}</div>
                   </div>
-                  <div class="modal-body">
-                    <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
-                      @csrf
-                      <input type="hidden" name="team_formation_id" value="{{ $project->id }}">
-                      <div class="mb-3">
-                        <label for="Project_Name_en" class="form-label">
-                          {{ __('admin.Project_Name') }}
-                        </label>
-                        <input type="text" class="form-control" name="Project_Name_en"
-                          value="{{ $project->project_name }}" id="Project_Name_en" required>
-                      </div>
+                </td>
+                <td>{{ $project->created_at }}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
+                    data-bs-target="#editProjectIdeaModal{{ $project->id }}">
+                    <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
+                  </button>
+                </td>
+              </tr>
+              <!-- Edit Project Idea Modal -->
+              <div class="modal fade" id="editProjectIdeaModal{{ $project->id }}" tabindex="-1"
+                aria-labelledby="editProjectIdeaModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="editProjectIdeaModalLabel">{{ $l == 'en' ? 'Edit Project Idea' : 'تعديل
+                        فكرة
+                        المشروع' }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <form method="POST" action="/dashboard/hackathon/EditProjectIdea">
+                        @csrf
+                        <input type="hidden" name="team_formation_id" value="{{ $project->id }}">
+                        <div class="mb-3">
+                          <label for="Project_Name_en" class="form-label">
+                            {{ __('admin.Project_Name') }}
+                          </label>
+                          <input type="text" class="form-control" name="Project_Name_en"
+                            value="{{ $project->project_name }}" id="Project_Name_en" required>
+                        </div>
 
-                      <div class="mb-3">
-                        <label for="Project_Description_en" class="form-label">
-                          {{ __('admin.Project_Description') }}
-                        </label>
-                        <textarea class="form-control" name="Project_Description_en" id="Project_Description_en"
-                          rows="2">{{ $project->project_description }}</textarea>
-                      </div>
+                        <div class="mb-3">
+                          <label for="Project_Description_en" class="form-label">
+                            {{ __('admin.Project_Description') }}
+                          </label>
+                          <textarea class="form-control" name="Project_Description_en" id="Project_Description_en"
+                            rows="2">{{ $project->project_description }}</textarea>
+                        </div>
 
-                      <div class="mb-3">
-                        <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع'
-                          }}</label>
-                        <select class="form-select" id="Project_Status" name="Project_Status">
-                          <option value="">{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
-                          <option value="20" {{ $project->project_status == '20' ? 'selected' : '' }} >{{
-                            __('admin.Idea + Team') }}</option>
-                          <option value="40" {{ $project->project_status == '40' ? 'selected' : '' }} >{{
-                            __('admin.Research') }}</option>
-                          <option value="60" {{ $project->project_status == '60' ? 'selected' : '' }} >{{
-                            __('admin.Design & Build') }}</option>
-                          <option value="80" {{ $project->project_status == '80' ? 'selected' : '' }} >{{
-                            __('admin.Ready for Pitch') }}</option>
-                          <option value="100" {{ $project->project_status == '100' ? 'selected' : '' }} >{{
-                            __('admin.Project Submitted') }}</option>
-                        </select>
-                      </div>
+                        <div class="mb-3">
+                          <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع'
+                            }}</label>
+                          <select class="form-select" id="Project_Status" name="Project_Status">
+                            <option value="">{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
+                            <option value="20" {{ $project->project_status == '20' ? 'selected' : '' }} >{{
+                              __('admin.Idea + Team') }}</option>
+                            <option value="40" {{ $project->project_status == '40' ? 'selected' : '' }} >{{
+                              __('admin.Research') }}</option>
+                            <option value="60" {{ $project->project_status == '60' ? 'selected' : '' }} >{{
+                              __('admin.Design & Build') }}</option>
+                            <option value="80" {{ $project->project_status == '80' ? 'selected' : '' }} >{{
+                              __('admin.Ready for Pitch') }}</option>
+                            <option value="100" {{ $project->project_status == '100' ? 'selected' : '' }} >{{
+                              __('admin.Project Submitted') }}</option>
+                          </select>
+                        </div>
 
-                      <div class="mb-3">
-                        <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
-                        <select class="form-select" id="Region" name="Region">
-                          <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
-                          <option value="{{ __('admin.AL_Madinah_AL_Munawwarah') }}" {{ $project->region == __('admin.AL_Madinah_AL_Munawwarah') ? 'selected' : '' }}>
-                            {{ __('admin.AL_Madinah_AL_Munawwarah') }}
-                          </option>
-                          <option value="{{ __('admin.Al_Ahsa') }}" {{ $project->region == __('admin.Al_Ahsa') ? 'selected' : '' }}>
-                            {{ __('admin.Al_Ahsa') }}
-                          </option>
-                          <option value="{{ __('admin.Asir') }}" {{ $project->region == __('admin.Asir') ? 'selected' : '' }}>
-                            {{ __('admin.Asir') }}
-                          </option>
-                        
-                        </select>
-                      </div>
+                        <div class="mb-3">
+                          <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
+                          <select class="form-select" id="Region" name="Region">
+                            <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
+                            <option value="{{ __('admin.AL_Madinah_AL_Munawwarah') }}" {{ $project->region == __('admin.AL_Madinah_AL_Munawwarah') ? 'selected' : '' }}>
+                              {{ __('admin.AL_Madinah_AL_Munawwarah') }}
+                            </option>
+                            <option value="{{ __('admin.Al_Ahsa') }}" {{ $project->region == __('admin.Al_Ahsa') ? 'selected' : '' }}>
+                              {{ __('admin.Al_Ahsa') }}
+                            </option>
+                            <option value="{{ __('admin.Asir') }}" {{ $project->region == __('admin.Asir') ? 'selected' : '' }}>
+                              {{ __('admin.Asir') }}
+                            </option>
+                          
+                          </select>
+                        </div>
 
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                        {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
+                      </button>
+                    </div>
+                    </form>
                   </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                      {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                      {{ $l == 'en' ? 'Edit Project Idea' : 'تعديل فكرة المشروع' }}
-                    </button>
-                  </div>
-                  </form>
                 </div>
               </div>
-            </div>
-            @endforeach
-          </tbody>
-        </table>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
