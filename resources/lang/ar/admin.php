@@ -2067,6 +2067,7 @@ return [
 	'Vendor Info' => 'معلومات البائع',
 	'All_Trainings' => 'جميع التدريبات',
 	'Company Data' => 'بيانات الشركة',
+	'Submissions' => 'التسليمات',
 	'No Organizations' => 'لا توجد منظمات',
 	'total_evaluation_weight_not_exceed_100' => 'مجموع الوزن يجب ان يكون اقل من 100%',
 	'total_evaluation_weight_be_100' => 'مجموع الوزن يجب ان يكون 100%',
