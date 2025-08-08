@@ -362,6 +362,26 @@
               </option>
             </select>
           </div>
+
+
+          <div class="mb-3">
+            <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
+            <select class="form-select" id="Region" name="Region">
+              <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
+              <option value="{{ __('admin.AL_Madinah_AL_Munawwarah') }}" {{ $team_Formation_raw->first()->tf_region == __('admin.AL_Madinah_AL_Munawwarah') ? 'selected' : '' }}>
+                {{ __('admin.AL_Madinah_AL_Munawwarah') }}
+              </option>
+              <option value="{{ __('admin.Al_Ahsa') }}" {{ $team_Formation_raw->first()->tf_region == __('admin.Al_Ahsa') ? 'selected' : '' }}>
+                {{ __('admin.Al_Ahsa') }}
+              </option>
+              <option value="{{ __('admin.Asir') }}" {{ $team_Formation_raw->first()->tf_region == __('admin.Asir') ? 'selected' : '' }}>
+                {{ __('admin.Asir') }}
+              </option>
+             
+            </select>
+          </div>
+
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">

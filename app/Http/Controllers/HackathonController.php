@@ -120,6 +120,7 @@ class HackathonController extends Controller
         tf.project_description_en as 'tf_projectDescription_en',
         tf.target_track as 'tf_targetTrack',
         tf.project_status as 'tf_projectStatus',
+        tf.region as 'tf_region',
         tf.created_at as 'tf_created_at',
         tf.updated_at as 'tf_updated_at',
         u.id as 'u_id',
@@ -241,6 +242,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         tf.project_name_en as 'tf_projectName',
         tf.project_description_en as 'tf_projectDescription',
         tf.project_status as 'tf_projectStatus',
+        tf.region as 'tf_region',
         tf.created_at as 'tf_created_at',
         tf.updated_at as 'tf_updated_at',
         u.id as 'u_id',
@@ -1067,6 +1069,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
             'Project_Description_en' => 'nullable|string|max:1000',
             'Target_Track' => 'nullable|integer',
             'Project_Status' => 'nullable|integer',
+            'Region' => 'nullable|string|max:255',
 
         ]);
         
@@ -1114,6 +1117,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $teamformation->project_description_en = $request->Project_Description_en;
         $teamformation->target_track = $request->Target_Track ?? 0;
         $teamformation->project_status = $request->Project_Status ?? 0;
+        $teamformation->region = $request->Region ?? '';
 
         if ($request->hasFile('img_team')) {
                     $image = $request->file('img_team');
@@ -1166,6 +1170,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
         $team_q->project_description_en = $request->Project_Description_en;
         $team_q->target_track = $request->Target_Track ?? 0;
         $team_q->project_status = $request->Project_Status ?? 0;
+        $team_q->region = $request->Region ?? '';
         $team_q->save();
         return redirect()->back()->with('success', 'Project idea updated successfully.');
         
@@ -1615,6 +1620,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                 tf.project_description_ar as tf_projectDescription_ar,
                 tf.project_description_en as tf_projectDescription_en,
                 tf.project_status as tf_projectStatus,
+                tf.region as 'tf_region',
                 tf.created_at as tf_created_at,
                 tm.id as tm_id,
                 tm.user_id as tm_user_id,
@@ -1687,6 +1693,7 @@ $data['countNotInTeams'] = $usersNotInTeams->count();
                                         $team->project_description_en = $leader->tf_projectDescription_en;
                                         $team->project_description_ar = $leader->tf_projectDescription_ar;
                                         $team->project_status = $leader->tf_projectStatus;
+                                        $team->region = $leader->tf_region;
 
                                         $team->members = $teamMembers->map(function ($member) use ($l) {
                                             $user = new stdClass;
@@ -1708,9 +1715,10 @@ $data['countNotInTeams'] = $usersNotInTeams->count();
                                     ->map(function ($project) use ($l) {
                                         $team = new stdClass;
                                         $team->id = $project->tf_id;
-                                        $team->project_name = $project->{'tf_projectName_'.$l};
-                                        $team->project_description = $project->{'tf_projectDescription_'.$l};
+                                        $team->project_name = $project->tf_projectName_en;
+                                        $team->project_description = $project->tf_projectDescription_en;
                                         $team->project_status = $project->tf_projectStatus;
+                                        $team->region = $project->tf_region;
                                         $team->created_at = $project->tf_created_at;
                                         return $team;
             })->values()->unique('id');

@@ -305,12 +305,14 @@ $engagementCounts = [200, 150, 120, 5];
               <th>{{ __('admin.project_name') }}</th>
               <th>{{ __('admin.project_description') }}</th>
               <th>{{ __('admin.Status') }}</th>
+              <th>{{ __('admin.Region') }}</th>
               <th>{{ __('admin.Progress') }}</th>
               <th>{{ __('admin.creation_date') }}</th>
               {{-- <th>{{ __('admin.actions') }}</th> --}}
             </tr>
           </thead>
           <tbody>
+           
             <!-- This is example data, should be populated from a loop in a real application -->
             @foreach ($data['all_projects'] as $project)
             <tr>
@@ -335,6 +337,7 @@ $engagementCounts = [200, 150, 120, 5];
                 {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
                 @endif
               </td>
+              <td>{{ $project->region }}</td>
               <td>
                 <div class="progress mb-2" style="height: 20px;">
                   <div class="progress-bar bg-success" role="progressbar"
@@ -398,6 +401,23 @@ $engagementCounts = [200, 150, 120, 5];
                             __('admin.Ready for Pitch') }}</option>
                           <option value="100" {{ $project->project_status == '100' ? 'selected' : '' }} >{{
                             __('admin.Project Submitted') }}</option>
+                        </select>
+                      </div>
+
+                      <div class="mb-3">
+                        <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
+                        <select class="form-select" id="Region" name="Region">
+                          <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
+                          <option value="{{ __('admin.AL_Madinah_AL_Munawwarah') }}" {{ $project->region == __('admin.AL_Madinah_AL_Munawwarah') ? 'selected' : '' }}>
+                            {{ __('admin.AL_Madinah_AL_Munawwarah') }}
+                          </option>
+                          <option value="{{ __('admin.Al_Ahsa') }}" {{ $project->region == __('admin.Al_Ahsa') ? 'selected' : '' }}>
+                            {{ __('admin.Al_Ahsa') }}
+                          </option>
+                          <option value="{{ __('admin.Asir') }}" {{ $project->region == __('admin.Asir') ? 'selected' : '' }}>
+                            {{ __('admin.Asir') }}
+                          </option>
+                        
                         </select>
                       </div>
 

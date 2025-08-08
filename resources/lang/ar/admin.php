@@ -2302,4 +2302,8 @@ return [
 	'Sketch UI, set up the project, and develop core functionality.' => 'الواجهة المستخدمية المخططة، تحديد المشروع، وتطوير الوظائف الاساسية.',
 	'Submitted_Projects' => 'المشاريع المقدمة',
 	'Hackathon_Dashboard' => 'لوحة تحكم الهاكاثون',
+	'AL_Madinah_AL_Munawwarah' => 'المدينة المنورة',
+	'Al_Ahsa' => 'الأحساء',
+	'Asir' => 'عسير',
+	'Region' => 'المنطقة',
 ];
