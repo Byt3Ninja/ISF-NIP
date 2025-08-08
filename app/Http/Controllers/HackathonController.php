@@ -1290,7 +1290,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                     $inviteduser = $teamformation->user_id;
                     $userInv = User::where('id', $inviteduser)->first();
                     $updatecompany =Company::where('id', $user->company_id)->first();
-                    if($userInv->company->cycle != null){
+                    if($userInv?->company?->cycle != null){
                         $updatecompany->cycle = $userInv->company->cycle;
                         $updatecompany->step = $userInv->company->step;
                         $updatecompany->save();
