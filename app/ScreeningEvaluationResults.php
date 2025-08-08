@@ -115,7 +115,18 @@ class ScreeningEvaluationResults extends Model
 			});
 		}
 
-		if( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+		if( $getStep->stype == 5 )
+		{
+			foreach( $judges as $index => $judge )
+			{
+				$startup_ids = $judge->startups->pluck('id')->toArray();
+				$get_companies = $companies->filter(function( $c ) use ( $startup_ids ) {
+					return $c->users->whereIn('id', $startup_ids)->count() > 0;
+				});
+				$judges[$index]->startups = $get_companies->pluck('id');
+			}
+		}
+		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
 		foreach( $judges as $index => $judge )
 		{

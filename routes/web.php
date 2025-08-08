@@ -86,7 +86,6 @@ Route::get('/2otp', function () {
 
 Route::get('/db-migrate', 'IndexController@dbMigrate');
 Route::get('/seed-permissions', 'IndexController@seedPermissions');
-Route::get('/populate-zoom-passcode', 'IndexController@populateZoomPasscode');
 Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('invitations.set_password_view_form');
