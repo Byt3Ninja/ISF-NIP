@@ -380,6 +380,9 @@
 														$companyJudgeIds[] = $judge->id;
 													}
 												}
+												$scoped_judges = $judges->filter(function($judge) use ($company) {
+													return in_array($company->id, $judge->companies_ids);
+												})->values();
 											@endphp
 											
 											<div class="col-xl-4 col-lg-6 col-md-12 company-card" 
@@ -477,11 +480,11 @@
 																<i class="ti ti-users me-2 text-primary"></i>
 																<span>{{ __('cycles.Judges Evaluation') }}</span>
 																<span class="badge bg-label-primary bg-opacity-10 text-primary ms-2 rounded-pill">
-																	{{ $judges->count() }}
+																	{{ $scoped_judges->count() }}
 																</span>
 															</h6>
 															<div class="judges-list">
-																@foreach ($judges->take(3) as $judge)
+																@foreach ($scoped_judges->take(3) as $judge)
 																	@php($scoped_company = collect($judge->companies)->where('id', $company->id)->first())
 																	@if( in_array($company->id, $judge->startups->toArray()) )
 																		<div class="judge-evaluation-item bg-transparent rounded-3 border px-2 py-1 mb-2">
@@ -510,9 +513,9 @@
 																		</div>
 																	@endif
 																@endforeach
-																@if( $judges->count() > 3 )
+																@if( $scoped_judges->count() > 3 )
 																	<div class="text-center">
-																		<small class="text-muted">+{{ $judges->count() - 3 }} {{ __('cycles.more judges') }}</small>
+																		<small class="text-muted">+{{ $scoped_judges->count() - 3 }} {{ __('cycles.more judges') }}</small>
 																	</div>
 																@endif
 															</div>
