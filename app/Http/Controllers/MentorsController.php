@@ -722,14 +722,14 @@ class MentorsController extends Controller
 				// 	->where('approved', 'Yes')
 				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
 				
-					$my = Schedule::where('active', 1)->where('user_id', 242)->get();
-				// $sessions = MentorshipRequest::where('mentor_id', 242)
+					$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
+				// $sessions = MentorshipRequest::where('mentor_id', $request->id)
 				// 	->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
 				// 	->where('approved', 'Yes')
 				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
 
-                    $sessions = MentorshipRequest::where('mentor_id', 242)
-    // ->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
+                    $sessions = MentorshipRequest::where('mentor_id', $request->id)
+    ->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
     ->where('approved', 'Yes')
     ->get([
         DB::raw("DATE(zoom_date) AS date"),
