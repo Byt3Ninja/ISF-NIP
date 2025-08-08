@@ -326,6 +326,10 @@ class FinalscreeningController extends Controller
 		$results = $metadata['results'];
 		$_companies = $metadata['_companies']->where('step', $id)->values();
 
+        $judges = $judges->map(function( $item ) {
+            $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
+            return $item;
+        });
         return view('admin.settings.final.results', compact('cstep', 'judges', 'steps', '_steps', 'id', '_companies', 'companies', 'evaluation', 'results', 'c', 'cj', ));
     }
 
