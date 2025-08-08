@@ -1,15 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', __('admin.Activities'))
-@section('vendorstyle')
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
-@stop
+
 @section('styles')
 <style>
   .chart-container {
@@ -22,16 +14,6 @@
   .stat-card-border-top {
     border-top: 4px solid;
   }
-  /* Style for DataTables buttons */
-    .dt-buttons .btn-success {
-        background-color: #28a745 !important;
-        border-color: #28a745 !important;
-        color: #fff !important;
-    }
-    .dt-buttons .btn-success:hover {
-        background-color: #218838 !important;
-        border-color: #1e7e34 !important;
-    }
 </style>
 @endsection
 
@@ -163,54 +145,30 @@
         </div>
     </div>
 
-    {{-- Filter Form --}}
-    @if ($activities->isNotEmpty())
-    <div class="card mb-4">
-      <div class="card-body">
-        <h6 class="mb-3 text-primary"><i class="ti ti-filter me-1"></i> @lang('admin.Filter_Activities')</h6>
-        <form method="GET">
-          <div class="row g-3 align-items-end">
-            <div class="col-md-2">
-              <label class="form-label">@lang('admin.user')</label>
-              <input type="text" name="user" class="form-control" placeholder="@lang('admin.user')" value="{{ request('user') }}">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">@lang('admin.Date_From')</label>
-              <input type="text" name="date_from" class="form-control datepicker" placeholder="@lang('admin.Date_From')" value="{{ request('date_from') }}">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">@lang('admin.Date_To')</label>
-              <input type="text" name="date_to" class="form-control datepicker" placeholder="@lang('admin.Date_To')" value="{{ request('date_to') }}">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">@lang('admin.device')</label>
-              <input type="text" name="device" class="form-control" placeholder="@lang('admin.device')" value="{{ request('device') }}">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">@lang('admin.location')</label>
-              <input type="text" name="location" class="form-control" placeholder="@lang('admin.location')" value="{{ request('location') }}">
-            </div>
-            <div class="col-md-2 d-grid">
-              <button type="submit" class="btn btn-primary">@lang('admin.Filter')</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-    @endif
+
 
     {{-- Activities Table --}}
     <div class="card">
-      <div class="card-body">
+      <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
-          <h6 class="mb-0 text-primary"><i class="ti ti-list-details me-1"></i> @lang('admin.Users_Activities')</h6>
+          <h6 class="mb-0"><i class="ti ti-list-details me-1"></i> @lang('admin.Users_Activities')</h6>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="projectsExportBtn">
+              <i class="bi bi-download me-1"></i> {{ $l == 'ar' ? 'تصدير' : 'Export' }}
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportTable('activities-datatable', 'csv')"><i class="bi bi-filetype-csv me-2"></i>{{ $l == 'ar' ? 'تصدير CSV' : 'Export CSV' }}</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportTable('activities-datatable', 'excel')"><i class="bi bi-file-earmark-excel me-2"></i>{{ $l == 'ar' ? 'تصدير Excel' : 'Export Excel' }}</a></li>
+            </ul>
+          </div>
         </div>
+      </div>
+      <div class="card-body">
         <div class="table-responsive">
           <table id="activities-datatable" class="table align-middle">
             <thead class="table-light">
               <tr>
-                <th>@lang('admin.Name')</th>
-                <th>@lang('admin.Email')</th>
+                <th>@lang('admin.User')</th>
                 <th>@lang('admin.browser')</th>
                 <th>@lang('admin.device')</th>
                 <th>@lang('admin.platform')</th>
@@ -223,14 +181,29 @@
             <tbody>
               @foreach($activities as $activity)
               <tr>
-                <td>{{ $activity->user->first_name_en . ' ' . $activity->user->last_name_en }}</td>
-                <td>{{ $activity->user->email }}</td>
-                <td>{{ $activity->browser }}</td>
-                <td>{{ $activity->device }}</td>
-                <td>{{ $activity->platform }}</td>
-                <td>{{ $activity->ip_address }}</td>
-                <td>{{ $activity->location }}</td>
-                <td>{{ $activity->activity_time->format('d M Y, H:i') }}</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm me-3">
+                      @if($activity->user->img_url ?? false)
+                        <img src="{{ asset("191014/{$activity->user->img_url}") }}" alt="{{ $activity->user->first_name_en }}" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
+                      @else
+                        <div class="avatar-initial rounded-circle bg-label-primary">
+                          {{ strtoupper(substr($activity->user->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr($activity->user->last_name_en ?? 'U', 0, 1)) }}
+                        </div>
+                      @endif
+                    </div>
+                    <div class="d-flex flex-column">
+                      <h6 class="mb-0 text-sm">{{ $activity->user->first_name_en . ' ' . $activity->user->last_name_en }}</h6>
+                      <small class="text-muted">{{ $activity->user->email }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-nowrap">{{ $activity->browser }}</td>
+                <td class="text-nowrap">{{ $activity->device }}</td>
+                <td class="text-nowrap">{{ $activity->platform }}</td>
+                <td class="text-nowrap">{{ $activity->ip_address }}</td>
+                <td class="text-nowrap">{{ $activity->location }}</td>
+                <td class="text-nowrap">{{ $activity->activity_time->format('d M Y, H:i') }}</td>
                 <td>
                   <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="d-inline delete-form">
                     @csrf
@@ -258,19 +231,28 @@
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script>
   // Initialize Date Picker
   flatpickr(".datepicker", {
     dateFormat: "Y-m-d",
     allowInput: true,
+    onChange: function(selectedDates, dateStr, instance) {
+      // Trigger table redraw when date changes
+      if (instance.element.id === 'loginTimeFilter') {
+        $('#activities-datatable').DataTable().draw();
+      }
+    }
   });
+
+  // Define exportTable function globally before document ready
+  window.exportTable = function(tableClass, format) {
+    const table = $('#' + tableClass).DataTable();
+    if (format === 'csv') {
+      table.button('.buttons-csv').trigger();
+    } else if (format === 'excel') {
+      table.button('.buttons-excel').trigger();
+    }
+  };
 
   $(document).ready(function() {
     const lang = "{{ $l }}";
@@ -299,25 +281,134 @@
         }
     } : {};
 
-   const table = $('#activities-datatable').DataTable({
-            language: datatableLanguage,
-            order: [[4, 'desc']],
-            pageLength: 10,
-            lengthMenu: [10, 25, 50, 100],
-            searching: true,
-            dom: 'Bfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: '<i class="ti ti-file-export me-1"></i>@lang("admin.Export_to_Excel")',
-                    title: 'Activities_' + new Date().toISOString().slice(0, 10),
-                    className: 'btn btn-success',
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                }
-            ]
-        });
+    const table = $('#activities-datatable').DataTable({
+      language: datatableLanguage,
+      paging: true,
+      searching: true,
+      ordering: true,
+      order: [[6, 'desc']], // Changed to column 6 (Login_Time) since we removed email column
+      pageLength: 10,
+      lengthMenu: [10, 25, 50, 100],
+      dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6"f>><"row mb-3"<"col-12"<"filter-row">>>rtip<"d-none"B>', // Add filter-row container
+      buttons: [
+        {
+          extend: 'csv',
+          className: 'buttons-csv d-none'
+        },
+        {
+          extend: 'excel',
+          className: 'buttons-excel d-none'
+        }
+      ]
+    });
+
+    const fieldsTranslation = {
+      en: {
+        'allPlatforms': 'All Platforms',
+        'allBrowsers': 'All Browsers',
+        'allLocations': 'All Locations',
+        'selectDate': 'Select Date'
+      },
+      ar: {
+        'allPlatforms': 'جميع المنصات',
+        'allBrowsers': 'جميع المتصفحات',
+        'allLocations': 'جميع المواقع',
+        'selectDate': 'اختر التاريخ'
+      }
+    }
+
+    // Add filter controls after table initialization
+    @if ($activities->isNotEmpty())
+    const filterHtml = `
+      <div class="row g-3 align-items-end mb-6">
+        <div class="col-md-3">
+          <select id="platformFilter" class="form-select">
+            <option value="">${fieldsTranslation[lang].allPlatforms}</option>
+            @foreach($activities->pluck('platform')->unique()->filter() as $platform)
+              <option value="{{ $platform }}">{{ $platform }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select id="browserFilter" class="form-select">
+            <option value="">${fieldsTranslation[lang].allBrowsers}</option>
+            @foreach($activities->pluck('browser')->unique()->filter() as $browser)
+              <option value="{{ $browser }}">{{ $browser }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select id="locationFilter" class="form-select">
+            <option value="">${fieldsTranslation[lang].allLocations}</option>
+            @foreach($activities->pluck('location')->unique()->filter() as $location)
+              <option value="{{ $location }}">{{ $location }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input type="text" id="loginTimeFilter" class="form-control datepicker" placeholder="${fieldsTranslation[lang].selectDate}">
+        </div>
+      </div>
+    `;
+    $('.filter-row').html(filterHtml);
+    
+    // Re-initialize date picker for the dynamically added filter
+    flatpickr("#loginTimeFilter", {
+      dateFormat: "Y-m-d",
+      allowInput: true,
+      onChange: function(selectedDates, dateStr, instance) {
+        table.draw();
+      }
+    });
+    @endif
+
+    // Custom filter functions
+    $.fn.dataTable.ext.search.push(
+      function(settings, data, dataIndex) {
+        // Get filter values
+        const platformFilter = $('#platformFilter').val();
+        const browserFilter = $('#browserFilter').val();
+        const locationFilter = $('#locationFilter').val();
+        const loginTimeFilter = $('#loginTimeFilter').val();
+
+        // Get data from the row
+        const platform = data[3] || ''; // Platform column (index 3)
+        const browser = data[1] || '';   // Browser column (index 1)
+        const location = data[5] || '';  // Location column (index 5)
+        const loginTime = data[6] || ''; // Login Time column (index 6)
+
+        // Apply filters
+        if (platformFilter && platform.toLowerCase().indexOf(platformFilter.toLowerCase()) === -1) {
+          return false;
+        }
+
+        if (browserFilter && browser.toLowerCase().indexOf(browserFilter.toLowerCase()) === -1) {
+          return false;
+        }
+
+        if (locationFilter && location.toLowerCase().indexOf(locationFilter.toLowerCase()) === -1) {
+          return false;
+        }
+
+        if (loginTimeFilter) {
+          // Parse the date from the login time (format: "01 Jan 2025, 12:30")
+          const loginDate = new Date(loginTime.split(',')[0]);
+          const filterDate = new Date(loginTimeFilter);
+          
+          // Compare dates (ignore time)
+          if (loginDate.toDateString() !== filterDate.toDateString()) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    );
+
+    // Bind change events to filters
+    $('#platformFilter, #browserFilter, #locationFilter, #loginTimeFilter').on('change keyup', function() {
+      table.draw();
+    });
     // Chart Data
     const topDevicesData = @json($topDevices);
     const topBrowsersData = @json($topBrowsers);
