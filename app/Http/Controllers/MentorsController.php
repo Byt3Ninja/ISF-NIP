@@ -719,7 +719,10 @@ class MentorsController extends Controller
 				$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
 				$sessions = MentorshipRequest::where('mentor_id', $request->id)
 					->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
-					->where('approved', 'Yes')
+					->where(function($query) {
+                        $query->where('approved', 'Yes')
+                            ->orWhereNull('approved');
+                    })
 					->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
 				$my = $my->merge($sessions);
 				return response()->json($my);

@@ -2247,4 +2247,8 @@ return [
 	'Sketch UI, set up the project, and develop core functionality.' => 'Sketch UI, set up the project, and develop core functionality.',
 	'Submitted_Projects' => 'Submitted Projects',
 	'Hackathon_Dashboard' => 'Hackathon Dashboard',
+	'AL_Madinah_AL_Munawwarah' => 'Al Madinah Al Munawwarah',
+	'Al_Ahsa' => 'Al Ahsa',
+	'Asir' => 'Asir',
+	'Region' => 'Region',
 ];

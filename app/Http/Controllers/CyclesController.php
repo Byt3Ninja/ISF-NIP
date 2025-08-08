@@ -388,8 +388,11 @@ class CyclesController extends Controller
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
             /// add new step
+       
             $stype = $request->stype;
+            
             $data = null;
+           
             if ($stype == 1) {
                 $data = $request->FormSelect;
                 $id = Step::insertGetId([
@@ -468,7 +471,11 @@ class CyclesController extends Controller
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add service
+                if($request->FormSelect != null){
+                $data = $request->FormSelect;
+                }else{
                 $data = $request->FinalScreeningSelect;
+                }
                 $fform = $request->FormSelect;
                 if (!$fform) {
                     return redirect()->back()->with('message2', 'You must add form first');
@@ -556,6 +563,7 @@ class CyclesController extends Controller
         } elseif ($type == 7) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
+            dd($step);
             return response()->json($step);
         } elseif ($type == 8) {
             /// deleted saved data if type changed
