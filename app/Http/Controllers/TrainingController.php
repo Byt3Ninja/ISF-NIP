@@ -663,14 +663,16 @@ class TrainingController extends Controller
 			$duration = $start->diffInMinutes($end);
 
 			if ($type == 'sessions') {
-				$trainingSession = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
+				$_session = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 
-				if ($trainingSession == "Error") {
+				if( $_session['success'] == false )
+				{
 					return back()->with([
-						'message' => "Configration Error, please check your Zoom settings",
+						'message' => $_session['message'],
 						'class' => 'danger'
 					]);
 				}
+				$trainingSession = $_session['message'];
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
@@ -746,13 +748,16 @@ class TrainingController extends Controller
 
 			if ($type == 'sessions') {
 				// Add Zoom
-				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
-				if ($trainingSession == "Error") {
+				$_session = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
+				
+				if( $_session['success'] == false )
+				{
 					return back()->with([
-						'message' => "Configration Error, please check your Zoom settings",
+						'message' => $_session['message'],
 						'class' => 'danger'
 					]);
 				}
+				$trainingSession = $_session['message'];
 				// $session = TrainingSession::find($trainingSession->sid);
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
@@ -787,7 +792,11 @@ class TrainingController extends Controller
 			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 			if (!$onlineMeeting['success']) {
-				return "Error";
+				return [
+					'success' => false,
+					'message' => $onlineMeeting['data']
+				];
+				// return "Error";
 			}
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
@@ -816,7 +825,11 @@ class TrainingController extends Controller
 				$trainingSession_update = TrainingSession::where('id', $sid)->update($data);
 				$trainingSession = TrainingSession::find($sid);
 			}
-			return $trainingSession;
+			return [
+				'success' => true,
+				'message' => $trainingSession
+			];
+			// return $trainingSession;
 		}
 	}
 	private function addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $online, $sid = null)
