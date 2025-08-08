@@ -6,6 +6,7 @@ use App\User;
 use App\Company;
 use App\Messages;
 use App\Settings;
+use GuzzleHttp\Client;
 use App\Mail\CustomEmail;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
@@ -99,6 +100,224 @@ class IndexController extends Controller
                     ], 500);
                 }
             }
+        }
+    }
+
+    public function populateZoomPasscode(Request $request)
+    {
+        if( $request->has('token') )
+        {
+            $token = $request->input('token', null);
+            if( $token == 'populateCodes@ZooM!@NoW' )
+            {
+                $settings = DB::table('settings')
+                ->select([
+                    'ZOOM_CLIENT_ID',
+                    'ZOOM_CLIENT_SECRET',
+                    'ZOOM_ACCOUNT_ID',
+                ])
+                ->where('id', 1)->first();
+
+                $trainings = DB::table('training_sessions AS ts')->select([
+                    'ts.id',
+                    'ts.zoom_id',
+                    'ts.zoom_passcode',
+                    'o.zoom_client_id',
+                    'o.zoom_client_secret',
+                    'o.zoom_account_id',
+                ])
+                ->leftJoin('steps AS s', 'ts.step_id', '=', 's.id')
+                ->leftJoin('cycles AS c', 's.cycle_id', '=', 'c.id')
+                ->leftJoin('organizations AS o', 'c.organization_id', '=', 'o.id')
+                ->where('ts.type', 'sessions')->whereNull('ts.zoom_passcode')->get();
+
+                $mentorship_requests = DB::table('mentorship_requests AS mr')->select([
+                    'mr.id',
+                    'mr.zoom_id',
+                    'mr.zoom_passcode',
+                    'o.zoom_client_id',
+                    'o.zoom_client_secret',
+                    'o.zoom_account_id',
+                ])
+                ->leftJoin('cycles AS c', 'mr.cycle_id', '=', 'c.id')
+                ->leftJoin('organizations AS o', 'c.organization_id', '=', 'o.id')
+                ->whereNotNull('mr.zoom_id')
+                ->whereNull('mr.zoom_passcode')->get();
+
+                $final_screenings = DB::table('finalscreenings AS fs')->select([
+                    'fs.id',
+                    'fs.zoom_id',
+                    'fs.zoom_passcode',
+                    'o.zoom_client_id',
+                    'o.zoom_client_secret',
+                    'o.zoom_account_id',
+                ])
+                ->leftJoin('steps AS s', 'fs.step_id', '=', 's.id')
+                ->leftJoin('cycles AS c', 's.cycle_id', '=', 'c.id')
+                ->leftJoin('organizations AS o', 'c.organization_id', '=', 'o.id')
+                ->whereNull('fs.zoom_passcode')->get();
+
+                $accountTokens = [];
+                foreach( $trainings as $training )
+                {
+                    $zoom_client_id = $training->zoom_client_id;
+                    $zoom_client_secret = $training->zoom_client_secret;
+                    $zoom_account_id = $training->zoom_account_id;
+                    if( empty( $training->zoom_client_id ) || empty( $training->zoom_client_secret ) || empty( $training->zoom_account_id ) )
+                    {
+                        $zoom_client_id = $settings->ZOOM_CLIENT_ID;
+                        $zoom_client_secret = $settings->ZOOM_CLIENT_SECRET;
+                        $zoom_account_id = $settings->ZOOM_ACCOUNT_ID;
+                    }
+
+                    if( !array_key_exists($zoom_account_id, $accountTokens) )
+                    {
+                        $access_token = '';
+                        $client = new Client([
+                            'headers' => [
+                                'Authorization' => 'Basic ' . base64_encode($zoom_client_id . ':' . $zoom_client_secret),
+                                'Host' => 'zoom.us',
+                            ],
+                        ]);
+                        $response = $client->request('POST', "https://zoom.us/oauth/token", [
+                            'form_params' => [
+                                'grant_type' => 'account_credentials',
+                                'account_id' => $zoom_account_id,
+                            ],
+                        ]);
+                        $responseBody = json_decode($response->getBody()->getContents(), true);
+                        if (isset($responseBody['access_token'])) { $access_token = $responseBody['access_token']; }
+                        $accountTokens[$zoom_account_id] = $access_token;
+                    }
+
+                    if( isset( $accountTokens[$zoom_account_id] ) )
+                    {
+                        $token = $accountTokens[$zoom_account_id];
+                        $passcode = $this->getZoomMeetingPassCode( $token, $training->zoom_id );
+                        if( empty( $passcode ) && isset( $accountTokens[$settings->ZOOM_ACCOUNT_ID] ) )
+                        {
+                            $passcode = $this->getZoomMeetingPassCode( $accountTokens[$settings->ZOOM_ACCOUNT_ID], $training->zoom_id );
+                        }
+                        if( !empty( $passcode ) )
+                        {
+                            DB::table('training_sessions')->where('id', $training->id)->update(['zoom_passcode' => $passcode]);
+                        }
+                    }
+                }
+
+                foreach( $mentorship_requests as $ms_req )
+                {
+                    $zoom_client_id = $ms_req->zoom_client_id;
+                    $zoom_client_secret = $ms_req->zoom_client_secret;
+                    $zoom_account_id = $ms_req->zoom_account_id;
+                    if( empty( $ms_req->zoom_client_id ) || empty( $ms_req->zoom_client_secret ) || empty( $ms_req->zoom_account_id ) )
+                    {
+                        $zoom_client_id = $settings->ZOOM_CLIENT_ID;
+                        $zoom_client_secret = $settings->ZOOM_CLIENT_SECRET;
+                        $zoom_account_id = $settings->ZOOM_ACCOUNT_ID;
+                    }
+
+                    if( !array_key_exists($zoom_account_id, $accountTokens) )
+                    {
+                        $access_token = '';
+                        $client = new Client([
+                            'headers' => [
+                                'Authorization' => 'Basic ' . base64_encode($zoom_client_id . ':' . $zoom_client_secret),
+                                'Host' => 'zoom.us',
+                            ],
+                        ]);
+                        $response = $client->request('POST', "https://zoom.us/oauth/token", [
+                            'form_params' => [
+                                'grant_type' => 'account_credentials',
+                                'account_id' => $zoom_account_id,
+                            ],
+                        ]);
+                        $responseBody = json_decode($response->getBody()->getContents(), true);
+                        if (isset($responseBody['access_token'])) { $access_token = $responseBody['access_token']; }
+                        $accountTokens[$zoom_account_id] = $access_token;
+                    }
+
+                    if( isset( $accountTokens[$zoom_account_id] ) )
+                    {
+                        $token = $accountTokens[$zoom_account_id];
+                        $passcode = $this->getZoomMeetingPassCode( $token, $ms_req->zoom_id );
+                        if( empty( $passcode ) && isset( $accountTokens[$settings->ZOOM_ACCOUNT_ID] ) )
+                        {
+                            $passcode = $this->getZoomMeetingPassCode( $accountTokens[$settings->ZOOM_ACCOUNT_ID], $ms_req->zoom_id );
+                        }
+                        if( !empty( $passcode ) )
+                        {
+                            DB::table('mentorship_requests')->where('id', $ms_req->id)->update(['zoom_passcode' => $passcode]);
+                        }
+                    }
+                }
+                foreach( $final_screenings as $screening )
+                {
+                    $zoom_client_id = $screening->zoom_client_id;
+                    $zoom_client_secret = $screening->zoom_client_secret;
+                    $zoom_account_id = $screening->zoom_account_id;
+                    if( empty( $screening->zoom_client_id ) || empty( $screening->zoom_client_secret ) || empty( $screening->zoom_account_id ) )
+                    {
+                        $zoom_client_id = $settings->ZOOM_CLIENT_ID;
+                        $zoom_client_secret = $settings->ZOOM_CLIENT_SECRET;
+                        $zoom_account_id = $settings->ZOOM_ACCOUNT_ID;
+                    }
+
+                    if( !array_key_exists($zoom_account_id, $accountTokens) )
+                    {
+                        $access_token = '';
+                        $client = new Client([
+                            'headers' => [
+                                'Authorization' => 'Basic ' . base64_encode($zoom_client_id . ':' . $zoom_client_secret),
+                                'Host' => 'zoom.us',
+                            ],
+                        ]);
+                        $response = $client->request('POST', "https://zoom.us/oauth/token", [
+                            'form_params' => [
+                                'grant_type' => 'account_credentials',
+                                'account_id' => $zoom_account_id,
+                            ],
+                        ]);
+                        $responseBody = json_decode($response->getBody()->getContents(), true);
+                        if (isset($responseBody['access_token'])) { $access_token = $responseBody['access_token']; }
+                        $accountTokens[$zoom_account_id] = $access_token;
+                    }
+
+                    if( isset( $accountTokens[$zoom_account_id] ) )
+                    {
+                        $token = $accountTokens[$zoom_account_id];
+                        $passcode = $this->getZoomMeetingPassCode( $token, $screening->zoom_id );
+                        if( empty( $passcode ) && isset( $accountTokens[$settings->ZOOM_ACCOUNT_ID] ) )
+                        {
+                            $passcode = $this->getZoomMeetingPassCode( $accountTokens[$settings->ZOOM_ACCOUNT_ID], $screening->zoom_id );
+                        }
+                        if( !empty( $passcode ) )
+                        {
+                            DB::table('finalscreenings')->where('id', $screening->id)->update(['zoom_passcode' => $passcode]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function getZoomMeetingPassCode( $token, $id )
+    {
+        $_client = new Client();
+        try {
+            $meeting_response = $_client->request('GET', 'https://api.zoom.us/v2/meetings/' . $id, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $token,
+                ],
+            ]);
+            $meeting_data = json_decode($meeting_response->getBody()->getContents(), true);
+            if( array_key_exists('password', $meeting_data) )
+            {
+                return $meeting_data['password'];
+            }
+            return null;
+        } catch (\Throwable $th) {
+            return null;
         }
     }
 
