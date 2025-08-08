@@ -115,6 +115,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <tr>
                 <th>{{ __('admin.team_name') }}</th>
                 <th>{{ __('admin.team_leader') }}</th>
+                <th>{{ __('admin.Email') }}</th>
                 <th>{{ __('admin.number_of_members') }}</th>
                 <th>{{ __('admin.creation_date') }}</th>
                 <th>{{ __('admin.actions') }}</th>
@@ -125,7 +126,8 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               @foreach ($data['all_teams'] as $team)
               <tr>
                 <td>{{ $team->name }}</td>
-                <td> {{ $team->user_name }} ( {{ $team->email }} )</td>
+                <td> {{ $team->user_name }} </td>
+                <td> {{ $team->email }} </td>
                 <td>{{ $team->count_members }} / {{ $team->max_count_members }}</td>
                 <td>{{ $team->created_at }}</td>
                 <td>
@@ -166,6 +168,9 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
             <tr>
               <th>{{ __('admin.project_name') }}</th>
               <th>{{ __('admin.project_description') }}</th>
+              <th>{{ __('admin.team_leader') }}</th>
+              <th>{{ __('admin.Email') }}</th>
+              <th>{{ __('admin.Phone') }}</th>
               <th>{{ __('admin.Status') }}</th>
               <th>{{ __('admin.Region') }}</th>
               <th>{{ __('admin.Progress') }}</th>
@@ -180,6 +185,9 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
             <tr>
               <td>{{ $project->project_name }}</td>
               <td> {{ $project->project_description }}</td>
+              <td>{{ $project->leader->name }}</td>
+              <td>{{ $project->leader->email }}</td>
+              <td>{{ $project->leader->phone }}</td>
               <td>
 
                 @if($project->project_status == 20)

@@ -1634,6 +1634,7 @@ $availableMembers = collect($results)->map(function ($member) use ($l, $pendingI
                 concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
                 concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
                 u.email as u_email,
+                u.phone as u_phone,
                 u.img_url as u_img_url,
                 u.title_ar as u_title_ar,
                 u.title_en as u_title_en
@@ -1711,8 +1712,19 @@ $data['countNotInTeams'] = $usersNotInTeams->count();
                                     })->unique('id')
                                     ->values();
 
-        $data['all_projects'] = $teams->whereNotNull('tf_projectName_en')
-                                    ->map(function ($project) use ($l) {
+                                $groupedTeams = $teams->groupBy('tf_id')->map(function ( $teamMembers ) {
+                                    $leader = $teamMembers->where('tm_isTeamLeader', 1)->first();
+                                    $output = new stdClass;
+                                    $output->id = $teamMembers->first()->tf_id;
+                                    $output->leader = new stdClass;
+                                    $output->leader->id = $leader->tm_id;
+                                    $output->leader->name = $leader->tm_name;
+                                    $output->leader->email = $leader->tm_email;
+                                    $output->leader->phone = $leader->u_phone;
+                                    return $output;
+                                })->values();
+                                $data['all_projects'] = $teams->whereNotNull('tf_projectName_en')
+                                    ->map(function ($project) use ($l, $groupedTeams) {
                                         $team = new stdClass;
                                         $team->id = $project->tf_id;
                                         $team->project_name = $project->tf_projectName_en;
@@ -1720,8 +1732,9 @@ $data['countNotInTeams'] = $usersNotInTeams->count();
                                         $team->project_status = $project->tf_projectStatus;
                                         $team->region = $project->tf_region;
                                         $team->created_at = $project->tf_created_at;
+                                        $team->leader = $groupedTeams->where('id', $project->tf_id)->first()->leader;
                                         return $team;
-            })->values()->unique('id');
+                                    })->values()->unique('id');
             $data['count_projects'] = $data['all_projects']->count();
             
             $service = new \App\Services\NextSessionsService();
