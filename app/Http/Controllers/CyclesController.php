@@ -563,7 +563,7 @@ class CyclesController extends Controller
         } elseif ($type == 7) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
-            dd($step);
+            // dd($step);
             return response()->json($step);
         } elseif ($type == 8) {
             /// deleted saved data if type changed
