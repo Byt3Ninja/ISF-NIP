@@ -169,16 +169,14 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
           <table class="table projects-table table-hover align-middle">
             <thead>
               <tr>
-                <th>{{ __('admin.project_name') }}</th>
-                <th>{{ __('admin.project_description') }}</th>
-                <th>{{ __('admin.team_leader') }}</th>
-                <th>{{ __('admin.Email') }}</th>
-                <th>{{ __('admin.Phone') }}</th>
-                <th>{{ __('admin.Status') }}</th>
-                <th>{{ __('admin.Region') }}</th>
-                <th>{{ __('admin.Progress') }}</th>
-                <th>{{ __('admin.creation_date') }}</th>
-                <th>{{ __('admin.actions') }}</th>
+                <th class="text-nowrap">{{ __('admin.project_name') }}</th>
+                <th class="text-nowrap">{{ __('admin.project_description') }}</th>
+                <th class="text-nowrap">{{ __('admin.team_leader') }}</th>
+                <th class="text-nowrap">{{ __('admin.Status') }}</th>
+                <th class="text-nowrap">{{ __('admin.Region') }}</th>
+                <th class="text-nowrap">{{ __('admin.Progress') }}</th>
+                <th class="text-nowrap">{{ __('admin.creation_date') }}</th>
+                <th class="text-nowrap">{{ __('admin.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -188,43 +186,61 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <tr>
                 <td>{{ $project->project_name }}</td>
                 <td> {{ $project->project_description }}</td>
-                <td>{{ $project->leader->name }}</td>
-                <td>{{ $project->leader->email }}</td>
-                <td>{{ $project->leader->phone }}</td>
                 <td>
-
-                  @if($project->project_status == 20)
-                  {{ __('admin.Idea + Team') }} 
-                  {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
-                  @elseif($project->project_status == 40)
-                  {{ __('admin.Research') }} 
-                  {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
-                  @elseif($project->project_status == 60)
-                  {{ __('admin.Design & Build') }} 
-                  {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
-                  @elseif($project->project_status == 80)
-                  {{ __('admin.Ready for Pitch') }} 
-                  {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
-                  @elseif($project->project_status == 100)
-                  {{ __('admin.Project Submitted') }} 
-                  {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
-                  @endif
+                  <div class="d-flex flex-column">
+                    <strong>{{ $project->leader->name }}</strong>
+                    <small class="text-muted">{{ $project->leader->email }}</small>
+                    <small class="text-muted">{{ $project->leader->phone }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-nowrap">
+                    @if($project->project_status == 20)
+                    {{ __('admin.Idea + Team') }} 
+                    {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
+                    @elseif($project->project_status == 40)
+                    {{ __('admin.Research') }} 
+                    {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
+                    @elseif($project->project_status == 60)
+                    {{ __('admin.Design & Build') }} 
+                    {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
+                    @elseif($project->project_status == 80)
+                    {{ __('admin.Ready for Pitch') }} 
+                    {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
+                    @elseif($project->project_status == 100)
+                    {{ __('admin.Project Submitted') }} 
+                    {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
+                    @endif
+                  </span>
                 </td>
                 <td>{{ $project->region }}</td>
                 <td>
-                  <div class="progress mb-2" style="height: 20px;">
-                    <div class="progress-bar bg-success" role="progressbar"
-                      style="width:{{ $project->project_status  }}%;" aria-valuenow="{{ $project->project_status  }}"
-                      aria-valuemin="0" aria-valuemax="100">{{
-                      $project->project_status }}% {{ $l == 'en' ? 'Complete' :
-                      'مكتمل' }}</div>
+                  <div class="progress mb-2" style="height: 18px; background-color: #f3f4f6; border-radius: 8px;">
+                    <div 
+                      class="progress-bar 
+                        @if($project->project_status < 40) bg-danger
+                        @elseif($project->project_status < 80) bg-warning
+                        @else bg-success
+                        @endif
+                        fw-semibold text-dark"
+                        role="progressbar"
+                        style="width: {{ $project->project_status }}%; border-radius: 8px;"
+                        aria-valuenow="{{ $project->project_status }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                    >
+                      <span style="font-size: 0.95em;">
+                        {{ $project->project_status }}% 
+                        {{-- {{ $l == 'en' ? 'Complete' : 'مكتمل' }} --}}
+                      </span>
+                    </div>
                   </div>
                 </td>
                 <td>{{ $project->created_at }}</td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
+                  <button class="btn btn-sm btn-icon rounded-circle btn-label-info mb-3" data-bs-toggle="modal"
                     data-bs-target="#editProjectIdeaModal{{ $project->id }}">
-                    <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
+                    <i class="ti ti-edit ti-sm"></i>
                   </button>
                 </td>
               </tr>
@@ -362,6 +378,10 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <th scope="col">{{ $l == 'en' ? 'Submitted On' : 'تم التقديم في' }}</th>
               <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
               <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Team Leader' : 'قائد الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الإلكتروني' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Phone' : ' رقم الهاتف' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Region' : ' المنطقة' }}</th>
               <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
             </tr>
           </thead>
@@ -373,6 +393,10 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $project->step_name }}</td>
                 <td>{{ $project->project_name }}</td>
                 <td>{{ $project->submissionDate }}</td>
+                <td>{{ $project->team_leader }}</td>
+                <td>{{ $project->eamil }}</td>
+                <td>{{ $project->phone }}</td>
+                <td>{{ $project->region }}</td>
                 <td>
                   <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
                     {{ $l == 'en' ? 'View' : 'عرض' }}
@@ -387,6 +411,66 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
       </div>
     </div>
 
+
+     <div class="card shadow-sm mb-4" id="submitted-project-section">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.Projects_NotSubmitted') }}
+             
+            </h4>
+          </div>
+          <div class="btn-group ms-3">
+            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="submittedProjectsExportBtn">
+              <i class="bi bi-download me-1"></i> {{ $l == 'ar' ? 'تصدير' : 'Export' }}
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="exportTable('submitted-projects-table', 'csv')"><i class="bi bi-filetype-csv me-2"></i>{{ $l == 'ar' ? 'تصدير CSV' : 'Export CSV' }}</a></li>
+              <li><a class="dropdown-item" href="#" onclick="exportTable('submitted-projects-table', 'excel')"><i class="bi bi-file-earmark-excel me-2"></i>{{ $l == 'ar' ? 'تصدير Excel' : 'Export Excel' }}</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <table class="table submitted-projects-table table-hover align-middle">
+          <thead>
+            <tr>
+              <th scope="col">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Not Submitted On' : 'لم يتم التقديم في' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
+              {{-- <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th> --}}
+              <th scope="col">{{ $l == 'en' ? 'Team Leader' : 'قائد الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الإلكتروني' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Phone' : ' رقم الهاتف' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Region' : ' المنطقة' }}</th>
+              {{-- <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th> --}}
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            @foreach ($data['not_submitted_projects'] as $notproject)
+              <tr>
+                <td>{{ $notproject->team_name }}</td>
+                <td>{{ $notproject->company_step }}</td>
+                <td>{{ $notproject->project_name }}</td>
+                {{-- <td>{{ $notproject->submissionDate }}</td> --}}
+                <td>{{ $notproject->team_leader }}</td>
+                <td>{{ $notproject->email }}</td>
+                <td>{{ $notproject->phone }}</td>
+                <td>{{ $notproject->region }}</td>
+                {{-- <td>
+                  <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
+                    {{ $l == 'en' ? 'View' : 'عرض' }}
+                  </a>
+                </td> --}}
+            </tr>
+           
+            @endforeach
+          </tbody>
+        </table>
+
+      </div>
+    </div>
 
   </div>
 </div>
