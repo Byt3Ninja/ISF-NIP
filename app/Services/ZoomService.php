@@ -256,7 +256,14 @@ class ZoomService implements OnlineMeetingServiceInterface
         }
 
         $hostEmail = $this->getAvailableZoomUserEmail($data['start_time'], $data['duration']);
-        $path = "users/{$hostEmail}/meetings";
+        if( empty( $hostEmail ) || !trim( $hostEmail ) )
+        {
+            $path = 'users/me/meetings';
+        }
+        else
+        {
+            $path = "users/{$hostEmail}/meetings";
+        }
         $url = $this->retrieveZoomUrl();
 
         $payload = [
@@ -290,6 +297,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                         'id'        => $responseData['id'],
                         'start_url' => $responseData['start_url'],
                         'join_url'  => $responseData['join_url'],
+                        'passcode' => array_key_exists('password', $responseData) ? $responseData['password'] : null,
                     ],
                 ];
 

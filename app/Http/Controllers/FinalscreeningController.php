@@ -216,8 +216,9 @@ class FinalscreeningController extends Controller
                 'duration' => $request->period,
                 'zoom_id' => $onlineMeeting['data']['id'],
                 'start_url' =>  $onlineMeeting['data']['start_url'],
-                'join_url' =>  $onlineMeeting['data']['join_url']
-                ]);
+                'join_url' =>  $onlineMeeting['data']['join_url'],
+                'zoom_passcode' => $onlineMeeting['data']['passcode'] ?? null,
+            ]);
                 
             $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;
@@ -325,6 +326,10 @@ class FinalscreeningController extends Controller
 		$results = $metadata['results'];
 		$_companies = $metadata['_companies']->where('step', $id)->values();
 
+        $judges = $judges->map(function( $item ) {
+            $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
+            return $item;
+        });
         return view('admin.settings.final.results', compact('cstep', 'judges', 'steps', '_steps', 'id', '_companies', 'companies', 'evaluation', 'results', 'c', 'cj', ));
     }
 

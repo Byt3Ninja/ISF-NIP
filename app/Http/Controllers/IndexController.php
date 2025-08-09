@@ -6,6 +6,7 @@ use App\User;
 use App\Company;
 use App\Messages;
 use App\Settings;
+use GuzzleHttp\Client;
 use App\Mail\CustomEmail;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
