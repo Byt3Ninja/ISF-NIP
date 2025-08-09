@@ -396,6 +396,66 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
     </div>
 
 
+     <div class="card shadow-sm mb-4" id="submitted-project-section">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i> {{ __('admin.Projects_NotSubmitted') }}
+             
+            </h4>
+          </div>
+          <div class="btn-group ms-3">
+            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="submittedProjectsExportBtn">
+              <i class="bi bi-download me-1"></i> {{ $l == 'ar' ? 'تصدير' : 'Export' }}
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="exportTable('submitted-projects-table', 'csv')"><i class="bi bi-filetype-csv me-2"></i>{{ $l == 'ar' ? 'تصدير CSV' : 'Export CSV' }}</a></li>
+              <li><a class="dropdown-item" href="#" onclick="exportTable('submitted-projects-table', 'excel')"><i class="bi bi-file-earmark-excel me-2"></i>{{ $l == 'ar' ? 'تصدير Excel' : 'Export Excel' }}</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <table class="table submitted-projects-table table-hover align-middle">
+          <thead>
+            <tr>
+              <th scope="col">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Not Submitted On' : 'لم يتم التقديم في' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
+              {{-- <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th> --}}
+              <th scope="col">{{ $l == 'en' ? 'Team Leader' : 'قائد الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الإلكتروني' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Phone' : ' رقم الهاتف' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Region' : ' المنطقة' }}</th>
+              {{-- <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th> --}}
+            </tr>
+          </thead>
+          <tbody>
+            <!-- This is example data, should be populated from a loop in a real application -->
+            @foreach ($data['not_submitted_projects'] as $notproject)
+              <tr>
+                <td>{{ $notproject->team_name }}</td>
+                <td>{{ $notproject->company_step }}</td>
+                <td>{{ $notproject->project_name }}</td>
+                {{-- <td>{{ $notproject->submissionDate }}</td> --}}
+                <td>{{ $notproject->team_leader }}</td>
+                <td>{{ $notproject->email }}</td>
+                <td>{{ $notproject->phone }}</td>
+                <td>{{ $notproject->region }}</td>
+                {{-- <td>
+                  <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
+                    {{ $l == 'en' ? 'View' : 'عرض' }}
+                  </a>
+                </td> --}}
+            </tr>
+           
+            @endforeach
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
