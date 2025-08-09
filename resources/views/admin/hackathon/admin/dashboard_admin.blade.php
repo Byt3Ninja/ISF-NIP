@@ -362,6 +362,10 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <th scope="col">{{ $l == 'en' ? 'Submitted On' : 'تم التقديم في' }}</th>
               <th scope="col">{{ $l == 'en' ? 'Project Name' : ' اسم المشروع ' }}</th>
               <th scope="col">{{ $l == 'en' ? 'Date of Submission' : 'تاريخ التقديم' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Team Leader' : 'قائد الفريق' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Email' : 'البريد الإلكتروني' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Phone' : ' رقم الهاتف' }}</th>
+              <th scope="col">{{ $l == 'en' ? 'Region' : ' المنطقة' }}</th>
               <th scope="col">{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}</th>
             </tr>
           </thead>
@@ -373,6 +377,10 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $project->step_name }}</td>
                 <td>{{ $project->project_name }}</td>
                 <td>{{ $project->submissionDate }}</td>
+                <td>{{ $project->team_leader }}</td>
+                <td>{{ $project->eamil }}</td>
+                <td>{{ $project->phone }}</td>
+                <td>{{ $project->region }}</td>
                 <td>
                   <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
                     {{ $l == 'en' ? 'View' : 'عرض' }}

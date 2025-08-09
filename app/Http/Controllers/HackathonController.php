@@ -1842,7 +1842,13 @@ class HackathonController extends Controller
                 TF.id as 'TF_id',
                 TF.name as 'TF_name',
                 TF.user_id as 'TF_user_id',
-                TF.project_name_en as 'TF_project_name_en'
+                TF.project_name_en as 'TF_project_name_en',
+                TF.Region as 'TF_region',
+                Concat(UTF.first_name_en, ' ', UTF.last_name_en) as 'UTF_user_name_en',
+                Concat(UTF.first_name_ar, ' ', UTF.last_name_ar) as 'UTF_user_name_ar',
+                UTF.id as 'UTF_id',
+                UTF.email as 'UTF_email',
+                UTF.phone as 'UTF_phone'
             FROM
                 form_data as FD 
             LEFT JOIN
@@ -1851,6 +1857,8 @@ class HackathonController extends Controller
                 users as U ON U.id = FD.user_id
             LEFT JOIN
                 team_formations as TF ON TF.user_id = U.id
+            LEFT JOIN
+                users as UTF ON UTF.id = FD.user_id
             LEFT JOIN
                 steps as S ON S.id = FD.step_id
             LEFT JOIN
@@ -1886,11 +1894,11 @@ class HackathonController extends Controller
             $submission->step_id = $first->FD_step_id;
             $submission->user_id = $first->FD_user_id;
             $submission->company_step = $first->C_step;
-            // $submission->startup_name = $first->{'C_name_' . $l};
-            // $submission->submitted_by = $first->{'user_name_' . $l};
+            $submission->team_leader = $first->UTF_user_name_en;
+            $submission->region = $first->TF_region;
             $submission->step_name = $first->S_title;
-            // $submission->program_name = $first->CYC_title;
-            // $submission->organization_name = $first->O_name_en;
+            $submission->eamil = $first->UTF_email;
+            $submission->phone = $first->UTF_phone;
             $submission->submissionDate = $first->FD_created_at ?? $first->FD_updated_at;
             return $submission;
         })->values()->all(); // remove collection keys (numeric indexing)
