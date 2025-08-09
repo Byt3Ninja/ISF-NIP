@@ -1925,49 +1925,40 @@ class HackathonController extends Controller
 
         $data['projects_NotSubmitted'] = array_diff($allUsers, $usersWithFormData);
 
-        
-            $notSubmittedUsers = "
-            SELECT
-                C.name_en as 'C_name_en',
-                C.name_ar as 'C_name_ar',
-                C.id as 'C_id',
-                C.step as 'C_step',
-                Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
-                Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
-                U.id as 'U_id',
-                U.email as 'U_email',
-                U.phone as 'U_phone',
-                CYC.title as 'CYC_title',
-                CYC.id as 'CYC_id',
-                CYC.organization_id as 'CYC_organization_id',
-                TF.id as 'TF_id',
-                TF.name as 'TF_name',
-                TF.user_id as 'TF_user_id',
-                TF.project_name_en as 'TF_project_name_en',
-                TF.Region as 'TF_region',
-                S.id as 'S_id',
-                S.title as 'S_title',
-                S.stype as 'S_stype'
-            FROM
-                users as U
-            LEFT JOIN
-                companies as C ON C.id = U.company_id
-            LEFT JOIN
-                team_formations as TF ON TF.user_id = U.id
-            LEFT JOIN
-                cycles as CYC ON CYC.id = C.cycle
-            LEFT JOIN
-                organizations as O ON O.id = CYC.organization_id
-            LEFT JOIN
-                steps as S ON S.id = C.step 
-             WHERE
-                U.id NOT IN (".implode(',', $usersWithFormData).")
-                AND CYC.id = ?
-                AND S.stype = 5
-                AND U.id IN (".implode(',', $data['projects_NotSubmitted']).")
-                ";
+        $notSubmittedUsers = DB::table('users as U')
+            ->select([
+                'C.name_en as C_name_en',
+                'C.name_ar as C_name_ar',
+                'C.id as C_id',
+                'C.step as C_step',
+                DB::raw("Concat(U.first_name_en, ' ', U.last_name_en) as user_name_en"),
+                DB::raw("Concat(U.first_name_ar, ' ', U.last_name_ar) as user_name_ar"),
+                'U.id as U_id',
+                'U.email as U_email',
+                'U.phone as U_phone',
+                'CYC.title as CYC_title',
+                'CYC.id as CYC_id',
+                'CYC.organization_id as CYC_organization_id',
+                'TF.id as TF_id',
+                'TF.name as TF_name',
+                'TF.user_id as TF_user_id',
+                'TF.project_name_en as TF_project_name_en',
+                'TF.Region as TF_region',
+                'S.id as S_id',
+                'S.title as S_title',
+                'S.stype as S_stype'
+            ])
+            ->leftJoin('companies as C', 'C.id', '=', 'U.company_id')
+            ->leftJoin('team_formations as TF', 'TF.user_id', '=', 'U.id')
+            ->leftJoin('cycles as CYC', 'CYC.id', '=', 'TF.cycle_id')
+            ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
+            ->leftJoin('steps as S', 'S.id', '=', 'C.step')
+            ->where('CYC.id', $id)
+            ->where('S.stype', 5)
+            ->whereNotIn('U.id', $usersWithFormData)
+            ->whereIn('U.id', $data['projects_NotSubmitted'])
+            ->get();
 
-        $notSubmittedUsers = collect(DB::select($notSubmittedUsers, [$id]));
 
         $data['not_submitted_projects'] = $notSubmittedUsers->map(function ($group, $stepId) use ($l) {
             $submission = new stdClass;
