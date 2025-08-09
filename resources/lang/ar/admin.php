@@ -2307,5 +2307,6 @@ return [
 	'Al_Ahsa' => 'الأحساء',
 	'Asir' => 'عسير',
 	'Region' => 'المنطقة',
-	'On going' => 'جاري'
+	'On going' => 'جاري',
+	'Projects_NotSubmitted' => 'المشاريع غير المقدمة',
 ];

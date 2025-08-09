@@ -1904,6 +1904,7 @@ class HackathonController extends Controller
         })->values()->all(); // remove collection keys (numeric indexing)
 
         $data['submitted_projects'] = array_values($data['submitted_projects']);
+        
         $allUsers = DB::table('users')
             ->join('team_formations', 'team_formations.user_id', '=', 'users.id')
             ->join('steps', 'steps.cycle_id', '=', 'team_formations.cycle_id')
@@ -1921,6 +1922,75 @@ class HackathonController extends Controller
             ->distinct()
             ->pluck('form_data.user_id')
             ->toArray();
+
+        $data['projects_NotSubmitted'] = array_diff($allUsers, $usersWithFormData);
+
+        
+            $notSubmittedUsers = "
+            SELECT
+                C.name_en as 'C_name_en',
+                C.name_ar as 'C_name_ar',
+                C.id as 'C_id',
+                C.step as 'C_step',
+                Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
+                Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
+                U.id as 'U_id',
+                U.email as 'U_email',
+                U.phone as 'U_phone',
+                CYC.title as 'CYC_title',
+                CYC.id as 'CYC_id',
+                CYC.organization_id as 'CYC_organization_id',
+                TF.id as 'TF_id',
+                TF.name as 'TF_name',
+                TF.user_id as 'TF_user_id',
+                TF.project_name_en as 'TF_project_name_en',
+                TF.Region as 'TF_region',
+                S.id as 'S_id',
+                S.title as 'S_title',
+                S.stype as 'S_stype'
+            FROM
+                users as U
+            LEFT JOIN
+                companies as C ON C.id = U.company_id
+            LEFT JOIN
+                team_formations as TF ON TF.user_id = U.id
+            LEFT JOIN
+                cycles as CYC ON CYC.id = C.cycle
+            LEFT JOIN
+                organizations as O ON O.id = CYC.organization_id
+            LEFT JOIN
+                steps as S ON S.id = C.step 
+             WHERE
+                U.id NOT IN (".implode(',', $usersWithFormData).")
+                AND CYC.id = ?
+                AND S.stype = 5
+                AND U.id IN (".implode(',', $data['projects_NotSubmitted']).")
+                ";
+
+        $notSubmittedUsers = collect(DB::select($notSubmittedUsers, [$id]));
+
+        $data['not_submitted_projects'] = $notSubmittedUsers->map(function ($group, $stepId) use ($l) {
+            $submission = new stdClass;
+            $submission->company_id = $group->C_id;
+            $submission->team_leader = $group->{'user_name_' . $l};
+            $submission->team_name = $group->TF_name;
+            $submission->project_name = $group->TF_project_name_en;
+            $submission->email = $group->U_email;
+            $submission->phone = $group->U_phone;
+            $submission->cycle_title = $group->CYC_title;
+            $submission->cycle_id = $group->CYC_id;
+            $submission->step_id = 5; // Assuming step_id is always 5 for not submitted projects
+            $submission->user_id = $group->U_id;
+            $submission->company_step = $group->S_title;
+            $submission->region = $group->TF_region;
+            return $submission;
+        })->values()->all();
+     
+        // dd($data['not_submitted_projects']);
+        
+
+
+     
 
         $data['totalUsers']= count($allUsers);
         $data['usersWithFormDataCount'] = count($usersWithFormData);
