@@ -169,14 +169,16 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
           <table class="table projects-table table-hover align-middle">
             <thead>
               <tr>
-                <th class="text-nowrap">{{ __('admin.project_name') }}</th>
-                <th class="text-nowrap">{{ __('admin.project_description') }}</th>
-                <th class="text-nowrap">{{ __('admin.team_leader') }}</th>
-                <th class="text-nowrap">{{ __('admin.Status') }}</th>
-                <th class="text-nowrap">{{ __('admin.Region') }}</th>
-                <th class="text-nowrap">{{ __('admin.Progress') }}</th>
-                <th class="text-nowrap">{{ __('admin.creation_date') }}</th>
-                <th class="text-nowrap">{{ __('admin.actions') }}</th>
+                <th>{{ __('admin.project_name') }}</th>
+                <th>{{ __('admin.project_description') }}</th>
+                <th>{{ __('admin.team_leader') }}</th>
+                <th>{{ __('admin.Email') }}</th>
+                <th>{{ __('admin.Phone') }}</th>
+                <th>{{ __('admin.Status') }}</th>
+                <th>{{ __('admin.Region') }}</th>
+                <th>{{ __('admin.Progress') }}</th>
+                <th>{{ __('admin.creation_date') }}</th>
+                <th>{{ __('admin.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -186,61 +188,43 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <tr>
                 <td>{{ $project->project_name }}</td>
                 <td> {{ $project->project_description }}</td>
+                <td>{{ $project->leader->name }}</td>
+                <td>{{ $project->leader->email }}</td>
+                <td>{{ $project->leader->phone }}</td>
                 <td>
-                  <div class="d-flex flex-column">
-                    <strong>{{ $project->leader->name }}</strong>
-                    <small class="text-muted">{{ $project->leader->email }}</small>
-                    <small class="text-muted">{{ $project->leader->phone }}</small>
-                  </div>
-                </td>
-                <td>
-                  <span class="text-nowrap">
-                    @if($project->project_status == 20)
-                    {{ __('admin.Idea + Team') }} 
-                    {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
-                    @elseif($project->project_status == 40)
-                    {{ __('admin.Research') }} 
-                    {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
-                    @elseif($project->project_status == 60)
-                    {{ __('admin.Design & Build') }} 
-                    {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
-                    @elseif($project->project_status == 80)
-                    {{ __('admin.Ready for Pitch') }} 
-                    {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
-                    @elseif($project->project_status == 100)
-                    {{ __('admin.Project Submitted') }} 
-                    {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
-                    @endif
-                  </span>
+
+                  @if($project->project_status == 20)
+                  {{ __('admin.Idea + Team') }} 
+                  {{-- : {{ __('admin.Define the problem and form a team with clear roles.') }} --}}
+                  @elseif($project->project_status == 40)
+                  {{ __('admin.Research') }} 
+                  {{-- : {{ __('admin.Validate the idea, study users, and outline key features.') }} --}}
+                  @elseif($project->project_status == 60)
+                  {{ __('admin.Design & Build') }} 
+                  {{-- : {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }} --}}
+                  @elseif($project->project_status == 80)
+                  {{ __('admin.Ready for Pitch') }} 
+                  {{-- : {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }} --}}
+                  @elseif($project->project_status == 100)
+                  {{ __('admin.Project Submitted') }} 
+                  {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
+                  @endif
                 </td>
                 <td>{{ $project->region }}</td>
                 <td>
-                  <div class="progress mb-2" style="height: 18px; background-color: #f3f4f6; border-radius: 8px;">
-                    <div 
-                      class="progress-bar 
-                        @if($project->project_status < 40) bg-danger
-                        @elseif($project->project_status < 80) bg-warning
-                        @else bg-success
-                        @endif
-                        fw-semibold text-dark"
-                        role="progressbar"
-                        style="width: {{ $project->project_status }}%; border-radius: 8px;"
-                        aria-valuenow="{{ $project->project_status }}"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                    >
-                      <span style="font-size: 0.95em;">
-                        {{ $project->project_status }}% 
-                        {{-- {{ $l == 'en' ? 'Complete' : 'مكتمل' }} --}}
-                      </span>
-                    </div>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar"
+                      style="width:{{ $project->project_status  }}%;" aria-valuenow="{{ $project->project_status  }}"
+                      aria-valuemin="0" aria-valuemax="100">{{
+                      $project->project_status }}% {{ $l == 'en' ? 'Complete' :
+                      'مكتمل' }}</div>
                   </div>
                 </td>
                 <td>{{ $project->created_at }}</td>
                 <td>
-                  <button class="btn btn-sm btn-icon rounded-circle btn-label-info mb-3" data-bs-toggle="modal"
+                  <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
                     data-bs-target="#editProjectIdeaModal{{ $project->id }}">
-                    <i class="ti ti-edit ti-sm"></i>
+                    <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
                   </button>
                 </td>
               </tr>
