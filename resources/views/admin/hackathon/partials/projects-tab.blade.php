@@ -20,7 +20,7 @@
           </p>
           <div id="submission-status-message" class="alert alert-info">
             {{ $l == 'en' ? 'You can upload your project now. Deadline: '. $data_evi['end']->format('F j, Y,') .'.'
-            : 'يمكنك رفع مشروعك الآن. الموعد النهائي: 17 مارس 2024, 12:00 ظهراً.' }}
+            : 'يمكنك رفع مشروعك الآن. الموعد النهائي: '. $data_evi['end']->format('F j, Y,') .'.' }}
           </div>
           {{-- <div id="already-submitted-message" class="alert alert-success" style="display:none;">
             <i class="bi bi-check-circle-fill me-2"></i>
