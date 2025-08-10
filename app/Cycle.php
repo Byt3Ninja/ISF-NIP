@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Step;
+use Carbon\Carbon;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -77,4 +79,17 @@ class Cycle extends Model
     {
         return $this->hasMany(CycleCustomPages::class);
     }
+
+  public function getProgress()
+{
+    $totalSteps = Step::where('cycle_id', $this->id)->count();
+
+    $totalStepsFinish = \App\Step::where('to', '>', Carbon::now())
+        ->where('cycle_id', $this->id)
+        ->count();
+
+    return $totalSteps > 0
+        ? ($totalStepsFinish / $totalSteps) * 100
+        : 0;
+}
 }
