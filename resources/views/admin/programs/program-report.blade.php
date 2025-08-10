@@ -369,7 +369,7 @@
                     <label for="perfFilterSector" class="form-label fw-semibold">{{ __('admin.Sector') }}</label>
                     <select class="form-select select2" id="perfFilterSector" name="sector">
                        <option selected value="">{{ __('admin.All') }}</option>
-                       @foreach ($sectors as $sector)
+                       @foreach ($sectorsLabel as $sector)
                           <option value="{{ $sector->name_en }}" {{ request('sector') == $sector->name_en ? 'selected' : '' }}>
                              {{ $sector->{'name_'.$l} }}
                           </option>
@@ -438,19 +438,19 @@
                   <table class="table table-striped table-hover align-middle performance-table">
                     <thead>
                       <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">{{ __('admin.company name') }}</th>
-                        <th scope="col">{{ __('admin.Sector') }}</th>
-                        <th scope="col">{{ __('admin.Stage') }}</th>
+                        <th class="text-center">#</th>
+                        <th class="text-center">{{ __('admin.company name') }}</th>
+                        <th class="text-center">{{ __('admin.Sector') }}</th>
+                        <th class="text-center">{{ __('admin.Stage') }}</th>
                       </tr>
                     </thead>
                     <tbody>
                         @foreach ($companies as $index => $company)
                            <tr>
-                              <th scope="row">{{ $index + 1 }}</th>
-                              <td>{{ $company->{'name_'.$l} }}</td>
-                              <td>{{ $company->sectoR?->{'name_'.$l} ?? '-' }}</td>
-                              <td>{{ $company->stagE->{'name_'.$l} ?? '-' }}</td>
+                              <th class="text-center">{{ $index + 1 }}</th>
+                              <td class="text-center">{{ $company->{'name_'.$l} }}</td>
+                              <td class="text-center">{{ $company->sectoR?->{'name_'.$l} ?? '-' }}</td>
+                              <td class="text-center">{{ $company->stagE->{'name_'.$l} ?? '-' }}</td>
                            </tr>
                         @endforeach
                     </tbody>
@@ -585,7 +585,7 @@
                     <thead>
                       <tr>
                         <th scope="col">{{ __('admin.Mentor') }}</th>
-                        <th scope="col">{{ __('admin.Total Hours') }}</th>
+                        <th scope="col">{{ __('admin.Total Sessions') }}</th>
                         <th scope="col">{{ __('admin.Total Hours') }}</th>
                         <th scope="col">{{ __('admin.Average Rating') }}</th>
                       </tr>
@@ -720,7 +720,6 @@
                         <th class="text-center">{{ __('admin.Workshop Name') }}</th>
                         <th class="text-center">{{ __('admin.Trainer') }}</th>
                         <th class="text-center">{{ __('admin.Participants') }}</th>
-                        {{-- <th class="text-center">{{ __('admin.rating') }}</th> --}}
                         <th class="text-center">{{ __('admin.type') }}</th>
                       </tr>
                     </thead>
@@ -735,11 +734,6 @@
                                  {{  '-' }}
                             @endif
                          </td>
-                         {{-- <td>
-                             <span class="badge bg-label-primary rating-badge">
-                                  {{ '-' }}
-                              </span>
-                         </td> --}}
                           <td class="text-center"> <span class="badge {{ $ws->type === 'sessions' ? 'bg-secondary' : ($ws->type === 'online' ? 'bg-info' : 
                               'bg-label-warning text-dark') }}">
                              {{ $ws->type === 'sessions' ? 'Live Training' : 
@@ -765,8 +759,6 @@
                     <thead>
                       <tr>
                         <th scope="col">{{ __('admin.company name') }}</th>
-                        {{-- <th scope="col">{{ __('admin.completion rate') }}</th>
-                        <th scope="col">{{ __('admin.Pass/Fail') }}</th> --}}
                       </tr>
                     </thead>
                     <tbody>
@@ -793,14 +785,6 @@
                   <canvas id="workshopTypeChart"></canvas>
                 </div>
               </div>
-              <!-- Chart 2: Average Rating per Trainer -->
-              {{-- <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Average Trainer Ratings') }}</h4>
-                <div class="chart-container">
-                  <canvas id="trainerRatingChart"></canvas>
-                </div>
-              </div> --}}
-
               <div>
   <h4 class="fw-semibold border-bottom border-2 border-primary">
     <i class="fas fa-poll text-primary me-2"></i> {{ __('admin.Survey Results') }}
@@ -905,7 +889,7 @@
                     <tbody>
                          @forelse ($companyEvaluations as $index => $eval)
                       <tr>
-                        <td class="text-center rank-col">
+                        {{-- <td class="text-center rank-col">
                           {{ $index + 1 }}
                           @if ($index == 0)
                             <i class="fas fa-medal text-gold"></i>
@@ -914,15 +898,15 @@
                           @elseif ($index == 2)
                             <i class="fas fa-bronze text-bronze"></i>
                           @endif
-                        </td>
-                        <td class="text-right-align">{{ $eval['company_name'] }}</td>
+                        </td> --}}
+                        {{-- <td class="text-right-align">{{ $eval['company_name'] }}</td>
                         <td class="text-center score-col">{{ $eval['total_score'] }} / 100</td>
                         <td class="text-right-align comments-col">{{ $eval['comments'] }}</td>
                         <td class="text-center">
                           <span class="badge bg-label-{{ $eval['status'] == 'Highest Rated' ? 'success' : ($eval['status'] == 'Good Performance' ? 'primary' : 'danger') }} status-badge">
                             {{ __($eval['status']) }}
                           </span>
-                        </td>
+                        </td> --}}
                       </tr>
                     @empty
                       {{--  <tr>
@@ -977,21 +961,21 @@
                 <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-bullseye text-primary me-2"></i> {{ __('admin.Final Results Summary') }}</h4>
                 <h6 class="mb-2 fw-bold text-success">{{ __('admin.Highest Rated') }}:</h6>
                 <ul class="summary-list" id="feTopCompaniesList">
-                    @foreach ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->take(3) as $eval)
+                    {{-- @foreach ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->take(3) as $eval)
                         <li><i class="fas fa-star"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score'] }}/100)</small></li>
                     @endforeach
                     @if ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->isEmpty())
                         <li>{{ __('admin.No companies found') }}</li>
-                    @endif
+                    @endif --}}
                 </ul>
                 <h6 class="mt-4 mb-2 fw-bold text-danger">{{ __('admin.Needs Improvement') }}:</h6>
                 <ul class="summary-list" id="feImprovementCompaniesList">
-                    @foreach ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1) as $eval)
+                    {{-- @foreach ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1) as $eval)
                         <li><i class="fas fa-wrench"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score'] }}/100)</small></li>
-                    @endforeach
-                    @if ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1)->isEmpty())
+                    @endforeach --}}
+                    {{-- @if ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1)->isEmpty())
                         <li>{{ __('admin.No companies found') }}</li>
-                    @endif
+                    @endif --}}
                 </ul>
             </div>
         </div>

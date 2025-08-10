@@ -93,22 +93,4 @@ class ProgramResource extends JsonResource
         return 'Unknown';
     }
 
-    protected function getProgress(): int
-    {
-        $now = Carbon::now();
-
-        $steps = $this->steps;
-
-        if ($steps->count() === 0) {
-          return 0;
-        }
-
-        $finishedSteps = $steps->filter(function ($step) use ($now) {
-             return $step->to && Carbon::parse($step->to)->lte($now);
-        });
-
-        $progress = ($finishedSteps->count() / $steps->count()) * 100;
-
-        return round($progress, 2); 
-    }
 }
