@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use App\Team_member;
 use App\CyclesMentors;
 use App\TeamFormation;
+use App\ScreeningEvaluation;
+use App\ScreeningEvaluationResults;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Beta\Microsoft\Graph\Model\Team;
@@ -416,6 +418,7 @@ class HackathonController extends Controller
                 c.img_url as 'c_img_url',
                 c.created_at as 'c_created_at',
                 c.updated_at as 'c_updated_at',
+                c.winners_announcement as 'c_winners_announcement',
                 o.id as 'o_id',
                 o.name_ar as 'o_name_ar',
                 o.name_en as 'o_name_en',
@@ -488,7 +491,7 @@ class HackathonController extends Controller
                 'cycle_id' => $id,
                 'Company_id' => $item->Com_id,
                 'max_team' => $step->where('id', $item->Com_step)->first()?->count_team_number ?? 0,
-               
+                'announcement' => $item->c_winners_announcement == 1 ? true : false,
             ];
         }
 
@@ -923,6 +926,35 @@ class HackathonController extends Controller
 
 
         // return view('admin.hackathon.show', compact('hackathon'));
+        $winners = collect([]);
+        if( $currentHackathon['announcement'] == true )
+        {
+            $teams = TeamFormation::teams( $id );
+            $teams = $teams->where('winner', 'selected')->values();
+            $winners = $teams->map(function( $team ) {
+                $winner = new stdClass;
+                $winner->id = $team->id;
+                $winner->name = $team->company->name;
+                $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
+                $winner->projectTitle = $team->project->name;
+                $winner->teamName = $team->name;
+                $winner->description = $team->project->description;
+                $leader = $team->members->where('isLeader', true)->first(); 
+                $winner->teamLeader = new stdClass;
+                $winner->teamLeader->name = $leader?->name;
+                $winner->teamLeader->role = $leader?->role;
+                $winner->teamLeader->image = $leader?->image;
+                $winner->teamMembers = $team->members->map(function( $team_member ) {
+                    $member = new stdClass;
+                    $member->name = $team_member->name;
+                    $member->role = $team_member->role;
+                    $member->image = $team_member->image;
+                    $member->isLeader = $team_member->isLeader == 1 ? true : false;
+                    return $member;
+                });
+                return $winner;
+            });
+        }
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
             'currentHackathon',
@@ -943,7 +975,8 @@ class HackathonController extends Controller
             'steps',
             'showStep',
             'steps_ids',
-            'teamJoins'
+            'teamJoins',
+            'winners'
         ));
     }
 
@@ -1990,9 +2023,161 @@ class HackathonController extends Controller
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));
     }
 
-    public function viewHackathonWinners($id)
+    public function viewHackathonWinners( $id )
     {
-      
-        return view('admin.hackathon.admin.winners');
+        $l = app()->getLocale();
+        $cycle = DB::table('cycles as c')
+            ->select([
+                'c.id',
+                'c.title',
+                'c.description',
+                'c.start',
+                'c.end',
+                'c.winners_announcement',
+                'o.id AS organization_id',
+                'o.name_ar AS organization_name_ar',
+                'o.name_en AS organization_name_en',
+            ])
+            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
+            ->where('c.type', 'Hackathon')
+            ->whereNull('c.deleted_at')
+            ->where('c.id', $id)
+            ->first();
+
+        if( empty( $cycle ) ) { return abort(404); }
+        $teams = TeamFormation::teams( $id );
+        $teps_ids = $teams->whereNotNull('step')->pluck('step')->unique()->toArray();
+        foreach( $teps_ids as $stepId )
+        {
+            $check = ScreeningEvaluation::where('step_id', $stepId)->first();
+            if( empty( $check ) )
+			{
+				$evaluation = new ScreeningEvaluation();
+				$evaluation->step_id = $stepId;
+				$evaluation->save();
+			}
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
+            $metadata = ScreeningEvaluationResults::metadata( $stepId );
+            $judges = $metadata['judges'];
+            $judges = $judges->map(function( $item ) {
+                $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
+                return $item;
+            });
+
+            foreach( $teams as $index => $team )
+            {
+                $totalScore = 0;
+                $teamJudges = [];
+                $company_id = $team->company->id;
+                $publishedEvaluations = 0;
+                $averageScore = 0;
+                
+                foreach( $judges as $judge )
+                {
+                    if( in_array($company_id, $judge->startups->toArray()) )
+                    {
+                        $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
+                        if ($scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score)) {
+                            $teamJudges[] = $judge;
+                            $totalScore += (float) $scoped_company->score;
+                            $publishedEvaluations++;
+                        }
+                    }
+                }
+
+                if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
+                $teams[$index]->score = $averageScore;
+                $teams[$index]->judges = $teamJudges;
+            }
+        }
+        $winnersData = $teams->map(function( $team ) {
+            return [
+                'id' => $team->id,
+                'team' => $team->name,
+                'step' => $team->step_title,
+                'project' => $team->project->name ?? '-',
+                'score' => $team->score,
+                'judges' => $team->judges,
+                'rank' => $team->project->winner ?? '',
+            ];
+        });
+
+        $now = now();
+        $start = Carbon::parse($cycle->start);
+        $end = Carbon::parse($cycle->end);
+        $status = $now->lt($start) ? 'Upcoming' : ( $now->between($start, $end) ? 'Ongoing' : 'Finished' );
+        $status_ar = match($status) {
+            'Upcoming' => 'قادم',
+            'Ongoing' => 'قائم',
+            'Finished' => 'منتهي',
+            default => '',
+        };
+        $duration = $start->format('F d') . ' - ' . $end->format('d, Y');
+        $duration_ar = $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.'.$end->format('m')) . ' ' . $end->format('Y');
+
+        $hackathon = new stdClass;
+        $hackathon->id = $cycle->id;
+        $hackathon->title = $cycle->title;
+        $hackathon->description = $cycle->description;
+        $hackathon->status = $l == 'en' ? $status : $status_ar;
+        $hackathon->duration = $l == 'en' ? $duration : $duration_ar;
+        $hackathon->announcement = $cycle->winners_announcement == 1 ? true : false;
+        $hackathon->organization = new stdClass;
+        $hackathon->organization->id = $cycle->organization_id;
+        $hackathon->organization->name =  $cycle->{'organization_name_' . $l};
+
+        return view('admin.hackathon.admin.winners', compact('teams', 'winnersData', 'hackathon'));
+    }
+
+    public function publishHackathonWinners( Request $request, $id )
+    {
+        $cycle = DB::table('cycles as c')
+            ->select([
+                'c.id',
+                'c.title',
+                'c.description',
+                'c.start',
+                'c.end',
+                'c.winners_announcement',
+                'o.id AS organization_id',
+                'o.name_ar AS organization_name_ar',
+                'o.name_en AS organization_name_en',
+            ])
+            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
+            ->where('c.type', 'Hackathon')
+            ->whereNull('c.deleted_at')
+            ->where('c.id', $id)
+            ->first();
+
+        $l = app()->getLocale();
+        if( empty( $cycle ) )
+        {
+            $notFound = $l == 'en' ? 'Hackathon not found' : 'الهاكاتون غير موجود';
+            return redirect()->back()->with('error', $notFound);
+        }
+
+        DB::beginTransaction();
+        try {
+            $status = intval($request->announcementStatus);
+            DB::table('cycles')->where('id', $cycle->id)->update([
+                'winners_announcement' => $status
+            ]);
+            $winners = $request->winners;
+            $teamsIds = array_keys($winners);
+            $teams = TeamFormation::where('cycle_id', $cycle->id)->whereIn('id', $teamsIds)->get();
+            foreach( $teams as $team )
+            {
+                $team->winner_status = array_key_exists($team->id, $winners) ? $winners[$team->id] : null;
+                $team->save();
+            }
+            DB::commit();
+            return redirect()->back()->with('success', $l == 'en' ? 'Saved successfully' : 'تم الحفظ بنجاح');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $th->getMessage());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }
