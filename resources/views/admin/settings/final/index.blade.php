@@ -264,50 +264,45 @@
                                     $final_session = $company->fsession($cstep->id);
                                   @endphp
                                   
-                                  <div class="dropdown">
-                                    <button type="button" class="btn btn-sm btn-icon btn-label-secondary rounded-circle dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                                      <i class="ti ti-dots-vertical"></i>
+                                  <div class="d-flex gap-1 flex-wrap">
+                                    <button type="button" class="btn btn-sm btn-icon rounded-circle btn-label-info" onclick="viewDetails(this, {{ $company->id }})" title="{{ __('cycles.View Details') }}">
+                                      <i class="ti ti-eye"></i>
                                     </button>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                      <a class="dropdown-item" href="javascript:void(0);" onclick="viewDetails(this, {{ $company->id }})">
-                                        <i class="ti ti-eye me-2"></i>{{ __('cycles.View Details') }}
-                                      </a>
-                                      <div class="dropdown-divider"></div>
-                                      @if (!$final_session)
-                                        <span class="dropdown-item-text text-muted">{{ __('cycles.Add Judges first') }}</span>
+                                    
+                                    @if (!$final_session)
+                                      <span class="btn btn-sm btn-icon rounded-circle btn-label-secondary disabled" title="{{ __('cycles.Add Judges first') }}">
+                                        <i class="ti ti-plus"></i>
+                                      </span>
+                                    @else
+                                      @if($final_session && $final_session->join_url)
+                                        <button type="button" class="btn btn-sm btn-icon rounded-circle btn-label-primary" onclick="edit({{ $company->id }}, '{{ $final_session->datetime }}', '{{ $final_session->duration }}')" title="{{ __('cycles.Edit Session') }}">
+                                          <i class="ti ti-edit"></i>
+                                        </button>
+                                        <a class="btn btn-sm btn-icon rounded-circle btn-label-success" href="{{ $final_session->start_url }}" target="_blank" title="{{ __('cycles.Start Meeting') }}">
+                                          <i class="ti ti-brand-zoom"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-icon rounded-circle btn-label-warning" href="{{ $final_session->join_url }}" target="_blank" title="{{ __('cycles.Join Meeting') }}">
+                                          <i class="ti ti-user"></i>
+                                        </a>
+                                        @if( !empty( $final_session->zoom_passcode ) )
+                                          <button type="button" class="btn btn-sm btn-icon rounded-circle btn-label-secondary show-passcode" data-passcode="{{ $final_session->zoom_passcode }}" title="{{ __('cycles.Show Passcode') }}">
+                                            <i class="ti ti-key"></i>
+                                          </button>
+                                        @endif
+                                        <button type="button" class="btn btn-sm btn-icon rounded-circle btn-label-danger" onclick="deleteme({{ $final_session->id }})" title="{{ __('cycles.Delete Session') }}">
+                                          <i class="ti ti-trash"></i>
+                                        </button>
                                       @else
-                                        @if($final_session && $final_session->join_url)
-                                          <a class="dropdown-item" href="javascript:void(0);" onclick="edit({{ $company->id }}, '{{ $final_session->datetime }}', '{{ $final_session->duration }}')">
-                                            <i class="ti ti-edit me-2"></i>{{ __('cycles.Edit Session') }}
-                                          </a>
-                                          <a class="dropdown-item" href="{{ $final_session->start_url }}" target="_blank">
-                                            <i class="ti ti-brand-zoom me-2"></i>{{ __('cycles.Start Meeting') }}
-                                          </a>
-                                          <a class="dropdown-item" href="{{ $final_session->join_url }}" target="_blank">
-                                            <i class="ti ti-user me-2"></i>{{ __('cycles.Join Meeting') }}
-                                          </a>
-                                          @if( !empty( $final_session->zoom_passcode ) )
-                                            <a class="dropdown-item show-passcode" href="javascript:void(0);" data-passcode="{{ $final_session->zoom_passcode }}">
-                                              <i class="ti ti-key me-2"></i>{{ __('cycles.Show Passcode') }}
-                                            </a>
-                                          @endif
-                                          <div class="dropdown-divider"></div>
-                                          <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteme({{ $final_session->id }})">
-                                            <i class="ti ti-trash me-2"></i>{{ __('cycles.Delete Session') }}
-                                          </a>
-                                        @else
-                                          <a class="dropdown-item" href="javascript:void(0);" onclick="addzoom({{ $company->id }})">
-                                            <i class="ti ti-plus me-2"></i>{{ __('cycles.Add Zoom Session') }}
-                                          </a>
-                                          @if ($final_session && $final_session->id)
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteme({{ $final_session->id }})">
-                                              <i class="ti ti-trash me-2"></i>{{ __('cycles.Delete Session') }}
-                                            </a>
-                                          @endif
+                                        <button type="button" class="btn btn-sm btn-icon rounded-circle btn-label-primary" onclick="addzoom({{ $company->id }})" title="{{ __('cycles.Add Zoom Session') }}">
+                                          <i class="ti ti-plus"></i>
+                                        </button>
+                                        @if ($final_session && $final_session->id)
+                                          <button type="button" class="btn btn-sm btn-icon rounded-circle btn-label-danger" onclick="deleteme({{ $final_session->id }})" title="{{ __('cycles.Delete Session') }}">
+                                            <i class="ti ti-trash"></i>
+                                          </button>
                                         @endif
                                       @endif
-                                    </div>
+                                    @endif
                                   </div>
                                 </td>
                               </tr>
@@ -1022,10 +1017,18 @@
                 '_token': token
               },
               function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Session Deleted') }}.',
-                  'success');
+                Swal.fire({
+                  icon: 'success',
+                  title: "{{ __('admin.Deleted') }}!",
+                  html: "{{ __('admin.DeletedSuccessfully') }}.",
+                  showCancelButton: false,
+                  showConfirmButton: true,
+                  confirmButtonText: "{{ __('admin.OK') }}",
+                  customClass: {
+                    confirmButton: 'btn btn-primary',
+                  },
+                  buttonsStyling: false,
+                });
                 window.location.href = '/dashboard/final';
               }).fail(function(error) {
               console.log(error);

@@ -7,18 +7,29 @@ $winners = [
     'project' => 'Smart Medical Diagnosis System',
     'award_date' => 'August 4, 2025',
     'teamName' => 'Team Alpha',
+    'teamLeader' => (object)[
+      'name' => 'Alice Johnson',
+      'role' => 'Project Manager',
+      'image' => '/vuexy/assets/img/avatars/1.png'
+    ],
     'teamMembers' => [
       (object)[
         'name' => 'Alice Johnson',
-        'role' => 'Project Manager'
+        'role' => 'Project Manager',
+        'image' => '/vuexy/assets/img/avatars/1.png',
+        'isLeader' => true
       ],
       (object)[
         'name' => 'Bob Smith',
-        'role' => 'Lead Developer'
+        'role' => 'Lead Developer',
+        'image' => null,
+        'isLeader' => false
       ],
       (object)[
         'name' => 'Charlie Brown',
-        'role' => 'UX Designer'
+        'role' => 'UX Designer',
+        'image' => null,
+        'isLeader' => false
       ]
     ],
     'projectTitle' => 'Smart Medical Diagnosis System',
@@ -30,18 +41,29 @@ $winners = [
       'projectTitle' => 'AI-Powered Business Analytics',
       'award_date' => 'August 4, 2025',
       'teamName' => 'Team Beta',
+      'teamLeader' => (object)[
+        'name' => 'David Wilson',
+        'role' => 'Data Scientist',
+        'image' => '/images/team/david.jpg'
+      ],
       'teamMembers' => [
         (object)[
         'name' => 'David Wilson',
-        'role' => 'Data Scientist'
+        'role' => 'Data Scientist',
+        'image' => '/vuexy/assets/img/avatars/1.png',
+        'isLeader' => true
         ],
         (object)[
         'name' => 'Eva Green',
-        'role' => 'AI Engineer'
+        'role' => 'AI Engineer',
+        'image' => '/vuexy/assets/img/avatars/2.png',
+        'isLeader' => false
         ],
         (object)[
         'name' => 'Frank Wright',
-        'role' => 'Business Analyst'
+        'role' => 'Business Analyst',
+        'image' => '/vuexy/assets/img/avatars/3.png',
+        'isLeader' => false
         ]
       ],
     ],
@@ -52,18 +74,29 @@ $winners = [
       'projectTitle' => 'Eco-Friendly Smart Grid',
       'award_date' => 'August 4, 2025',
       'teamName' => 'Team Gamma',
+      'teamLeader' => (object)[
+        'name' => 'Grace Lee',
+        'role' => 'Environmental Scientist',
+        'image' => '/images/team/grace.jpg'
+      ],
       'teamMembers' => [
         (object)[
         'name' => 'Grace Lee',
-        'role' => 'Environmental Scientist'
+        'role' => 'Environmental Scientist',
+        'image' => '/vuexy/assets/img/avatars/4.png',
+        'isLeader' => true
         ],
         (object)[
         'name' => 'Henry Kim',
-        'role' => 'Renewable Energy Engineer'
+        'role' => 'Renewable Energy Engineer',
+        'image' => '/vuexy/assets/img/avatars/5.png',
+        'isLeader' => false
         ],
         (object)[
         'name' => 'Isabella Martinez',
-        'role' => 'Sustainability Consultant'
+        'role' => 'Sustainability Consultant',
+        'image' => '/vuexy/assets/img/avatars/6.png',
+        'isLeader' => false
         ]
       ],
     ],
@@ -78,9 +111,9 @@ $winners = [
       <div class="card h-100 border-0 shadow">
         <!-- Header -->
         <div class="card-header bg-light border-0 d-flex align-items-center py-3">
-          <img src="{{ $winner->logo }}" class="rounded-circle me-3 border" alt="Startup Logo" width="45" height="45">
+          <img src="{{ $winner->logo ?? '/images/logo-placeholder.png' }}" class="rounded-circle me-3 border shadow-xs" alt="Startup Logo" width="45" height="45">
           <div>
-            <h6 class="mb-0 fw-semibold text-dark">{{ $winner->name }}</h6>
+            <h6 class="mb-0 fw-bold text-dark">{{ $winner->name }}</h6>
             <small class="text-dark">{{ $winner->teamName }}</small>
           </div>
         </div>
@@ -91,7 +124,7 @@ $winners = [
           
           <!-- Project Description -->
           <p class="card-text text-muted mb-4 lh-lg">{{ $winner->description }}</p>
-          
+                    
           <!-- Team Members -->
           <div class="mb-0">
             <h6 class="text-dark mb-3 fw-semibold d-flex align-items-center">
@@ -104,9 +137,21 @@ $winners = [
               <div class="row g-2">
                 @foreach ($winner->teamMembers as $member)
                 <div class="col-12">
-                  <div class="bg-white border rounded p-2">
-                    <div class="fw-medium text-dark small mb-1">{{ $member->name }}</div>
-                    <small class="text-muted">{{ $member->role }}</small>
+                  <div class="bg-white border rounded p-2 {{ $member->isLeader ? 'border-primary bg-opacity-10' : '' }}">
+                    <div class="d-flex align-items-center">
+                      <img src="{{ $member->image ?? '/icons/account.svg' }}" class="rounded-circle me-3 border" alt="{{ $member->name }}" width="40" height="40">
+                      <div class="flex-grow-1">
+                        <div class="fw-medium text-dark small mb-1 d-flex align-items-center">
+                          {{ $member->name }}
+                        </div>
+                        <small class="text-muted">{{ $member->role }}</small>
+                      </div>
+                      @if($member->isLeader)
+                        <span class="badge bg-label-primary text-primary fw-semibold px-2 py-1 small">
+                          <i class="bi bi-award me-1"></i> {{ $l == 'ar' ? 'قائد' : 'Leader' }}
+                        </span>
+                      @endif
+                    </div>
                   </div>
                 </div>
                 @endforeach
@@ -117,14 +162,22 @@ $winners = [
                 <div class="row g-2">
                   @foreach ($winner->teamMembers as $index => $member)
                   <div class="col-12">
-                    <div class="d-flex align-items-center py-1">
-                      <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px; min-width: 24px;">
-                        <small class="text-white fw-bold">{{ $index + 1 }}</small>
-                      </div>
+                    <div class="d-flex align-items-center py-1 {{ $member->isLeader ? 'bg-warning bg-opacity-10 rounded px-2' : '' }}">
+                      <img src="{{ $member->image ?? '/icons/account.svg' }}" class="rounded-circle me-3 border" alt="{{ $member->name }}" width="32" height="32">
                       <div class="flex-grow-1">
-                        <div class="fw-medium text-dark small">{{ $member->name }}</div>
+                        <div class="fw-medium text-dark small d-flex align-items-center">
+                          {{ $member->name }}
+                          @if($member->isLeader)
+                            <i class="bi bi-star-fill text-warning ms-2" title="Team Leader"></i>
+                          @endif
+                        </div>
                         <small class="text-muted">{{ $member->role }}</small>
                       </div>
+                      @if($member->isLeader)
+                        <span class="badge bg-warning text-dark fw-semibold px-2 py-1 small">
+                          <i class="bi bi-award me-1"></i>Leader
+                        </span>
+                      @endif
                     </div>
                     @if(!$loop->last)
                     <hr class="my-2 opacity-25">
@@ -141,15 +194,7 @@ $winners = [
               </div>
             @endif
           </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="card-footer bg-white border-0 pt-0 pb-3 px-4 text-center">
-          <div class="d-flex align-items-center justify-content-center">
-            <i class="bi bi-trophy text-warning me-2"></i>
-            <small class="text-muted fw-medium">Awarded on {{ $winner->award_date }}</small>
-          </div>
-        </div>
+        </div>        
       </div>
     </div>
     @endforeach
