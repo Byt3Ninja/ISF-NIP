@@ -2131,6 +2131,7 @@ return [
 	'You are not allowed to submit answers' => 'You are not allowed to submit answers',
 	'Team Name' => 'Team Name',
 	'Project Name' => 'Project Name',
+	'Submission Step' => 'Submission Step',
 	'Winner Rank' => 'Winner Rank',
 	'management_dashboard' => 'Management Dashboard',
 	'create_new_hackathon' => 'Create New Hackathon',
