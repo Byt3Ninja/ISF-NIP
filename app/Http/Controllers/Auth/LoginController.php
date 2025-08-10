@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-
+use App\Activity; 
+use Jenssegers\Agent\Agent;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 class LoginController extends Controller
 {
     /*
@@ -46,5 +49,53 @@ class LoginController extends Controller
     //         $request->filled('remember') // تحقق من وجود خيار remember
     //     );
     // }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // Initialize Agent for device/browser detection
+        $agent = new Agent();
+        $browser = $agent->browser();
+        $os = $agent->platform();
+        $device = $agent->device();
+        $clientIp = $this->getClientIp();
+        $location = $this->getLocationFromIP($clientIp);
+        $browserWithOs = $browser ? "$browser on $os" : 'Unknown Browser';
+
+       Activity::create([
+            'user_id' => auth()->id(),
+            'browser' => $browserWithOs,
+            'device' => $device,
+            'location' => $location,
+            'activity_time' => now(),
+            'ip_address' => $clientIp,
+            'platform' => $os,
+        ]);
+
+        return redirect()->intended($this->redirectTo);
+    }
+
+    /**
+     * Get the client's public IP address.
+     */
+    private function getClientIp()
+    {
+        return request()->ip(); 
+    }
+
+    /**
+     * Get country based on IP address.
+     */
+    private function getLocationFromIP($ip)
+    {
+        try {
+        $response = Http::get("https://ipapi.co/{$ip}/json/");
+        $data = $response->json();
+
+        return $data['country_name'] ?? 'Unknown Location';
+    } catch (\Exception $e) {
+        Log::error('Failed to get location: ' . $e->getMessage());
+        return 'Unknown Location';
+    }
+    }
 
 }

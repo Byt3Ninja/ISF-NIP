@@ -186,7 +186,7 @@
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
               <a href="/dashboard" class="app-brand-link">
-                <img src="{{ $logo }}" alt="avatar"  width="150">
+                <img src="{{ $logo }}" alt="avatar"  width="150" class="rounded">
               </a>
             </div>
             <!-- /Logo -->

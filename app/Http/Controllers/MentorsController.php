@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendMentorshipRequestJob;
 use App\Factories\OnlineMeetingFactory;
 use App\Events\MentorshipSessionUpdated;
+use App\Http\Resources\MentorResource;
 use App\Jobs\SendMentorshipNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipRequestNotification;
@@ -326,7 +327,9 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
-	
+		$request->validate([
+			'notes' => 'nullable|string|max:255',
+		]);
 		$user = auth()->user();
 		if($user->hasRole('admin') || $user->hasRole('organizationManager')){
 			
@@ -344,6 +347,12 @@ class MentorsController extends Controller
 				$datefrom = $date . ' ' . $time_from;
 				$dateto = $date . ' ' . $time_to;
 
+				$mentorshipnotadded = MentorshipRequest::where('zoom_date', $datefrom)->where('mentor_id', $request->mentorid)->first();
+
+				if($mentorshipnotadded){
+					$errors[] = "Mentor already scheduled on $date from $time_from to $time_to";
+					continue;
+				}
 				$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 				$dayName = Carbon::parse($date)->format('l');
 
@@ -388,6 +397,7 @@ class MentorsController extends Controller
 				$meetingId = $onlineMeeting['data']['id'];
 				$startUrl = $onlineMeeting['data']['start_url'];
 				$joinUrl = $onlineMeeting['data']['join_url'];
+				$passcode = $onlineMeeting['data']['passcode'];
 
 				$createMentor = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
@@ -397,6 +407,7 @@ class MentorsController extends Controller
 					'start_url' => $startUrl,
 					'join_url' => $joinUrl,
 					'zoom_id' => $meetingId,
+					'zoom_passcode' => $passcode,
 					'zoom_date' => $datefrom,
 					'period' => $period,
 					'organization_id' => $request->organization_id,
@@ -466,6 +477,7 @@ class MentorsController extends Controller
 					$meetingId = $onlineMeeting['data']['id'];
 					$startUrl = $onlineMeeting['data']['start_url'];
 					$joinUrl = $onlineMeeting['data']['join_url'];
+					$passcode = $onlineMeeting['data']['passcode'];
 					if ($autoApprove == 1) {
 						$approved = 'Yes';
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
@@ -479,6 +491,7 @@ class MentorsController extends Controller
 							'start_url' => $startUrl,
 							'join_url' => $joinUrl,
 							'zoom_id' => $meetingId,
+							'zoom_passcode' => $passcode,
 							'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 							'period' => $period,
 							'organization_id' => $request->organization_id,
@@ -552,6 +565,7 @@ class MentorsController extends Controller
 					'start_url' => $onlineMeeting['data']['start_url'],
 					'join_url' => $onlineMeeting['data']['join_url'],
 					'zoom_id' => $onlineMeeting['data']['id'],
+					'zoom_passcode' => $onlineMeeting['data']['passcode'],
 					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
 					'period' => $request->period,
 					'organization_id' => $request->organization_id,
@@ -670,8 +684,9 @@ class MentorsController extends Controller
 				$start = $onlineMeeting['data']['start_url'];
 				$join = $onlineMeeting['data']['join_url'];
 				$meetingId = $onlineMeeting['data']['id'];
+				$passcode = $onlineMeeting['data']['passcode'];
 			}
-			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
+			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'zoom_passcode' => $passcode, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
 
 			SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, null, 'modifySession');
 			/// Notify Mentor
@@ -708,11 +723,29 @@ class MentorsController extends Controller
 				return response()->json('success');
 			} elseif ($type == 5) {
 				$my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
-				$sessions = MentorshipRequest::where('mentor_id', $request->id)
-					->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
-					->where('approved', 'Yes')
-					->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
-				$my = $my->merge($sessions);
+				// $sessions = MentorshipRequest::where('mentor_id', $request->id)
+				// 	->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
+				// 	->where('approved', 'Yes')
+				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
+				
+					// $my = Schedule::where('active', 1)->where('user_id', $request->id)->get();
+				// $sessions = MentorshipRequest::where('mentor_id', $request->id)
+				// 	->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
+				// 	->where('approved', 'Yes')
+				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
+
+                    $sessions = MentorshipRequest::where('mentor_id', $request->id)
+						->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
+						->where('approved', 'Yes')
+						->get([
+							DB::raw("DATE(zoom_date) AS date"),
+							DB::raw("TIME(zoom_date) AS tfrom"),
+							DB::raw("TIME(ADDTIME(zoom_date, SEC_TO_TIME(period * 60))) AS tto"),
+							DB::raw("(id + 1000000) AS id"),
+							DB::raw("'Session' AS type"),
+							DB::raw("'Mentorship session' AS notes")
+						]);
+			$my = $my->merge($sessions);
 				return response()->json($my);
 			} elseif ($type == 4) {
 				$values = ['type' => $request->type, 'days' => json_encode($request->days), 'dfrom' => $request->dfrom, 'dto' => $request->dto, 'tfrom' => $request->tfrom, 'tto' => $request->tto, 'notes' => $request->notes];

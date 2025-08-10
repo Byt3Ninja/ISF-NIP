@@ -217,6 +217,12 @@ $('#flatpickr-datetimeLimit').on('change', e => {
   });
   // console.log('filteredDateObjs', filteredDateObjs);
 
+  // Find booked sessions for the selected date
+  const bookedSessions = responseData.filter(item => {
+    return item.type === 'Session' && item.date === selectedDate;
+  });
+  // console.log('bookedSessions', bookedSessions);
+
   // Always clear time options when date changes, regardless of availability
   const timeFromSelect = $('#timeFrom');
   const timeToSelect = $('#timeTo');
@@ -236,6 +242,9 @@ $('#flatpickr-datetimeLimit').on('change', e => {
     
     // Generate time slots for "From" dropdown (excludes end times)
     let fromTimeSlots = generateFromTimeSlots(mergedPeriods);
+    
+    // Filter out booked session times
+    fromTimeSlots = filterOutBookedTimes(fromTimeSlots, bookedSessions);
     
     // Filter out past times if the selected date is today
     if (isToday) {
@@ -315,6 +324,29 @@ function mergeTimePeriods(periods) {
   return merged;
 }
 
+// Function to filter out booked session times from available time slots
+function filterOutBookedTimes(timeSlots, bookedSessions) {
+  if (!bookedSessions || bookedSessions.length === 0) {
+    return timeSlots;
+  }
+
+  return timeSlots.filter(slot => {
+    const slotTime = moment(slot.value, 'HH:mm:ss');
+    
+    // Check if this time slot conflicts with any booked session
+    const hasConflict = bookedSessions.some(session => {
+      const sessionStart = moment(session.tfrom, 'HH:mm:ss');
+      const sessionEnd = moment(session.tto, 'HH:mm:ss');
+      
+      // Check if the slot time falls within the booked session time range
+      // We need to ensure the slot doesn't start during an existing session
+      return slotTime.isSameOrAfter(sessionStart) && slotTime.isBefore(sessionEnd);
+    });
+    
+    return !hasConflict;
+  });
+}
+
 // Function to generate time slots for "From" dropdown (excludes end times)
 function generateFromTimeSlots(mergedPeriods) {
   const allSlots = [];
@@ -386,6 +418,11 @@ function updateTimeToOptions(timeFromValue) {
   
   if (filteredDateObjs.length === 0) return;
 
+  // Find booked sessions for the selected date
+  const bookedSessions = responseData.filter(item => {
+    return item.type === 'Session' && item.date === selectedDate;
+  });
+
   // Clear current options
   timeToSelect.empty();
 
@@ -408,9 +445,26 @@ function updateTimeToOptions(timeFromValue) {
   }
 
   // Find valid end times (at least 30 minutes after the selected from time)
-  const validEndSlots = allToTimeSlots.filter(slot => 
+  let validEndSlots = allToTimeSlots.filter(slot => 
     slot.moment.isAfter(selectedFromTime.clone().add(29, 'minutes'))
   );
+
+  // Filter out times that would conflict with booked sessions
+  // We need to ensure the entire session (from timeFrom to timeTo) doesn't overlap with existing sessions
+  validEndSlots = validEndSlots.filter(slot => {
+    const proposedEndTime = moment(slot.value, 'HH:mm:ss');
+    
+    // Check if the proposed session time range conflicts with any booked session
+    const hasConflict = bookedSessions.some(session => {
+      const sessionStart = moment(session.tfrom, 'HH:mm:ss');
+      const sessionEnd = moment(session.tto, 'HH:mm:ss');
+      
+      // Check for any overlap between proposed session and existing session
+      return (selectedFromTime.isBefore(sessionEnd) && proposedEndTime.isAfter(sessionStart));
+    });
+    
+    return !hasConflict;
+  });
 
   // Populate timeTo dropdown with valid options
   validEndSlots.forEach(slot => {

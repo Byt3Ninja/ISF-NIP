@@ -20,6 +20,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -29,6 +31,11 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
+		
+		@if( $_user->hasAnyRole('Registered', 'Admin') )
+			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
+			<br>
+		@endif
 		<div class="content-body">
 			@if( session()->has('success') )
 			<div class="row">
@@ -68,16 +75,38 @@
 			@endif
 		</div>
 
-			@if( $_user->hasRole('Registered') )
-			@if($_user->company?->cycle == null)
-				<div class="col-md-12">
-					<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
-						{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
+		@if( $_user->hasRole('Registered') )
+		@if($_user->company?->cycle == null)
+			<div class="col-md-12">
+				<div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
+					{{ __('admin.Welcome_StartUp_Registration_Please_Join_The_Program_The_First') }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			</div>
+		@endif
+		@endif
+
+		<!-- Demo Invitation Notification -->
+		{{-- <div class="col-md-12">
+			<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+				<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex align-items-center">
+						<i class="ti ti-mail me-3 ti-24px"></i>
+						<div>
+							<h6 class="mb-1">{{ __('dashboard.New Invitation Received!') }}</h6>
+							<small class="text-muted">{{ __('dashboard.You have been invited to participate in the Startup Pitch Competition 2025') }}</small>
+						</div>
+					</div>
+					<div class="d-flex gap-2">
+						<button type="button" class="btn btn-sm btn-outline-primary" onclick="openInvitationModal()">
+							<i class="ti ti-eye me-1"></i>
+							{{ __('dashboard.View Details') }}
+						</button>
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 					</div>
 				</div>
-			@endif
-			@endif
+			</div>
+		</div> --}}
 		<div class="row g-6">
 			
 			<!-- Count cards -->
@@ -95,10 +124,10 @@
 							<h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
 						</div>
 						<p class="mb-1 text-center"> @if( Str::contains($card['text'], '.') )
-                                {{ __($card['text']) ?: $card['text'] }}
-                            @else
-                                {{ __('admin.' . $card['text']) ?: $card['text'] }}
-                            @endif</p>
+								{{ __($card['text']) ?: $card['text'] }}
+							@else
+								{{ __('admin.' . $card['text']) ?: $card['text'] }}
+							@endif</p>
 					</div>
 				</div>
 			</a>
@@ -348,7 +377,7 @@
 														$step->description ? $step->description : '...' }} </span>
 												</td>
 												<td>
-													@if( $step->stype == 1 )
+													@if( $step->stype == 1 or $step->stype == 5 )
 													@if( $step->status == 'Started' )
 													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
 														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
@@ -541,8 +570,8 @@
 													<td>{{ $key + 1 }}</td>
 													<td>{{ __('cycles.' . $session->type) }}</td>
 													<td>{{ $session->title }}</td>
-													<td>{{ $session->datetime }}</td>
-													<td>{{ $session->end_datetime ?? '-' }}</td>
+													<td>{{ FormatDate($session->datetime, 'Y-m-d H:i A') ?? '-' }} </td>
+													<td>{{ FormatDate($session->end_datetime, 'Y-m-d H:i A') ?? '-' }}</td>
 													<td>
 														@if( $session->type == 'sessions' )
 														{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
@@ -902,9 +931,14 @@
 																@if( $now <= $end_time )
 																<a href="{{ $session->start_url }}" target="_blank">
 																	<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																		<i class="ti ti-link"></i> Join Meeting
+																		<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
 																	</button>
 																</a>
+																@if( !empty( $session->passcode ) )
+																	 | <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																		<i class="ti ti-key"></i>
+																	</button>
+																@endif
 																@else
 																	<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
 																@endif
@@ -1004,19 +1038,19 @@
 															<td>
 																@if( $company->evaluation_status == 'not_started' )
 																<span class="badge bg-label-warning">
-																	<i class="ti ti-clock me-2"></i> Not started
+																	<i class="ti ti-clock me-2"></i> {{ __('dashboard.evaluation_not_started') }}
 																</span>
 																@elseif( $company->evaluation_status == 'in_progress' )
 																<span class="badge bg-label-info">
-																	<i class="ti ti-clock-bolt me-2"></i> In progress
+																	<i class="ti ti-clock-bolt me-2"></i> {{ __('dashboard.evaluation_in_progress') }}
 																</span>
 																@elseif( $company->evaluation_status == 'evaluated' )
 																<span class="badge bg-label-success">
-																	<i class="ti ti-circle-check me-2"></i> Completed
+																	<i class="ti ti-circle-check me-2"></i> {{ __('dashboard.evaluation_completed') }}
 																</span>
 																@elseif( $company->evaluation_status == 'not_evaluated' )
 																<span class="badge bg-label-danger">
-																	<i class="ti ti-exclamation-circle me-2"></i> Not Evaluated
+																	<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
 																</span>
 																@endif
 															</td>
@@ -1043,9 +1077,128 @@
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
-			{{--  <div class="col-12">
-				// allowed to list final screening
-			</div>  --}}
+			<div class="col-12">
+				<div class="card mt-10">
+					<section>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="card">
+									<div class="card-header border-bottom mb-4">
+										<h5 class="card-title align-items-center">
+											<i class="ti ti-calendar-stats ti-24px"></i>
+											<span class="mx-2">{{ __('dashboard.Cycle final screening') }}</span>
+										</h5>
+									</div>
+									<div class="card-body">
+										@foreach( $final_screening_steps as $step )
+										<div class="card mt-4">
+											<div class="card-header bg-label-light p-3 mb-4">
+												<h5 class="mb-0">
+													<i class="ti ti-bell ti-24px"></i>
+													<span class="mx-2">
+														{{ $step->title }} - ({{ $step->cycle->title }}) - {{ __('dashboard.start from') }} {{ $step->start ?? '-' }} {{ __('dashboard.to') }} {{ $step->end ?? '-' }}
+													</span>
+												</h5>
+											</div>
+											<div class="card-body">
+												<div class="mb-4">
+													<p class="card-text">{{ $step->description }}</p>
+													<small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
+														{{ $step->cycle->start ?? '-' }} {{ __('dashboard.to') }}
+														{{ $step->cycle->end ?? '-' }}
+													</small>
+												</div>
+												<div class="table-responsive">
+													<table class="table">
+														<thead>
+															<tr>
+															<th>{{ __('dashboard.Company') }}</th>
+															<th>{{ __('dashboard.User/Title') }}</th>
+															<th>{{ __('dashboard.Screening completed') }}</th>
+															<th>{{ __('dashboard.Meeting') }}</th>
+															<th>{{ __('dashboard.Actions') }}</th>
+															</tr>
+														</thead>
+														<tbody>
+															@foreach( $step->companies as $company )
+																<tr>
+																	<td>
+																		<div class="d-flex align-items-center">
+																			<img src="{{ $company->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																			@if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+																			{{ $company->name }}
+																			@if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
+																		</div>
+																	</td>
+																	<td>
+																		<div class="d-flex align-items-center">
+																			@if( $company->users->count() )
+																				@foreach( $company->users as $company_user )
+																					<img src="{{ $company_user->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																					<div>
+																						<h6 class="mb-0">{{ $company_user->name }}</h6>
+																						<small class="text-muted">{{ $company_user->title }}</small>
+																					</div>
+																				@endforeach
+																			@else
+																			-
+																			@endif
+																		</div>
+																	</td>
+																	<td>
+																		@if( $company->evaluation_status == 'not_started' )
+																		<span class="badge bg-label-warning">
+																			<i class="ti ti-clock me-2"></i> {{ __('dashboard.evaluation_not_started') }}
+																		</span>
+																		@elseif( $company->evaluation_status == 'in_progress' )
+																		<span class="badge bg-label-info">
+																			<i class="ti ti-clock-bolt me-2"></i> {{ __('dashboard.evaluation_in_progress') }}
+																		</span>
+																		@elseif( $company->evaluation_status == 'evaluated' )
+																		<span class="badge bg-label-success">
+																			<i class="ti ti-circle-check me-2"></i> {{ __('dashboard.evaluation_completed') }}
+																		</span>
+																		@elseif( $company->evaluation_status == 'not_evaluated' )
+																		<span class="badge bg-label-danger">
+																			<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
+																		</span>
+																		@endif
+																	</td>
+																	<td> {{ $company->datetime ?? __('dashboard.Not added yet') }} </td>
+																	<td>
+																		@if( $company->join_url )
+																			<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
+																				<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
+																			</a>
+																			@if( !empty( $company->passcode ) )
+																				 | <button title="Show Passcode" type="button" data-passcode="{{ $company->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																					<i class="ti ti-key"></i>
+																				</button>
+																			@endif
+																			{{--  @if( $_user->ableTo('screening.form_view', $permissions) )
+																			<a href="/dashboard/final/{{ $step->id }}/{{ $company->id }}" target="_blank" class="btn btn-success btn-sm">
+																				<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
+																			</a>
+																			@endif  --}}
+																		@else
+																			{{ __('dashboard.Not started') }}
+																		@endif
+																	</td>
+																</tr>
+															@endforeach
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+										@endforeach
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
 			@endif
 		</div>
 		
@@ -1145,13 +1298,123 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <!--  Edit SP Modal -->
 @include('admin.clients.startup.partials._session_modal')
 <!--/ Edit SP Modal -->
-@endif
 
+<!-- Respond Invitation Modal -->
+@if($team_member->count() > 0)
+<div
+	class="modal fade"
+	id="teamInvitationModal"
+	tabindex="-1"
+	aria-labelledby="teamInvitationLabel"
+	aria-modal="true"
+	role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content overflow-hidden position-relative">
+
+			<!-- Optional Background Gradient Overlay -->
+			<div
+				style="position: absolute; inset: 0; background: linear-gradient(135deg, #f5f7fa, #c3cfe2); opacity: 0.3;"
+			></div>
+
+			<div class="modal-body position-relative text-center py-12 px-12">
+				@foreach($team_member as $join)
+				<!-- Team & Inviter Avatar -->
+				<div class="position-relative d-inline-block mb-4">
+					<img
+						src="{{ $join->tf_img_team ? asset($join->tf_img_team) : 'https://placehold.co/400x200?text='.$join->tf_name }}"
+						alt="Team Avatar"
+						class="rounded-circle border-4 shadow"
+						style="width: 64px; height: 64px; object-fit: cover;"
+					/>
+				</div>
+				
+				<!-- Title -->
+				<h5 id="teamInvitationLabel" class="fw-bold mb-2">{{ $join->tf_name }}</h5>
+
+				<!-- Description -->
+				<p class="mb-2">
+					<strong>{{ $join->{'user_name_' . $l} }}</strong> {{ $l == 'en' ? 'invited you to join their team' : 'تم دعوتك للانضمام لفريقه' }}
+				</p>
+				<p class="fst-italic text-muted small">
+					{{ $l == 'en' ? 'Joining this team will allow you to collaborate on projects, share resources, and participate in discussions.' : 'الانضمام للفريق سوف تسمح لك بالتعاون في المشاريع، والمشاركة في الموارد، والتشارك في النقاشات.' }}
+				</p>
+
+				<!-- Buttons -->
+				<div class="d-flex flex-column flex-sm-row gap-2">
+
+					<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
+						@csrf
+						@method('PATCH')
+						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
+						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+							<i class="ti ti-users me-2 me-2"></i>
+							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
+						</button>
+					</form>
+					<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
+						@csrf
+						@method('PATCH')
+						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
+						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
+							<i class="ti ti-users me-2 me-2"></i>
+							{{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
+						</button>
+                	</form>
+
+				</div>
+				@endforeach
+			</div>
+		</div>
+	</div>
+</div>
+@endif
+<!--/ Respond Invitation Modal -->
+@endif
 
 @include('mentor.partials._availability_slots')
 <!-- / Content Wrapper -->
 @stop
 @section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	$('#teamInvitationModal').modal('show');
+
+	$('#acceptInvitationBtn').on('click', function() {
+		var btn = $(this);
+		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Accepting...');
+		// Simulate AJAX request
+		setTimeout(function() {
+			btn.prop('disabled', false).html('<i class="ti ti-circle-check"></i> Accept Invitation');
+			$('#teamInvitationModal').modal('hide');
+			$('body').prepend(`
+				<div class="alert alert-success alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
+					<i class="ti ti-check-circle me-2"></i>
+					Invitation accepted! You have joined the team.
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			`);
+		}, 1200);
+	});
+
+	$('#declineInvitationBtn').on('click', function() {
+		var btn = $(this);
+		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Declining...');
+		// Simulate AJAX request
+		setTimeout(function() {
+			btn.prop('disabled', false).html('<i class="ti ti-circle-x"></i> Decline');
+			$('#teamInvitationModal').modal('hide');
+			$('body').prepend(`
+				<div class="alert alert-warning alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
+					<i class="ti ti-info-circle me-2"></i>
+					Invitation declined. The team organizer has been notified.
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			`);
+		}, 1200);
+	});
+});
+</script>
+
 <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -1162,6 +1425,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 @section('pagescripts')
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
@@ -1169,6 +1433,16 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 @endif
 <script>
 	// Initialize DataTable with pagination configuration
+    $(document).on('click', '.show-passcode', function(e) {
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      alertify.defaults.transition = 'zoom';
+      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+      alertify.defaults.theme.input = 'form-control';
+
+      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
 	$(document).ready(function() {
 		$("#ratingsTable").DataTable({
 			"pageLength": 5,
@@ -1468,6 +1742,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 			  alert("Error Occurred, Try again!");
 			}
 		  });
-		});      
+		});
 </script>
 @stop

@@ -164,11 +164,6 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto"
-                                                                                        src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}"
-                                                                                        style="display: block; height: auto; border: 0; width: 100%;"
-                                                                                        title="I'm an image"
-                                                                                        width="560"/></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -222,7 +217,10 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     
                                                     <p style="margin: 0;">Email is: {{ $data['email'] }}</p>
-                                                    <p style="margin: 0;">password is: {{ $data['password'] }}</p>
+                                                    <p style="margin: 0;">
+                                                        You can reset your password by clicking the link below:
+                                                        <a href="{{ $data['reset_url'] }}">Reset Password</a>
+                                                    </p>
                                                     
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
@@ -247,7 +245,10 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     
                                                     <p style="margin: 0;">البريد الالكترونى : {{ $data['email'] }}</p>
-                                                    <p style="margin: 0;">كلمة المرور : {{ $data['password'] }}</p>
+                                                    <p style="margin: 0;">
+                                                    يمكنك تعيين كلمة المرور الخاصة بك من خلال الضغط على الرابط التالي:
+                                                    <a href="{{ $data['reset_url'] }}">إعادة تعيين كلمة المرور</a>
+                                                    </p>
                                                     
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
@@ -348,11 +349,6 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto"
-                                                                                        src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}"
-                                                                                        style="display: block; height: auto; border: 0; width: 100%;"
-                                                                                        title="I'm an image"
-                                                                                        width="640"/></div>
                                                 </div>
                                             </td>
                                         </tr>

@@ -1,167 +1,53 @@
-<!DOCTYPE html>
-<html 
-  lang="{{ $l }}" 
-  dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" 
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-  class="light-style layout-navbar-fixed layout-compact" 
-  data-theme="theme-default" 
-  data-assets-path="/vuexy/assets/"
-  data-template="vertical-menu-template" 
-  data-style="light"
->
+@extends('layouts.admin')
 
-<head>
-  @include('admin.includes.head')
-
-  <!-- Additional Styles -->
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
-</head>
-
-@php
-  $hackathons = [
-    [
-      'title' => 'Future of AI Hackathon',
-      'date' => 'March 15 - 17, 2024',
-      'location' => 'Virtual',
-      'status' => 'Upcoming',
-      'description' => 'Innovate solutions using artificial intelligence to address urgent industrial challenges.',
-      'tags' => ['AI', 'Big Data'],
-    ],
-    [
-      'title' => 'Sustainability Hackathon',
-      'date' => 'April 20 - 22, 2024',
-      'location' => 'Hybrid (Riyadh & Online)',
-      'status' => 'Ongoing',
-      'description' => 'Develop innovative solutions for sustainable development goals.',
-      'tags' => ['Sustainability', 'Green Tech'],
-    ],
-    [
-      'title' => 'HealthTech Hackathon',
-      'date' => 'May 10 - 12, 2024',
-      'location' => 'Virtual',
-      'status' => 'Upcoming',
-      'description' => 'Create innovative health tech solutions to improve patient care.',
-      'tags' => ['HealthTech', 'AI'],
-    ],
-    [
-      'title' => 'FinTech Innovation Challenge',
-      'date' => 'June 5 - 7, 2024',
-      'location' => 'Hybrid (Dubai & Online)',
-      'status' => 'Upcoming',
-      'description' => 'Develop cutting-edge financial technology solutions.',
-      'tags' => ['FinTech', 'Blockchain'],
-    ],
-    [
-      'title' => 'Smart Cities Hackathon',
-      'date' => 'July 15 - 17, 2024',
-      'location' => 'Virtual',
-      'status' => 'Upcoming',
-      'description' => 'Innovate solutions for smart city challenges.',
-      'tags' => ['Smart Cities', 'IoT'],
-    ],
-  ];
-
-  $pastHackathons = [
-    [
-      'title' => 'Cybersecurity Challenge',
-      'date' => 'January 10 - 12, 2024',
-      'location' => 'Virtual',
-      'status' => 'Completed',
-      'description' => 'Develop solutions to enhance cybersecurity in digital platforms.',
-      'tags' => ['Cybersecurity', 'AI'],
-    ],
-    [
-      'title' => 'E-commerce Innovation Hackathon',
-      'date' => 'February 5 - 7, 2024',
-      'location' => 'Hybrid (Cairo & Online)',
-      'status' => 'Completed',
-      'description' => 'Create innovative solutions for the e-commerce industry.',
-      'tags' => ['E-commerce', 'AI'],
-    ],
-  ];
-@endphp
-
-<body>
-  <!-- Include original navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="/dashboard/hackathon">
-        <i class="ti ti-tournament text-primary me-2"></i> {{ $l == 'en' ? 'Hackathon Platform' : 'منصة الهاكثونات' }}
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/dashboard/hackathon">
-              <i class="ti ti-home"></i>
-              {{ $l == 'en' ? 'Home' : 'الرئيسية' }}</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#past-hackathons"><i class="ti ti-calendar-check"></i> {{ $l == 'en' ? 'Past
-              Hackathons' : 'الهاكثونات السابقة' }}</a>
-          </li>
-        </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              <i class="ti ti-user-circle"></i> {{ $l == 'en' ? 'Hello, Entrepreneur' : 'مرحباً، رائد أعمال' }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
-              <li><a class="dropdown-item" href="#"><i class="ti ti-user"></i> {{ $l == 'en' ? 'My Profile' : 'ملفي
-                  الشخصي' }}</a></li>
-              <li><a class="dropdown-item" href="#"><i class="ti ti-users"></i> {{ $l == 'en' ? 'My Team' : 'فريقي'
-                  }}</a></li>
-              <li><a class="dropdown-item" href="/dashboard"><i class="ti ti-dashboard"></i> {{ $l == 'en' ? 'Admin
-                  Dashboard' : 'لوحة تحكم الإدارة' }}</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="#"><i class="ti ti-logout"></i> {{ $l == 'en' ? 'Logout' : 'تسجيل
-                  الخروج' }}</a></li>
-            </ul>
-          </li>
-        </ul>
+@section('content')
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Header Section -->
+    <div class="col-12 mb-8 text-white text-center p-12 rounded"
+      style="background: linear-gradient(180deg, #7367f0 0%, #6610f2 100%);">
+      <div class="container">
+        <h1 class="display-4 fw-bold text-white">
+          {{ $l == 'en' ? 'Innovate, Collaborate, and Propel into the Future!' : 'ابتكر، تعاون، وانطلق نحو المستقبل!' }}
+        </h1>
+        <p class="lead">
+          {{ $l == 'en' ? 'Join our virtual and hybrid hackathons, develop solutions to real-world problems, and qualify
+          for advanced support stages.' : 'انضم إلى هاكثوناتنا الافتراضية والهجينة، طور حلولاً لمشكلات حقيقية، وتأهل
+          لمراحل دعم متقدمة.' }}
+        </p>
+        <a href="#upcoming-hackathons" class="btn btn-label-primary btn-lg fw-bold mt-3">
+          {{ $l == 'en' ? 'Discover Hackathons' : 'اكتشف الهاكثونات' }} <i
+            class="ti ti-circle-arrow-down ti-md ms-2"></i>
+        </a>
       </div>
     </div>
-  </nav>
-
-  <!-- Header Section -->
-  <header class="mb-8 text-white text-center p-12" style="background: linear-gradient(180deg, #7367f0 0%, #6610f2 100%);">
-    <div class="container">
-      <h1 class="display-4 fw-bold text-white">
-        {{ $l == 'en' ? 'Innovate, Collaborate, and Propel into the Future!' : 'ابتكر، تعاون، وانطلق نحو المستقبل!' }}
-      </h1>
-      <p class="lead">
-        {{ $l == 'en' ? 'Join our virtual and hybrid hackathons, develop solutions to real-world problems, and qualify for advanced support stages.' : 'انضم إلى هاكثوناتنا الافتراضية والهجينة، طور حلولاً لمشكلات حقيقية، وتأهل لمراحل دعم متقدمة.' }}
-      </p>
-      <a href="#upcoming-hackathons" class="btn btn-label-primary btn-lg fw-bold mt-3">
-       {{ $l == 'en' ? 'Discover Hackathons' : 'اكتشف الهاكثونات' }} <i class="ti ti-circle-arrow-down ti-md ms-2"></i>
-      </a>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="overflow-x-hidden mx-auto" style="width: 90%;">
-
+    <section id="multiple-column-form">
+      @if (session()->has('message'))
+      <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      @endif
+    </section>
     <!-- Filter Section -->
     <div class="row mb-8" id="upcoming-hackathons">
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            <form class="row g-3 align-items-end">
+
+            <form class="row g-3 align-items-end" action="/dashboard/hackathon" method="get">
+
               <div class="col-md-4">
                 <label class="form-label fw-bold">{{ $l == 'en' ? 'Search' : 'البحث' }}</label>
                 <div class="input-group">
                   <span class="input-group-text"><i class="ti ti-search"></i></span>
-                  <input type="text" class="form-control"
+                  <input type="text" class="form-control" name="searchHackathon"
+                    value="{{ request('searchHackathon') }}"
                     placeholder="{{ $l == 'en' ? 'Search for hackathon...' : 'ابحث عن هاكثون...' }}">
                 </div>
               </div>
-              <div class="col-md-3">
+
+              {{-- <div class="col-md-3">
                 <label class="form-label fw-bold">{{ $l == 'en' ? 'Type' : 'النوع' }}</label>
                 <select class="form-select select2">
                   <option selected>{{ $l == 'en' ? 'All Types' : 'جميع الأنواع' }}</option>
@@ -169,8 +55,8 @@
                   <option value="2">{{ $l == 'en' ? 'Hybrid' : 'هجين' }}</option>
                   <option value="3">{{ $l == 'en' ? 'In-Person' : 'حضوري' }}</option>
                 </select>
-              </div>
-              <div class="col-md-3">
+              </div> --}}
+              {{-- <div class="col-md-3">
                 <label class="form-label fw-bold">{{ $l == 'en' ? 'Theme' : 'المحور' }}</label>
                 <select class="form-select select2">
                   <option selected>{{ $l == 'en' ? 'All Themes' : 'جميع المحاور' }}</option>
@@ -178,7 +64,8 @@
                   <option value="2">{{ $l == 'en' ? 'AI' : 'الذكاء الاصطناعي' }}</option>
                   <option value="3">{{ $l == 'en' ? 'Sustainability' : 'الاستدامة' }}</option>
                 </select>
-              </div>
+              </div> --}}
+
               <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
                   <i class="ti ti-filter me-2"></i>
@@ -186,6 +73,7 @@
                 </button>
               </div>
             </form>
+
           </div>
         </div>
       </div>
@@ -195,21 +83,65 @@
     <div class="row">
       <div class="col-12">
         <h5 class="fw-bold">
-          <i class="ti ti-calendar-event ti-md me-1"></i> {{ $l == 'en' ? 'Upcoming & Ongoing Hackathons' : 'الهاكثونات القادمة والجارية' }}
+          <i class="ti ti-calendar-event ti-md me-1"></i> {{ $l == 'en' ? 'Upcoming & Ongoing Hackathons' : 'الهاكثونات
+          القادمة والجارية' }}
         </h5>
       </div>
     </div>
 
     <div class="row g-4 mb-8">
+      @php
+      $user = Auth::user();
+      $user_cycle_id = $user->company?->cycle;
+
+      $isExistinghackathon = in_array($user_cycle_id, $hackathon_ids);
+      @endphp
+
       @foreach ($hackathons as $hackathon)
-        <div class="col-lg-4 col-md-6">
-          @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l])
-        </div>
+      @php
+
+      $user = Auth::user();
+      $step_id = $user->company?->step;
+      if($hackathon['step_id'] == $step_id){
+      $apply_q = "SELECT * FROM form_data WHERE user_id = ? ";
+      if($step_id != null){
+      $apply_q .= "AND step_id = ?";
+      $apply = collect(DB::select($apply_q, [$user->id, $step_id]));
+      }else{
+      $apply = collect(DB::select($apply_q, [$user->id]));
+      }
+      }else{
+      $apply = null;
+      }
+
+      $team_q = "SELECT * FROM team_formations WHERE user_id = ? ";
+      if($step_id != null){
+      $team_q .= "AND step_id = ?";
+      $team = collect(DB::select($team_q, [$user->id, $step_id]));
+      }else{
+      $team = collect(DB::select($team_q, [$user->id]));
+      }
+
+
+
+      if($step_id != null){
+      $stypeStep_q = "SELECT * FROM steps WHERE id = ?";
+      $stypeStep = collect(DB::select($stypeStep_q, [$step_id]));
+      }else{
+      $stypeStep = null;
+      }
+
+
+      @endphp
+      <div class="col-lg-4 col-md-6">
+        @include('admin.hackathon.partials.hackathon-card', ['hackathon' => $hackathon, 'l' => $l, 'apply' => $apply,
+        'team' => $team, 'stypeStep' => $stypeStep, 'user' => $user, 'isExistinghackathon' => $isExistinghackathon])
+      </div>
       @endforeach
     </div>
 
     <!-- Past Hackathons -->
-    <div class="row">
+    <div class="row" id="past-hackathons">
       <div class="col-12">
         <h5 class="fw-bold">
           <i class="ti ti-calendar-check ti-md me-1"></i> {{ $l == 'en' ? 'Past Hackathons' : 'الهاكثونات السابقة' }}
@@ -218,54 +150,39 @@
     </div>
 
     <div class="row g-4 mb-12">
+      @if (count($pastHackathons) > 0)
       <div class="col-12">
         <div class="card">
           <div class="card-body p-0">
             <div class="list-group list-group-flush">
               @foreach ($pastHackathons as $hackathon)
-                @include('admin.hackathon.partials.hackathon-item', ['hackathon' => $hackathon, 'l' => $l])
+              @include('admin.hackathon.partials.hackathon-item', ['hackathon' => $hackathon, 'l' => $l])
               @endforeach
             </div>
           </div>
         </div>
       </div>
+      @else
+      <div class="col-12">
+        <div class="alert alert-info text-center">
+          {{ $l == 'en' ? 'No past hackathons available.' : 'لا توجد هاكثونات سابقة متاحة.' }}
+        </div>
+      </div>
+      @endif
     </div>
-  </main>
+  </div>
+</div>
 
-  <!-- Include original footer -->
-  <footer class="footer mt-auto py-3 bg-dark text-white">
-    <div class="container text-center">
-      <span>
-        © 2024 {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع الحقوق محفوظة.' }}
-      </span>
-    </div>
-  </footer>
+<!-- Apply Modal -->
+@include('admin.hackathon.partials.hackathon-apply', ['l' => $l])
 
-  <!-- Apply Modal -->
-  @include('admin.hackathon.partials.hackathon-apply', ['l' => $l])
+<!-- Terms Modal -->
+@include('admin.hackathon.partials.hackathon-terms', ['l' => $l])
+@stop
 
-  <!-- Terms Modal -->
-  @include('admin.hackathon.partials.hackathon-terms', ['l' => $l])
-
-  <!-- Core JS -->
-  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-  <script src="/vuexy/assets/vendor/js/menu.js"></script>
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-  <script src="/vuexy/assets/js/main.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-
-  <!-- Custom JS -->
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
-
-  <script>
-    // Initialize tooltips
+@section('pagescripts')
+<script>
+  // Initialize tooltips
     $(document).ready(function() {
       $('[data-bs-toggle="tooltip"]').tooltip();
       
@@ -301,7 +218,5 @@
         // window.location.href = "hackathon-details.html?id=1&applied=true";
       });
     }
-  </script>
-</body>
-
-</html>
+</script>
+@stop

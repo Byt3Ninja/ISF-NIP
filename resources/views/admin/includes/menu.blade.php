@@ -293,7 +293,7 @@
 
     <li class="{{ Request::is('dashboard/hackathon') ? 'active' : '' }} menu-item"><a
           href="/dashboard/hackathon" class="menu-link">
-          <i class="ti ti-file-text ti-md me-2 me-lg-4 ti-lg"></i>
+          <i class="ti ti-activity ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('admin.Hackathon') }}</div>
         </a>
       </li>
@@ -702,7 +702,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </li>
         </ul>
       </li>
-      <li class="{{ Request::is('*quizzes*', '*surveys*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li class="{{ Request::is('*quizzes*', '*surveys*', '*quizResults*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-stack me-3 ti-md"></i>
           <div>{{ __('admin.quizzesAndSurveys') }}</div>
@@ -714,6 +714,13 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.quizzes') }}</span>
             </a>
           </li>
+           <li class="{{ Request::is('dashboard/quizResults*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('quizzes.quiz_Results_view') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Quiz_Results') }}</span>
+            </a>
+          </li>
+          
           <li class="{{ Request::is('dashboard/surveys*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/surveys">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -727,6 +734,9 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.Survey_Results') }}</span>
             </a>
           </li>
+
+         
+
         </ul>
       </li>
       <li class="{{ Request::is('dashboard/final/*') ? 'sidebar-group-active open' : '' }} menu-item">
@@ -789,13 +799,14 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
     @endif
    
     @if ($_user->hasAnyRole('organizationManager|Admin'))
-      @if( $_user->ableToAny(['users.index '], $permissions) )
+     
         <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-users"></i>
             <div>{{ __('admin.Users') }}</div>
           </a>
           <ul class="menu-sub">
+            @if( $_user->ableToAny(['users.index '], $permissions) )
             <li class="{{ Request::is('dashboard/users/create') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('users.create') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -834,9 +845,27 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </a>
           </li> --}}
             @endif
+             @endif
+            @if( $_user->ableTo('audit-logs.index', $permissions) )
+              <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="/dashboard/audit-logs">
+                <i class="menu-icon tf-icons ti ti-wood"></i>
+              <div>{{ __('admin.Log viewer') }}</div>
+            </a>
+             </li>
+            @endif
+            @if( $_user->ableTo('activities.index', $permissions) )
+            <li class="{{ Request::is('*activities*') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('activities.index') }}">
+                <i class="menu-icon tf-icons ti ti-activity"></i>
+                  <div>{{ __('admin.Activities') }}</div>
+               </a>
+            </li>
+            @endif
           </ul>
+          
         </li>
-      @endif
+     
 
       @if ($_user->hasAnyRole('organizationManager|Admin'))
         <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
@@ -845,14 +874,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
           </a>
         </li>
-        @if( $_user->ableTo('audit-logs.index', $permissions) )
-          <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/audit-logs">
-              <i class="menu-icon tf-icons ti ti-wood"></i>
-              <div>{{ __('admin.Log viewer') }}</div>
-            </a>
-          </li>
-        @endif
+       
       @endif
 
       @if ($_user->hasAnyRole('organizationManager'))

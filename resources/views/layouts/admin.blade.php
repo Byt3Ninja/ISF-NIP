@@ -25,6 +25,8 @@
           <!-- Navbar -->
           @include('admin.includes.header')
 
+          
+
           <!-- Content -->
           @yield('content')
 
@@ -96,7 +98,7 @@
             g.onload = function () {
               window.chatwootSDK.run({
                 websiteToken: '{{ env("CHATWOOT_WEBSITE_TOKEN") }}',
-                baseUrl: BASE_URL,
+                baseUrl: '{{ env("CHATWOOT_WEBSITE_BASEURL") }}',
               });
 
               window.addEventListener("chatwoot:ready", function () {

@@ -158,7 +158,7 @@
               <button class="nav-link" id="pills-form-data-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-form-data" type="button" role="tab" aria-controls="pills-form-data"
                 aria-selected="false">
-                {{ __('admin.Company Data')}}
+                {{ __('admin.Submissions')}}
               </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -187,7 +187,7 @@
             <div class="tab-pane fade" id="pills-form-data" role="tabpanel" aria-labelledby="pills-form-data-tab">
               <div class="row mb-6">
                   <div class="col-12">
-                    <h5 class="mb-0">{{ __('admin.Company Data')}}</h5>
+                    <h5 class="mb-0">{{ __('admin.Submissions')}}</h5>
                   </div>
                   <div class="col-12 my-6">
                     <table class="table table-bordered table-hover">
@@ -195,7 +195,13 @@
                         @foreach( $formData as $dataEntry )
                         <tr>
                           <td> {{ $dataEntry->question }} </td>
-                          <td> {{ $dataEntry->answer }} </td>
+                          <td>
+                            @if( $dataEntry->field_type == 'file' )
+                              <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
+                            @else
+                              {{ $dataEntry->answer }}
+                            @endif
+                          </td>
                         </tr>
                         @endforeach
                       </tbody>

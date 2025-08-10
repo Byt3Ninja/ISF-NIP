@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Cycle;
-use App\Role as R;
 use App\Company;
 use App\Country;
+use App\Settings;
+use App\Role as R;
 use App\Team_member;
+use App\TeamFormation;
 use Illuminate\Http\Request;
 use App\Mail\WelcomeJudgerMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -40,7 +43,8 @@ class UserController extends Controller
 	 */
 	public function index()
 	{
-		$users = User::with('company')->with('roles')->orderBy('id', 'DESC')->get();
+		$user = auth()->id();
+		$users = User::with('company')->with('roles')->where('id', '!=', $user)->orderBy('id', 'DESC')->get();
 		return view('admin/users/index', compact('users'));
 	}
 
@@ -64,6 +68,7 @@ class UserController extends Controller
 	 */
 	public function store(StoreUserRequest $request)
 	{
+
 		if ($request->hasFile('img_url')) {
 			//store the image
 			$img_url = $request->file('img_url');
@@ -118,20 +123,23 @@ class UserController extends Controller
 			// إرسال الإشعار
 			// if( !in_array(env('APP_ENV', 'local'), ['local']) )
 			// {
+		$settings = Settings::first();
+		$emailSettingsOk = $settings && !empty($settings->Mail) && !empty($settings->Mailpassword) && !empty($settings->Port) && !empty($settings->encryption);
+        if ($emailSettingsOk && !in_array(env('APP_ENV'), ['local'])) {
 			try {
 				$result->notify(new WelcomeJudgerNotification($data));
-			} catch (\Throwable $th) {
-				throw $th;
-			}
-			// }
+		} catch (\Throwable $th) {
+			throw $th;
 		}
+	      return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
+       }else {
+		return redirect()->route('users.index')->with([
+			'msg' => 'StoredSuccessfully',
+			'message2' => 'email_settings_missing',
+		]);
+	}
+   }
 
-
-		if ($result) {
-			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
-		} else {
-			return back()->withInput()->with(['msg' => 'FailedStore']);
-		}
 	}
 
 	/**
@@ -257,9 +265,18 @@ class UserController extends Controller
 		if ($user->id == 1) {
 			return response()->json(['state' => 'failed'], 500);
 		}
+		$team_member = Team_member::where('email', $user->email)->first();
+		if ($team_member) {
+			$team_member->delete();
+		}
+		$team_formation = TeamFormation::where('user_id', $user->id)->first();
+		if ($team_formation) {
+			$team_formation->delete();
+		}
 		$user->roles()->detach();
 		$user->delete();
 		$user->company()->delete();
+
 		return response()->json(['state' => 'success'], 200);
 	}
 

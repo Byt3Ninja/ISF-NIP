@@ -171,6 +171,62 @@ class ZoomService implements OnlineMeetingServiceInterface
             return ''; // أو throw exception
         }
     }
+    protected function getAvailableZoomUserEmail(string $startTime, int $duration): ?string
+    {
+        $startTimestamp = strtotime($startTime);
+        $endTimestamp = $startTimestamp + ($duration * 60);
+
+        $licensedHosts = explode(',', env('ZOOM_LICENSED_HOSTS')); 
+
+        if (empty($licensedHosts)) {
+            Log::error('ZoomService: No licensed hosts configured.');
+            return null;
+        }
+
+        foreach ($licensedHosts as $email) {
+            if (!$this->isLicensedZoomUser($email)) {
+                Log::warning("ZoomService: User $email is not a licensed Zoom user.");
+                continue;
+            }
+
+            $url = "https://api.zoom.us/v2/users/" . urlencode($email) . "/meetings";
+            try {
+                $nextPageToken = null;
+                do {
+                    $query = [
+                        'type' => 'scheduled',
+                        'page_size' => 100,
+                        'next_page_token' => $nextPageToken,
+                    ];
+                    $response = $this->client->get($url, [
+                        'headers' => $this->headers,
+                        'query' => $query,
+                    ]);
+
+                    $responseData = json_decode($response->getBody(), true);
+                    $meetings = $responseData['meetings'] ?? [];
+                    $nextPageToken = $responseData['next_page_token'] ?? null;
+
+                    foreach ($meetings as $meeting) {
+                        $existingStart = strtotime($meeting['start_time']);
+                        $existingEnd = $existingStart + ($meeting['duration'] * 60);
+
+                        if ($startTimestamp < $existingEnd && $endTimestamp > $existingStart) {
+                            continue 2; // Conflict found, try next user
+                        }
+                    }
+                } while ($nextPageToken);
+
+                return $email; // No conflicts found
+            } catch (RequestException $e) {
+                Log::error("ZoomService: Failed to check meetings for $email.", ['error' => $e->getMessage()]);
+                continue;
+            }
+        }
+
+        Log::warning('ZoomService: No available licensed Zoom user found.');
+        return null;
+    }
 
     public function createMeeting($data): array
     {
@@ -199,9 +255,16 @@ class ZoomService implements OnlineMeetingServiceInterface
             }
         }
 
-
-        $path = 'users/me/meetings';
-        $url = 'https://api.zoom.us/v2/';
+        $hostEmail = $this->getAvailableZoomUserEmail($data['start_time'], $data['duration']);
+        if( empty( $hostEmail ) || !trim( $hostEmail ) )
+        {
+            $path = 'users/me/meetings';
+        }
+        else
+        {
+            $path = "users/{$hostEmail}/meetings";
+        }
+        $url = $this->retrieveZoomUrl();
 
         $payload = [
             'topic'      => $data['topic'],
@@ -234,6 +297,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                         'id'        => $responseData['id'],
                         'start_url' => $responseData['start_url'],
                         'join_url'  => $responseData['join_url'],
+                        'passcode' => array_key_exists('password', $responseData) ? $responseData['password'] : null,
                     ],
                 ];
 
@@ -254,6 +318,25 @@ class ZoomService implements OnlineMeetingServiceInterface
         } catch (\Exception $e) {
             Log::error('ZoomService::createMeeting - General Exception', ['error' => $e->getMessage()]);
             return ['success' => false, 'data' => $e->getMessage()];
+        }
+    }
+
+    public function isLicensedZoomUser($email): bool
+    {
+        if (!$this->ensureCredentialsInitialized()) {
+            Log::error('ZoomService: Cannot validate user due to failed credential initialization.');
+            return false;
+        }
+
+        try {
+            $response = $this->client->get("https://api.zoom.us/v2/users/" . urlencode($email), [
+                'headers' => $this->headers,
+            ]);
+            $userData = json_decode($response->getBody(), true);
+            return $userData['type'] === 2;
+        } catch (\Exception $e) {
+            Log::error("ZoomService: User validation failed for $email: " . $e->getMessage());
+            return false;
         }
     }
 

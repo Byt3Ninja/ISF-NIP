@@ -341,7 +341,10 @@ class quizzesController extends Controller
 
 			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-			if (!empty($cycleData->organization_id)) {
+
+			QuizResults::refresh_my_attempts();
+			if (!empty($cycleData->organization_id))
+			{
 				$organization_id = $cycleData->organization_id;
 				$get_step = Step::where('stype', 4)->where('cycle_id', $cycleData->id)->get();
 				$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function ($training) {
@@ -356,6 +359,15 @@ class quizzesController extends Controller
 			} else {
 				$quizzes = collect([]);
 			}
+
+			$quizzes = $quizzes->map(function ( $quiz ) {
+				$in_progress = $quiz->myAttempts->where('status', false)->first() ? true : false;
+				$quiz->in_progress = $in_progress;
+				$quiz->questions = $quiz->questions;
+				return $quiz;
+			})->filter(function( $quiz ) {
+				return $quiz->questions->count() > 0;
+			})->values();
 			return view('admin/clients/quiz/dashboard', compact('quizzes'));
 		} else {
 			return abort(401);
@@ -365,6 +377,23 @@ class quizzesController extends Controller
 	{
 		try {
 			$user = auth()->user();
+			QuizResults::refresh_my_attempts();
+			$last_attempt = QuizResults::where('quiz_id', $quizId)->where('user_id', $user->id)->with(['quiz'])->orderBy('created_at', 'desc')->first();
+			if( !empty( $last_attempt ) )
+			{
+				$attempt_quiz = $last_attempt->quiz;
+				if( !empty( $attempt_quiz ) )
+				{
+					$retryAfter = Carbon::createFromFormat('H:i', $attempt_quiz->retry_after);
+					$last = !empty($last_attempt->ended_at) ? $last_attempt->ended_at : $last_attempt->updated_at;
+					$available_at = $last->addHours($retryAfter->hour)->addMinutes($retryAfter->minute);
+					$available = now() >= $available_at ? true : false;
+					if( $available == true )
+					{
+						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizNotYetAvailable'), 'class' => 'danger']);
+					}
+				}
+			}
 			if ($user->hasAnyRole(['Registered'])) {
 				if (!$user->HaveCompany) {
 					return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
@@ -424,7 +453,7 @@ class quizzesController extends Controller
 				}
 				$questions = $quiz->questions;
 				if (empty($questions) || $questions->count() == 0) {
-					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => 'This quiz has no questions. Please contact administrator.', 'class' => 'danger']);
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizNoQuestions'), 'class' => 'danger']);
 				}
 				if ($quiz->shuffle) {
 					$questions = $questions->shuffle();
@@ -527,6 +556,7 @@ class quizzesController extends Controller
 	{
 		try {
 			$user = auth()->user();
+			QuizResults::refresh_my_attempts();
 			if ($user->hasAnyRole(['Registered'])) {
 				if (!$user->HaveCompany) {
 					return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
@@ -614,7 +644,35 @@ class quizzesController extends Controller
 					$diff = $available_at->diff(now());
 					$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
 				}
-				return view('admin/clients/quiz/overview', compact('quiz', 'training', 'questions', 'tags', 'attempts', 'available', 'available_at', 'time_remaining', 'completion_percentage', 'allowActions', 'active_now'));
+				$quiz_status = null;
+				$time_now = now()->format('Y-m-d H:i:s');
+				$quiz->in_progress = $attempts->where('status', false)->first() ? true : false;
+				if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 ) { $quiz_status = 'passed'; }
+				elseif( $time_now > $quiz->end->format('Y-m-d H:i:s') && $attempts->count() == 0 ) { $quiz_status = 'notTaken'; }
+				elseif(
+					$attempts->where('score', '<', $quiz->passing_criteria)->where('status', true)->count() >= $quiz->attempts
+					|| $time_now > $quiz->end->format('Y-m-d H:i:s')
+				) { $quiz_status = 'failed'; }
+				elseif( $time_now < $quiz->start->format('Y-m-d H:i:s') ) { $quiz_status = 'notStartedYet'; }
+				elseif( $quiz->in_progress == true ) { $quiz_status = 'inProgress'; }
+				else { $quiz_status = 'available'; }
+
+				$completion_percentage = 0;
+				if( $quiz_status == 'inProgress' )
+				{
+					$in_progress = $attempts->where('status', false)->first();
+					if( !empty( $in_progress ) )
+					{
+						$max_questions = $in_progress->quiz->questions->count();
+						if( $max_questions > 0 )
+						{
+							$my_responses = $in_progress->responses->where('user_id', $user->id)->whereNotNull('response')->count();
+							$completion_percentage = intval(($my_responses / $max_questions) * 100);
+						}
+					}
+				}
+
+				return view('admin/clients/quiz/overview', compact('quiz', 'quiz_status', 'completion_percentage', 'training', 'questions', 'tags', 'attempts', 'available', 'available_at', 'time_remaining', 'completion_percentage', 'allowActions', 'active_now'));
 			} else {
 				return abort(401);
 			}
@@ -628,6 +686,7 @@ class quizzesController extends Controller
 	{
 		try {
 			$user = auth()->user();
+			QuizResults::refresh_my_attempts();
 			if ($user->hasAnyRole(['Registered'])) {
 				if (!$user->HaveCompany) {
 					return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
@@ -662,4 +721,114 @@ class quizzesController extends Controller
 			Log::error('Error in quizzesController@myQuizResponses: ' . $e->getMessage());
 		}
 	}
+
+	public function quizResults(Request $request)
+	{
+		$user = auth()->user();
+		if ($user->hasAnyRole(['Registered'])) {
+			return abort(401);
+		}
+		$quizzesResults_q = "SELECT 
+		qr.id AS qr_result_id,
+		qr.user_id AS qr_id,
+		qr.quiz_id AS qr_quiz_id,
+		qr.score AS qr_result_score,
+		qr.status AS qr_result_status,
+		qr.started_at AS qr_result_started_at,
+		qr.ended_at AS qr_result_ended_at,
+		q.id AS q_quiz_id,
+		q.title AS q_quiz_title,
+		q.organization_id AS q_quiz_organization_id,
+		q.training_id AS q_quiz_training_id,
+		q.description AS q_quiz_description,
+		q.start AS q_quiz_start,
+		q.end AS q_quiz_end,
+		q.time_limit AS q_quiz_time_limit, 
+		q.attempts AS q_quiz_attempts, 
+		q.retry_after AS q_quiz_retry_after, 
+		q.passing_criteria AS q_quiz_passing_criteria, 
+		q.shuffle AS q_quiz_shuffle, 
+		q.status AS q_quiz_status, 
+		q.created_at AS q_quiz_created_at, 
+		q.updated_at AS q_quiz_updated_at,
+		t.id as t_training_id,
+		t.title as t_training_title,
+		t.dsc as t_training_description,
+		o.id as o_org_id,
+		o.name_ar as o_org_name_ar,
+		o.name_en as o_org_name_en,
+		u.id as u_user_id,
+		u.first_name_en as u_user_first_name_en,
+		u.first_name_ar as u_user_first_name_ar,
+		u.last_name_en as u_user_last_name_en,
+		u.last_name_ar as u_user_last_name_ar,
+		u.img_url as u_user_img_url,
+		c.id as c_company_id,
+		c.name_en as c_company_name_en,
+		c.name_ar as c_company_name_ar,
+		c.logo as c_company_logo
+			FROM quiz_results qr
+			LEFT JOIN quizzes q ON qr.quiz_id = q.id
+			LEFT JOIN trainings t ON t.id = q.training_id
+			LEFT JOIN organizations o ON o.id = q.organization_id
+			LEFT JOIN users u ON u.id = qr.user_id
+			LEFT JOIN companies c ON c.id = u.company_id
+			WHERE 1=1 ";
+
+		$quizzesResults = collect(DB::select($quizzesResults_q));
+
+		return view('admin/clients/quiz/quiz_results', compact('quizzesResults'));
+
+	}
+	public function quizResultsdetails($id)
+	{
+		$user = auth()->user();
+		if ($user->hasAnyRole(['Registered'])) {
+			return abort(401);
+		}
+		$quizzesResults_q = "SELECT 
+		qr.id AS qr_result_id,
+		qr.user_id AS qr_id,
+		qr.quiz_id AS qr_quiz_id,
+		qr.score AS qr_result_score,
+		qr.status AS qr_result_status,
+		qr.started_at AS qr_result_started_at,
+		qr.ended_at AS qr_result_ended_at,
+		q.id AS q_quiz_id,
+		q.title AS q_quiz_title,
+		q.organization_id AS q_quiz_organization_id,
+		q.training_id AS q_quiz_training_id,
+		q.description AS q_quiz_description,
+		q.start AS q_quiz_start,
+		q.end AS q_quiz_end,
+		q.time_limit AS q_quiz_time_limit, 
+		q.attempts AS q_quiz_attempts, 
+		q.retry_after AS q_quiz_retry_after, 
+		q.passing_criteria AS q_quiz_passing_criteria, 
+		q.shuffle AS q_quiz_shuffle, 
+		q.status AS q_quiz_status, 
+		q.created_at AS q_quiz_created_at, 
+		q.updated_at AS q_quiz_updated_at,
+		t.id as t_training_id,
+		t.title as t_training_title,
+		t.dsc as t_training_description,
+		o.id as o_org_id,
+		o.name_ar as o_org_name_ar,
+		o.name_en as o_org_name_en
+			FROM quiz_results qr
+			LEFT JOIN quizzes q ON qr.quiz_id = q.id
+			LEFT JOIN trainings t ON t.id = q.training_id
+			LEFT JOIN organizations o ON o.id = q.organization_id
+			LEFT JOIN users u ON u.id = qr.user_id
+			WHERE qr.id= ? ";
+
+		$quizResult = collect(DB::select($quizzesResults_q, [$id]));
+		
+		return view('admin/clients/quiz/quiz_results_details', compact('quizResult'));
+
+	}
+
+
+
+
 }

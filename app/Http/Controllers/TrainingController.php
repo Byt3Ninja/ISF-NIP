@@ -590,9 +590,23 @@ class TrainingController extends Controller
 	public function mysessions()
 	{
 		try {
-			$sessions = [];
-			if (Auth::user()->company) {
-				$sessions = TrainingSession::where('step_id', Auth::user()->company->step)->orderBy('datetime', 'DESC')->get();
+			$sessions = collect([]);
+			$company = Auth::user()->company;
+			if( $company )
+			{
+				$steps = $company?->cycledata?->steps;
+				if( !empty( $steps ) )
+				{
+					$now = time();
+					$steps_ids = $steps->filter(function ($step) use ($now) {
+						return $step->from->timestamp <= $now && $step->to->timestamp >= $now;
+					})->values()->pluck('id')->toArray();
+					$sessions = TrainingSession::where('id', '>', 0);
+					// where('step_id', Auth::user()->company->step)
+					$sessions = $sessions->whereIn('step_id', $steps_ids);
+					$sessions = $sessions->orderBy('datetime', 'DESC')->get();
+				}
+				
 			}
 			$sessions = $sessions->map(function ($session) {
 				if ($session->type == "online") {
@@ -605,6 +619,7 @@ class TrainingController extends Controller
 
 				return $session;
 			});
+			$sessions = $sessions->sortBy('datetime1')->values();
 
 			return view('admin/settings/training/mysessions', compact('sessions'));
 		} catch (\Throwable $e) {
@@ -648,14 +663,16 @@ class TrainingController extends Controller
 			$duration = $start->diffInMinutes($end);
 
 			if ($type == 'sessions') {
-				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
+				$_session = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email);
 
-				if ($trainingSession == "Error") {
+				if( $_session['success'] == false )
+				{
 					return back()->with([
-						'message' => "Configration Error, please check your Zoom settings",
+						'message' => $_session['message'],
 						'class' => 'danger'
 					]);
 				}
+				$trainingSession = $_session['message'];
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
@@ -681,7 +698,6 @@ class TrainingController extends Controller
 			Log::error('Error in TrainingController@addsession: ' . $e->getMessage());
 		}
 	}
-
 	public function editsession(Request $request, $id)
 	{
 		try {
@@ -732,13 +748,16 @@ class TrainingController extends Controller
 
 			if ($type == 'sessions') {
 				// Add Zoom
-				$trainingSession = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
-				if ($trainingSession == "Error") {
+				$_session = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
+				
+				if( $_session['success'] == false )
+				{
 					return back()->with([
-						'message' => "Configration Error, please check your Zoom settings",
+						'message' => $_session['message'],
 						'class' => 'danger'
 					]);
 				}
+				$trainingSession = $_session['message'];
 				// $session = TrainingSession::find($trainingSession->sid);
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
@@ -773,11 +792,16 @@ class TrainingController extends Controller
 			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 			if (!$onlineMeeting['success']) {
-				return "Error";
+				return [
+					'success' => false,
+					'message' => $onlineMeeting['data']
+				];
+				// return "Error";
 			}
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
 			$join = $onlineMeeting['data']['join_url'];
+			$passcode = $onlineMeeting['data']['passcode'];
 
 			$data = [
 				'type' => $type,
@@ -785,6 +809,7 @@ class TrainingController extends Controller
 				'title' => $title,
 				'dsc' => $dsc,
 				'zoom_id' => $zoomid,
+				'zoom_passcode' => $passcode,
 				'datetime' => $datetimeStamp,
 				'enddatetime' => $end_datetimeStamp,
 				'duration' => $duration,
@@ -800,7 +825,11 @@ class TrainingController extends Controller
 				$trainingSession_update = TrainingSession::where('id', $sid)->update($data);
 				$trainingSession = TrainingSession::find($sid);
 			}
-			return $trainingSession;
+			return [
+				'success' => true,
+				'message' => $trainingSession
+			];
+			// return $trainingSession;
 		}
 	}
 	private function addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $online, $sid = null)

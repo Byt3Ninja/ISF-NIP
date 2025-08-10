@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\City;
+use App\Like;
+use App\Step;
+use App\User;
+use App\Cycle;
+use App\Stage;
+use App\State;
+use App\Sector;
+use App\Company;
 use App\Country;
-use App\Events\WebMessage;
+use App\Currency;
+use App\Settings;
+use App\Milestone;
+use App\Team_member;
 use App\FundingRound;
 use App\Organization;
-use App\ScreeningEvaluation;
-use App\ScreeningEvaluationResults;
-use App\Step;
-use App\Sector;
-use App\Team_member;
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreUpdateClientCompanyRequest;
-use Illuminate\Support\Facades\Validator;
-use App\User;
-use App\State;
-use App\City;
-use App\Company;
-use App\Currency;
-use App\Cycle;
-use App\Like;
-use App\Milestone;
-use App\Settings;
-use App\Stage;
 use App\SustainableIcon;
-use \Illuminate\Validation\ValidationException;
-use URL, File, DB, Exception, Session, Storage, stdClass;
-use Intervention\Image\ImageManagerStatic as Image;
-use Illuminate\Support\Facades\Auth;
+use App\Events\WebMessage;
+use App\ScreeningEvaluation;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use \Illuminate\Validation\ValidationException;
+use Intervention\Image\ImageManagerStatic as Image;
+use App\Http\Requests\StoreUpdateClientCompanyRequest;
+use URL, File, DB, Exception, Session, Storage, stdClass;
 
 class ClientCompanyController extends Controller
 {
@@ -86,8 +87,20 @@ class ClientCompanyController extends Controller
             if( !empty( $evaluationForm ) )
             {
                 $current_step = $company->stepdata;
-                $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first();
+                if( $current_step->stype == 2 ) { $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr - 1)->first(); }
+                else
+                {
+                    $form = Step::where('cycle_id', $current_step?->cycle_id)->where('arr', $current_step?->arr)->first();
+                }
                 $formData = $form->formData;
+                if( !empty( $formData ) ) { $formData = $formData->where('company_id', $company->id)->values(); }
+                $formData = $formData->map(function ($item) {
+                    $field = $item->field()->first();
+                    $field_type = '';
+                    if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
+                    $item->field_type = $field_type;
+                    return $item;
+                });
                 $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
                 $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
                 $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id, $company->id );
@@ -359,6 +372,47 @@ class ClientCompanyController extends Controller
 
             if( $data['CompanyN'] == 1 )
             {
+
+                $l = $request->input('locale', app()->getLocale());
+                if($l == 'en'){
+                $allCategories = [
+                            'Food & Beverage',
+                            'Technology',
+                            'App / Website',
+                            'Housewares / Home Design',
+                            'Health / Wellness / Nutrition',
+                            'Fitness',
+                            'Sports',
+                            'Beauty',
+                            'Clothing / Fashion',
+                            'Toys / Games',
+                            'Children',
+                            'Entertainment / Experiential',
+                            'Pets',
+                            'Music',
+                            'Holiday',
+                            'Other',
+                        ];
+                }else{
+                        $allCategories = [
+                            'الأطعمة والمشروبات',
+                                'التكنولوجيا',
+                                'تطبيق / موقع إلكتروني',
+                                'الأدوات المنزلية / تصميم المنزل',
+                                'الصحة / العافية / التغذية',
+                                'اللياقة البدنية',
+                                'الرياضة',
+                                'الجمال',
+                                'الملابس / الأزياء',
+                                'الألعاب / الألعاب الإلكترونية',
+                                'الأطفال',
+                                'الترفيه / التجارب',
+                                'الحيوانات الأليفة',
+                                'الموسيقى',
+                                'العطلات',
+                                'أخرى',
+                        ];
+                }
                 $validatedData = $request->validate([
                     'name_en' => 'required|string|max:255',
                     'country_id' => 'required|exists:countries,id',
@@ -369,7 +423,7 @@ class ClientCompanyController extends Controller
                     'years_of_operations' => 'required|string',
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
-                    'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
+                    'business_categories.*' => ['string', Rule::in($allCategories)],
                     'other_category' => 'nullable|string|max:255',
                 ], [
                     'name_en.required' => __('admin.Name is required'),

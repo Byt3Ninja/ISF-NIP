@@ -86,20 +86,22 @@
 															@php $attempts = $quiz->myAttempts; @endphp
 															@if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 )
 																<span class="badge bg-label-success"> {{ __('admin.quizPassed') }} </span>
-															@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->count() >= $quiz->attempts )
+															@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') && $attempts->count() == 0 )
+																<span class="badge bg-label-danger"> {{ __('admin.quizNotTaken') }} </span>
+															@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->where('status', true)->count() >= $quiz->attempts )
 																<span class="badge bg-label-danger"> {{ __('admin.quizFailed') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
 																<span class="badge bg-label-danger"> {{ __('admin.quizFailed') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
 																<span class="badge bg-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
-															@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
-																<span class="badge bg-label-danger"> {{ __('admin.quizNotTaken') }} </span>
-															@else
+															@elseif( $quiz->in_progress == true )
 																<span class="badge bg-label-primary"> {{ __('admin.quizInProgress') }} </span>
+															@else
+																<span class="badge bg-label-primary"> {{ __('admin.quizAvailable') }} </span>
 															@endif
 														</td>
 														<td> {{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' . ($quiz->time_limit % 60 > 0 ? intval($quiz->time_limit % 60) . ' ' . __('admin.minutes') : '')  : $quiz->time_limit . ' ' . __('admin.minutes') }} </td>
-														<td> {{ $quiz->attempts }} </td>
+														<td> {{ $quiz->myAttempts->count() }} / {{ $quiz->attempts }} </td>
 														<td> {{ $quiz->passing_criteria . '%' }} </td>
 													</tr>
 												@endforeach

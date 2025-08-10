@@ -4,8 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Traits\ApiResponder;
 class UpdateUserApiRequest extends FormRequest
 {
+    use ApiResponder;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -39,5 +43,11 @@ class UpdateUserApiRequest extends FormRequest
             'role' => ['nullable', 'exists:roles,id'],
             'status' => ['nullable', 'string'],
         ];
+    }
+       protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            $this->validationError(__('api.validation_error'), 422, $validator->errors())
+        );
     }
 }

@@ -3,9 +3,12 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Traits\ApiResponder;
 class StoreUserApiRequest extends FormRequest
 {
+    use ApiResponder;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -30,5 +33,12 @@ class StoreUserApiRequest extends FormRequest
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'role' => 'required|exists:roles,id',
             ];
+    }
+
+       protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            $this->validationError(__('api.validation_error'), 422, $validator->errors())
+        );
     }
 }

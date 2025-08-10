@@ -58,30 +58,75 @@ class ScreeningEvaluationResults extends Model
 		}
 
 		$l = app()->getLocale();
-		$getUsers = Screening::where('step_id', $step_id)->with(['user'])->get();
+		if( $getStep->stype == 5 )
+		{
+			$finals = Finalscreening::where('step_id', $step_id)->with(['company', 'company.users'])->get()->map(function( $f ) {
+				$f->judgers_ids = array_map(function( $i ) { return intval( $i ); }, $f->judges);
+				return $f;
+			});
+			$users_ids = $finals->map(function( $u ) {
+				return array_map(function( $i ) { return intval( $i ); }, $u->judges);
+			})->flatten()->unique()->values();
 
-		$judges = $getUsers->map(function($item) use ( $l ) {
-			$user = $item->user;
-			$judger = new stdClass;
-			$judger->id = $user->id ?? 0;
-			$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
-			$judger->phone = $user->phone ?? '';
-			$judger->email = $user->email ?? '';
-			$judger->image_url = $user->image_url ?? '';
-			return $judger;
-		})->unique('id')->values();
+			$judges = User::whereIn('id', $users_ids)->get()->map(function( $user ) use ( $l ) {
+				$judger = new stdClass;
+				$judger->id = $user->id ?? 0;
+				$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+				$judger->phone = $user->phone ?? '';
+				$judger->email = $user->email ?? '';
+				$judger->image_url = $user->image_url ?? '';
+				return $judger;
+			})->unique('id')->values();
 
-		$judges = $judges->map(function( $item ) use ( $getUsers ) {
-			$startups = $getUsers->where('user_id', $item->id)->map(function( $i ) {
-				return $i->users;
-			})->flatten()->unique()->filter(function( $i ) {
-				return !is_null($i);
-			})->values();
-			$item->startups = $startups;
-			return $item;
-		});
+			$judges = $judges->map(function( $item ) use ( $finals ) {
+				$startups = $finals->filter(function( $f ) use ( $item ) {
+					return in_array($item->id, $f->judgers_ids);
+				})->values()->map(function( $i ) {
+					return $i?->company?->users;
+				})->flatten()->unique()->filter(function( $i ) {
+					return !is_null( $i );
+				})->values();
+				$item->startups = $startups;
+				return $item;
+			});
+		}
+		else
+		{
+			$getUsers = Screening::where('step_id', $step_id)->with(['user'])->get();
+			$judges = $getUsers->map(function($item) use ( $l ) {
+				$user = $item->user;
+				$judger = new stdClass;
+				$judger->id = $user->id ?? 0;
+				$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+				$judger->phone = $user->phone ?? '';
+				$judger->email = $user->email ?? '';
+				$judger->image_url = $user->image_url ?? '';
+				return $judger;
+			})->unique('id')->values();
 
-		if( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+			$judges = $judges->map(function( $item ) use ( $getUsers ) {
+				$startups = $getUsers->where('user_id', $item->id)->map(function( $i ) {
+					return $i->users;
+				})->flatten()->unique()->filter(function( $i ) {
+					return !is_null($i);
+				})->values();
+				$item->startups = $startups;
+				return $item;
+			});
+		}
+
+		if( $getStep->stype == 5 )
+		{
+			foreach( $judges as $index => $judge )
+			{
+				$startup_ids = $judge->startups->pluck('id')->toArray();
+				$get_companies = $companies->filter(function( $c ) use ( $startup_ids ) {
+					return $c->users->whereIn('id', $startup_ids)->count() > 0;
+				});
+				$judges[$index]->startups = $get_companies->pluck('id');
+			}
+		}
+		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
 		foreach( $judges as $index => $judge )
 		{
@@ -105,29 +150,32 @@ class ScreeningEvaluationResults extends Model
 		}
 		if( $getStep )
 		{
-			foreach( $evaluation->categories as $criteria )	
+			if( !empty( $evaluation->categories ) )
 			{
-				$subCriteria = $criteria->subCriteria;
-				foreach( $judges as $judges_key => $judge )
+				foreach( $evaluation->categories as $criteria )	
 				{
-					foreach( $judge->companies as $companies_key => $company )
+					$subCriteria = $criteria->subCriteria;
+					foreach( $judges as $judges_key => $judge )
 					{
-						foreach( $company->results as $results_key => $result )
+						foreach( $judge->companies as $companies_key => $company )
 						{
-							if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
-							if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
-							$getResult = $subCriteria->where('id', $result->criteria_id)->first();
-							if( !empty( $getResult ) )
+							foreach( $company->results as $results_key => $result )
 							{
-								$weight = $getResult->weight;
-								$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
-								$result->weighted_score = $weighted_score;
+								if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
+								if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
+								$getResult = $subCriteria->where('id', $result->criteria_id)->first();
+								if( !empty( $getResult ) )
+								{
+									$weight = $getResult->weight;
+									$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
+									$result->weighted_score = $weighted_score;
+								}
+								$company->results[$results_key] = $result;
 							}
-							$company->results[$results_key] = $result;
+							$judge->companies[$companies_key] = $company;
 						}
-						$judge->companies[$companies_key] = $company;
+						$judges[$judges_key] = $judge;
 					}
-					$judges[$judges_key] = $judge;
 				}
 			}
 		}

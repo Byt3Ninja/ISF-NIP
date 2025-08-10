@@ -1391,7 +1391,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           <h6 class="mb-0">{{__('admin.Description')}}</span>
                         </div>
                         <div class="d-flex flex-wrap ps-7 text-muted">
-                          {{ $step->description }} Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem perspiciatis ab eaque repudiandae officia consequatur nobis. Provident, adipisci aliquid magnam ex beatae culpa consequatur! Numquam repudiandae dolore vero. Ea, rerum?
+                          {{ $step->description }} 
                         </div>
                       </div>
                     @endif
@@ -1452,66 +1452,78 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
-            <input type="hidden" name="type" id="type7" value="8">
-          
-            <fieldset class="row">
-              <div class="col-12 form-group mb-3">
-                <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}: </label>
-                <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
-                  {{-- @foreach (\App\BuilderForm::all() as $form) --}}
-                  {{-- <option value="{{$form->id}}" >{{$form->form_name}}</option> --}}
-                  {{-- @endforeach --}}
+          <input type="hidden" name="type" id="type7" value="8">
+
+          <fieldset class="row">
+            <div class="col-12 form-group mb-3">
+              <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}: </label>
+              <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
+                {{-- @foreach (\App\BuilderForm::all() as $form) --}}
+                {{-- <option value="{{$form->id}}" >{{$form->form_name}}</option> --}}
+                {{-- @endforeach --}}
+              </select>
+            </div>
+
+            <div class="col-12 form-group mb-3 public-data-form-fields">
+              <label class="form-label" for="is_public">{{ __('cycles.Step Visibility') }}: </label>
+              <select class="select form-control" id="is_public" name="is_public">
+                <option value="0">{{ __('cycles.Step Visible To Private') }}</option>
+                <option value="1">{{ __('cycles.Step Visible To Public') }}</option>
+              </select>
+            </div>
+            <div class="col-12 form-group mb-3 public-data-form-fields" id="public_slug_div">
+              <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
+              <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
+            </div>
+
+            <div class="mb-2" id="mmenu2">
+              <label class="form-label">{{ __('cycles.Choose screening type') }}: </label>
+              <div>
+                <select class="select2 form-control" id="mScreeningSelect" name="mScreeningSelect" required>
+                  <option selected disabled> {{ __('cycles.Select type') }}</option>
+                  <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
+                  <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
+                  <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
                 </select>
               </div>
-
-              <div class="mb-2" id="mmenu2">
-                <label class="form-label">{{ __('cycles.Choose screening type') }}: </label>
-                <div>
-                  <select class="select2 form-control" id="mScreeningSelect" name="mScreeningSelect" required>
-                    <option selected disabled> {{ __('cycles.Select type') }}</option>
-                    <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
-                    <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
-                    <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
-                  </select>
-                </div>
-              </div>
+            </div>
 
 
-              <div class="col-12 form-group mb-3">
-                <label class="form-label" for="step-name">{{ __('cycles.Form title') }}:</label>
-                <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
-                class="form-control" required>
-              </div>
-              <div class="col-12 mb-4">
-                <label for="step-range-picker" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
-                <input type="hidden" name="fromDate" id="mfromDate">
-                <input type="hidden" name="toDate" id="mtoDate">
-                <input type="text" id="step-range-picker" class="form-control" name="date_range" />
-              </div>
-              {{-- <div class="col-md-6 form-group mb-3">
-                <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
-                <div class="position-relative">
-                  <input id='mfromDate' name='fromDate' type="text" class="form-control flatpickr-date" required>
-                  <div class="position-absolute top-0 end-0 mt-2 me-3">
-                    <i class="ti ti-calendar ti-24px text-primary"></i>
-                  </div>
+            <div class="col-12 form-group mb-3">
+              <label class="form-label" for="step-name">{{ __('cycles.Form title') }}:</label>
+              <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
+              class="form-control" required>
+            </div>
+            <div class="col-12 mb-4">
+              <label for="step-range-picker" class="form-label">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
+              <input type="hidden" name="fromDate" id="mfromDate">
+              <input type="hidden" name="toDate" id="mtoDate">
+              <input type="text" id="step-range-picker" class="form-control" name="date_range" />
+            </div>
+            {{-- <div class="col-md-6 form-group mb-3">
+              <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
+              <div class="position-relative">
+                <input id='mfromDate' name='fromDate' type="text" class="form-control flatpickr-date" required>
+                <div class="position-absolute top-0 end-0 mt-2 me-3">
+                  <i class="ti ti-calendar ti-24px text-primary"></i>
                 </div>
               </div>
-              <div class="col-md-6 form-group mb-3">
-                <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid to') }}:</label>
-                <div class="position-relative">
-                  <input id='mtoDate' name='toDate' type="text" class="form-control flatpickr-date" required>
-                  <div class="position-absolute top-0 end-0 mt-2 me-3">
-                    <i class="ti ti-calendar ti-24px text-primary"></i>
-                  </div>
+            </div>
+            <div class="col-md-6 form-group mb-3">
+              <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid to') }}:</label>
+              <div class="position-relative">
+                <input id='mtoDate' name='toDate' type="text" class="form-control flatpickr-date" required>
+                <div class="position-absolute top-0 end-0 mt-2 me-3">
+                  <i class="ti ti-calendar ti-24px text-primary"></i>
                 </div>
-              </div> --}}
-              <div class="col-12 form-group mb-5">
-                <label class="form-label" form="step-desc">{{ __('cycles.Description') }}: </label>
-                <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control"></textarea>
-            
               </div>
-            </fieldset>
+            </div> --}}
+            <div class="col-12 form-group mb-5">
+              <label class="form-label" form="step-desc">{{ __('cycles.Description') }}: </label>
+              <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control"></textarea>
+          
+            </div>
+          </fieldset>
         </div>
         <div class="modal-footer">
           <button type="submit" value="submit" class="btn btn-primary">
@@ -2317,7 +2329,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle").val(),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 menu.show();
               },
               error: function(error) {
@@ -2333,7 +2345,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 $('#menu1').show();
               },
               error: function(error) {
@@ -2369,22 +2381,32 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             success: function(response) {
               console.log('response', response)
               step = response.stype;
+              sData = response.data;
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
-              if (response.data !== null) {
-                if (step == 1 || step == 5) {
-                  $('#mFormSelect').val(response.data);
+              $('.public-data-form-fields').hide();
+              if( response.data !== null )
+              {
+                if( step == 1 )
+                {
+                  $('.public-data-form-fields').show();
+                  $('#is_public').val(response.is_public);
+                  $('#public_slug').val(response.public_slug);
+                  if( response.is_public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
                 }
-                if (step == 2) {
-                  $('#mScreeningSelect').val(response.data);
-                }
+                if( step == 1 || step == 5 ) { $('#mFormSelect').val(response.data); }
+                if( step == 2 ) { $('#mScreeningSelect').val(response.data); }
               }
               if (menu !== null) {
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     menu.show();
                   },
                   error: function(error) {
@@ -2398,8 +2420,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     $('#mmenu1').show();
                   },
                   error: function(error) {
@@ -2470,5 +2496,9 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         });
       }
     }
+    $(document).on('change', '#is_public', function() {
+      let _public = $(this).val();
+      if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
+    });
   </script>
 @stop

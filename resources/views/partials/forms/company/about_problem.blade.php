@@ -74,24 +74,3 @@
     </div>
   </div>
   
-  <!-- Get countries and phone codes -->
-  <script>
-    fetch('https://restcountries.com/v3.1/all')
-      .then(response => response.json())
-      .then(data => {
-        const select = document.getElementById('country_code');
-        data.forEach(country => {
-          const option = document.createElement('option');
-          const countryCode =
-            `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
-          option.value = countryCode;
-          option.text = `${countryCode} (${country.cca2})`;
-          option.style.fontSize = '12px';
-          if (country.cca2 === 'EG') {
-            option.selected = true;
-          }
-          select.appendChild(option);
-        });
-      });
-  </script>
-  

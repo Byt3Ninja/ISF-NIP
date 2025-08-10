@@ -130,7 +130,7 @@
                 accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
               <div class="form-text mt-2">
                 <i class="ti ti-info-circle me-1"></i>
-                Supported formats: PDF, DOC, XLS, PPT, Images
+                  {{ $l == 'ar' ? 'الصيغ المدعومة: PDF، DOC، XLS، PPT، الصور' : 'Supported formats: PDF, DOC, XLS, PPT, Images' }}
               </div>
             </div>
           </div>

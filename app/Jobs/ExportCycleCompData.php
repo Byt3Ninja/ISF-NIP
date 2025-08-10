@@ -78,7 +78,6 @@ class ExportCycleCompData implements ShouldQueue
 
 
         }else{
-
         Company::where('cycle', $step)->chunk(1000, function($companies) use (&$sheet, &$row) {
         foreach ($companies as $companie) {
             

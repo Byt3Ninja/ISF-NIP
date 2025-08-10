@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Services;
+
+use App\User;
+use App\Settings;
+use App\UsersBio;
+use App\Traits\ApiResponder;
+use Illuminate\Http\Request;
+use App\Mail\WelcomeUserMail;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+
+class AuthService
+{
+    use ApiResponder;
+    public function attemptLogin(string $email, string $password): User
+    {
+        $user = User::where('email', $email)->first();
+
+        if (! $user || ! Hash::check($password, $user->password)) {
+            throw new \Exception(json_encode(['type' => 'credential', 'message' => __('api.incorrect_credentials')]));
+        }
+
+        if ($user->status !== 'active') {
+            throw new \Exception(json_encode(['type' => 'inactive', 'message' => __('api.inactive_user')]));
+        }   
+
+
+        return $user;
+    }
+
+    public function generateToken(User $user): string
+    {
+        return $user->createToken('auth-login')->plainTextToken;
+    }
+
+    public function register(array $data): array
+    {
+        $settings = Settings::find(1);
+
+        $userData = [
+            'first_name_en' => $data['firstName'],
+            'last_name_en'  => $data['lastName'],
+            'first_name_ar' => $data['firstName'],
+            'last_name_ar'  => $data['lastName'],
+            'gender'        => $data['gender'],
+            'phone'         => $data['phone'],
+            'email'         => $data['email'],
+            'password'      => Hash::make($data['password']),
+            'title_en'      => $data['title'] ?? null,
+            'title_ar'      => $data['title'] ?? null,
+        ];
+
+        if ($settings && $settings->VFEmail != 1) {
+            $userData['email_verified_at'] = now();
+        }
+
+        DB::beginTransaction();
+        try {
+            $user = User::create($userData);
+
+            $role = Role::where('name', $data['role'])->firstOrFail();
+
+            DB::table('model_has_roles')->insert([
+                'role_id'    => $role->id,
+                'model_type' => User::class,
+                'model_id'   => $user->id,
+             ]);
+
+           if ($role->name === 'Mentor') {
+                UsersBio::create([
+                    'user_id'  => $user->id,
+                    'bio_en'   => $data['userbio'] ?? null,
+                    'linkedin' => $data['linkedin'] ?? null,
+                ]);
+
+                if (!empty($data['expertise'])) {
+                    $expertiseInsert = collect($data['expertise'])->map(fn($expertiseId) => [
+                        'expertise_id' => $expertiseId,
+                        'mentor_id'    => $user->id,
+                    ])->toArray();
+
+                    DB::table('mentor_expertise')->insert($expertiseInsert);
+                }
+            }
+
+            Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
+            DB::commit();
+
+            $token = $user->createToken('auth-register')->plainTextToken;
+
+            return [
+                'success' => true,
+                'user' => $user,
+                'token' => $token
+            ];
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            throw $e;
+        }
+    }
+
+    public function logout(Request $request, ?User $user)
+{
+      $bearerToken = $request->bearerToken();
+
+    if (! $bearerToken || ! $user || ! $user->currentAccessToken()) {
+        return $this->unauthorized(__('api.unauthenticated'));
+    }
+
+    $user->currentAccessToken()->delete();
+
+    return $this->success(null, [], __('api.logged_out'), 200);
+}
+}

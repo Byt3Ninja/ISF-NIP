@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Password;
 
 class WelcomeJudgerNotification extends Notification
 {
@@ -35,6 +36,13 @@ class WelcomeJudgerNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $token = Password::broker()->createToken($notifiable);
+
+        $resetUrl = url(route('password.reset', [
+        'token' => $token,
+        'email' => $notifiable->email,
+    ], false));
+    $this->data['reset_url'] = $resetUrl;
         if ($this->data['role'] === 'Judger') {
             return (new MailMessage)
                 ->subject('مرحبًا بك كـ Judger!')

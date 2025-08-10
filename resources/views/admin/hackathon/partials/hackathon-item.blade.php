@@ -13,9 +13,9 @@
       <i class="ti ti-check"></i>
       {{ $l == 'en' ? 'Completed' : 'مكتمل' }}
     </span>
-    <span class="badge bg-label-info">
+    {{-- <span class="badge bg-label-info">
       <i class="ti ti-trophy me-1"></i>
       {{ $l == 'en' ? 'View Results' : 'عرض النتائج' }}
-    </span>
+    </span> --}}
   </div>
 </a>

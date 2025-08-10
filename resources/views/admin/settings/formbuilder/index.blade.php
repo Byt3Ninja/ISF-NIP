@@ -119,7 +119,7 @@
 										  <div class="d-flex align-items-center mx-2">
 											<div style="display: flex; align-items: center;">
 											<button
-											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center me-2" 
 											  style="border-radius: 17px; width: 40px; height: 40px;"
 											   type="submit" >
 											  <i class="ti ti-filter text-white ti-24px"></i>
@@ -128,7 +128,7 @@
 										  <!-- Search Bar -->
 										  <div class="position-relative me-3 d-none d-md-flex">
                         <select name="org_id" class="form-control">
-                          <option value="0">{{ __('admin.All') }}</option>
+                          <option value="0">{{ __('admin.All_Organizations') }}</option>
                           @php
                           $user = Auth::user();
                           if($user->hasRole('organizationManager')){

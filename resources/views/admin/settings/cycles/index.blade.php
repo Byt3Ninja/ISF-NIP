@@ -214,11 +214,18 @@
                         </a>
                         @endif
                         @if($step->stype == 1 && $step->form)
-                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}" class="mx-1">
                           <span class="btn btn-icon btn-label-primary rounded-circle">
                             <i class="ti ti-eye" title="{{ __('cycles.view step results') }}"></i>
                           </span>
                         </a>
+                        @if( !empty( $step->join_url ) && !is_null( $step->join_url ) )
+                        <a href="javascript:void(0)" class="mx-1 copy-public-link" data-clipboard="{{ $step->join_url }}">
+                          <span class="btn btn-icon btn-label-dark rounded-circle">
+                            <i class="ti ti-copy" title="{{ __('cycles.copy public link') }}"></i>
+                          </span>
+                        </a>
+                        @endif
                       @endif
                         </div>
                       </div>
@@ -339,8 +346,10 @@
 <div class="modal fade" id="stepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
-      <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" onsubmit="disableSubmitButton()">
+      <form id="addStepForm" class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
+        autocomplete="off" 
+        {{-- onsubmit="disableSubmitButton()" --}}
+        >
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.New step data') }} - <span id="formtitle">{{
@@ -355,7 +364,7 @@
           <div class="mb-4" id="menu1">
             <div class="form-group mb-0">
               <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
-              <select class="select form-control" name="FormSelect" id="FormSelect" required>
+              <select class="select form-control" name="FormSelect" id="FormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
                 {{-- @endforeach --}}
@@ -365,7 +374,7 @@
           <div class="mb-4" id="menu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div class="form-group mb-0">
-              <select class="select2 form-control" name="ScreeningSelect" required>
+              <select class="form-select" name="ScreeningSelect">
                 <option selected disabled> {{ __('cycles.Select type') }}</option>
                 <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
                 <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
@@ -382,7 +391,7 @@
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Step Title') }}: </label>
             <input id='title' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
-              required>
+              >
           </div>
           {{-- <div class="form-group mt-3">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid from') }}: </label>
@@ -402,7 +411,13 @@
 
           <div class="form-group mb-4" id="team_number">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='count_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input 
+                id='count_team_number' 
+                name='count_team_number' 
+                type="number" 
+                placeholder="{{ __('admin.maxInTeam') }}" 
+                class="form-control"
+              >
           </div>
         </div>
         <div class="modal-footer">
@@ -426,7 +441,7 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off">
+        autocomplete="off" id="editStepForm">
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Modify current step') }}</h4>
@@ -436,6 +451,7 @@
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
           <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
             <div class="form-group mb-4">
@@ -446,10 +462,21 @@
               </select>
             </div>
           </div>
+          <div class="form-group mb-4 public-data-form-fields">
+            <label class="form-label" for="is_public">{{ __('cycles.Step Visibility') }}: </label>
+            <select class="select form-control" id="is_public" name="is_public">
+              <option value="0">{{ __('cycles.Step Visible To Private') }}</option>
+              <option value="1">{{ __('cycles.Step Visible To Public') }}</option>
+            </select>
+          </div>
+          <div class="form-group mb-4 public-data-form-fields" id="public_slug_div">
+            <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
+            <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
+          </div>
           <div class="mb-4" id="mmenu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div>
-              <select class="select2 form-control" id="mScreeningSelect" name="mScreeningSelect" required>
+              <select class="form-select" id="mScreeningSelect" name="mScreeningSelect" required>
                 <option selected disabled> {{ __('cycles.Select type') }}</option>
                 <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
                 <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
@@ -460,7 +487,7 @@
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Form title') }}: </label>
           <div class="mb-4">
             <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
-              required>
+              >
           </div>
           <div class="col-12 mb-4">
             <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
@@ -476,15 +503,15 @@
           <div class="mb-4">
             <input id='mtoDate' name='toDate' type="text" class="form-control" required readonly>
           </div> --}}
-          <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
-          <div class="form-group mb-0">
+          <div class="form-group mb-4">
+            <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Description') }}: </label>
             <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}"
               class="form-control"></textarea>
           </div>
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='mcount_team_number' name='count_team_number' type="text" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='mcount_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
 
 
@@ -522,11 +549,165 @@
 <script src="/vuexy/assets/js/forms-selects.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
+
 <script>
-  function disableSubmitButton() {
-    document.getElementById("submitBtn").disabled = true;
+  const currentLang = '{{ $l }}';
+
+  const errors = {
+    title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
+    description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
+    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.'
+  };
+
+ function validateStepForm(form, mode = 'add') {
+  const stepType = form.querySelector('#stype');
+  const stepTitle = form.querySelector(`${mode === 'add' ? '#title' : '#mtitle'}`);
+  const stepDescription = form.querySelector(`${mode === 'add' ? '#description' : '#mdescription'}`);
+  const teamNumberInput = form.querySelector(`${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`);
+  const formSelect = form.querySelector(`${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`);
+  const screeningSelect = form.querySelector(`${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`);
+
+  // Remove any previous error messages
+  const existingErrors = form.querySelectorAll('.invalid-feedback');
+  existingErrors.forEach(error => error.remove());
+
+  // Helper function to show error
+  const showError = (element, message) => {
+    element.focus();
+    element.classList.add('is-invalid');
+
+    const errorSpan = document.createElement('span');
+    errorSpan.classList.add('invalid-feedback');
+    errorSpan.textContent = message;
+
+    element.insertAdjacentElement('afterend', errorSpan);
+  };
+
+  // Validation checks
+  if (!stepTitle.value.trim()) {
+    showError(stepTitle, errors.title);
+    return false;
+  }
+
+  if (!stepDescription.value.trim()) {
+    showError(stepDescription, errors.description);
+    return false;
+  }
+
+  // Check for conditional required fields based on step type
+  if ((stepType.value === '1' || stepType.value === '5') && formSelect && formSelect.hasAttribute('required') && !formSelect.value) {
+    showError(formSelect, currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار نموذج.');
+    return false;
+  }
+
+  if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
+    showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
+    return false;
+  }
+
+  if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < 1)) {
+    showError(teamNumberInput, errors.teamNumber);
+    return false;
+  }
+
+  // Clear any invalid styling
+  [stepTitle, stepDescription, teamNumberInput, formSelect, screeningSelect].forEach(input => {
+    if (input) input.classList.remove('is-invalid');
+  });
+
+  return true; // All validations passed
 }
-    console.log('loaded');
+
+function disableFormWithLoading(form) {
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+  }
+}
+
+const addStepForm = document.querySelector('#addStepForm');
+const editStepForm = document.querySelector('#editStepForm');
+
+if (addStepForm) {
+  addStepForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateStepForm(addStepForm, 'add')) {
+      disableFormWithLoading(addStepForm);
+      addStepForm.submit();
+    }
+  });
+}
+
+if (editStepForm) {
+  editStepForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateStepForm(editStepForm, 'edit')) {
+      disableFormWithLoading(editStepForm);
+      editStepForm.submit();
+    }
+  });
+}
+function clearValidationOnChange(form, mode = 'add') {
+  const fields = [
+    `${mode === 'add' ? '#title' : '#mtitle'}`,
+    `${mode === 'add' ? '#description' : '#mdescription'}`,
+    `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`,
+    `${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`,
+    `${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`
+  ];
+
+  fields.forEach(selector => {
+    const input = form.querySelector(selector);
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+      input.classList.remove('is-invalid');
+
+      // Remove the next sibling if it's an error message
+      const next = input.nextElementSibling;
+      if (next && next.classList.contains('invalid-feedback')) {
+        next.remove();
+      }
+    });
+
+    // Also listen for change events on select elements
+    if (input.tagName === 'SELECT') {
+      input.addEventListener('change', () => {
+        input.classList.remove('is-invalid');
+
+        // Remove the next sibling if it's an error message
+        const next = input.nextElementSibling;
+        if (next && next.classList.contains('invalid-feedback')) {
+          next.remove();
+        }
+      });
+    }
+  });
+}
+
+if (addStepForm) {
+  clearValidationOnChange(addStepForm, 'add');
+}
+
+if (editStepForm) {
+  clearValidationOnChange(editStepForm, 'edit');
+}
+</script>
+
+<script>
+
+  // $('#count_team_number, #mcount_team_number').on('input', function () {
+  //   let val = $(this).val();
+  //   if (val < 1) {
+  //     $(this).val(1);
+  //   }
+  // });
+
+//   function disableSubmitButton() {
+//     document.getElementById("submitBtn").disabled = true;
+// }
+    // console.log('loaded');
     const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
     // console.log('stepFormRamgePicker', stepFormRamgePicker);
 
@@ -681,6 +862,11 @@
           let steptxt = $('#StepSelect').find(":selected").text();
           let menu = $('#menu' + step);
           $('#menu1,#menu2,#team_number').hide();
+          
+          // Remove required attributes from all fields first
+          $('#FormSelect').removeAttr('required');
+          $('#ScreeningSelect').removeAttr('required');
+          
           if(step === '6'){
             $('#team_number').show();
           }
@@ -690,7 +876,9 @@
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
+                // Add required attribute only if this menu is shown
+                $('#FormSelect').attr('required', 'required');
                 menu.show();
               },
               error: function(error) {
@@ -706,7 +894,9 @@
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
+                // Add required attribute for step 5
+                $('#FormSelect').attr('required', 'required');
                 $('#menu1').show();
               },
               error: function(error) {
@@ -714,6 +904,11 @@
                 alert("Error Occurred, Try again!");
               }
             });
+          }
+          if (step === '2') {
+            // Add required attribute for screening select
+            $('#ScreeningSelect').attr('required', 'required');
+            $('#menu2').show();
           }
           $('#stype').val(step);
           $('#formtitle').text(steptxt);
@@ -747,29 +942,38 @@
             },
             success: function(response) {
               step = response.stype;
+              sData = response.data;
               console.log(step);
+              $('#editStepForm #stype').val(step);
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
-              if(step == 6){
-                $('#mteam_number').show();
-              }else{
-                $('#mteam_number').hide();
-              }
-              if (response.data !== null) {
-                if (step == 1 || step == 5) {
-                  $('#mFormSelect').val(response.data);
+              $('.public-data-form-fields').hide();
+              if( step == 6 ) { $('#mteam_number').show(); }
+              else { $('#mteam_number').hide(); }
+
+              if( response.data !== null )
+              {
+                if( step == 1 )
+                {
+                  $('.public-data-form-fields').show();
+                  $('#is_public').val(response.is_public);
+                  $('#public_slug').val(response.public_slug);
+                  if( response.is_public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
                 }
-                if (step == 2) {
-                  $('#mScreeningSelect').val(response.data);
-                }
+                if( step == 1 || step == 5 ) { $('#mFormSelect').val(response.data); }
+                if( step == 2 ) { $('#mScreeningSelect').val(response.data); }
               }
               if (menu !== null) {
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     menu.show();
                   },
                   error: function(error) {
@@ -784,8 +988,12 @@
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     $('#mmenu1').show();
                   },
                   error: function(error) {
@@ -857,5 +1065,29 @@
         });
       }
     }
+    $(document).on('change', '#is_public', function() {
+      let _public = $(this).val();
+      if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
+    });
+
+    $(document).on('click', '.copy-public-link', function(e) {
+      e.preventDefault();
+      let url = $(this).data('clipboard');
+      const $tempInput = $("<input>");
+      $("body").append($tempInput);
+      $tempInput.val(url).select();
+      try {
+        const success = document.execCommand("copy");
+        if (success) {
+          alert("Public Link Copied!");
+        } else {
+          console.warn("Copy command failed.");
+        }
+      }
+      catch (err) {
+        console.error("Copy error: ", err);
+      }
+      $tempInput.remove();
+    });
 </script>
 @stop

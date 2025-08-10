@@ -45,20 +45,18 @@
 					<div class="p-10 h-100 d-flex flex-column justify-content-between">
 						<div class="d-flex justify-content-between align-items-center mb-2">
 							<h3 class="mb-0">{{ $quiz->title }}</h3>
-
-							@php $attempts = $quiz->myAttempts; @endphp
-							@if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 )
+							@if( $quiz_status == 'passed' )
 								<span class="badge px-4 py-2 rounded-pill bg-label-success"> {{ __('admin.quizPassed') }} </span>
-							@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->count() >= $quiz->attempts )
-								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
-							@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
-								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
-							@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
-								<span class="badge px-4 py-2 rounded-pill bg-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
-							@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
+							@elseif( $quiz_status == 'notTaken' )
 								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizNotTaken') }} </span>
-							@else
+							@elseif( $quiz_status == 'failed' )
+								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
+							@elseif( $quiz_status == 'notStartedYet' )
+								<span class="badge px-4 py-2 rounded-pill bg-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
+							@elseif( $quiz_status == 'inProgress' )
 								<span class="badge px-4 py-2 rounded-pill bg-label-primary"> {{ __('admin.quizInProgress') }} </span>
+							@elseif( $quiz_status == 'available' )
+								<span class="badge px-4 py-2 rounded-pill bg-label-primary"> {{ __('admin.quizAvailable') }} </span>
 							@endif
 						</div>
 
@@ -109,12 +107,16 @@
 							</div>
 						</div>
 
-						{{-- <div class="progress">
-							<div class="progress-bar bg-primary" role="progressbar" style="width: {{ $quiz->passing_criteria }}%" aria-valuenow="{{ $quiz->passing_criteria }}"
-								aria-valuemin="0" aria-valuemax="100"></div>
-						</div> --}}
+						@if( $quiz_status == 'inProgress' )
 
-						@if($available || !is_null($active_now))
+						<div class="progress" style="height: 20px !important;">
+							<div class="progress-bar bg-primary" role="progressbar" style="width: {{ $completion_percentage }}%" aria-valuenow="{{ $completion_percentage }}" aria-valuemin="0" aria-valuemax="100">
+								<div class="progress-bar text-bg-primary" style="width: {{ $completion_percentage }}%">{{ $completion_percentage }}%</div>
+							</div>
+						</div>
+						@endif
+
+						@if($available || !is_null( $active_now ))
 							<form 
 								id="startQuizForm" 
 								class="text-end mt-auto"
@@ -124,7 +126,9 @@
 								{!! csrf_field() !!}
 								<button type="submit" id="quizStartBtn" class="btn btn-primary btn-lg shadow-sm">
 									<i class="ti ti-player-play me-2"></i>
-									@if( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
+									@if( !is_null( $active_now ) )
+									{{ __('admin.quizResume') }}
+									@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') || $attempts->count() == 0 )
 									{{ __('admin.quizStart') }}
 									@else
 									{{ __('admin.quizResume') }}
