@@ -2186,6 +2186,7 @@ return [
 	'You are not allowed to submit answers' => 'ليس لديك الصلاحية لتقديم الاجابات',
 	'Team Name' => 'اسم الفريق',
 	'Project Name' => 'اسم المشروع',
+	'Submission Step' => 'مرحلة التقديم',
 	'Winner Rank' => 'ترتيب الفائز',
 	'management_dashboard' => 'لوحة تحكم الإدارة',
 	'create_new_hackathon' => 'إنشاء هاكثون جديد',
