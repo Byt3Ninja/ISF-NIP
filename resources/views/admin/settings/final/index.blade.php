@@ -1017,10 +1017,18 @@
                 '_token': token
               },
               function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Session Deleted') }}.',
-                  'success');
+                Swal.fire({
+                  icon: 'success',
+                  title: "{{ __('admin.Deleted') }}!",
+                  html: "{{ __('admin.DeletedSuccessfully') }}.",
+                  showCancelButton: false,
+                  showConfirmButton: true,
+                  confirmButtonText: "{{ __('admin.OK') }}",
+                  customClass: {
+                    confirmButton: 'btn btn-primary',
+                  },
+                  buttonsStyling: false,
+                });
                 window.location.href = '/dashboard/final';
               }).fail(function(error) {
               console.log(error);
