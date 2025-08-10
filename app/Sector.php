@@ -25,4 +25,9 @@ class Sector extends Model
     {
         return $this->hasOne(Company::class,'sector');
     }
+
+    public function companies()
+{
+    return $this->hasMany(Company::class, 'sector', 'id');
+}
 }

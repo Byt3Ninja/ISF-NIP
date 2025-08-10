@@ -27,4 +27,5 @@
         "laravel-echo": "^1.17.1",
         "pusher-js": "^5.1.1"
     }
+
 }

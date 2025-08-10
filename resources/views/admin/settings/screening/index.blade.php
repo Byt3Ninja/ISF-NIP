@@ -284,13 +284,21 @@
         @include('admin.settings.screening-evaluation')
       @endif
       @else
-      <div class="card">
-        <div class="card-header border-bottom">
-          <h4 class="card-title">{{ __('cycles.Error') }}</h4>
-        </div>
-        <div class="card-body">
-          {{ __('cycles.No records screening from') }}
-          <a href="/dashboard/cycles">{{ __('cycles.Cycles') }}</a>.
+      <div class="card card-body shadow-none h-100 d-flex justify-content-center align-items-center">
+        <div class="d-flex flex-column">
+          <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+          <h5 class="mb-0 text-center text-dark fw-bold">
+            {{ __('admin.No Result') }}            
+          </h5>
+          <p class="text-center text-muted">
+            {{ $l == 'en' ? 'You should add a screening from programs' : 'يجب عليك إضافة مرحلة تصفية من البرامج' }}
+          </p>
+          <div class="text-center">
+            <a class="btn btn-lg btn-primary" href="/dashboard/cycles">
+              <i class="ti ti-plus me-2"></i>
+              {{ $l == 'en' ? 'Add Screening' : 'إضافة مرحلة تصفية' }}
+            </a>
+          </div>
         </div>
       </div>
       @endif
