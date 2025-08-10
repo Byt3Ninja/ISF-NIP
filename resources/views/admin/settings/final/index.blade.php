@@ -803,17 +803,7 @@
       }
     });
 
-    $('#create-zoom-form').submit(function(e) {
-      neededZoomDateTimeValue = $('#neededZoomDateTime').val();
-
-      if (!neededZoomDateTimeValue) {
-        e.preventDefault();
-        zoomDateTime.addClass('is-invalid');
-        zoomDateTime.focus();
-        $('#create-zoom-error').show();
-      }
-    })
-
+    // Initialize zoom date time picker first
     const zoomDateTime = $('.zoomDateTime');
     if (zoomDateTime.length) {
       zoomDateTime.flatpickr({
@@ -821,9 +811,27 @@
         minDate: "today",
         onChange: function(selectedDates, dateStr, instance) {
           $('#neededZoomDateTime').val(dateStr);
+          // Clear any validation errors when date is selected
+          zoomDateTime.removeClass('is-invalid');
+          $('#create-zoom-error').hide();
         }
       });
     }
+
+    $('#create-zoom-form').submit(function(e) {
+      var neededZoomDateTimeValue = $('#neededZoomDateTime').val();
+
+      if (!neededZoomDateTimeValue || neededZoomDateTimeValue.trim() === '') {
+        e.preventDefault();
+        zoomDateTime.addClass('is-invalid');
+        zoomDateTime.focus();
+        $('#create-zoom-error').show();
+        return false;
+      }
+      
+      // If validation passes, allow form to submit
+      return true;
+    });
 
     $('#edit-zoom-form').submit(function(e) {
       editNeededZoomDateTimeValue = $('#editNeededZoomDateTime').val();
@@ -945,9 +953,35 @@
     });
 
     function addzoom(company) {
+      // Clear previous form data
+      $('#create-zoom-form')[0].reset();
+      $('#neededZoomDateTime').val('');
+      $('.zoomDateTime').removeClass('is-invalid');
+      $('#create-zoom-error').hide();
+      
+      // Set company ID
       $('#cid').val(company);
+      
+      // Show modal
       $('#addzoom').modal('show');
     }
+
+    // Ensure date picker works when modal is shown
+    $('#addzoom').on('shown.bs.modal', function() {
+      // Re-initialize or refresh the date picker if needed
+      const modalZoomDateTime = $('#addzoom .zoomDateTime');
+      if (modalZoomDateTime.length && !modalZoomDateTime.hasClass('flatpickr-input')) {
+        modalZoomDateTime.flatpickr({
+          enableTime: true,
+          minDate: "today",
+          onChange: function(selectedDates, dateStr, instance) {
+            $('#neededZoomDateTime').val(dateStr);
+            modalZoomDateTime.removeClass('is-invalid');
+            $('#create-zoom-error').hide();
+          }
+        });
+      }
+    });
 
     function edit(company, date_zoom = '', Period = '')
     {
