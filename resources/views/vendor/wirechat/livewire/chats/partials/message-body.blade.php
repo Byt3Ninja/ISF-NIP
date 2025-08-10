@@ -1,35 +1,38 @@
-<div class="flex gap-x-2 items-center">
+<div class="d-flex align-items-center gap-2">
 
-    {{-- Only show if AUTH is onwer of message --}}
+    {{-- فقط إذا كان المستخدم الحالي صاحب الرسالة --}}
     @if ($belongsToAuth)
-        <span class="font-bold text-xs dark:text-white/90 dark:font-normal">
+        <span class="fw-bold small text-dark">
             @lang('wirechat::chats.labels.you'):
         </span>
     @elseif(!$belongsToAuth && $group !== null)
-        <span class="font-bold text-xs dark:text-white/80 dark:font-normal">
+        <span class="fw-bold small text-dark">
             {{ $lastMessage->sendable?->display_name }}:
         </span>
     @endif
 
     <p @class([
-        'truncate text-sm dark:text-white  gap-2 items-center',
-        'font-semibold text-black' =>
+        'text-truncate small d-flex align-items-center gap-2',
+        'fw-semibold text-dark' =>
             !$isReadByAuth && !$lastMessage?->ownedBy($this->auth),
-        'font-normal text-gray-600' =>
+        'fw-normal text-secondary' =>
             $isReadByAuth && !$lastMessage?->ownedBy($this->auth),
-        'font-normal text-gray-600' =>
+        'fw-normal text-secondary' =>
             $isReadByAuth && $lastMessage?->ownedBy($this->auth),
     ])>
-        {{ $lastMessage->body != '' ? $lastMessage->body : ($lastMessage->isAttachment() ? '📎 '.__('wirechat::chats.labels.attachment') : '') }}
+        {{ $lastMessage->body != '' 
+            ? $lastMessage->body 
+            : ($lastMessage->isAttachment() 
+                ? '📎 '.__('wirechat::chats.labels.attachment') 
+                : '') }}
     </p>
 
-    <span class="font-medium px-1 text-xs shrink-0 text-gray-800 dark:text-gray-50">
+    <span class="fw-medium px-1 small text-muted">
         @if ($lastMessage->created_at->diffInMinutes(now()) < 1)
-          @lang('wirechat::chats.labels.now')
+            @lang('wirechat::chats.labels.now')
         @else
             {{ $lastMessage->created_at->shortAbsoluteDiffForHumans() }}
         @endif
     </span>
-
 
 </div>

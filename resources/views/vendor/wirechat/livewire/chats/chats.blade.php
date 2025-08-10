@@ -10,7 +10,7 @@
              conversationElement.scrollIntoView({ behavior: 'smooth' });
          }
      }, 200);"
-    class="flex flex-col bg-[var(--wc-light-primary)] dark:bg-[var(--wc-dark-primary)] transition-all h-full overflow-hidden w-full sm:p-3">
+    class="d-flex flex-column bg-light transition-all h-100 overflow-hidden w-100 p-3">
 
     @php
         /* Show header if any of these conditions are true  */
@@ -22,20 +22,17 @@
 
     <main x-data
         @scroll.self.debounce="
-           {{-- Detect when scrolled to the bottom --}}
-            // Calculate scroll values
             scrollTop = $el.scrollTop;
             scrollHeight = $el.scrollHeight;
             clientHeight = $el.clientHeight;
 
-            // Check if the user is at the bottom of the scrollable element
             if ((scrollTop + clientHeight) >= (scrollHeight - 1) && $wire.canLoadMore) {
-                // Trigger load more if we're at the bottom
                 await $nextTick();
                 $wire.loadMore();
             }
-            "
-        class=" overflow-y-auto py-2   grow  h-full relative " style="contain:content">
+        "
+        class="overflow-auto py-2 flex-grow position-relative"
+        style="contain:content">
 
         {{-- loading indicator --}}
 
@@ -43,16 +40,12 @@
             {{-- include list item --}}
             @include('wirechat::livewire.chats.partials.list')
 
-
             {{-- include load more if true --}}
             @includeWhen($canLoadMore, 'wirechat::livewire.chats.partials.load-more-button')
         @else
-            <div class="w-full flex items-center h-full justify-center">
-                <h6 class=" font-bold text-gray-700 dark:text-white">{{ __('wirechat::chats.labels.no_conversations_yet')  }}</h6>
+            <div class="w-100 d-flex align-items-center justify-content-center h-100">
+                <h6 class="fw-bold text-muted">{{ __('wirechat::chats.labels.no_conversations_yet') }}</h6>
             </div>
         @endif
     </main>
-
-
-
 </div>
