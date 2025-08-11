@@ -171,7 +171,7 @@ $setting = \App\settings::where('id', 1)->first();
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
-                                                     <p style="margin: 0 0 10px;">عزيزي {{ $user->first_name_ar . ' ' . $user->last_name_ar }},</p>
+                                                     <p style="margin: 0 0 10px;">عزيزي {{ $user->first_name_en . ' ' . $user->last_name_en }},</p>
                                                      <p style="margin: 0 0 10px;">تم إنشاء حسابك بنجاح.</p>
                                                      <p style="margin: 0 0 10px;">  يمكنك الآن تسجيل الدخول باستخدام بريدك الإلكتروني:<strong>{{ $user->email }}</strong></p>
                                                      <p style="margin: 0 0 10px;">

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateUserApiRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\User\UserFilterRequest;
+use App\Services\UserService;
 use App\User;
 use App\Cycle;
 use App\Role as R;
@@ -24,13 +28,20 @@ use Illuminate\Support\Facades\Log as FacadesLog;
 class UserController extends Controller
 {
 	/**
+	 * UserController constructor.
+	 * @param UserService $userService
+	 */
+	protected $userService;
+
+	/**
 	 * Create a new controller instance.
 	 *
 	 * @return void
 	 */
-	public function __construct()
+	public function __construct(UserService $userService)
 	{
 		$this->middleware('auth');
+		$this->userService = $userService;
 	}
 
 	/**
@@ -38,11 +49,18 @@ class UserController extends Controller
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function index()
+	public function index(UserFilterRequest $request)
 	{
-		$users = User::with('company')->with('roles')->orderBy('id', 'DESC')->get();
+
+		$this->authorize('index', Auth::user());
+
+		$users = $this->userService->index($request->all())['data'];
+
+
 		return view('admin/users/index', compact('users'));
 	}
+
+
 
 
 	/**
@@ -52,7 +70,8 @@ class UserController extends Controller
 	 */
 	public function create()
 	{
-		$roles = Role::all();
+		$this->authorize('create',Auth::user());
+		$roles =$this->userService->roleList();
 		return view('admin/users/create', compact('roles'));
 	}
 
@@ -64,70 +83,74 @@ class UserController extends Controller
 	 */
 	public function store(StoreUserRequest $request)
 	{
-		if ($request->hasFile('img_url')) {
-			//store the image
-			$img_url = $request->file('img_url');
-			//get the path of the stores image
-			$img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-		} else {
-			$img_url = '';
-		}
-		$inputs = $request->except(['img_url']) + ['img_url' => $img_url];
-		$inputs['password'] = Hash::make($inputs['password']);
-		$inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
-		$result = User::create($inputs);
-
-		$result->first_name_ar = $request->first_name_en;
-		$result->last_name_ar = $request->last_name_en;
-		$result->save();
-
-		Storage::disk('UsersLFM')->makeDirectory("$result->id");
-		Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
-		Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
-		Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
-		Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
-		Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
-
-		$result->allotRoleById($request->role);
-		$data = [];
-		$name = $result->first_name_en . ' ' . $result->last_name_en;
-		if ($request->role == 'Judger') {
-			// إرسال الإيميل الترحيبي
-			$data = [
-				'name' => $name,
-				'email' => $result->email,
-				'role' => 'Judger',
-			];
-			// إرسال الإشعار
-			if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-				try {
-					$result->notify(new WelcomeJudgerNotification($data));
-				} catch (\Throwable $th) {
-					// throw $th;
-				}
-			}
-		}else{
-
-			// إرسال الإيميل الترحيبي
-			$data = [
-				'name' => $name,
-				'email' => $result->email,
-				'password' => $result->password,
-				'role' => '',
-			];
-			// إرسال الإشعار
-			// if( !in_array(env('APP_ENV', 'local'), ['local']) )
-			// {
-			try {
-				$result->notify(new WelcomeJudgerNotification($data));
-			} catch (\Throwable $th) {
-				throw $th;
-			}
-			// }
-		}
+         $this->authorize('store',Auth::user());
+		 $result = $this->userService->store($request->all());
 
 
-		if ($result) {
+		// if ($request->hasFile('img_url')) {
+		// 	//store the image
+		// 	$img_url = $request->file('img_url');
+		// 	//get the path of the stores image
+		// 	$img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+		// } else {
+		// 	$img_url = '';
+		// }
+		// $inputs = $request->except(['img_url']) + ['img_url' => $img_url];
+		// $inputs['password'] = Hash::make($inputs['password']);
+		// $inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
+		// $result = User::create($inputs);
+
+		// $result->first_name_ar = $request->first_name_en;
+		// $result->last_name_ar = $request->last_name_en;
+		// $result->save();
+
+		// Storage::disk('UsersLFM')->makeDirectory("$result->id");
+		// Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
+		// Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
+		// Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
+		// Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
+		// Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
+
+		// $result->allotRoleById($request->role);
+		// $data = [];
+		// $name = $result->first_name_en . ' ' . $result->last_name_en;
+		// if ($request->role == 'Judger') {
+		// 	// إرسال الإيميل الترحيبي
+		// 	$data = [
+		// 		'name' => $name,
+		// 		'email' => $result->email,
+		// 		'role' => 'Judger',
+		// 	];
+		// 	// إرسال الإشعار
+		// 	if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+		// 		try {
+		// 			$result->notify(new WelcomeJudgerNotification($data));
+		// 		} catch (\Throwable $th) {
+		// 			// throw $th;
+		// 		}
+		// 	}
+		// } else {
+
+		// 	// إرسال الإيميل الترحيبي
+		// 	$data = [
+		// 		'name' => $name,
+		// 		'email' => $result->email,
+		// 		'password' => $result->password,
+		// 		'role' => '',
+		// 	];
+		// 	// إرسال الإشعار
+		// 	// if( !in_array(env('APP_ENV', 'local'), ['local']) )
+		// 	// {
+		// 	try {
+		// 		$result->notify(new WelcomeJudgerNotification($data));
+		// 	} catch (\Throwable $th) {
+		// 		throw $th;
+		// 	}
+		// 	// }
+		// }
+
+
+		if ($result['user']) {
 			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
 		} else {
 			return back()->withInput()->with(['msg' => 'FailedStore']);
@@ -153,26 +176,9 @@ class UserController extends Controller
 	 */
 	public function edit(User $user)
 	{
-		$roles = Role::all();
-		$countries = Country::all();
-		$json = File::get(base_path('database/dbFiles/countries.json'));
-		$_countries = json_decode($json, true);
-		$_countries = collect($_countries)->map(function ($country) {
-			$country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
-			return $country;
-		});
-		$countries = $countries->map(function ($country) use ($_countries) {
-			$getCountry = $_countries->where('iso3', $country->iso3)->first();
-			$flag = null;
-			$emoji = null;
-			if (!empty($getCountry)) {
-				$flag = $getCountry['flag'];
-				$emoji = $getCountry['emoji'];
-			}
-			$country->flag = $flag;
-			$country->emoji = $emoji;
-			return $country;
-		});
+		$roles = $this->userService->roleList();
+		$countries=$this->userService->countries();
+
 		return view('admin/users/edit', compact('user', 'roles', 'countries'));
 	}
 
@@ -183,38 +189,12 @@ class UserController extends Controller
 	 * @param  \App\User  $User
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, User $user)
+	public function update(UpdateUserApiRequest $request, User $user)
 	{
-		$role = R::find($request->role);
-		if ($user->id == 1) {
-			return back()->with(['msg' => 'FailedStore']);
-		}
-		if (empty($role)) {
-			return back()->with(['msg' => 'Role Not Found']);
-		}
-		if ($request->hasFile('img_url')) {
-			//store the image
-			$img_url = $request->file('img_url');
-			//get the path of the stores image
-			$img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-			//update
-			$result = $user->update($request->except(['img_url']) + ['img_url' => $img_url]);
-		} else {
-			$request->validate([
-				'first_name_en' => 'required|string|max:255',
-				'last_name_en' => 'required|string|max:255',
-				'first_name_ar' => 'required|string|max:255',
-				'last_name_ar' => 'required|string|max:255',
-				'email' => 'required|email|unique:users,email,' . $user->id,
-				'phone' => 'nullable|string|max:20',
-				'country_id' => 'nullable|exists:countries,id',
-				'HadCompany' => 'nullable|boolean',
-			]);
-			$result = $user->update($request->all());
-		}
+			$this->authorize('update', Auth::user());
+			$result=$this->userService->update($user,$request->validated());
 
-		$user->roles()->detach();
-		$user->allotRoleById($role->id);
+
 
 		if ($result) {
 			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
@@ -230,14 +210,11 @@ class UserController extends Controller
 	 * @param  \App\User  $User
 	 * @return \Illuminate\Http\Response
 	 */
-	public function updatePassword(UpdateUserPasswordRequest $request)
+	public function updatePassword(UpdateUserPasswordRequest $request,User $user)
 	{
-		if ($request->id == 1) {
-			return back()->with(['msg' => 'FailedStore', 'class' => 'danger']);
-		}
-		$user = User::find($request->id);
-		$password = Hash::make($request->password);
-		$result = $user->where('id', $user->id)->update(['password' => $password]);
+		$this->authorize('updatePassword', Auth::user());
+		
+		$result= $this->userService->updatePassword($user, $request->validated());
 
 		if ($result) {
 			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
@@ -254,13 +231,14 @@ class UserController extends Controller
 	 */
 	public function destroy(User $user)
 	{
-		if ($user->id == 1) {
-			return response()->json(['state' => 'failed'], 500);
+		$this->authorize('destroy', Auth::user());
+		$result = $this->userService->destroy($user);
+
+		if ($result) {
+			return redirect()->route('users.index')->with(['msg' => 'DeletedSuccessfully']);
+		} else {
+			return back()->withInput()->with(['msg' => 'FailedDelete']);
 		}
-		$user->roles()->detach();
-		$user->delete();
-		$user->company()->delete();
-		return response()->json(['state' => 'success'], 200);
 	}
 
 	public function companies(Request $request)
@@ -270,7 +248,6 @@ class UserController extends Controller
 		$errorMessage = '';
 
 		if (Auth::user()->hasRole('Registered')) {
-			// return redirect()->route('core.dashboard_view')->with(['error' => 'cantAccessAllCompanies']);
 			$organization_id = auth()->user()->organization_id;
 			$company = auth()->user()->company;
 			if ($company && $company->cycle != null) {
@@ -291,6 +268,7 @@ class UserController extends Controller
 					})
 					->where('id', $company_id)
 					->get();
+					
 			} else {
 				$companies = [];
 				$errorMessage = $cycle_id === null ? 'انت غير مشترك في البرامج الحالية' : null;
