@@ -53,8 +53,10 @@
               <table class="table table-bordered">
                 <thead class="">
                   <tr>
-                    <th>{{ __('admin.Team Name') }}</th>
                     <th>{{ __('admin.Project Name') }}</th>
+                    <th>{{ __('admin.team_leader') }}</th>
+                    <th>{{ __('admin.Email') }}</th>
+                    {{--  <th>{{ __('admin.Team Name') }}</th>  --}}
                     <th>{{ __('admin.Submission Step') }}</th>
                     <th>{{ __('admin.Judges') }}</th>
                     <th>{{ __('admin.Score') }}</th>
@@ -65,8 +67,10 @@
                   @foreach($winnersData as $winner)
                   <tr @if($winner['rank']==='first' ) class="bg-label-warning" @elseif($winner['rank']==='second' )
                     class="bg-label-secondary" @elseif($winner['rank']==='third' ) class="bg-label-success" @endif>
-                    <td class="px-4 py-2">{{ $winner['team'] }}</td>
                     <td class="px-4 py-2">{{ $winner['project'] }}</td>
+                    <td class="px-4 py-2">{{ $winner['leader']?->name }}</td>
+                    <td class="px-4 py-2">{{ $winner['leader']?->email }}</td>
+                    {{--  <td class="px-4 py-2">{{ $winner['team'] }}</td>  --}}
                     <td class="px-4 py-2">{{ $winner['step'] }}</td>
                     <td class="px-4 py-2">
                       @foreach( $winner['judges'] as $judge )
