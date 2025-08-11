@@ -49,9 +49,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($companyEvaluations as $index => $eval)
+                        @forelse( $publishedCompanies as $index => $eval )
                         <tr>
-                            {{-- <td class="text-center rank-col">
+                            <td class="text-center rank-col">
                                 {{ $index + 1 }}
                                 @if ($index == 0)
                                 <i class="fas fa-medal text-gold"></i>
@@ -60,21 +60,25 @@
                                 @elseif ($index == 2)
                                 <i class="fas fa-bronze text-bronze"></i>
                                 @endif
-                            </td> --}}
-                            {{-- <td class="text-end">{{ $eval['company_name'] }}</td>
-                            <td class="text-center score-col">{{ $eval['total_score'] }} / 100</td>
-                            <td class="text-end comments-col">{{ $eval['comments'] }}</td>
+                            </td>
+                            <td class="text-end">{{ $eval['name'] }}</td>
+                            <td class="text-center score-col">{{ $eval['score'] }} / 100</td>
+                            <td class="text-end comments-col">
+                                @foreach( $eval['company_judges'] as $judge )
+                                    @if( !empty( $judge->comments ) ) <div>{{ $judge->comments }}</div> @endif
+                                @endforeach
+                            </td>
                             <td class="text-center">
                                 <span
                                     class="badge bg-label-{{ $eval['status'] == 'Highest Rated' ? 'success' : ($eval['status'] == 'Good Performance' ? 'primary' : 'danger') }} status-badge">
                                     {{ __($eval['status']) }}
                                 </span>
-                            </td> --}}
+                            </td>
                         </tr>
                         @empty
-                        {{-- <tr>
+                        <tr>
                             <td colspan="5" class="text-center">{{ __('admin.No evaluations found') }}</td>
-                        </tr> --}}
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -127,27 +131,21 @@
                         class="fas fa-bullseye text-primary me-2"></i> {{ __('admin.Final Results Summary') }}</h4>
                 <h6 class="mb-2 fw-bold text-success">{{ __('admin.Highest Rated') }}:</h6>
                 <ul class="summary-list" id="feTopCompaniesList">
-                    {{-- @foreach ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status',
-                    1)->take(3) as $eval)
-                    <li><i class="fas fa-star"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score']
-                            }}/100)</small></li>
+                    @foreach ($publishedCompanies->where('status', 'Highest Rated')->take(3) as $eval)
+                        <li><i class="fas fa-star"></i> {{ $eval['name'] }} <small>({{ $eval['score'] }}/100)</small></li>
                     @endforeach
-                    @if ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status',
-                    1)->isEmpty())
-                    <li>{{ __('admin.No companies found') }}</li>
-                    @endif --}}
+                    @if ($publishedCompanies->where('status', 'Highest Rated')->isEmpty())
+                        <li>{{ __('admin.No companies found') }}</li>
+                    @endif
                 </ul>
                 <h6 class="mt-4 mb-2 fw-bold text-danger">{{ __('admin.Needs Improvement') }}:</h6>
                 <ul class="summary-list" id="feImprovementCompaniesList">
-                    {{-- @foreach ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status',
-                    1) as $eval)
-                    <li><i class="fas fa-wrench"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score']
-                            }}/100)</small></li>
-                    @endforeach --}}
-                    {{-- @if ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status',
-                    1)->isEmpty())
-                    <li>{{ __('admin.No companies found') }}</li>
-                    @endif --}}
+                    @foreach ($publishedCompanies->where('status', 'Needs Improvement') as $eval)
+                        <li><i class="fas fa-wrench"></i> {{ $eval['name'] }} <small>({{ $eval['score'] }}/100)</small></li>
+                    @endforeach
+                        @if ($publishedCompanies->where('status', 'Needs Improvement')->isEmpty())
+                        <li>{{ __('admin.No companies found') }}</li>
+                    @endif
                 </ul>
             </div>
         </div>

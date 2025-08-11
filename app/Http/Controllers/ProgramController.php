@@ -516,7 +516,7 @@ class ProgramController extends Controller
         $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
 
         // Fetch final evaluations
-        $finalStepIds = $cycle->steps->pluck('id');
+        $finalStepIds = $cycle->steps->where('stype', 5)->pluck('id');
 
         // Get metadata for each step and merge company scores
         $allCompaniesData = collect();
@@ -532,47 +532,68 @@ class ProgramController extends Controller
             }
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
             $meta = ScreeningEvaluationResults::metadata($stepId);
-        }
+            $comments = $meta['comments'];
 
-        if( !empty( $meta['_companies'] ) && !is_null( $meta['_companies'] ) )
-        {
-            foreach( $meta['_companies'] as $index => $company )
+            $allJudges = $allJudges->merge( $meta['judges'] );
+            if( !empty( $meta['_companies'] ) && !is_null( $meta['_companies'] ) )
             {
-                $company_id = $company->id;
-                $totalScore = 0;
-                $publishedEvaluations = 0;
-                $averageScore = 0;
-                foreach( $meta['judges'] as $judge )
+                foreach( $meta['_companies'] as $index => $company )
                 {
-                    if( in_array($company_id, $judge->startups->toArray()) )
+                    $teamJudges = collect([]);
+                    $company_id = $company->id;
+                    $totalScore = 0;
+                    $publishedEvaluations = 0;
+                    $averageScore = 0;
+                    $evaluation_status = 'not_evaluated';
+                    $company_comments = $comments->where('company_id', $company_id)->values();
+                    foreach( $meta['judges'] as $judge )
                     {
-                        $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
-                        if( $scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score) )
+                        if( in_array($company_id, $judge->startups->toArray()) )
                         {
-                            $teamJudges[] = $judge;
-                            $totalScore += (float) $scoped_company->score;
-                            $publishedEvaluations++;
+                            $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
+                            if( $scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score) )
+                            {
+                                $comment = $company_comments->where('user_id', $judge->id)->first();
+                                $comment = $comment?->value;
+                                $judge->comments = $comment;
+                                $teamJudges->push($judge);
+                                $evaluation_status = 'published';
+                                $totalScore += (float) $scoped_company->score;
+                                $publishedEvaluations++;
+                            }
                         }
                     }
+    
+                    if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
+                    $meta['_companies'][$index]->score = $averageScore;
+                    $meta['_companies'][$index]->evaluation_status = $evaluation_status;
+                    $meta['_companies'][$index]->company_judges = $teamJudges;
                 }
-
-                if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
-                $meta['_companies'][$index]->score = $averageScore;
+                $allCompaniesData = $allCompaniesData->merge($meta['_companies']);
             }
         }
 
-        if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
+
         $companyEvaluations = $allCompaniesData->groupBy('id')->map(function ($group) {
             return $group->sortByDesc('score')->first();
         })->values();
 
+        // Evaluation completion
+        $totalCompanies = $companyEvaluations->count();
+        $publishedCompanies = $companyEvaluations->where('evaluation_status', 'published')->values();
+        $evaluationCompletion = $totalCompanies > 0 ? round(($publishedCompanies->count() / $totalCompanies) * 100, 2) : 0;
+
         // Calculate average final score
-        $averageFinalScore = $companyEvaluations->avg('score') ?: 0;
+        $averageFinalScore = $publishedCompanies->avg('score') ?: 0;
         $averageFinalScore = round($averageFinalScore, 2);
 
         // Status classification
         $companyEvaluations = $companyEvaluations->map(function ($company) {
-            $status = $company['average_score'] >= 90 ? 'Highest Rated' : ($company['average_score'] >= 70 ? 'Good Performance' : 'Needs Improvement');
+            if( $company->evaluation_status == 'not_evaluated' ) { $status = 'Not Evaluated'; }
+            else
+            {
+                $status = $company['average_score'] >= 90 ? 'Highest Rated' : ($company['average_score'] >= 70 ? 'Good Performance' : 'Needs Improvement');
+            }
             $company['status'] = $status;
             return $company;
         });
@@ -582,12 +603,8 @@ class ProgramController extends Controller
             'Highest Rated' => $companyEvaluations->where('status', 'Highest Rated')->count(),
             'Good Performance' => $companyEvaluations->where('status', 'Good Performance')->count(),
             'Needs Improvement' => $companyEvaluations->where('status', 'Needs Improvement')->count(),
+            'Not Evaluated' => $companyEvaluations->where('status', 'Not Evaluated')->count(),
         ];
-
-        // Evaluation completion
-        $totalCompanies = $companyEvaluations->count();
-        $publishedCompanies = $allCompaniesData->filter(fn($c) => $c['average_score'] > 0)->count();
-        $evaluationCompletion = $totalCompanies > 0 ? round(($publishedCompanies / $totalCompanies) * 100, 2) : 0;
 
         // Evaluator status
         $evaluatorStatus = $allJudges->map(function ($judge) {
@@ -604,17 +621,23 @@ class ProgramController extends Controller
         })->values();
 
         $scoreDistribution = [
-            '0-10'   => $companyEvaluations->whereBetween('average_score', [0, 10])->count(),
-            '11-20'  => $companyEvaluations->whereBetween('average_score', [11, 20])->count(),
-            '21-30'  => $companyEvaluations->whereBetween('average_score', [21, 30])->count(),
-            '31-40'  => $companyEvaluations->whereBetween('average_score', [31, 40])->count(),
-            '41-50'  => $companyEvaluations->whereBetween('average_score', [41, 50])->count(),
-            '51-60'  => $companyEvaluations->whereBetween('average_score', [51, 60])->count(),
-            '61-70'  => $companyEvaluations->whereBetween('average_score', [61, 70])->count(),
-            '71-80'  => $companyEvaluations->whereBetween('average_score', [71, 80])->count(),
-            '81-90'  => $companyEvaluations->whereBetween('average_score', [81, 90])->count(),
-            '91-100' => $companyEvaluations->whereBetween('average_score', [91, 100])->count(),
+            ['label' => '90-100', 'min' => 90, 'max' => 100, 'count' =>  $publishedCompanies->whereBetween('score', [90, 100])->count()],
+            ['label' => '80-89', 'min' => 80, 'max' => 89.9, 'count' =>  $publishedCompanies->whereBetween('score', [80, 89.9])->count()],
+            ['label' => '60-79', 'min' => 60, 'max' => 79.9, 'count' =>  $publishedCompanies->whereBetween('score', [60, 79.9])->count()],
+            ['label' => '< 60', 'min' => 0, 'max' => 59.9, 'count' =>  $publishedCompanies->whereBetween('score', [0, 59.9])->count()],
         ];
+        /* $scoreDistribution = [
+            '0-10'   => $publishedCompanies->whereBetween('score', [0, 10])->count(),
+            '11-20'  => $publishedCompanies->whereBetween('score', [11, 20])->count(),
+            '21-30'  => $publishedCompanies->whereBetween('score', [21, 30])->count(),
+            '31-40'  => $publishedCompanies->whereBetween('score', [31, 40])->count(),
+            '41-50'  => $publishedCompanies->whereBetween('score', [41, 50])->count(),
+            '51-60'  => $publishedCompanies->whereBetween('score', [51, 60])->count(),
+            '61-70'  => $publishedCompanies->whereBetween('score', [61, 70])->count(),
+            '71-80'  => $publishedCompanies->whereBetween('score', [71, 80])->count(),
+            '81-90'  => $publishedCompanies->whereBetween('score', [81, 90])->count(),
+            '91-100' => $publishedCompanies->whereBetween('score', [91, 100])->count(),
+        ];*/
 
         return view('admin.programs.program-report', [
            'cycle' => $cycle,
@@ -648,6 +671,7 @@ class ProgramController extends Controller
            'evaluatorStatus' => $evaluatorStatus,
            'scoreDistribution' => $scoreDistribution,
            'progress' => $progress, 
+           'publishedCompanies' => $publishedCompanies
         ]);
     }
 }

@@ -232,11 +232,16 @@
       const chart = new Chart(ctx, {
         type: 'doughnut', 
         data: {
-          labels: currentLanguage === 'ar' ? ['جيد', 'يحتاج إلى تحسين', 'ممتاز'] : ['Good', 'Needs Improvement', 'Excellent'],
+          labels: currentLanguage === 'ar' ? ['أعلى التقييمات', 'أعلى الأداء', 'أعلى التحسيسات', 'لم يتم التقييم'] : ['Highest Rated', 'Good Performance', 'Needs Improvement', 'Not Evaluated'],
           datasets: [{
             label: 'Status Distribution',
-            data: [10, 5, 15],
-            backgroundColor: ['#28a745', '#dc3545', '#007bff'],
+            data: @json(array_values($statusDistribution)),
+            backgroundColor: [
+                '#28A745', // Highest Rated
+                '#39DA8A', // Good Performance
+                '#DC3545', // Needs Improvement
+                '#616060', // Not Evaluated
+            ],
           }]
         },
         options: {
@@ -553,13 +558,7 @@
         });
 
         // Chart: Score Distribution
-        const scoreBins = [
-            { label: '90-100', min: 90, max: 100, count: 0 },
-            { label: '80-89', min: 80, max: 89.9, count: 0 },
-            { label: '70-79', min: 70, max: 79.9, count: 0 },
-            { label: '60-69', min: 60, max: 69.9, count: 0 },
-            { label: '< 60', min: 0, max: 59.9, count: 0 }
-        ];
+        const scoreBins = @json($scoreDistribution);
         finalEvalData.forEach(item => {
             if (item.score !== null) {
                 for (const bin of scoreBins) {
