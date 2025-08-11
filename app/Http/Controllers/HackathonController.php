@@ -1328,8 +1328,8 @@ class HackathonController extends Controller
                     $userInv = User::where('id', $inviteduser)->first();
                     $updatecompany =Company::where('id', $user->company_id)->first();
                     if($userInv?->company?->cycle != null){
-                        $updatecompany->cycle = $userInv->company->cycle;
-                        $updatecompany->step = $userInv->company->step;
+                        $updatecompany->cycle = $userInv?->company?->cycle ?? 0;
+                        $updatecompany->step = $userInv?->company?->step ?? 0;
                         $updatecompany->save();
                     }
     
