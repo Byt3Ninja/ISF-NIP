@@ -673,7 +673,7 @@ class ProgramController extends Controller
            'steps' => $cycle->steps,
            'companies' => $companies,
            'sectorsLabel' => $sectorsLabel,
-           'sectorCount' => $sectorsCount,
+           'sectorsData' => $sectorsCount,
            'stages' => $stages,
            'mentors' => $mentors,
            'mentorshipRequests' => $mentorshipRequests,

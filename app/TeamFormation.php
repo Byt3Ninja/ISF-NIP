@@ -75,20 +75,20 @@ class TeamFormation extends Model
             ->get();
 
         $teams = $teams->groupBy('team_id')->map(function( $groupedTeam ) use ( $l ) {
-            $tem = new stdClass;
+            $team = new stdClass;
             $t = $groupedTeam->first();
-            $tem->id = $t->team_id;
-            $tem->region = $t->team_region;
-            $tem->name = $t->team_name;
-            $tem->winner = $t->team_winner_status;
-            $tem->img = $t->team_img_team;
-            $tem->project = new stdClass;
-            $tem->project->name = $t->{'team_project_name_' . $l};
-            $tem->project->description = $t->{'team_project_description_' . $l};
-            $tem->project->status = $t->team_project_status;
-            $tem->project->track = $t->team_target_track;
-            $tem->project->winner = $t->team_winner_status;
-            $tem->members = $groupedTeam->groupBy('team_member_id')->map(function( $groupedMembers ) use ( $l ) {
+            $team->id = $t->team_id;
+            $team->region = $t->team_region;
+            $team->name = $t->team_name;
+            $team->winner = $t->team_winner_status;
+            $team->img = $t->team_img_team;
+            $team->project = new stdClass;
+            $team->project->name = $t->{'team_project_name_' . $l};
+            $team->project->description = $t->{'team_project_description_' . $l};
+            $team->project->status = $t->team_project_status;
+            $team->project->track = $t->team_target_track;
+            $team->project->winner = $t->team_winner_status;
+            $team->members = $groupedTeam->groupBy('team_member_id')->map(function( $groupedMembers ) use ( $l ) {
                 $teamMember = $groupedMembers->first();
                 $member = new stdClass;
                 $member->id = $teamMember->team_member_id;
@@ -99,19 +99,19 @@ class TeamFormation extends Model
                 $member->image = User::image_handler( $teamMember->user_img_url );
                 return $member;
             })->values();
-            $tem->company = new stdClass;
-            $tem->company->id = $t->company_id;
-            $tem->company->name = $t->{'company_name_' . $l};
-            $tem->evaluation = $groupedTeam->whereNotNull('evaluation_id')->map(function($x) {
+            $team->company = new stdClass;
+            $team->company->id = $t->company_id;
+            $team->company->name = $t->{'company_name_' . $l};
+            $team->evaluation = $groupedTeam->whereNotNull('evaluation_id')->map(function($x) {
                 return $x->evaluation_id;
             })->unique()->first();
-            $tem->step = $groupedTeam->whereNotNull('step_id')->map(function($x) {
+            $team->step = $groupedTeam->whereNotNull('step_id')->map(function($x) {
                 return $x->step_id;
             })->unique()->first();
-            $tem->step_title = $groupedTeam->whereNotNull('step_title')->map(function($x) {
+            $team->step_title = $groupedTeam->whereNotNull('step_title')->map(function($x) {
                 return $x->step_title;
             })->unique()->first();
-            return $tem;
+            return $team;
         })->values();
 
         return $teams;
