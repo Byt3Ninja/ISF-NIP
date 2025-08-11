@@ -62,7 +62,7 @@ class SendChangeCycleNotificationJob implements ShouldQueue
             ->where('email', $company_owner->email)
             ->get();
 
-        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+        if (!in_array(env('APP_ENV', 'local'), ['local']) || env('APP_NAME', 'incubator') != "BIAC" ) {
             foreach ($recipients as $recipient) {
                 try {
                     $recipient->notify(new ChangeCycle($data));
