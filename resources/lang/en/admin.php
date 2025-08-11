@@ -1597,6 +1597,7 @@ return [
 	'Highest Rated' => 'Highest Rated',
 	'Good Performance' => 'Good Performance',
 	'Needs Improvement' => 'Needs Improvement',
+	'Not Evaluated' => 'Not Evaluated',
 	'Min Rating' => 'Min Rating',
 	'Min Progress' => 'Min Progress',
 	'Distribution by Sector' => 'Distribution by Sector',

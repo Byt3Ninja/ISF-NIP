@@ -1618,6 +1618,7 @@ return [
 	'Highest Rated' => 'الأعلى تقييماً',
 	'Good Performance' => 'أداء جيد',
 	'Needs Improvement' => 'يحتاج إلى تحسين',
+	'Not Evaluated' => 'لم يتم التقييم',
 	'Min Rating' => 'أقل تقييم',
 	'Min Progress' => 'أقل تقدم',
 	'Distribution by Sector' => 'توزيع حسب القطاع',
