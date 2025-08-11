@@ -69,6 +69,7 @@
           $mentortotals = App\User::where('id','=',$org->user_id)->get();
           $mentor_Count = $mentortotals->count();
         }
+
   $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->count();
   $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
   $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
@@ -84,7 +85,9 @@ foreach ($steps as  $step) {
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
   $answerspinding = 0;
-  $answers = app(App\FinalData::class)->where('step_id', $step->id)->count();
+  
+  $otherCount = app(App\FinalData::class)->where('step_id', $step->id)->count();
+  $answers += $otherCount;
           $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
           $answersdone = app(App\FinalData::class)
           ->where('step_id', $step->id)
