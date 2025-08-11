@@ -75,7 +75,7 @@
   $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
-  $answerspinding = [];
+  // $answerspinding = [];
   $answerspinding = 0;
   $answers=0;
 foreach ($steps as  $step) {
@@ -84,11 +84,14 @@ foreach ($steps as  $step) {
 
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
-  $answerspinding = 0;
+ 
   
   $otherCount = app(App\FinalData::class)->where('step_id', $step->id)->count();
   $answers += $otherCount;
-          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+
+          $answerspinding_q = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+          $answerspinding += $answerspinding_q;
+          
           $answersdone = app(App\FinalData::class)
           ->where('step_id', $step->id)
           ->whereNotNull('answer') // الحقل ليس NULL
