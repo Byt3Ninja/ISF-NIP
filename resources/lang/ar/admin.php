@@ -2310,4 +2310,5 @@ return [
 	'Region' => 'المنطقة',
 	'On going' => 'جاري',
 	'Projects_NotSubmitted' => 'المشاريع غير المقدمة',
+	'Program Report' => 'تقرير البرنامج'
 ];
