@@ -56,10 +56,10 @@ class ScreeningEvaluationResults extends Model
 			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
 			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
 			$results = self::where('evaluation_id', $evaluation?->id )->get();
-			$comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation?->id)->with(['values'])->first();
-			if( !empty( $comments ) )
+			$get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation?->id)->with(['values'])->first();
+			if( !empty( $get_comments ) && !is_null( $get_comments ) )
 			{
-				$comments = $comments->values;
+				$comments = $get_comments->values;
 				if( empty( $comments ) || is_null( $comments ) ) { $comments = collect([]); }
 			}
 		}
