@@ -2255,4 +2255,5 @@ return [
 	'Region' => 'Region',
 	'On going' => 'On going',
 	'Projects_NotSubmitted' => 'Projects Not Submitted',
+	'Startups_trainings_Hours' => 'Startups Trainings Hours',
 ];

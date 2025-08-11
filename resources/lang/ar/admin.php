@@ -2310,4 +2310,5 @@ return [
 	'Region' => 'المنطقة',
 	'On going' => 'جاري',
 	'Projects_NotSubmitted' => 'المشاريع غير المقدمة',
+	'Startups_trainings_Hours' => 'ساعات تدريبات الشركات الناشئة',
 ];
