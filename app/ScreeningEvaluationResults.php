@@ -60,6 +60,7 @@ class ScreeningEvaluationResults extends Model
 			if( !empty( $comments ) )
 			{
 				$comments = $comments->values;
+				if( empty( $comments ) || is_null( $comments ) ) { $comments = collect([]); }
 			}
 		}
 
