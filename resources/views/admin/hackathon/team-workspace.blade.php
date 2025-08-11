@@ -348,7 +348,7 @@
     </div>
 </div>
 
-<!-- Add Task Modal -->
+<!-- Edit Task Modal -->
 <div class="modal fade" id="EditTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
