@@ -49,7 +49,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse( $publishedCompanies as $index => $eval )
+                        @foreach( $publishedCompanies as $index => $eval )
                         <tr>
                             <td class="text-center rank-col">
                                 {{ $index + 1 }}
@@ -75,11 +75,11 @@
                                 </span>
                             </td>
                         </tr>
-                        @empty
+                        {{--  @empty
                         <tr>
                             <td colspan="5" class="text-center">{{ __('admin.No evaluations found') }}</td>
-                        </tr>
-                        @endforelse
+                        </tr>  --}}
+                        @endforeach
                     </tbody>
                 </table>
             </div>
