@@ -26,7 +26,7 @@
     <div class="col-lg col-md-4 col-sm-6">
       <div class="card card-body text-center mb-6">
         <i class="fas fa-star fs-3 mb-3 text-warning"></i>
-        <div class="display-6 fw-bold text-dark">{{ $averageFinalScore }}</div>
+        <div class="display-6 fw-bold text-dark">{{ $averageFinalScore > 0 ? $averageFinalScore . '%' : '-'  }}</div>
         <div class="kpi-label">{{ __('admin.Average Final Score') }}</div>
       </div>
     </div>
@@ -77,13 +77,21 @@
         <div class="w-100">
           <h6 class="mt-4 fw-bold">{{ __('admin.Results Summary') }}:</h6>
           <ul class="list-group list-group-flush">
-            <li class="list-group-item" id="summaryTopCompanies"><i class="fas fa-trophy text-muted"></i>
-              {{ __('admin.Highest Rated') }}: {{ $statusDistribution['Highest Rated'] }}</li>
-            <li class="list-group-item" id="summaryGoodCompanies"><i class="fas fa-thumbs-up" style="color:#28a745"></i>
-              {{ __('admin.Good Performance') }}: {{ $statusDistribution['Good Performance'] }}</li>
+            <li class="list-group-item" id="summaryTopCompanies">
+              <i class="fas fa-trophy text-muted"></i>
+              {{ __('admin.Highest Rated') }}: {{ $statusDistribution['Highest Rated'] }}
+            </li>
+            <li class="list-group-item" id="summaryGoodCompanies">
+              <i class="fas fa-thumbs-up" style="color:#28a745"></i>
+              {{ __('admin.Good Performance') }}: {{ $statusDistribution['Good Performance'] }}
+            </li>
             <li class="list-group-item" id="summaryImprovementCompanies">
               <i class="fas fa-flag" style="color:#dc3545"></i>
-               {{ __('admin.Needs Improvement') }}: {{ $statusDistribution['Needs Improvement'] }}
+              {{ __('admin.Needs Improvement') }}: {{ $statusDistribution['Needs Improvement'] }}
+            </li>
+            <li class="list-group-item" id="summaryNotEvaluatedCompanies">
+              <i class="fas fa-minus-circle" style="color:#616060"></i>
+              {{ __('admin.Not Evaluated') }}: {{ $statusDistribution['Not Evaluated'] }}
             </li>
           </ul>
         </div>
