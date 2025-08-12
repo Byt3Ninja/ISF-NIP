@@ -338,7 +338,7 @@
 
         {{-- Project Tab --}}
         <div class="tab-pane fade" id="project" role="tabpanel" aria-labelledby="project-tab">
-          @if($team->project && ($team->project->name || $team->project->description))
+          @if($team->project)
           <div class="card">
             <div class="card-header">
               <h5 class="mb-0">
@@ -357,6 +357,26 @@
               <div class="mb-4">
                 <label class="form-label fw-semibold">{{ $l == 'ar' ? 'وصف المشروع' : 'Project Description' }}</label>
                 <p class="fs-6">{{ $team->project->description }}</p>
+              </div>
+              @endif
+
+              @if($team->project->status)
+              <div class="mb-4">
+                <label class="form-label fw-semibold">{{ $l == 'ar' ? ' وصف حالة المشروع' : 'Project Status Description' }}</label>
+                @if($team->project->status == 20)
+                      <p class="fs-6">{{ __('admin.Define the problem and form a team with clear roles.') }}/p>
+                    @elseif($team->project->status == 40)
+                      <p class="fs-6">{{ __('admin.Validate the idea, study users, and outline key features.') }}</p>
+                    @elseif($team->project->status == 60)
+                      <p class="fs-6">{{ __('admin.Sketch UI, set up the project, and develop core functionality.') }}</p>
+                    @elseif($team->project->status == 80)
+                      <p class="fs-6">{{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }}</p>
+                    @elseif($team->project->status == 100)
+                      <p class="fs-6">{{ __('admin.Submit code, share the demo, and complete documentation. story.') }}</p>
+                    @else
+                      <p class="fs-6">{{ $l == 'en' ? 'Not Set' : 'غير محدد' }}</p>
+                    @endif
+                {{-- <p class="fs-6">{{ $team->project->description }}</p> --}}
               </div>
               @endif
               
@@ -382,11 +402,11 @@
                 </div>
                 @endif
                 
-                @if($team->project->track)
+                @if($team->project->region)
                 <div class="col-md-4 mb-3">
-                  <label class="form-label fw-semibold">{{ $l == 'ar' ? 'المسار المستهدف' : 'Target Track' }}</label>
+                  <label class="form-label fw-semibold">{{ $l == 'ar' ? 'منطقة المشروع' : ' Project Region' }}</label>
                   <div>
-                    <span class="badge bg-label-info fs-6">{{ $team->project->track }}</span>
+                    <span class="badge bg-label-secondary fs-6">{{ $team->project->region }}</span>
                   </div>
                 </div>
                 @endif

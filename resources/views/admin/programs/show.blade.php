@@ -71,10 +71,15 @@
         }
 
   $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->count();
-  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $totalMentorperiod1 = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $hoursm = floor($totalMentorperiod1 / 60);
+  $minutesm = $totalMentorperiod1 % 60;
+  $totalMentorperiod = "{$hoursm} h {$minutesm} m";
+
   $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
+  $totalDurationSum1 = 0;
   // $answerspinding = [];
   $answerspinding = 0;
   $answers=0;
@@ -83,7 +88,12 @@ foreach ($steps as  $step) {
   $totalStepsIdsCount += $TotalStepsIds;
 
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
-  $totalDurationSum += $TotalStepsDuration;
+  $totalDurationSum1 += $TotalStepsDuration;
+
+  $hours = floor($totalDurationSum1 / 60);
+  $minutes = $totalDurationSum1 % 60;
+
+  $totalDurationSum = "{$hours} h {$minutes} m";
  
   
   $otherCount = app(App\FinalData::class)->where('step_id', $step->id)->count();
@@ -120,7 +130,7 @@ $orgCollection = collect([
 [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
 [__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
 [__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
-[__('admin.Training sessions duration (hours)'), 'clock-hour-5', $totalDurationSum, 'success'],
+[__('admin.Startups_trainings_Hours'), 'clock-hour-5', $totalDurationSum, 'success'],
 [__('admin.Traditional_Evaluation_pending'), 'transform', $answerspinding, 'warning'],
 [__('admin.Evaluation'), 'presentation', $answers, 'danger']
 ]);
