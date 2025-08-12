@@ -1797,14 +1797,11 @@ class HackathonController extends Controller
             
             // Project information
             $team->project = new stdClass;
-            $team->project->name_ar = $first->tf_project_name_ar;
-            $team->project->name_en = $first->tf_project_name_en;
-            $team->project->name = $l == 'ar' ? $first->tf_project_name_ar : $first->tf_project_name_en;
-            $team->project->description_ar = $first->tf_project_description_ar;
-            $team->project->description_en = $first->tf_project_description_en;
-            $team->project->description = $l == 'ar' ? $first->tf_project_description_ar : $first->tf_project_description_en;
+            $team->project->name = $first->tf_project_name_en;
+            $team->project->description = $first->tf_project_description_en;
             $team->project->status = $first->tf_project_status;
             $team->project->track = $first->tf_target_track;
+            $team->project->region = $first->tf_region;
 
             // Team Members
             $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) use ($l) {
@@ -1835,7 +1832,6 @@ class HackathonController extends Controller
                 
                 return $user;
             })->values()->all();
-            
             // Shared files
             $team->shared_files = $shared_files->map(function ($file) use ($l) {
                 $attachment = new stdClass;
