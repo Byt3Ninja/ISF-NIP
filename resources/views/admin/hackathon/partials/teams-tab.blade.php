@@ -44,6 +44,7 @@
       @endphp
 
       @foreach($teamsData as $team)
+        {{-- {{ dd($team) }} --}}
       <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm border-0 h-100 team-card position-relative overflow-hidden" 
              style="transition: all 0.3s ease; cursor: pointer;" 
@@ -52,9 +53,15 @@
           
           <!-- Team Photo with Overlay -->
           <div class="position-relative overflow-hidden" style="height: 200px;">
-            <img src="{{ $team->photo ? asset($team->photo) : 'https://placehold.co/400x200?text='.$team->name }}"
+            @php
+            $teamImageSrc = 'https://placehold.co/400x200?text='.$team->name;
+            if ($team->photo) {
+                $teamImageSrc = '/191014/' . $team->photo . '?t=' . time();
+            }
+            @endphp
+            <img src="{{ $teamImageSrc }}"
                 class="w-100 h-100 object-fit-cover" alt="Team Photo" style="transition: transform 0.3s ease;"
-                onerror="this.onerror=null; this.src='https://placehold.co/400x200?text={{ urlencode($team->name) }}';"
+                onerror="this.onerror=null; this.src='/icons/team-default.svg';"
               >
             <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-25 d-flex align-items-center justify-content-center opacity-0" 
                  style="transition: opacity 0.3s ease;" 

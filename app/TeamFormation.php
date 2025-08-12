@@ -11,6 +11,24 @@ class TeamFormation extends Model
 {
     use HasFactory;
     protected $table = 'team_formations';
+    
+    protected $fillable = [
+        'name',
+        'description',
+        'cycle_id',
+        'step_id',
+        'max_teams_members',
+        'user_id',
+        'project_name_ar',
+        'project_name_en',
+        'project_description_ar',
+        'project_description_en',
+        'target_track',
+        'project_status',
+        'region',
+        'winner_status',
+        'img_team'
+    ];
 
     public function cycle()
     {
