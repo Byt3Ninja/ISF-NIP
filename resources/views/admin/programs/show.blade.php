@@ -342,7 +342,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="20" height="20" class="rounded-circle" />
                           @else
                           <i class="ti ti-user"></i>
                           @endif
@@ -740,7 +740,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="20" height="20" class="rounded-circle" />
                           @else
                           <i class="ti ti-user"></i>
                           @endif
@@ -1015,7 +1015,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="30" height="30" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="30" height="30" class="rounded-circle" />
                           @else
                           <i class="ti ti-user ti-28px"></i>
                           @endif
@@ -1391,7 +1391,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="20" height="20" class="rounded-circle" />
                           @else
                           <i class="ti ti-user"></i>
                           @endif

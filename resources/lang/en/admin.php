@@ -1597,6 +1597,7 @@ return [
 	'Highest Rated' => 'Highest Rated',
 	'Good Performance' => 'Good Performance',
 	'Needs Improvement' => 'Needs Improvement',
+	'Not Evaluated' => 'Not Evaluated',
 	'Min Rating' => 'Min Rating',
 	'Min Progress' => 'Min Progress',
 	'Distribution by Sector' => 'Distribution by Sector',
@@ -2256,4 +2257,8 @@ return [
 	'On going' => 'On going',
 	'Projects_NotSubmitted' => 'Projects Not Submitted',
 	'Startups_trainings_Hours' => 'Startups Trainings Hours',
+	'Program Report' => 'Program Report',
+	'Live Training' => 'Live Training',
+    'Online' => 'Online',
+    'In-Person' => 'In-Person',
 ];

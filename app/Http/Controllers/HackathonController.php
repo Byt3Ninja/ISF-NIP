@@ -2009,12 +2009,6 @@ class HackathonController extends Controller
             $submission->region = $group->TF_region;
             return $submission;
         })->values()->all();
-     
-        // dd($data['not_submitted_projects']);
-        
-
-
-     
 
         $data['totalUsers']= count($allUsers);
         $data['usersWithFormDataCount'] = count($usersWithFormData);
@@ -2046,8 +2040,9 @@ class HackathonController extends Controller
 
         if( empty( $cycle ) ) { return abort(404); }
         $teams = TeamFormation::teams( $id );
-        $teps_ids = $teams->whereNotNull('step')->pluck('step')->unique()->toArray();
-        foreach( $teps_ids as $stepId )
+        $steps_ids = $teams->whereNotNull('step')->pluck('step')->unique()->toArray();
+        $output = collect([]);
+        foreach( $steps_ids as $stepId )
         {
             $check = ScreeningEvaluation::where('step_id', $stepId)->first();
             if( empty( $check ) )
@@ -2064,7 +2059,8 @@ class HackathonController extends Controller
                 return $item;
             });
 
-            foreach( $teams as $index => $team )
+            $scoped_teams = $teams->where('step', $stepId)->values();
+            foreach( $scoped_teams as $index => $team )
             {
                 $totalScore = 0;
                 $teamJudges = [];
@@ -2086,11 +2082,12 @@ class HackathonController extends Controller
                 }
 
                 if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
-                $teams[$index]->score = $averageScore;
-                $teams[$index]->judges = $teamJudges;
+                $scoped_teams[$index]->score = $averageScore;
+                $scoped_teams[$index]->judges = $teamJudges;
             }
+            $output = $output->merge($scoped_teams);
         }
-        $winnersData = $teams->map(function( $team ) {
+        $winnersData = $output->map(function( $team ) {
             return [
                 'id' => $team->id,
                 'team' => $team->name,
@@ -2099,6 +2096,7 @@ class HackathonController extends Controller
                 'score' => $team->score,
                 'judges' => $team->judges,
                 'rank' => $team->project->winner ?? '',
+                'leader' => $team->members->where('isLeader', 1)->first(),
             ];
         });
 

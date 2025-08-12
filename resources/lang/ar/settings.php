@@ -129,4 +129,5 @@ return [
 	'whatsApp_URL_callback' => 'إعادة الاتصال عبر عنوان URL الخاص بـ WhatsApp',
 	'whatsapp_api_key' => 'معرف حالة الواتساب',
 	'whatsApp_ACCESS_TOKEN' => 'رمز الوصول إلى واتساب',
+	'Encryption' => 'تشفير',
 ];
