@@ -639,40 +639,43 @@ class ProgramController extends Controller
             '91-100' => $publishedCompanies->whereBetween('score', [91, 100])->count(),
         ];*/
          $companyIds = $companies->pluck('id')->toArray();
+        if (!empty($companyIds)) {
          $quizzesResults_q = "
-      SELECT 
-        qr.id AS qr_result_id,
-        qr.user_id AS qr_id,
-        qr.quiz_id AS qr_quiz_id,
-        qr.score AS qr_result_score,
-        qr.status AS qr_result_status,
-        qr.started_at AS qr_result_started_at,
-        qr.ended_at AS qr_result_ended_at,
-        q.id AS q_quiz_id,
-        q.title AS q_quiz_title,
-        q.organization_id AS q_quiz_organization_id,
-        q.training_id AS q_quiz_training_id,
-        q.description AS q_quiz_description,
-        q.start AS q_quiz_start,
-        q.end AS q_quiz_end,
-        q.status AS q_quiz_status, 
-        q.created_at AS q_quiz_created_at, 
-        o.name_ar as o_org_name_ar,
-        o.name_en as o_org_name_en,
-        c.id as c_company_id,
-        c.name_en as c_company_name_en,
-        c.name_ar as c_company_name_ar,
-        c.logo as c_company_logo
+         SELECT 
+            qr.id AS qr_result_id,
+            qr.user_id AS qr_id,
+            qr.quiz_id AS qr_quiz_id,
+            qr.score AS qr_result_score,
+            qr.status AS qr_result_status,
+            qr.started_at AS qr_result_started_at,
+            qr.ended_at AS qr_result_ended_at,
+            q.id AS q_quiz_id,
+            q.title AS q_quiz_title,
+            q.organization_id AS q_quiz_organization_id,
+            q.training_id AS q_quiz_training_id,
+            q.description AS q_quiz_description,
+            q.start AS q_quiz_start,
+            q.end AS q_quiz_end,
+            q.status AS q_quiz_status, 
+            q.created_at AS q_quiz_created_at, 
+            o.name_ar as o_org_name_ar,
+            o.name_en as o_org_name_en,
+            c.id as c_company_id,
+            c.name_en as c_company_name_en,
+            c.name_ar as c_company_name_ar,
+            c.logo as c_company_logo
     FROM quiz_results qr
-    LEFT JOIN quizzes q ON qr.quiz_id = q.id
-    LEFT JOIN trainings t ON t.id = q.training_id
-    LEFT JOIN organizations o ON o.id = q.organization_id
-    LEFT JOIN users u ON u.id = qr.user_id
-    LEFT JOIN companies c ON c.id = u.company_id
-    WHERE c.id IN (" . implode(',', $companyIds) . ")
+        LEFT JOIN quizzes q ON qr.quiz_id = q.id
+        LEFT JOIN trainings t ON t.id = q.training_id
+        LEFT JOIN organizations o ON o.id = q.organization_id
+        LEFT JOIN users u ON u.id = qr.user_id
+        LEFT JOIN companies c ON c.id = u.company_id
+        WHERE c.id IN (" . implode(',', $companyIds) . ")
     ";
-
-		$quizzesResults = collect(DB::select($quizzesResults_q));
+        $quizzesResults = collect(DB::select($quizzesResults_q));    
+	} else {
+     $quizzesResults = collect();
+  }
 
         return view('admin.programs.program-report', [
            'cycle' => $cycle,
