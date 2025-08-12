@@ -130,7 +130,7 @@ class ScreeningEvaluationResults extends Model
 
 		foreach( $judges as $index => $judge )
 		{
-			$judges[$index]->companies = [];
+			$judges[$index]->companies = collect([]);
 			foreach( $judge->startups as $company_id )
 			{
 				$_company = new stdClass;
@@ -145,7 +145,7 @@ class ScreeningEvaluationResults extends Model
 					$_company->status = 'Not Evaluated';
 				}
 				$_company->results = $_results;
-				$judges[$index]->companies[] = $_company;
+				$judges[$index]->companies->push($_company);
 			}
 		}
 		if( $getStep )
