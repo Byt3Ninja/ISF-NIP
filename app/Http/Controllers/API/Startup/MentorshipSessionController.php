@@ -166,6 +166,7 @@ class MentorshipSessionController extends Controller
         $meetingId = $onlineMeeting['data']['id'] ?? null;
         $startUrl = $onlineMeeting['data']['start_url'] ?? null;
         $joinUrl = $onlineMeeting['data']['join_url'] ?? null;
+        $passcode = $onlineMeeting['data']['passcode'] ?? null;
 
         // Save MentorshipRequest
         $mentorship = new MentorshipRequest();
@@ -180,6 +181,7 @@ class MentorshipSessionController extends Controller
         $mentorship->start_url = $startUrl;
         $mentorship->join_url = $joinUrl;
         $mentorship->zoom_id = $meetingId;
+        $mentorship->zoom_passcode = $passcode;
         $mentorship->save();
 
         if (!in_array(env('APP_ENV', 'local'), ['local'])) {
@@ -322,13 +324,17 @@ class MentorshipSessionController extends Controller
          return $this->forbidden(__('api.forbidden'));
       }
 
-       $sessions = MentorshipRequest::with('mentor')
-        ->where('user_id', $user->id)
-        ->where('approved', 'Yes')
-        ->whereNull('rating')
-        ->where('zoom_date', '<', now())
-        ->orderByDesc('zoom_date')
-        ->paginate(10);
+       $sessions = MentorshipRequest::with([
+        'mentor', 
+        'mentor.bio', 
+        'mentor.mentorExpertises',
+    ])
+    ->where('user_id', $user->id)
+    ->where('approved', 'Yes')
+    ->whereNull('rating')
+    ->where('zoom_date', '<', now())
+    ->orderByDesc('zoom_date')
+    ->paginate(10);
 
        return $this->success(
          MentorshipSessionResource::collection($sessions),

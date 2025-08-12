@@ -79,17 +79,7 @@ class LoginController extends Controller
      */
     private function getClientIp()
     {
-        $ip = request()->ip();
-
-        try {
-               $response = Http::get('https://api.ipify.org?format=json');
-               $data = $response->json();
-               $ip = $data['ip'] ?? $ip;
-            } catch (\Exception $e) {
-                Log::error('Failed to get client IP: ' . $e->getMessage());
-        }
-     
-        return $ip;
+        return request()->ip(); 
     }
 
     /**
@@ -98,14 +88,14 @@ class LoginController extends Controller
     private function getLocationFromIP($ip)
     {
         try {
-            $response = Http::get("http://ip-api.com/json/{$ip}");
-            $data = $response->json();
+        $response = Http::get("https://ipapi.co/{$ip}/json/");
+        $data = $response->json();
 
-            return $data['country'] ?? 'Unknown Location';
-        } catch (\Exception $e) {
-            Log::error('Failed to get location: ' . $e->getMessage());
-            return 'Unknown Location';
-        }
+        return $data['country_name'] ?? 'Unknown Location';
+    } catch (\Exception $e) {
+        Log::error('Failed to get location: ' . $e->getMessage());
+        return 'Unknown Location';
+    }
     }
 
 }

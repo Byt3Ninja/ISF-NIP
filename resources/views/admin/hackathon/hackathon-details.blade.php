@@ -1,4 +1,4 @@
-@extends('layouts.hr-admin')
+@extends('layouts.admin')
 
 @section('style')
 <!-- Additional Styles -->
@@ -63,8 +63,8 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 @endphp
 
 @section('content')
-<div class="row">
-  <div class="container mt-4">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Hackathon Details Banner -->
     @include('admin.hackathon.partials.details-banner')
     
@@ -119,7 +119,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
             $partial = $partials[$tab['target']] ?? null;
             // Tab visibility conditions
             $showTab = true;
-            if ($tab['target'] === 'teams' && ($companyStep?->stype == 1)) $showTab = false;
+            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
             if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
             $showTab = false;
           @endphp
@@ -136,7 +136,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
   </div>
 </div>
 
-@if($companyStep?->stype == 6)
+@if($companyStep?->stype == 6 || $showStep == true)
 <!-- Create Team Modal -->
 @include('admin.hackathon.partials.create-team-modal')
 @endif
@@ -174,6 +174,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
         paging: true,
         searching: true,
         ordering: true,
+        order: [[0, 'desc']],
         language: {
           @if($l == 'ar')
           "search": "{{ __('admin.Search') }}:",

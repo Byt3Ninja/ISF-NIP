@@ -1,5 +1,10 @@
 @extends('layouts.admin')
 
+@section('style')
+  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
+@stop
+
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
@@ -130,7 +135,7 @@
                               <a href="/dashboard/users/{{ $session->user_id }}/edit">
                                 @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                 <img 
-                                  onerror="this.src='/icons/account.svg'"
+                                  onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
                                   src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                               @endif
                                 </a>
@@ -144,7 +149,7 @@
                             <div class="d-flex align-items-center">
                               @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
-                                onerror="this.src='/icons/account.svg'"
+                                onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
                                 src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                                 @endif
                               {{ $session->mentor->name ?? '' }}
@@ -204,6 +209,12 @@
                                 <a href="{{ $session->join_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-primary" title="Join only">
                                   <i class="ti ti-user"></i>
                                 </a>
+                                @if( !empty( $session->zoom_passcode ) )
+                                <button data-passcode="{{ $session->zoom_passcode }}" title="Show Passcode" type="button"
+                                  class="me-1 btn-icon rounded-circle btn btn-sm btn-label-warning show-passcode">
+                                  <i class="ti ti-key"></i>
+                                </button>
+                                @endif
                               @endif
                               @if ($session->fileurl)
                                 <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
@@ -405,8 +416,22 @@
   </div>
 @stop
 
+@section('scripts')
+  <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+@stop
+
 @section('pagescripts')
   <script>
+    $(document).on('click', '.show-passcode', function(e) {
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      alertify.defaults.transition = 'zoom';
+      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+      alertify.defaults.theme.input = 'form-control';
+
+      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
     $(document).ready(function() {
     $('#userstable').DataTable().destroy();
     $('#userstable').DataTable({

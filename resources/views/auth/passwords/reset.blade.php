@@ -73,8 +73,11 @@
   <!-- Content -->
   <div class="authentication-wrapper authentication-cover">
     <!-- Logo -->
+    @php
+        $setting = App\Settings::findorfail(1)->first();
+    @endphp
     <a class="app-brand auth-cover-brand bg-label-secondary p-4 rounded" href="/dashboard">
-      <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
+      <img src="{{ $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png') }} " alt="avatar" height="50" width="150">
     </a>
     <!-- /Logo -->
     <div class="authentication-inner row m-0">
@@ -290,7 +293,7 @@
                 message: translations[lang].password.stringLength
               },
               regexp: {
-                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
                 message: translations[lang].password.strong
               }
             }
@@ -306,7 +309,7 @@
                 message: translations[lang].password_confirmation.stringLength
               },
               regexp: {
-                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
                 message: translations[lang].password_confirmation.strong
               },
               identical: {

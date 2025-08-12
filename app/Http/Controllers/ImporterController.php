@@ -85,10 +85,16 @@ class ImporterController extends Controller
 
                 // Cycle validations
                 if (isset($row['Program Name']) && empty(trim($row['Program Name']))) {
-                    $rowErrors[] = "Missing program name";
+                    $rowErrors[] = __('admin.missing_program_name');
                 } elseif (isset($row['Program Name']) && strlen(trim($row['Program Name'])) > 255) {
-                    $rowErrors[] = "Program name exceeds 255 characters";
+                    $rowErrors[] = __('admin.program_name_too_long');
                 }
+
+            if (isset($row['Type']) && empty(trim($row['Type']))) {
+                $rowErrors[] = "Missing program type";
+            } elseif (isset($row['Type']) && !in_array(trim($row['Type']), ['General_Program', 'Hackathon'])) {
+                $rowErrors[] = "Invalid program type; must be one of: General_Program,Hackathon";
+            }
 
                 $startDate = null;
                 $endDate = null;
@@ -96,62 +102,62 @@ class ImporterController extends Controller
                 $datePattern = '/^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])\/\d{4}$/';
                 if (isset($row['Program Start Date']) && !empty($row['Program Start Date'])) {
                 if (!preg_match($datePattern, $row['Program Start Date'])) {
-                    $rowErrors[] = "Invalid program start date format (must be MM/DD/YYYY with 4-digit year)";
+                    $rowErrors[] = __('admin.invalid_program_start_date_format');
                 } else {
                  try {
                     $startDate = Carbon::createFromFormat('m/d/Y', $row['Program Start Date']);
                 } catch (\Exception $e) {
-                 $rowErrors[] = "Invalid program start date format (must be MM/DD/YYYY)";
+                 $rowErrors[] = __('admin.invalid_program_start_date');
                 }
                 }
                 } else {
-                    $rowErrors[] = "Missing program start date";
+                    $rowErrors[] = __('admin.missing_program_start_date');
                 }
 
                 if (isset($row['Program End Date']) && !empty($row['Program End Date'])) {
                 if (!preg_match($datePattern, $row['Program End Date'])) {
-                     $rowErrors[] = "Invalid program end date format (must be MM/DD/YYYY with 4-digit year)";
+                     $rowErrors[] = __('admin.invalid_program_end_date_format');
                   } else {
                 try {
                     $endDate = Carbon::createFromFormat('m/d/Y', $row['Program End Date']);
                 } catch (\Exception $e) {
-                    $rowErrors[] = "Invalid program end date format (must be MM/DD/YYYY)";
+                    $rowErrors[] = __('admin.invalid_program_end_date');
                 }
                 }
                 } else {
-                    $rowErrors[] = "Missing program end date";
+                    $rowErrors[] = __('admin.missing_program_end_date');
                 }
 
                 if ($startDate && $endDate && $startDate->gt($endDate)) {
-                    $rowErrors[] = "Program start date must be before end date";
+                    $rowErrors[] = __('admin.program_start_date_after_end_date');
                 }
 
                 // Founder validations
                 if (isset($row['Founder Name']) && empty(trim($row['Founder Name']))) {
-                    $rowErrors[] = "Missing founder first name";
+                    $rowErrors[] = __('admin.missing_founder_first_name');
                 } elseif (isset($row['Founder Name']) && strlen(trim($row['Founder Name'])) > 255) {
-                    $rowErrors[] = "Founder first name exceeds 255 characters";
+                    $rowErrors[] = __('admin.founder_first_name_too_long');
                 }
 
                 // Startup validations
                 if (isset($row['Startup Name']) && empty(trim($row['Startup Name']))) {
-                    $rowErrors[] = "Missing Startup Name";
+                    $rowErrors[] = __('admin.missing_startup_name');
                 }
 
                 if (isset($row['Founder Last Name']) && empty(trim($row['Founder Last Name']))) {
-                    $rowErrors[] = "Missing founder last name";
+                    $rowErrors[] = __('admin.missing_founder_last_name');
                 } elseif (isset($row['Founder Last Name']) && strlen(trim($row['Founder Last Name'])) > 255) {
-                    $rowErrors[] = "Founder last name exceeds 255 characters";
+                    $rowErrors[] = __('admin.founder_last_name_too_long');
                 }
 
                 if (isset($row['E-Mail']) && empty(trim($row['E-Mail']))) {
-                    $rowErrors[] = "Missing founder email";
+                    $rowErrors[] = __('admin.missing_founder_email');
                 } elseif (isset($row['E-Mail']) && !filter_var($row['E-Mail'], FILTER_VALIDATE_EMAIL)) {
-                    $rowErrors[] = "Invalid founder email format";
+                    $rowErrors[] = __('admin.invalid_founder_email_format');
                 }
 
               if (empty($row['Phone'])) {
-                    $rowErrors[] = "Phone is required";
+                    $rowErrors[] = __('admin.missing_phone');
                  } else {
                    $phone = trim($row['Phone']);
                     Log::info('Phone validation', [
@@ -159,9 +165,6 @@ class ImporterController extends Controller
                     'original_phone' => $row['Phone'],
                     'trimmed_phone' => $phone
                  ]);
-                if (!preg_match('/^\d{10,}$/', $phone)) {
-                  $rowErrors[] = "Phone must contain only numbers (at least 11 digits, no hyphens or special characters)";
-                }
               }
 
                 if (!empty($rowErrors)) {
@@ -171,7 +174,6 @@ class ImporterController extends Controller
 
             session(['csv_file_path' => $path]);
 
-            Log::info('CSV uploaded successfully', ['headers' => $headers, 'row_count' => count($data), 'validation_errors' => $errors]);
 
             return response()->json([
                 'success' => true,
@@ -298,6 +300,7 @@ class ImporterController extends Controller
                     $cycleTitle = trim($row[$rowKeys[$mappings['title']]]);
                     $startDateRaw = trim($row[$rowKeys[$mappings['start']]]);
                     $endDateRaw = trim($row[$rowKeys[$mappings['end']]]);
+                    $type = trim($row[$rowKeys[$mappings['type']]]);
                     try {
                         $startDate = Carbon::createFromFormat('m/d/Y', $startDateRaw)->toDateString();
                         $endDate = Carbon::createFromFormat('m/d/Y', $endDateRaw)->toDateString();
@@ -306,6 +309,12 @@ class ImporterController extends Controller
                         $results['skipped_rows'][] = "Row " . ($index + 2) . ": Invalid date format for start ($startDateRaw) or end ($endDateRaw) (use MM/DD/YYYY)";
                         continue;
                     }
+
+                 if (!in_array($type, ['General_Program','Hackathon'])) {
+                    $results['skipped']++;
+                    $results['skipped_rows'][] = "Row " . ($index + 2) . ": Invalid program type '$type'; must be one of: General_Program, Hackathon";
+                    continue;
+                }
 
                     $cycleKey = $cycleTitle; 
                     if (!isset($cycleCache[$cycleKey])) {
@@ -334,6 +343,7 @@ class ImporterController extends Controller
                                     'organization_id' => $organizationId,
                                     'start' => $startDate,
                                     'end' => $endDate,
+                                    'type' => $type
                                 ]
                             );
                             
@@ -457,8 +467,9 @@ class ImporterController extends Controller
 
                 // Process Founder
                 $userData = [
-                    'organization_id' => $organizationId,
                     'company_id' => $company->id,
+                    'country_id' => $countryId,
+                    'state_id' => $stateId,
                     'email' => $email,
                     'first_name_en' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
                     'first_name_ar' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
@@ -468,23 +479,20 @@ class ImporterController extends Controller
                     'phone' => isset($mappings['phone']) && isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) . trim($row[$rowKeys[$mappings['phone']]]) : null,
                     'country_code' => isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) : null,
                     'HaveCompany' => 1,
+                    'email_verified_at' => now(),
                 ];
 
                 $existingUser = User::where('email', $email)->first();
                 if (!$existingUser) {
-                    $userData['password'] = bcrypt('password');
+                    $userData['password'] = bcrypt('123456789');
                 }
 
-                Log::info('Processing user', [
-                    'email' => $email,
-                    'company_id' => $company->id,
-                    'data' => $userData
-                ]);
-
-                User::updateOrCreate(
+                $user = User::updateOrCreate(
                     ['email' => $email],
                     $userData
                 );
+
+                $user->allotRole('Registered');
 
                 $results['imported']++;
             }

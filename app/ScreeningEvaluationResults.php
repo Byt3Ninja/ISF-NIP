@@ -48,6 +48,7 @@ class ScreeningEvaluationResults extends Model
 		$companies = collect([]);
 		$evaluation = collect([]);
 		$results = collect([]);
+		$comments = collect([]);
 		$getStep = Step::find( $step_id );
 		if( $getStep )
 		{
@@ -55,6 +56,12 @@ class ScreeningEvaluationResults extends Model
 			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
 			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
 			$results = self::where('evaluation_id', $evaluation?->id )->get();
+			$get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation?->id)->with(['values'])->first();
+			if( !empty( $get_comments ) && !is_null( $get_comments ) )
+			{
+				$comments = $get_comments->values;
+				if( empty( $comments ) || is_null( $comments ) ) { $comments = collect([]); }
+			}
 		}
 
 		$l = app()->getLocale();
@@ -115,11 +122,22 @@ class ScreeningEvaluationResults extends Model
 			});
 		}
 
-		if( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
+		if( $getStep->stype == 5 )
+		{
+			foreach( $judges as $index => $judge )
+			{
+				$startup_ids = $judge->startups->pluck('id')->toArray();
+				$get_companies = $companies->filter(function( $c ) use ( $startup_ids ) {
+					return $c->users->whereIn('id', $startup_ids)->count() > 0;
+				});
+				$judges[$index]->startups = $get_companies->pluck('id');
+			}
+		}
+		elseif( $getStep?->data != 'grouptogroup' ) { foreach( $judges as $index => $judge ) { $judges[$index]->startups = $companies->pluck('id'); } }
 
 		foreach( $judges as $index => $judge )
 		{
-			$judges[$index]->companies = [];
+			$judges[$index]->companies = collect([]);
 			foreach( $judge->startups as $company_id )
 			{
 				$_company = new stdClass;
@@ -134,34 +152,37 @@ class ScreeningEvaluationResults extends Model
 					$_company->status = 'Not Evaluated';
 				}
 				$_company->results = $_results;
-				$judges[$index]->companies[] = $_company;
+				$judges[$index]->companies->push($_company);
 			}
 		}
 		if( $getStep )
 		{
-			foreach( $evaluation->categories as $criteria )	
+			if( !empty( $evaluation->categories ) )
 			{
-				$subCriteria = $criteria->subCriteria;
-				foreach( $judges as $judges_key => $judge )
+				foreach( $evaluation->categories as $criteria )	
 				{
-					foreach( $judge->companies as $companies_key => $company )
+					$subCriteria = $criteria->subCriteria;
+					foreach( $judges as $judges_key => $judge )
 					{
-						foreach( $company->results as $results_key => $result )
+						foreach( $judge->companies as $companies_key => $company )
 						{
-							if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
-							if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
-							$getResult = $subCriteria->where('id', $result->criteria_id)->first();
-							if( !empty( $getResult ) )
+							foreach( $company->results as $results_key => $result )
 							{
-								$weight = $getResult->weight;
-								$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
-								$result->weighted_score = $weighted_score;
+								if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
+								if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
+								$getResult = $subCriteria->where('id', $result->criteria_id)->first();
+								if( !empty( $getResult ) )
+								{
+									$weight = $getResult->weight;
+									$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
+									$result->weighted_score = $weighted_score;
+								}
+								$company->results[$results_key] = $result;
 							}
-							$company->results[$results_key] = $result;
+							$judge->companies[$companies_key] = $company;
 						}
-						$judge->companies[$companies_key] = $company;
+						$judges[$judges_key] = $judge;
 					}
-					$judges[$judges_key] = $judge;
 				}
 			}
 		}
@@ -210,7 +231,8 @@ class ScreeningEvaluationResults extends Model
 			'companies' => $companies,
 			'_companies' => $_companies,
 			'evaluation' => $evaluation,
-			'results' => $results
+			'results' => $results,
+			'comments' => $comments
 		];
 	}
 }

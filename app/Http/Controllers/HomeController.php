@@ -576,6 +576,7 @@ class HomeController extends Controller
                     fs.datetime,
                     fs.duration,
                     fs.zoom_id,
+                    fs.zoom_passcode,
                     fs.start_url,
                     fs.join_url
                 FROM
@@ -634,6 +635,7 @@ class HomeController extends Controller
                     $company->datetime = $_company->datetime;
                     $company->duration = $_company->duration;
                     $company->zoom_id = $_company->zoom_id;
+                    $company->passcode = $_company->zoom_passcode;
                     $company->start_url = $_company->start_url;
                     $company->join_url = $_company->join_url;
                     return $company;
@@ -651,6 +653,7 @@ class HomeController extends Controller
                     mr.admin_comment,
                     mr.zoom_date,
                     mr.start_url,
+                    mr.zoom_passcode,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_ar AS `first_name_ar`,
@@ -693,6 +696,7 @@ class HomeController extends Controller
                 $output->admin_comment = $session->admin_comment;
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
+                $output->passcode = $session->zoom_passcode;
 
                 $image = User::image_handler($session->user_image_url);
                 $user = new stdClass;
@@ -1038,17 +1042,29 @@ class HomeController extends Controller
             ORDER BY
                 s.arr asc
         ";
-
-        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id) {
+        $now = time();
+        $steps = collect(DB::select($steps_q))->map(function ($step) use ($l, $company, $stepData, $cycle_id, $now) {
             $step->from = Carbon::parse($step->from)->format('d-m-Y');
             $step->to = Carbon::parse($step->to)->format('d-m-Y');
 
             $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
             $color = 'label-light';
             $textColor = 'light';
-            if (!empty($step) && !empty($stepData)) {
-
-                if ($stepData->arr > $step->arr) {
+            if (!empty($step) && !empty($stepData))
+            {
+                if( $now > Carbon::parse($step->to)->timestamp )
+                {
+                    $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                    $color = 'label-success';
+                    $textColor = 'success';
+                }
+                if( $now <= Carbon::parse($step->to)->timestamp && $now >= Carbon::parse($step->from)->timestamp )
+                {
+                    $status = $l == 'ar' ? 'يحدث اﻵن' : 'On going';
+                    $color = 'label-primary';
+                    $textColor = 'primary';
+                }
+                /* if ($stepData->arr > $step->arr) {
                     $status = $l == 'ar' ? 'انتهت' : 'Completed';
                     $color = 'label-success';
                     $textColor = 'success';
@@ -1056,7 +1072,7 @@ class HomeController extends Controller
                     $status = $l == 'ar' ? 'بدأت' : 'Started';
                     $color = 'label-primary';
                     $textColor = 'primary';
-                }
+                } */
             }
             $trType = $fLink = null;
             if ($company->approved) {
@@ -1610,7 +1626,7 @@ class HomeController extends Controller
             ];
             $data['countCards'][] = [
                 'color' => 'danger',
-                'href' => '/dashboard/cycles',
+                'href' => '/dashboard/programlist',
                 'icon' => 'ti-circles',
                 'text' => 'Cycles',
                 'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
@@ -2235,6 +2251,45 @@ class HomeController extends Controller
         $data['notrated_mens'] = $notRated_men;
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
+
+        $newhackathon_q = "SELECT * FROM cycles WHERE `type` = 'hackathon' ORDER BY created_at DESC LIMIT 1";
+        $newhackathon = DB::select($newhackathon_q);
+        $newhackathon = collect($newhackathon)->first();
+        $data['newhackathon'] = $newhackathon;
+        
+
+        $team_member_q = "SELECT 
+                        tm.id as 'tm_id',
+                        tm.user_id as 'tm_user_id',
+                        tm.team_formation_id as 'tm_team_formation_id',
+                        tm.Name as 'tm_name',
+                        tm.Email as 'tm_email',
+                        tm.isTeamLeader as 'tm_isTeamLeader',
+                        tf.id as 'tf_id',
+                        tf.name as 'tf_name',
+                        tf.description as 'tf_description',
+                        tf.cycle_id as 'tf_cycle_id',
+                        tf.step_id as 'tf_step_id',
+                        tf.img_team as 'tf_img_team',
+                        tf.user_id as 'tf_user_id',
+                        tf.project_name_en as 'tf_projectName',
+                        u.id as 'u_id',
+                        concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                        concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                        u.email as 'u_email',
+                        u.img_url as 'u_img_url'
+                    FROM
+                        team_members as tm
+                    LEFT JOIN
+                        team_formations as tf ON tf.id = tm.team_formation_id
+                    LEFT JOIN
+                        users as u ON u.id = tf.user_id
+                    WHERE tm.Email = ? 
+                    AND tm.TeamMember = 'hackathon' 
+                    AND tm.acceptInvition = 'pending' ";
+        $team_member = DB::select($team_member_q, [$user->email]);
+        $team_member = collect($team_member);
+        $data['team_member'] = $team_member;
 
         return view('includes.dashboard', $data);
     }

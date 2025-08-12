@@ -26,6 +26,8 @@ class Permissions
         'public.join',
         'public.program_join',
         'public.program_apply',
+        'chats*',
+        'livewire.*',
     ];
 
     private $exceptControllers = [

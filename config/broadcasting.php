@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => config('broadcasting.default', 'pusher'),
+    'default' => 'log',
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections

@@ -24,19 +24,19 @@
   </div>
   
   @if($currentHackathon['cycle_id'] == $user->company?->cycle)
-  <div id="action-buttons-placeholder" class="mt-4">
-    <!-- Buttons will be injected by JS -->
-      @php
-      $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
-      $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-      'pending')->first();
-      $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-      'accepted')->first();
+    <div id="action-buttons-placeholder" class="mt-4">
+      <!-- Buttons will be injected by JS -->
+        @php
+        $teamcreated = App\TeamFormation::where('user_id', auth()->user()->id)->first();
+        $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+        'pending')->first();
+        $teamaccept = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
+        'accepted')->first();
 
-      @endphp
+        @endphp
       @if(!auth()->user()->hasRole('admin'))
         @if($teamcreated != null)
-          @if($teamcreated->cycle_id == $currentHackathon['cycle_id'])
+          @if( $teamcreated->cycle_id == $currentHackathon['cycle_id'] || $showStep == true )
             <a href="/dashboard/hackathon/{{ $teamcreated->id }}/manage" class="btn btn-light btn-lg px-4 py-2 me-3"
               style="border-radius: 50px; font-weight: 600;">
               <i class="ti ti-settings me-2 me-2"></i>
@@ -53,8 +53,8 @@
         @else
 
 
-          @if($companyStep?->stype == 6 OR $companyStep == null)
-            @if($teamJoin != null)
+          @if( $companyStep?->stype == 6 || $companyStep == null || $showStep == true )
+            {{-- @if($teamJoin != null)
               <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
                 @csrf
                 @method('PATCH')
@@ -71,10 +71,16 @@
                   {{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
                 </button>
               </form>
-            @else
+            @else --}}
 
               @if($teamaccept == null)
-                @if($companyStep?->stype != 6)
+                @if( $showStep == true )
+                  <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
+                    data-bs-toggle="modal" data-bs-target="#createTeamModal">
+                    <i class="ti ti-settings me-2 me-2"></i>
+                    {{ $l == 'en' ? 'Create New Team' : 'كون فريقك' }}
+                  </a>
+                @elseif($companyStep?->stype != 6)
                   <button type="button" class="btn btn-primary" style="flex: 1;"
                     onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
                     <i class="ti ti-send me-1"></i>
@@ -84,7 +90,7 @@
                   <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
                     data-bs-toggle="modal" data-bs-target="#createTeamModal">
                     <i class="ti ti-settings me-2 me-2"></i>
-                    {{ $l == 'en' ? 'Create New Team' : 'تكوين فريق جديد' }}
+                    {{ $l == 'en' ? 'Create New Team' : 'كون فريقك' }}
                   </a>
                 @endif
               @else
@@ -94,7 +100,7 @@
                   {{ $l == 'en' ? 'View My Team' : 'مشاهدة الفريق' }}
                 </a>
               @endif
-            @endif
+            {{-- @endif --}}
           @else
             @if($companyStep->stype == 1)
               <a href="#" class="btn btn-light btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;"
@@ -135,18 +141,17 @@
       @else
       
       @endif
-  </div>
+    </div>
   @endif
-              @php
-                $teamJoin = App\Team_member::where('Email', auth()->user()->email)->where('acceptInvition',
-                'pending')->first();
-              @endphp
-            @if($teamJoin != null)
-              @php
+             
+            @if($teamJoins->count() > 0)
+            @foreach($teamJoins as $teamJoin)
+              {{-- @php
               $teamformation = App\TeamFormation::where('id', $teamJoin->team_formation_id)->first();
-              @endphp
-              @if($teamformation->cycle_id == $id)
-                <form action="{{ route('hackathon.acceptInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+              @endphp --}}
+              <div class="d-flex align-items-center">{{ $l == 'en' ? 'Team Name' : 'اسم الفريق' }} {{ $teamJoin->tf_name }}</div>
+              @if($teamJoin->tf_cycle_id == $id)
+                <form action="{{ route('hackathon.acceptInvitation', $teamJoin->tm_id) }}" class="d-inline-block" method="post">
                   @csrf
                   @method('PATCH')
                   <button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
@@ -154,7 +159,7 @@
                     {{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
                   </button>
                 </form>
-                <form action="{{ route('hackathon.rejectInvitation', $teamJoin->id) }}" class="d-inline-block" method="post">
+                <form action="{{ route('hackathon.rejectInvitation', $teamJoin->tm_id) }}" class="d-inline-block" method="post">
                   @csrf
                   @method('PATCH')
                   <button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
@@ -163,6 +168,8 @@
                   </button>
                 </form>
               @endif
+              <br>
+            @endforeach
             @endif
 </div>
 </div>

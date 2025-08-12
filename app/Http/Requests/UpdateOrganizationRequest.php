@@ -47,6 +47,7 @@ class UpdateOrganizationRequest extends FormRequest
 
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'password_confirmation' => ['nullable', 'required_with:password'],
+            'countryCode' => ['nullable', 'string', 'max:5'],
         ];
     }
      protected function failedValidation(Validator $validator)

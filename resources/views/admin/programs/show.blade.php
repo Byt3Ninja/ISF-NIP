@@ -69,12 +69,18 @@
           $mentortotals = App\User::where('id','=',$org->user_id)->get();
           $mentor_Count = $mentortotals->count();
         }
+
   $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->count();
-  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $totalMentorperiod1 = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $hoursm = floor($totalMentorperiod1 / 60);
+  $minutesm = $totalMentorperiod1 % 60;
+  $totalMentorperiod = "{$hoursm} h {$minutesm} m";
+
   $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
-  $answerspinding = [];
+  $totalDurationSum1 = 0;
+  // $answerspinding = [];
   $answerspinding = 0;
   $answers=0;
 foreach ($steps as  $step) {
@@ -82,10 +88,20 @@ foreach ($steps as  $step) {
   $totalStepsIdsCount += $TotalStepsIds;
 
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
-  $totalDurationSum += $TotalStepsDuration;
-  $answerspinding = 0;
-  $answers = app(App\FinalData::class)->where('step_id', $step->id)->count();
-          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+  $totalDurationSum1 += $TotalStepsDuration;
+
+  $hours = floor($totalDurationSum1 / 60);
+  $minutes = $totalDurationSum1 % 60;
+
+  $totalDurationSum = "{$hours} h {$minutes} m";
+ 
+  
+  $otherCount = app(App\FinalData::class)->where('step_id', $step->id)->count();
+  $answers += $otherCount;
+
+          $answerspinding_q = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+          $answerspinding += $answerspinding_q;
+          
           $answersdone = app(App\FinalData::class)
           ->where('step_id', $step->id)
           ->whereNotNull('answer') // الحقل ليس NULL
@@ -114,7 +130,7 @@ $orgCollection = collect([
 [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
 [__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
 [__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
-[__('admin.Training sessions duration (hours)'), 'clock-hour-5', $totalDurationSum, 'success'],
+[__('admin.Startups_trainings_Hours'), 'clock-hour-5', $totalDurationSum, 'success'],
 [__('admin.Traditional_Evaluation_pending'), 'transform', $answerspinding, 'warning'],
 [__('admin.Evaluation'), 'presentation', $answers, 'danger']
 ]);
@@ -326,7 +342,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="20" height="20" class="rounded-circle" />
                           @else
                           <i class="ti ti-user"></i>
                           @endif
@@ -724,7 +740,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="20" height="20" class="rounded-circle" />
                           @else
                           <i class="ti ti-user"></i>
                           @endif
@@ -999,7 +1015,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="30" height="30" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="30" height="30" class="rounded-circle" />
                           @else
                           <i class="ti ti-user ti-28px"></i>
                           @endif
@@ -1375,7 +1391,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
+                            onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" width="20" height="20" class="rounded-circle" />
                           @else
                           <i class="ti ti-user"></i>
                           @endif
@@ -2329,7 +2345,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle").val(),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 menu.show();
               },
               error: function(error) {
@@ -2345,7 +2361,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
-                $('#FormSelect').append(response)
+                $('#FormSelect').append(response.appear)
                 $('#menu1').show();
               },
               error: function(error) {
@@ -2381,6 +2397,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             success: function(response) {
               console.log('response', response)
               step = response.stype;
+              sData = response.data;
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
               $('.public-data-form-fields').hide();
@@ -2400,8 +2417,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     menu.show();
                   },
                   error: function(error) {
@@ -2415,8 +2436,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 $.ajax({
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
                   success: function(response) {
-                    $('#mFormSelect').empty()
-                    $('#mFormSelect').append(response)
+                    $('#mFormSelect').empty();
+                    let appends = '';
+                    response.data.forEach(function(form) {
+                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+                    });
+                    $('#mFormSelect').append(appends);
                     $('#mmenu1').show();
                   },
                   error: function(error) {

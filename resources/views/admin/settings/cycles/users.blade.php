@@ -135,7 +135,9 @@
                   <table class="table mt-3">
                     <thead class="bg-label-light">
                       <tr>
-                        <th><input type="checkbox" class="checkAll"></th>
+                        <th>
+                          <input type="checkbox" class="form-check-input checkAll">
+                        </th>
                         <th>{{ __('cycles.Company') }}</th>
                         <th>{{ __('cycles.User/Title') }}</th>
                         <th>{{ __('cycles.Mobile') }}</th>
@@ -150,38 +152,45 @@
                       @foreach ($companies as $company)
                         <tr>
                           <td>
-                            <div class="d-flex align-items-center gap-1">
-                              <input type="checkbox" class="chboxcyclesReg" do="{{ $company->id }}"
-                                userid="{{ $company->user->id ?? '' }}" value="1" name="chboxcyclesReg[]">
+                            <div class="form-check d-flex align-items-center gap-1">
+                              <input type="checkbox" class="form-check-input chboxcyclesReg" do="{{ $company->id }}"
+                              userid="{{ $company->user->id ?? '' }}" value="1" name="chboxcyclesReg[]">
                             </div>
                           </td>
                           <td>
-                            <div class="d-flex align-items-center">
-                              <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                <img src="{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
-                                  alt="avatar" class="rounded-circle" height="40" width="40">
-                              </a>
-                              <a href="/dashboard/companyProfile/{{ $company->id }}">
-                                <div class="d-flex align-items-center gap-1">
-                                  {{ $company->{'name_' . $l} }}
-                                </div>
-                              </a>
-                            </div>
+                            <a 
+                              class="d-flex align-items-center gap-2"
+                              href="/dashboard/companyProfile/{{ $company->id }}"
+                            >
+                              <img 
+                                src="{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
+                                onerror="this.src='/app-assets/images/logo_placeholder.png'"
+                                alt="avatar" height="40" width="40"
+                                class="rounded-circle border shadow-xs"
+                              >
+                              <span>{{ $company->{'name_' . $l} }}</span>
+                            </a>
                           </td>
                           <td>
-                            <div class="d-flex align-items-center">
-                              <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
-                                <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
-                                  alt="avatar" class="rounded-circle" height="40" width="40">
-                              </a>
-                              <a href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
-                                <div class="media-body">
-                                  <h6 class="media-heading mb-0">{{ $company->user->{'first_name_' . $l} ?? ''  }}
-                                    {{ $company->user->{'last_name_' . $l} ?? ''  }}</h6>
-                                  <span class="font-small-2">{{ $company->user->{'title_' . $l} ?? ''  }}</span>
-                                </div>
-                              </a>
-                            </div>
+                            <a class="d-flex align-items-center gap-2" href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
+                              <img 
+                                src="/191014/{{ $company->user->img_url ?? '/icons/account.svg' }}"
+                                onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
+                                alt="avatar" 
+                                class="rounded-circle border shadow-xs" 
+                                height="40" 
+                                width="40"
+                              >
+                              <div class="d-flex flex-column justify-content-center">
+                                <h6 class="mb-1 fw-bold">
+                                  {{ $company->user->{'first_name_' . $l} ?? '' }}
+                                  {{ $company->user->{'last_name_' . $l} ?? '' }}
+                                </h6>
+                                <span class="font-small-2 text-muted fst-italic">
+                                  {{ $company->user->{'title_' . $l} ?? '' }}
+                                </span>
+                              </div>
+                            </a>
                           </td>
                           <td>
                             {{ $company->user->phone ?? ''  }}
@@ -448,46 +457,50 @@
     }
   </script>
 
-  <script type="text/javascript">
-    $(document).ready(function() {
+   <script type="text/javascript">
+    $(document).ready(function () {
       $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "columnDefs": [{
-          "orderable": false,
-          "targets": [4]
-        }, ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
+      "responsive": true,
+      "searching": true,
+      "lengthChange": true,
+      "paging": true,
+      "bInfo": false,
+      "pageLength": 10, // Default selected length is 10
+      "lengthMenu": [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "{{ __('admin.All') }}"]],
+      "columnDefs": [{
+        "orderable": false,
+        "targets": [4]
+      }],
+      @if ($l == 'ar')
+      "language": {
+        "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+        "sLoadingRecords": "جارٍ التحميل...",
+        "sProcessing": "جارٍ التحميل...",
+        "sLengthMenu": "أظهر _MENU_ مدخلات",
+        "sZeroRecords": "لم يعثر على أية سجلات",
+        "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+        "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+        "sInfoPostFix": "",
+        "sSearch": "ابحث:",
+        "sUrl": "",
+        "oPaginate": {
+        "sFirst": "الأول",
+        "sPrevious": "السابق",
+        "sNext": "التالي",
+        "sLast": "الأخير"
+        },
+        "oAria": {
+        "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+        "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+        }
+      }
+      @endif
       });
     });
   </script>
+
+
   <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script>

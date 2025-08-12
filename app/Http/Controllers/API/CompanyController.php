@@ -154,6 +154,13 @@ class CompanyController extends Controller
     $locale = app()->getLocale();
     $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization']);
 
+    if ($user->hasRole('organizationManager')) {
+        $organizationId = $user->organization_id;
+        $query->whereHas('cycleRelation.organization', function ($q) use ($organizationId) {
+            $q->where('id', $organizationId);
+        });
+    }
+    
     if ($request->filled('sector')) {
         if (is_numeric($request->sector)) {
             $query->where('sector', $request->sector);

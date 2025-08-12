@@ -4,10 +4,12 @@ namespace App\Providers;
 
 
 use App\Settings;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -75,6 +77,14 @@ class AppServiceProvider extends ServiceProvider
             'services.linkedin.client_secret' => $pusherConfig['LINKEDIN_CLIENT_SECRET'],
             'services.linkedin.redirect' => $pusherConfig['LINKEDIN_REDIRECT_URI'],
 
+            // 'mail.mailers.smtp.host' => $pusherConfig['host'],
+            // 'mail.mailers.smtp.username' => $pusherConfig['Mail'],
+            // 'mail.mailers.smtp.password' => $pusherConfig['Mailpassword'],
+            // 'mail.mailers.smtp.port' => $pusherConfig['Port'],
+            // 'mail.mailers.smtp.encryption' => $pusherConfig['encryption'],
+            // 'mail.from.address' => $pusherConfig['Mail'],
+
+
             'app.locale' => $pusherConfig['locale'],
 
             // 'broadcasting.connections.pusher.MICROSOFT_CLIENT_ID' => $pusherConfig['MICROSOFT_CLIENT_ID'],
@@ -95,5 +105,28 @@ class AppServiceProvider extends ServiceProvider
 				app()->setLocale( $lang );
 			}
         }
+
+        if (Schema::hasTable('settings')) {
+        try {
+            $settings = DB::table('settings')->where('id', 1)->first();
+
+            if ($settings) {
+                Config::set('mail.driver', 'smtp');
+                Config::set('mail.host', $settings->host);
+                Config::set('mail.port', $settings->Port);
+                Config::set('mail.username', $settings->Mail);
+                Config::set('mail.password', $settings->Mailpassword);
+                Config::set('mail.encryption', $settings->encryption);
+                
+                Config::set('mail.from.address', $settings->Mail);
+                Config::set('mail.from.name', $settings->title ?? 'Your App Name');
+            }
+        } catch (\Exception $e) {
+            // يمكنك تسجيل الخطأ هنا إذا فشل الاتصال بقاعدة البيانات
+            // Log::error('Could not load mail settings from database: ' . $e->getMessage());
+        }
+    }
+    
+    
     }
 }

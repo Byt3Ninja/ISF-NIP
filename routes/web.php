@@ -18,6 +18,8 @@ Route::get('default-permissions', function () {
     App\Permission::default_permissions();
 });
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
+
+Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -120,6 +122,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
     Route::get('hackathon/my-team', 'HackathonController@myTeam')->name('hackathon.myTeam');
     Route::post('hackathon/EditProjectIdea', 'HackathonController@EditProjectIdea')->name('hackathon.EditProjectIdea');
+    Route::post('hackathon/EditTeamInfo', 'HackathonController@EditTeamInfo')->name('hackathon.EditTeamInfo');
     Route::post('hackathon/RequestJoin', 'HackathonController@RequestJoin')->name('hackathon.RequestJoinTeam');
     Route::post('hackathon/ApprovedRequestJoin', 'HackathonController@ApprovedRequestJoin')->name('hackathon.ApprovedRequestJoinTeam');
     Route::post('hackathon/RejectedRequestJoin', 'HackathonController@RejectedRequestJoin')->name('hackathon.RejectedRequestJoin');
@@ -127,11 +130,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
     // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
     Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
+    Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
     Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
     Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
+    Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
+    Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
+    Route::delete('hackathon/deleteTodoList/{id}', 'TodoListController@destroy')->name('hackathon.deleteTodoList');
 
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
