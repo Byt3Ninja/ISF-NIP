@@ -96,11 +96,11 @@
               $totalSessions = $requests->count();
               $totalMinutes = $requests->sum('period');
               $totalHours = $totalMinutes / 60;
-              $avgRating = $requests->whereNotNull('rating')->avg('rating');
+              $avgRating = $requests->first()->rating;
               @endphp
               <tr>
                 <td class="text-end">{{ $company?->{'name_' . app()->getLocale()} }}</td>
-                <td>{{ $mentor->first_name . ' ' . $mentor->last_name ?? 'N/A' }}</td>
+                <td>{{ $mentor->first_name_en . ' ' . $mentor->last_name_en ?? 'N/A' }}</td>
                 <td>{{ $totalSessions }}</td>
                 <td>{{ number_format($totalHours, 1) }}</td>
                 <td>
