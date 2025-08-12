@@ -104,13 +104,14 @@
                   {{ '-' }}
                   @endif
                 </td>
-                <td class="text-center"> <span class="badge {{ $ws->type === 'sessions' ? 'bg-secondary' : ($ws->type === 'online' ? 'bg-info' : 
-                              'bg-label-warning text-dark') }}">
-                    {{ $ws->type === 'sessions' ? 'Live Training' :
-                    ($ws->type === 'sessions' ? 'Online' :
-                    'In-Person') }}
-                  </span>
-                </td>
+                 <td class="text-center">
+                  <span class="badge 
+                  {{ $ws->type === 'sessions' ? 'bg-secondary' : 
+                  ($ws->type === 'online' ? 'bg-info' : 'bg-label-warning text-dark') }}">
+                     {{ $ws->type === 'sessions' ? __('admin.Live Training') : 
+                   ($ws->type === 'online' ? __('admin.Online') : __('admin.In-Person')) }}
+                 </span>
+              </td>
 
               </tr>
 
@@ -130,12 +131,25 @@
             <thead>
               <tr>
                 <th scope="col">{{ __('admin.company name') }}</th>
+                <th scope="col">{{ __('admin.Score') }}</th>
+                <th scope="col">{{ __('admin.Status') }}</th>
               </tr>
             </thead>
             <tbody>
-              @forelse($companies as $company)
+              @forelse($quizzesResults as $result)
               <tr>
-                <td>{{ $company->{'name_'.$l} }}</td>
+                <td>{{ $result->{'c_company_name_'.$l} ?? '-' }}</td>
+                <td> 
+                  <span
+											class="fw-bold fs-6 {{ $result->qr_result_score >= 50 ? 'text-success' : 'text-danger' }}">
+											{{ $result->qr_result_score }}%
+									</span></td>
+                <td>
+                  {!! $result->qr_result_status == 1
+                    ? '<span class="badge bg-success rounded-pill">' . __('admin.Completed') . '</span>'
+                     : '<span class="badge bg-danger rounded-pill">' . __('admin.Pending') . '</span>'
+                 !!}
+                </td>
               </tr>
               @empty
               <tr>

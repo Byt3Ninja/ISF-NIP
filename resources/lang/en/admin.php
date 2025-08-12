@@ -2257,4 +2257,7 @@ return [
 	'On going' => 'On going',
 	'Projects_NotSubmitted' => 'Projects Not Submitted',
 	'Program Report' => 'Program Report',
+	'Live Training' => 'Live Training',
+    'Online' => 'Online',
+    'In-Person' => 'In-Person',
 ];

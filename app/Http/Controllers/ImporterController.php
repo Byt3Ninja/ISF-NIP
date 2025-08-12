@@ -468,6 +468,8 @@ class ImporterController extends Controller
                 // Process Founder
                 $userData = [
                     'company_id' => $company->id,
+                    'country_id' => $countryId,
+                    'state_id' => $stateId,
                     'email' => $email,
                     'first_name_en' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
                     'first_name_ar' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
@@ -482,7 +484,7 @@ class ImporterController extends Controller
 
                 $existingUser = User::where('email', $email)->first();
                 if (!$existingUser) {
-                    $userData['password'] = bcrypt('password');
+                    $userData['password'] = bcrypt('123456789');
                 }
 
                 $user = User::updateOrCreate(
