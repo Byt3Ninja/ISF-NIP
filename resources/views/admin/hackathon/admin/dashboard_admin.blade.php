@@ -797,7 +797,7 @@ $mentorsLists = showMintors($request);
 
 <!-- Team Details Modal -->
 <div class="modal fade" id="teamDetailsModal" tabindex="-1" aria-labelledby="teamDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="teamDetailsModalLabel">{{ __('admin.team_details_title') }} <span
@@ -805,15 +805,27 @@ $mentorsLists = showMintors($request);
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-        <p><strong>{{ __('admin.hackathon') }}:</strong> <span id="modal-team-hackathon"></span></p>
-        <p><strong>{{ __('admin.team_leader') }}:</strong> <span id="modal-team-leader"></span></p>
-        <h6>{{ __('admin.members') }}</h6>
-        <ul class="list-group" id="modal-team-members-list"></ul>
-        <h6 class="mt-3">{{ __('admin.project_idea_if_available') }}</h6>
-        <p id="modal-team-project-idea" class="text-muted">{{ __('admin.idea_not_specified_yet') }}</p>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.hackathon') }}:</label>
+          <span id="modal-team-hackathon" class="badge bg-label-primary text-dark"></span>
+        </div>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.team_leader') }}:</label>
+          <span id="modal-team-leader" class="badge bg-label-info text-dark"></span>
+        </div>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.members') }}</label>
+          <ul class="list-group list-group-flush" id="modal-team-members-list"></ul>
+        </div>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.project_idea_if_available') }}</label>
+          <div id="modal-team-project-idea" class="border rounded bg-light p-2 text-dark">
+        {{ __('admin.idea_not_specified_yet') }}
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
         {{-- <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
           __('admin.message_team') }}</button> --}}
       </div>
@@ -952,19 +964,21 @@ $teamsJson = $data['all_teams']->map(function($team) {
             const button = event.relatedTarget;
             const teamId = button.getAttribute('data-team-id');
             const teamData = teamsData[teamId];
+            console.log('teamData', teamData)
             if (teamData) {
                 document.getElementById('modal-team-name-detail').textContent = teamData.name;
                 document.getElementById('modal-team-hackathon').textContent = teamData.hackathon;
                 document.getElementById('modal-team-leader').textContent = teamData.leader;
                 const membersList = document.getElementById('modal-team-members-list');
                 membersList.innerHTML = '';
-                (teamData.members || []).forEach(member => {
+                const teamMembers = teamData?.members.filter(member => member !== null && member !== undefined);
+                (teamMembers || []).forEach(member => {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
                     li.textContent = member;
                     membersList.appendChild(li);
                 });
-                document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "لم يتم تحديد فكرة بعد.";
+                document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "{{ __('admin.No_idea_specified') }}";
             } else {
                 // حال وجود خطأ في ID
                 console.warn('لا توجد بيانات للفريق بالمعرّف:', teamId);
