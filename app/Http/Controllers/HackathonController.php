@@ -1496,11 +1496,16 @@ class HackathonController extends Controller
             ->where('acceptInvition', 'join')
             ->first();
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-        $count_team = Team_member::where('team_formation_id', $teams->id)
-            ->where('acceptInvition', 'accepted')
-            ->count();
+        $count_team_q = Team_member::where('team_formation_id', $teams->id)
+            ->get();
+        $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+
         $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
         if($step->count_team_number < $count_team){
+            foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+                $member->acceptInvition = 'rejected';
+                $member->save();
+            }
             return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
         }
             if(!$teamMember) {
