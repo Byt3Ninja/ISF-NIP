@@ -43,12 +43,18 @@
                       alt="{{ $team->name }}" 
                       class="rounded-circle border-3 border-white"
                       style="width: 120px; height: 120px; object-fit: cover;"
-                      onerror="this.src='/assets/img/team-placeholder.svg'"
+                      onerror="this.onerror=null;this.src='https://placehold.co/400x200?text={{ urlencode($team->name) }}';"
                     >
-                  @else
-                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center border-3" 
-                         style="width: 120px; height: 120px; margin: 0 auto;">
-                      <i class="ti ti-users text-primary" style="font-size: 3rem;"></i>
+                    @else
+                    <img 
+                      src="https://ui-avatars.com/api/?name={{ urlencode($team->name) }}&background=random&color=fff&size=120&rounded=true"
+                      alt="{{ $team->name }}"
+                      class="rounded-circle border-3 border-white shadow"
+                      style="width: 120px; height: 120px; object-fit: cover;"
+                    >
+                    <div class="mt-2 d-flex align-items-center text-white-75 small">
+                      <i class="ti ti-info-circle me-1"></i>
+                      {{ $l == 'ar' ? 'لا توجد صورة للفريق' : 'No team photo available' }}
                     </div>
                   @endif
                 </div>
@@ -86,12 +92,12 @@
                     </div>
                   @endif
                   
-                  @if($team->cycle)
+                  {{-- @if($team->cycle)
                     <div class="text-white small w-px-100 text-start">
                       <strong>{{ $l == 'ar' ? 'الدورة:' : 'Cycle:' }}</strong><br>
                       {{ $team->cycle->title }}
                     </div>
-                  @endif
+                  @endif --}}
                 </div>
               </div>
             </div>
@@ -223,28 +229,28 @@
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-semibold">{{ $l == 'ar' ? 'اسم الفريق' : 'Team Name' }}</label>
-                      <p class="mb-0">{{ $team->name }}</p>
+                      <p class="mb-0 text-muted">{{ $team->name }}</p>
                     </div>
                     @if($team->desc)
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-12 mb-3">
                       <label class="form-label fw-semibold">{{ $l == 'ar' ? 'الوصف' : 'Description' }}</label>
-                      <p class="mb-0">{{ $team->desc }}</p>
+                      <p class="mb-0 text-muted">{{ $team->desc }}</p>
                     </div>
                     @endif
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-semibold">{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created Date' }}</label>
-                      <p class="mb-0">{{ \Carbon\Carbon::parse($team->created_at)->format('F d, Y \a\t H:i') }}</p>
+                      <p class="mb-0 text-muted">{{ \Carbon\Carbon::parse($team->created_at)->format('F d, Y \a\t H:i') }}</p>
                     </div>
                     @if($team->region)
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-semibold">{{ $l == 'ar' ? 'المنطقة' : 'Region' }}</label>
-                      <p class="mb-0">{{ $team->region }}</p>
+                      <p class="mb-0 text-muted">{{ $team->region }}</p>
                     </div>
                     @endif
                     @if($team->max_members)
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-semibold">{{ $l == 'ar' ? 'الحد الأقصى للأعضاء' : 'Max Members' }}</label>
-                      <p class="mb-0">{{ $team->max_members }}</p>
+                      <p class="mb-0 text-muted">{{ $team->max_members }}</p>
                     </div>
                     @endif
                   </div>
