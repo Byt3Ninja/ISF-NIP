@@ -258,80 +258,82 @@
         <div class="tab-pane fade" id="members" role="tabpanel" aria-labelledby="members-tab">
           <div class="row">
             @foreach($team->members as $member)
-            <div class="col-lg-4 col-md-6 mb-4">
-              <div class="card h-100">
-                <div class="card-body text-center position-relative">
-                  {{-- Leader Badge --}}
-                  @if($member->is_leader)
-                  <div class="position-absolute top-0 start-50 translate-middle">
-                    <span class="badge bg-warning text-dark">
-                      <i class="ti ti-crown"></i> {{ $l == 'ar' ? 'قائد الفريق' : 'Team Leader' }}
-                    </span>
-                  </div>
-                  @endif
-                  
-                  {{-- Member Avatar --}}
-                  <div class="avatar avatar-xl mx-auto mb-3">
-                    <img 
-                      src="{{ '/191014/'. $member->img_url ?? '/icons/account.svg' }}"
-                      onerror="this.onerror=null;this.src='/icons/account.svg';"
-                      alt="{{ $member->name }}" 
-                      class="avatar-img rounded-circle"
-                    >
-                  </div>
-                  
-                  <h5 class="card-title mb-1">{{ $member->name }}</h5>
-                  @if($member->title)
-                    <p class="text-primary fw-medium mb-2">{{ $member->title }}</p>
-                  @endif
-                  
-                  {{-- Contact Information --}}
-                  <div class="mb-3">
-                    @if($member->email)
-                      <div class="text-muted small mb-1">
-                        <i class="ti ti-mail me-1"></i>{{ $member->email }}
+              <div class="col-lg-4 col-md-6 mb-4">
+                <a href="{{ route('mentors.profile_view', $member->id) }}">
+                  <div class="card h-100">
+                    <div class="card-body text-center position-relative">
+                      {{-- Leader Badge --}}
+                      @if($member->is_leader)
+                      <div class="position-absolute top-0 start-50 translate-middle">
+                        <span class="badge bg-warning text-dark">
+                          <i class="ti ti-crown"></i> {{ $l == 'ar' ? 'قائد الفريق' : 'Team Leader' }}
+                        </span>
                       </div>
-                    @endif
-                    @if($member->phone)
-                      <div class="text-muted small mb-1">
-                        <i class="ti ti-phone me-1"></i>{{ $member->phone }}
+                      @endif
+                      
+                      {{-- Member Avatar --}}
+                      <div class="avatar avatar-xl mx-auto mb-3">
+                        <img 
+                          src="{{ '/191014/'. $member->img_url ?? '/icons/account.svg' }}"
+                          onerror="this.onerror=null;this.src='/icons/account.svg';"
+                          alt="{{ $member->name }}" 
+                          class="avatar-img rounded-circle"
+                        >
                       </div>
-                    @endif
-                    @if($member->company && $member->company->name)
-                      <div class="text-muted small">
-                        <i class="ti ti-building me-1"></i>{{ $member->company->name }}
+                      
+                      <h5 class="card-title mb-1">{{ $member->name }}</h5>
+                      @if($member->title)
+                        <p class="text-primary fw-medium mb-2">{{ $member->title }}</p>
+                      @endif
+                      
+                      {{-- Contact Information --}}
+                      <div class="mb-3">
+                        @if($member->email)
+                          <div class="text-muted small mb-1">
+                            <i class="ti ti-mail me-1"></i>{{ $member->email }}
+                          </div>
+                        @endif
+                        @if($member->phone)
+                          <div class="text-muted small mb-1">
+                            <i class="ti ti-phone me-1"></i>{{ $member->phone }}
+                          </div>
+                        @endif
+                        @if($member->company && $member->company->name)
+                          <div class="text-muted small">
+                            <i class="ti ti-building me-1"></i>{{ $member->company->name }}
+                          </div>
+                        @endif
                       </div>
-                    @endif
+                      
+                      {{-- Bio --}}
+                      @if($member->bio)
+                      <p class="text-muted small mb-3">{{ Str::limit($member->bio, 100) }}</p>
+                      @endif
+                      
+                      {{-- Social Media Links --}}
+                      <div class="d-flex justify-content-center gap-2">
+                        @if($member->email)
+                        <a href="mailto:{{ $member->email }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                          <i class="ti ti-mail"></i>
+                        </a>
+                        @endif
+                        @if($member->linkedin)
+                        <a href="{{ $member->linkedin }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                          <i class="ti ti-brand-linkedin"></i>
+                        </a>
+                        @endif
+                      </div>
+                      
+                      {{-- Join Date --}}
+                      @if($member->joined_at)
+                      <div class="text-muted small mt-3">
+                        {{ $l == 'ar' ? 'انضم في' : 'Joined' }} {{ \Carbon\Carbon::parse($member->joined_at)->format('M Y') }}
+                      </div>
+                      @endif
+                    </div>
                   </div>
-                  
-                  {{-- Bio --}}
-                  @if($member->bio)
-                  <p class="text-muted small mb-3">{{ Str::limit($member->bio, 100) }}</p>
-                  @endif
-                  
-                  {{-- Social Media Links --}}
-                  <div class="d-flex justify-content-center gap-2">
-                    @if($member->email)
-                    <a href="mailto:{{ $member->email }}" class="btn btn-sm btn-outline-primary rounded-pill">
-                      <i class="ti ti-mail"></i>
-                    </a>
-                    @endif
-                    @if($member->linkedin)
-                    <a href="{{ $member->linkedin }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
-                      <i class="ti ti-brand-linkedin"></i>
-                    </a>
-                    @endif
-                  </div>
-                  
-                  {{-- Join Date --}}
-                  @if($member->joined_at)
-                  <div class="text-muted small mt-3">
-                    {{ $l == 'ar' ? 'انضم في' : 'Joined' }} {{ \Carbon\Carbon::parse($member->joined_at)->format('M Y') }}
-                  </div>
-                  @endif
-                </div>
+                </a>
               </div>
-            </div>
             @endforeach
           </div>
         </div>
