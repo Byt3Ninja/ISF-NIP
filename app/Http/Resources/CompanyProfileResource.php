@@ -44,13 +44,36 @@ class CompanyProfileResource extends JsonResource
              $documents[] = Storage::disk('pitch_deck')->url($docPath);
         }
     }
+     $categoryMap = [
+        'Food & Beverage' => 'categories.food_beverage',
+        'Technology' => 'categories.technology',
+        'App / Website' => 'categories.app_website',
+        'Housewares / Home Design' => 'categories.housewares_home_design',
+        'Health / Wellness / Nutrition' => 'categories.health_wellness_nutrition',
+        'Fitness' => 'categories.fitness',
+        'Sports' => 'categories.sports',
+        'Beauty' => 'categories.beauty',
+        'Clothing / Fashion' => 'categories.clothing_fashion',
+        'Toys / Games' => 'categories.toys_games',
+        'Children' => 'categories.children',
+        'Entertainment / Experiential' => 'categories.entertainment_experiential',
+        'Pets' => 'categories.pets',
+        'Music' => 'categories.music',
+        'Holiday' => 'categories.holiday',
+        'Other' => 'categories.other',
+     ];
 
         return [
             'id' => $this->id,
             'name' => $this->{'name_'.$locale},
             'logo' => $this->logo ? url($this->logo) : null,
             'sector' => is_numeric($this->sector) ? optional($this->sectoR)->{"name_$locale"} : $this->sector,
-            'businessCategories' => is_string($this->business_categories)? json_decode($this->business_categories, true): $this->business_categories,
+            'businessCategories' => collect(is_string($this->business_categories) ? json_decode($this->business_categories, true) : $this->business_categories
+            )->filter()->map(function ($categoryValue) use ($categoryMap) {
+            return isset($categoryMap[$categoryValue])
+                ? __('admin.' . $categoryMap[$categoryValue])
+                : $categoryValue; 
+            })->values(),
             'state' => $this->state?->{'name_'.$locale},
             'city' => $this->city?->{'name_'.$locale},
             'country' => $this->country?->{'name_'.$locale},
