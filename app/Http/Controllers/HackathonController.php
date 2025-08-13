@@ -1095,10 +1095,9 @@ class HackathonController extends Controller
 
     public function createTeam(Request $request)
     {
-      
         $request->validate([
-            'team_name' => 'required|string|unique:team_formations,name,max:255',
-            'description' => 'nullable|string|max:1000',
+            'team_name' => 'required|string|max:50|unique:team_formations,name',
+            'team_description' => 'nullable|string|max:500',
             'cycle_id' => 'required|exists:cycles,id',
             'step_id' => 'required|exists:steps,id',
             'Project_Name_ar' => 'nullable|string|max:255',
@@ -1108,7 +1107,7 @@ class HackathonController extends Controller
             'Target_Track' => 'nullable|integer',
             'Project_Status' => 'nullable|integer',
             'Region' => 'nullable|string|max:255',
-
+            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         
         $user = Auth::user();
@@ -1145,7 +1144,7 @@ class HackathonController extends Controller
 
         $teamformation = new TeamFormation();
         $teamformation->name = $request->team_name;
-        $teamformation->description = $request->description;
+        $teamformation->description = $request->team_description;
         $teamformation->cycle_id = $request->cycle_id;
         $teamformation->step_id = $request->step_id;
         $teamformation->user_id = $user->id;
@@ -1157,12 +1156,12 @@ class HackathonController extends Controller
         $teamformation->project_status = $request->Project_Status ?? 0;
         $teamformation->region = $request->Region ?? '';
 
-        if ($request->hasFile('img_team')) {
-                    $image = $request->file('img_team');
-                    $imageName = time() . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('programs/teams/'), $imageName);
-                    $teamformation->img_team = 'programs/teams/' . $imageName;
-                }
+        if ($request->hasFile('team_image')) {
+            $image = $request->file('team_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('191014'), $imageName);
+            $teamformation->img_team = $imageName;
+        }
 
         $teamformation->save();
 
