@@ -1299,7 +1299,14 @@ class HackathonController extends Controller
         if (!$team_q) {
             return redirect()->back()->with('error', 'You are not authorized to send invitations.');
         }
-        $user_q = User::where('email', $request->memberEmail)->where('id', $request->user_id)->first();
+        if($user->email == $email){
+            return redirect()->back()->with('error', 'You cannot invite yourself.');
+        }
+        $haveTeam = Team_member::where('Email', $email)->where('acceptInvition', 'accepted')->first();
+        if($haveTeam){
+            return redirect()->back()->with('error', 'This user is already a member of another team.');
+        }
+        $user_q = User::where('email', $email)->where('id', $request->user_id)->first();
         if (!$user_q) {
             $teamMember = new Team_member();
             $teamMember->Name = 'Waiting for user';
