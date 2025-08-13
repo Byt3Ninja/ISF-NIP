@@ -401,7 +401,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     $teamImage = $team_Formation_raw->first();
                     $imageSrc = '/icons/team-default.svg';
                     if ($teamImage && property_exists($teamImage, 'tf_img_team') && $teamImage->tf_img_team) {
-                        $imageSrc = '/191014/' . $teamImage->tf_img_team . '?t=' . time();
+                        $imageSrc = '/' . $teamImage->tf_img_team . '?t=' . time();
                     }
                     @endphp
                     <img 
@@ -541,7 +541,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   $teamImageModal = $team_Formation_raw->first();
                   $imageSrcModal = '/icons/team-default.svg';
                   if ($teamImageModal && property_exists($teamImageModal, 'tf_img_team') && $teamImageModal->tf_img_team) {
-                      $imageSrcModal = '/191014/' . $teamImageModal->tf_img_team . '?t=' . time();
+                      $imageSrcModal = '/' . $teamImageModal->tf_img_team . '?t=' . time();
                   }
                   @endphp
                   <img 

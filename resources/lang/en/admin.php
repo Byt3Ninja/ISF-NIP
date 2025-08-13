@@ -2262,4 +2262,5 @@ return [
 	'Live Training' => 'Live Training',
     'Online' => 'Online',
     'In-Person' => 'In-Person',
+	'Team_is_full.' => 'Team is full.',
 ];

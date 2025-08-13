@@ -1095,10 +1095,9 @@ class HackathonController extends Controller
 
     public function createTeam(Request $request)
     {
-      
         $request->validate([
-            'team_name' => 'required|string|unique:team_formations,name,max:255',
-            'description' => 'nullable|string|max:1000',
+            'team_name' => 'required|string|max:50|unique:team_formations,name',
+            'team_description' => 'nullable|string|max:1000',
             'cycle_id' => 'required|exists:cycles,id',
             'step_id' => 'required|exists:steps,id',
             'Project_Name_ar' => 'nullable|string|max:255',
@@ -1108,7 +1107,7 @@ class HackathonController extends Controller
             'Target_Track' => 'nullable|integer',
             'Project_Status' => 'nullable|integer',
             'Region' => 'nullable|string|max:255',
-
+            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         
         $user = Auth::user();
@@ -1145,7 +1144,7 @@ class HackathonController extends Controller
 
         $teamformation = new TeamFormation();
         $teamformation->name = $request->team_name;
-        $teamformation->description = $request->description;
+        $teamformation->description = $request->team_description;
         $teamformation->cycle_id = $request->cycle_id;
         $teamformation->step_id = $request->step_id;
         $teamformation->user_id = $user->id;
@@ -1157,12 +1156,12 @@ class HackathonController extends Controller
         $teamformation->project_status = $request->Project_Status ?? 0;
         $teamformation->region = $request->Region ?? '';
 
-        if ($request->hasFile('img_team')) {
-                    $image = $request->file('img_team');
-                    $imageName = time() . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('programs/teams/'), $imageName);
-                    $teamformation->img_team = 'programs/teams/' . $imageName;
-                }
+        if ($request->hasFile('team_image')) {
+            $image = $request->file('team_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('programs/teams/'), $imageName);
+            $teamformation->img_team = 'programs/teams/' . $imageName;
+        }
 
         $teamformation->save();
 
@@ -1218,7 +1217,7 @@ class HackathonController extends Controller
     {
         $request->validate([
             'team_name' => 'required|string|max:50',
-            'team_description' => 'nullable|string|max:500',
+            'team_description' => 'nullable|string|max:1000',
             'team_formation_id' => 'required|exists:team_formations,id',
             'team_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'remove_image' => 'nullable|boolean'
@@ -1253,7 +1252,7 @@ class HackathonController extends Controller
         if ($request->hasFile('team_image')) {
             // Delete old image if exists
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path('191014/' . $teamFormation->img_team);
+                $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
                 }
@@ -1262,14 +1261,14 @@ class HackathonController extends Controller
             // Upload new image
             $image = $request->file('team_image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('191014'), $imageName);
+            $image->move(public_path('programs/teams/'), $imageName);
             
-            $teamFormation->img_team = $imageName;
-            $newImageUrl = '/191014/' . $imageName;
+            $teamFormation->img_team = 'programs/teams/' . $imageName;
+            $newImageUrl = '/programs/teams/' . $imageName;
         } elseif ($request->remove_image) {
             // Remove existing image
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path('191014/' . $teamFormation->img_team);
+                $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
                 }
@@ -1299,7 +1298,14 @@ class HackathonController extends Controller
         if (!$team_q) {
             return redirect()->back()->with('error', 'You are not authorized to send invitations.');
         }
-        $user_q = User::where('email', $request->memberEmail)->where('id', $request->user_id)->first();
+        if($user->email == $email){
+            return redirect()->back()->with('error', 'You cannot invite yourself.');
+        }
+        $haveTeam = Team_member::where('Email', $email)->where('acceptInvition', 'accepted')->first();
+        if($haveTeam){
+            return redirect()->back()->with('error', 'This user is already a member of another team.');
+        }
+        $user_q = User::where('email', $email)->where('id', $request->user_id)->first();
         if (!$user_q) {
             $teamMember = new Team_member();
             $teamMember->Name = 'Waiting for user';
@@ -1376,6 +1382,21 @@ class HackathonController extends Controller
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation not found.');
             }
+
+            $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+            $count_team_q = Team_member::where('team_formation_id', $teams->id)
+                ->get();
+            $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+
+            $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+            if($step->count_team_number < $count_team){
+                foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+                    $member->acceptInvition = 'rejected';
+                    $member->save();
+                }
+                return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+            }
+
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
@@ -1495,9 +1516,23 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
+        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+        $count_team_q = Team_member::where('team_formation_id', $teams->id)
+            ->get();
+        $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+
+        $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+        if($step->count_team_number < $count_team){
+            foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+                $member->acceptInvition = 'rejected';
+                $member->save();
+            }
+            return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+        }
             if(!$teamMember) {
                 return redirect()->back()->with('error', 'Request not found.');
             }
+
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->save();
                 $allteamMembers = Team_member::where('Email', $teamMember->Email)
