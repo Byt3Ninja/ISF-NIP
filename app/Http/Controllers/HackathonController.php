@@ -1097,7 +1097,7 @@ class HackathonController extends Controller
     {
         $request->validate([
             'team_name' => 'required|string|max:50|unique:team_formations,name',
-            'team_description' => 'nullable|string|max:500',
+            'team_description' => 'nullable|string|max:1000',
             'cycle_id' => 'required|exists:cycles,id',
             'step_id' => 'required|exists:steps,id',
             'Project_Name_ar' => 'nullable|string|max:255',
@@ -1159,8 +1159,8 @@ class HackathonController extends Controller
         if ($request->hasFile('team_image')) {
             $image = $request->file('team_image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('191014'), $imageName);
-            $teamformation->img_team = $imageName;
+            $image->move(public_path('programs/teams/'), $imageName);
+            $teamformation->img_team = 'programs/teams/' . $imageName;
         }
 
         $teamformation->save();
@@ -1217,7 +1217,7 @@ class HackathonController extends Controller
     {
         $request->validate([
             'team_name' => 'required|string|max:50',
-            'team_description' => 'nullable|string|max:500',
+            'team_description' => 'nullable|string|max:1000',
             'team_formation_id' => 'required|exists:team_formations,id',
             'team_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'remove_image' => 'nullable|boolean'
@@ -1252,7 +1252,7 @@ class HackathonController extends Controller
         if ($request->hasFile('team_image')) {
             // Delete old image if exists
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path('191014/' . $teamFormation->img_team);
+                $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
                 }
@@ -1261,14 +1261,14 @@ class HackathonController extends Controller
             // Upload new image
             $image = $request->file('team_image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('191014'), $imageName);
+            $image->move(public_path('programs/teams/'), $imageName);
             
-            $teamFormation->img_team = $imageName;
-            $newImageUrl = '/191014/' . $imageName;
+            $teamFormation->img_team = 'programs/teams/' . $imageName;
+            $newImageUrl = '/programs/teams/' . $imageName;
         } elseif ($request->remove_image) {
             // Remove existing image
             if ($teamFormation->img_team) {
-                $oldImagePath = public_path('191014/' . $teamFormation->img_team);
+                $oldImagePath = public_path($teamFormation->img_team);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
                 }
