@@ -2315,4 +2315,7 @@ return [
 	'Live Training' => 'تدريب مباشر',
     'Online' => 'عن بعد',
     'In-Person' => 'حضوري',
+	'Startups_trainings_Hours' => 'ساعات تدريبات الشركات الناشئة',
+	'Team_is_full.' => 'الفريق مكتمل.',
+
 ];

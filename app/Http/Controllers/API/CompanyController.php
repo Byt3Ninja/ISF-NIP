@@ -184,8 +184,8 @@ class CompanyController extends Controller
         } else {
             $q->where("name_{$locale}", 'like', "%{$request->organization}%");
         }
-    });
-}
+     });
+   }
 
     if ($request->filled('state')) {
             $query->whereHas('state', function ($q) use ($request, $locale) {

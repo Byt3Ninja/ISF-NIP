@@ -2256,8 +2256,10 @@ return [
 	'Region' => 'Region',
 	'On going' => 'On going',
 	'Projects_NotSubmitted' => 'Projects Not Submitted',
+	'Startups_trainings_Hours' => 'Startups Trainings Hours',
 	'Program Report' => 'Program Report',
 	'Live Training' => 'Live Training',
     'Online' => 'Online',
     'In-Person' => 'In-Person',
+	'Team_is_full.' => 'Team is full.',
 ];
