@@ -43,7 +43,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
           ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
           ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
           ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static'],
-          ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
+          // ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
           ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static']
           
           // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
