@@ -748,7 +748,7 @@ class TrainingController extends Controller
 
 			if ($type == 'sessions') {
 				// Add Zoom
-				$_session = $this->addorcreatSession($type, $datetime, $request->duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
+				$_session = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
 				
 				if( $_session['success'] == false )
 				{
@@ -780,6 +780,7 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@editsession: ' . $e->getMessage());
+			dd($e->getMessage());
 		}
 	}
 
