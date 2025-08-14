@@ -2080,6 +2080,353 @@
                 ]
             }
         },
+        "/api/messages": {
+            "post": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Send a new message or save as draft",
+                "description": "Creates a new message to recipients or saves it as a draft based on the draft flag.",
+                "operationId": "storeMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "userTypeValue",
+                                    "userId",
+                                    "title",
+                                    "subject",
+                                    "draft"
+                                ],
+                                "properties": {
+                                    "userTypeValue": {
+                                        "description": "0: same org, 1: company, 2: specific users, 3: by org id",
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "userId": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            103,
+                                            104
+                                        ]
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Team Standup Notes"
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "example": "Summary of today's meeting"
+                                    },
+                                    "draft": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message sent or draft saved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Sent Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No recipients found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No Recipients Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/reply": {
+            "post": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Reply to a message",
+                "description": "Creates a reply to an existing message.",
+                "operationId": "replyMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "messageId",
+                                    "subject",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "messageId": {
+                                        "type": "integer",
+                                        "example": 45
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "example": "Re: Project Update"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Thanks for the update, looks good!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reply sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reply Sent Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/toggle-status": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Toggle read/unread status of messages",
+                "description": "Updates the read status for one or more messages by IDs.",
+                "operationId": "toggleMessageStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "messageIds",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "messageIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            45,
+                                            46
+                                        ]
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "read",
+                                            "unread"
+                                        ],
+                                        "example": "read"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Status Updated Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/star": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Toggle star status of messages",
+                "description": "Updates the starred status for one or more messages by IDs.",
+                "operationId": "toggleStar",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "messageId",
+                                    "starred"
+                                ],
+                                "properties": {
+                                    "messageId": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 45
+                                        },
+                                        "example": [
+                                            45,
+                                            46
+                                        ]
+                                    },
+                                    "starred": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message star status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Star Status Updated Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Not Found"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/organizations": {
             "get": {
                 "tags": [
@@ -5431,6 +5778,10 @@
         {
             "name": "Schedules",
             "description": "Schedules"
+        },
+        {
+            "name": "Messages",
+            "description": "Messages"
         },
         {
             "name": "Organizations",
