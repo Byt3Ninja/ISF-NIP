@@ -466,7 +466,9 @@ public function index(Request $request)
                   ->orWhere('description', 'like', '%' . $request->search . '%');
             });
         }
-
+        if ($request->boolean('hasSteps')) {
+          $query->whereHas('steps');
+        }
         $programs = $query->latest()->paginate($request->get('limit', 10));
         // Check if there are no results
         if ($programs->isEmpty()) {
@@ -488,7 +490,7 @@ public function index(Request $request)
             'next' => $programs->nextPageUrl(),
         ],
     ]
-);
+  );
 }
 
 /**

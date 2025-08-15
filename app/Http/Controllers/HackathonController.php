@@ -77,7 +77,7 @@ class HackathonController extends Controller
                 'id' => $item->c_id,
                 'title' => $item->c_title,
                 'image' => $item->c_img_url,
-                'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
+                'date' => $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d'),
                 'location' => $item->o_name_en ?? 'Unknown',
                 'status' => $status,
                 'description' => $item->c_description,
@@ -93,14 +93,15 @@ class HackathonController extends Controller
             ];
          });
 
-            // استخراج الهاكاثونات المنتهية فقط
-            $pastHackathons = $hackathons->where('status', 'Finished')->values();
-            $hackathons = $hackathons->reject(function ($item) {
-                return $item['status'] === 'Finished';
-            })->values();
-           
+         
+        $pastHackathons = $hackathons->where('status', 'Finished')
+        ->sortByDesc('cycle_end')
+        ->values();
         
-        // return view('admin.hackathon.index', compact('hackathons'));
+        $hackathons = $hackathons->reject(function ($item) {
+            return $item['status'] === 'Finished';
+        })->values();
+                
         return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step', 'hackathon_ids'));
     }
 

@@ -1047,7 +1047,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           Swal.fire({
             icon: 'error',
             title: '{{ $l == 'en' ? 'Error!' : 'خطأ!' }}',
-            text: '{{ $l == 'en' ? 'There was an error updating the team information.' : 'حدث خطأ أثناء تحديث معلومات الفريق.' }}',
+            text: error?.message || '{{ $l == 'en' ? 'There was an error updating the team information.' : 'حدث خطأ أثناء تحديث معلومات الفريق.' }}',
             confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
             customClass: {
               confirmButton: 'btn btn-primary',
