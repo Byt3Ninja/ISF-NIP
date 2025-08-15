@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\TodoList;
 use App\Team_member;
 use Illuminate\Http\Request;
+use App\Mail\TaskAssignedMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TodoListController extends Controller
 {
@@ -59,6 +62,14 @@ class TodoListController extends Controller
         $todoList->team_member_id = $team_member[0]->id;
         $todoList->save();
 
+        $assignedUser = User::find($assignee);
+
+        if ($assignedUser && $assignedUser->email) {
+            Mail::to($assignedUser->email)->queue(new TaskAssignedMail($assignedUser, $todoList));
+            
+        }
+
+
         return response()->json(['success' => true, 'message' => __("admin.Task_added_successfully.")]);
         
     }
@@ -108,6 +119,13 @@ class TodoListController extends Controller
         $todoList->step_id = $user->company->step;
         $todoList->user_id = $user->id;
         $todoList->save();
+
+        $assignedUser = User::find($assignee);
+
+        if ($assignedUser && $assignedUser->email) {
+            Mail::to($assignedUser->email)->queue(new TaskAssignedMail($assignedUser, $todoList));
+            
+        }
 
         return response()->json(['success' => true, 'message' => __("admin.Task_updated_successfully.")]);
          

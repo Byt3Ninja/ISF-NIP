@@ -48,6 +48,7 @@ class ScreeningEvaluationResults extends Model
 		$companies = collect([]);
 		$evaluation = collect([]);
 		$results = collect([]);
+		$comments = collect([]);
 		$getStep = Step::find( $step_id );
 		if( $getStep )
 		{
@@ -55,10 +56,16 @@ class ScreeningEvaluationResults extends Model
 			$_steps = Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
 			$evaluation = ScreeningEvaluation::getEvaluationData( $getStep->id );
 			$results = self::where('evaluation_id', $evaluation?->id )->get();
+			$get_comments = ScreeningEvaluationCustomFields::where('name', 'final_comment')->where('evaluation_id', $evaluation?->id)->with(['values'])->first();
+			if( !empty( $get_comments ) && !is_null( $get_comments ) )
+			{
+				$comments = $get_comments->values;
+				if( empty( $comments ) || is_null( $comments ) ) { $comments = collect([]); }
+			}
 		}
 
 		$l = app()->getLocale();
-		if( $getStep->stype == 5 )
+		if( $getStep?->stype == 5 )
 		{
 			$finals = Finalscreening::where('step_id', $step_id)->with(['company', 'company.users'])->get()->map(function( $f ) {
 				$f->judgers_ids = array_map(function( $i ) { return intval( $i ); }, $f->judges);
@@ -224,7 +231,8 @@ class ScreeningEvaluationResults extends Model
 			'companies' => $companies,
 			'_companies' => $_companies,
 			'evaluation' => $evaluation,
-			'results' => $results
+			'results' => $results,
+			'comments' => $comments
 		];
 	}
 }

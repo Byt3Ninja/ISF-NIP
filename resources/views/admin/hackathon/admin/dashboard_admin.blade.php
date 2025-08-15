@@ -186,8 +186,16 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               <!-- This is example data, should be populated from a loop in a real application -->
               @foreach ($data['all_projects'] as $project)
               <tr>
-                <td>{{ $project->project_name }}</td>
-                <td> {{ $project->project_description }}</td>
+                <td>
+                  <div style="width: 120px;">
+                    {{ $project->project_name }}
+                  </div>
+                </td>
+                <td> 
+                  <div class="text-truncate" style="max-width: 200px;">
+                    {{ $project->project_description }}
+                  </div>
+                </td>
                 <td>{{ $project->leader->name }}</td>
                 <td>{{ $project->leader->email }}</td>
                 <td>{{ $project->leader->phone }}</td>
@@ -212,20 +220,47 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 </td>
                 <td>{{ $project->region }}</td>
                 <td>
-                  <div class="progress mb-2" style="height: 20px;">
-                    <div class="progress-bar bg-success" role="progressbar"
-                      style="width:{{ $project->project_status  }}%;" aria-valuenow="{{ $project->project_status  }}"
-                      aria-valuemin="0" aria-valuemax="100">{{
-                      $project->project_status }}% {{ $l == 'en' ? 'Complete' :
-                      'مكتمل' }}</div>
+                  <div class="progress mb-2" style="height: 22px; background-color: #f1f3f4; border-radius: 12px;">
+                    <div 
+                      class="progress-bar 
+                        @if($project->project_status == 100)
+                          bg-success
+                        @elseif($project->project_status >= 80)
+                          bg-primary
+                        @elseif($project->project_status >= 60)
+                          bg-info
+                        @elseif($project->project_status >= 40)
+                          bg-warning
+                        @else
+                          bg-danger
+                        @endif
+                      " 
+                      role="progressbar"
+                      style="width:{{ $project->project_status }}%; font-weight: 600; font-size: 1rem; border-radius: 12px;"
+                      aria-valuenow="{{ $project->project_status }}"
+                      aria-valuemin="0" aria-valuemax="100"
+                    >
+                      <span style="color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.15);">
+                        {{ $project->project_status }}%
+                        {{-- {{ $l == 'en' ? 'Complete' : 'مكتمل' }} --}}
+                      </span>
+                    </div>
                   </div>
                 </td>
                 <td>{{ $project->created_at }}</td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary mb-3" data-bs-toggle="modal"
-                    data-bs-target="#editProjectIdeaModal{{ $project->id }}">
-                    <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit ' : 'تعديل ' }}
-                  </button>
+                  <div class="d-flex align-items-center">
+                    <button class="btn btn-sm btn-icon rounded-circle btn-label-info me-1" data-bs-toggle="modal"
+                      data-bs-target="#projectDetailsModal{{ $project->id }}"
+                      title="{{ $l == 'en' ? 'View Details' : 'عرض التفاصيل' }}">
+                      <i class="ti ti-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-icon rounded-circle btn-label-primary" data-bs-toggle="modal"
+                      data-bs-target="#editProjectIdeaModal{{ $project->id }}"
+                      title="{{ $l == 'en' ? 'Edit Project' : 'تعديل المشروع' }}">
+                      <i class="ti ti-edit ti-sm"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
               <!-- Edit Project Idea Modal -->
@@ -304,6 +339,124 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                       </button>
                     </div>
                     </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Project Details Modal -->
+              <div class="modal fade" id="projectDetailsModal{{ $project->id }}" tabindex="-1"
+                aria-labelledby="projectDetailsModalLabel{{ $project->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="projectDetailsModalLabel{{ $project->id }}">
+                        <i class="bi bi-info-circle-fill me-2"></i>{{ $l == 'en' ? 'Project Details' : 'تفاصيل المشروع' }}
+                      </h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}</label>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->project_name }}</p>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Team Leader' : 'قائد الفريق' }}</label>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->leader->name }}</p>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Email' : 'البريد الإلكتروني' }}</label>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->leader->email }}</p>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Phone' : 'رقم الهاتف' }}</label>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->leader->phone }}</p>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->region }}</p>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Creation Date' : 'تاريخ الإنشاء' }}</label>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->created_at }}</p>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</label>
+                            <div class="border p-2 rounded bg-light">
+                              @if($project->project_status == 20)
+                                <span class="badge bg-info">{{ __('admin.Idea + Team') }}</span>
+                              @elseif($project->project_status == 40)
+                                <span class="badge bg-warning">{{ __('admin.Research') }}</span>
+                              @elseif($project->project_status == 60)
+                                <span class="badge bg-primary">{{ __('admin.Design & Build') }}</span>
+                              @elseif($project->project_status == 80)
+                                <span class="badge bg-secondary">{{ __('admin.Ready for Pitch') }}</span>
+                              @elseif($project->project_status == 100)
+                                <span class="badge bg-success">{{ __('admin.Project Submitted') }}</span>
+                              @endif
+                            </div>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Progress' : 'التقدم' }}</label>
+                            <div class="progress" style="height: 28px; background-color: #f1f3f4; border-radius: 14px;">
+                              <div 
+                                class="progress-bar 
+                                  @if($project->project_status == 100)
+                                    bg-success
+                                  @elseif($project->project_status >= 80)
+                                    bg-primary
+                                  @elseif($project->project_status >= 60)
+                                    bg-info
+                                  @elseif($project->project_status >= 40)
+                                    bg-warning
+                                  @else
+                                    bg-danger
+                                  @endif
+                                " 
+                                role="progressbar"
+                                style="width:{{ $project->project_status }}%; font-weight: 600; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+                                aria-valuenow="{{ $project->project_status }}"
+                                aria-valuemin="0" aria-valuemax="100"
+                              >
+                                <span style="color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.18); letter-spacing: 0.5px;">
+                                  {{ $project->project_status }}% {{ $l == 'en' ? 'Complete' : 'مكتمل' }}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="mb-3">
+                            <label class="form-label fw-bold">{{ $l == 'en' ? 'Project Description' : 'وصف المشروع' }}</label>
+                            <div class="border p-3 rounded bg-light" style="min-height: 100px;">
+                              {{ $project->project_description ?: ($l == 'en' ? 'No description provided' : 'لا يوجد وصف متاح') }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        {{ $l == 'en' ? 'Close' : 'إغلاق' }}
+                      </button>
+                      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal"
+                        data-bs-target="#editProjectIdeaModal{{ $project->id }}">
+                        <i class="ti ti-edit me-1"></i> {{ $l == 'en' ? 'Edit Project' : 'تعديل المشروع' }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -644,7 +797,7 @@ $mentorsLists = showMintors($request);
 
 <!-- Team Details Modal -->
 <div class="modal fade" id="teamDetailsModal" tabindex="-1" aria-labelledby="teamDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="teamDetailsModalLabel">{{ __('admin.team_details_title') }} <span
@@ -652,15 +805,27 @@ $mentorsLists = showMintors($request);
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.close') }}"></button>
       </div>
       <div class="modal-body">
-        <p><strong>{{ __('admin.hackathon') }}:</strong> <span id="modal-team-hackathon"></span></p>
-        <p><strong>{{ __('admin.team_leader') }}:</strong> <span id="modal-team-leader"></span></p>
-        <h6>{{ __('admin.members') }}</h6>
-        <ul class="list-group" id="modal-team-members-list"></ul>
-        <h6 class="mt-3">{{ __('admin.project_idea_if_available') }}</h6>
-        <p id="modal-team-project-idea" class="text-muted">{{ __('admin.idea_not_specified_yet') }}</p>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.hackathon') }}:</label>
+          <span id="modal-team-hackathon" class="badge bg-label-primary text-dark"></span>
+        </div>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.team_leader') }}:</label>
+          <span id="modal-team-leader" class="badge bg-label-info text-dark"></span>
+        </div>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.members') }}</label>
+          <ul class="list-group list-group-flush" id="modal-team-members-list"></ul>
+        </div>
+        <div class="mb-6">
+          <label class="form-label fw-bold me-2">{{ __('admin.project_idea_if_available') }}</label>
+          <div id="modal-team-project-idea" class="border rounded bg-light p-2 text-dark">
+        {{ __('admin.idea_not_specified_yet') }}
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
         {{-- <button type="button" class="btn btn-primary"><i class="bi bi-envelope-fill me-2"></i> {{
           __('admin.message_team') }}</button> --}}
       </div>
@@ -799,19 +964,21 @@ $teamsJson = $data['all_teams']->map(function($team) {
             const button = event.relatedTarget;
             const teamId = button.getAttribute('data-team-id');
             const teamData = teamsData[teamId];
+            console.log('teamData', teamData)
             if (teamData) {
                 document.getElementById('modal-team-name-detail').textContent = teamData.name;
                 document.getElementById('modal-team-hackathon').textContent = teamData.hackathon;
                 document.getElementById('modal-team-leader').textContent = teamData.leader;
                 const membersList = document.getElementById('modal-team-members-list');
                 membersList.innerHTML = '';
-                (teamData.members || []).forEach(member => {
+                const teamMembers = teamData?.members.filter(member => member !== null && member !== undefined);
+                (teamMembers || []).forEach(member => {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
                     li.textContent = member;
                     membersList.appendChild(li);
                 });
-                document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "لم يتم تحديد فكرة بعد.";
+                document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "{{ __('admin.No_idea_specified') }}";
             } else {
                 // حال وجود خطأ في ID
                 console.warn('لا توجد بيانات للفريق بالمعرّف:', teamId);

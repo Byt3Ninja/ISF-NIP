@@ -397,7 +397,7 @@
                                 <div
                                   class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1 rounded-pill">
                                   <img src="{{ $founder->image ? $founder->image : '/icons/account.svg' }}"
-                                    onerror="this.src='/icons/account.svg'" class="rounded-circle" width="24"
+                                    onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" class="rounded-circle" width="24"
                                     height="24" />
                                   <div class="text-xs text-nowrap">
                                     {{ $founder->Name }}

@@ -431,98 +431,77 @@ class ProgramController extends Controller
     public function programReport(string $id , Request $request)
     {
         $cycle = Cycle::withCount(['companies', 'mentors'])->with(['steps' => function ($query) {
-          $query->orderBy('arr');
-          }])->findOrFail($id);
+            $query->orderBy('arr');
+        }])->findOrFail($id);
 
         $totalWorkshops = $cycle->trainingSessions()->count();
-        
-
         $companyQuery = $cycle->companies()->with(['sectoR', 'stagE']);
 
-        if ($request->filled('sector')) {
-               $companyQuery->whereHas('sectoR', function ($q) use ($request) {
-                  $q->where('name_en', $request->sector);
-           });
+        if( $request->filled('sector') ) {
+            $companyQuery->whereHas('sectoR', function ($q) use ($request) {
+                $q->where('name_en', $request->sector);
+            });
         }
 
-        if ($request->filled('stage')) {
-               $companyQuery->whereHas('stagE', function ($q) use ($request) {
-                  $q->where('name_en', $request->stage);
-         });
+        if( $request->filled('stage') ) {
+            $companyQuery->whereHas('stagE', function ($q) use ($request) {
+                $q->where('name_en', $request->stage);
+            });
         }
 
         $companies = $companyQuery->get();
+        $sectorsLabel = Sector::select('id', 'name_en', 'name_ar')->get();
+        $sectorsCount = Sector::withCount('companies')->get();
 
-        $sectors = Sector::all();
+        $stages = Stage::select('id', 'name_en', 'name_ar')->get();
+        $progress = $cycle->getProgress();
 
-        $stages = Stage::all();
-
-            
         // Mentorship Requests Filtering
         $mentorshipRequests = $cycle->mentorshipRequests()
-         ->with(['user.company', 'mentor'])
-        ->when($request->filled('mentor'), fn($q) => $q->where('mentor_id', $request->mentor))
-        ->when($request->filled('company'), fn($q) => $q->whereHas('user', fn($q2) => $q2->where('company_id', $request->company)))
-        ->when($request->filled('zoom_date'), fn($q) => $q->whereDate('zoom_date', '>=', $request->zoom_date))
-        ->get();
+            ->with(['user.company', 'mentor'])
+            ->when($request->filled('mentor'), fn($q) => $q->where('mentor_id', $request->mentor))
+            ->when($request->filled('company'), fn($q) => $q->whereHas('user', fn($q2) => $q2->where('company_id', $request->company)))
+            ->when($request->filled('zoom_date'), fn($q) => $q->whereDate('zoom_date', '>=', $request->zoom_date))
+            ->get();
 
-      $mentors = $cycle->mentors;
+        $mentors = $cycle->mentors;
+        $mentorNames = $mentorshipRequests->pluck('mentor.name')->toArray();
+        $mentorSessions = $mentorshipRequests->groupBy('mentor_id')->map(fn($group) => $group->count())->toArray();
 
-      $mentorNames = $mentorshipRequests->pluck('mentor.name')->toArray();
+        $mentorAvgRatings = $mentorshipRequests->groupBy('mentor_id')->map(fn($group) => $group->avg('rating'))->toArray();
 
-      $mentorSessions = $mentorshipRequests
-        ->groupBy('mentor_id')
-        ->map(fn($group) => $group->count())
-        ->toArray();
-
-        $mentorAvgRatings = $mentorshipRequests
-        ->groupBy('mentor_id')
-        ->map(fn($group) => $group->avg('rating'))
-        ->toArray();
-
-     // Top Mentors
-        $topMentors = collect($mentorSessions)
-        ->sortDesc()
-        ->take(5)
-        ->keys()
-        ->all();
+        // Top Mentors
+        $topMentors = collect($mentorSessions)->sortDesc()->take(5)->keys()->all();
 
         $topMentorNames = [];
         $topMentorSessionsArray = [];
-        foreach ($topMentors as $mentorId) {
-             $mentorName = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor?->name;
-            if ($mentorName) {
+        foreach( $topMentors as $mentorId )
+        {
+            $mentorName = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor?->name;
+            if( $mentorName )
+            {
                 $topMentorNames[] = $mentorName;
                 $topMentorSessionsArray[] = $mentorSessions[$mentorId] ?? 0;
-             }
-        }
-
-        $mentorAvgRatingsArray = [];
-        foreach ($mentorAvgRatings as $mentorId => $avgRating) {
-            $mentor = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor;
-             if ($mentor) {
-                $mentorAvgRatingsArray[$mentor->name] = round($avgRating, 2);
             }
         }
 
-     $workshopsQuery = $cycle->trainingSessions();
-
-        if ($request->filled('trainer')) {
-            $workshopsQuery->where('trainer_name', $request->trainer);
+        $mentorAvgRatingsArray = [];
+        foreach( $mentorAvgRatings as $mentorId => $avgRating )
+        {
+            $mentor = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor;
+            if( $mentor ) { $mentorAvgRatingsArray[$mentor->name] = round($avgRating, 2); }
         }
 
-        if ($request->filled('workshop_name')) {
-            $workshopsQuery->where('training_sessions.title', 'like', '%' . $request->workshop_name . '%');
-        }
+        $workshopsQuery = $cycle->trainingSessions();
 
-        if ($request->filled('type')) {
-            $workshopsQuery->where('type', $request->type);
-        }
+        if( $request->filled('trainer') ) { $workshopsQuery->where('trainer_name', $request->trainer); }
+
+        if( $request->filled('workshop_name') ) { $workshopsQuery->where('training_sessions.title', 'like', '%' . $request->workshop_name . '%'); }
+
+        if( $request->filled('type') ) { $workshopsQuery->where('type', $request->type); }
 
         $workshops = $workshopsQuery->where(function($query) {
-        $query->where('type', 'offline')
-          ->orWhere('type', 'online')
-          ->orWhere('type', 'sessions');
+            $query->where('type', 'offline')->orWhere('type', 'online')->orWhere('type', 'sessions');
         })->get();
 
         $trainerNames = $cycle->trainingSessions()->pluck('trainer_name')->unique()->values();
@@ -536,89 +515,168 @@ class ProgramController extends Controller
 
         $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
 
-        // Final Evaluations
-        $finalEvaluations = ScreeningEvaluation::whereIn('step_id', $cycle->steps->pluck('id'))
-            ->with([
-                'criteria' => fn($q) => $q->select('id', 'evaluation_id', 'title', 'weight', 'parent_id'),
-                'customFields.values.user.company'
-            ])
-            ->get();
+        // Fetch final evaluations
+        $finalStepIds = $cycle->steps->where('stype', 5)->pluck('id');
 
-        $evaluationResults = ScreeningEvaluationResults::whereIn('evaluation_id', $finalEvaluations->pluck('id'))
-            ->with(['criteria' => fn($q) => $q->select('id', 'evaluation_id', 'weight', 'parent_id'), 'user'])
-            ->get();
+        // Get metadata for each step and merge company scores
+        $allCompaniesData = collect();
+        $allJudges = collect();
 
-        $averageFinalScore = ScreeningEvaluationResults::whereIn('evaluation_id', $finalEvaluations->pluck('id'))
-            ->where('status', 1)
-            ->avg('score') ?: 0;
-        $averageFinalScore = round((float)$averageFinalScore, 2);
-
-        $companyEvaluations = [];
-        foreach ($finalEvaluations as $evaluation) {
-            $finalCommentField = $evaluation->customFields->where('name', 'final_comment')->first();
-            $userValue = $finalCommentField ? $finalCommentField->values->first() : null;
-            $companyUser = $userValue ? $userValue->user : null;
-            $company = $companyUser ? $companyUser->company : null;
-
-            if (!$company || !$companies->contains('id', $company->id)) {
-                continue;
+        foreach( $finalStepIds as $stepId )
+        {
+            $check = ScreeningEvaluation::where('step_id', $stepId)->first();
+            if( empty( $check ) ) 
+            {
+                $evaluation = new ScreeningEvaluation();
+                $evaluation->step_id = $stepId; $evaluation->save(); 
             }
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
+            $meta = ScreeningEvaluationResults::metadata($stepId);
+            $comments = $meta['comments'];
 
-            $results = $evaluationResults->where('evaluation_id', $evaluation->id)
-                ->where('status', 1);
-
-            $totalScore = $results->sum(function ($result) {
-                $criterion = $result->criteria;
-                if ($criterion && is_null($criterion->parent_id)) {
-                    $score = (float)$result->score;
-                    return ($criterion->weight * $score) / 100;
+            $allJudges = $allJudges->merge( $meta['judges'] );
+            if( !empty( $meta['_companies'] ) && !is_null( $meta['_companies'] ) )
+            {
+                foreach( $meta['_companies'] as $index => $company )
+                {
+                    $teamJudges = collect([]);
+                    $company_id = $company->id;
+                    $totalScore = 0;
+                    $publishedEvaluations = 0;
+                    $averageScore = 0;
+                    $evaluation_status = 'not_evaluated';
+                    $company_comments = $comments->where('company_id', $company_id)->values();
+                    foreach( $meta['judges'] as $judge )
+                    {
+                        if( in_array($company_id, $judge->startups->toArray()) )
+                        {
+                            $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
+                            if( $scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score) )
+                            {
+                                $comment = $company_comments->where('user_id', $judge->id)->first();
+                                $comment = $comment?->value;
+                                $judge->comments = $comment;
+                                $teamJudges->push($judge);
+                                $evaluation_status = 'published';
+                                $totalScore += (float) $scoped_company->score;
+                                $publishedEvaluations++;
+                            }
+                        }
+                    }
+    
+                    if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
+                    $meta['_companies'][$index]->score = $averageScore;
+                    $meta['_companies'][$index]->evaluation_status = $evaluation_status;
+                    $meta['_companies'][$index]->company_judges = $teamJudges;
                 }
-                return 0;
-            });
-
-            $status = $totalScore >= 90 ? 'Highest Rated' : ($totalScore >= 70 ? 'Good Performance' : 'Needs Improvement');
-
-            $comments = $userValue && $userValue->value ? $userValue->value : $results->pluck('comment')->filter()->join('; ');
-
-            $companyEvaluations[] = [
-                'company_id' => $company->id,
-                'company_name' => $company->{'name_' . app()->getLocale()},
-                'total_score' => round($totalScore, 2),
-                'status' => $status,
-                'comments' => $comments,
-                'evaluation_status' => $evaluation->status,
-            ];
+                $allCompaniesData = $allCompaniesData->merge($meta['_companies']);
+            }
         }
 
-        $companyEvaluations = collect($companyEvaluations)
-            ->groupBy('company_id')
-            ->map(function ($group) {
-                return $group->sortByDesc('total_score')->first();
-            })
-            ->sortByDesc('total_score')
-            ->values();
 
-        $totalEvaluations = $finalEvaluations->count();
-        $publishedEvaluations = $finalEvaluations->where('status', 1)->count();
-        $evaluationCompletion = $totalEvaluations > 0 ? round(($publishedEvaluations / $totalEvaluations) * 100, 2) : 0;
+        $companyEvaluations = $allCompaniesData->groupBy('id')->map(function ($group) {
+            return $group->sortByDesc('score')->first();
+        })->values();
+
+        // Evaluation completion
+        $totalCompanies = $companyEvaluations->count();
+        $publishedCompanies = $companyEvaluations->where('evaluation_status', 'published')->values();
+        $evaluationCompletion = $totalCompanies > 0 ? round(($publishedCompanies->count() / $totalCompanies) * 100, 2) : 0;
+
+        // Calculate average final score
+        $averageFinalScore = $publishedCompanies->avg('score') ?: 0;
+        $averageFinalScore = round($averageFinalScore, 2);
+
+        // Status classification
+        $companyEvaluations = $companyEvaluations->map(function ($company) {
+            if( $company->evaluation_status == 'not_evaluated' ) { $status = 'Not Evaluated'; }
+            else
+            {
+                $status = $company['average_score'] >= 90 ? 'Highest Rated' : ($company['average_score'] >= 70 ? 'Good Performance' : 'Needs Improvement');
+            }
+            $company['status'] = $status;
+            return $company;
+        });
+
+        // Final Status distribution
         $statusDistribution = [
             'Highest Rated' => $companyEvaluations->where('status', 'Highest Rated')->count(),
             'Good Performance' => $companyEvaluations->where('status', 'Good Performance')->count(),
             'Needs Improvement' => $companyEvaluations->where('status', 'Needs Improvement')->count(),
+            'Not Evaluated' => $companyEvaluations->where('status', 'Not Evaluated')->count(),
         ];
 
-        $evaluatorStatus = $evaluationResults->groupBy('user_id')->map(function ($results, $userId) {
-            $user = User::find($userId);
-            $name = $user ? ($user->first_name_en . ' ' . $user->last_name_en ?? $user->name ?? "Evaluator $userId") : "Evaluator $userId";
+        // Evaluator status
+        $evaluatorStatus = $allJudges->map(function ($judge) {
+            $published = collect($judge->companies)->where('status', 'Published')->count();
+            $draft = collect($judge->companies)->where('status', 'Draft')->count();
+            $total = $published + $draft;
             return [
-                'evaluator_id' => $userId,
-                'evaluator_name' => $name,
-                'total_evaluations' => $results->count(),
-                'published_evaluations' => $results->where('status', 1)->count(),
-                'draft_evaluations' => $results->where('status', 0)->count(),
+                'evaluator_id' => $judge->id,
+                'evaluator_name' => $judge->name,
+                'total_evaluations' => $total,
+                'published_evaluations' => $published,
+                'draft_evaluations' => $draft,
             ];
         })->values();
-     
+
+        $scoreDistribution = [
+            ['label' => '90-100', 'min' => 90, 'max' => 100, 'count' =>  $publishedCompanies->whereBetween('score', [90, 100])->count()],
+            ['label' => '80-89', 'min' => 80, 'max' => 89.9, 'count' =>  $publishedCompanies->whereBetween('score', [80, 89.9])->count()],
+            ['label' => '60-79', 'min' => 60, 'max' => 79.9, 'count' =>  $publishedCompanies->whereBetween('score', [60, 79.9])->count()],
+            ['label' => '< 60', 'min' => 0, 'max' => 59.9, 'count' =>  $publishedCompanies->whereBetween('score', [0, 59.9])->count()],
+        ];
+        /* $scoreDistribution = [
+            '0-10'   => $publishedCompanies->whereBetween('score', [0, 10])->count(),
+            '11-20'  => $publishedCompanies->whereBetween('score', [11, 20])->count(),
+            '21-30'  => $publishedCompanies->whereBetween('score', [21, 30])->count(),
+            '31-40'  => $publishedCompanies->whereBetween('score', [31, 40])->count(),
+            '41-50'  => $publishedCompanies->whereBetween('score', [41, 50])->count(),
+            '51-60'  => $publishedCompanies->whereBetween('score', [51, 60])->count(),
+            '61-70'  => $publishedCompanies->whereBetween('score', [61, 70])->count(),
+            '71-80'  => $publishedCompanies->whereBetween('score', [71, 80])->count(),
+            '81-90'  => $publishedCompanies->whereBetween('score', [81, 90])->count(),
+            '91-100' => $publishedCompanies->whereBetween('score', [91, 100])->count(),
+        ];*/
+         $companyIds = $companies->pluck('id')->toArray();
+        if (!empty($companyIds)) {
+         $quizzesResults_q = "
+         SELECT 
+            qr.id AS qr_result_id,
+            qr.user_id AS qr_id,
+            qr.quiz_id AS qr_quiz_id,
+            qr.score AS qr_result_score,
+            qr.status AS qr_result_status,
+            qr.started_at AS qr_result_started_at,
+            qr.ended_at AS qr_result_ended_at,
+            q.id AS q_quiz_id,
+            q.title AS q_quiz_title,
+            q.organization_id AS q_quiz_organization_id,
+            q.training_id AS q_quiz_training_id,
+            q.description AS q_quiz_description,
+            q.start AS q_quiz_start,
+            q.end AS q_quiz_end,
+            q.status AS q_quiz_status, 
+            q.created_at AS q_quiz_created_at, 
+            o.name_ar as o_org_name_ar,
+            o.name_en as o_org_name_en,
+            c.id as c_company_id,
+            c.name_en as c_company_name_en,
+            c.name_ar as c_company_name_ar,
+            c.logo as c_company_logo
+    FROM quiz_results qr
+        LEFT JOIN quizzes q ON qr.quiz_id = q.id
+        LEFT JOIN trainings t ON t.id = q.training_id
+        LEFT JOIN organizations o ON o.id = q.organization_id
+        LEFT JOIN users u ON u.id = qr.user_id
+        LEFT JOIN companies c ON c.id = u.company_id
+        WHERE c.id IN (" . implode(',', $companyIds) . ")
+    ";
+        $quizzesResults = collect(DB::select($quizzesResults_q));    
+	} else {
+     $quizzesResults = collect();
+  }
+
         return view('admin.programs.program-report', [
            'cycle' => $cycle,
            'totalStartups' => $cycle->companies_count,
@@ -626,7 +684,8 @@ class ProgramController extends Controller
            'totalWorkshops'  => $totalWorkshops,
            'steps' => $cycle->steps,
            'companies' => $companies,
-           'sectors' => $sectors,
+           'sectorsLabel' => $sectorsLabel,
+           'sectorsData' => $sectorsCount,
            'stages' => $stages,
            'mentors' => $mentors,
            'mentorshipRequests' => $mentorshipRequests,
@@ -640,15 +699,18 @@ class ProgramController extends Controller
            'uploadedMaterials' => $uploadedMaterials,
            'workshops' => $workshops,
            'surveyResponses' => $surveyResponses,
-           'averageFinalScore' => $averageFinalScore,
            'mentorNamesChart1' => $topMentorNames,
            'mentorSessionsArray' => $topMentorSessionsArray,
            'mentorAvgRatings' => $mentorAvgRatingsArray,
            'companyEvaluations' => $companyEvaluations,
+           'averageFinalScore' => $averageFinalScore,
            'evaluationCompletion' => $evaluationCompletion,
            'statusDistribution' => $statusDistribution,
            'evaluatorStatus' => $evaluatorStatus,
+           'scoreDistribution' => $scoreDistribution,
+           'progress' => $progress, 
+           'publishedCompanies' => $publishedCompanies,
+           'quizzesResults' => $quizzesResults
         ]);
-   
     }
 }

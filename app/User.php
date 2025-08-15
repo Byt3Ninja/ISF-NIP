@@ -2,16 +2,19 @@
 
 namespace App;
 
+use App\Traits\Auditable;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
+use Namu\WireChat\Traits\Chatable;
+use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\VerifyEmailQueued;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\Auditable;
-use Spatie\Permission\Traits\HasRoles;
-use App\Notifications\VerifyEmailQueued;
-use Laravel\Sanctum\HasApiTokens;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     // use Auditable;
@@ -253,5 +256,64 @@ class User extends Authenticatable implements MustVerifyEmail
             if( in_array( trim( strtolower($p) ), $permissions ) ) { return true; }
         }
         return false;
+    }
+
+    /**
+    * Returns the URL for the user's cover image (avatar).
+    * Adjust the 'avatar_url' field to your database setup.
+    */
+    public function getCoverUrlAttribute(): ?string
+    {
+      return $this->avatar_url ?? null;
+    }
+
+    /**
+    * Returns the URL for the user's profile page.
+    * Adjust the 'profile' route as needed for your setup.
+    */
+    public function getProfileUrlAttribute(): ?string
+    {
+      return route('profile', ['id' => $this->id]);
+    }
+
+    /**
+    * Returns the display name for the user.
+    * Modify this to use your preferred name field.
+    */
+    public function getDisplayNameAttribute(): ?string
+    {
+      return $this->name ?? 'user';
+    }
+
+    /**
+    * Search for users when creating a new chat or adding members to a group.
+    * Customize the search logic to limit results, such as restricting to friends or eligible users only.
+    */
+    public function searchChatables(string $query): ?Collection
+    {
+     $searchableFields = ['first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'email'];
+     return User::where(function ($queryBuilder) use ($searchableFields, $query) {
+        foreach ($searchableFields as $field) {
+                $queryBuilder->orWhere($field, 'LIKE', '%'.$query.'%');
+        }
+      })
+        ->limit(20)
+        ->get();
+    }
+
+    /**
+    * Determine if the user can create new groups.
+    */
+    public function canCreateGroups(): bool
+    {
+      return $this->hasVerifiedEmail();
+    }
+
+    /**
+    * Determine if the user can create new groups with other users
+    */
+    public function canCreateChats(): bool
+    {
+     return $this->hasVerifiedEmail();
     }
 }

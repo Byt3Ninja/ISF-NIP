@@ -1618,6 +1618,7 @@ return [
 	'Highest Rated' => 'الأعلى تقييماً',
 	'Good Performance' => 'أداء جيد',
 	'Needs Improvement' => 'يحتاج إلى تحسين',
+	'Not Evaluated' => 'لم يتم التقييم',
 	'Min Rating' => 'أقل تقييم',
 	'Min Progress' => 'أقل تقدم',
 	'Distribution by Sector' => 'توزيع حسب القطاع',
@@ -2186,6 +2187,7 @@ return [
 	'You are not allowed to submit answers' => 'ليس لديك الصلاحية لتقديم الاجابات',
 	'Team Name' => 'اسم الفريق',
 	'Project Name' => 'اسم المشروع',
+	'Submission Step' => 'مرحلة التقديم',
 	'Winner Rank' => 'ترتيب الفائز',
 	'management_dashboard' => 'لوحة تحكم الإدارة',
 	'create_new_hackathon' => 'إنشاء هاكثون جديد',
@@ -2309,4 +2311,11 @@ return [
 	'Region' => 'المنطقة',
 	'On going' => 'جاري',
 	'Projects_NotSubmitted' => 'المشاريع غير المقدمة',
+	'Program Report' => 'تقرير البرنامج',
+	'Live Training' => 'تدريب مباشر',
+    'Online' => 'عن بعد',
+    'In-Person' => 'حضوري',
+	'Startups_trainings_Hours' => 'ساعات تدريبات الشركات الناشئة',
+	'Team_is_full.' => 'الفريق مكتمل.',
+
 ];
