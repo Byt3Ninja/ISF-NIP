@@ -200,5 +200,15 @@ if( !function_exists('date_ranges') )
 
         return $formatted;
     }
+
+
+
+    if (! function_exists('setting')) {
+    function setting($key, $default = null) {
+        return app(\App\Repositories\SettingRepository::class)->get($key, $default);
+    }
+
+    
+}
 }
 

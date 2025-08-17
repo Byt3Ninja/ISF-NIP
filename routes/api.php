@@ -51,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
-    Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate']);
+    Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
     Route::get('/roles', [RoleController::class, 'index']);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);

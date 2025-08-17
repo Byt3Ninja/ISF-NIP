@@ -48,4 +48,13 @@ return [
 	'Enter_Code_Sent' => 'We sent a verification code to your whatsapp number. Enter the code below',
 	'otp_label' => 'Enter you 6 digit security code',
 	'Please_enter_otp' => 'Please enter OTP',
+	'formHeading' => 'Adventure starts here',
+	'formSubHeading' => 'Make your app management easy and fun!',
+	'firstName' => 'First Name',
+	'secondName' => 'Last Name',
+	'gender'=> 'gender',
+	'googleSignIn' => 'Sign in with Google',
+	'linkdinSignIn' => 'Sign in with Linkedin'
+
+
 ];
