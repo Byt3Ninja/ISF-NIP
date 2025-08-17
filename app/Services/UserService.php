@@ -75,8 +75,9 @@ class UserService
     {
         try{
 
-
+ 
         $result = $this->userRepository->create($data);
+         
         if($result['success'] ==true){
         $user=$result['data'];
         Storage::disk('UsersLFM')->makeDirectory("$user->id");
@@ -88,31 +89,30 @@ class UserService
 
 
         if($user->hasRole('Judger')){
-               $user->notify(new WelcomeJudgerNotification($data));
+               $user->notify(new WelcomeJudgerNotification($user));
         }elseif( $user->hasRole('organizationmanager')){
                 $org_owner= $user->organization();
+               
                 Mail::to($user->email)->queue(new OrganizationCreatedMail($org_owner,$user, $data['password']));
 
         }else{
-  
-             Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
+
+             Mail::to(users: $user->email)->queue(new WelcomeUserMail($user, $data['password']));
         }
 
 
         }
 
 
-        return [
-            'success' =>$result['success'],
-            'data' => $result['data'],
-        ];
+        return $result;
 
 
         } catch (\Throwable $e) {
             return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'status' => 500
+            'success' => false,
+            'message' => 'Failed to create user',
+            'data'    => null,
+            'errors'  => [$e->getMessage()]
             ];
         }
     }

@@ -961,7 +961,7 @@ class SettingsController extends Controller
 
 				return back()->with('message', 'InvitationSent');
 	}
-	
+	 
 	public function showSetPasswordForm($invitationId)
 	{
 		$invitation = Invitation::findOrFail($invitationId);

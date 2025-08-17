@@ -8,7 +8,7 @@
 <!-- Menu -->
 @php
       $updateSittings = App\Settings::where('id', 1)->first();
-    @endphp
+@endphp
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
@@ -687,6 +687,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item">{{ __('admin.Training sessions') }}</span>
             </a>
           </li>
+          
           <li
             class="{{ Request::is('dashboard/training/all*', 'dashboard/training/addcontent*', 'dashboard/training/editcontent*', 'dashboard/training/viewcontent*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/all">
@@ -924,6 +925,37 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
     </li>
    @endif
 
+   @if ($_user->hasAnyRole('Admin|organizationManager'))
+    <li class="{{ Request::is('dashboard/admin/notification-templates*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <a class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-mail"></i>
+        <div>{{ __('admin.Notification Templates') }}</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="{{ Request::is('dashboard/admin/notification-templates/create') ? 'active' : '' }} menu-item">
+          <a class="menu-link" href="{{ route('admin.notification-templates.create') }}">
+            <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
+            <span class="menu-item">{{ __('admin.Create Template') }}</span>
+          </a>
+        </li>
+        <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit', 'dashboard/admin/notification-templates/*') ? 'active' : '' }} menu-item">
+          <a class="menu-link" href="{{ route('admin.notification-templates.index') }}">
+            <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
+            <span class="menu-item">{{ __('admin.Manage Templates') }}</span>
+          </a>
+        </li>
+
+        <li class="{{ Request::is('dashboard/admin/notification-triggers', 'dashboard/admin/notification-triggers/*/edit', 'dashboard/admin/notification-triggers/*') ? 'active' : '' }} menu-item">
+          <a class="menu-link" href="{{ route('admin.notification-triggers.index') }}">
+            <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
+            <span class="menu-item">{{ __('admin.Manage Triggers') }}</span>
+          </a>
+        </li>
+
+      </ul>
+    </li>
+   @endif
+
      
   
     @if ($_user->hasAnyRole('Admin'))
@@ -1090,6 +1122,43 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                       </a>
                     </li>
                   @endif
+                @endif
+                @if(auth()->user()->hasRole(['Admin', 'organizationManager']))
+                  <li class="nav-item has-treeview {{ request()->is('dashboard/admin/notification-*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('dashboard/admin/notification-*') ? 'active' : '' }}">
+                      <i class="nav-icon fas fa-bell"></i>
+                      <p>
+                        Notifications
+                        <i class="right fas fa-angle-left"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="{{ route('admin.notification-templates.index') }}" class="nav-link {{ request()->routeIs('admin.notification-templates.*') ? 'active' : '' }}">
+                          <i class="far fa-file-alt nav-icon"></i>
+                          <p>Templates</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{{ route('admin.notification-templates.create') }}" class="nav-link {{ request()->routeIs('admin.notification-templates.create') ? 'active' : '' }}">
+                          <i class="far fa-plus-square nav-icon"></i>
+                          <p>Create Template</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{{ route('admin.notification-triggers.index') }}" class="nav-link {{ request()->routeIs('admin.notification-triggers.*') ? 'active' : '' }}">
+                          <i class="far fa-play-circle nav-icon"></i>
+                          <p>Event Triggers</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="{{ route('admin.notification-triggers.create') }}" class="nav-link {{ request()->routeIs('admin.notification-triggers.create') ? 'active' : '' }}">
+                          <i class="far fa-plus nav-icon"></i>
+                          <p>Create Trigger</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
                 @endif
             </ul>
           </li>

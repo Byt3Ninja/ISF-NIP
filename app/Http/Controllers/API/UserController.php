@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Requests\User\StoreUserRequest;
 use App\User;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -62,17 +63,24 @@ class UserController extends Controller
 
         /**
          * Store a newly created resource in storage.
-         * @param StoreUserApiRequest $request
+         * @param StoreUserRequest $request
          * @return \Illuminate\Http\JsonResponse
          */
-        public function store(StoreUserApiRequest $request)
+        public function store(StoreUserRequest $request)
         {
             $this->authorize('store', Auth::user());
 
             $result = $this->userService->store($request->all());
 
+            
 
-        return $this->created(new UserResource($result['user']), __('api.user_created'), [], 201);
+                  if ($result['success'])
+                    {
+                    $this->success(new UserResource($result['data']),[], __('api.user_updated'));
+                    }
+
+                 return response()->json($result, 201);
+
         }
 
         /**
@@ -86,7 +94,7 @@ class UserController extends Controller
             $this->authorize('update', Auth::user());
 
             $result = $this->userService->update($user, $request->validated());
-
+            
 
             return $this->success(new UserResource($result['user']),[], __('api.user_updated'));
         }

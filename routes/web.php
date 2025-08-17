@@ -644,6 +644,33 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate_view_form');
     Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate_execute');
 
+    /* 
+     Templates Routes */
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Define specific routes BEFORE resource routes to avoid conflicts
+        Route::get('notification-templates/variables', 'NotificationTemplateController@getVariables')->name('notification-templates.variables');
+        Route::get('notification-templates/{notificationTemplate}/preview', 'NotificationTemplateController@preview')->name('notification-templates.preview');
+        Route::post('notification-templates/{notificationTemplate}/clone', 'NotificationTemplateController@clone')->name('notification-templates.clone');
+        Route::post('notification-templates/{notificationTemplate}/test-send', 'NotificationTemplateController@testSend')->name('notification-templates.test-send');
+        
+        // Resource routes come last
+        Route::resource('notification-templates', 'NotificationTemplateController');
+        
+        /* Notification Triggers Routes - MOVED INSIDE DASHBOARD GROUP */
+        // Define specific routes BEFORE resource routes to avoid conflicts
+        Route::get('notification-triggers/events', 'NotificationTriggerController@getEvents')->name('notification-triggers.events');
+        Route::get('notification-triggers/recipient-types', 'NotificationTriggerController@getRecipientRuleTypes')->name('notification-triggers.recipient-types');
+        Route::get('notification-triggers/sample-conditions', 'NotificationTriggerController@getSampleConditions')->name('notification-triggers.sample-conditions');
+        Route::post('notification-triggers/{notificationTrigger}/toggle-active', 'NotificationTriggerController@toggleActive')->name('notification-triggers.toggle-active');
+        Route::post('notification-triggers/{notificationTrigger}/clone', 'NotificationTriggerController@clone')->name('notification-triggers.clone');
+        Route::post('notification-triggers/{notificationTrigger}/test', 'NotificationTriggerController@test')->name('notification-triggers.test');
+        
+        // Resource routes come last
+        Route::resource('notification-triggers', 'NotificationTriggerController');
+    });
+
+
+
      /* Start of Activities Routes */
     Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
     Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');

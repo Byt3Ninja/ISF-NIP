@@ -112,7 +112,8 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "4") {
+                if ($data['role'] == "4" && !auth()->user()->hasRole('admin')) {
+                    dd('sdasdas');
                     UsersBio::create([
                         'user_id' => $user->id,
                         'bio_en' => $data['bio_en'],
@@ -133,17 +134,17 @@ class UserRepository
                     }
 
 
+
+
+                    $user->title_en = $data['title_en'];
+
+                }
                     $role = Role::find($data['role']);
                     DB::table('model_has_roles')->insert([
                         'role_id' => $role->id,
                         'model_type' => User::class,
                         'model_id' => $user->id,
                     ]);
-
-
-                    $user->title_en = $data['title_en'];
-
-                }
 
 
                     $user->save();
@@ -153,16 +154,18 @@ class UserRepository
 
 
             return [
-                'success'=> true,
-                'data'=>$user,
-
+            'success' => true,
+            'message' => 'User created successfully',
+            'data'    => $user,
+            'errors'  => null
             ];
 
         } catch (\Throwable $e) {
             return [
-                'success' => false,
-                'message' => $e->getMessage(),
-                'status' => 500
+            'success' => false,
+            'message' => 'Failed to create user',
+            'data'    => null,
+            'errors'  => [$e->getMessage()]
             ];
         }
     }
@@ -279,9 +282,26 @@ class UserRepository
     /**
      * get all Roles
      */
-    public function roles(): collection
+    public function roles()     
     {
-        return Role::all();
+        try{
+
+        
+    $roles= Role::all();
+            return [
+                'success' => true,
+                'message' => 'Roles List successfully',
+                'data'    => $roles,
+                'errors'  => null
+                ];
+        } catch (\Throwable $e) {
+            return [
+            'success' => false,
+            'message' => 'Failed to create user',
+            'data'    => null,
+            'errors'  => [$e->getMessage()]
+            ];
+        }
 
     }
     /**

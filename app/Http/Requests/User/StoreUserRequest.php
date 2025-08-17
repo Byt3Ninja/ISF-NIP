@@ -13,7 +13,7 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,6 +24,8 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
 
+        
+
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -32,17 +34,25 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,id',
             'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
-            'bio_en' => 'required_if:role,Mentor',
-            'Linkedin' => 'required_if:role,Mentor|url',
-            'expertise' => 'required_if:role,Mentor|array',
-            'expertise.*' => 'exists:expertises,id',
             'country_code' => 'required',
-            'title_en' => 'required_if:role,Mentor|string',
+      'bio_en'       => 'nullable|string',
+        'Linkedin'     => 'nullable|url',
+        'expertise'    => 'nullable|array',
+        'expertise.*'  => 'exists:expertises,id',
+        'title_en'     => 'nullable|string',
+    ];
 
-        ];
-
-
+    // Apply mentor-required rules ONLY if:
+    // - role is "Mentor"
+    // - auth user is NOT an Admin
+    if ($this->input('role') === 'Mentor' && !auth()->user()->hasRole('Admin')) {
+        $rules['bio_en']      = 'required|string';
+        $rules['Linkedin']    = 'required|url';
+        $rules['expertise']   = 'required|array';
+        $rules['expertise.*'] = 'exists:expertises,id';
+        $rules['title_en']    = 'required|string';
     }
-
+    
+    }
 
 }

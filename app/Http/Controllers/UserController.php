@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateUserApiRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UserFilterRequest;
 use App\Services\UserService;
 use App\User;
@@ -19,7 +20,6 @@ use App\Mail\WelcomeJudgerMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use \Spatie\Permission\Models\Role as Role;
@@ -71,10 +71,11 @@ class UserController extends Controller
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function create()
+	public function create()	
 	{
 		$this->authorize('create',Auth::user());
 		$roles =$this->userService->roleList();
+		$roles=$roles['data'];
 		return view('admin/users/create', compact('roles'));
 	}
 
@@ -87,73 +88,10 @@ class UserController extends Controller
 	public function store(StoreUserRequest $request)
 	{
          $this->authorize('store',Auth::user());
+		
 		 $result = $this->userService->store($request->all());
 
-
-		// if ($request->hasFile('img_url')) {
-		// 	//store the image
-		// 	$img_url = $request->file('img_url');
-		// 	//get the path of the stores image
-		// 	$img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-		// } else {
-		// 	$img_url = '';
-		// }
-		// $inputs = $request->except(['img_url']) + ['img_url' => $img_url];
-		// $inputs['password'] = Hash::make($inputs['password']);
-		// $inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
-		// $result = User::create($inputs);
-
-		// $result->first_name_ar = $request->first_name_en;
-		// $result->last_name_ar = $request->last_name_en;
-		// $result->save();
-
-		// Storage::disk('UsersLFM')->makeDirectory("$result->id");
-		// Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
-		// Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
-		// Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
-		// Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
-		// Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
-
-		// $result->allotRoleById($request->role);
-		// $data = [];
-		// $name = $result->first_name_en . ' ' . $result->last_name_en;
-		// if ($request->role == 'Judger') {
-		// 	// إرسال الإيميل الترحيبي
-		// 	$data = [
-		// 		'name' => $name,
-		// 		'email' => $result->email,
-		// 		'role' => 'Judger',
-		// 	];
-		// 	// إرسال الإشعار
-		// 	if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-		// 		try {
-		// 			$result->notify(new WelcomeJudgerNotification($data));
-		// 		} catch (\Throwable $th) {
-		// 			// throw $th;
-		// 		}
-		// 	}
-		// } else {
-
-		// 	// إرسال الإيميل الترحيبي
-		// 	$data = [
-		// 		'name' => $name,
-		// 		'email' => $result->email,
-		// 		'password' => $result->password,
-		// 		'role' => '',
-		// 	];
-		// 	// إرسال الإشعار
-		// 	// if( !in_array(env('APP_ENV', 'local'), ['local']) )
-		// 	// {
-		// 	try {
-		// 		$result->notify(new WelcomeJudgerNotification($data));
-		// 	} catch (\Throwable $th) {
-		// 		throw $th;
-		// 	}
-		// 	// }
-		// }
-
-
-		if ($result['user']) {
+		if ($result['data']) {
 			return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
 		} else {
 			return back()->withInput()->with(['msg' => 'FailedStore']);
