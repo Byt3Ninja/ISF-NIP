@@ -4,10 +4,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
+use App\Http\Controllers\API\StepController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\StageController;
 use App\Http\Controllers\API\SectorController;
 use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
+use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\CurrencyController;
@@ -19,7 +22,6 @@ use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\Mentors\MentorController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
-use App\Http\Controllers\API\StepController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
     Route::get('/startups', [CompanyController::class, 'index']);
     Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
+    Route::post('/company/profile', [CompanyController::class, 'update']);
     Route::get('/sectors', [SectorController::class, 'index']);
     Route::get('/states', [SectorController::class, 'getStates']);
     Route::post('/programs', [ProgramController::class, 'store']);
@@ -82,6 +85,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
     Route::apiResource('steps', StepController::class);
+    Route::prefix('messages')->group(function () {
+        Route::post('/', [MessageController::class, 'store']);
+        Route::post('/reply', [MessageController::class, 'reply']); 
+        Route::patch('/toggle-status', [MessageController::class, 'toggleStatus']);
+        Route::patch('/star', [MessageController::class, 'toggleStar']);
+    });
+    Route::get('/stages', [StageController::class, 'index']);
 });
 
 

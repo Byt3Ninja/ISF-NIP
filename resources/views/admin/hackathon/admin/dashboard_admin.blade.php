@@ -218,7 +218,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                   {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
                   @endif
                 </td>
-                <td>{{ $project->region }}</td>
+                <td>{{ __('admin.'.$project->region) }}</td>
                 <td>
                   <div class="progress mb-2" style="height: 22px; background-color: #f1f3f4; border-radius: 12px;">
                     <div 
@@ -316,13 +316,13 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                           <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
                           <select class="form-select" id="Region" name="Region">
                             <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
-                            <option value="{{ __('admin.AL_Madinah_AL_Munawwarah') }}" {{ $project->region == __('admin.AL_Madinah_AL_Munawwarah') ? 'selected' : '' }}>
+                            <option value="AL_Madinah_AL_Munawwarah" {{ $project->region =='AL_Madinah_AL_Munawwarah' ? 'selected' : '' }}>
                               {{ __('admin.AL_Madinah_AL_Munawwarah') }}
                             </option>
-                            <option value="{{ __('admin.Al_Ahsa') }}" {{ $project->region == __('admin.Al_Ahsa') ? 'selected' : '' }}>
+                            <option value="Al_Ahsa" {{ $project->region == 'Al_Ahsa' ? 'selected' : '' }}>
                               {{ __('admin.Al_Ahsa') }}
                             </option>
-                            <option value="{{ __('admin.Asir') }}" {{ $project->region == __('admin.Asir') ? 'selected' : '' }}>
+                            <option value="Asir" {{ $project->region == 'Asir' ? 'selected' : '' }}>
                               {{ __('admin.Asir') }}
                             </option>
                           
@@ -381,7 +381,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                         <div class="col-md-6">
                           <div class="mb-3">
                             <label class="form-label fw-bold">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
-                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->region }}</p>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ __('admin.'.$project->region) }}</p>
                           </div>
                           
                           <div class="mb-3">
@@ -533,7 +533,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $project->team_leader }}</td>
                 <td>{{ $project->eamil }}</td>
                 <td>{{ $project->phone }}</td>
-                <td>{{ $project->region }}</td>
+                <td>{{ __('admin.'.$project->region) }}</td>
                 <td>
                   <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
                     {{ $l == 'en' ? 'View' : 'عرض' }}
@@ -594,7 +594,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $notproject->team_leader }}</td>
                 <td>{{ $notproject->email }}</td>
                 <td>{{ $notproject->phone }}</td>
-                <td>{{ $notproject->region }}</td>
+                <td>{{ __('admin.'.$notproject->region) }}</td>
                 {{-- <td>
                   <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
                     {{ $l == 'en' ? 'View' : 'عرض' }}

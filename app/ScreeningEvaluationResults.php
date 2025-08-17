@@ -65,7 +65,7 @@ class ScreeningEvaluationResults extends Model
 		}
 
 		$l = app()->getLocale();
-		if( $getStep->stype == 5 )
+		if( $getStep?->stype == 5 )
 		{
 			$finals = Finalscreening::where('step_id', $step_id)->with(['company', 'company.users'])->get()->map(function( $f ) {
 				$f->judgers_ids = array_map(function( $i ) { return intval( $i ); }, $f->judges);

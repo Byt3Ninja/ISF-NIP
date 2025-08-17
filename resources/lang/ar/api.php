@@ -57,4 +57,12 @@ return [
 	'programs_not_found' => 'البرامج غير موجودة',
 	'program_not_found' => 'البرنامج غير موجود',
 	'stepsNotFound' => 'المراحل غير موجودة',
+	'message_status_updated' => 'تم تحديث حالة الرسالة بنجاح',
+	'Message_star_status_updated' => 'تم تحديث حالة تمييز الرسالة بنجاح',
+	'Draft_saved_successfully' => 'تم حفظ المسودة بنجاح',
+	'Message_sent_successfully' => 'تم إرسال الرسالة بنجاح',
+	'Reply_sent_successfully' => 'تم إرسال الرد بنجاح',
+	'Message_not_found' => 'الرسالة غير موجودة',
+	'No_recipients_found' => 'لا يوجد مستلمون',
+	'companyUpdated' => 'تم تحديث ملف الشركة بنجاح',
 ];
