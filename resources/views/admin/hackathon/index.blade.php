@@ -92,7 +92,7 @@
     <div class="row g-4 mb-8">
       @php
       $user = Auth::user();
-      $user_cycle_id = $user->company?->cycle;
+      $user_cycle_id = $user->team_member->teamFormation->user->company->cycle;
 
       $isExistinghackathon = in_array($user_cycle_id, $hackathon_ids);
       @endphp

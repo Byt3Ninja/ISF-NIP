@@ -202,7 +202,7 @@ class HackathonController extends Controller
                 states as s ON u.state_id = s.id
             WHERE c.cycle = ?
         ";
-        $params = [$user->company->cycle];
+        $params = [$user->team_member->teamFormation->user->company->cycle];
         if( count($existInTeam) > 0 )
         {
             $viewMember_q .= " AND u.id NOT IN ($placeholders)";
@@ -1367,7 +1367,7 @@ class HackathonController extends Controller
             ->where('acceptInvition', 'pending')
             ->first();
            
-            if($isExpired->created_at < $isExpired->created_at->subHours(24)) {
+            if($isExpired && $isExpired->created_at < $isExpired->created_at->subHours(24)) {
                 $isExpired->acceptInvition = 'expired';
                 $isExpired->Name = $user->first_name . ' ' . $user->last_name;
                 $isExpired->TeamMember = 'hackathon';
@@ -1385,6 +1385,8 @@ class HackathonController extends Controller
             }
 
             $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+            
+
             $count_team_q = Team_member::where('team_formation_id', $teams->id)
                 ->get();
             $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
@@ -1397,7 +1399,7 @@ class HackathonController extends Controller
                 }
                 return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
             }
-
+            
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
@@ -1417,18 +1419,6 @@ class HackathonController extends Controller
                     $allteamMember->user_id = $user->id;
                     $allteamMember->save();
                 }
-
-                
-                    $teamformation = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-                    $inviteduser = $teamformation->user_id;
-                    $userInv = User::where('id', $inviteduser)->first();
-                    $updatecompany =Company::where('id', $user->company_id)->first();
-                    if($userInv?->company?->cycle != null){
-                        $updatecompany->cycle = $userInv?->company?->cycle ?? 0;
-                        $updatecompany->step = $userInv?->company?->step ?? 0;
-                        $updatecompany->save();
-                    }
-    
 
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
     }

@@ -316,4 +316,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
      return $this->hasVerifiedEmail();
     }
+
+     public function teamformation()
+    {
+        return $this->hasOne(TeamFormation::class, 'user_id');
+    }
+    public function team_member()
+    {
+        return $this->hasOne(Team_member::class, 'user_id');
+    }
+
 }

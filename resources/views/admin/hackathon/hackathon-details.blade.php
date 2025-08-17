@@ -17,7 +17,7 @@
 if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 'type' => 'static'];
   }
-    if($currentHackathon['cycle_id'] == $user->company?->cycle){
+    if($currentHackathon['cycle_id'] == $user->team_member->teamFormation->user->company->cycle){
       $tabsDatastatic =  [
           // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
           // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
