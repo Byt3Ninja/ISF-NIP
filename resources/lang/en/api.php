@@ -66,4 +66,5 @@ return [
 	'Reply_sent_successfully' => 'Reply Sent Successfully',
 	'Message_not_found' => 'Message Not Found',
 	'No_recipients_found' => 'No Recipients Found',
+	'companyUpdated' => 'Company Profile Updated Successfully',
 ];

@@ -544,6 +544,349 @@
                 ]
             }
         },
+        "/api/company/profile": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update authenticated user's company profile",
+                "description": "Updates the authenticated startup's profile with detailed business info, team, milestones, documents, etc.",
+                "operationId": "updateCompany",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Flick Tech"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "country_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "state_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "sector_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "stage_id": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "categories[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Smart Village"
+                                    },
+                                    "yearsOfOperations": {
+                                        "type": "string",
+                                        "example": "3"
+                                    },
+                                    "productOrService": {
+                                        "type": "string",
+                                        "example": "AI Platform for Startups"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "info@flicktech.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+20123456789"
+                                    },
+                                    "whatsapp": {
+                                        "type": "string",
+                                        "example": "+20123456789"
+                                    },
+                                    "website": {
+                                        "type": "string",
+                                        "example": "https://flicktech.com"
+                                    },
+                                    "googleMapUrl": {
+                                        "type": "string",
+                                        "example": "https://goo.gl/maps/xyz123"
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "example": "https://linkedin.com/company/flicktech"
+                                    },
+                                    "x": {
+                                        "type": "string",
+                                        "example": "https://x.com/flicktech"
+                                    },
+                                    "facebook": {
+                                        "type": "string",
+                                        "example": "https://facebook.com/flicktech"
+                                    },
+                                    "youtube": {
+                                        "type": "string",
+                                        "example": "https://youtube.com/@flicktech"
+                                    },
+                                    "instagram": {
+                                        "type": "string",
+                                        "example": "https://instagram.com/flicktech"
+                                    },
+                                    "tiktok": {
+                                        "type": "string",
+                                        "example": "https://tiktok.com/@flicktech"
+                                    },
+                                    "aboutStartup": {
+                                        "type": "string"
+                                    },
+                                    "aboutProblem": {
+                                        "type": "string"
+                                    },
+                                    "aboutMarketOpportunities": {
+                                        "type": "string"
+                                    },
+                                    "aboutCompetitors": {
+                                        "type": "string"
+                                    },
+                                    "aboutMonetization": {
+                                        "type": "string"
+                                    },
+                                    "aboutChallenges": {
+                                        "type": "string"
+                                    },
+                                    "sustainabilityFeatures[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "EGP"
+                                    },
+                                    "preMoneyEvaluation": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1000000
+                                    },
+                                    "raisedFund": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50000
+                                    },
+                                    "fundingTarget": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 200000
+                                    },
+                                    "targetMarket[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "businessType": {
+                                        "type": "string"
+                                    },
+                                    "financialPlanAttachment": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "teamNumber": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "workingTeamDetails": {
+                                        "type": "string"
+                                    },
+                                    "founders[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email"
+                                                },
+                                                "linkedin": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "shareholders[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "ownership": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "investors[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "investmentType": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "pitchDeckFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "pitchDeckVideoUrl": {
+                                        "type": "string",
+                                        "example": "https://youtube.com/watch?v=xyz"
+                                    },
+                                    "documents[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "businessModel": {
+                                        "type": "string"
+                                    },
+                                    "businessModelDescription": {
+                                        "type": "string"
+                                    },
+                                    "businessPlanAttachment": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "haveStartup": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Yes",
+                                            "No"
+                                        ]
+                                    },
+                                    "CreatedTax": {
+                                        "type": "boolean"
+                                    },
+                                    "CommercialRegister": {
+                                        "type": "string"
+                                    },
+                                    "TaxCard": {
+                                        "type": "string"
+                                    },
+                                    "Country_Register_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Company profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Company"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Company profile updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/countries": {
             "get": {
                 "tags": [
@@ -4103,6 +4446,49 @@
                 }
             }
         },
+        "/api/stages": {
+            "get": {
+                "tags": [
+                    "Stages"
+                ],
+                "summary": "Get all stages",
+                "operationId": "1a7ece5b5899b72b39acbfb53c589cd1",
+                "responses": {
+                    "200": {
+                        "description": "List of stages",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/mentorship-sessions": {
             "post": {
                 "tags": [
@@ -5806,6 +6192,10 @@
         {
             "name": "Sectors",
             "description": "Sectors"
+        },
+        {
+            "name": "Stages",
+            "description": "Stages"
         },
         {
             "name": "Mentorship Sessions",
