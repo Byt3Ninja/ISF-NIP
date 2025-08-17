@@ -5,6 +5,7 @@
       {{ $l == 'en' ? 'Former Submissions Requests' : 'طلبات تقديم الشركات' }}
     </h5>
     <form action="/dashboard/hackathon/details/{{ $id }}" method="GET">
+      <input type="hidden" name="tab" value="submissions-tab">
       <div class="d-flex align-items-center gap-4">
         <div class="media align-items-center col-md-3">
           <select class="form-select select2 " name="step_id" data-placeholder="{{ __('cycles.Select Step') }}">

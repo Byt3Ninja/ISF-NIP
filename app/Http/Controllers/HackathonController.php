@@ -2340,16 +2340,23 @@ class HackathonController extends Controller
                 $company_id = $team->company->id;
                 $publishedEvaluations = 0;
                 $averageScore = 0;
-                
+                $published = true;
+
                 foreach( $judges as $judge )
                 {
                     if( in_array($company_id, $judge->startups->toArray()) )
                     {
                         $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
-                        if ($scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score)) {
-                            $teamJudges[] = $judge;
-                            $totalScore += (float) $scoped_company->score;
-                            $publishedEvaluations++;
+                        if( $scoped_company )
+                        {
+                            if( strtolower($scoped_company->status) != 'published' ) { $published = false; }
+                            if( $published == false ) { continue( 2 ); }
+                            if( strtolower($scoped_company->status) === 'published' && isset( $scoped_company->score ) )
+                            {
+                                $teamJudges[] = $judge;
+                                $totalScore += (float) $scoped_company->score;
+                                $publishedEvaluations++;
+                            }
                         }
                     }
                 }
@@ -2357,15 +2364,20 @@ class HackathonController extends Controller
                 if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
                 $scoped_teams[$index]->score = $averageScore;
                 $scoped_teams[$index]->judges = $teamJudges;
+                $scoped_teams[$index]->published = $published;
             }
             $output = $output->merge($scoped_teams);
         }
+        $output = $output->where('published', true)->filter(function($item) {
+            return count( $item->judges ) > 0;
+        })->values();
         $winnersData = $output->map(function( $team ) {
             return [
                 'id' => $team->id,
                 'team' => $team->name,
                 'step' => $team->step_title,
-                'project' => $team->project->name ?? '-',
+                // 'project' => $team->project->name ?? '-',
+                'project' => $team->project->name ?? ( $team->company->name ?? '-' ),
                 'score' => $team->score,
                 'judges' => $team->judges,
                 'rank' => $team->project->winner ?? '',
