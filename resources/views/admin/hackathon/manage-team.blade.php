@@ -268,7 +268,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             </ul>
             </div>
             <!-- Team Recruitment Section -->
-            @if($leaderOrnot->count() > 0 && $members <= $maxMembers)
+            @if($leaderOrnot->count() > 0 && $members < $maxMembers)
             <div class="card bg-label-light border-0 mb-4">
               <div class="card-body">
                 <h6 class="mb-3">
