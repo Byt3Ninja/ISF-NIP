@@ -353,7 +353,7 @@
                 </p>
             </div>
             <div class="col-auto">
-                <a href="{{ route('admin.notification-templates.index') }}" class="btn btn-secondary">
+                <a href="{{ route('notification-templates.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>
                     {{ __('notification_templates.back_to_templates', [], 'Back to Templates') }}
                 </a>
@@ -385,7 +385,7 @@
             </div>
         @endif
         
-        <form id="template-form" action="{{ route('admin.notification-templates.store') }}" method="POST">
+        <form id="template-form" action="{{ route('notification-templates.store') }}" method="POST">
             @csrf
             
             <!-- Basic Information Card -->
@@ -611,7 +611,7 @@
             <!-- Action Buttons -->
             <div class="btn-toolbar">
                 <div>
-                    <a href="{{ route('admin.notification-templates.index') }}" class="btn btn-secondary me-2">
+                    <a href="{{ route('notification-templates.index') }}" class="btn btn-secondary me-2">
                         <i class="fas fa-arrow-left me-1"></i>
                         {{ __('notification_templates.back_to_templates', [], 'Back') }}
                     </a>
@@ -768,7 +768,7 @@ $(document).ready(function() {
 
 function loadVariables() {
     console.log('Loading variables...');
-    $.get('{{ route("admin.notification-templates.variables") }}')
+    $.get('{{ route("notification-templates.variables") }}')
         .done(function(variables) {
             console.log('Variables received:', variables);
             

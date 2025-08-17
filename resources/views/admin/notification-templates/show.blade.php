@@ -10,10 +10,10 @@
                 <div class="card-header">
                     <h3 class="card-title">{{ $notificationTemplate->title }}</h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.notification-templates.edit', $notificationTemplate) }}" class="btn btn-warning">
+                        <a href="{{ route('notification-templates.edit', $notificationTemplate) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <a href="{{ route('admin.notification-templates.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('notification-templates.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Templates
                         </a>
                     </div>
@@ -112,7 +112,7 @@
                                     <ul class="list-unstyled">
                                         @foreach($notificationTemplate->childTemplates as $child)
                                             <li>
-                                                <a href="{{ route('admin.notification-templates.show', $child) }}">
+                                                <a href="{{ route('notification-templates.show', $child) }}">
                                                     {{ $child->name }} (v{{ $child->version }})
                                                 </a>
                                             </li>
@@ -162,7 +162,7 @@
                     <button type="button" class="btn btn-info" onclick="cloneTemplate({{ $notificationTemplate->id }})">
                         <i class="fas fa-copy"></i> Clone Template
                     </button>
-                    <a href="{{ route('admin.notification-templates.edit', $notificationTemplate) }}" class="btn btn-warning">
+                    <a href="{{ route('notification-templates.edit', $notificationTemplate) }}" class="btn btn-warning">
                         <i class="fas fa-edit"></i> Edit Template
                     </a>
                 </div>

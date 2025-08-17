@@ -646,7 +646,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     /* 
      Templates Routes */
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->group(function () {
         // Define specific routes BEFORE resource routes to avoid conflicts
         Route::get('notification-templates/variables', 'NotificationTemplateController@getVariables')->name('notification-templates.variables');
         Route::get('notification-templates/{notificationTemplate}/preview', 'NotificationTemplateController@preview')->name('notification-templates.preview');

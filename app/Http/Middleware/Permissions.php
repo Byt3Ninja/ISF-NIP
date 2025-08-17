@@ -68,7 +68,7 @@ class Permissions
                 {
                     if( $this->match( $route ) && !$user->ableTo( $permission ) )
                     {
-                        abort('402', $permission);
+                        abort('401', $permission);
                     }
                 }
             }

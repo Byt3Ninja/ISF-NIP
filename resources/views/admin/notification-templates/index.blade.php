@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Notification Templates</h3>
-                    <a href="{{ route('admin.notification-templates.create') }}" class="btn btn-primary">
+                    <a href="{{ route('notification-templates.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Create Template
                     </a>
                 </div>
@@ -87,11 +87,11 @@
                                     <td>{{ $template->created_at->format('M d, Y') }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.notification-templates.show', $template) }}" 
+                                            <a href="{{ route('notification-templates.show', $template) }}" 
                                                class="btn btn-sm btn-info" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('admin.notification-templates.edit', $template) }}" 
+                                            <a href="{{ route('notification-templates.edit', $template) }}" 
                                                class="btn btn-sm btn-warning" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -204,7 +204,7 @@ $(document).ready(function() {
         if (status) params.append('active', status);
         if (search) params.append('search', search);
         
-        window.location.href = '{{ route("admin.notification-templates.index") }}?' + params.toString();
+        window.location.href = '{{ route("notification-templates.index") }}?' + params.toString();
     }
 });
 

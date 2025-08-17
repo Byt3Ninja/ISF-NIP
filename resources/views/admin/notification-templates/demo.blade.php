@@ -285,11 +285,11 @@
                         <i class="fas fa-plus me-2"></i>
                         {{ __('notification_templates.create_samples', [], 'Create Sample Templates') }}
                     </button>
-                    <a href="{{ route('admin.notification-templates.create') }}" class="btn btn-demo btn-primary">
+                    <a href="{{ route('notification-templates.create') }}" class="btn btn-demo btn-primary">
                         <i class="fas fa-edit me-2"></i>
                         {{ __('notification_templates.create_new', [], 'Create New Template') }}
                     </a>
-                    <a href="{{ route('admin.notification-templates.index') }}" class="btn btn-demo btn-info">
+                    <a href="{{ route('notification-templates.index') }}" class="btn btn-demo btn-info">
                         <i class="fas fa-list me-2"></i>
                         {{ __('notification_templates.view_all', [], 'View All Templates') }}
                     </a>
@@ -349,7 +349,7 @@
                                     <i class="fas fa-paper-plane me-1"></i>
                                     {{ __('notification_templates.test_send') }}
                                 </button>
-                                <a href="{{ route('admin.notification-templates.edit', $template) }}" class="btn btn-demo btn-warning btn-sm">
+                                <a href="{{ route('notification-templates.edit', $template) }}" class="btn btn-demo btn-warning btn-sm">
                                     <i class="fas fa-edit me-1"></i>
                                     {{ __('notification_templates.edit') }}
                                 </a>

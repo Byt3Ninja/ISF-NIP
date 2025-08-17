@@ -112,7 +112,7 @@ class NotificationTriggerController extends Controller
             return response()->json($trigger->load(['template', 'creator']), 201);
         }
 
-        return redirect()->route('admin.notification-triggers.show', $trigger)
+        return redirect()->route('notification-triggers.show', $trigger)
             ->with('success', 'Notification trigger created successfully.');
     }
 
@@ -181,7 +181,7 @@ class NotificationTriggerController extends Controller
             return response()->json($notificationTrigger->load(['template', 'creator']));
         }
 
-        return redirect()->route('admin.notification-triggers.show', $notificationTrigger)
+        return redirect()->route('notification-triggers.show', $notificationTrigger)
             ->with('success', 'Notification trigger updated successfully.');
     }
 
@@ -196,7 +196,7 @@ class NotificationTriggerController extends Controller
             return response()->json(['message' => 'Notification trigger deleted successfully.']);
         }
 
-        return redirect()->route('admin.notification-triggers.index')
+        return redirect()->route('notification-triggers.index')
             ->with('success', 'Notification trigger deleted successfully.');
     }
 
@@ -253,7 +253,7 @@ class NotificationTriggerController extends Controller
             return response()->json($clonedTrigger->load(['template', 'creator']), 201);
         }
 
-        return redirect()->route('admin.notification-triggers.edit', $clonedTrigger)
+        return redirect()->route('notification-triggers.edit', $clonedTrigger)
             ->with('success', 'Notification trigger cloned successfully. You can now modify it.');
     }
 

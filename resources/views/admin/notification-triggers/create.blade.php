@@ -10,13 +10,13 @@
                 <div class="card-header">
                     <h3 class="card-title mb-0">Create Notification Trigger</h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.notification-triggers.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <a href="{{ route('notification-triggers.index') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Back to Triggers
                         </a>
                     </div>
                 </div>
 
-                <form action="{{ route('admin.notification-triggers.store') }}" method="POST">
+                <form action="{{ route('notification-triggers.store') }}" method="POST">
                     @csrf
                     <div class="card-body">
                         <div class="row">
@@ -187,7 +187,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Create Trigger
                         </button>
-                        <a href="{{ route('admin.notification-triggers.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('notification-triggers.index') }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                     </div>

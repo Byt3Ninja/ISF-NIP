@@ -5,26 +5,26 @@
 @section('content')
 <div class="container-fluid py-3">
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <h1 class="h3 mb-0">{{ $notificationTrigger->name ?? __('admin.notification_triggers.show') }}</h1>
+        <h1 class="h3 mb-0">{{ $notificationTrigger->name ?? __('notification_triggers.show') }}</h1>
         <div class="btn-group" role="group" aria-label="Actions">
-            <a href="{{ route('admin.notification-triggers.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('notification-triggers.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> {{ __('admin.back') }}</a>
-            <a href="{{ route('admin.notification-triggers.edit', $notificationTrigger) }}" class="btn btn-primary">
+            <a href="{{ route('notification-triggers.edit', $notificationTrigger) }}" class="btn btn-primary">
                 <i class="bi bi-pencil"></i> {{ __('admin.edit') }}</a>
-            <form action="{{ route('admin.notification-triggers.clone', $notificationTrigger) }}" method="POST" class="d-inline">
+            <form action="{{ route('notification-triggers.clone', $notificationTrigger) }}" method="POST" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-outline-primary">
                     <i class="bi bi-files"></i> {{ __('admin.clone') }}
                 </button>
             </form>
-            <form action="{{ route('admin.notification-triggers.toggle-active', $notificationTrigger) }}" method="POST" class="d-inline">
+            <form action="{{ route('notification-triggers.toggle-active', $notificationTrigger) }}" method="POST" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-{{ $notificationTrigger->is_active ? 'warning' : 'success' }}">
                     <i class="bi bi-toggle-{{ $notificationTrigger->is_active ? 'off' : 'on' }}"></i>
                     {{ $notificationTrigger->is_active ? __('admin.deactivate') : __('admin.activate') }}
                 </button>
             </form>
-            <form action="{{ route('admin.notification-triggers.test', $notificationTrigger) }}" method="POST" class="d-inline">
+            <form action="{{ route('notification-triggers.test', $notificationTrigger) }}" method="POST" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-outline-success">
                     <i class="bi bi-send"></i> {{ __('admin.test_send') }}
@@ -59,7 +59,7 @@
                         <dt class="col-sm-4">{{ __('admin.template') }}</dt>
                         <dd class="col-sm-8">
                             @if($notificationTrigger->template)
-                                <a href="{{ route('admin.notification-templates.show', $notificationTrigger->template) }}">
+                                <a href="{{ route('notification-templates.show', $notificationTrigger->template) }}">
                                     {{ $notificationTrigger->template->name }}
                                 </a>
                             @else
@@ -94,11 +94,11 @@
                     <p class="text-muted small">{{ __('admin.quick_actions_help') }}</p>
                     <ul class="list-unstyled mb-0">
                         <li class="mb-2">
-                            <a class="link-primary" href="{{ route('admin.notification-triggers.edit', $notificationTrigger) }}">{{ __('admin.edit_this_trigger') }}</a>
+                            <a class="link-primary" href="{{ route('notification-triggers.edit', $notificationTrigger) }}">{{ __('admin.edit_this_trigger') }}</a>
                         </li>
                         @if($notificationTrigger->template)
                         <li class="mb-2">
-                            <a class="link-primary" href="{{ route('admin.notification-templates.show', $notificationTrigger->template) }}">{{ __('admin.view_related_template') }}</a>
+                            <a class="link-primary" href="{{ route('notification-templates.show', $notificationTrigger->template) }}">{{ __('admin.view_related_template') }}</a>
                         </li>
                         @endif
                     </ul>
