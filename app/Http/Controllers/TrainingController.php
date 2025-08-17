@@ -780,7 +780,6 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@editsession: ' . $e->getMessage());
-			dd($e->getMessage());
 		}
 	}
 

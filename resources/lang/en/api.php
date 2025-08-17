@@ -58,4 +58,12 @@ return [
 	'programs_not_found' => 'Programs Not Found',
 	'program_not_found' => 'Program Not Found',
 	'stepsNotFound' => 'Steps Not Found',
+	'message_status_updated' => 'Message Status Updated Successfully',
+	'Message_star_status_updated' => 'Message Star Status Updated Successfully',
+	'Draft_saved_successfully' => 'Draft Saved Successfully',
+	'Message_sent_successfully' => 'Message Sent Successfully',
+	'Draft_saved_successfully' => 'Draft Saved Successfully',
+	'Reply_sent_successfully' => 'Reply Sent Successfully',
+	'Message_not_found' => 'Message Not Found',
+	'No_recipients_found' => 'No Recipients Found',
 ];
