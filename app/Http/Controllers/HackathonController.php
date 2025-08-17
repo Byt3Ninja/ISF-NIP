@@ -1392,7 +1392,7 @@ class HackathonController extends Controller
             $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
 
             $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
-            if($step->count_team_number < $count_team){
+            if($step->count_team_number <= $count_team){
                 foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
                     $member->acceptInvition = 'rejected';
                     $member->save();

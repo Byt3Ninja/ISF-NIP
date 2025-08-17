@@ -16,7 +16,7 @@
         <div class="d-flex justify-content-between align-items-start w-100">
           <div class="d-flex align-items-center gap-2 mb-1">
             <h5 class="m-0 fw-bold text-white">
-              {{ $newhackathon->title }}
+              {{ $newhackathon?->title }}
             </h5>
             <div class="px-2 py-1 rounded-pill small text-black bg-light bg-opacity-25 backdrop-blur-sm">
               {{ $l == 'ar' ? 'جديد' : 'New' }}
@@ -31,12 +31,12 @@
 
         <!-- Description -->
         <p class="text-white-90 mb-3">
-          {{ $l == 'ar' ? 'انضم إلى هاكاثون '.$newhackathon->title.' ونافس المبتكرين من جميع أنحاء العالم لبناء المستقبل باستخدام '.$newhackathon->title.' .' : 'Join our '.$newhackathon->title.' hackathon and compete with innovators from around the world to build the future with '.$newhackathon->title.'.' }}
+          {{ $l == 'ar' ? 'انضم إلى هاكاثون '.$newhackathon?->title.' ونافس المبتكرين من جميع أنحاء العالم لبناء المستقبل باستخدام '.$newhackathon?->title.' .' : 'Join our '.$newhackathon?->title.' hackathon and compete with innovators from around the world to build the future with '.$newhackathon?->title.'.' }}
         </p>
 
         <!-- Buttons -->
         <div class="d-flex gap-2">
-          <a href="/dashboard/hackathon/details/{{ $newhackathon->id }}" class="btn btn-sm btn-light text-primary shadow-sm">
+          <a href="/dashboard/hackathon/details/{{ $newhackathon?->id }}" class="btn btn-sm btn-light text-primary shadow-sm">
             {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
           </a>
           <a href="/dashboard/hackathon" class="btn btn-sm btn-outline-light">
