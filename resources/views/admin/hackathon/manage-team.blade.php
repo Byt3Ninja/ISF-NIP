@@ -717,13 +717,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
             <select class="form-select" id="Region" name="Region">
               <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
-              <option value="{{ __('admin.AL_Madinah_AL_Munawwarah') }}" {{ $team_Formation_raw->first()->tf_region == __('admin.AL_Madinah_AL_Munawwarah') ? 'selected' : '' }}>
+              <option value="AL_Madinah_AL_Munawwarah" {{ $team_Formation_raw->first()->tf_region == 'AL_Madinah_AL_Munawwarah' ? 'selected' : '' }}>
                 {{ __('admin.AL_Madinah_AL_Munawwarah') }}
               </option>
-              <option value="{{ __('admin.Al_Ahsa') }}" {{ $team_Formation_raw->first()->tf_region == __('admin.Al_Ahsa') ? 'selected' : '' }}>
+              <option value="Al_Ahsa" {{ $team_Formation_raw->first()->tf_region == 'Al_Ahsa' ? 'selected' : '' }}>
                 {{ __('admin.Al_Ahsa') }}
               </option>
-              <option value="{{ __('admin.Asir') }}" {{ $team_Formation_raw->first()->tf_region == __('admin.Asir') ? 'selected' : '' }}>
+              <option value="Asir" {{ $team_Formation_raw->first()->tf_region == 'Asir' ? 'selected' : '' }}>
                 {{ __('admin.Asir') }}
               </option>
              
