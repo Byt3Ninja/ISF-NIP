@@ -87,7 +87,7 @@ class NotificationTemplateController extends Controller
             return response()->json($template->load('creator'), 201);
         }
 
-        return redirect()->route('admin.notification-templates.index')
+        return redirect()->route('notification-templates.index')
             ->with('success', 'Notification template created successfully.');
     }
 
@@ -148,7 +148,7 @@ class NotificationTemplateController extends Controller
             return response()->json($notificationTemplate->load('creator'));
         }
 
-        return redirect()->route('admin.notification-templates.index')
+        return redirect()->route('notification-templates.index')
             ->with('success', 'Notification template updated successfully.');
     }
 
@@ -163,7 +163,7 @@ class NotificationTemplateController extends Controller
             return response()->json(['message' => 'Template deleted successfully.']);
         }
 
-        return redirect()->route('admin.notification-templates.index')
+        return redirect()->route('notification-templates.index')
             ->with('success', 'Notification template deleted successfully.');
     }
 
@@ -221,7 +221,7 @@ class NotificationTemplateController extends Controller
             return response()->json($clonedTemplate->load('creator'), 201);
         }
 
-        return redirect()->route('admin.notification-templates.edit', $clonedTemplate)
+        return redirect()->route('notification-templates.edit', $clonedTemplate)
             ->with('success', 'Template cloned successfully. You can now modify it.');
     }
 

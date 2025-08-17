@@ -283,13 +283,13 @@ fetch('/api/notifications/send', {
                         
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a href="{{ route('admin.notification-templates.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('notification-templates.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-1"></i>
                                 {{ __('notification_templates.back_to_templates', [], 'Back to Templates') }}
                             </a>
                             
                             <div class="d-flex gap-2">
-                                <a href="{{ route('admin.notification-templates.create') }}" class="btn btn-success">
+                                <a href="{{ route('notification-templates.create') }}" class="btn btn-success">
                                     <i class="fas fa-plus me-1"></i>
                                     {{ __('notification_templates.create_template', [], 'Create New Template') }}
                                 </a>
@@ -459,7 +459,7 @@ The Growth Labs Team</p>`
     localStorage.setItem('template_example_data', JSON.stringify(templateData));
     
     // Redirect to create form
-    window.location.href = '{{ route("admin.notification-templates.create") }}?example=welcome';
+    window.location.href = '{{ route("notification-templates.create") }}?example=welcome';
 }
 </script>
 @endsection

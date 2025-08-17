@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title mb-0">Notification Triggers</h3>
-                    <a href="{{ route('admin.notification-triggers.create') }}" class="btn btn-primary">
+                    <a href="{{ route('notification-triggers.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Create New Trigger
                     </a>
                 </div>
@@ -67,7 +67,7 @@
                                             <span class="badge badge-info">{{ $availableEvents[$trigger->event] ?? $trigger->event }}</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('admin.notification-templates.show', $trigger->template) }}" class="text-decoration-none">
+                                            <a href="{{ route('notification-templates.show', $trigger->template) }}" class="text-decoration-none">
                                                 {{ $trigger->template->title }}
                                             </a>
                                         </td>
@@ -89,11 +89,11 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('admin.notification-triggers.show', $trigger) }}" 
+                                                <a href="{{ route('notification-triggers.show', $trigger) }}" 
                                                    class="btn btn-sm btn-outline-info" title="View">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('admin.notification-triggers.edit', $trigger) }}" 
+                                                <a href="{{ route('notification-triggers.edit', $trigger) }}" 
                                                    class="btn btn-sm btn-outline-primary" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -120,7 +120,7 @@
                                     <tr>
                                         <td colspan="7" class="text-center text-muted py-4">
                                             <i class="fas fa-bell-slash fa-3x mb-3"></i><br>
-                                            No notification triggers found. <a href="{{ route('admin.notification-triggers.create') }}">Create your first trigger</a>.
+                                            No notification triggers found. <a href="{{ route('notification-triggers.create') }}">Create your first trigger</a>.
                                         </td>
                                     </tr>
                                 @endforelse

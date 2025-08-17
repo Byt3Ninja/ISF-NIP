@@ -6712,5 +6712,324 @@
             ]
         }
     ]
+
+
+    },
+    {
+        "name":"Notification",
+        "description":"Notification Templates",
+        "permissions":[
+            {
+                "name":"notification-templates.index",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+                        {
+                "name":"notification-templates.create",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+                        {
+                "name":"notification-templates.store",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+                        {
+                "name":"notification-templates.show",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+                                    {
+                "name":"notification-templates.edit",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                                    {
+                "name":"notification-templates.update",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                                    {
+                "name":"notification-templates.destroy",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                                    {
+                "name":"notification-templates.variables",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+                                                {
+                "name":"notification-templates.preview",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+                                                {
+                "name":"notification-templates.clone",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+            {
+                "name":"notification-templates.test-send",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+
+            
+        ]
+    },
+    {
+        "name":"notification triggers",
+        "description":"Notification Triggers",
+        "permissions":[
+            {
+                "name":"notification-triggers.events",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+                        {
+                "name":"notification-triggers.recipient-types",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                        {
+                "name":"notification-triggers.sample-conditions",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                        {
+                "name":"notification-triggers.toggle-active",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                        {
+                "name":"notification-triggers.clone",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+                        {
+                "name":"notification-triggers.test",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+                                    {
+                "name":"notification-triggers.show",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+                                    {
+                "name":"notification-triggers.index",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+                                    {
+                "name":"notification-triggers.create",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+                                    {
+                "name":"notification-triggers.store",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+                                                {
+                "name":"notification-triggers.edit",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+                                                {
+                "name":"notification-triggers.update",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+
+
+
+                                                {
+                "name":"notification-triggers.destroy",
+                "description":"List Notification Templates",
+                "guard_name":"web",
+                "is_core":0,
+                 "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            }
+        ]
     }
+
 ]
