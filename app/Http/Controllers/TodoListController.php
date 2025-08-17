@@ -55,8 +55,8 @@ class TodoListController extends Controller
         $todoList->status = 'To Do';
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
-        $todoList->cycle_id = $user->company->cycle;
-        $todoList->step_id = $user->company->step;
+        $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;
+        $todoList->step_id = $user->team_member->teamFormation->user->company->step;
         $todoList->user_id = $user->id;
         $todoList->team_formation_id = $team_member[0]->team_formation_id;
         $todoList->team_member_id = $team_member[0]->id;
@@ -115,8 +115,8 @@ class TodoListController extends Controller
         $todoList->status = 'To Do';
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
-        $todoList->cycle_id = $user->company->cycle;
-        $todoList->step_id = $user->company->step;
+        $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;
+        $todoList->step_id = $user->team_member->teamFormation->user->company->step;
         $todoList->user_id = $user->id;
         $todoList->save();
 
