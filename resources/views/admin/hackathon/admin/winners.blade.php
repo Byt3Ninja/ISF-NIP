@@ -49,7 +49,7 @@
             </div>
             <div class="col-md-2 col-lg-2 col-sm-12">
               <div class="dropdown">
-                <a class="btn btn-primary dropdown-toggle w-100" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Export Results</a>
+                <a class="btn btn-primary dropdown-toggle w-100" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $l == 'en' ? 'Export Results' : 'تصدير نتايج التحكيم' }}</a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" target="_blank" href='{{ URL::to("dashboard/hackathon/dashboard/winners/$hackathon->id/export?type=excel") }}'><i class="fas fa-fw fa-sm fa-file-excel me-2"></i> Excel</a></li>
                   <li><a class="dropdown-item" target="_blank" href='{{ URL::to("dashboard/hackathon/dashboard/winners/$hackathon->id/export?type=csv") }}'><i class="fas fa-fw fa-sm fa-file-csv me-2"></i> CSV</a></li>

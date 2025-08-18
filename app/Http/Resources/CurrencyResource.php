@@ -18,6 +18,10 @@ class CurrencyResource extends JsonResource
             'id' => $this->id,
             'currencyCode' => $this->currency_code,
             'currencyName' => $this->currency_name,
+            'currencySymbol' => $this->currency_symbol,
+            'exchangeRateToUsd' => $this->exchange_rate_to_usd,
+            'enabled' => (bool) $this->enabled,
+            'flag' => $this->flag ? asset($this->flag) : null,
         ];
     }
 }
