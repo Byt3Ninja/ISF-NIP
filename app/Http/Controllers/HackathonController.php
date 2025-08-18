@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
+use App\Exports\WinnersExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class HackathonController extends Controller
 {
@@ -2298,97 +2300,11 @@ class HackathonController extends Controller
     public function viewHackathonWinners( $id )
     {
         $l = app()->getLocale();
-        $cycle = DB::table('cycles as c')
-            ->select([
-                'c.id',
-                'c.title',
-                'c.description',
-                'c.start',
-                'c.end',
-                'c.winners_announcement',
-                'o.id AS organization_id',
-                'o.name_ar AS organization_name_ar',
-                'o.name_en AS organization_name_en',
-            ])
-            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
-            ->where('c.type', 'Hackathon')
-            ->whereNull('c.deleted_at')
-            ->where('c.id', $id)
-            ->first();
+        $cycle = Cycle::getHackathon( $id );
 
         if( empty( $cycle ) ) { return abort(404); }
         $teams = TeamFormation::teams( $id );
-        $steps_ids = $teams->whereNotNull('step')->pluck('step')->unique()->toArray();
-        $output = collect([]);
-        foreach( $steps_ids as $stepId )
-        {
-            $check = ScreeningEvaluation::where('step_id', $stepId)->first();
-            if( empty( $check ) )
-			{
-				$evaluation = new ScreeningEvaluation();
-				$evaluation->step_id = $stepId;
-				$evaluation->save();
-			}
-            $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
-            $metadata = ScreeningEvaluationResults::metadata( $stepId );
-            $judges = $metadata['judges'];
-            $judges = $judges->map(function( $item ) {
-                $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
-                return $item;
-            });
-
-            $scoped_teams = $teams->where('step', $stepId)->values();
-            foreach( $scoped_teams as $index => $team )
-            {
-                $totalScore = 0;
-                $teamJudges = [];
-                $company_id = $team->company->id;
-                $publishedEvaluations = 0;
-                $averageScore = 0;
-                $published = true;
-
-                foreach( $judges as $judge )
-                {
-                    if( in_array($company_id, $judge->startups->toArray()) )
-                    {
-                        $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
-                        if( $scoped_company )
-                        {
-                            if( strtolower($scoped_company->status) != 'published' ) { $published = false; }
-                            if( $published == false ) { continue( 2 ); }
-                            if( strtolower($scoped_company->status) === 'published' && isset( $scoped_company->score ) )
-                            {
-                                $teamJudges[] = $judge;
-                                $totalScore += (float) $scoped_company->score;
-                                $publishedEvaluations++;
-                            }
-                        }
-                    }
-                }
-
-                if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
-                $scoped_teams[$index]->score = $averageScore;
-                $scoped_teams[$index]->judges = $teamJudges;
-                $scoped_teams[$index]->published = $published;
-            }
-            $output = $output->merge($scoped_teams);
-        }
-        $output = $output->where('published', true)->filter(function($item) {
-            return count( $item->judges ) > 0;
-        })->values();
-        $winnersData = $output->map(function( $team ) {
-            return [
-                'id' => $team->id,
-                'team' => $team->name,
-                'step' => $team->step_title,
-                // 'project' => $team->project->name ?? '-',
-                'project' => $team->project->name ?? ( $team->company->name ?? '-' ),
-                'score' => $team->score,
-                'judges' => $team->judges,
-                'rank' => $team->project->winner ?? '',
-                'leader' => $team->members->where('isLeader', 1)->first(),
-            ];
-        });
+        $winnersData = TeamFormation::winners( $teams );
 
         $now = now();
         $start = Carbon::parse($cycle->start);
@@ -2415,6 +2331,22 @@ class HackathonController extends Controller
         $hackathon->organization->name =  $cycle->{'organization_name_' . $l};
 
         return view('admin.hackathon.admin.winners', compact('teams', 'winnersData', 'hackathon'));
+    }
+
+    public function exportHackathonWinners( $id )
+    {
+        $tail = 'xlsx';
+        $request = request();
+        $type = $request->has('type') ? ( in_array( $request->input('type', 'excel'), ['csv', 'excel'] ) ? $request->input('type', 'excel') : 'excel' ) : 'excel';
+        if( $type == 'csv' ) { $tail = 'csv'; } elseif( $type == 'excel' ) { $tail = 'xlsx'; } else { return abort(404); }
+        $cycle = Cycle::getHackathon( $id );
+
+        if( empty( $cycle ) ) { return abort(404); }
+        $teams = TeamFormation::teams( $id );
+        $winnersData = TeamFormation::winners( $teams );
+
+        $date = date('Y_m_d_H_i_s');
+        return Excel::download(new WinnersExport( $winnersData ), 'winners_report_' . $date . '.' . $tail);
     }
 
     public function publishHackathonWinners( Request $request, $id )

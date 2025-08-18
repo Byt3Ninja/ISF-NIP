@@ -38,13 +38,22 @@
       <div class="card">
         <div class="card-body">
           <div class="row">
-            <div class="col-12">
+            <div class="col-md-10 col-lg-10 col-sm-12">
               <div class="form-floating">
                 <select class="form-select" name="announcementStatus" id="announcementStatus" aria-label="Announcement Status">
 								  <option value="0" {{ $hackathon->announcement == false ? 'selected' : '' }}>{{ $l == 'en' ? 'Not Announced' : 'لم يتم الاعلان' }}</option>
 								  <option value="1" {{ $hackathon->announcement == true ? 'selected' : '' }}>{{ $l == 'en' ? 'Announced' : 'تم الاعلان' }}</option>
 							  </select>
 							  <label for="announcementStatus">{{ $l == 'en' ? 'Announcement Status' : 'حالة الاعلان' }}</label>
+              </div>
+            </div>
+            <div class="col-md-2 col-lg-2 col-sm-12">
+              <div class="dropdown">
+                <a class="btn btn-primary dropdown-toggle w-100" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Export Results</a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" target="_blank" href='{{ URL::to("dashboard/hackathon/dashboard/winners/$hackathon->id/export?type=excel") }}'><i class="fas fa-fw fa-sm fa-file-excel me-2"></i> Excel</a></li>
+                  <li><a class="dropdown-item" target="_blank" href='{{ URL::to("dashboard/hackathon/dashboard/winners/$hackathon->id/export?type=csv") }}'><i class="fas fa-fw fa-sm fa-file-csv me-2"></i> CSV</a></li>
+                </ul>
               </div>
             </div>
           </div>
@@ -74,7 +83,7 @@
                     <td class="px-4 py-2">{{ $winner['step'] }}</td>
                     <td class="px-4 py-2">
                       @foreach( $winner['judges'] as $judge )
-                        {{ $judge->name }} @if( !$loop->last ) , @endif
+                        <div>( {{ $judge->score }} ) {{ $judge->name }}</div>
                       @endforeach
                     </td>
                     <td class="px-4 py-2">{{ $winner['score'] }}</td>

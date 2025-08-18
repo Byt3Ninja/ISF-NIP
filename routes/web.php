@@ -130,6 +130,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
     // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
     Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
+    Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners');
     Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
     Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
     Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
