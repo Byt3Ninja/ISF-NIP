@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StepController;
@@ -99,7 +100,32 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/trash', [MessageController::class, 'moveToTrash']);
     });
     Route::get('/stages', [StageController::class, 'index']);
+
+
+    // جروبات
+    Route::post('/groups', [ChatController::class, 'createGroup']);
+    Route::post('/groups/{groupId}/add-user', [ChatController::class, 'addUser']);
+    Route::post('/groups/{groupId}/remove-user', [ChatController::class, 'removeUser']);
+    Route::post('/groups/{groupId}/exit', [ChatController::class, 'exitGroup']);
+    Route::delete('/groups/{groupId}/delete', [ChatController::class, 'deleteGroup']);
+    Route::get('/my-groups', [ChatController::class, 'myGroups']);
+    
+
+
+
+    // wirechat messages
+    Route::get('/wirechat/messages', [ChatController::class, 'messages']);
+    Route::post('/groups/{groupId}/messages', [ChatController::class, 'sendMessage']);
+    Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
+
+    // Search Users
+    Route::get('/users/search', [ChatController::class, 'searchUser']);
+    
 });
+
+
+
+
 
 
 

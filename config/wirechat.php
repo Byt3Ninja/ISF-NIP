@@ -16,7 +16,7 @@ return [
     | migrations generate UUID-based keys or unsigned big integers.
     |
     */
-    'uuids' => true,
+    'uuids' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ return [
     | start a new conversation)
     |
     */
-    'user_model' => \App\User::class,
+    'user_model' => \App\Models\User::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -103,7 +103,7 @@ return [
     | the dynamic chat content.
     |
     */
-    'layout' => 'wirechat::layouts.bootstrap-wirechat',
+    'layout' => 'wirechat::layouts.app',
 
     /*
     |--------------------------------------------------------------------------
