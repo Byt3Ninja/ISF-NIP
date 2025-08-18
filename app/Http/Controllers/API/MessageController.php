@@ -71,7 +71,7 @@ class MessageController extends Controller
             'receiver'  => $request->userId,
             'cycle_id'  => $request->cycleId,
             'subject'   => $request->subject,
-            'message'   => $request->title,
+            'message'   => $request->message,
             'drafts'    => 1,
             'created_at'=> now(),
             'updated_at'=> now()
@@ -80,8 +80,8 @@ class MessageController extends Controller
         $data = [
             'id'        => $draftId,
             'type'      => 'draft',
-            'title'     => $request->title,
             'subject'   => $request->subject,
+            'message'     => $request->message,
             'createdBy' => $sender->name,
             'createdAt' => now()->toISOString(),
             'status'    => 'unread',
@@ -121,7 +121,7 @@ class MessageController extends Controller
             'sender'    => $senderId,
             'receiver'  => $receiver->id,
             'subject'   => $request->subject,
-            'message'   => $request->title,
+            'message'   => $request->message,
             'read'      => 0,
             'starred'   => 0,
             'created_at'=> now(),
@@ -131,8 +131,8 @@ class MessageController extends Controller
         $insertedMessages[] = [
             'id'        => $messageId,
             'type'      => 'outbox',
-            'title'     => $request->message,
             'subject'   => $request->subject,
+            'message'     => $request->message,
             'createdBy' => $sender->name,
             'createdAt' => now()->toISOString(),
             'status'    => 'unread',
@@ -400,8 +400,8 @@ class MessageController extends Controller
             return [
                 'id'        => $draft->id,
                 'type'      => 'draft',
-                'title'     => $draft->message,
                 'subject'   => $draft->subject,
+                'message'     => $draft->message,
                 'createdBy' => $user->name,
                 'createdAt' => Carbon::parse($draft->created_at)->toISOString(),
                 'status'    => 'unread',
@@ -466,8 +466,8 @@ class MessageController extends Controller
         return [
             'id'        => $msg->id,
             'type'      => $msg->sender == $user->id ? 'outbox' : 'inbox',
-            'title'     => $msg->message,
             'subject'   => $msg->subject,
+            'message'     => $msg->message,
             'createdBy' => $msg->sender == $user->id ? $user->name : optional($msg->senderUser)->name,
             'createdAt' => $msg->created_at->toISOString(),
             'status'    => $msg->read ? 'read' : 'unread',
@@ -554,8 +554,8 @@ public function show($id)
     $data = [
         'id'        => $message->id,
         'box'       => $message->sender == $user->id ? 'outbox' : 'inbox',
-        'title'     => $message->message,
         'subject'   => $message->subject,
+        'message'     => $message->message,
         'from'      => [
             'id'   =>  $message->sender,
             'name' => optional(User::find($message->sender))->first_name_en . ' ' . optional(User::find($message->sender))->last_name_en

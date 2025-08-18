@@ -26,8 +26,8 @@ class StoreMessageRequest extends FormRequest
     {
         return [
             'userTypeValue' => 'required|in:0,1,2,3',
-            'title'         => 'required|string|max:255',
             'subject'       => 'nullable|string',
+            'message'         => 'required|string|max:255',
             'draft'         => 'boolean',
             'cycleId'       => 'nullable|integer|exists:cycles,id',
         ];
