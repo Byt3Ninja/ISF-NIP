@@ -901,8 +901,6 @@ class CyclesController extends Controller
 
     public function saveForm(Request $request)
     {
-
-       
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
@@ -1004,7 +1002,7 @@ class CyclesController extends Controller
         }
 
 
-        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
+        return redirect(url('/dashboard'))->with(['msg' => 'formSubmittedSuccessfully', 'class' => 'success']);
     }
 
     public function testSend(Request $request)
