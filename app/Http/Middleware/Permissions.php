@@ -28,6 +28,9 @@ class Permissions
         'public.program_apply',
         'chats*',
         'livewire.*',
+        'groups*',
+        'messages*',
+        'users/search',
     ];
 
     private $exceptControllers = [
