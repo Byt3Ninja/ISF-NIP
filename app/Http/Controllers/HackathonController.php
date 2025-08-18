@@ -15,16 +15,17 @@ use App\Team_member;
 use App\CyclesMentors;
 use App\TeamFormation;
 use App\ScreeningEvaluation;
-use App\ScreeningEvaluationResults;
 use Illuminate\Http\Request;
+use App\Exports\WinnersExport;
 use Illuminate\Support\Facades\DB;
+use App\ScreeningEvaluationResults;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
-use App\Exports\WinnersExport;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HackathonController extends Controller
 {
@@ -96,9 +97,27 @@ class HackathonController extends Controller
          });
 
          
-        $pastHackathons = $hackathons->where('status', 'Finished')
+        $pastHackathons_q = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
+
+        // عدد العناصر في كل صفحة
+        $perPage = 5;
+
+        // الصفحة الحالية
+        $page = request()->get('page', 1);
+
+        // قص البيانات على حسب الصفحة
+        $currentPageItems = $pastHackathons_q->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // عمل الـ Paginator
+        $pastHackathons = new LengthAwarePaginator(
+            $currentPageItems,
+            $pastHackathons_q->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
         
         $hackathons = $hackathons->reject(function ($item) {
             return $item['status'] === 'Finished';
