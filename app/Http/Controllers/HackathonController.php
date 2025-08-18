@@ -352,7 +352,7 @@ class HackathonController extends Controller
             LEFT JOIN
                 users as u ON u.id = sf.user_id
             WHERE sf.team_formation_id = ? 
-        ";
+        ORDER BY sf.created_at DESC";
 
         $sharedFile = collect(DB::select($sharedFile_q, [$TF_id]));
 
