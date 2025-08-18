@@ -50,10 +50,10 @@ class UpdateCompanyProfileRequest extends FormRequest
             'tiktok' => 'nullable|url',
             'aboutStartup' => 'nullable|string',
             'aboutProblem' => 'nullable|string',
-            'aboutMarketOpportunities' => 'nullable|string',
-            'aboutCompetitors' => 'nullable|string',
-            'aboutMonetization' => 'nullable|string',
-            'aboutChallenges' => 'nullable|string',
+            'aboutMarketOpportunities' => 'nullable|string|max:200',
+            'aboutCompetitors' => 'nullable|string|max:200',
+            'aboutMonetization' => 'nullable|string|max:200',
+            'aboutChallenges' => 'nullable|string|max:200',
             'sustainabilityFeatures' => 'nullable|array',
             'currency' => 'nullable|string',
             'preMoneyEvaluation' => 'nullable|numeric',
@@ -61,8 +61,8 @@ class UpdateCompanyProfileRequest extends FormRequest
             'fundingTarget' => 'nullable|numeric',
             'targetMarket' => 'nullable|array',
             'targetMarket.*' => 'exists:countries,id',
-            'businessType' => 'nullable|string',
-            'financialPlan' => 'nullable|string',
+            'businessType' => 'nullable|string|max:50',
+            'financialPlan' => 'nullable|string|max:200',
             'financialPlanAttachment' => 'nullable|file',
             'teamNumber' => 'nullable|integer',
             'workingTeamDetails' => 'nullable|string',
@@ -80,12 +80,12 @@ class UpdateCompanyProfileRequest extends FormRequest
             'pitchDeckFile' => 'nullable|file',
             'pitchDeckVideoUrl' => 'nullable|url',
             'documents' => 'nullable|array',
-            'documents.*' => 'file',
+            'documents.*' => 'file|mimes:doc,docx,pdf|max:2048',
             'achievedMilestones' => 'nullable|array',
             'plannedMilestones' => 'nullable|array',
             'archivedMilestones' => 'nullable|array',
-            'businessModel' => 'nullable|string',
-            'businessModelDescription' => 'nullable|string',
+            'businessModel' => 'nullable|string|max:100',
+            'businessModelDescription' => 'nullable|string|max:200',
             'businessPlanAttachment' => 'nullable|file',
             'haveStartup' => 'nullable|in:Yes,No',
             'CreatedTax' => 'required_if:haveStartup,Yes|boolean',
@@ -101,4 +101,23 @@ class UpdateCompanyProfileRequest extends FormRequest
             $this->validationError(__('api.validation_error'), 422, $validator->errors())
         );
     }
+
+    public function withValidator($validator)
+{
+    $validator->after(function ($validator) {
+        $shareholders = $this->input('shareholders', []);
+
+        if (is_array($shareholders) && count($shareholders)) {
+            $totalOwnership = collect($shareholders)->sum(function ($item) {
+                return floatval($item['ownership'] ?? 0);
+            });
+
+            if ($totalOwnership > 100) {
+                throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                    $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
+                );
+            }
+        }
+    });
+}
 }

@@ -67,4 +67,6 @@ return [
 	'Message_not_found' => 'Message Not Found',
 	'No_recipients_found' => 'No Recipients Found',
 	'companyUpdated' => 'Company Profile Updated Successfully',
+	'total_shareholder_ownership_exceeded' => 'The total ownership percentage of shareholders must not exceed 100%',
+	'companies_not_found' => 'Companies Not Found',
 ];
