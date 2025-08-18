@@ -64,4 +64,7 @@ return [
 	'Reply_sent_successfully' => 'تم إرسال الرد بنجاح',
 	'Message_not_found' => 'الرسالة غير موجودة',
 	'No_recipients_found' => 'لا يوجد مستلمون',
+	'companyUpdated' => 'تم تحديث ملف الشركة بنجاح',
+	'total_shareholder_ownership_exceeded' => 'المساهمة الكلية للمشاركين لا يجب ان تتجاوز 100%',
+	'companyNotFound' => 'الشركات غير موجودة',
 ];

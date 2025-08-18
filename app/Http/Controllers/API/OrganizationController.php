@@ -187,7 +187,7 @@ class OrganizationController extends Controller
             $image->move(public_path('organizations/'), $imageName);
             $img_url = 'organizations/' . $imageName;
         }
-
+ 
         $organization = DB::transaction(function () use ($data, $img_url, $request) {
             $password = $data['password'];
 

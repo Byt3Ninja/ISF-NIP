@@ -6,6 +6,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StepController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\StageController;
 use App\Http\Controllers\API\SectorController;
 use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
@@ -50,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
-    Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate']);
+    Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
     Route::get('/roles', [RoleController::class, 'index']);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
@@ -72,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
     Route::get('/startups', [CompanyController::class, 'index']);
     Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
+    Route::post('/company/profile', [CompanyController::class, 'update']);
     Route::get('/sectors', [SectorController::class, 'index']);
     Route::get('/states', [SectorController::class, 'getStates']);
     Route::post('/programs', [ProgramController::class, 'store']);
@@ -84,11 +86,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
     Route::apiResource('steps', StepController::class);
     Route::prefix('messages')->group(function () {
-    Route::post('/', [MessageController::class, 'store']);
-    Route::post('/reply', [MessageController::class, 'reply']); 
-    Route::patch('/toggle-status', [MessageController::class, 'toggleStatus']);
-    Route::patch('/star', [MessageController::class, 'toggleStar']);
+        Route::post('/', [MessageController::class, 'store']);
+        Route::post('/reply', [MessageController::class, 'reply']); 
+        Route::patch('/toggle-status', [MessageController::class, 'toggleStatus']);
+        Route::patch('/star', [MessageController::class, 'toggleStar']);
     });
+    Route::get('/stages', [StageController::class, 'index']);
 });
 
 

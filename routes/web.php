@@ -130,6 +130,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
     // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
     Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
+    Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners');
     Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
     Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
     Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
@@ -643,6 +644,33 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate_view_form');
     Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate_execute');
+
+    /* 
+     Templates Routes */
+    Route::prefix('admin')->group(function () {
+        // Define specific routes BEFORE resource routes to avoid conflicts
+        Route::get('notification-templates/variables', 'NotificationTemplateController@getVariables')->name('notification-templates.variables');
+        Route::get('notification-templates/{notificationTemplate}/preview', 'NotificationTemplateController@preview')->name('notification-templates.preview');
+        Route::post('notification-templates/{notificationTemplate}/clone', 'NotificationTemplateController@clone')->name('notification-templates.clone');
+        Route::post('notification-templates/{notificationTemplate}/test-send', 'NotificationTemplateController@testSend')->name('notification-templates.test-send');
+        
+        // Resource routes come last
+        Route::resource('notification-templates', 'NotificationTemplateController');
+        
+        /* Notification Triggers Routes - MOVED INSIDE DASHBOARD GROUP */
+        // Define specific routes BEFORE resource routes to avoid conflicts
+        Route::get('notification-triggers/events', 'NotificationTriggerController@getEvents')->name('notification-triggers.events');
+        Route::get('notification-triggers/recipient-types', 'NotificationTriggerController@getRecipientRuleTypes')->name('notification-triggers.recipient-types');
+        Route::get('notification-triggers/sample-conditions', 'NotificationTriggerController@getSampleConditions')->name('notification-triggers.sample-conditions');
+        Route::post('notification-triggers/{notificationTrigger}/toggle-active', 'NotificationTriggerController@toggleActive')->name('notification-triggers.toggle-active');
+        Route::post('notification-triggers/{notificationTrigger}/clone', 'NotificationTriggerController@clone')->name('notification-triggers.clone');
+        Route::post('notification-triggers/{notificationTrigger}/test', 'NotificationTriggerController@test')->name('notification-triggers.test');
+        
+        // Resource routes come last
+        Route::resource('notification-triggers', 'NotificationTriggerController');
+    });
+
+
 
      /* Start of Activities Routes */
     Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');

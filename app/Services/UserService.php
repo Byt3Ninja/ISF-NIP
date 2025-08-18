@@ -2,55 +2,43 @@
 
 namespace App\Services;
 
+use App\Mail\OrganizationCreatedMail;
+use App\Notifications\WelcomeJudgerNotification;
 use App\User;
 use App\Mail\WelcomeUserMail;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use App\Http\Resources\UserResource;
+use Google\Service\ServiceControl\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserService
 {
-    public function index(array $filters, User $authUser): array
+    /**
+     * Summary of userRepository
+     * @var \App\Repositories\UserRepository
+     */
+    protected $userRepository;
+    
+    function __construct()
     {
-        $query = User::query();
-        $query->where('id', '!=', $authUser->id);
+        // You can inject dependencies here if needed
+        $this->userRepository = new \App\Repositories\UserRepository();
 
-        if ($authUser->hasRole('OrganizationManager')) {
-            $query->where('organization_id', $authUser->organization_id);
-        }
-
-        if (!empty($filters['gender']) && in_array(strtolower($filters['gender']), ['male', 'female'])) {
-            $query->where('gender', strtolower($filters['gender']));
-        }
-
-       if (array_key_exists('haveCompany', $filters)) {
-       $value = $filters['haveCompany'];
-
-         if (in_array($value, ['1', 1], true)) {
-            $query->where('HaveCompany', 1);
-        } elseif (in_array($value, ['0', 0], true)) {
-            $query->where('HaveCompany', 0);
-        }
     }
-      
-        if (!empty($filters['role'])) {
-            $query->whereHas('roles', fn ($q) => $q->where('name', $filters['role']));
-        }
-
-        if (!empty($filters['search'])) {
-            $search = $filters['search'];
-            $query->where(function (Builder $q) use ($search) {
-                $q->where('first_name_en', 'like', "%$search%")
-                  ->orWhere('last_name_en', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
-            });
-        }
-
-        $users = $query->orderBy('created_at', 'desc')->paginate(10);
+    /**
+     * Summary of index
+     * @param array $filters
+     * @return array{data: \Illuminate\Http\Resources\Json\AnonymousResourceCollection, meta: array}
+     */
+    public function index(array $filters): array
+    {
+        $query = $this->userRepository->filter($filters);
+        $users = $this->userRepository->paginate($query, 10, 'desc');
 
         return [
             'data' => UserResource::collection($users),
@@ -68,147 +56,148 @@ class UserService
             ]
         ];
     }
-
+    /**
+     * Summary of show
+     * @param int $id
+     * @return User|User[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     */
     public function show(int $id): ?User
     {
         return User::find($id);
     }
-
+    /**
+     * Summary of store
+     * @param array $data
+     * @throws \Exception
+     * @return array{message: string, status: int, success: bool|array{success: bool, user: mixed}}
+     */
     public function store(array $data): array
-{
-    try {
-        $user = DB::transaction(function () use ($data) {
-            $user = User::create([
-                'first_name_en' => $data['firstName'],
-                'last_name_en' => $data['lastName'],
-                'first_name_ar' => $data['firstName'],
-                'last_name_ar' => $data['lastName'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'gender' => $data['gender'],
-                'password' => Hash::make($data['password']),
-            ]);
+    {
+        try{
 
-            $role = Role::find($data['role']);
-            if (!$role) {
-                throw new \Exception(__('api.invalid_role'));
-            }
-
-            DB::table('model_has_roles')->insert([
-                'role_id'    => $role->id,
-                'model_type' => User::class,
-                'model_id'   => $user->id,
-            ]);
-            Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
-
-            return $user->fresh();
-        });
-
-        return [
-            'success' => true,
-            'user' => $user,
-        ];
-
-    } catch (\Throwable $e) {
-        return [
-            'success' => false,
-            'message' => $e->getMessage(),
-            'status' => 500
-        ];
-    }
-}
  
+        $result = $this->userRepository->create($data);
+         
+        if($result['success'] ==true){
+        $user=$result['data'];
+        Storage::disk('UsersLFM')->makeDirectory("$user->id");
+		Storage::disk('UsersLFM')->makeDirectory("$user->id/BusinessPlans");
+		Storage::disk('UsersLFM')->makeDirectory("$user->id/FinancialPlans");
+		Storage::disk('UsersLFM')->makeDirectory("$user->id/PitchDeck");
+		Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
+		Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
 
-  public function update(User $user, array $data): array
-{
-    try {
-        $updated = DB::transaction(function () use ($user, $data) {
-            if (isset($data['firstName'])) {
-                $user->first_name_en = $data['firstName'];
-                $user->first_name_ar = $data['firstName'];
-            }
 
-            if (isset($data['lastName'])) {
-                $user->last_name_en = $data['lastName'];
-                $user->last_name_ar = $data['lastName'];
-            }
+        if($user->hasRole('Judger')){
+               $user->notify(new WelcomeJudgerNotification($user));
+        }elseif( $user->hasRole('organizationmanager')){
+                $org_owner= $user->organization();
+               
+                Mail::to($user->email)->queue(new OrganizationCreatedMail($org_owner,$user, $data['password']));
 
-            if (isset($data['email'])) {
-                $user->email = $data['email'];
-            }
+        }else{
 
-            if (isset($data['phone'])) {
-                $user->phone = $data['phone'];
-            }
+             Mail::to(users: $user->email)->queue(new WelcomeUserMail($user, $data['password']));
+        }
 
-            if (isset($data['gender'])) {
-                $user->gender = $data['gender'];
-            }
 
-            if (isset($data['password'])) {
-                $user->password = Hash::make($data['password']);
-            }
+        }
 
-            if (isset($data['status'])) {
-                $user->status = $data['status'];
-            }
 
-            $user->save();
+        return $result;
 
-            if (isset($data['role'])) {
-                DB::table('model_has_roles')
-                    ->where('model_type', User::class)
-                    ->where('model_id', $user->id)
-                    ->delete();
 
-                DB::table('model_has_roles')->insert([
-                    'role_id'    => $data['role'],
-                    'model_type' => User::class,
-                    'model_id'   => $user->id,
-                ]);
-            }
-
-            return $user->fresh();
-        });
-
-        return [
-            'success' => true,
-            'user' => $updated,
-        ];
-    } catch (\Throwable $e) {
-        return [
+        } catch (\Throwable $e) {
+            return [
             'success' => false,
-            'message' => $e->getMessage(),
-            'status' => 500,
-        ];
-    }
-}
-
-  public function deactivateUser(User $authUser, $id): array
-{
-    if ($authUser->id == $id) {
-        return [
-            'success' => false,
-            'message' => __('api.cannot_deactivate_self'),
-            'status' => 403
-        ];
+            'message' => 'Failed to create user',
+            'data'    => null,
+            'errors'  => [$e->getMessage()]
+            ];
+        }
     }
 
-    $user = User::find($id);
+    /**
+     * Summary of update
+     * @param \App\User $user
+     * @param array $data
+     * @return array{message: string, status: int, success: bool}
+     */
+    public function update(User $user, array $data) 
+    {
+        try {
+            $updated = $this->userRepository->update($user, $data);
 
-    if (!$user) {
+            return [
+                'success' => true,
+                'user' => $updated
+            ];
+            
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'status' => 500,
+            ];
+        }
+    }
+    /**
+     * Summary of deactivateUser
+     * @param \App\User $user
+     * @param mixed $id
+     * @return array{message: array|string|null, status: int, success: bool|array{success: bool}}
+     */
+    public function deactivateUser(User $user ,$authId): array
+    {
+
+        if ($user->id == $authId) {
+            return [
+                'success' => false,
+                'message' => __('api.cannot_deactivate_self'),
+                'status' => 403
+            ];
+        }
+
+            $result= $this->userRepository->deactivate($user);
+        
+
         return [
-            'success' => false,
-            'message' => __('api.user_not_found'),
-            'status' => 404
+            'success' => $result,
         ];
     }
 
-    $user->status = 'inactive';
-    $user->save();
+    /**
+     * get role list 
+     */
+    public function roleList()
+    {
+      $result=$this->userRepository->roles();
 
-    return [
-        'success' => true
-    ];
-}
+      return $result;
+    }
+
+    /**
+     * get Country List
+     */
+
+    public function countries()
+    {
+        $result=$this->userRepository->countries();
+        return $result;
+    }
+
+    public function updatePassword(User $user, array $data): array
+    {
+      $result=$this->userRepository->updatePassword($user, $data);
+      return $result;
+    }
+
+
+    public function destroy(User $user): bool
+    {
+        $result = $this->userRepository->delete($user);
+        return $result;
+    }
+
 }

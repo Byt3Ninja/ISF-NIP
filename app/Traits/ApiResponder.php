@@ -6,6 +6,23 @@ use Illuminate\Http\JsonResponse;
 
 trait ApiResponder
 {
+
+    protected function checkData($data = null, $extra = [], $message = 'Success', $statusCode = 200)
+    {
+        if($data['success'] ==true){
+        $response = [
+            'success' => true,
+
+            'message' => $message,
+        ];
+        if(isset($data)) $response['data'] = $data;
+        foreach($extra as $key => $value) $response[$key] = $value;
+        return response()->json($response, $statusCode);
+        }
+        return false;
+    }
+
+
     protected function success($data = null, $extra = [], $message = 'Success', $statusCode = 200): JsonResponse
     {
         $response = [

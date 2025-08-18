@@ -806,12 +806,12 @@ $mentorsLists = showMintors($request);
       </div>
       <div class="modal-body">
         <div class="mb-6">
-          <label class="form-label fw-bold me-2">{{ __('admin.hackathon') }}:</label>
-          <span id="modal-team-hackathon" class="badge bg-label-primary text-dark"></span>
+          <label class="form-label fw-bold me-2">{{ __('admin.Team Name') }}:</label>
+          <span id="modal-team-hackathon" class="text-dark"></span>
         </div>
         <div class="mb-6">
           <label class="form-label fw-bold me-2">{{ __('admin.team_leader') }}:</label>
-          <span id="modal-team-leader" class="badge bg-label-info text-dark"></span>
+          <span id="modal-team-leader" class="text-dark"></span>
         </div>
         <div class="mb-6">
           <label class="form-label fw-bold me-2">{{ __('admin.members') }}</label>
@@ -832,16 +832,28 @@ $mentorsLists = showMintors($request);
     </div>
   </div>
 </div>
-@php
 
+@php
 $teamsJson = $data['all_teams']->map(function($team) {
   return [
     'id' => $team->id,
     'name' => $team->name,
     'hackathon' => $team->name,
-    'leader' => "{$team->name} ({$team->email})",
-    'members' => collect($team->members)->map(fn($m) => $m->name)->all(),
-    'projectIdea' => $team->project_name_en,
+    'leader' => $team->user_name,
+    'members' => collect($team->members ?? [])->filter(function($m) {
+      return !empty($m->name);
+    })->map(function($m) {
+      return [
+      'id' => $m->id ?? null,
+      'name' => $m->name ?? 'Unknown',
+      'email' => $m->email ?? '',
+      'title' => $m->title ?? '',
+      'img_url' => $m->img_url ?  '/191014/' . $m->img_url : '',
+      'is_leader' => $m->is_leader ?? false,
+      'status' => $m->status ?? 'Unknown'
+      ];
+    })->all(),
+    'projectIdea' => $team->project_name_en ?? __('admin.idea_not_specified_yet'),
   ];
 })->keyBy('id')->toJson(JSON_UNESCAPED_UNICODE);
 @endphp
@@ -964,21 +976,56 @@ $teamsJson = $data['all_teams']->map(function($team) {
             const button = event.relatedTarget;
             const teamId = button.getAttribute('data-team-id');
             const teamData = teamsData[teamId];
-            console.log('teamData', teamData)
             if (teamData) {
                 document.getElementById('modal-team-name-detail').textContent = teamData.name;
                 document.getElementById('modal-team-hackathon').textContent = teamData.hackathon;
                 document.getElementById('modal-team-leader').textContent = teamData.leader;
                 const membersList = document.getElementById('modal-team-members-list');
                 membersList.innerHTML = '';
-                const teamMembers = teamData?.members.filter(member => member !== null && member !== undefined);
-                (teamMembers || []).forEach(member => {
+                const teamMembers = teamData?.members?.filter(member => member !== null && member !== undefined) || [];
+                
+                if (teamMembers.length === 0) {
                     const li = document.createElement('li');
-                    li.classList.add('list-group-item');
-                    li.textContent = member;
+                    li.classList.add('list-group-item', 'text-muted');
+                    li.textContent = "{{ __('admin.no_members_found') }}";
                     membersList.appendChild(li);
-                });
-                document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "{{ __('admin.No_idea_specified') }}";
+                } else {
+                    teamMembers.forEach(member => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item', 'd-flex', 'align-items-center');
+                        
+                        // Create member info HTML
+                        const memberHtml = `
+                            <div class="d-flex align-items-center w-100">
+                                <div class="avatar me-3">
+                                    <img src="${member.img_url ?? '/icons/account.svg'}" 
+                                        alt="avatar" 
+                                        class="rounded-circle" 
+                                        style="width: 40px; height: 40px; object-fit: cover;"
+                                        onerror="this.onerror=null; this.src='/icons/account.svg';"
+                                    >
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-0">${member.name}</h6>
+                                            <small class="text-muted">${member.email}</small>
+                                            <!-- ${member.title ? `<br><small class="badge badge-outline-secondary">${member.title}</small>` : ''} -->
+                                        </div>
+                                        <div class="text-end">
+                                            ${member.is_leader ? '<span class="badge bg-label-primary">{{ __("admin.team_leader") }}</span>' : ''}
+                                            <!-- <span class="badge ${member.status === 'Accepted' ? 'bg-success' : member.status === 'Pending' ? 'bg-warning' : 'bg-secondary'}">${member.status}</span> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        li.innerHTML = memberHtml;
+                        membersList.appendChild(li);
+                    });
+                }
+                document.getElementById('modal-team-project-idea').textContent = teamData.projectIdea || "{{ __('admin.idea_not_specified_yet') }}";
             } else {
                 // حال وجود خطأ في ID
                 console.warn('لا توجد بيانات للفريق بالمعرّف:', teamId);

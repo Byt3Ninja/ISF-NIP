@@ -48,8 +48,8 @@ class SharedFileController extends Controller
             $sharedFile->file = 'hackathon/sharedfiles/' . $fileName;
             $sharedFile->description = $request->description;
             $sharedFile->user_id = $user->id;
-            $sharedFile->cycle_id = $user->company->cycle;
-            $sharedFile->step_id = $user->company->step;
+            $sharedFile->cycle_id = $user->team_member->teamFormation->user->company->cycle;
+            $sharedFile->step_id = $user->team_member->teamFormation->user->company->step;
             $sharedFile->save();
 
         return response()->json(['status' => 'success', 'message' => 'File uploaded successfully']);

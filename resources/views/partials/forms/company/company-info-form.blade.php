@@ -170,10 +170,10 @@
                 data-placeholder="{{ __('admin.Select Years of Operations') }}"
               >
                 <option value="">{{ __('admin.Select Years of Operations') }}</option>
-                <option value="1" {{ optional($client->company)->years_of_operations === '1' ? 'selected' : '' }}>0-2</option>
-                <option value="2" {{ optional($client->company)->years_of_operations === '2' ? 'selected' : '' }}>2-5</option>
-                <option value="3" {{ optional($client->company)->years_of_operations === '3' ? 'selected' : '' }}>5-10</option>
-                <option value="4" {{ optional($client->company)->years_of_operations === '4' ? 'selected' : '' }}>10+</option>
+                <option value="0-2" {{ optional($client->company)->years_of_operations === '0-2' ? 'selected' : '' }}>0-2</option>
+                <option value="2-5" {{ optional($client->company)->years_of_operations === '2-5' ? 'selected' : '' }}>2-5</option>
+                <option value="5-10" {{ optional($client->company)->years_of_operations === '5-10' ? 'selected' : '' }}>5-10</option>
+                <option value="10+" {{ optional($client->company)->years_of_operations === '10+' ? 'selected' : '' }}>10+</option>
               </select>
           </div>
         </div>

@@ -569,6 +569,17 @@
   {"name": "importer.organizations", "description": "Fetch Organizations", "permission_group_id": "Importer Tool", "guard_name": "web"},
   {"name": "mentorship.sessions_Rate", "description": "Rate mentorship session", "permission_group_id": "Dashboard (Startup)", "guard_name": "web"},
   {"name": "screening.get", "description": "Get Judger Users", "permission_group_id": "Screening", "guard_name": "web"},
-  {"name": "surveys.questions_delete", "description": "Remove Question", "permission_group_id": "Surveys", "guard_name": "web"}
+  {"name": "surveys.questions_delete", "description": "Remove Question", "permission_group_id": "Surveys", "guard_name": "web"},
+  {"name": "notification-templates.index", "description": "List Notification Templates", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.create", "description": "Create Notification Template Form", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.store", "description": "Save New Notification Template", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.show", "description": "View Notification Template Details", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.edit", "description": "Edit Notification Template Form", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.update", "description": "Save Notification Template Update", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.destroy", "description": "Delete Notification Template", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.variables", "description": "Get Available Template Variables", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.preview", "description": "Preview Notification Template", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.clone", "description": "Clone Notification Template", "permission_group_id": "Notification Templates", "guard_name": "web"},
+  {"name": "notification-templates.test-send", "description": "Test Send Notification Template", "permission_group_id": "Notification Templates", "guard_name": "web"}
 
 ]
