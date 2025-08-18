@@ -134,4 +134,88 @@ class TeamFormation extends Model
 
         return $teams;
     }
+
+    public static function winners( $teams )
+    {
+        $steps_ids = $teams->whereNotNull('step')->pluck('step')->unique()->toArray();
+        $output = collect([]);
+        foreach( $steps_ids as $stepId )
+        {
+            $check = ScreeningEvaluation::where('step_id', $stepId)->first();
+            if( empty( $check ) )
+			{
+				$evaluation = new ScreeningEvaluation();
+				$evaluation->step_id = $stepId;
+				$evaluation->save();
+			}
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
+            $metadata = ScreeningEvaluationResults::metadata( $stepId );
+            $judges = $metadata['judges'];
+            $judges = $judges->map(function( $item ) {
+                $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
+                return $item;
+            });
+
+            $scoped_teams = $teams->where('step', $stepId)->values();
+            foreach( $scoped_teams as $index => $team )
+            {
+                $totalScore = 0;
+                $teamJudges = [];
+                $company_id = $team->company->id;
+                $publishedEvaluations = 0;
+                $averageScore = 0;
+                $published = true;
+
+                foreach( $judges as $judge )
+                {
+                    if( in_array($company_id, $judge->startups->toArray()) )
+                    {
+                        $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
+                        if( $scoped_company )
+                        {
+                            if( strtolower($scoped_company->status) != 'published' ) { $published = false; }
+                            if( $published == false ) { continue( 2 ); }
+                            if( strtolower($scoped_company->status) === 'published' && isset( $scoped_company->score ) )
+                            {
+                                $scopedJudge = new stdClass;
+                                $scopedJudge->id = $judge->id;
+                                $scopedJudge->name = $judge->name;
+                                $scopedJudge->phone = $judge->phone;
+                                $scopedJudge->email = $judge->email;
+                                $scopedJudge->image_url = $judge->image_url;
+                                $scopedJudge->score = $scoped_company->score;
+                                $teamJudges[] = $scopedJudge;
+                                $totalScore += (float) $scoped_company->score;
+                                $publishedEvaluations++;
+                            }
+                        }
+                    }
+                }
+
+                if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
+                $scoped_teams[$index]->score = $averageScore;
+                $scoped_teams[$index]->judges = $teamJudges;
+                $scoped_teams[$index]->published = $published;
+            }
+            $output = $output->merge($scoped_teams);
+        }
+        $output = $output->where('published', true)->filter(function($item) {
+            return count( $item->judges ) > 0;
+        })->values();
+        $winnersData = $output->map(function( $team ) {
+            return [
+                'id' => $team->id,
+                'team' => $team->name,
+                'step' => $team->step_title,
+                // 'project' => $team->project->name ?? '-',
+                'project' => $team->project->name ?? ( $team->company->name ?? '-' ),
+                'score' => $team->score,
+                'judges' => $team->judges,
+                'rank' => $team->project->winner ?? '',
+                'leader' => $team->members->where('isLeader', 1)->first(),
+            ];
+        });
+
+        return $winnersData;
+    }
 }

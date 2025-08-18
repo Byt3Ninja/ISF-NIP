@@ -5,7 +5,9 @@ namespace App;
 use App\Step;
 use Carbon\Carbon;
 use App\Traits\Auditable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use stdClass;
 
 class Cycle extends Model
 {
@@ -80,16 +82,35 @@ class Cycle extends Model
         return $this->hasMany(CycleCustomPages::class);
     }
 
-  public function getProgress()
-{
-    $totalSteps = Step::where('cycle_id', $this->id)->count();
+    public function getProgress()
+    {
+        $totalSteps = Step::where('cycle_id', $this->id)->count();
 
-    $totalStepsFinish = \App\Step::where('to', '>', Carbon::now())
-        ->where('cycle_id', $this->id)
-        ->count();
+        $totalStepsFinish = \App\Step::where('to', '>', Carbon::now())->where('cycle_id', $this->id)->count();
 
-    return $totalSteps > 0
-        ? ($totalStepsFinish / $totalSteps) * 100
-        : 0;
-}
+        return $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
+    }
+
+    public static function getHackathon( $id )
+    {
+        $hackathon = DB::table('cycles as c')
+            ->select([
+                'c.id',
+                'c.title',
+                'c.description',
+                'c.start',
+                'c.end',
+                'c.winners_announcement',
+                'o.id AS organization_id',
+                'o.name_ar AS organization_name_ar',
+                'o.name_en AS organization_name_en',
+            ])
+            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
+            ->where('c.type', 'Hackathon')
+            ->whereNull('c.deleted_at')
+            ->where('c.id', $id)
+            ->first();
+
+        return $hackathon;
+    }
 }
