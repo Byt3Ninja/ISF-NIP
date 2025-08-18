@@ -25,7 +25,6 @@ trait ApiResponder
 
     protected function success($data = null, $extra = [], $message = 'Success', $statusCode = 200): JsonResponse
     {
-        if($data['success'] ==true){
         $response = [
             'success' => true,
             'message' => $message,
@@ -33,10 +32,6 @@ trait ApiResponder
         if(isset($data)) $response['data'] = $data;
         foreach($extra as $key => $value) $response[$key] = $value;
         return response()->json($response, $statusCode);
-        }else{
-             return response()->json($data, 400);
-        }
-
     }
 
     protected function created($data = null, $message = 'Created successfully',$extra= [], $statusCode = 201): JsonResponse

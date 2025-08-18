@@ -195,6 +195,9 @@ class CompanyController extends Controller
                 $q->where("name_{$locale}", 'like', "%{$request->state}%");
             });
     }
+    if ($request->filled('programId')) {
+        $query->where('cycle', $request->programId);
+    }
 
     if ($request->filled('search')) {
         $search = $request->search;
@@ -214,6 +217,9 @@ class CompanyController extends Controller
 
     $limit = $request->get('limit', 10);
     $companies = $query->paginate($limit);
+    if ($companies->isEmpty()) {
+        return $this->error(__('api.companies_not_found'), 404);
+    }
 
     return $this->success(
         CompanyResource::collection($companies->items()),
@@ -518,17 +524,16 @@ public function show($id)
             }
         }
 
-        if (!empty($data['shareholders'])) {
-            foreach ($data['shareholders'] as $shareholder) {
-                $company->teamMembers()->create([
-                    'Name' => $shareholder['name'],
-                    'RoleShereholder' => $shareholder['role'] ?? null,
-                    'PresentagShereholder' => $shareholder['ownership'],
-                    'TeamMember' => 'Shareholder'
-                ]);
-            }
-        }
-
+       if (!empty($data['shareholders'])) {
+       foreach ($data['shareholders'] as $shareholder) {
+         $company->teamMembers()->create([
+            'Name' => $shareholder['name'],
+            'RoleShereholder' => $shareholder['role'] ?? null,
+            'PresentagShereholder' => $shareholder['ownership'],
+            'TeamMember' => 'Shareholder'
+         ]);
+      }
+    }
         if (!empty($data['investors'])) {
             foreach ($data['investors'] as $investor) {
                 $company->teamMembers()->create([
@@ -614,6 +619,15 @@ public function show($id)
             $company->Tax_Card = null;
             $company->Country_Register_id = null;
          }
+        }
+        if (isset($data['financialPlanAttachment'])) {
+             $file = $data['financialPlanAttachment'];
+            $path = $file->storeAs(
+            $user->company_id . '/financial_plan/documents',
+            $file->getClientOriginalName(),
+            'pitch_deck'
+            );
+            $company->financial_plan = 'financial_plan/' . $path;
         }
 
            $company->save();

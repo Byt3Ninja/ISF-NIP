@@ -93,6 +93,7 @@ class CompanyProfileResource extends JsonResource
             'teamNum' => $this->team_num,
             'workingTeamSummary' => $this->working_team_summary,
             'stage' => [
+                'id' => $this->stagE?->id,
                 'name' => $this->stagE?->{"name_$locale"},
             ],
             'fundingStage' => $this->development_stage,
