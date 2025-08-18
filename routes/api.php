@@ -90,6 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reply', [MessageController::class, 'reply']); 
         Route::patch('/toggle-status', [MessageController::class, 'toggleStatus']);
         Route::patch('/star', [MessageController::class, 'toggleStar']);
+        Route::get('/', [MessageController::class, 'index']);
+        Route::get('/{id}', [MessageController::class, 'show']);
+        Route::patch('/trash', [MessageController::class, 'moveToTrash']);
     });
     Route::get('/stages', [StageController::class, 'index']);
 });
