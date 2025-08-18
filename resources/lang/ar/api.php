@@ -82,4 +82,9 @@ return [
     'distinct' => 'لا يُسمح بتكرار معرّفات الرسائل',
  ],
  'Could_not_move_to_trash' => 'لا يمكن نقل الرسائل الى سلة المحذوفات',
+ 'Currency_created' => 'تم إنشاء العملة بنجاح',
+ 'Currency_updated' => 'تم تحديث العملة بنجاح',
+ 'currencies_not_found' => 'العملات غير موجودة',
+ 'currency_not_found' => 'العملة غير موجودة',
+ 'currency_deleted' => 'تم حذف العملة بنجاح',
 ];

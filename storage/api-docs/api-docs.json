@@ -1041,6 +1041,306 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Create new currency",
+                "description": "Stores a new currency with code, name, symbol, rate, and optional flag.",
+                "operationId": "storeCurrency",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "currencyCode",
+                                    "currencyName",
+                                    "currencySymbol",
+                                    "exchangeRateToUsd"
+                                ],
+                                "properties": {
+                                    "currencyCode": {
+                                        "type": "string",
+                                        "maxLength": 3,
+                                        "example": "USD"
+                                    },
+                                    "currencyName": {
+                                        "type": "string",
+                                        "example": "US Dollar"
+                                    },
+                                    "currencySymbol": {
+                                        "type": "string",
+                                        "example": "$"
+                                    },
+                                    "exchangeRateToUsd": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "flag": {
+                                        "description": "Currency flag image (optional)",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Currency created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency created successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Currency"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/currencies-all": {
+            "get": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Get all currencies (paginated)",
+                "description": "Returns paginated currencies with optional enabled filter.",
+                "operationId": "getCurrenciesPaginated",
+                "parameters": [
+                    {
+                        "name": "enabled",
+                        "in": "query",
+                        "description": "Filter by enabled status (1 = enabled, 0 = disabled)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of currencies",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Currency"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/currencies?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/currencies/{id}": {
+            "post": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Update currency",
+                "description": "Updates an existing currency by ID.",
+                "operationId": "updateCurrency",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the currency to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "currencyCode": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "currencyName": {
+                                        "type": "string",
+                                        "example": "US Dollar"
+                                    },
+                                    "currencySymbol": {
+                                        "type": "string",
+                                        "example": "$"
+                                    },
+                                    "exchangeRateToUsd": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "flag": {
+                                        "description": "Currency flag image (optional)",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Currency updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency updated successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Currency"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Delete currency",
+                "description": "Deletes a currency by ID.",
+                "operationId": "deleteCurrency",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the currency to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Currency deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency deleted successfully"
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/dashboard": {
@@ -5434,6 +5734,40 @@
                             }
                         },
                         "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Currency": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "currencyCode": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "currencyName": {
+                        "type": "string",
+                        "example": "US Dollar"
+                    },
+                    "currencySymbol": {
+                        "type": "string",
+                        "example": "$"
+                    },
+                    "exchangeRateToUsd": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "flag": {
+                        "type": "string",
+                        "example": "http://yourdomain.com/icons/flags/us.png"
                     }
                 },
                 "type": "object"

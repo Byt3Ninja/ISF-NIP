@@ -84,4 +84,9 @@ return [
     'distinct' => 'Duplicate message IDs are not allowed',
    ],
    'Could_not_move_to_trash' => 'Could not move to trash',
+   'Currency_created' => 'Currency Created Successfully',
+   'Currency_updated' => 'Currency Updated Successfully',
+   'currencies_not_found' => 'Currencies Not Found',
+   'currency_not_found' => 'Currency Not Found',
+   'currency_deleted' => 'Currency Deleted Successfully',
 ];
