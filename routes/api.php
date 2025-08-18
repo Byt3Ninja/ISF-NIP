@@ -58,6 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
     Route::get('/currencies', [CurrencyController::class, 'index']);
+    Route::get('/currencies-all', [CurrencyController::class, 'currencies']);
+    Route::post('/currencies', [CurrencyController::class, 'store']);
+    Route::post('/currencies/{id}', [CurrencyController::class, 'update']);
+    Route::delete('/currencies/{id}', [CurrencyController::class, 'destroy']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
     Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
