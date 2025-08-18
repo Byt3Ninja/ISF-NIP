@@ -29,17 +29,17 @@ class RoleController extends Controller
         $this->userService = $userService;
     }
     public function index()
-    {
-            $this->authorize('deactivate', Auth::user());
-            $roles=$this->userService->roleList();
+{
+    $this->authorize('deactivate', Auth::user());
 
-                            if ($roles['success'])
-                    {
-                    $this->success(RoleResource::collection($roles['data']),[], __('api.user_updated'));
-                    }
+    $roles = $this->userService->roleList();
 
-                 return response()->json($roles, 201);
-
-        
+    if ($roles['success']) {
+        return $this->success(
+            RoleResource::collection($roles['data']),
+        );
     }
+
+    return response()->json($roles, 400);
+}
 }
