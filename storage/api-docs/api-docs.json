@@ -2424,6 +2424,132 @@
             }
         },
         "/api/messages": {
+            "get": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "List messages with filtering, search, and pagination",
+                "operationId": "0236e77c6ebe14b822188027b9205fee",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "inbox",
+                                "outbox",
+                                "draft",
+                                "trash",
+                                "starred"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "read",
+                                "unread"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "starred",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "createdAt",
+                                "title",
+                                "status"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Messages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Messages retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "tags": [
                     "Messages"
@@ -2768,6 +2894,270 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/messages/{id}": {
+            "get": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Get single message by ID",
+                "description": "Fetch a single message with full details. Marks message as read if the current user is the receiver.",
+                "operationId": "getSingleMessage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Message ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Not Found"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/trash": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Move messages to trash",
+                "description": "Move one or more messages to the trash folder. Accepts a single ID or an array of IDs.",
+                "operationId": "moveToTrash",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "description": "Single message ID",
+                                                "type": "integer",
+                                                "example": 61
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer"
+                                                },
+                                                "example": [
+                                                    61,
+                                                    62
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Partial success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Some messages moved to trash successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "trashedCount": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "failedIds": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer"
+                                                    },
+                                                    "example": [
+                                                        3,
+                                                        4
+                                                    ]
+                                                },
+                                                "errors": {
+                                                    "type": "object",
+                                                    "example": {
+                                                        "3": "Message not found",
+                                                        "4": "Permission denied"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No accessible messages found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No accessible messages found"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "invalidIds": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer"
+                                                    },
+                                                    "example": [
+                                                        1,
+                                                        2
+                                                    ]
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation Error"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "messageIds": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "Message IDs must be an array"
+                                                    ]
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/organizations": {
@@ -4291,75 +4681,6 @@
                 ]
             }
         },
-        "/api/roles": {
-            "get": {
-                "tags": [
-                    "Roles"
-                ],
-                "summary": "Get list of available roles",
-                "description": "Returns a list of all roles. Only accessible by Admin users.",
-                "operationId": "getRoles",
-                "responses": {
-                    "200": {
-                        "description": "List of roles returned successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Mentor"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only accessible by Admin",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Access denied."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/api/sectors": {
             "get": {
                 "tags": [
@@ -4988,671 +5309,6 @@
                     }
                 }
             }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get a specific user's information",
-                "description": "Returns the profile data of the specified user including their role",
-                "operationId": "getUserById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "firstName": {
-                                                    "type": "string"
-                                                },
-                                                "lastName": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": "string"
-                                                },
-                                                "role": {
-                                                    "type": "string"
-                                                },
-                                                "imgUrl": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/image.jpg"
-                                                },
-                                                "haveCompany": {
-                                                    "type": "boolean"
-                                                },
-                                                "createdAt": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update an existing user",
-                "description": "Admins can update a user's profile information and role.",
-                "operationId": "b166772cec9714067040e77cf14beeba",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID to update",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string",
-                                        "example": "Ahmed"
-                                    },
-                                    "lastName": {
-                                        "type": "string",
-                                        "example": "Ali"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "ahmed@example.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01012345678"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female"
-                                        ],
-                                        "example": "male"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "role": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "haveCompany": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "imgUrl": {
-                                        "type": "string",
-                                        "example": "https://example.com/uploads/avatar.jpg"
-                                    },
-                                    "createdAt": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-07-15 09:30:00"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "active"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "User updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User updated successfully."
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "firstName": {
-                                                    "type": "string",
-                                                    "example": "Ahmed"
-                                                },
-                                                "lastName": {
-                                                    "type": "string",
-                                                    "example": "Ali"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "ahmed@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "01012345678"
-                                                },
-                                                "role": {
-                                                    "type": "string",
-                                                    "example": "Manager"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only admins can update users"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    },
-                    "404": {
-                        "description": "User not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "List users with filters (Admin and OrganizationManager only)",
-                "description": "Returns a paginated list of users, filtered by role or search query. Excludes current authenticated user.",
-                "operationId": "getUsers",
-                "parameters": [
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "description": "Filter users by role (e.g. Admin, User, Mentor)",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Search by name, email, or phone",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number for pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User list",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "firstName": {
-                                                        "type": "string",
-                                                        "example": "Ahmed"
-                                                    },
-                                                    "lastName": {
-                                                        "type": "string",
-                                                        "example": "Mohamed"
-                                                    },
-                                                    "email": {
-                                                        "type": "string",
-                                                        "example": "ahmed@example.com"
-                                                    },
-                                                    "gender": {
-                                                        "type": "string",
-                                                        "example": "male"
-                                                    },
-                                                    "phone": {
-                                                        "type": "string",
-                                                        "example": "01012345678"
-                                                    },
-                                                    "role": {
-                                                        "type": "string",
-                                                        "example": "User"
-                                                    },
-                                                    "haveCompany": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "imgUrl": {
-                                                        "type": "string",
-                                                        "example": "https://example.com/image.jpg"
-                                                    },
-                                                    "createdAt": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2025-07-09T10:00:00"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "meta": {
-                                            "properties": {
-                                                "currentPage": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "lastPage": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "total": {
-                                                    "type": "integer",
-                                                    "example": 25
-                                                },
-                                                "path": {
-                                                    "type": "string",
-                                                    "example": "http://api.example.com/api/users"
-                                                },
-                                                "links": {
-                                                    "properties": {
-                                                        "first": {
-                                                            "type": "string"
-                                                        },
-                                                        "last": {
-                                                            "type": "string"
-                                                        },
-                                                        "prev": {
-                                                            "type": "string",
-                                                            "nullable": true
-                                                        },
-                                                        "next": {
-                                                            "type": "string",
-                                                            "nullable": true
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Access forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Access forbidden / غير مصرح بالدخول"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Create a new user",
-                "description": "Admins can create a new user with basic profile and role. Sends a welcome email.",
-                "operationId": "9fea6f2adcb69614c521a7733358382d",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "firstName",
-                                    "lastName",
-                                    "email",
-                                    "phone",
-                                    "gender",
-                                    "password",
-                                    "password_confirmation",
-                                    "role"
-                                ],
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string",
-                                        "example": "Ahmed"
-                                    },
-                                    "lastName": {
-                                        "type": "string",
-                                        "example": "Ali"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "ahmed@example.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01012345678"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female"
-                                        ],
-                                        "example": "male"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret123"
-                                    },
-                                    "role": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "imgUrl": {
-                                        "type": "string",
-                                        "example": "https://example.com/uploads/avatar.jpg"
-                                    },
-                                    "createdAt": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-07-15 09:30:00"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "active"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "User created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User created successfully."
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "firstName": {
-                                                    "type": "string",
-                                                    "example": "Ahmed"
-                                                },
-                                                "lastName": {
-                                                    "type": "string",
-                                                    "example": "Ali"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "ahmed@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "01012345678"
-                                                },
-                                                "role": {
-                                                    "type": "string",
-                                                    "example": "User"
-                                                },
-                                                "haveCompany": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "imgUrl": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/uploads/avatar.jpg"
-                                                },
-                                                "createdAt": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-07-15 09:30:00"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "active"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only admins can create users"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users/{id}/deactivate": {
-            "patch": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Deactivate a user account",
-                "description": "Deactivates a user account by setting status to 'inactive'. Admins only. Cannot deactivate self or super_admin.",
-                "operationId": "deactivateUser",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the user to deactivate",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 5
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User deactivated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User has been deactivated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (e.g. deactivating self or super_admin)",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You cannot deactivate your own account."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
         }
     },
     "components": {
@@ -6186,10 +5842,6 @@
             "description": "Programs"
         },
         {
-            "name": "Roles",
-            "description": "Roles"
-        },
-        {
             "name": "Sectors",
             "description": "Sectors"
         },
@@ -6204,10 +5856,6 @@
         {
             "name": "Steps",
             "description": "Steps"
-        },
-        {
-            "name": "Users",
-            "description": "Users"
         }
     ]
 }
