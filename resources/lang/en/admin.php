@@ -483,6 +483,7 @@ return [
 	'Problem Solution' => 'Problem Solution',
 	'add organizations first' => 'Please Create Organization Firstly',
 	'CycleStoredSuccessfully' => 'Thank you for joining the program. Your request will be evaluated, and our program management team will respond to you later.',
+	'formSubmittedSuccessfully' => 'Thank you for filling the form. Your request will be evaluated, and our program management team will respond to you later.',
 	'Training sessions Duration' => 'Training sessions Durations (Hours)',
 	'Mentorship requests Duration' => 'Mentorship sessions Durations (Hours)',
 	'hours' => 'Hosrs',
