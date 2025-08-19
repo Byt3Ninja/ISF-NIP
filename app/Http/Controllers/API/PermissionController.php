@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\User;
+use App\Role;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -14,8 +14,8 @@ use App\Http\Resources\PermissionResource;
  *     type="object",
  *     title="GroupedPermissions",
  *     example={
- *         "user_id": 12,
- *         "roles": {"Admin"},
+ *         "roleId": 12,
+ *         "roleName": {"Admin"},
  *         "permissions": {
  *             "program": {
  *                 "view_program",
@@ -74,8 +74,8 @@ class PermissionController extends Controller
 
     /**
  * @OA\Get(
- *     path="/api/v1/users/{user_id}/permissions",
- *     summary="Get specified user's permissions (Admin only)",
+ *     path="/api/v1/{role}/permissions",
+ *     summary="Get permissions based on Role (Admin only)",
  *     description="Returns the specified user's roles and permissions grouped by module. Admin only.",
  *     tags={"Permissions"},
  *     security={{"sanctum":{}}},
@@ -83,7 +83,7 @@ class PermissionController extends Controller
  *         name="user_id",
  *         in="path",
  *         required=true,
- *         description="User ID to fetch permissions for",
+ *         description="Role ID to fetch permissions for",
  *         @OA\Schema(type="integer")
  *     ),
  *     @OA\Response(
@@ -97,16 +97,17 @@ class PermissionController extends Controller
  * )
  */
 
-    public function userPermissions(User $user)
+    public function userPermissions(Role $role)
     {
         if (!auth()->user()->hasRole('Admin')) {
             return $this->forbidden(__('api.forbidden'));
         }
 
-        if(!$user) {
-            return $this->notFound(__('api.user_not_found'));
+        if(!$role) {
+            return $this->notFound(__('api.role_not_found'));
         }
+        $role->load(['permissions', 'permissions.permissionsGroup']);
 
-        return $this->success(new PermissionResource($user));
+        return $this->success(new PermissionResource($role));
     }
 }

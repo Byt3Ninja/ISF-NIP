@@ -6,19 +6,26 @@ use App\Traits\Auditable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 use Namu\WireChat\Traits\Chatable;
+use Namu\WireChat\Models\Conversation;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Model;
 use App\Notifications\VerifyEmailQueued;
 use Illuminate\Notifications\Notifiable;
+use Namu\WireChat\Enums\ParticipantRole;
+use Namu\WireChat\Enums\ConversationType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Namu\WireChat\Models\Message as WireChatMessage;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     // use Auditable;
-    use Notifiable ,HasRoles,HasApiTokens;
+    use Notifiable ,HasRoles,HasApiTokens, Chatable;
     // use SoftDeletes;
     public static $module = 'Users';
 
@@ -316,4 +323,99 @@ class User extends Authenticatable implements MustVerifyEmail
     {
      return $this->hasVerifiedEmail();
     }
+
+     public function teamformation()
+    {
+        return $this->hasOne(TeamFormation::class, 'user_id');
+    }
+    public function team_member()
+    {
+        return $this->hasOne(Team_member::class, 'user_id');
+    }
+    /**
+     * Get all group conversations the user is a participant in.
+     * This will return a collection of Conversation models that are of type GROUP.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     */
+    public function groups()
+    {
+        return $this->conversations();
+    }
+
+     /**
+     * Get all messages for the conversation.
+     *
+     * @return HasMany
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(WireChatMessage::class, 'sendable_id', 'id');
+    }
+
+    /**
+     * Get the latest message for the conversation.
+     * This is a HasOne relationship that orders by the latest message.
+     *
+     * @return HasOne
+     */
+    public function latestMessage(): HasOne
+    {
+        // This will return a single Message model (the latest one)
+        return $this->hasOne(WireChatMessage::class, 'sendable_id', 'id')->latest('id');
+        // We use latest('id') for better performance on indexed columns
+        // You can also use latest('created_at') if you prefer
+    }
+
+     public function removeParticipantFromGroup(Conversation $conversation, Model $participantToRemove): bool
+    {
+        // 1. Basic Validation: Ensure this is a group conversation.
+        abort_if(
+            $conversation->type !== ConversationType::GROUP,
+            403,
+            'This action is only available for group conversations.'
+        );
+
+        // 2. Prevent self-removal: Admins should use exitConversation() for themselves.
+        abort_if(
+            $this->is($participantToRemove),
+            403,
+            'You cannot remove yourself using this method. Use exitConversation() instead.'
+        );
+
+        // 3. Get the participant records for both the admin and the target user.
+        $adminParticipant = $conversation->participant($this);
+        $targetParticipant = $conversation->participant($participantToRemove);
+
+        // 4. Abort if the target user is not even in the conversation.
+        abort_if(!$targetParticipant, 404, 'The specified user is not a member of this group.');
+
+        // 5. Permission Checks (The most important part)
+        // a) The user performing the action must be an admin or owner.
+        abort_unless(
+            $adminParticipant && $adminParticipant->isAdmin(),
+            403,
+            'You do not have permission to remove members from this group.'
+        );
+
+        // b) An admin cannot remove the owner of the group.
+        abort_if(
+            $targetParticipant->isOwner(),
+            403,
+            'You cannot remove the owner of the group.'
+        );
+
+        // c) (Optional but recommended) Prevent admins from removing other admins. Only owners can.
+        if ($adminParticipant->role === ParticipantRole::ADMIN && $targetParticipant->role === ParticipantRole::ADMIN) {
+            abort(403, 'An admin cannot remove another admin.');
+        }
+
+        // 6. Execute the removal
+        // The removeByAdmin method already exists on your Participant model.
+        // It handles creating the action record and updating the participant's state.
+        $targetParticipant->removeByAdmin($this);
+
+        return true;
+    }
+
 }

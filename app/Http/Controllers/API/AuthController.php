@@ -9,7 +9,6 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthResource;
 use App\Http\Requests\RegisterUserRequest;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {

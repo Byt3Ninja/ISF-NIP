@@ -74,7 +74,7 @@
                     @if($team->region)
                       <div class="d-flex align-items-center text-white-75">
                         <i class="ti ti-map-pin me-2"></i>
-                        <span>{{ $team->region }}</span>
+                        <span>{{ __('admin.'.$team->region) }}</span>
                       </div>
                     @endif
                     <div class="d-flex align-items-center text-white-75">
@@ -244,7 +244,7 @@
                     @if($team->region)
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-semibold">{{ $l == 'ar' ? 'المنطقة' : 'Region' }}</label>
-                      <p class="mb-0 text-muted">{{ $team->region }}</p>
+                      <p class="mb-0 text-muted">{{ __('admin.'.$team->region) }}</p>
                     </div>
                     @endif
                     @if($team->max_members)
@@ -414,7 +414,7 @@
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ $l == 'ar' ? 'منطقة المشروع' : ' Project Region' }}</label>
                   <div>
-                    <span class="badge bg-label-secondary fs-6">{{ $team->project->region }}</span>
+                    <span class="badge bg-label-secondary fs-6">{{ __('admin.'.$team->project->region) }}</span>
                   </div>
                 </div>
                 @endif

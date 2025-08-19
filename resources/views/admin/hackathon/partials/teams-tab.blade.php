@@ -56,13 +56,16 @@
             @php
             $teamImageSrc = 'https://placehold.co/400x200?text='.$team->name;
             if ($team->photo) {
-                $teamImageSrc = '/191014/' . $team->photo . '?t=' . time();
+                $teamImageSrc = '/' . $team->photo . '?t=' . time();
             }
             @endphp
-            <img src="{{ $teamImageSrc }}"
-                class="w-100 h-100 object-fit-cover" alt="Team Photo" style="transition: transform 0.3s ease;"
-                onerror="this.onerror=null; this.src='/icons/team-default.svg';"
-              >
+            <img 
+              src="{{ $teamImageSrc }}"
+              class="w-100 h-100 object-fit-cover" 
+              alt="Team Photo" 
+              style="transition: transform 0.3s ease;"
+              onerror="this.onerror=null; this.src='https://placehold.co/400x200?text={{ urlencode($team->name) }}';"
+            />
             <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-25 d-flex align-items-center justify-content-center opacity-0" 
                  style="transition: opacity 0.3s ease;" 
                  onmouseover="this.style.opacity='1'" 
@@ -79,7 +82,7 @@
             @endif
           </div>
           
-          <div class="card-body p-4">
+          <div class="card-body p-4 d-flex flex-column">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <h5 class="card-title mb-0 fw-bold text-dark">{{ $team->name }}</h5>
             </div>
@@ -112,8 +115,9 @@
               @endphp
               @foreach($displayMembers as $member)
               @if(!empty($member->img_url))
-              <div class="position-relative">
-                <img src="{{ $member->img_url ?? '/icons/account.svg' }}"
+              <div class="position-relative" title="{{ $member->name }}"
+                   data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ $member->name }}">
+                <img src="/191014/{{$member->img_url}}"
                   class="rounded-circle border-2 border-white shadow-sm" 
                   style="width: 40px; height: 40px; object-fit: cover;" 
                   alt="img"

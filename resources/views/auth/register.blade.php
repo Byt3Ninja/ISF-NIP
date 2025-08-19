@@ -16,23 +16,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta name="description" content="VI Login">
   <meta name="author" content="info@growthlabs.app">
-  <title>{{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}} - {{
-    App\Settings::findorfail(1)->first('title')->title }} - v1</title>
+  <title>{{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}} -
+     {{setting('title','title') }} </title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
-  {{--
-  <!-- Fonts -->
-  @if ($l == 'ar')
-  <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
-  @else
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
-    rel="stylesheet" />
-  @endif
-  <!-- End Fonts --> --}}
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,8 +51,6 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-
-  {{-- <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css"> --}}
   
   <!-- Page CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
@@ -118,17 +104,10 @@
 <body>
   @php
   $setting = App\Settings::first();
-  $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
-  $formHeading = $l == 'ar' ? 'تبدأ المغامرة من هنا' : 'Adventure starts here';
-  $formSubHeading = $l == 'ar' ? '!اجعل إدارة تطبيقك سهلة وممتعة' : 'Make your app management easy and fun!';
-  $firstName = $l == 'ar' ? 'الاسم الأول' : 'First Name';
-  $secondName = $l == 'ar' ? 'الاسم الاخير' : 'Last Name';
-  $gender = $l == 'ar' ? 'النوع' : 'Gender';
-  $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
-  $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
+  $logo =setting('Logo','images/background/logo.png');
   $accountRoles = ['Mentor', 'Founder'];
-  $termsUrl = $setting ? $setting->terms_url : '#';
-  $privacyUrl = $setting ? $setting->privacy_url : '#';
+  $termsUrl = setting('terms_url','#') ;
+  $privacyUrl = setting('privacy_url','#');
   @endphp
 
   @if (App\Settings::findOrFail(1)->set_order)
@@ -212,27 +191,20 @@
             </div>
             <!-- /Logo -->
 
-            <h4 class="mb-1 text-center lh-base text-capitalize">{{ $formHeading }} 🚀</h4>
-            <p class="mb-6 text-center">{{ $formSubHeading }}</p>
+            <h4 class="mb-1 text-center lh-base text-capitalize">{{ __('auth.formHeading') }} 🚀</h4>
+            <p class="mb-6 text-center">{{ __('auth.formSubHeading') }}</p>
 
             
-            <form id="registerForm" class="mb-6 px-md-8" method="POST" action="{{ route('register') }}">
+            <form id="registerForm" class="mb-6 px-md-8" method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
               @csrf
               <div class="row">
-                <!-- Alert -->
-                @if (count($errors) > 0)
-                  @foreach ($errors->all() as $error)
-                    <x-alert type="danger" message="{{ $error }}" />
-                  @endforeach
-                @endif
-                <!-- /Alert -->
-
                 <!-- Switch Role -->
+        
                 @foreach($accountRoles as $key => $role)
                 <div class="col-6 mb-4">
                   <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                     <div class="d-flex align-items-center">
-                      <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? $role : 'Registered'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
+                      <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? 4 : '3'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
                       <div class="form-check-label custom-option-content d-flex align-items-center">
                         <i class="ti ti-{{ $key==0 ? 'user' : 'businessplan' }} me-2"></i>
                         <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
@@ -241,24 +213,63 @@
                   </label>
                 </div>
                 @endforeach
-                <!--/ Switch Role -->
 
+            <div>
+              @if (session('error'))
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="alert alert-danger">
+                      <ul>
+                        <li>{{ session('error') }} </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              @endif
+                
+                <!--/ Switch Role -->
+												<div class="col-12 mb-6">
+													<label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
+														style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
+														<img 
+															src="{{'/images/user-placeholder.jpeg' }}"
+															onerror="this.src='/images/user-placeholder.jpeg'"
+															alt="Organization Logo" 
+															class="rounded img-fluid border shadow-sm"
+															style="height: 140px; width: 200px; object-fit: cover;" 
+														/>
+														<input type="file" class="form-control d-none" id="file1" name="img_url">
+														<i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
+													</label>
+                  @error('img_url')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
+												</div>
                 <div class="col-12 mb-3">
-                  <label for="username" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $firstName }}</label>
+                  <label for="username" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="first_name_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en" autofocus />
+                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en" autofocus />
+                    @error('first_name')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                   </div>
                 </div>
                 <div class="col-12 mb-3">
-                  <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $secondName }}</label>
+                  <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="last_name_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
+                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
+                    @error('last_name')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                   </div>
                 </div>
                 <div class="col-12 mb-3">
                   <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
                   <div class="input-group input-group-merge">
                     <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
+                                     @error('email')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                   </div>
                 </div>
                 <div class="col-12 mb-4 form-password-toggle">
@@ -266,6 +277,9 @@
                   <div class="input-group input-group-merge">
                     <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" />
                     <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+                                                       @error('password')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                   </div>
                 </div>
                 <div class="col-12 mb-4 form-password-toggle">
@@ -273,25 +287,41 @@
                   <div class="input-group input-group-merge">
                     <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" />
                     <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+                
                   </div>
                 </div>
                 <div class="col-12 mb-4">
-                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ $gender }}</label>
+                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
                   <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
                     <option value="Male">{{ __('Male') }}</option>
                     <option value="Female">{{ __('Female') }}</option>
                   </select>
+                                                                     @error('gender')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
+              
                 </div>
                 <div class="col-12 mb-4 d-grid">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
                   <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
                   <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
+                  <input type="hidden" name="country_code" id="phone_code" value="20">
+                 @error('phone')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
+
+                   @error('phone_code')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                 </div>
                 <div id="mentorInputsWrapper" style="display: none;">
                   <div class="col-12 mb-3">
                     <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
                     <div class="input-group input-group-merge">
                       <input name="title_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
+                                    @error('title_en')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                     </div>
                   </div>
                   <div class="col-12 mb-3">
@@ -309,18 +339,30 @@
                         </optgroup>
                         @endforeach
                       </select>
+                   
+                                                       @error('expertise')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                     </div>
                   </div>
                   <div class="col-12 mb-3">
-                    <label for="userbio" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
+                    <label for="bio_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
                     <div class="input-group">
-                      <textarea name="userbio" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="userbio" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
+                      <textarea name="bio_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="bio_en" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
+                                     
+                                                       @error('bio_en')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                     </div>
                   </div>
                   <div class="col-12 mb-3">
                     <label for="Linkedin" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.Linkedin') }}</label>
                     <div class="input-group">
                       <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
+                                                         
+                                                       @error('Linkedin')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                     </div>
                   </div>
                 </div>
@@ -422,6 +464,7 @@
     // Initialize the phone input
     const phoneInput = document.getElementById("phone");
     const phoneError = document.getElementById('phone-error');
+    const countryCodeInput = document.querySelector("#phone_code");
 
     const iti = intlTelInput(phoneInput, {
       initialCountry: 'eg',
@@ -430,7 +473,17 @@
       formatOnDisplay: false,
       separateDialCode: true,
       autoPlaceholder: "aggressive",
+      
       customPlaceholder: (placeholder) => "e.g. " + placeholder,
+    });
+
+        // Set initial country code
+    countryCodeInput.value = iti.getSelectedCountryData().dialCode;
+
+    // Update country code when country changes
+    phoneInput.addEventListener('countrychange', function() {
+      const countryData = iti.getSelectedCountryData();
+      countryCodeInput.value = countryData.dialCode;
     });
 
     // Optional: Handle validation
@@ -445,22 +498,57 @@
       }
     });
   </script>
-  <script>
-    document.querySelectorAll('.role-input').forEach(input => {
-      input.addEventListener('change', function () {
-        const selectedRole = this.value;
-        if(selectedRole === 'Mentor') {
-          selectedRolehash = "2520";
-        }else{
-          selectedRolehash = "2521";
-        }
-  
-        // تعديل رابط الصفحة بدون تحميل
-        const url = new URL(window.location);
-        url.searchParams.set('data', selectedRolehash);
-        window.history.pushState({}, '', url);
-      });
-    });
-  </script>
+<script>
+const mentorWrapper = document.getElementById('mentorInputsWrapper');
+const mentorFields = mentorWrapper.querySelectorAll('input, select, textarea');
+
+document.querySelectorAll('.role-input').forEach(input => {
+  input.addEventListener('change', function () {
+    let selectedRole = this.value;
+    let selectedRoleHash, typeValue;
+
+    if (selectedRole === '4') {
+      selectedRoleHash = "2520";
+      typeValue = "mentor";
+      mentorWrapper.style.display = 'block';
+      mentorFields.forEach(f => f.disabled = false);
+    } else {
+      selectedRoleHash = "2521";
+      typeValue = "3";
+      mentorWrapper.style.display = 'none';
+      mentorFields.forEach(f => f.disabled = true);
+    }
+
+    // تحديث الرابط بنفس الصفحة مع إضافة type و data
+    const url = new URL(window.location.href);
+    url.searchParams.set('type', typeValue);
+    url.searchParams.set('data', selectedRoleHash);
+    window.history.pushState({}, '', url);
+  });
+});
+</script>
+
+<script>
+	const fileInput = document.getElementById('file1');
+	const previewImage = document.querySelector('label[for="file1"] img');
+
+	fileInput.addEventListener('change', (event) => {
+		const file = event.target.files[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = (event) => {
+				previewImage.src = event.target.result;
+			};
+			reader.onerror = () => {
+				alert('Error loading file');
+			};
+			reader.readAsDataURL(file);
+		}
+	});
+
+	document.getElementById('company-logo').addEventListener('click', () => {
+		document.getElementById('file1').click();
+	});
+</script>
 </body>
 </html>

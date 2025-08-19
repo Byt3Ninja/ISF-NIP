@@ -465,7 +465,7 @@ return [
 	'Problem Solution' => 'حل المشكلة',
 	'add organizations first' => 'برجاء اضافة مؤسسات اولا',
 	'CycleStoredSuccessfully' => 'شكرا علي انضمامك للبرنامج، سيتم تقييم الطلب والرد عليك لاحقا من فريق ادارة البرنامج',
-
+	'formSubmittedSuccessfully' => 'شكرا علي تعبئة النموذج، سيتم تقييم الطلب والرد عليك لاحقا من فريق ادارة البرنامج',
 	'Training sessions Duration' => 'عدد ساعات جلسات التدريب',
 	'Mentorship requests Duration' => 'عدد ساعات جلسات الارشاد',
 	'hours' => 'ساعات',
@@ -2317,5 +2317,6 @@ return [
     'In-Person' => 'حضوري',
 	'Startups_trainings_Hours' => 'ساعات تدريبات الشركات الناشئة',
 	'Team_is_full.' => 'الفريق مكتمل.',
+	'No_results_found' => 'لم يتم العثور على نتايج',
 
 ];

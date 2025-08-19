@@ -28,7 +28,7 @@ if($user)
     @if ($all > 0)
       <li class="dropdown-menu-header border-bottom">
         <div class="dropdown-header d-flex align-items-center py-3">
-          <h6 class="mb-0 me-auto" style="text-transform:capitalize;">{{ __('admin.Notification') }}</h6>
+          <h6 class="mb-0 me-auto" style="text-transform:capitalize;">{{ __('notification') }}</h6>
           <div class="d-flex align-items-center h6 mb-0">
             <span class="badge bg-label-primary me-2" id="new-count">{{ $all }} {{ $l == 'en' ? 'New': 'جديد' }}</span>
 

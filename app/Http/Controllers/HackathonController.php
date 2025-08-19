@@ -15,14 +15,17 @@ use App\Team_member;
 use App\CyclesMentors;
 use App\TeamFormation;
 use App\ScreeningEvaluation;
-use App\ScreeningEvaluationResults;
 use Illuminate\Http\Request;
+use App\Exports\WinnersExport;
 use Illuminate\Support\Facades\DB;
+use App\ScreeningEvaluationResults;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HackathonController extends Controller
 {
@@ -94,9 +97,27 @@ class HackathonController extends Controller
          });
 
          
-        $pastHackathons = $hackathons->where('status', 'Finished')
+        $pastHackathons_q = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
+
+        // عدد العناصر في كل صفحة
+        $perPage = 5;
+
+        // الصفحة الحالية
+        $page = request()->get('page', 1);
+
+        // قص البيانات على حسب الصفحة
+        $currentPageItems = $pastHackathons_q->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // عمل الـ Paginator
+        $pastHackathons = new LengthAwarePaginator(
+            $currentPageItems,
+            $pastHackathons_q->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
         
         $hackathons = $hackathons->reject(function ($item) {
             return $item['status'] === 'Finished';
@@ -202,7 +223,7 @@ class HackathonController extends Controller
                 states as s ON u.state_id = s.id
             WHERE c.cycle = ?
         ";
-        $params = [$user->company->cycle];
+        $params = [$user->team_member->teamFormation->user->company->cycle];
         if( count($existInTeam) > 0 )
         {
             $viewMember_q .= " AND u.id NOT IN ($placeholders)";
@@ -331,7 +352,7 @@ class HackathonController extends Controller
             LEFT JOIN
                 users as u ON u.id = sf.user_id
             WHERE sf.team_formation_id = ? 
-        ";
+        ORDER BY sf.created_at DESC";
 
         $sharedFile = collect(DB::select($sharedFile_q, [$TF_id]));
 
@@ -1367,7 +1388,7 @@ class HackathonController extends Controller
             ->where('acceptInvition', 'pending')
             ->first();
            
-            if($isExpired->created_at < $isExpired->created_at->subHours(24)) {
+            if($isExpired && $isExpired->created_at < $isExpired->created_at->subHours(24)) {
                 $isExpired->acceptInvition = 'expired';
                 $isExpired->Name = $user->first_name . ' ' . $user->last_name;
                 $isExpired->TeamMember = 'hackathon';
@@ -1384,20 +1405,8 @@ class HackathonController extends Controller
                 return redirect()->back()->with('error', 'Invitation not found.');
             }
 
-            $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-            $count_team_q = Team_member::where('team_formation_id', $teams->id)
-                ->get();
-            $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
-
-            $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
-            if($step->count_team_number < $count_team){
-                foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
-                    $member->acceptInvition = 'rejected';
-                    $member->save();
-                }
-                return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
-            }
-
+            
+            
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
@@ -1405,6 +1414,20 @@ class HackathonController extends Controller
                 $teamMember->user_id = $user->id;
                 $teamMember->save();
 
+                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+            
+
+            $count_team_q = Team_member::where('team_formation_id', $teams->id)->get();
+            $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+            $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+           
+            if($step->count_team_number <= $count_team){
+                foreach ($count_team_q->whereIn('acceptInvition', ['join', 'pending']) as $member){
+                    $member->acceptInvition = 'rejected';
+                    $member->save();
+                }
+            }
+            
                 $allteamMembers = Team_member::where('Email', $teamMember->Email)
                 ->where('acceptInvition', 'pending')
                 ->get();
@@ -1417,18 +1440,6 @@ class HackathonController extends Controller
                     $allteamMember->user_id = $user->id;
                     $allteamMember->save();
                 }
-
-                
-                    $teamformation = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-                    $inviteduser = $teamformation->user_id;
-                    $userInv = User::where('id', $inviteduser)->first();
-                    $updatecompany =Company::where('id', $user->company_id)->first();
-                    if($userInv?->company?->cycle != null){
-                        $updatecompany->cycle = $userInv?->company?->cycle ?? 0;
-                        $updatecompany->step = $userInv?->company?->step ?? 0;
-                        $updatecompany->save();
-                    }
-    
 
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
     }
@@ -1454,6 +1465,21 @@ class HackathonController extends Controller
                 $teamMember = Team_member::where('id', $id)
                 ->where('acceptInvition', 'pending')
                 ->first();
+
+            $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+            $count_team_q = Team_member::where('team_formation_id', $teams->id)
+                ->get();
+            $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+                $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+            if($step->count_team_number <= $count_team){
+                foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+                    $member->acceptInvition = 'rejected';
+                    $member->save();
+                }
+                return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+            }
+
+
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation not found.');
             }
@@ -2293,85 +2319,11 @@ class HackathonController extends Controller
     public function viewHackathonWinners( $id )
     {
         $l = app()->getLocale();
-        $cycle = DB::table('cycles as c')
-            ->select([
-                'c.id',
-                'c.title',
-                'c.description',
-                'c.start',
-                'c.end',
-                'c.winners_announcement',
-                'o.id AS organization_id',
-                'o.name_ar AS organization_name_ar',
-                'o.name_en AS organization_name_en',
-            ])
-            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
-            ->where('c.type', 'Hackathon')
-            ->whereNull('c.deleted_at')
-            ->where('c.id', $id)
-            ->first();
+        $cycle = Cycle::getHackathon( $id );
 
         if( empty( $cycle ) ) { return abort(404); }
         $teams = TeamFormation::teams( $id );
-        $steps_ids = $teams->whereNotNull('step')->pluck('step')->unique()->toArray();
-        $output = collect([]);
-        foreach( $steps_ids as $stepId )
-        {
-            $check = ScreeningEvaluation::where('step_id', $stepId)->first();
-            if( empty( $check ) )
-			{
-				$evaluation = new ScreeningEvaluation();
-				$evaluation->step_id = $stepId;
-				$evaluation->save();
-			}
-            $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
-            $metadata = ScreeningEvaluationResults::metadata( $stepId );
-            $judges = $metadata['judges'];
-            $judges = $judges->map(function( $item ) {
-                $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
-                return $item;
-            });
-
-            $scoped_teams = $teams->where('step', $stepId)->values();
-            foreach( $scoped_teams as $index => $team )
-            {
-                $totalScore = 0;
-                $teamJudges = [];
-                $company_id = $team->company->id;
-                $publishedEvaluations = 0;
-                $averageScore = 0;
-                
-                foreach( $judges as $judge )
-                {
-                    if( in_array($company_id, $judge->startups->toArray()) )
-                    {
-                        $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
-                        if ($scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score)) {
-                            $teamJudges[] = $judge;
-                            $totalScore += (float) $scoped_company->score;
-                            $publishedEvaluations++;
-                        }
-                    }
-                }
-
-                if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
-                $scoped_teams[$index]->score = $averageScore;
-                $scoped_teams[$index]->judges = $teamJudges;
-            }
-            $output = $output->merge($scoped_teams);
-        }
-        $winnersData = $output->map(function( $team ) {
-            return [
-                'id' => $team->id,
-                'team' => $team->name,
-                'step' => $team->step_title,
-                'project' => $team->project->name ?? '-',
-                'score' => $team->score,
-                'judges' => $team->judges,
-                'rank' => $team->project->winner ?? '',
-                'leader' => $team->members->where('isLeader', 1)->first(),
-            ];
-        });
+        $winnersData = TeamFormation::winners( $teams );
 
         $now = now();
         $start = Carbon::parse($cycle->start);
@@ -2398,6 +2350,22 @@ class HackathonController extends Controller
         $hackathon->organization->name =  $cycle->{'organization_name_' . $l};
 
         return view('admin.hackathon.admin.winners', compact('teams', 'winnersData', 'hackathon'));
+    }
+
+    public function exportHackathonWinners( $id )
+    {
+        $tail = 'xlsx';
+        $request = request();
+        $type = $request->has('type') ? ( in_array( $request->input('type', 'excel'), ['csv', 'excel'] ) ? $request->input('type', 'excel') : 'excel' ) : 'excel';
+        if( $type == 'csv' ) { $tail = 'csv'; } elseif( $type == 'excel' ) { $tail = 'xlsx'; } else { return abort(404); }
+        $cycle = Cycle::getHackathon( $id );
+
+        if( empty( $cycle ) ) { return abort(404); }
+        $teams = TeamFormation::teams( $id );
+        $winnersData = TeamFormation::winners( $teams );
+
+        $date = date('Y_m_d_H_i_s');
+        return Excel::download(new WinnersExport( $winnersData ), 'winners_report_' . $date . '.' . $tail);
     }
 
     public function publishHackathonWinners( Request $request, $id )

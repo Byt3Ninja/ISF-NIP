@@ -2,10 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StepController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\StageController;
 use App\Http\Controllers\API\SectorController;
 use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
@@ -50,16 +52,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
-    Route::patch('/users/{id}/deactivate', [UserController::class, 'deactivate']);
+    Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
     Route::get('/roles', [RoleController::class, 'index']);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
     Route::get('/currencies', [CurrencyController::class, 'index']);
+    Route::get('/currencies-all', [CurrencyController::class, 'currencies']);
+    Route::post('/currencies', [CurrencyController::class, 'store']);
+    Route::post('/currencies/{id}', [CurrencyController::class, 'update']);
+    Route::delete('/currencies/{id}', [CurrencyController::class, 'destroy']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
-    Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
     Route::post('/v1/availability', [ScheduleController::class, 'store']);
     Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
     Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);
@@ -72,24 +78,60 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('organizations/{id}', [OrganizationController::class, 'destroy']);
     Route::get('/startups', [CompanyController::class, 'index']);
     Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
+    Route::post('/company/profile', [CompanyController::class, 'update']);
     Route::get('/sectors', [SectorController::class, 'index']);
     Route::get('/states', [SectorController::class, 'getStates']);
     Route::post('/programs', [ProgramController::class, 'store']);
     Route::post('programs/{id}', [ProgramController::class, 'update']);
     Route::get('/v1/programs', [ProgramController::class, 'index']);
     Route::get('/v1/programs/{id}', [ProgramController::class, 'show']);
+    Route::get('/v1/programs/{programId}/reports/summary', [ProgramController::class, 'summary']);
+    Route::get('/v1/programs/{programId}/reports/performance', [ProgramController::class, 'performance']);
+    Route::get('/v1/programs/{programId}/reports/mentorship', [ProgramController::class, 'mentorship']);
+    Route::get('/v1/programs/{programId}/reports/workshops', [ProgramController::class, 'workshops']);
+    Route::get('/v1/programs/{programId}/reports/final-evaluation', [ProgramController::class, 'finalEvaluation']);
     Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
     Route::apiResource('steps', StepController::class);
     Route::prefix('messages')->group(function () {
-    Route::post('/', [MessageController::class, 'store']);
-    Route::post('/reply', [MessageController::class, 'reply']); 
-    Route::patch('/toggle-status', [MessageController::class, 'toggleStatus']);
-    Route::patch('/star', [MessageController::class, 'toggleStar']);
+        Route::post('/', [MessageController::class, 'store']);
+        Route::post('/reply', [MessageController::class, 'reply']); 
+        Route::patch('/toggle-status', [MessageController::class, 'toggleStatus']);
+        Route::patch('/star', [MessageController::class, 'toggleStar']);
+        Route::get('/', [MessageController::class, 'index']);
+        Route::get('/{id}', [MessageController::class, 'show']);
+        Route::patch('/trash', [MessageController::class, 'moveToTrash']);
+        Route::delete('/', [MessageController::class, 'forceDelete']);
     });
+    Route::get('/stages', [StageController::class, 'index']);
+
+
+    // جروبات
+    Route::post('/groups', [ChatController::class, 'createGroup']);
+    Route::post('/groups/{groupId}/add-user', [ChatController::class, 'addUser']);
+    Route::post('/groups/{groupId}/remove-user', [ChatController::class, 'removeUser']);
+    Route::post('/groups/{groupId}/exit', [ChatController::class, 'exitGroup']);
+    Route::delete('/groups/{groupId}/delete', [ChatController::class, 'deleteGroup']);
+    Route::get('/my-groups', [ChatController::class, 'myGroups']);
+    
+
+
+
+    // wirechat messages
+    Route::get('/wirechat/messages', [ChatController::class, 'messages']);
+    Route::post('/groups/{groupId}/messages', [ChatController::class, 'sendMessage']);
+    Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
+
+    // Search Users
+    Route::get('/users/search', [ChatController::class, 'searchUser']);
+    
 });
+
+
+
+
 
 
 

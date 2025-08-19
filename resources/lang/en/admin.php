@@ -483,6 +483,7 @@ return [
 	'Problem Solution' => 'Problem Solution',
 	'add organizations first' => 'Please Create Organization Firstly',
 	'CycleStoredSuccessfully' => 'Thank you for joining the program. Your request will be evaluated, and our program management team will respond to you later.',
+	'formSubmittedSuccessfully' => 'Thank you for filling the form. Your request will be evaluated, and our program management team will respond to you later.',
 	'Training sessions Duration' => 'Training sessions Durations (Hours)',
 	'Mentorship requests Duration' => 'Mentorship sessions Durations (Hours)',
 	'hours' => 'Hosrs',
@@ -728,6 +729,7 @@ return [
 	'Tags Created By' => 'Created By',
 	'Tags Created At' => 'Created At',
 	'Show' => 'Show',
+
 	'TimeSheet' => 'Time Sheet',
 	'UserTimeSheet' => 'Time Sheet Users',
 	'Financial Report' => ' Financial Report ',
@@ -2262,4 +2264,5 @@ return [
     'Online' => 'Online',
     'In-Person' => 'In-Person',
 	'Team_is_full.' => 'Team is full.',
+	'No_results_found' => 'No results found',
 ];
