@@ -2,9 +2,9 @@
 
 @section('content')
   @php
-    $clist = [$cstep->id];
+    $clist = [$cstep?->id];
     if ($form) {
-      $clist = [$form->id, $cstep->id];
+      $clist = [$form->id, $cstep?->id];
     }
     $companies = \App\Company::whereIn('step', $clist);
     
