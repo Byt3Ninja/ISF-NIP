@@ -2264,4 +2264,5 @@ return [
     'Online' => 'Online',
     'In-Person' => 'In-Person',
 	'Team_is_full.' => 'Team is full.',
+	'No_results_found' => 'No results found',
 ];

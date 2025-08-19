@@ -2317,5 +2317,6 @@ return [
     'In-Person' => 'حضوري',
 	'Startups_trainings_Hours' => 'ساعات تدريبات الشركات الناشئة',
 	'Team_is_full.' => 'الفريق مكتمل.',
+	'No_results_found' => 'لم يتم العثور على نتايج',
 
 ];
