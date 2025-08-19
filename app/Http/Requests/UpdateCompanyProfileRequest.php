@@ -92,6 +92,8 @@ class UpdateCompanyProfileRequest extends FormRequest
             'CommercialRegister' => 'required_if:haveStartup,Yes|string|max:255',
             'TaxCard' => 'required_if:haveStartup,Yes|string|max:255',
             'Country_Register_id' => 'required_if:haveStartup,Yes|exists:countries,id',
+            'countryCode' => 'nullable|string|max:10',
+            'countryCodeWA' => 'nullable|string|max:10',
         ];
     }
 

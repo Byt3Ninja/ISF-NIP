@@ -122,7 +122,7 @@ class ScreeningEvaluationResults extends Model
 			});
 		}
 
-		if( $getStep->stype == 5 )
+		if( $getStep?->stype == 5 )
 		{
 			foreach( $judges as $index => $judge )
 			{

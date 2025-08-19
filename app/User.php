@@ -25,7 +25,7 @@ use App\Notifications\ResetPassword as ResetPasswordNotification;
 class User extends Authenticatable implements MustVerifyEmail
 {
     // use Auditable;
-    use Notifiable ,HasRoles,HasApiTokens;
+    use Notifiable ,HasRoles,HasApiTokens, Chatable;
     // use SoftDeletes;
     public static $module = 'Users';
 
