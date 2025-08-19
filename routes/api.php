@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/currencies/{id}', [CurrencyController::class, 'destroy']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
-    Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
     Route::post('/v1/availability', [ScheduleController::class, 'store']);
     Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
     Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);
@@ -98,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [MessageController::class, 'index']);
         Route::get('/{id}', [MessageController::class, 'show']);
         Route::patch('/trash', [MessageController::class, 'moveToTrash']);
+        Route::delete('/', [MessageController::class, 'forceDelete']);
     });
     Route::get('/stages', [StageController::class, 'index']);
 

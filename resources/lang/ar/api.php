@@ -87,4 +87,5 @@ return [
  'currencies_not_found' => 'العملات غير موجودة',
  'currency_not_found' => 'العملة غير موجودة',
  'currency_deleted' => 'تم حذف العملة بنجاح',
+ 'Messages_deleted_permanently' => 'تم حذف الرسائل بنجاح',
 ];
