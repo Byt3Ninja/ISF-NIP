@@ -254,7 +254,7 @@
                   <td>
                     <button
                       {{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
-                      onclick="add({{ $company->user->id }},{{ $company->cycledata->organization_id }},{{ $company->cycle }})"
+                      onclick="add({{ $company?->user?->id }},{{ $company?->cycledata?->organization_id }},{{ $company?->cycle }})"
                       type="button" class="btn btn-label-primary btn-icon rounded-circle">
                       <i class="ti ti-plus"></i>
                     </button>
