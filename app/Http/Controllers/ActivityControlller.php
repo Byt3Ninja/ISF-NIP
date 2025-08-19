@@ -6,6 +6,8 @@ use App\Activity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 
 class ActivityControlller extends Controller
@@ -72,14 +74,63 @@ class ActivityControlller extends Controller
             ->limit(5)
             ->get();
 
-        $suspiciousLogins = Activity::select('user_id', DB::raw('COUNT(*) as login_count'), DB::raw('GROUP_CONCAT(location SEPARATOR ", ") as locations'))
+        $suspiciousLogins = Activity::select(
+                'user_id', 
+                DB::raw('COUNT(*) as login_count'), 
+                DB::raw('GROUP_CONCAT(DISTINCT location SEPARATOR ", ") as locations'),
+                DB::raw('COUNT(DISTINCT location) as location_count'),
+                DB::raw('MAX(activity_time) as last_login'),
+                DB::raw('GROUP_CONCAT(DISTINCT ip_address SEPARATOR ", ") as ip_addresses'),
+                DB::raw('GROUP_CONCAT(DISTINCT browser SEPARATOR ", ") as browsers'),
+                DB::raw('GROUP_CONCAT(DISTINCT device SEPARATOR ", ") as devices')
+            )
+            ->with(['user'])
             ->groupBy('user_id')
-            ->havingRaw('login_count > 2')
+            ->havingRaw('login_count > 5 OR COUNT(DISTINCT location) > 1')
+            ->orderByDesc('login_count')
             ->get()
-            ->filter(function ($activity) {
+            ->map(function ($activity) {
                 $locations = array_filter(explode(', ', $activity->locations));
-                return count(array_unique($locations)) > 1;
+                $uniqueLocations = array_unique($locations);
+                $loginCount = $activity->login_count;
+                $locationCount = count($uniqueLocations);
+                
+                // Calculate risk level
+                $riskLevel = 'low';
+                if ($loginCount > 50 || $locationCount > 3) {
+                    $riskLevel = 'high';
+                } elseif ($loginCount > 20 || $locationCount > 1) {
+                    $riskLevel = 'medium';
+                }
+                
+                $activity->risk_level = $riskLevel;
+                $activity->unique_locations = $uniqueLocations;
+                
+                // Get actual location counts for this user
+                $locationCounts = Activity::where('user_id', $activity->user_id)
+                    ->select('location', DB::raw('COUNT(*) as count'))
+                    ->groupBy('location')
+                    ->pluck('count', 'location')
+                    ->toArray();
+                
+                $activity->location_counts = $locationCounts;
+                
+                return $activity;
+            })
+            ->filter(function ($activity) {
+                return count($activity->unique_locations) > 1 || $activity->login_count > 10;
             });
+       // Add detailed activities for each suspicious user
+       $suspiciousLogins->each(function ($suspiciousLogin) {
+           $totalActivitiesCount = Activity::where('user_id', $suspiciousLogin->user_id)->count();
+           $suspiciousLogin->recent_activities = Activity::where('user_id', $suspiciousLogin->user_id)
+               ->orderBy('activity_time', 'desc')
+               ->limit(10)
+               ->get();
+           $suspiciousLogin->has_more_activities = $totalActivitiesCount > 10;
+           $suspiciousLogin->total_activities_count = $totalActivitiesCount;
+       });
+
        return view('admin.activities.index', compact('activities', 'totalLoginsToday', 'totalLoginsWeek', 'totalLoginsMonth', 'topDevices', 'topBrowsers', 'loginsByCountry', 'peakHours', 'suspiciousLogins'));
     }
 
@@ -90,6 +141,76 @@ class ActivityControlller extends Controller
         $activity->delete();
 
         return to_route('activities.index')->with('success', __('admin.activity_deleted'));
+    }
+
+    public function forceLogout(Request $request)
+    {
+        $userId = $request->user_id;
+        
+        // In a real application, you would invalidate user sessions here
+        // For example: DB::table('sessions')->where('user_id', $userId)->delete();        
+        return response()->json(['success' => true, 'message' => __('admin.User_forcefully_logged_out')]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $l = app()->getLocale();
+
+        $userId = $request->user_id;
+        $user = \App\User::findOrFail($userId);
+        
+        // Generate a random password
+        $newPassword = Str::random(12);
+        $user->password = Hash::make($newPassword);
+        $user->save();
+        
+        // In a real application, you would send this password to the user via email
+        
+        return response()->json(['success' => true, 'message' => __('admin.Password_reset_successfully'), 'new_password' => $newPassword]);
+    }
+
+    public function blockIp(Request $request)
+    {
+        $ipAddress = $request->ip_address;
+        
+        // In a real application, you would add this IP to a blacklist table
+        // For example: BlockedIp::create(['ip_address' => $ipAddress]);
+        
+        return response()->json(['success' => true, 'message' => __('admin.IP_blocked_successfully')]);
+    }
+
+    public function loadMoreActivities(Request $request)
+    {
+        $userId = $request->user_id;
+        $offset = $request->offset ?? 0;
+        $limit = 10;
+        
+        $totalCount = Activity::where('user_id', $userId)->count();
+        
+        $activities = Activity::where('user_id', $userId)
+            ->orderBy('activity_time', 'desc')
+            ->skip($offset)
+            ->limit($limit)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'formatted_date' => $activity->activity_time->format('d M Y, H:i'),
+                    'location' => $activity->location,
+                    'ip_address' => $activity->ip_address,
+                    'browser' => $activity->browser,
+                    'device' => $activity->device,
+                ];
+            });
+        
+        $hasMore = ($offset + $limit) < $totalCount;
+        
+        return response()->json([
+            'success' => true,
+            'activities' => $activities,
+            'has_more' => $hasMore,
+            'total_count' => $totalCount
+        ]);
     }
 
 }

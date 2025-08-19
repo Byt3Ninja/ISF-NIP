@@ -679,6 +679,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
     Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
     Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
+    
+    // Security actions for suspicious logins
+    Route::post('/activities/force-logout', [ActivityControlller::class, 'forceLogout'])->name('activities.force-logout');
+    Route::post('/activities/reset-password', [ActivityControlller::class, 'resetPassword'])->name('activities.reset-password');
+    Route::post('/activities/block-ip', [ActivityControlller::class, 'blockIp'])->name('activities.block-ip');
+    Route::get('/activities/load-more', [ActivityControlller::class, 'loadMoreActivities'])->name('activities.load-more');
     /* End of Activities Routes */
 
 
