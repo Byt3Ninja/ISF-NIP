@@ -612,6 +612,16 @@
                                         "type": "string",
                                         "example": "+20123456789"
                                     },
+                                    "countryCode": {
+                                        "description": "Phone country code",
+                                        "type": "string",
+                                        "example": "+20"
+                                    },
+                                    "countryCodeWA": {
+                                        "description": "WhatsApp country code",
+                                        "type": "string",
+                                        "example": "+20"
+                                    },
                                     "whatsapp": {
                                         "type": "string",
                                         "example": "+20123456789"
@@ -5108,6 +5118,423 @@
                 ]
             }
         },
+        "/api/v1/programs/{programId}/summary": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get summary report for a program",
+                "description": "Returns KPIs, evaluation completion, average score, and step progress.",
+                "operationId": "getProgramSummary",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Summary data returned",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "kpis": {
+                                            "type": "object"
+                                        },
+                                        "programInfo": {
+                                            "type": "object"
+                                        },
+                                        "programStages": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "finalStatusDistribution": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/performance": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get company performance by sector and stage",
+                "operationId": "getProgramPerformance",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sector_id",
+                        "in": "query",
+                        "description": "Filter by sector ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "stage_id",
+                        "in": "query",
+                        "description": "Filter by stage ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Performance data by sector and stage",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "filters": {
+                                            "type": "object"
+                                        },
+                                        "companies": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/mentorship": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get mentorship performance data",
+                "operationId": "getMentorshipReport",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "mentor_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "company_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentorship data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "kpis": {
+                                            "type": "object"
+                                        },
+                                        "filters": {
+                                            "type": "object"
+                                        },
+                                        "mentorshipByCompany": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "mentorPerformance": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/workshops": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get workshops, performance, and surveys",
+                "operationId": "getWorkshopStatistics",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "trainer_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "workshop_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "workshop_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Workshops and performance stats",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "kpis": {
+                                            "type": "object"
+                                        },
+                                        "filters": {
+                                            "type": "object"
+                                        },
+                                        "workshops": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "companyPerformance": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "surveyResponses": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/final-evaluation": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get final evaluation report for a program",
+                "description": "Returns detailed scoring, evaluators' progress, and chart data for a specific program.",
+                "operationId": "getFinalEvaluation",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "The ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by evaluation status (e.g., Highest Rated, Good Performance, Needs Improvement)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_score",
+                        "in": "query",
+                        "description": "Minimum score to filter evaluations",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Final evaluation data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "evaluations": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "evaluators": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "summary": {
+                                            "type": "object"
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/sectors": {
             "get": {
                 "tags": [
@@ -5747,23 +6174,25 @@
                         "type": "integer",
                         "example": 1
                     },
+                    "name": {
+                        "type": "string",
+                        "example": "Flick Tech"
+                    },
                     "logo": {
                         "type": "string",
                         "format": "url",
                         "example": "https://example.com/logo.png"
                     },
-                    "name": {
-                        "type": "string",
-                        "example": "Flick Tech"
-                    },
                     "sector": {
                         "type": "string",
                         "example": "Technology"
                     },
-                    "establishmentDate": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "2020-01-15"
+                    "businessCategories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Technology"
+                        }
                     },
                     "state": {
                         "type": "string",
@@ -5777,18 +6206,196 @@
                         "type": "string",
                         "example": "Egypt"
                     },
-                    "organization": {
+                    "address": {
+                        "type": "string",
+                        "example": "123 Nile St."
+                    },
+                    "establishmentDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-01-15"
+                    },
+                    "yearsOfOperations": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "productOrService": {
+                        "type": "string",
+                        "example": "Mobile payment solution"
+                    },
+                    "infoCompany": {
+                        "type": "string",
+                        "example": "Leading fintech startup."
+                    },
+                    "aboutProblem": {
+                        "type": "string",
+                        "example": "Lack of financial inclusion."
+                    },
+                    "aboutMarketOpportunity": {
+                        "type": "string",
+                        "example": "Large unbanked population."
+                    },
+                    "aboutCompetitors": {
+                        "type": "string",
+                        "example": "PayMob, Fawry."
+                    },
+                    "aboutMonetization": {
+                        "type": "string",
+                        "example": "Transaction fees and subscriptions."
+                    },
+                    "aboutChallenges": {
+                        "type": "string",
+                        "example": "Regulatory compliance."
+                    },
+                    "idea": {
+                        "type": "string",
+                        "example": "Build a secure fintech wallet."
+                    },
+                    "problem": {
+                        "type": "string",
+                        "example": "People lack access to banking."
+                    },
+                    "solution": {
+                        "type": "string",
+                        "example": "An inclusive digital wallet."
+                    },
+                    "teamNum": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "workingTeamSummary": {
+                        "type": "string",
+                        "example": "Experienced fintech professionals."
+                    },
+                    "stage": {
                         "properties": {
                             "id": {
                                 "type": "integer",
-                                "example": 12
+                                "example": 3
                             },
                             "name": {
                                 "type": "string",
-                                "example": "Flat6Labs"
+                                "example": "Growth"
                             }
                         },
                         "type": "object"
+                    },
+                    "fundingStage": {
+                        "type": "string",
+                        "example": "Series A"
+                    },
+                    "revenueGenerating": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "currentlyFundraising": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "desiredFundingAmount": {
+                        "type": "number",
+                        "example": 500000
+                    },
+                    "raisedFund": {
+                        "type": "number",
+                        "example": 200000
+                    },
+                    "equityOffered": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10.5
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "PreMoneyValuation": {
+                        "type": "number",
+                        "example": 1500000
+                    },
+                    "targetedMarket": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Egypt"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "businessType": {
+                        "type": "string",
+                        "example": "B2B"
+                    },
+                    "financialPlan": {
+                        "type": "string",
+                        "example": "Detailed 3-year plan."
+                    },
+                    "financialPlanAttachment": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/plan.pdf"
+                    },
+                    "achievedMilestones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "MVP Launch"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Launched beta version."
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "plannedMilestones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Scale to 3 countries"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Expand operations."
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "archivedMilestones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Seed Round Closed"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Closed $200K round."
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "Industries": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Fintech"
+                        }
                     },
                     "founders": {
                         "type": "array",
@@ -5801,6 +6408,50 @@
                                 "role": {
                                     "type": "string",
                                     "example": "Founder"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "ahmed@example.com"
+                                },
+                                "linkedin": {
+                                    "type": "string",
+                                    "example": "https://linkedin.com/in/ahmed"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "shareholders": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Sara Ali"
+                                },
+                                "role": {
+                                    "type": "string",
+                                    "example": "Co-Founder"
+                                },
+                                "ownership": {
+                                    "type": "number",
+                                    "example": 20
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "investors": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "XYZ Capital"
+                                },
+                                "investmentType": {
+                                    "type": "string",
+                                    "example": "Angel Investor"
                                 }
                             },
                             "type": "object"
@@ -5810,10 +6461,6 @@
                         "type": "array",
                         "items": {
                             "properties": {
-                                "id": {
-                                    "type": "integer",
-                                    "example": 1
-                                },
                                 "name": {
                                     "type": "string",
                                     "example": "No Poverty"
@@ -5821,6 +6468,94 @@
                             },
                             "type": "object"
                         }
+                    },
+                    "documents": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "url",
+                            "example": "https://example.com/docs/file1.pdf"
+                        }
+                    },
+                    "pitchDeck": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/pitch.pdf"
+                    },
+                    "pitchDeckVideo": {
+                        "type": "string",
+                        "example": "https://youtube.com/watch?v=abc123"
+                    },
+                    "businessPlan": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/business-plan.pdf"
+                    },
+                    "pitchDeckSummary": {
+                        "type": "string",
+                        "example": "Our plan to reach 1M users."
+                    },
+                    "businessModel": {
+                        "type": "string",
+                        "example": "Freemium + Subscription"
+                    },
+                    "businessModelDescription": {
+                        "type": "string",
+                        "example": "Users start free, then upgrade."
+                    },
+                    "productPhoto": {
+                        "type": "string",
+                        "example": "https://example.com/photo.png"
+                    },
+                    "CreatedTax": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "CommercialRegister": {
+                        "type": "string",
+                        "example": "123456"
+                    },
+                    "TaxCard": {
+                        "type": "string",
+                        "example": "654321"
+                    },
+                    "countryRegister": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Egypt"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "info@company.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+201234567890"
+                    },
+                    "countryCode": {
+                        "type": "string",
+                        "example": "+20"
+                    },
+                    "whatsapp": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "countryCodeWA": {
+                        "type": "string",
+                        "example": "+20"
+                    },
+                    "googleMapUrl": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://goo.gl/maps/xyz"
                     },
                     "socialLinks": {
                         "properties": {
@@ -6149,6 +6884,20 @@
                         "type": "string",
                         "format": "url",
                         "example": "https://example.com/policies/delegation.pdf"
+                    }
+                },
+                "type": "object"
+            },
+            "Role": {
+                "title": "Role",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Admin"
                     }
                 },
                 "type": "object"

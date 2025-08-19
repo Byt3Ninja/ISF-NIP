@@ -12,44 +12,133 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\CompanyProfileResource;
 use App\Http\Requests\UpdateCompanyProfileRequest;
 
- /**
+/**
  * @OA\Schema(
  *     schema="Company",
  *     type="object",
  *     title="Company",
  *     @OA\Property(property="id", type="integer", example=1),
- *     @OA\Property(property="logo", type="string", format="url", example="https://example.com/logo.png"),
  *     @OA\Property(property="name", type="string", example="Flick Tech"),
+ *     @OA\Property(property="logo", type="string", format="url", example="https://example.com/logo.png"),
  *     @OA\Property(property="sector", type="string", example="Technology"),
- *     @OA\Property(property="establishmentDate", type="string", format="date", example="2020-01-15"),
+ *     @OA\Property(property="businessCategories", type="array", @OA\Items(type="string", example="Technology")),
  *     @OA\Property(property="state", type="string", example="Giza"),
  *     @OA\Property(property="city", type="string", example="Cairo"),
  *     @OA\Property(property="country", type="string", example="Egypt"),
- * 
- *     @OA\Property(
- *         property="organization",
- *         type="object",
- *         @OA\Property(property="id", type="integer", example=12),
- *         @OA\Property(property="name", type="string", example="Flat6Labs")
+ *     @OA\Property(property="address", type="string", example="123 Nile St."),
+ *     @OA\Property(property="establishmentDate", type="string", format="date", example="2020-01-15"),
+ *     @OA\Property(property="yearsOfOperations", type="integer", example=5),
+ *     @OA\Property(property="productOrService", type="string", example="Mobile payment solution"),
+ *     @OA\Property(property="infoCompany", type="string", example="Leading fintech startup."),
+ *     @OA\Property(property="aboutProblem", type="string", example="Lack of financial inclusion."),
+ *     @OA\Property(property="aboutMarketOpportunity", type="string", example="Large unbanked population."),
+ *     @OA\Property(property="aboutCompetitors", type="string", example="PayMob, Fawry."),
+ *     @OA\Property(property="aboutMonetization", type="string", example="Transaction fees and subscriptions."),
+ *     @OA\Property(property="aboutChallenges", type="string", example="Regulatory compliance."),
+ *     @OA\Property(property="idea", type="string", example="Build a secure fintech wallet."),
+ *     @OA\Property(property="problem", type="string", example="People lack access to banking."),
+ *     @OA\Property(property="solution", type="string", example="An inclusive digital wallet."),
+ *     @OA\Property(property="teamNum", type="integer", example=12),
+ *     @OA\Property(property="workingTeamSummary", type="string", example="Experienced fintech professionals."),
+ *     @OA\Property(property="stage", type="object",
+ *         @OA\Property(property="id", type="integer", example=3),
+ *         @OA\Property(property="name", type="string", example="Growth")
  *     ),
+ *     @OA\Property(property="fundingStage", type="string", example="Series A"),
+ *     @OA\Property(property="revenueGenerating", type="boolean", example=true),
+ *     @OA\Property(property="currentlyFundraising", type="boolean", example=false),
+ *     @OA\Property(property="desiredFundingAmount", type="number", example=500000),
+ *     @OA\Property(property="raisedFund", type="number", example=200000),
+ *     @OA\Property(property="equityOffered", type="number", format="float", example=10.5),
+ *     @OA\Property(property="currency", type="string", example="USD"),
+ *     @OA\Property(property="PreMoneyValuation", type="number", example=1500000),
+ *     @OA\Property(
+ *         property="targetedMarket",
+ *         type="array",
+ *         @OA\Items(
+ *             type="object",
+ *             @OA\Property(property="id", type="integer", example=1),
+ *             @OA\Property(property="name", type="string", example="Egypt")
+ *         )
+ *     ),
+ *     @OA\Property(property="businessType", type="string", example="B2B"),
+ *     @OA\Property(property="financialPlan", type="string", example="Detailed 3-year plan."),
+ *     @OA\Property(property="financialPlanAttachment", type="string", format="url", example="https://example.com/plan.pdf"),
+ *     @OA\Property(property="achievedMilestones", type="array", @OA\Items(
+ *         @OA\Property(property="name", type="string", example="MVP Launch"),
+ *         @OA\Property(property="description", type="string", example="Launched beta version.")
+ *     )),
+ *     @OA\Property(property="plannedMilestones", type="array", @OA\Items(
+ *         @OA\Property(property="name", type="string", example="Scale to 3 countries"),
+ *         @OA\Property(property="description", type="string", example="Expand operations.")
+ *     )),
+ *     @OA\Property(property="archivedMilestones", type="array", @OA\Items(
+ *         @OA\Property(property="name", type="string", example="Seed Round Closed"),
+ *         @OA\Property(property="description", type="string", example="Closed $200K round.")
+ *     )),
+ *     @OA\Property(property="Industries", type="array", @OA\Items(type="string", example="Fintech")),
+ * 
  *     @OA\Property(
  *         property="founders",
  *         type="array",
  *         @OA\Items(
  *             @OA\Property(property="name", type="string", example="Ahmed Hassan"),
- *             @OA\Property(property="role", type="string", example="Founder")
+ *             @OA\Property(property="role", type="string", example="Founder"),
+ *             @OA\Property(property="email", type="string", example="ahmed@example.com"),
+ *             @OA\Property(property="linkedin", type="string", example="https://linkedin.com/in/ahmed")
  *         )
  *     ),
- * 
+ *     @OA\Property(
+ *         property="shareholders",
+ *         type="array",
+ *         @OA\Items(
+ *             @OA\Property(property="name", type="string", example="Sara Ali"),
+ *             @OA\Property(property="role", type="string", example="Co-Founder"),
+ *             @OA\Property(property="ownership", type="number", example=20)
+ *         )
+ *     ),
+ *     @OA\Property(
+ *         property="investors",
+ *         type="array",
+ *         @OA\Items(
+ *             @OA\Property(property="name", type="string", example="XYZ Capital"),
+ *             @OA\Property(property="investmentType", type="string", example="Angel Investor")
+ *         )
+ *     ),
  *     @OA\Property(
  *         property="sdgs",
  *         type="array",
  *         @OA\Items(
- *             @OA\Property(property="id", type="integer", example=1),
  *             @OA\Property(property="name", type="string", example="No Poverty")
  *         )
  *     ),
- * 
+ *     @OA\Property(
+ *         property="documents",
+ *         type="array",
+ *         @OA\Items(type="string", format="url", example="https://example.com/docs/file1.pdf")
+ *     ),
+ *     @OA\Property(property="pitchDeck", type="string", format="url", example="https://example.com/pitch.pdf"),
+ *     @OA\Property(property="pitchDeckVideo", type="string", example="https://youtube.com/watch?v=abc123"),
+ *     @OA\Property(property="businessPlan", type="string", format="url", example="https://example.com/business-plan.pdf"),
+ *     @OA\Property(property="pitchDeckSummary", type="string", example="Our plan to reach 1M users."),
+ *     @OA\Property(property="businessModel", type="string", example="Freemium + Subscription"),
+ *     @OA\Property(property="businessModelDescription", type="string", example="Users start free, then upgrade."),
+ *     @OA\Property(property="productPhoto", type="string", example="https://example.com/photo.png"),
+ *     @OA\Property(property="CreatedTax", type="boolean", example=true),
+ *     @OA\Property(property="CommercialRegister", type="string", example="123456"),
+ *     @OA\Property(property="TaxCard", type="string", example="654321"),
+ *     @OA\Property(
+ *         property="countryRegister",
+ *         type="object",
+ *         @OA\Property(property="id", type="integer", example=1),
+ *         @OA\Property(property="name", type="string", example="Egypt")
+ *     ),
+ *     @OA\Property(property="email", type="string", example="info@company.com"),
+ *     @OA\Property(property="phone", type="string", example="+201234567890"),
+ *     @OA\Property(property="countryCode", type="string", example="+20"),
+ *     @OA\Property(property="whatsapp", type="string", example="1234567890"),
+ *     @OA\Property(property="countryCodeWA", type="string", example="+20"),
+ *     @OA\Property(property="googleMapUrl", type="string", format="url", example="https://goo.gl/maps/xyz"),
  *     @OA\Property(
  *         property="socialLinks",
  *         type="object",
@@ -342,6 +431,8 @@ public function show($id)
      *                 @OA\Property(property="productOrService", type="string", example="AI Platform for Startups"),
      *                 @OA\Property(property="email", type="string", format="email", example="info@flicktech.com"),
      *                 @OA\Property(property="phone", type="string", example="+20123456789"),
+     *                 @OA\Property(property="countryCode", type="string", example="+20", description="Phone country code"),
+     *                 @OA\Property(property="countryCodeWA", type="string", example="+20", description="WhatsApp country code"),
      *                 @OA\Property(property="whatsapp", type="string", example="+20123456789"),
      *                 @OA\Property(property="website", type="string", example="https://flicktech.com"),
      *                 @OA\Property(property="googleMapUrl", type="string", example="https://goo.gl/maps/xyz123"),
@@ -459,6 +550,12 @@ public function show($id)
         if (isset($data['address'])) $company->{"address_en"} = $data['address'];
         if (isset($data['yearsOfOperations'])) $company->years_of_operations = $data['yearsOfOperations'];
         if (isset($data['productOrService'])) $company->product_or_service = $data['productOrService'];
+        if (isset($data['countryCode'])) {
+            $company->country_code = $data['countryCode'];
+        }
+        if (isset($data['countryCodeWA'])) {
+           $company->country_code_w_a = $data['countryCodeWA'];
+        }
         if ($request->hasFile('logo')) {
             $image = $request->file('logo');
             $img_path = $image->store('images/logo', 'public_uploads');

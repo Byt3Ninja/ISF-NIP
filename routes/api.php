@@ -85,6 +85,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('programs/{id}', [ProgramController::class, 'update']);
     Route::get('/v1/programs', [ProgramController::class, 'index']);
     Route::get('/v1/programs/{id}', [ProgramController::class, 'show']);
+    Route::get('/v1/programs/{programId}/reports/summary', [ProgramController::class, 'summary']);
+    Route::get('/v1/programs/{programId}/reports/performance', [ProgramController::class, 'performance']);
+    Route::get('/v1/programs/{programId}/reports/mentorship', [ProgramController::class, 'mentorship']);
+    Route::get('/v1/programs/{programId}/reports/workshops', [ProgramController::class, 'workshops']);
+    Route::get('/v1/programs/{programId}/reports/final-evaluation', [ProgramController::class, 'finalEvaluation']);
     Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
