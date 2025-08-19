@@ -2948,6 +2948,133 @@
                         }
                     }
                 }
+            },
+            "delete": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Permanently delete trashed messages",
+                "description": "Force deletes one or more trashed messages. Only works on messages already moved to trash.",
+                "operationId": "permanentlyDeleteMessages",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "description": "Single message ID to permanently delete",
+                                                "type": "integer",
+                                                "example": 55
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "description": "Array of message IDs to permanently delete",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer"
+                                                },
+                                                "example": [
+                                                    55,
+                                                    56,
+                                                    57
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Messages permanently deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Messages deleted permanently"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No accessible messages found or not trashed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No accessible messages found"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/messages/reply": {
@@ -3887,19 +4014,19 @@
                 ]
             }
         },
-        "/api/v1/users/{user_id}/permissions": {
+        "/api/v1/{role}/permissions": {
             "get": {
                 "tags": [
                     "Permissions"
                 ],
-                "summary": "Get specified user's permissions (Admin only)",
+                "summary": "Get permissions based on Role (Admin only)",
                 "description": "Returns the specified user's roles and permissions grouped by module. Admin only.",
-                "operationId": "a23cfd278922d02379631675415c7cae",
+                "operationId": "7290946f4835f322f56aec9fa0bd46fa",
                 "parameters": [
                     {
                         "name": "user_id",
                         "in": "path",
-                        "description": "User ID to fetch permissions for",
+                        "description": "Role ID to fetch permissions for",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -5855,8 +5982,8 @@
                 },
                 "type": "object",
                 "example": {
-                    "user_id": 12,
-                    "roles": [
+                    "roleId": 12,
+                    "roleName": [
                         "Admin"
                     ],
                     "permissions": {

@@ -63,32 +63,36 @@ class MessageController extends Controller
         if (!$sender->ableToAny(['messages.send', 'messages.save'])) {
           return $this->forbidden(__('api.forbidden'));
         }
+
         $isDraft  = $request->draft;
-
+        $userIds = is_array($request->userId) ? $request->userId : [$request->userId];
        if ($isDraft) {
-        $draftId = DB::table('message_drafts')->insertGetId([
-            'sender'    => $senderId,
-            'receiver'  => $request->userId,
-            'cycle_id'  => $request->cycleId,
-            'subject'   => $request->subject,
-            'message'   => $request->title,
-            'drafts'    => 1,
-            'created_at'=> now(),
-            'updated_at'=> now()
-        ]);
+          $savedDrafts = [];
 
-        $data = [
-            'id'        => $draftId,
-            'type'      => 'draft',
-            'title'     => $request->title,
-            'subject'   => $request->subject,
-            'createdBy' => $sender->name,
-            'createdAt' => now()->toISOString(),
-            'status'    => 'unread',
-            'starred'   => false
-        ];
+        foreach ($userIds as $receiverId) {
+            $draftId = DB::table('message_drafts')->insertGetId([
+                'sender'     => $senderId,
+                'receiver'   => $receiverId,
+                'cycle_id'   => $request->cycleId,
+                'subject'    => $request->subject,
+                'message'    => $request->message,
+                'drafts'     => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-        return $this->created($data, __('api.Draft_saved_successfully'));
+            $savedDrafts[] = [
+                'id'        => $draftId,
+                'type'      => 'draft',
+                'subject'   => $request->subject,
+                'message'   => $request->message,
+                'createdBy' => $sender->name,
+                'createdAt' => now()->toISOString(),
+                'status'    => 'unread',
+                'starred'   => false
+            ];
+        }
+        return $this->created($savedDrafts, __('api.Draft_saved_successfully'));
        }
 
       $recipients = collect();
@@ -121,7 +125,7 @@ class MessageController extends Controller
             'sender'    => $senderId,
             'receiver'  => $receiver->id,
             'subject'   => $request->subject,
-            'message'   => $request->title,
+            'message'   => $request->message,
             'read'      => 0,
             'starred'   => 0,
             'created_at'=> now(),
@@ -131,8 +135,8 @@ class MessageController extends Controller
         $insertedMessages[] = [
             'id'        => $messageId,
             'type'      => 'outbox',
-            'title'     => $request->message,
             'subject'   => $request->subject,
+            'message'     => $request->message,
             'createdBy' => $sender->name,
             'createdAt' => now()->toISOString(),
             'status'    => 'unread',
@@ -400,8 +404,8 @@ class MessageController extends Controller
             return [
                 'id'        => $draft->id,
                 'type'      => 'draft',
-                'title'     => $draft->message,
                 'subject'   => $draft->subject,
+                'message'     => $draft->message,
                 'createdBy' => $user->name,
                 'createdAt' => Carbon::parse($draft->created_at)->toISOString(),
                 'status'    => 'unread',
@@ -466,8 +470,8 @@ class MessageController extends Controller
         return [
             'id'        => $msg->id,
             'type'      => $msg->sender == $user->id ? 'outbox' : 'inbox',
-            'title'     => $msg->message,
             'subject'   => $msg->subject,
+            'message'     => $msg->message,
             'createdBy' => $msg->sender == $user->id ? $user->name : optional($msg->senderUser)->name,
             'createdAt' => $msg->created_at->toISOString(),
             'status'    => $msg->read ? 'read' : 'unread',
@@ -488,6 +492,14 @@ class MessageController extends Controller
                 })
         ];
     });
+    $inboxCount = Messenger::where('receiver', $user->id)->count();
+    $outboxCount = Messenger::where('sender', $user->id)->count();
+    $starredCount = Messenger::where('receiver', $user->id)->where('starred', 1)->count();
+    $trashCount = Messenger::onlyTrashed()
+     ->where(function ($q) use ($user) {
+        $q->where('receiver', $user->id)->orWhere('sender', $user->id);
+     })->count();
+    $draftCount = DB::table('message_drafts')->where('sender', $user->id)->count();
 
     return $this->success($data, [
         'total'        => $messages->total(),
@@ -496,6 +508,11 @@ class MessageController extends Controller
         'totalPages'   => $messages->lastPage(),
         'hasNextPage'  => $messages->hasMorePages(),
         'hasPrevPage'  => $messages->currentPage() > 1,
+        'inboxCount'   => $inboxCount,
+        'outboxCount'  => $outboxCount,
+        'starredCount' => $starredCount,
+        'trashCount'   => $trashCount,
+        'draftCount'   => $draftCount,
     ], __('api.messages_retrieved_successfully'));
 }
 
@@ -554,8 +571,8 @@ public function show($id)
     $data = [
         'id'        => $message->id,
         'box'       => $message->sender == $user->id ? 'outbox' : 'inbox',
-        'title'     => $message->message,
         'subject'   => $message->subject,
+        'message'     => $message->message,
         'from'      => [
             'id'   =>  $message->sender,
             'name' => optional(User::find($message->sender))->first_name_en . ' ' . optional(User::find($message->sender))->last_name_en
@@ -708,5 +725,117 @@ public function moveToTrash(MoveToTrashRequest $request)
     }
 
     return $this->success($responseData, [], __('api.Messages_moved_to_trash_successfully'));
+}
+
+/**
+ * @OA\Delete(
+ *     path="/api/messages",
+ *     summary="Permanently delete trashed messages",
+ *     description="Force deletes one or more trashed messages. Only works on messages already moved to trash.",
+ *     operationId="permanentlyDeleteMessages",
+ *     tags={"Messages"},
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             oneOf={
+ *                 @OA\Schema(
+ *                     type="object",
+ *                     required={"messageIds"},
+ *                     @OA\Property(
+ *                         property="messageIds",
+ *                         type="integer",
+ *                         example=55,
+ *                         description="Single message ID to permanently delete"
+ *                     )
+ *                 ),
+ *                 @OA\Schema(
+ *                     type="object",
+ *                     required={"messageIds"},
+ *                     @OA\Property(
+ *                         property="messageIds",
+ *                         type="array",
+ *                         @OA\Items(type="integer"),
+ *                         example={55, 56, 57},
+ *                         description="Array of message IDs to permanently delete"
+ *                     )
+ *                 )
+ *             }
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="Messages permanently deleted successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Messages deleted permanently"),
+ *             @OA\Property(property="data", type="object", example={})
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="No accessible messages found or not trashed",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="No accessible messages found"),
+ *             @OA\Property(property="data", type="object", example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthorized",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Authentication required")
+ *         )
+ *     )
+ * )
+ */
+public function forceDelete(Request $request)
+{
+    $user = auth()->user();
+
+    if (!$user->ableTo('messages.delete')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    $messageIds = $request->messageIds;
+
+    if (!is_array($messageIds)) {
+        $messageIds = explode(',', $messageIds);
+    }
+
+    $messageIds = array_filter(array_map('trim', $messageIds));
+
+    $deleted = false;
+
+    foreach ($messageIds as $id) {
+        $message = Messenger::withTrashed()->find($id);
+
+        if (!$message || !$message->trashed()) {
+            continue;
+        }
+
+        if ($message->sender !== $user->id && $message->receiver !== $user->id) {
+            continue;
+        }
+
+        try {
+            $message->forceDelete();
+            $deleted = true;
+        } catch (\Exception $e) {
+            // log error if needed
+        }
+    }
+
+    if (!$deleted) {
+        return $this->error(__('api.No_accessible_messages_found'), 404);
+    }
+
+    return $this->success(null, [], __('api.Messages_deleted_permanently'));
 }
 }
