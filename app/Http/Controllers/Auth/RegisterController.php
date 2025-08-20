@@ -66,7 +66,7 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-       // dd($data);  
+
     return Validator::make($data, (new StoreUserRequest())->rules());
     }
     /**
@@ -79,7 +79,7 @@ class RegisterController extends Controller
     {
       
        $user= $this->userService->store($data);
-  
+    
          return $user['data'];
 
   
