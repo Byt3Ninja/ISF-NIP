@@ -16,21 +16,28 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       <div class="col-12">
         <div class="card bg-gradient-primary text-white">
           <div class="card-body py-4">
-            <div class="d-flex align-items-center">
-              <div class="avatar avatar-lg me-3">
-                <div class="avatar-initial bg-white bg-opacity-20 rounded">
-                  <i class="ti ti-user-cog ti-lg text-primary"></i>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <div class="avatar avatar-lg me-3">
+                  <div class="avatar-initial bg-white bg-opacity-20 rounded">
+                    <i class="ti ti-user-cog ti-lg text-primary"></i>
+                  </div>
+                </div>
+                <div>
+                  <h3 class="mb-1 text-white">
+                    {{ $l == 'en' ? 'Team Management' : 'إدارة الفريق' }}
+                  </h3>
+                  <p class="mb-0 text-white-75">
+                    {{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }}
+                    <span class="fw-semibold">{{ $team_Formation_raw->first()->tf_name }}</span>
+                  </p>
                 </div>
               </div>
-              <div>
-                <h3 class="mb-1 text-white">
-                  {{ $l == 'en' ? 'Team Management' : 'إدارة الفريق' }}
-                </h3>
-                <p class="mb-0 text-white-75">
-                  {{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }}
-                  <span class="fw-semibold">{{ $team_Formation_raw->first()->tf_name }}</span>
-                </p>
-              </div>
+              <!-- Chat Button -->
+              <a href="/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
+                <i class="ti ti-message-circle me-1"></i>
+                {{ $l == 'en' ? 'Team Chat' : 'محادثة الفريق' }}
+              </a>
             </div>
           </div>
         </div>
@@ -75,7 +82,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     <!-- Team Management Section -->
     <div id="team-management-section" class="row g-4">
       <!-- Team Members Column -->
-      <div class="col-lg-8">
+      <div class="col-lg-7">
         <div class="card h-100">
           <div class="card-header bg-light border-bottom py-4 mb-4">
             <div class="d-flex justify-content-between align-items-center">
@@ -388,7 +395,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       </div>
 
       <!-- Team Project & Info Column -->
-      <div class="col-lg-4">
+      <div class="col-lg-5">
         <div class="row g-4">
           <!-- Team Image & Quick Info Card -->
           <div class="col-12">
@@ -443,69 +450,209 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             </div>
           </div>
 
-          <!-- Project Information Card -->
+          <!-- Team Workspace Tabs -->
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <h5 class="mb-0">
-                  <i class="ti ti-bulb text-warning me-2"></i>
-                  {{ $l == 'en' ? 'Project Information' : 'معلومات المشروع' }}
-                </h5>
+                <!-- Workspace Navigation -->
+                <ul class="nav nav-pills mb-0" id="workspaceTabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="project-info-tab" data-bs-toggle="tab" data-bs-target="#project-info" type="button" role="tab" aria-controls="project-info" aria-selected="true">
+                      <i class="ti ti-bulb me-1"></i>
+                      {{ $l == 'en' ? 'Project' : 'المشروع' }}
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="shared-files-tab" data-bs-toggle="tab" data-bs-target="#shared-files" type="button" role="tab" aria-controls="shared-files" aria-selected="false">
+                      <i class="ti ti-folder me-1"></i>
+                      {{ $l == 'en' ? 'Files' : 'الملفات' }}
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="team-tasks-tab" data-bs-toggle="tab" data-bs-target="#team-tasks" type="button" role="tab" aria-controls="team-tasks" aria-selected="false">
+                      <i class="ti ti-list-check me-1"></i>
+                      {{ $l == 'en' ? 'Tasks' : 'المهام' }}
+                    </button>
+                  </li>
+                </ul>
               </div>
+              
               <div class="card-body">
-                <div class="mb-4">
-                  <label class="form-label small text-muted fw-semibold">
-                    {{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}
-                  </label>
-                  <h6 class="mb-0">{{ $team_Formation_raw->first()->tf_projectName_en }}</h6>
-                </div>
+                <div class="tab-content" id="workspaceTabsContent">
+                  <!-- Project Information Tab -->
+                  <div class="tab-pane fade show active" id="project-info" role="tabpanel" aria-labelledby="project-info-tab">
+                    <div class="mb-4">
+                      <label class="form-label small text-muted fw-semibold">
+                        {{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}
+                      </label>
+                      <h6 class="mb-0">{{ $team_Formation_raw->first()->tf_projectName_en }}</h6>
+                    </div>
 
-                <div class="mb-4">
-                  <label class="form-label small text-muted fw-semibold">
-                    {{ $l == 'en' ? 'Project Description' : 'وصف المشروع' }}
-                  </label>
-                  <p class="small mb-0" id="team-project-idea">{{ $team_Formation_raw->first()->tf_projectDescription_en }}</p>
-                </div>
+                    <div class="mb-4">
+                      <label class="form-label small text-muted fw-semibold">
+                        {{ $l == 'en' ? 'Project Description' : 'وصف المشروع' }}
+                      </label>
+                      <p class="small mb-0" id="team-project-idea">{{ $team_Formation_raw->first()->tf_projectDescription_en }}</p>
+                    </div>
 
-                <button class="btn btn-outline-info btn-sm w-100 mb-3" data-bs-toggle="modal"
-                  data-bs-target="#editProjectIdeaModal">
-                  <i class="ti ti-edit me-1"></i>
-                  {{ $l == 'en' ? 'Edit Project Details' : 'تعديل تفاصيل المشروع' }}
-                </button>
+                    <button class="btn btn-outline-info btn-sm w-100 mb-3" data-bs-toggle="modal"
+                      data-bs-target="#editProjectIdeaModal">
+                      <i class="ti ti-edit me-1"></i>
+                      {{ $l == 'en' ? 'Edit Project Details' : 'تعديل تفاصيل المشروع' }}
+                    </button>
 
-                <!-- Project Progress -->
-                <div class="mb-3">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label small text-muted fw-semibold mb-0">
-                      {{ $l == 'en' ? 'Project Progress' : 'تقدم المشروع' }}
-                    </label>
-                    <span class="badge bg-primary">{{ $team_Formation_raw->first()->tf_projectStatus }}%</span>
-                  </div>
-                  <div class="progress mb-2" style="height: 8px;">
-                    <div class="progress-bar bg-gradient-primary" role="progressbar"
-                      style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;"
-                      aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0"
-                      aria-valuemax="100">
+                    <!-- Project Progress -->
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small text-muted fw-semibold mb-0">
+                          {{ $l == 'en' ? 'Project Progress' : 'تقدم المشروع' }}
+                        </label>
+                        <span class="badge bg-primary">{{ $team_Formation_raw->first()->tf_projectStatus }}%</span>
+                      </div>
+                      <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-gradient-primary" role="progressbar"
+                          style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;"
+                          aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0"
+                          aria-valuemax="100">
+                        </div>
+                      </div>
+                      <small class="text-muted">
+                        @if($team_Formation_raw->first()->tf_projectStatus == 20)
+                        <strong>{{ __('admin.Idea + Team') }}</strong><br>
+                        {{ __('admin.Define the problem and form a team with clear roles.') }}
+                        @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
+                        <strong>{{ __('admin.Research') }}</strong><br>
+                        {{ __('admin.Validate the idea, study users, and outline key features.') }}
+                        @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
+                        <strong>{{ __('admin.Design & Build') }}</strong><br>
+                        {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }}
+                        @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
+                        <strong>{{ __('admin.Ready for Pitch') }}</strong><br>
+                        {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }}
+                        @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
+                        <strong>{{ __('admin.Project Submitted') }}</strong><br>
+                        {{ __('admin.Submit code, share the demo, and complete documentation. story.') }}
+                        @endif
+                      </small>
                     </div>
                   </div>
-                  <small class="text-muted">
-                    @if($team_Formation_raw->first()->tf_projectStatus == 20)
-                    <strong>{{ __('admin.Idea + Team') }}</strong><br>
-                    {{ __('admin.Define the problem and form a team with clear roles.') }}
-                    @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
-                    <strong>{{ __('admin.Research') }}</strong><br>
-                    {{ __('admin.Validate the idea, study users, and outline key features.') }}
-                    @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
-                    <strong>{{ __('admin.Design & Build') }}</strong><br>
-                    {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }}
-                    @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
-                    <strong>{{ __('admin.Ready for Pitch') }}</strong><br>
-                    {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }}
-                    @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
-                    <strong>{{ __('admin.Project Submitted') }}</strong><br>
-                    {{ __('admin.Submit code, share the demo, and complete documentation. story.') }}
-                    @endif
-                  </small>
+
+                  <!-- Shared Files Tab -->
+                  <div class="tab-pane fade" id="shared-files" role="tabpanel" aria-labelledby="shared-files-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="mb-0">{{ $l == 'en' ? 'Team Files' : 'ملفات الفريق' }}</h6>
+                      <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadFileModal">
+                        <i class="ti ti-cloud-upload me-1"></i>
+                        {{ $l == 'en' ? 'Upload' : 'رفع' }}
+                      </button>
+                    </div>
+
+                    <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
+                      <ul class="list-group list-group-flush" id="fileList">
+                        @if(isset($sharedFile) && $sharedFile->count() > 0)
+                          @foreach($sharedFile as $file)
+                            @php
+                              $user = Auth::user();
+                              $fullPath = $file->sf_file;
+                              $pathInfo = pathinfo($fullPath);
+                              $filename = $pathInfo['filename'];
+                              $extension = $pathInfo['extension'];
+                              if (file_exists($fullPath)) {
+                                  $bytes = filesize($fullPath);
+                                  $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                                  $factor = floor((strlen($bytes) - 1) / 3);
+                                  $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
+                              } else {
+                                  $sizeReadable = $l == 'en' ? 'File not found' : 'الملف غير موجود';
+                              }
+                            @endphp
+                            
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2">
+                              <div class="d-flex align-items-center">
+                                <i class="ti ti-file text-primary me-2"></i>
+                                <div>
+                                  <div class="small fw-medium">{{ $filename.".".$extension }}</div>
+                                  <div class="text-muted small">
+                                    {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="btn-group btn-group-sm">
+                                <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                  <i class="ti ti-download"></i>
+                                </a>
+                                @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
+                                  <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                    <i class="ti ti-trash"></i>
+                                  </button>
+                                @endif
+                              </div>
+                            </li>
+                          @endforeach
+                        @else
+                          <li class="list-group-item border-0 text-center py-4">
+                            <i class="ti ti-folder-open text-muted mb-2 d-block" style="font-size: 2rem;"></i>
+                            <p class="text-muted mb-0">{{ $l == 'en' ? 'No files uploaded yet' : 'لم يتم رفع ملفات بعد' }}</p>
+                          </li>
+                        @endif
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- Team Tasks Tab -->
+                  <div class="tab-pane fade" id="team-tasks" role="tabpanel" aria-labelledby="team-tasks-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="mb-0">{{ $l == 'en' ? 'Team Tasks' : 'مهام الفريق' }}</h6>
+                      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                        <i class="ti ti-plus me-1"></i>
+                        {{ $l == 'en' ? 'Add Task' : 'إضافة مهمة' }}
+                      </button>
+                    </div>
+
+                    <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
+                      <ul class="list-group list-group-flush" id="taskList">
+                        @if(isset($todoList) && $todoList->count() > 0)
+                          @foreach($todoList as $task)
+                            <li class="list-group-item border-0 px-2 py-2">
+                              <div class="d-flex justify-content-between align-items-start">
+                                <div class="form-check flex-grow-1">
+                                  <input class="form-check-input me-2" type="checkbox" value="" id="task{{ $task->tl_id }}"
+                                    @if($task->tl_status == "Done") checked @endif>
+                                  <label class="form-check-label" for="task{{ $task->tl_id }}"
+                                    @if($task->tl_status == "Done") style="text-decoration: line-through;" @endif>
+                                    <div class="fw-medium">{{ $task->tl_title }}</div>
+                                    <small class="text-muted">
+                                      {{ $l == 'en' ? 'Assigned to: '. $task->assignee_name_en : 'مُسند إلى: '. $task->assignee_name_en }}
+                                      @if($task->tl_due_date)
+                                        - {{ $l == 'en' ? 'Due: ' . $task->tl_due_date : 'موعد الانتهاء: ' . $task->tl_due_date }}
+                                      @endif
+                                    </small>
+                                  </label>
+                                </div>
+                                <div class="btn-group btn-group-sm ms-2">
+                                  <button class="btn btn-outline-secondary btn-sm" 
+                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->assignee_name_en }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}')"
+                                    title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
+                                    <i class="ti ti-edit"></i>
+                                  </button>
+                                  <button class="btn btn-outline-danger btn-sm"
+                                    onclick="deleteTask('{{ $task->tl_id }}', '{{ $task->tl_title }}')"
+                                    title="{{ $l == 'en' ? 'Delete Task' : 'حذف المهمة' }}">
+                                    <i class="ti ti-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </li>
+                          @endforeach
+                        @else
+                          <li class="list-group-item border-0 text-center py-4">
+                            <i class="ti ti-list-check text-muted mb-2 d-block" style="font-size: 2rem;"></i>
+                            <p class="text-muted mb-0">{{ $l == 'en' ? 'No tasks created yet' : 'لم يتم إنشاء مهام بعد' }}</p>
+                          </li>
+                        @endif
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -855,6 +1002,180 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     </div>
   </div>
 </div>
+
+<!-- Upload File Modal -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadFileModalLabel">
+          <i class="ti ti-cloud-upload me-2"></i>
+          {{ $l == 'en' ? 'Upload New File' : 'رفع ملف جديد' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="fileUploadForm" method="POST" action="/dashboard/hackathon/addSharedFile" enctype="multipart/form-data">
+          @csrf
+          <div class="mb-3">
+            <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف' }}</label>
+            <input class="form-control" name="file" type="file" id="fileInput" required>
+            <div class="form-text">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+          </div>
+          <div class="mb-3">
+            <label for="fileDescription" class="form-label">
+              {{ $l == 'en' ? 'File Description (Optional)' : 'وصف الملف (اختياري)' }}
+            </label>
+            <input type="text" class="form-control" id="fileDescription" name="description"
+              placeholder="{{ $l == 'en' ? 'e.g., Initial logo design' : 'مثال: تصميم الشعار الأولي' }}">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-1"></i>
+          {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+        </button>
+        <button type="button" class="btn btn-primary" onclick="uploadFile()">
+          <span class="btn-text">
+            <i class="ti ti-cloud-upload me-1"></i>
+            {{ $l == 'en' ? 'Upload' : 'رفع' }}
+          </span>
+          <span class="btn-spinner d-none">
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            {{ $l == 'en' ? 'Uploading...' : 'جاري الرفع...' }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTaskModalLabel">
+          <i class="ti ti-plus me-2"></i>
+          {{ $l == 'en' ? 'Add New Task' : 'إضافة مهمة جديدة' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="taskForm" method="POST" action="/dashboard/hackathon/AddtodoList">
+          @csrf
+          <div class="mb-3">
+            <label for="taskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة' }}</label>
+            <input type="text" class="form-control" name="title" id="taskTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
+            <select class="form-select" id="taskAssignee" name="assignee">
+              <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+              @if(isset($teamData['members']))
+                @foreach($teamData['members'] as $member)
+                  <option value="{{ $member['id'] }}">
+                    {{ $l == 'en' ? $member['name'] : $member['name_ar'] }}
+                  </option>
+                @endforeach
+              @endif
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="taskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق' }}</label>
+            <input type="date" name="due_date" class="form-control datepicker" id="taskDueDate">
+          </div>
+          <div class="mb-3">
+            <label for="taskDescription" class="form-label">
+              {{ $l == 'en' ? 'Task Description (Optional)' : 'وصف المهمة (اختياري)' }}
+            </label>
+            <textarea class="form-control" id="taskDescription" name="description" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-1"></i>
+          {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+        </button>
+        <button type="button" class="btn btn-primary" onclick="addTask()">
+          <span class="btn-text">
+            <i class="ti ti-plus me-1"></i>
+            {{ $l == 'en' ? 'Add Task' : 'إضافة المهمة' }}
+          </span>
+          <span class="btn-spinner d-none">
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            {{ $l == 'en' ? 'Adding...' : 'جاري الإضافة...' }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="EditTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editTaskModalLabel">
+          <i class="ti ti-edit me-2"></i>
+          {{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editTaskForm">
+          @csrf
+          <div class="mb-3">
+            <label for="EtaskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة' }}</label>
+            <input type="text" class="form-control" name="title" id="EtaskTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
+            <select class="form-select" id="EtaskAssignee" name="assignee">
+              <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+              @if(isset($teamData['members']))
+                @foreach($teamData['members'] as $member)
+                  <option value="{{ $member['id'] }}">
+                    {{ $l == 'en' ? $member['name'] : $member['name_ar'] }}
+                  </option>
+                @endforeach
+              @endif
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="EtaskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق' }}</label>
+            <input type="date" name="due_date" class="form-control datepicker" id="EtaskDueDate">
+          </div>
+          <div class="mb-3">
+            <label for="EtaskDescription" class="form-label">
+              {{ $l == 'en' ? 'Task Description (Optional)' : 'وصف المهمة (اختياري)' }}
+            </label>
+            <textarea class="form-control" id="EtaskDescription" name="description" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-1"></i>
+          {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
+        </button>
+        <button type="button" class="btn btn-primary" onclick="updateTask()">
+          <span class="btn-text">
+            <i class="ti ti-device-floppy me-1"></i>
+            {{ $l == 'en' ? 'Update Task' : 'تحديث المهمة' }}
+          </span>
+          <span class="btn-spinner d-none">
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            {{ $l == 'en' ? 'Updating...' : 'جاري التحديث...' }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('pagescripts')
@@ -862,6 +1183,12 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
   const HACKATHON_ID_TEAM_PAGE = new URLSearchParams(window.location.search).get('hackathonId') || '1';
   const HACKATHON_NAME = "{{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}"; 
   const IS_TEAM_LEADER = true; 
+
+  $('.datepicker').flatpickr({
+    monthSelectorType: 'static',
+    dateFormat: 'Y-m-d',
+    minDate: 'today'
+  });
 
   $(document).ready(function() {
     // Initialize tooltips
@@ -1500,5 +1827,519 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       }
     });
   });
+
+  // File Upload Functions
+  function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
+    const l = '{{ $l }}'; // "en" or "ar"
+
+    if (fileInput && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+
+      // Build FormData
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('description', fileDescription);
+
+      // URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const hackathonId = urlParams.get('hackathonId') || '1';
+      const teamId = urlParams.get('teamId') || '123';
+      formData.append('hackathon_id', hackathonId);
+      formData.append('team_id', teamId);
+
+      // Add CSRF token
+      formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+
+      // // Show loading
+      // Swal.fire({
+      //   title: l === 'en' ? "Uploading..." : "جاري الرفع...",
+      //   text: l === 'en' ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف.",
+      //   allowOutsideClick: false,
+      //   didOpen: () => {
+      //     Swal.showLoading();
+      //   },
+      //   showCancelButton: false,
+      //   showConfirmButton: true,
+      //   buttonsStyling: false,
+      // });
+
+      // Helper function to choose icon
+      const getIconClass = (name) => {
+        if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
+        if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
+        if (name.endsWith('.docx')) return 'ti-file-text text-info';
+        if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
+        if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
+        return 'ti-file-text';
+      };
+
+      const createListItem = (file) => {
+        const fileList = document.getElementById('fileList');
+        if (!fileList) return;
+        const newItem = document.createElement('li');
+        newItem.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2 file-list-item';
+
+        const iconClass = getIconClass(file.name);
+        const uploadedByText = l === 'en' ? 'by You' : 'بواسطة أنت';
+
+        newItem.innerHTML = `
+          <div class="d-flex align-items-center">
+            <i class="ti ${iconClass} me-2"></i>
+            <div>
+              <div class="small fw-medium">${file.name}</div>
+              <div class="text-muted small">${(file.size / 1024).toFixed(1)}KB - ${uploadedByText}</div>
+            </div>
+          </div>
+          <div class="btn-group btn-group-sm">
+            <a href="#" class="btn btn-outline-primary btn-sm" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}">
+              <i class="ti ti-download"></i>
+            </a>
+            <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>`;
+        fileList.prepend(newItem);
+      };
+
+      // Send request to the route
+      fetch('/dashboard/hackathon/addSharedFile', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
+            text: data.message,
+            confirmButtonText: l === 'en' ? "OK" : "موافق",
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+          createListItem(file);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: l === 'en' ? "Error" : "خطأ",
+            text: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+            confirmButtonText: l === 'en' ? "OK" : "موافق",
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Upload error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: l === 'en' ? "Error" : "خطأ",
+          text: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+          confirmButtonText: l === 'en' ? "OK" : "موافق",
+          showCancelButton: false,
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      })
+      .finally(() => {
+        const uploadModalEl = document.getElementById('uploadFileModal');
+        const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
+        if (uploadModal) uploadModal.hide();
+
+        const form = document.getElementById('fileUploadForm');
+        if (form && typeof form.reset === 'function') form.reset();
+      });
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
+        text: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
+        confirmButtonText: l === 'en' ? "OK" : "موافق",
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+    }
+  }
+
+  function deleteFile(buttonElement, fileId) {
+    console.log('deleteFile called with:', buttonElement, fileId);
+
+    if (typeof Swal === 'undefined') {
+      console.error('SweetAlert2 is not loaded!');
+      alert('Delete functionality not available - SweetAlert2 not loaded');
+      return;
+    }
+
+    Swal.fire({
+      title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+      text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Error deleting file");
+          return response.json();
+        })
+        .then(data => {
+          if (data.status === 'success') {
+            // Remove element from page
+            const fileElement = buttonElement.closest('li');
+            if (fileElement) fileElement.remove();
+
+            Swal.fire({
+              title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+              text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
+              icon: 'success',
+              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            });
+          } else {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+              text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+              icon: 'error',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            });
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire({
+            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+            text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+            icon: 'error',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+        });
+      }
+    });
+  }
+
+  // Task Management Functions
+  function addTask() {
+    const taskTitle = document.getElementById('taskTitle').value;
+    const taskAssignee = document.getElementById('taskAssignee').value;
+    const taskDueDate = document.getElementById('taskDueDate').value;
+    const taskDescription = document.getElementById('taskDescription').value;
+
+    if (!taskTitle) {
+      Swal.fire({
+        icon: 'warning',
+        title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
+        text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+      });
+      return;
+    }
+
+    const formData = {
+      title: taskTitle,
+      assignee: taskAssignee,
+      due_date: taskDueDate,
+      description: taskDescription
+    };
+
+    fetch('/dashboard/hackathon/AddtodoList', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success === true) {
+        Swal.fire({
+          icon: 'success',
+          title: '{{ $l == "en" ? "Task Added!" : "تمت إضافة المهمة!" }}',
+          text: data.message || '{{ $l == "en" ? "Task added successfully." : "تمت إضافة المهمة بنجاح." }}',
+          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          showCancelButton: false,
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        }).then(() => {
+          window.location.reload();
+        });
+
+        const addTaskModal = bootstrap.Modal.getInstance(document.getElementById('addTaskModal'));
+        addTaskModal.hide();
+        document.getElementById('taskForm').reset();
+
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+          text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          showCancelButton: false,
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+        text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+    });
+  }
+
+  function editTask(taskId, taskTitle, taskAssignee, taskDueDate, taskDescription) {
+    console.log('editTask called with:', taskId, taskTitle, taskAssignee, taskDueDate);
+    
+    try {
+      // Pre-fill the modal with existing task data
+      document.getElementById('EtaskTitle').value = taskTitle;
+      document.getElementById('EtaskAssignee').value = taskAssignee;
+      document.getElementById('EtaskDueDate').value = taskDueDate || '';
+      document.getElementById('EtaskDescription').value = taskDescription || '';
+      
+      // Store the task ID for updating
+      document.getElementById('EditTaskModal').setAttribute('data-editing-task', taskId);
+      
+      // Show the modal
+      const editModal = new bootstrap.Modal(document.getElementById('EditTaskModal'));
+      editModal.show();
+    } catch (error) {
+      console.error('Error in editTask:', error);
+    }
+  }
+
+  function updateTask() {
+    const taskTitle = document.getElementById('EtaskTitle').value;
+    const taskAssignee = document.getElementById('EtaskAssignee').value;
+    const taskDueDate = document.getElementById('EtaskDueDate').value;
+    const taskDescription = document.getElementById('EtaskDescription').value;
+
+    const taskModal = document.getElementById('EditTaskModal');
+    const editingTaskId = taskModal.getAttribute('data-editing-task');
+
+    if (!taskTitle) {
+      Swal.fire({
+        icon: 'warning',
+        title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
+        text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+      });
+      return;
+    }
+
+    const formData = {
+      id: editingTaskId,
+      title: taskTitle,
+      assignee: taskAssignee,
+      due_date: taskDueDate,
+      description: taskDescription
+    };
+
+    fetch('/dashboard/hackathon/EdittodoList', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success === true) {
+        Swal.fire({
+          icon: 'success',
+          title: '{{ $l == "en" ? "Task Updated!" : "تم تعديل المهمة!" }}',
+          text: data.message || '{{ $l == "en" ? "Task updated successfully." : "تم تعديل المهمة بنجاح." }}',
+          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          showCancelButton: false,
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        }).then(() => {
+          window.location.reload();
+        });
+
+        const editTaskModal = bootstrap.Modal.getInstance(document.getElementById('EditTaskModal'));
+        editTaskModal.hide();
+        taskModal.removeAttribute('data-editing-task');
+
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+          text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          showCancelButton: false,
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+        text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+    });
+  }
+
+  function deleteTask(taskId, taskTitle) {
+    console.log('deleteTask called with:', taskId, taskTitle);
+
+    if (typeof Swal === 'undefined') {
+      console.error('SweetAlert2 is not loaded!');
+      alert('Delete functionality not available - SweetAlert2 not loaded');
+      return;
+    }
+
+    Swal.fire({
+      title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+      text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+              text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
+              icon: 'success',
+              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            }).then(() => {
+              // Reload the page after pressing OK
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+              text: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+              icon: 'error',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            });
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire({
+            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+            text: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+            icon: 'error',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+        });
+      }
+    });
+  }
 </script>
 @stop
