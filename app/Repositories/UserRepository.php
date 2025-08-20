@@ -44,7 +44,7 @@ class UserRepository
         $query = $this->baseQuery();
 
         if (!empty($filters['gender'])) {
-            $query->where('gender', strtolower($filters['gender']));
+            $query->where('gender', $filters['gender']);
         }
 
         if (!empty($filters['haveCompany'])) {
