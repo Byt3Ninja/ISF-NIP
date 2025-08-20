@@ -621,14 +621,29 @@ public function summary(string $programId)
         return $company;
     });
 
-    $statusDistribution = [
-        ['statusEn' => 'Highest Rated', 'statusAr' => 'الأعلى تقييماً', 'count' => $companyEvaluations->where('status', 'Highest Rated')->count()],
-        ['statusEn' => 'Good Performance', 'statusAr' => 'أداء جيد', 'count' => $companyEvaluations->where('status', 'Good Performance')->count()],
-        ['statusEn' => 'Needs Improvement', 'statusAr' => 'بحاجة لتحسين', 'count' => $companyEvaluations->where('status', 'Needs Improvement')->count()],
+   $statusMap = [
+     'Highest Rated' => [
+        'en' => 'Highest Rated',
+        'ar' => 'الأعلى تقييماً',
+     ],
+      'Good Performance' => [
+        'en' => 'Good Performance',
+        'ar' => 'أداء جيد',
+      ],
+     'Needs Improvement' => [
+        'en' => 'Needs Improvement',
+        'ar' => 'بحاجة لتحسين',
+      ],
     ];
-
+    $locale = app()->getLocale();
     $currentStepId = collect($cycle->companies->pluck('step')->filter()->mode())->first();
     $currentStep = $cycle->steps->firstWhere('id', $currentStepId);
+    $statusDistribution = collect($statusMap)->map(function ($names, $statusKey) use ($companyEvaluations, $locale) {
+    return [
+        'status' => $names[$locale] ?? $names['en'],
+        'count' => $companyEvaluations->where('status', $statusKey)->count(),
+    ];
+   })->values();
 
     return $this->success([
         'kpis' => [
@@ -1002,7 +1017,8 @@ public function workshops(string $programId, Request $request)
         ]),
         'companyPerformance' => $companyPerformance,
         'surveyResponses' => SurveyResponses::where('cycle_id', $programId)
-         ->where('triggered_on', 'training') 
+         ->where('triggered_on', 'training')
+         ->WhereNotNull('responses') 
          ->with(['user:id,first_name_en,last_name_en'])
          ->get()
          ->map(function ($response) {

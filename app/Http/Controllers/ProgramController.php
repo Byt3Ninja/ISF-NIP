@@ -513,7 +513,7 @@ class ProgramController extends Controller
         $inPersonWorkshops = $workshops->where('type', 'offline')->count();
         $uploadedMaterials = $workshops->where('type', 'online')->count();
 
-        $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
+        $surveyResponses = SurveyResponses::where('cycle_id', $id)->where('triggered_on', 'training')->WhereNotNull('responses')->get();
 
         // Fetch final evaluations
         $finalStepIds = $cycle->steps->where('stype', 5)->pluck('id');
