@@ -90,4 +90,5 @@ return [
    'currency_not_found' => 'Currency Not Found',
    'currency_deleted' => 'Currency Deleted Successfully',
    'Messages_deleted_permanently' => 'Messages Deleted Permanently',
+   'user_create_failed' => 'Failed to Create User',
 ];

@@ -96,8 +96,10 @@ class UserRepository
 
 
                 $user = User::create([
-                    'first_name_en' => $data['first_name'],
-                    'last_name_en' => $data['last_name'],
+                    'first_name_en' => $data['firstName'],
+                    'first_name_ar' => $data['firstName'],
+                    'last_name_en' => $data['lastName'],
+                    'last_name_ar' => $data['lastName'],
                     'email' => $data['email'],
                     'phone' => $data['phone'],
                     'country_code' => $data['country_code'],
@@ -192,7 +194,8 @@ class UserRepository
                 $user->gender = $data['gender'] ?? $user->gender;
                 $user->status = $data['status'] ?? $user->status;
                 $user->country_id = $data['country_id'] ?? $user->country_id;
-                $user->HadCompany = $data['HaveCompany'] ?? $user->HadCompany;
+                $user->HaveCompany = $data['HaveCompany'] ?? $user->HaveCompany;
+                $user->country_code = $data['country_code'] ?? $user->country_code;
 
 
 

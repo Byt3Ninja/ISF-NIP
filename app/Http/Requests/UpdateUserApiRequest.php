@@ -46,6 +46,7 @@ class UpdateUserApiRequest extends FormRequest
         'HaveCompany'=> ['nullable', 'bool'],
         'country_id'=> ['nullable','exists:countries,id'],
         'img_url'=> ['nullable'],
+        'country_code' => 'required|numeric|digits_between:1,5',
     ];
     }
        protected function failedValidation(Validator $validator)

@@ -71,15 +71,14 @@ class UserController extends Controller
             $this->authorize('store', Auth::user());
 
             $result = $this->userService->store($request->all());
+            if ($result['success']) {
+              return $this->created(new UserResource($result['data']),__('api.user_created'));
+            }
 
-            
-
-                  if ($result['success'])
-                    {
-                    $this->success(new UserResource($result['data']),[], __('api.user_updated'));
-                    }
-
-                 return response()->json($result, 201);
+            return $this->error($result['message'] ?? __('api.user_create_failed'), 
+                $result['status_code'] ?? 400, 
+                $result['data'] ?? null
+            );
 
         }
 
@@ -94,9 +93,11 @@ class UserController extends Controller
             $this->authorize('update', Auth::user());
 
             $result = $this->userService->update($user, $request->validated());
-            
+            if ($result['success']) {
+                 return $this->success(new UserResource($result['user']), [], __('api.user_updated'));
+            }
 
-            return $this->success(new UserResource($result['user']),[], __('api.user_updated'));
+            return $this->error($result['message'], $result['status']);
         }
 
 

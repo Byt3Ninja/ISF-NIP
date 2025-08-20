@@ -88,4 +88,5 @@ return [
  'currency_not_found' => 'العملة غير موجودة',
  'currency_deleted' => 'تم حذف العملة بنجاح',
  'Messages_deleted_permanently' => 'تم حذف الرسائل بنجاح',
+ 'user_create_failed' => 'فشل إنشاء المستخدم',
 ];
