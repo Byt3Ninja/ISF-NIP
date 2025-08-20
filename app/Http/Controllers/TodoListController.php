@@ -141,6 +141,13 @@ class TodoListController extends Controller
         return response()->json(['success' => true, 'message' => __("admin.Task_deleted_successfully.")]);
     }
 
+    public function changeTodoStatus(Request $request){
+        $todoList = TodoList::find($request->id);
+        $todoList->status = $request->status;
+        $todoList->save();
+        return response()->json(['success' => true, 'message' => __("admin.Task_status_updated_successfully.")]);
+    }
+
 
     
 }

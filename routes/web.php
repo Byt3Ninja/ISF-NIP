@@ -140,6 +140,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
     Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
     Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
+    Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');
     Route::delete('hackathon/deleteTodoList/{id}', 'TodoListController@destroy')->name('hackathon.deleteTodoList');
 
     //waiting list
