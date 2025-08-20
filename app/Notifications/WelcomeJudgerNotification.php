@@ -42,16 +42,16 @@ class WelcomeJudgerNotification extends Notification
         'token' => $token,
         'email' => $notifiable->email,
     ], false));
-    $this->data['reset_url'] = $resetUrl;
-        if ($this->data['role'] === 'Judger') {
-            return (new MailMessage)
-                ->subject('مرحبًا بك كـ Judger!')
-                ->markdown('emails.welcome_judger', ['data' => $this->data]);
-        } else {
-            return (new MailMessage)
-                ->subject('مرحبًا بك!')
-                ->markdown('emails.welcome', ['data' => $this->data]);
-        }
+        $this->data['reset_url'] = $resetUrl;
+            if ($this->data['role'] === 'Judger') {
+                return (new MailMessage)
+                    ->subject('مرحبًا بك كـ Judger!')
+                    ->markdown('emails.welcome_judger', ['data' => $this->data]);
+            } else {
+                return (new MailMessage)
+                    ->subject('مرحبًا بك!')
+                    ->markdown('emails.welcome', ['data' => $this->data]);
+            }
     }
 
     /**

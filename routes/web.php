@@ -1,5 +1,7 @@
 <?php
 
+use App\Notifications\WelcomeUserNotification;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
@@ -14,7 +16,11 @@ use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
-Route::get('test', function () {});
+Route::get('test', function () {
+    $user = User::find(1); 
+$user->notify(new WelcomeUserNotification($user,'12345'));
+});
+
 Route::get('default-permissions', function () {
     App\Permission::default_permissions();
 });
