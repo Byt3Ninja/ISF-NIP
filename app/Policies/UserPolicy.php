@@ -65,6 +65,14 @@ class UserPolicy
     }
 
     /**
+     * Determine whether the user can delete the model.
+     */
+    public function destroy(User $user, User $model): bool
+    {
+         return $user->ableTo('users.destroy');
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(User $user, User $model): bool

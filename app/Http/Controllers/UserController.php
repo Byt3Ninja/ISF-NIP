@@ -117,7 +117,7 @@ class UserController extends Controller
 	 */
 	public function edit(User $user)
 	{
-		$roles = $this->userService->roleList();
+		$roles = Role::all();
 		$countries=$this->userService->countries();
 
 		return view('admin/users/edit', compact('user', 'roles', 'countries'));

@@ -195,6 +195,11 @@ class UserRepository
                 $user->status = $data['status'] ?? $user->status;
                 $user->country_id = $data['country_id'] ?? $user->country_id;
                 $user->HaveCompany = $data['HaveCompany'] ?? $user->HaveCompany;
+                $user->houre_rate = $data['houre_rate'] ?? $user->houre_rate;
+                $user->state_id = $data['state_id'] ?? $user->state_id;
+                $user->city_id = $data['city_id'] ?? $user->city_id;
+                $user->title_en = $data['title_en'] ?? $user->title_en;
+                $user->title_ar = $data['title_ar'] ?? $user->title_ar;
                 $user->country_code = $data['country_code'] ?? $user->country_code;
 
 
