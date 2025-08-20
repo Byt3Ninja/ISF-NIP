@@ -2352,5 +2352,5 @@ return [
 	'New_Password' => 'كلمة مرور جديدة',
 	'Reset_Password_Caution' => 'يرجى حفظ هذه الكلمة المرور ومشاركتها مع المستخدم بشكل آمن.',
 	'Task_status_updated_successfully' => 'تم تحديث حالة المهمة بنجاح',
-
+	'Task_not_found' => 'لم يتم العثور على المهمة',
 ];

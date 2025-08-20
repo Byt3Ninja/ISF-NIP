@@ -2299,4 +2299,5 @@ return [
 	'New_Password' => 'New Password',
 	'Reset_Password_Caution' => 'Please save this password and share it with the user securely.',
 	'Task_status_updated_successfully' => 'Task status updated successfully',
+	'Task_not_found' => 'Task not found',
 ];
