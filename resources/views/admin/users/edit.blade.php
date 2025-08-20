@@ -97,21 +97,22 @@
                       </span>
                     </div>
                     <div>
-                      <label for="first_name_en" class="form-label">{{ __('admin.English UserName')}}</label>
                       <div class="row">
                         <div class="col-md-6">
-                          <input value="{{ $user->first_name_en}}" name="first_name_en" type="text" class="form-control mb-3"
+                          <label for="first_name_en" class="form-label">{{ __('admin.First Name')}}</label>
+                          <input value="{{ $user->first_name_en}}" name="firstName" type="text" class="form-control mb-3"
                             id="first_name_en" style="direction: ltr;" placeholder="{{ __('admin.First Name') }}"
                             required autocomplete="first_name_en" autofocus />
                         </div>
                         <div class="col-md-6">
-                          <input value="{{ $user->last_name_en }}" name="last_name_en" type="text" class="form-control mb-3"
+                          <label for="last_name_en" class="form-label">{{ __('admin.Last Name')}}</label>
+                          <input value="{{ $user->last_name_en }}" name="lastName" type="text" class="form-control"
                             id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
                             autocomplete="last_name_en" />
                         </div>
                       </div>
                     </div>
-                    <div>
+                    {{-- <div>
                       <label for="first_name_ar" class="form-label">{{__('admin.Arabic UserName')}}</label>
                       <div class="row">
                         <div class="col-md-6">
@@ -125,7 +126,7 @@
                             autocomplete="last_name_ar" />
                         </div>
                       </div>
-                    </div>
+                    </div> --}}
                     <div>
                       <label class="form-label">{{ __('admin.Gender')}}</label>
                       <div class="d-flex">

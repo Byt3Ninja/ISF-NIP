@@ -2884,6 +2884,18 @@
                     "registered"
                    
                 ]
+            },
+            {
+                "name": "hackathon.EdittodoListStatus",
+                "description": " Edit Todo List Status in Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
             }
         ]
     },
@@ -6704,6 +6716,46 @@
         {
             "name": "activities.destroy",
             "description": "Delete Activity Log",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        },
+        {
+            "name": "activities.force-logout",
+            "description": "Force Logout User",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        },
+        {
+            "name": "activities.reset-password",
+            "description": "Reset User Password",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        },
+        {
+            "name": "activities.block-ip",
+            "description": "Block IP Address",
+            "guard_name": "web",
+            "is_core": 0,
+            "default_for": [
+                "admin",
+                "organizationmanager"
+            ]
+        },
+        {
+            "name": "activities.load-more",
+            "description": "Load More Activities",
             "guard_name": "web",
             "is_core": 0,
             "default_for": [

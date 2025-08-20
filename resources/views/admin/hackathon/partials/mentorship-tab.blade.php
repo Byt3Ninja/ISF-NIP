@@ -36,7 +36,7 @@
                       <tr>
                         <td>{{ $key + 1 }}</td>
                         <td>{{ __('cycles.' . $session->type) }}</td>
-                        <td>{{ $session->title }}</td>
+                        <td><a title="Click to show details" href="" onclick="ShowDetails('{{ $session->id }}'); return false;">{{ $session->title }}</a></td>
                         <td>{{ FormatDate($session->datetime, 'Y-m-d H:i A') ?? '-' }}</td>
                         <td>{{ FormatDate($session->end_datetime, 'Y-m-d H:i A') ?? '-' }}</td>
                         <td>

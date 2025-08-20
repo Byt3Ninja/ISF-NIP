@@ -44,7 +44,7 @@ class UserRepository
         $query = $this->baseQuery();
 
         if (!empty($filters['gender'])) {
-            $query->where('gender', strtolower($filters['gender']));
+            $query->where('gender', $filters['gender']);
         }
 
         if (!empty($filters['haveCompany'])) {
@@ -96,8 +96,10 @@ class UserRepository
 
 
                 $user = User::create([
-                    'first_name_en' => $data['first_name'],
-                    'last_name_en' => $data['last_name'],
+                    'first_name_en' => $data['firstName'],
+                    'first_name_ar' => $data['firstName'],
+                    'last_name_en' => $data['lastName'],
+                    'last_name_ar' => $data['lastName'],
                     'email' => $data['email'],
                     'phone' => $data['phone'],
                     'country_code' => $data['country_code'],
@@ -112,8 +114,8 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "4" && !auth()->user()->hasRole('admin')) {
-                    dd('sdasdas');
+                if ($data['role'] == "4" && !auth()?->user()?->hasRole('admin')) {
+               
                     UsersBio::create([
                         'user_id' => $user->id,
                         'bio_en' => $data['bio_en'],
@@ -192,7 +194,13 @@ class UserRepository
                 $user->gender = $data['gender'] ?? $user->gender;
                 $user->status = $data['status'] ?? $user->status;
                 $user->country_id = $data['country_id'] ?? $user->country_id;
-                $user->HadCompany = $data['HaveCompany'] ?? $user->HadCompany;
+                $user->HaveCompany = $data['HaveCompany'] ?? $user->HaveCompany;
+                $user->houre_rate = $data['houre_rate'] ?? $user->houre_rate;
+                $user->state_id = $data['state_id'] ?? $user->state_id;
+                $user->city_id = $data['city_id'] ?? $user->city_id;
+                $user->title_en = $data['title_en'] ?? $user->title_en;
+                $user->title_ar = $data['title_ar'] ?? $user->title_ar;
+                $user->country_code = $data['country_code'] ?? $user->country_code;
 
 
 

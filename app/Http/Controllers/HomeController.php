@@ -2029,32 +2029,34 @@ class HomeController extends Controller
             $conditions = " AND u.organization_id = " . $user->organization_id;
         }
         $sector_distribution_q = "SELECT
-                c.sector,
-                s.name_en,
-                s.name_ar,
-                count(c.id) AS total
-            FROM
-                companies c
-            INNER JOIN
-                cycles cy ON c.cycle = cy.id
-            LEFT JOIN
-                sectors s ON c.sector = s.id
-            LEFT JOIN
-                users u ON cy.organization_id = u.organization_id
-            WHERE
-                c.deleted_at IS NULL
-                AND c.sector IS NOT null
-                $conditions
-            GROUP BY
-                c.sector, s.name_en, s.name_ar
+            c.sector,
+            s.name_en,
+            s.name_ar,
+            count(c.id) AS total
+        FROM 
+            companies c
+        INNER JOIN 
+            cycles cy ON c.cycle = cy.id
+        LEFT JOIN 
+            sectors s ON (CAST(c.sector AS CHAR) = CAST(s.id AS CHAR))
+                OR (c.sector = s.name_en)   
+                OR (c.sector = s.name_ar)                     
+        LEFT JOIN 
+            users u ON cy.organization_id = u.organization_id
+        WHERE
+             c.deleted_at IS NULL
+             AND c.sector IS NOT NULL
+             $conditions
+        GROUP BY
+             c.sector, s.name_en, s.name_ar
         ";
-        $sector_distribution = collect(DB::select($sector_distribution_q))->map(function ($item) {
-            return [
-                'sector_en' => $item->name_en ?? __('admin.undefined', [], 'en'),
-                'sector_ar' => $item->name_ar ?? __('admin.undefined', [], 'en'),
-                'count' => $item->total,
-            ];
-        });
+    $sector_distribution = collect(DB::select($sector_distribution_q))->map(function ($item) {
+        return [
+            'sector_en' => $item->name_en ?? $item->sector ?? __('admin.undefined', [], 'en'),
+            'sector_ar' => $item->name_ar ?? $item->sector ?? __('admin.undefined', [], 'ar'),
+            'count'     => $item->total,
+        ];
+    });
 
         $cycles_labels = $cycles->pluck('title')->toArray();
         $cycles_startups_count = $cycles->map(function ($key) {
@@ -2290,7 +2292,6 @@ class HomeController extends Controller
         $team_member = DB::select($team_member_q, [$user->email]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;
-
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
