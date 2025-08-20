@@ -60,9 +60,13 @@ class StoreUserRequest extends FormRequest
 
         protected function failedValidation(Validator $validator)
     {
+        if ($this->expectsJson()) {
         throw new HttpResponseException(
             $this->validationError(__('api.validation_error'), 422, $validator->errors())
-        );
+         );
+      }
+
+        parent::failedValidation($validator);
     }
 
 }
