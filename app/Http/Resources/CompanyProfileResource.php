@@ -44,25 +44,56 @@ class CompanyProfileResource extends JsonResource
              $documents[] = Storage::disk('pitch_deck')->url($docPath);
         }
     }
+     $categoryMap = [
+        'Food & Beverage' => 'categories.food_beverage',
+        'Technology' => 'categories.technology',
+        'App / Website' => 'categories.app_website',
+        'Housewares / Home Design' => 'categories.housewares_home_design',
+        'Health / Wellness / Nutrition' => 'categories.health_wellness_nutrition',
+        'Fitness' => 'categories.fitness',
+        'Sports' => 'categories.sports',
+        'Beauty' => 'categories.beauty',
+        'Clothing / Fashion' => 'categories.clothing_fashion',
+        'Toys / Games' => 'categories.toys_games',
+        'Children' => 'categories.children',
+        'Entertainment / Experiential' => 'categories.entertainment_experiential',
+        'Pets' => 'categories.pets',
+        'Music' => 'categories.music',
+        'Holiday' => 'categories.holiday',
+        'Other' => 'categories.other',
+     ];
 
         return [
             'id' => $this->id,
             'name' => $this->{'name_'.$locale},
             'logo' => $this->logo ? url($this->logo) : null,
             'sector' => is_numeric($this->sector) ? optional($this->sectoR)->{"name_$locale"} : $this->sector,
-            'businessCategories' => is_string($this->business_categories)? json_decode($this->business_categories, true): $this->business_categories,
+            'businessCategories' => collect(is_string($this->business_categories) ? json_decode($this->business_categories, true) : $this->business_categories
+            )->filter()->map(function ($categoryValue) use ($categoryMap) {
+            return isset($categoryMap[$categoryValue])
+                ? __('admin.' . $categoryMap[$categoryValue])
+                : $categoryValue; 
+            })->values(),
             'state' => $this->state?->{'name_'.$locale},
             'city' => $this->city?->{'name_'.$locale},
             'country' => $this->country?->{'name_'.$locale},
+            'address' => $this->{"address_{$locale}"},
             'establishmentDate' => $this->est_date,
             'yearsOfOperations' => $this->years_of_operations,
+            'productOrService' => $this->product_or_service,
             'infoCompany' => $this->info_company,
+            'aboutProblem' => $this->about_problem,
+            'aboutMarketOpportunity' => $this->about_market_opportunity,
+            'aboutCompetitors' => $this->about_competitors,
+            'aboutMonetization' => $this->about_monetize,
+            'aboutChallenges' => $this->about_challenges,
             'idea'   => $this->idea,
             'problem' => $this->problem,
             'solution'=> $this->solution,
             'teamNum' => $this->team_num,
             'workingTeamSummary' => $this->working_team_summary,
             'stage' => [
+                'id' => $this->stagE?->id,
                 'name' => $this->stagE?->{"name_$locale"},
             ],
             'fundingStage' => $this->development_stage,
@@ -81,22 +112,65 @@ class CompanyProfileResource extends JsonResource
             })
             ->filter()
             ->values(),
+            'businessType' => $this->business_type,
+            'financialPlan' => $this->financial_plan_description,
+            'financialPlanAttachment' => $this->financial_plan ? Storage::disk('pitch_deck')->url( ltrim(preg_replace('/^financial_plan\//', '', $this->financial_plan), '/')) : null,
+            'achievedMilestones' => $this->milestones
+                ->where('plan', 'Achieved_Milestones')
+                 ->map(fn($m) => [
+                    'name' => $m->name,
+                    'description' => $m->description,
+                ])->values(),
+            'plannedMilestones' => $this->milestones
+                ->where('plan', 'Planned_Milestones')
+                ->map(fn($m) => [
+                    'name' => $m->name,
+                    'description' => $m->description,
+                ])->values(),
+            'archivedMilestones' => $this->milestones
+                ->where('plan', 'Archived_Milestones')
+                ->map(fn($m) => [
+                    'name' => $m->name,
+                    'description' => $m->description,
+                ])->values(),
             'Industries' => json_decode($this->industries, true),
             'founders' => $this->teamMembers
                 ->where('TeamMember', 'Founder')
-                ->map(fn($f) => ['name' => $f->Name, 'role' => $f->TeamMember])
+                ->map(fn($f) => ['name' => $f->Name, 'role' => $f->TeamMember, 'email' => $f->Email,'linkedin' => $f->LinkedIn,])
                 ->values(),
-            'website' => $this->website,
-            'linkedin' => $this->linkedin,
-            'twitter' => $this->twitter,
+            'shareholders' => $this->teamMembers
+                ->whereNotNull('PresentagShereholder')
+                ->map(fn($m) => [
+                    'name' => $m->Name,
+                    'role' => $m->RoleShereholder,
+                    'ownership' => $m->PresentagShereholder,
+                ])->values(),
+            'investors' => $this->teamMembers
+                ->whereNotNull('investorType')
+                ->map(fn($m) => [
+                    'name' => $m->Name,
+                    'investmentType' => $m->investorType,
+                ])->values(),
             'email' => $this->email,
             'phone' => $this->phone,
-            'address' => $this->address_en,
+            'countryCode' => $this->country_code,
+            'whatsapp' => $this->whatsapp,
+            'countryCodeWA' => $this->country_code_w_a,
+            'website' => $this->website,
+            'googleMapUrl' => $this->google_map,
+            'linkedin' => $this->linkedin,
+            'facebook' => $this->facebook,
+            'twitter' => $this->twitter,
+            'youtube' => $this->youtube,
+            'instagram' => $this->instagram,
+            'tiktok' => $this->tiktok,
             'productPhoto' => $this->product_photo,
             'pitchDeckSummary' => $this->pitch_deck_summary,
+            'businessModel' => $this->business_model,
             'businessModelDescription' => $this->business_model_description,
+            'businessPlan' => $this->business_plan ? Storage::disk('pitch_deck')->url(ltrim(preg_replace('/^business_plan\//', '', $this->business_plan), '/')) : null,
             'SustainableDevelopment' => $sdgs,
-           'pitchDeck' => $this->pitch_deck
+            'pitchDeck' => $this->pitch_deck
              ? Storage::disk('pitch_deck')->url(
              ltrim(preg_replace('/^pitch_decks\//', '', $this->pitch_deck), '/')
             ) : null,
@@ -108,7 +182,16 @@ class CompanyProfileResource extends JsonResource
              ltrim(preg_replace('/^pitch_decks\//', '', $docPath), '/')
             );
             })
-             ->values(),       
+             ->values(),
+             'CreatedTax' => (bool) $this->CreatedTax,
+             'CommercialRegister' => $this->Commercial_Register,
+             'TaxCard' => $this->Tax_Card,
+             'countryRegister' => $this->Country_Register_id
+            ? [
+              'id' => $this->Country_Register_id,
+              'name' => optional(\App\Country::find($this->Country_Register_id))->{"name_$locale"},
+            ]
+             : null,       
         ];
     }
 }

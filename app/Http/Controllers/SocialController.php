@@ -46,7 +46,7 @@ use Illuminate\Support\Facades\Http;
       	auth()->login($user);
         return redirect()->to('/dashboard');
     }
-
+ 
     function createUser($getInfo,$provider){
         $user = User::where('provider_id', $getInfo->id)->first();
       	if (!$user) {

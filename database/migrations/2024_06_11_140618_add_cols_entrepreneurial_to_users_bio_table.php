@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users_bio', function (Blueprint $table) {
             $table->boolean('entrepreneurial_experience')->default(false);
-            $table->mediumText('entrepreneurial_experience_brief')->default(false);
+            $table->mediumText('entrepreneurial_experience_brief')->nullable();
             $table->boolean('profile_privacy')->default(true);
             $table->text('mentorship_approach')->nullable();
         });

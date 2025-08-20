@@ -1,29 +1,28 @@
 <div class="text-center hackathon-banner">
 <div class="banner-content">
   <div class="hackathon-status-badge">
-    {{ $l == 'en' ? $currentHackathon['status'] : $currentHackathon['status_ar'] }}
+    {{ $l == 'en' ? $currentHackathon['status'] : $currentHackathon['status'] }}
   </div>
   <h1 class="display-5 fw-bold" id="hackathon-main-title">
-    {{ $l == 'en' ? $currentHackathon['title'] : $currentHackathon['title_ar'] }}
+    {{ $l == 'en' ? $currentHackathon['title'] : $currentHackathon['title'] }}
   </h1>
-  <p class="lead"> {{ $l == 'en' ? $currentHackathon['description'] : $currentHackathon['description_ar'] }} </p>
+  <p class="lead"> {{ $l == 'en' ? $currentHackathon['description'] : $currentHackathon['description'] }} </p>
   <p class="lead" id="hackathon-dates-location">
     <i class="ti ti-calendar-event me-2"></i>
-    {{ $l == 'en' ? $currentHackathon['date'] : $currentHackathon['date_ar'] }}
+    {{ $l == 'en' ? $currentHackathon['date'] : $currentHackathon['date'] }}
     <span class="mx-3">|</span>
     <i class="ti ti-map-pin me-2"></i>
-    {{ $l == 'en' ? $currentHackathon['location'] : $currentHackathon['location_ar'] }}
+    {{ $l == 'en' ? $currentHackathon['location'] : $currentHackathon['location'] }}
   </p>
   <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-    @foreach(($l == 'en' ? $currentHackathon['tags'] : $currentHackathon['tags_ar']) as $tag)
+    @foreach(($l == 'en' ? $currentHackathon['tags'] : $currentHackathon['tags']) as $tag)
     <span class="badge bg-light text-dark px-3 py-2"
       style="background: rgba(255, 255, 255, 0.2) !important; color: white !important; border: 1px solid rgba(255, 255, 255, 0.3);">
       {{ $tag }}
     </span>
     @endforeach
   </div>
-  
-  @if($currentHackathon['cycle_id'] == $user->company?->cycle)
+  @if($user->team_member && $user->team_member->teamFormation && $user->team_member->teamFormation->user && $user->team_member->teamFormation->user->company && $currentHackathon['cycle_id'] == $user->team_member->teamFormation->user->company->cycle)
     <div id="action-buttons-placeholder" class="mt-4">
       <!-- Buttons will be injected by JS -->
         @php

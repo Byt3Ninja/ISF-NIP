@@ -158,6 +158,10 @@ class CyclesController extends Controller
             $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
         }
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+        if($steps == null || count($steps) == 0)
+        {
+            $steps = collect([]);
+        }
         $steps = $steps->map(function ( $step ) use ( $cycles ) {
             $step->join_url = null;
             if( $step->stype != 1 ) { return $step; }
@@ -185,6 +189,7 @@ class CyclesController extends Controller
             }
             return $step;
         });
+
         return view('admin.settings.cycles.index', compact('cycles', 'steps', 'id', 'svgs'));
     }
 
@@ -896,8 +901,6 @@ class CyclesController extends Controller
 
     public function saveForm(Request $request)
     {
-
-       
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
@@ -999,7 +1002,7 @@ class CyclesController extends Controller
         }
 
 
-        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
+        return redirect(url('/dashboard'))->with(['msg' => 'formSubmittedSuccessfully', 'class' => 'success']);
     }
 
     public function testSend(Request $request)

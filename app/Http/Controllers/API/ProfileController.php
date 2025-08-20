@@ -6,17 +6,23 @@ use App\User;
 use App\UsersBio;
 use App\MentorshipTask;
 use App\MentorshipRequest;
+use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UpdateBioRequest;
+use App\Http\Resources\ProfileResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\MentorBioResource;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class ProfileController extends Controller
 {
+    use ApiResponder;
  /**
  * @OA\Get(
  *     path="/api/me",
@@ -107,10 +113,7 @@ class ProfileController extends Controller
       $user = Auth::user();
       $data = $this->getProfileData($user);
 
-    return response()->json([
-        'success' => true,
-        'data'    => $data,
-    ], 200);
+      return $this->success($data);
     }
  /**
  * @OA\Post(
@@ -175,93 +178,32 @@ class ProfileController extends Controller
  *     )
  * )
  */
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateProfileRequest $request)
 {
     $user = Auth::user();
-    $locale = app()->getLocale();
 
-    $request->validate([
-        'firstName'     => 'nullable|string|max:255',
-        'lastName'      => 'nullable|string|max:255',
-        'countryCode'      => 'nullable|string|max:10',
-        'country_code_w_a'  => 'nullable|string|max:10',
-        'phone'             => 'nullable|string|max:20',
-        'whatsapp'          => 'nullable|string|max:20',
-        'email'             => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
-        'zipCode'          => 'nullable|string|max:20',
-        'address'           => 'nullable|string|max:255',
-        'title'          => 'nullable|string|max:255',
-        'language'          => 'nullable|string|max:10',
-        'timezone'          => 'nullable|string|max:100',
-        'currency'          => 'nullable|string|max:10',
-        'country_id'        => 'nullable|exists:countries,id',
-        'state_id'          => 'nullable|exists:states,id',
-        'imgUrl'            => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+    $user->fill([
+        'first_name_en'   => $request->firstName ?? $user->first_name_en,
+        'first_name_ar'   => $request->firstName ?? $user->first_name_ar,
+        'last_name_en'    => $request->lastName ?? $user->last_name_en,
+        'last_name_ar'    => $request->lastName ?? $user->last_name_ar,
+        'email'           => $request->email ?? $user->email,
+        'gender'          => $request->gender ?? $user->gender,
+        'country_code'    => $request->countryCode ?? $user->country_code,
+        'country_code_w_a'=> $request->countryCodeWA ?? $user->country_code_w_a,
+        'phone'           => $request->phone ?? $user->phone,
+        'whatsapp'        => $request->whatsapp ?? $user->whatsapp,
+        'zip_code'        => $request->zipCode ?? $user->zip_code,
+        'address'         => $request->address ?? $user->address,
+        'title_en'        => $request->title ?? $user->title_en,
+        'language'        => $request->language ?? $user->language,
+        'timezone'        => $request->timezone ?? $user->timezone,
+        'currency'        => $request->currency ?? $user->currency,
+        'country_id'      => $request->country_id ?? $user->country_id,
+        'state_id'        => $request->state_id ?? $user->state_id,
+        'HaveCompany'     => $request->HaveCompany ?? $user->HaveCompany,
     ]);
-
-    if ($request->filled('firstName')) {
-        $user->first_name_en = $request->input('firstName');
-        $user->first_name_ar = $request->input('firstName');
-    }
-
-    if ($request->filled('lastName')) {
-        $user->last_name_en = $request->input('lastName');
-        $user->last_name_ar = $request->input('lastName');
-    }
-     if ($request->filled('email')) {
-        $user->email = $request->input('email');
-    }
-     if ($request->filled('gender')) {
-        $user->gender = $request->input('gender');
-    }
-    if ($request->has('countryCode')) {
-        $user->country_code = $request->input('countryCode');
-    }
-
-    if ($request->has('countryCodeWA')) {
-        $user->country_code_w_a = $request->input('countryCodeWA');
-    }
-
-    if ($request->has('phone')) {
-        $user->phone = $request->input('phone');
-    }
-
-    if ($request->has('whatsapp')) {
-        $user->whatsapp = $request->input('whatsapp');
-    }
-
-    if ($request->has('zipCode')) {
-        $user->zip_code = $request->input('zipCode');
-    }
-
-    if ($request->has('address')) {
-        $user->address = $request->input('address');
-    }
-    if ($request->filled('title')) {
-     $user->title_en    = $request->input('title');
-    }
-    if ($request->has('language')) {
-        $user->language = $request->input('language');
-    }
-    if ($request->filled('timezone')) {
-      $user->timezone      = $request->input('timezone');
-    }
-     if ($request->has('currency')) {
-        $user->currency = $request->input('currency');
-    }
-
-    if ($request->has('country_id')) {
-        $user->country_id = $request->input('country_id');
-    }
-
-    if ($request->has('state_id')) {
-        $user->state_id = $request->input('state_id');
-    }
-
-    if ($request->has('HaveCompany')) {
-        $user->HaveCompany = $request->input('HaveCompany');
-    }
-
+    
     if ($request->hasFile('imgUrl')) {
         $img = $request->file('imgUrl');
         $imgPath = $img->store('users', ['disk' => 'public_uploads']);
@@ -277,31 +219,7 @@ class ProfileController extends Controller
 
     $user->save();
 
-    return response()->json([
-        'success' => true,
-        'message' => __('api.ProfileUpdated'),
-        'data' => [
-           'firstName' => $user->first_name_en,
-           'lastName'  => $user->last_name_en,
-           'lastName'  => $user->last_name_en,
-            'email'         => $user->email,
-            'phone'          => $user->phone,
-            'gender'         => $user->gender,
-            'whatsapp'       => $user->whatsapp,
-            'countryCode'    => $user->country_code,
-            'countryCodeWA' => $user->country_code_w_a,
-            'zipCode'       => $user->zip_code,
-            'address'        => $user->address,
-            'title'          => $user->title_en,
-            'language'       => $user->language,
-            'timezone'       => $user->timezone,
-            'currency'       => $user->currency,
-            'country'          => optional($user->country)->{'name_' . $locale},
-            'state'            => optional($user->state)->{'name_' . $locale},
-            'HaveCompany'    => $user->HaveCompany,
-            'imgUrl'    => $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null,
-        ]
-    ]);
+    return $this->success(new ProfileResource($user),[], __('api.ProfileUpdated'));
 }
  /**
      * @OA\Put(
@@ -330,14 +248,9 @@ class ProfileController extends Controller
      *     )
      * )
      */
-public function updatePassword(Request $request)
+public function updatePassword(UpdatePasswordRequest  $request)
 {
     $user = Auth::user();
-
-    $request->validate([
-        'currentPassword'      => ['required'],
-        'password'              => ['required', 'confirmed', 'min:8'],
-    ]);
 
     if (!Hash::check($request->currentPassword, $user->password)) {
         throw ValidationException::withMessages([
@@ -348,10 +261,7 @@ public function updatePassword(Request $request)
     $user->password = Hash::make($request->password);
     $user->save();
 
-    return response()->json([
-        'success' => true,
-        'message' => __('api.Passwordupdated'),
-    ]);
+    return $this->success(null,[], __('api.Passwordupdated'));
 }
 /**
      * @OA\Put(
@@ -396,7 +306,7 @@ public function updatePassword(Request $request)
      *     )
      * )
      */
-public function updateBio(Request $request)
+public function updateBio(UpdateBioRequest  $request)
 {
     $user = Auth::user();
 
@@ -407,20 +317,11 @@ public function updateBio(Request $request)
         ], 403);
     }
 
-    $validated = $request->validate([
-        'bio'                            => 'nullable|string|max:255',
-        'specialization'                => 'nullable|string|max:250',
-        'linkedin'                      => 'nullable|url|max:250',
-        'entrepreneurialExperience'    => 'nullable|boolean',
-        'entrepreneurialExperienceBrief' => 'nullable|string',
-        'profilePrivacy'               => 'nullable|boolean',
-        'expertiseIds'                 => 'nullable|array',
-        'expertiseIds.*'               => 'exists:expertises,id',
-    ]);
+    $validated = $request->validated();
 
     $bio = UsersBio::firstOrNew(['user_id' => $user->id]);
 
-    if ($request->has('mentorshipApproach')) {
+    if (isset($validated['mentorshipApproach'])) {
         $approachInput = $request->input('mentorshipApproach');
         $allowedApproaches = ['E-mail', 'Phone Calls', 'Video Calls', 'In-Person Meetings'];
         $mentorshipApproach = [];
@@ -471,20 +372,8 @@ public function updateBio(Request $request)
         $user->mentorExpertises()->sync($validated['expertiseIds']);
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => __('api.MentorBioUpdated'),
-        'data' => [
-            'bio' => $bio->bio_en,
-            'specialization' => $bio->specialization_en,
-            'linkedin' => $bio->linkedin,
-            'entrepreneurialExperience' => (bool) $bio->entrepreneurial_experience,
-            'entrepreneurialExperienceBrief' => $bio->entrepreneurial_experience_brief,
-            'profilePrivacy' => (bool) $bio->profile_privacy,
-            'mentorshipApproach' => json_decode($bio->mentorship_approach, true),
-            'expertise_ids' => $user->mentorExpertises()->pluck('expertise_id')->toArray(),
-        ]
-    ]);
+    $bio->load('user.mentorExpertises');
+    return $this->success(new MentorBioResource($bio),[], __('api.MentorBioUpdated'));
 }
 
 public function showProfile($id)
@@ -492,10 +381,7 @@ public function showProfile($id)
     $user = User::with(['country', 'state', 'city', 'company'])->findOrFail($id);
     $data = $this->getProfileData($user);
 
-    return response()->json([
-        'success' => true,
-        'data'    => $data,
-    ], 200);
+    return $this->success($data);
 }
 
 
@@ -609,7 +495,7 @@ private function getProfileData(User $user): array
 
     $data['organizationId'] = $cycle->organization_id;
     $data['cycleId']        = $cycle->id;
-}
+   }
 
     return $data;
 }

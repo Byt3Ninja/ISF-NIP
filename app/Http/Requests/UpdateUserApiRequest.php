@@ -25,29 +25,43 @@ class UpdateUserApiRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('id');
-        return [
-            'firstName' => ['nullable', 'string', 'max:255'],
-            'lastName' => ['nullable', 'string', 'max:255'],
-            'email' => [
-                'nullable',
-                'email',
-                Rule::unique('users', 'email')->ignore($userId),
-            ],
-            'phone' => [
-                'nullable',
-                Rule::unique('users', 'phone')->ignore($userId),
-            ],
-            'gender' => ['nullable', 'string', 'in:male,female'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'role' => ['nullable', 'exists:roles,id'],
-            'status' => ['nullable', 'string'],
-        ];
+    $userId = $this->route('user')?->id;
+
+    return [
+        'firstName' => ['nullable', 'string', 'max:255'],
+        'lastName' => ['nullable', 'string', 'max:255'],
+        'email' => [
+            'nullable',
+            'email',
+            Rule::unique('users', 'email')->ignore($userId),
+        ],
+        'phone' => [
+            'nullable',
+            Rule::unique('users', 'phone')->ignore($userId),
+        ],
+        'gender' => ['nullable', 'string', 'in:Male,Female'],
+        'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        'role' => ['nullable', 'exists:roles,id'],
+        'status' => ['nullable', 'string'],
+        'HaveCompany'=> ['nullable', 'bool'],
+        'country_id'=> ['nullable','exists:countries,id'],
+        'img_url'=> ['nullable'],
+        'country_code' => 'nullable|numeric|digits_between:1,5',
+        'state_id' => 'nullable|exists:states,id',
+        'city_id' => 'nullable|exists:cities,id',
+        'houre_rate' => 'nullable|numeric',
+        'title_en' => 'nullable|string|max:100',
+        'title_ar' => 'nullable|string|max:100',
+    ];
     }
        protected function failedValidation(Validator $validator)
     {
+        if ($this->expectsJson()) {
         throw new HttpResponseException(
             $this->validationError(__('api.validation_error'), 422, $validator->errors())
-        );
+         );
+      }
+      parent::failedValidation($validator);
+
     }
 }

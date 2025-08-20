@@ -15,5 +15,9 @@ class UsersBio extends Model
 
         return $this->mentorship_approach=="null"|| is_null($this->mentorship_approach)?[]:json_decode($this->mentorship_approach);
     }
+    public function user()
+  {
+     return $this->belongsTo(User::class, 'user_id');
+  }
 
 }

@@ -14,13 +14,18 @@ use Carbon\Carbon;
 use App\Team_member;
 use App\CyclesMentors;
 use App\TeamFormation;
+use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
+use App\Exports\WinnersExport;
 use Illuminate\Support\Facades\DB;
+use App\ScreeningEvaluationResults;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HackathonController extends Controller
 {
@@ -75,7 +80,7 @@ class HackathonController extends Controller
                 'id' => $item->c_id,
                 'title' => $item->c_title,
                 'image' => $item->c_img_url,
-                'date' => $start->format('F d') . ' - ' . $end->format('d, Y'),
+                'date' => $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d'),
                 'location' => $item->o_name_en ?? 'Unknown',
                 'status' => $status,
                 'description' => $item->c_description,
@@ -91,14 +96,33 @@ class HackathonController extends Controller
             ];
          });
 
-            // استخراج الهاكاثونات المنتهية فقط
-            $pastHackathons = $hackathons->where('status', 'Finished')->values();
-            $hackathons = $hackathons->reject(function ($item) {
-                return $item['status'] === 'Finished';
-            })->values();
-           
+         
+        $pastHackathons_q = $hackathons->where('status', 'Finished')
+        ->sortByDesc('cycle_end')
+        ->values();
+
+        // عدد العناصر في كل صفحة
+        $perPage = 5;
+
+        // الصفحة الحالية
+        $page = request()->get('page', 1);
+
+        // قص البيانات على حسب الصفحة
+        $currentPageItems = $pastHackathons_q->slice(($page - 1) * $perPage, $perPage)->values();
+
+        // عمل الـ Paginator
+        $pastHackathons = new LengthAwarePaginator(
+            $currentPageItems,
+            $pastHackathons_q->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
         
-        // return view('admin.hackathon.index', compact('hackathons'));
+        $hackathons = $hackathons->reject(function ($item) {
+            return $item['status'] === 'Finished';
+        })->values();
+                
         return view('admin.hackathon.index', compact('hackathons', 'pastHackathons', 'step', 'hackathon_ids'));
     }
 
@@ -114,6 +138,7 @@ class HackathonController extends Controller
                 tf.cycle_id as 'tf_cycle_id',
                 tf.step_id as 'tf_step_id',
                 tf.user_id as 'tf_user_id',
+                tf.img_team as 'tf_img_team',
                 tf.project_name_ar as 'tf_projectName_ar',
                 tf.project_name_en as 'tf_projectName_en',
                 tf.project_description_ar as 'tf_projectDescription_ar',
@@ -168,6 +193,8 @@ class HackathonController extends Controller
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
         $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
 
+        $team_Formation_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id)->first();
+
         $existInTeam = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'accepted')->pluck('user_id')->toArray();
         $pendingInvites = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'pending')->get();
         $placeholders = implode(',', array_fill(0, count($existInTeam), '?'));
@@ -198,7 +225,7 @@ class HackathonController extends Controller
                 states as s ON u.state_id = s.id
             WHERE c.cycle = ?
         ";
-        $params = [$user->company->cycle];
+        $params = [$user->team_member->teamFormation->user->company->cycle];
         if( count($existInTeam) > 0 )
         {
             $viewMember_q .= " AND u.id NOT IN ($placeholders)";
@@ -223,7 +250,87 @@ class HackathonController extends Controller
             ];
         })->toArray();
 
-        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers'));
+        $todoList_q = "SELECT 
+                tl.id as tl_id,
+                tl.title as tl_title,
+                tl.description as tl_description,
+                tl.created_at as tl_created_at,
+                tl.due_date as tl_due_date,
+                tl.status as tl_status,
+                tl.assignee as tl_assignee_id,
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.user_id as tf_user_id,
+                tf.description as tf_description,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.team_formation_id as tm_team_formation_id,
+                tm.Name as tm_name,
+                tm.email as tm_email,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.isTeamLeader as tm_isTeamLeader,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                u.email as 'u_email',
+                u.img_url as 'u_img_url',
+                us.id as us_id,
+                concat(us.first_name_en, ' ', us.last_name_en) as 'assignee_name_en',
+                concat(us.first_name_ar, ' ', us.last_name_ar) as 'assignee_name_ar',
+                us.email as 'assignee_email',
+                us.img_url as 'assignee_img_url'
+            FROM 
+                todo_lists as tl
+            LEFT JOIN
+                team_formations as tf ON tf.id = tl.team_formation_id
+            LEFT JOIN
+                team_members as tm ON tm.id = tl.team_member_id
+            LEFT JOIN
+                users as u ON u.id = tl.user_id
+            LEFT JOIN
+                users as us ON us.id = tl.assignee
+            WHERE
+                tl.team_formation_id = ? 
+        ";
+        $todoList = collect(DB::select($todoList_q, [$id]));
+
+        $sharedFile_q = "SELECT 
+                sf.id as sf_id,
+                sf.file as sf_file,
+                sf.user_id as sf_user_id,
+                sf.description as sf_description,
+                sf.created_at as sf_created_at,
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.user_id as tf_user_id,
+                tf.description as tf_description,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.team_formation_id as tm_team_formation_id,
+                tm.Name as tm_name,
+                tm.email as tm_email,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.isTeamLeader as tm_isTeamLeader,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                u.email as 'u_email',
+                u.img_url as 'u_img_url'
+            FROM 
+                shared_files as sf
+            LEFT JOIN
+                team_formations as tf ON tf.id = sf.team_formation_id
+            LEFT JOIN
+                team_members as tm ON tm.id = sf.team_member_id
+            LEFT JOIN
+                users as u ON u.id = sf.user_id
+            WHERE sf.team_formation_id = ? 
+        ORDER BY sf.created_at DESC";
+
+        $sharedFile = collect(DB::select($sharedFile_q, [$id]));
+        
+
+        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers', 'todoList', 'sharedFile', 'team_Formation_leader'));
     }
 
     public function myTeam()
@@ -327,7 +434,7 @@ class HackathonController extends Controller
             LEFT JOIN
                 users as u ON u.id = sf.user_id
             WHERE sf.team_formation_id = ? 
-        ";
+        ORDER BY sf.created_at DESC";
 
         $sharedFile = collect(DB::select($sharedFile_q, [$TF_id]));
 
@@ -416,6 +523,7 @@ class HackathonController extends Controller
                 c.img_url as 'c_img_url',
                 c.created_at as 'c_created_at',
                 c.updated_at as 'c_updated_at',
+                c.winners_announcement as 'c_winners_announcement',
                 o.id as 'o_id',
                 o.name_ar as 'o_name_ar',
                 o.name_en as 'o_name_en',
@@ -488,7 +596,7 @@ class HackathonController extends Controller
                 'cycle_id' => $id,
                 'Company_id' => $item->Com_id,
                 'max_team' => $step->where('id', $item->Com_step)->first()?->count_team_number ?? 0,
-               
+                'announcement' => $item->c_winners_announcement == 1 ? true : false,
             ];
         }
 
@@ -923,6 +1031,35 @@ class HackathonController extends Controller
 
 
         // return view('admin.hackathon.show', compact('hackathon'));
+        $winners = collect([]);
+        if( $currentHackathon['announcement'] == true )
+        {
+            $teams = TeamFormation::teams( $id );
+            $teams = $teams->where('winner', 'selected')->values();
+            $winners = $teams->map(function( $team ) {
+                $winner = new stdClass;
+                $winner->id = $team->id;
+                $winner->name = $team->company->name;
+                $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
+                $winner->projectTitle = $team->project->name;
+                $winner->teamName = $team->name;
+                $winner->description = $team->project->description;
+                $leader = $team->members->where('isLeader', true)->first(); 
+                $winner->teamLeader = new stdClass;
+                $winner->teamLeader->name = $leader?->name;
+                $winner->teamLeader->role = $leader?->role;
+                $winner->teamLeader->image = $leader?->image;
+                $winner->teamMembers = $team->members->map(function( $team_member ) {
+                    $member = new stdClass;
+                    $member->name = $team_member->name;
+                    $member->role = $team_member->role;
+                    $member->image = $team_member->image;
+                    $member->isLeader = $team_member->isLeader == 1 ? true : false;
+                    return $member;
+                });
+                return $winner;
+            });
+        }
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
             'currentHackathon',
@@ -943,7 +1080,8 @@ class HackathonController extends Controller
             'steps',
             'showStep',
             'steps_ids',
-            'teamJoins'
+            'teamJoins',
+            'winners'
         ));
     }
 
@@ -1061,10 +1199,9 @@ class HackathonController extends Controller
 
     public function createTeam(Request $request)
     {
-      
         $request->validate([
-            'team_name' => 'required|string|unique:team_formations,name,max:255',
-            'description' => 'nullable|string|max:1000',
+            'team_name' => 'required|string|max:50|unique:team_formations,name',
+            'team_description' => 'nullable|string|max:1000',
             'cycle_id' => 'required|exists:cycles,id',
             'step_id' => 'required|exists:steps,id',
             'Project_Name_ar' => 'nullable|string|max:255',
@@ -1074,7 +1211,7 @@ class HackathonController extends Controller
             'Target_Track' => 'nullable|integer',
             'Project_Status' => 'nullable|integer',
             'Region' => 'nullable|string|max:255',
-
+            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         
         $user = Auth::user();
@@ -1111,7 +1248,7 @@ class HackathonController extends Controller
 
         $teamformation = new TeamFormation();
         $teamformation->name = $request->team_name;
-        $teamformation->description = $request->description;
+        $teamformation->description = $request->team_description;
         $teamformation->cycle_id = $request->cycle_id;
         $teamformation->step_id = $request->step_id;
         $teamformation->user_id = $user->id;
@@ -1123,12 +1260,12 @@ class HackathonController extends Controller
         $teamformation->project_status = $request->Project_Status ?? 0;
         $teamformation->region = $request->Region ?? '';
 
-        if ($request->hasFile('img_team')) {
-                    $image = $request->file('img_team');
-                    $imageName = time() . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('programs/teams/'), $imageName);
-                    $teamformation->img_team = 'programs/teams/' . $imageName;
-                }
+        if ($request->hasFile('team_image')) {
+            $image = $request->file('team_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('programs/teams/'), $imageName);
+            $teamformation->img_team = 'programs/teams/' . $imageName;
+        }
 
         $teamformation->save();
 
@@ -1180,6 +1317,79 @@ class HackathonController extends Controller
         
     }
 
+    public function EditTeamInfo(Request $request)
+    {
+        $request->validate([
+            'team_name' => 'required|string|max:50',
+            'team_description' => 'nullable|string|max:1000',
+            'team_formation_id' => 'required|exists:team_formations,id',
+            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'remove_image' => 'nullable|boolean'
+        ]);
+
+        $user = Auth::user();
+        
+        // Get the team formation and verify the user is the team leader
+        $teamFormation = TeamFormation::find($request->team_formation_id);
+        
+        if (!$teamFormation) {
+            return response()->json(['error' => 'Team not found.'], 404);
+        }
+
+        // Check if the current user is the team leader
+        $isLeader = Team_member::where('team_formation_id', $teamFormation->id)
+                               ->where('user_id', $user->id)
+                               ->where('isTeamLeader', 1)
+                               ->exists();
+
+        if (!$isLeader) {
+            return response()->json(['error' => 'You are not authorized to edit team information.'], 403);
+        }
+
+        // Update team information
+        $teamFormation->name = $request->team_name;
+        $teamFormation->description = $request->team_description;
+
+        // Handle image upload
+        $newImageUrl = null;
+        
+        if ($request->hasFile('team_image')) {
+            // Delete old image if exists
+            if ($teamFormation->img_team) {
+                $oldImagePath = public_path($teamFormation->img_team);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            
+            // Upload new image
+            $image = $request->file('team_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('programs/teams/'), $imageName);
+            
+            $teamFormation->img_team = 'programs/teams/' . $imageName;
+            $newImageUrl = '/programs/teams/' . $imageName;
+        } elseif ($request->remove_image) {
+            // Remove existing image
+            if ($teamFormation->img_team) {
+                $oldImagePath = public_path($teamFormation->img_team);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+                $teamFormation->img_team = null;
+            }
+        }
+
+        $teamFormation->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Team information updated successfully.',
+            'team_name' => $teamFormation->name,
+            'new_image_url' => $newImageUrl
+        ]);
+    }
+
     public function invitation(Request $request){
         $request->validate([
             'memberEmail' => 'required|email',
@@ -1192,7 +1402,14 @@ class HackathonController extends Controller
         if (!$team_q) {
             return redirect()->back()->with('error', 'You are not authorized to send invitations.');
         }
-        $user_q = User::where('email', $request->memberEmail)->where('id', $request->user_id)->first();
+        if($user->email == $email){
+            return redirect()->back()->with('error', 'You cannot invite yourself.');
+        }
+        $haveTeam = Team_member::where('Email', $email)->where('acceptInvition', 'accepted')->first();
+        if($haveTeam){
+            return redirect()->back()->with('error', 'This user is already a member of another team.');
+        }
+        $user_q = User::where('email', $email)->where('id', $request->user_id)->first();
         if (!$user_q) {
             $teamMember = new Team_member();
             $teamMember->Name = 'Waiting for user';
@@ -1253,7 +1470,7 @@ class HackathonController extends Controller
             ->where('acceptInvition', 'pending')
             ->first();
            
-            if($isExpired->created_at < $isExpired->created_at->subHours(24)) {
+            if($isExpired && $isExpired->created_at < $isExpired->created_at->subHours(24)) {
                 $isExpired->acceptInvition = 'expired';
                 $isExpired->Name = $user->first_name . ' ' . $user->last_name;
                 $isExpired->TeamMember = 'hackathon';
@@ -1269,6 +1486,9 @@ class HackathonController extends Controller
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation not found.');
             }
+
+            
+            
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
@@ -1276,6 +1496,20 @@ class HackathonController extends Controller
                 $teamMember->user_id = $user->id;
                 $teamMember->save();
 
+                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+            
+
+            $count_team_q = Team_member::where('team_formation_id', $teams->id)->get();
+            $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+            $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+           
+            if($step->count_team_number <= $count_team){
+                foreach ($count_team_q->whereIn('acceptInvition', ['join', 'pending']) as $member){
+                    $member->acceptInvition = 'rejected';
+                    $member->save();
+                }
+            }
+            
                 $allteamMembers = Team_member::where('Email', $teamMember->Email)
                 ->where('acceptInvition', 'pending')
                 ->get();
@@ -1288,18 +1522,6 @@ class HackathonController extends Controller
                     $allteamMember->user_id = $user->id;
                     $allteamMember->save();
                 }
-
-                
-                    $teamformation = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-                    $inviteduser = $teamformation->user_id;
-                    $userInv = User::where('id', $inviteduser)->first();
-                    $updatecompany =Company::where('id', $user->company_id)->first();
-                    if($userInv?->company?->cycle != null){
-                        $updatecompany->cycle = $userInv->company->cycle;
-                        $updatecompany->step = $userInv->company->step;
-                        $updatecompany->save();
-                    }
-    
 
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
     }
@@ -1325,6 +1547,21 @@ class HackathonController extends Controller
                 $teamMember = Team_member::where('id', $id)
                 ->where('acceptInvition', 'pending')
                 ->first();
+
+            $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+            $count_team_q = Team_member::where('team_formation_id', $teams->id)
+                ->get();
+            $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+                $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+            if($step->count_team_number <= $count_team){
+                foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+                    $member->acceptInvition = 'rejected';
+                    $member->save();
+                }
+                return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+            }
+
+
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation not found.');
             }
@@ -1388,9 +1625,23 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
+        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+        $count_team_q = Team_member::where('team_formation_id', $teams->id)
+            ->get();
+        $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
+
+        $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
+        if($step->count_team_number < $count_team){
+            foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+                $member->acceptInvition = 'rejected';
+                $member->save();
+            }
+            return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
+        }
             if(!$teamMember) {
                 return redirect()->back()->with('error', 'Request not found.');
             }
+
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->save();
                 $allteamMembers = Team_member::where('Email', $teamMember->Email)
@@ -1532,6 +1783,9 @@ class HackathonController extends Controller
 
     public function viewHackathonTeam($id)
     {
+        $l = app()->getLocale();
+        
+        // Comprehensive team query with all available information
         $teams_q = "SELECT 
                 tf.id as tf_id,
                 tf.name as tf_name,
@@ -1539,25 +1793,51 @@ class HackathonController extends Controller
                 tf.cycle_id as tf_cycle_id,
                 tf.step_id as tf_step_id,
                 tf.img_team as tf_img_team,
+                tf.user_id as tf_user_id,
+                tf.project_name_ar as tf_project_name_ar,
+                tf.project_name_en as tf_project_name_en,
+                tf.project_description_ar as tf_project_description_ar,
+                tf.project_description_en as tf_project_description_en,
+                tf.project_status as tf_project_status,
+                tf.target_track as tf_target_track,
+                tf.region as tf_region,
+                tf.winner_status as tf_winner_status,
+                tf.max_teams_members as tf_max_teams_members,
+                tf.created_at as tf_created_at,
+                tf.updated_at as tf_updated_at,
                 tm.id as tm_id,
                 tm.user_id as tm_user_id,
                 tm.acceptInvition as tm_acceptInvition,
                 tm.Name as tm_name,
                 tm.Email as tm_email,
                 tm.isTeamLeader as tm_isTeamLeader,
-                tm.acceptInvition as tm_acceptInvition,
                 tm.team_formation_id as tm_team_formation_id,
+                tm.Company_id as tm_company_id,
+                tm.created_at as tm_created_at,
                 u.id as u_id,
                 concat(u.first_name_en, ' ', u.last_name_en) as user_name_en,
                 concat(u.first_name_ar, ' ', u.last_name_ar) as user_name_ar,
                 u.email as u_email,
+                u.phone as u_phone,
                 u.img_url as u_img_url,
                 u.title_ar as u_title_ar,
                 u.title_en as u_title_en,
+                u.address as u_address,
+                u.gender as u_gender,
                 ub.id as ub_id,
                 ub.bio_ar as ub_bio_ar,
                 ub.bio_en as ub_bio_en,
-                ub.linkedin as ub_linkedin
+                ub.linkedin as ub_linkedin,
+                c.id as c_id,
+                c.name_en as c_name_en,
+                c.name_ar as c_name_ar,
+                c.logo as c_logo,
+                cy.id as cy_id,
+                cy.title as cy_title,
+                cy.description as cy_description,
+                s.id as s_id,
+                s.title as s_title,
+                s.description as s_description
             FROM 
                 team_members as tm
             LEFT JOIN
@@ -1566,37 +1846,170 @@ class HackathonController extends Controller
                 users as u ON tm.user_id = u.id
             LEFT JOIN
                 users_bio as ub ON u.id = ub.user_id
+            LEFT JOIN
+                companies as c ON tm.Company_id = c.id
+            LEFT JOIN
+                cycles as cy ON tf.cycle_id = cy.id
+            LEFT JOIN
+                steps as s ON tf.step_id = s.id
             WHERE
                 tm.team_formation_id = ?
         ";
 
+        // Get shared files for the team
+        $files_q = "SELECT 
+                sf.id as sf_id,
+                sf.file as sf_file,
+                sf.description as sf_description,
+                sf.created_at as sf_created_at,
+                sf.updated_at as sf_updated_at,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as uploader_name_en,
+                concat(u.first_name_ar, ' ', u.last_name_ar) as uploader_name_ar,
+                u.img_url as uploader_img_url
+            FROM 
+                shared_files as sf
+            LEFT JOIN
+                users as u ON sf.user_id = u.id
+            WHERE
+                sf.team_formation_id = ?
+            ORDER BY sf.created_at DESC
+        ";
+
+        // Get todo lists for the team
+        $todos_q = "SELECT 
+                tl.id as tl_id,
+                tl.title as tl_title,
+                tl.description as tl_description,
+                tl.status as tl_status,
+                tl.due_date as tl_due_date,
+                tl.created_at as tl_created_at,
+                tl.updated_at as tl_updated_at,
+                u_creator.id as creator_id,
+                concat(u_creator.first_name_en, ' ', u_creator.last_name_en) as creator_name_en,
+                u_assignee.id as assignee_id,
+                concat(u_assignee.first_name_en, ' ', u_assignee.last_name_en) as assignee_name_en
+            FROM 
+                todo_lists as tl
+            LEFT JOIN
+                users as u_creator ON tl.user_id = u_creator.id
+            LEFT JOIN
+                users as u_assignee ON tl.assignee = u_assignee.id
+            WHERE
+                tl.team_formation_id = ?
+            ORDER BY tl.created_at DESC
+        ";
+
         $teams_data = collect(DB::select($teams_q, [$id]));
+        $shared_files = collect(DB::select($files_q, [$id]));
+        $todo_lists = collect(DB::select($todos_q, [$id]));
+
+        if ($teams_data->isEmpty()) {
+            abort(404, 'Team not found');
+        }
+
         $teams = $teams_data->groupBy('tm_team_formation_id');
 
-        $teams = $teams->map(function ($group) {
+        $teams = $teams->map(function ($group) use ($l, $shared_files, $todo_lists) {
             $first = $group->first();
             $team = new stdClass;
+            
+            // Basic team information
             $team->id = $first->tf_id;
             $team->name = $first->tf_name;
             $team->desc = $first->tf_description;
             $team->cycle_id = $first->tf_cycle_id;
             $team->step_id = $first->tf_step_id;
             $team->photo = $first->tf_img_team ?? null;
+            $team->region = $first->tf_region;
+            $team->winner_status = $first->tf_winner_status;
+            $team->max_members = $first->tf_max_teams_members;
+            $team->created_at = $first->tf_created_at;
+            $team->updated_at = $first->tf_updated_at;
+            
+            // Cycle information
+            $team->cycle = new stdClass;
+            $team->cycle->id = $first->cy_id;
+            $team->cycle->title = $first->cy_title;
+            $team->cycle->description = $first->cy_description;
+            
+            // Step information
+            $team->step = new stdClass;
+            $team->step->id = $first->s_id;
+            $team->step->title = $first->s_title;
+            $team->step->description = $first->s_description;
+            
+            // Project information
+            $team->project = new stdClass;
+            $team->project->name = $first->tf_project_name_en;
+            $team->project->description = $first->tf_project_description_en;
+            $team->project->status = $first->tf_project_status;
+            $team->project->track = $first->tf_target_track;
+            $team->project->region = $first->tf_region;
 
             // Team Members
-            $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) {
+            $team->members = $group->where('tm_acceptInvition', 'accepted')->map(function ($member) use ($l) {
                 $user = new stdClass;
                 $user->id = $member->u_id;
-                $user->name = $member->user_name_en;
+                $user->name = $l == 'ar' ? $member->user_name_ar : $member->user_name_en;
                 $user->email = $member->u_email;
+                $user->phone = $member->u_phone;
                 $user->img_url = $member->u_img_url;
+                $user->title = $l == 'ar' ? $member->u_title_ar : $member->u_title_en;
+                $user->address = $member->u_address;
+                $user->gender = $member->u_gender;
                 $user->is_leader = $member->tm_isTeamLeader;
-                $user->request_sent = $member->tm_acceptInvition == 'join' ? true : false;
-                $user->status = $member->tm_acceptInvition == 'accepted' ? 'Accepted' : 'join';
+                $user->joined_at = $member->tm_created_at;
+                $user->status = $member->tm_acceptInvition;
+                
+                // Social media links
                 $user->linkedin = $member->ub_linkedin;
-                $user->title = $member->u_title_en;
+                
+                // Bio information
+                $user->bio = $l == 'ar' ? $member->ub_bio_ar : $member->ub_bio_en;
+                
+                // Company information
+                $user->company = new stdClass;
+                $user->company->id = $member->c_id;
+                $user->company->name = $l == 'ar' ? $member->c_name_ar : $member->c_name_en;
+                $user->company->logo = $member->c_logo;
+                
                 return $user;
             })->values()->all();
+            // Shared files
+            $team->shared_files = $shared_files->map(function ($file) use ($l) {
+                $attachment = new stdClass;
+                $attachment->id = $file->sf_id;
+                $attachment->file = $file->sf_file;
+                $attachment->description = $file->sf_description;
+                $attachment->created_at = $file->sf_created_at;
+                $attachment->updated_at = $file->sf_updated_at;
+                $attachment->uploader = new stdClass;
+                $attachment->uploader->id = $file->u_id;
+                $attachment->uploader->name = $l == 'ar' ? $file->uploader_name_ar : $file->uploader_name_en;
+                $attachment->uploader->img_url = $file->uploader_img_url;
+                return $attachment;
+            })->all();
+            
+            // Todo lists
+            $team->todo_lists = $todo_lists->map(function ($todo) use ($l) {
+                $task = new stdClass;
+                $task->id = $todo->tl_id;
+                $task->title = $todo->tl_title;
+                $task->description = $todo->tl_description;
+                $task->status = $todo->tl_status;
+                $task->due_date = $todo->tl_due_date;
+                $task->created_at = $todo->tl_created_at;
+                $task->updated_at = $todo->tl_updated_at;
+                $task->creator = new stdClass;
+                $task->creator->id = $todo->creator_id;
+                $task->creator->name = $todo->creator_name_en;
+                $task->assignee = new stdClass;
+                $task->assignee->id = $todo->assignee_id;
+                $task->assignee->name = $todo->assignee_name_en;
+                return $task;
+            })->all();
+            
             return $team;
         });
         
@@ -1605,7 +2018,8 @@ class HackathonController extends Controller
             
         // If no team is found, you might want to abort or handle it gracefully.
         if (!$team) { abort(404, 'Team not found'); }
-        return view('admin.hackathon.team', compact('team'));
+        
+        return view('admin.hackathon.team', compact('team', 'l'));
     }
 
     public function viewAdminHackaton($id)
@@ -1976,12 +2390,6 @@ class HackathonController extends Controller
             $submission->region = $group->TF_region;
             return $submission;
         })->values()->all();
-     
-        // dd($data['not_submitted_projects']);
-        
-
-
-     
 
         $data['totalUsers']= count($allUsers);
         $data['usersWithFormDataCount'] = count($usersWithFormData);
@@ -1990,9 +2398,107 @@ class HackathonController extends Controller
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));
     }
 
-    public function viewHackathonWinners($id)
+    public function viewHackathonWinners( $id )
     {
-      
-        return view('admin.hackathon.admin.winners');
+        $l = app()->getLocale();
+        $cycle = Cycle::getHackathon( $id );
+
+        if( empty( $cycle ) ) { return abort(404); }
+        $teams = TeamFormation::teams( $id );
+        $winnersData = TeamFormation::winners( $teams );
+
+        $now = now();
+        $start = Carbon::parse($cycle->start);
+        $end = Carbon::parse($cycle->end);
+        $status = $now->lt($start) ? 'Upcoming' : ( $now->between($start, $end) ? 'Ongoing' : 'Finished' );
+        $status_ar = match($status) {
+            'Upcoming' => 'قادم',
+            'Ongoing' => 'قائم',
+            'Finished' => 'منتهي',
+            default => '',
+        };
+        $duration = $start->format('F d') . ' - ' . $end->format('d, Y');
+        $duration_ar = $start->format('d') . ' - ' . $end->format('d') . ' ' . __('months.'.$end->format('m')) . ' ' . $end->format('Y');
+
+        $hackathon = new stdClass;
+        $hackathon->id = $cycle->id;
+        $hackathon->title = $cycle->title;
+        $hackathon->description = $cycle->description;
+        $hackathon->status = $l == 'en' ? $status : $status_ar;
+        $hackathon->duration = $l == 'en' ? $duration : $duration_ar;
+        $hackathon->announcement = $cycle->winners_announcement == 1 ? true : false;
+        $hackathon->organization = new stdClass;
+        $hackathon->organization->id = $cycle->organization_id;
+        $hackathon->organization->name =  $cycle->{'organization_name_' . $l};
+
+        return view('admin.hackathon.admin.winners', compact('teams', 'winnersData', 'hackathon'));
+    }
+
+    public function exportHackathonWinners( $id )
+    {
+        $tail = 'xlsx';
+        $request = request();
+        $type = $request->has('type') ? ( in_array( $request->input('type', 'excel'), ['csv', 'excel'] ) ? $request->input('type', 'excel') : 'excel' ) : 'excel';
+        if( $type == 'csv' ) { $tail = 'csv'; } elseif( $type == 'excel' ) { $tail = 'xlsx'; } else { return abort(404); }
+        $cycle = Cycle::getHackathon( $id );
+
+        if( empty( $cycle ) ) { return abort(404); }
+        $teams = TeamFormation::teams( $id );
+        $winnersData = TeamFormation::winners( $teams );
+
+        $date = date('Y_m_d_H_i_s');
+        return Excel::download(new WinnersExport( $winnersData ), 'winners_report_' . $date . '.' . $tail);
+    }
+
+    public function publishHackathonWinners( Request $request, $id )
+    {
+        $cycle = DB::table('cycles as c')
+            ->select([
+                'c.id',
+                'c.title',
+                'c.description',
+                'c.start',
+                'c.end',
+                'c.winners_announcement',
+                'o.id AS organization_id',
+                'o.name_ar AS organization_name_ar',
+                'o.name_en AS organization_name_en',
+            ])
+            ->leftJoin('organizations as o', 'c.organization_id', '=', 'o.id')
+            ->where('c.type', 'Hackathon')
+            ->whereNull('c.deleted_at')
+            ->where('c.id', $id)
+            ->first();
+
+        $l = app()->getLocale();
+        if( empty( $cycle ) )
+        {
+            $notFound = $l == 'en' ? 'Hackathon not found' : 'الهاكاتون غير موجود';
+            return redirect()->back()->with('error', $notFound);
+        }
+
+        DB::beginTransaction();
+        try {
+            $status = intval($request->announcementStatus);
+            DB::table('cycles')->where('id', $cycle->id)->update([
+                'winners_announcement' => $status
+            ]);
+            $winners = $request->winners;
+            $teamsIds = array_keys($winners);
+            $teams = TeamFormation::where('cycle_id', $cycle->id)->whereIn('id', $teamsIds)->get();
+            foreach( $teams as $team )
+            {
+                $team->winner_status = array_key_exists($team->id, $winners) ? $winners[$team->id] : null;
+                $team->save();
+            }
+            DB::commit();
+            return redirect()->back()->with('success', $l == 'en' ? 'Saved successfully' : 'تم الحفظ بنجاح');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $th->getMessage());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }

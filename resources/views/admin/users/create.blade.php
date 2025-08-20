@@ -1,6 +1,21 @@
 @extends('layouts.admin')
 
 @section('title', __('admin.Users'))
+@section('style')
+<!-- Vendors CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  
+@endsection
 @section('index_url', route('users.index'))
 @section('subTitle', __('admin.Add new user'))
 
@@ -54,7 +69,7 @@
                             <div class="col-md-6">
                               <div class="form-group mb-4">
                                 <label class="fs-6 fw-semibold form-label mb-1" for="first_name_en">{{ __('admin.First Name') }}</label>
-                                <input name="first_name_en" type="text" class="form-control" id="first_name_en"
+                                <input name="firstName" type="text" class="form-control" id="first_name_en"
                                   value="{{ old('first_name_en') }}" placeholder="{{ __('admin.First Name') }}" required
                                   autocomplete="first_name_en" autofocus />
                               </div>
@@ -62,7 +77,7 @@
                             <div class="col-md-6">
                               <div class="form-group mb-4">
                                 <label class="fs-6 fw-semibold form-label mb-1" for="last_name_en">{{ __('admin.Last Name') }}</label>
-                                <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
+                                <input value="{{ old('last_name_en') }}" name="lastName" type="text"
                                   class="form-control" id="last_name_en" placeholder="{{ __('admin.Last Name') }}"
                                   required autocomplete="last_name_en" />
                               </div>
@@ -103,13 +118,19 @@
                                   id="email" placeholder="{{ __('admin.Email') }}" required autocomplete="email">
                               </div>
                             </div>
-                            <div class="col-md-6 col-12">
-                              <div class="form-group mb-4">
-                                <label class="fs-6 fw-semibold form-label mb-1" for="phone">{{ __('admin.Phone') }}</label>
-                                <input type="text" class="form-control" id="phone" placeholder="{{ __('admin.Phone') }}"
-                                  value="{{ old('phone') }}" name="phone" required autocomplete="new-phone">
-                              </div>
-                            </div>
+                <div class="col-6 mb-4 d-grid">
+                  <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
+                  <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
+                  <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
+                  <input type="hidden" name="country_code" id="phone_code" value="20">
+                 @error('phone')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
+
+                   @error('phone_code')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
+                </div>
                           </div>
                         </fieldset>
                         <fieldset class="form-group mb-3">
@@ -157,7 +178,82 @@
 </div>
 <!-- END: Content-->
 @stop
-@section('pagescripts')
+
+<!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+@section('scripts')
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  {{-- <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script> --}}
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
+  <script src="/app-assets/js/1.js"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+  {{-- <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script> --}}
+
+  <!-- Main JS -->
+  <script src="/vuexy/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  <script src="/vuexy/assets/js/pages-auth.js"></script>
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
+
+  <script>
+    const lang = '{{ $l }}';
+
+    // Initialize the phone input
+    const phoneInput = document.getElementById("phone");
+    const phoneError = document.getElementById('phone-error');
+    const countryCodeInput = document.querySelector("#phone_code");
+
+    const iti = intlTelInput(phoneInput, {
+      initialCountry: 'eg',
+      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      formatOnDisplay: false,
+      separateDialCode: true,
+      autoPlaceholder: "aggressive",
+      
+      customPlaceholder: (placeholder) => "e.g. " + placeholder,
+    });
+
+        // Set initial country code
+    countryCodeInput.value = iti.getSelectedCountryData().dialCode;
+
+    // Update country code when country changes
+    phoneInput.addEventListener('countrychange', function() {
+      const countryData = iti.getSelectedCountryData();
+      countryCodeInput.value = countryData.dialCode;
+    });
+
+    // Optional: Handle validation
+    phoneInput.addEventListener("input", (e) => {
+      console.log(e.target.value);
+      if (!iti.isValidNumber()) {
+        phoneError.style.display = 'block';
+        phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
+      } else {
+        phoneError.style.display = 'none';
+        // console.error("Invalid number");
+      }
+    });
+  </script>
+
 <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
 <script>
   CKEDITOR.replace('description_ar', {
@@ -167,4 +263,4 @@
       language: 'en'
     });
 </script>
-@stop
+@endsection

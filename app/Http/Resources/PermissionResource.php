@@ -16,21 +16,21 @@ class PermissionResource extends JsonResource
     {
         $permissionsByGroup = [];
 
-        $permissions = $this->getAllPermissions();
+        $permissions = $this->permissions;
 
         foreach ($permissions as $permission) {
-            $groupName = optional($permission->permissionsGroup)->name ?? 'general';
-            $permissionsByGroup[$groupName][] = $permission->name;
+                $groupName = optional($permission->permissionsGroup)->name ?? 'general';
+                $permissionsByGroup[$groupName][] = $permission->name;
         }
 
-        foreach ($permissionsByGroup as $group => &$groupPermissions) {
-            $groupPermissions = array_unique($groupPermissions);
-        }
+            foreach ($permissionsByGroup as &$groupPermissions) {
+                $groupPermissions = array_unique($groupPermissions);
+            }
 
-        return [
-            'userId' => $this->id,
-            'roles' => $this->roles->pluck('name')->toArray(),
-            'permissions' => $permissionsByGroup
-        ];
+            return [
+                'roleId' => $this->id,
+                'roleName' => $this->name,
+                'permissions' => $permissionsByGroup
+            ];
     }
 }

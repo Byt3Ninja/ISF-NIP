@@ -135,7 +135,7 @@
                               <a href="/dashboard/users/{{ $session->user_id }}/edit">
                                 @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                 <img 
-                                  onerror="this.src='/icons/account.svg'"
+                                  onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
                                   src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                               @endif
                                 </a>
@@ -149,7 +149,7 @@
                             <div class="d-flex align-items-center">
                               @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
-                                onerror="this.src='/icons/account.svg'"
+                                onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
                                 src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                                 @endif
                               {{ $session->mentor->name ?? '' }}

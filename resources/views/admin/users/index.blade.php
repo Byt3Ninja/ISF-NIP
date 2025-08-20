@@ -25,25 +25,26 @@
         <div class="card-content">
           <div class="card-body">
             <div class="users-list-filter px-1">
-              <form>
+              <form method="GET" action="{{ url()->current() }}">
                 <div class="row border rounded py-2 mb-2">
                   <div class="col-12 col-sm-3 col-lg-3">
                     <label class="mb-2" for="users-list-verified">{{ __('admin.HaveCompany') }}</label>
                     <fieldset class="form-group">
-                      <select class="form-select select2" id="users-list-verified">
-                        <option value="">{{ __('admin.All') }}</option>
-                        <option value="{{ __('admin.Yes') }}">{{ __('admin.Yes') }}</option>
-                        <option value="{{ __('admin.No') }}">{{ __('admin.No') }}</option>
-                      </select>
+                    <select class="form-select select2" id="users-list-verified" name="haveCompany">
+                      <option value=" " {{ request('haveCompany') === null ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                      <option value="1" {{ request('haveCompany') === '1' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
+                      <option value="0" {{ request('haveCompany') === '0' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
+                    </select>
+
                     </fieldset>
                   </div>
                   <div class="col-12 col-sm-3 col-lg-3">
                     <label class="mb-2" for="users-list-role">{{ __('admin.Role') }}</label>
                     <fieldset class="form-group">
-                      <select class="form-select select2" id="users-list-role">
-                        <option value="">{{ __('admin.All') }}</option>
+                      <select class="form-select select2" id="users-list-role" name="role">
+                        <option value=" "  >{{ __('admin.All') }}</option>
                         @foreach (App\Role::get() as $role)
-                        <option value="{{ $role->name }}">{{ __('admin.' . $role->name) }}</option>
+                        <option value="{{ $role->name }}" {{ request('role') == $role->name ? 'selected' : '' }}>{{ __('admin.' . $role->name) }}</option>
                         @endforeach
                         <option value="Not Verified">{{ __('admin.NotVerified') }}</option>
                       </select>
@@ -52,11 +53,11 @@
                   <div class="col-12 col-sm-3 col-lg-3">
                     <label class="mb-2" for="users-list-status">{{ __('admin.Gender') }}</label>
                     <fieldset class="form-group">
-                      <select class="form-select select2" id="users-list-status">
-                        <option value="">{{ __('admin.All') }}</option>
-                        <option value="{{ __('admin.Male') }}">{{ __('admin.Male') }}</option>
-                        <option value="{{ __('admin.Female') }}">{{ __('admin.Female') }}</option>
-                      </select>
+                    <select class="form-select select2" id="users-list-status" name="gender">
+                      <option value=" ">{{ __('admin.All') }}</option>
+                      <option value="male" {{ request('gender') == 'male' ? 'selected' : '' }}>{{ __('admin.Male') }}</option>
+                      <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>{{ __('admin.Female') }}</option>
+                    </select>
                     </fieldset>
                   </div>
 
@@ -221,5 +222,37 @@
       });
     });
   });
+
+
+
+  
+</script>
+<script>
+
+$(document).ready(function () {
+  $('.form-select').on('change', function () {
+    let params = new URLSearchParams(window.location.search);
+
+    $('.form-select').each(function () {
+      let key = $(this).attr('name');
+      let value = $(this).val();
+
+      if (key) {
+        if (value && value !== '') {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      }
+    });
+
+    let newUrl = window.location.pathname;
+    let queryString = params.toString();
+    if (queryString) newUrl += '?' + queryString;
+
+    window.location.href = newUrl;
+  });
+});
+
 </script>
 @stop

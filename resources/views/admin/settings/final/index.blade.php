@@ -218,7 +218,7 @@
                                     @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                       <img
                                         src="{{ isset($company->user->img_url) ? asset("191014/{$company->user->img_url}") : asset('icons/account.svg') }}"
-                                        onerror="this.src='/icons/account.svg'" alt="avatar" class="rounded-circle"
+                                        onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" alt="avatar" class="rounded-circle"
                                         height="40" width="40" />
                                     @endif
                                     <div class="media-body">
@@ -242,7 +242,7 @@
                                       @foreach ($visibleJudges as $judge)
                                         <span class="btn btn-sm btn-outline-secondary rounded-pill d-flex align-items-center gap-1" style="padding: 4px 8px;">
                                           <img src="{{ $judge->image_url }}" 
-                                               onerror="this.src='/icons/account.svg'" 
+                                               onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" 
                                                alt="{{ $judge->name }}" 
                                                class="rounded-circle" 
                                                height="16" 
@@ -1070,7 +1070,7 @@
                 judgesHtml += `
                   <div class="d-flex align-items-center mb-2 p-2 bg-light rounded">
                     <img src="${judge.avatar || '/icons/account.svg'}" 
-                         onerror="this.src='/icons/account.svg'"
+                         onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
                          alt="${judge.name}" 
                          class="rounded-circle me-2" 
                          height="30" 

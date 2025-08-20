@@ -28,6 +28,9 @@ class Permissions
         'public.program_apply',
         'chats*',
         'livewire.*',
+        'groups*',
+        'messages*',
+        'users/search',
     ];
 
     private $exceptControllers = [
@@ -49,14 +52,18 @@ class Permissions
     public function handle(Request $request, Closure $next): Response
     {
         $cached = app(PermissionRegistrar::class)->getPermissions();
+    
         $core_permissions = $cached->where('is_core', true)->values()->pluck('name')->toArray();
+    
         if( env('PERMISSION_BYPASS', false) === true ) { return $next($request); }
         $user = auth()->user();
+    
         if( auth()->check() )
         {
             $route = $request->route();
             $permission = $route->getName();
-            if( !trim( $permission ) || in_array( $permission, ['', 'admin', 'dashboard']) ) { return $next($request); }
+
+            if( !trim( $permission ) || in_array( $permission, ['web', 'admin', 'dashboard']) ) { return $next($request); }
             else
             {
                 if( in_array( $permission, $core_permissions ) ) { return $next($request); }

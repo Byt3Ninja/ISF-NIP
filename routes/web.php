@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
@@ -122,6 +123,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
     Route::get('hackathon/my-team', 'HackathonController@myTeam')->name('hackathon.myTeam');
     Route::post('hackathon/EditProjectIdea', 'HackathonController@EditProjectIdea')->name('hackathon.EditProjectIdea');
+    Route::post('hackathon/EditTeamInfo', 'HackathonController@EditTeamInfo')->name('hackathon.EditTeamInfo');
     Route::post('hackathon/RequestJoin', 'HackathonController@RequestJoin')->name('hackathon.RequestJoinTeam');
     Route::post('hackathon/ApprovedRequestJoin', 'HackathonController@ApprovedRequestJoin')->name('hackathon.ApprovedRequestJoinTeam');
     Route::post('hackathon/RejectedRequestJoin', 'HackathonController@RejectedRequestJoin')->name('hackathon.RejectedRequestJoin');
@@ -129,6 +131,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
     // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
     Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
+    Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners');
+    Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
     Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
     Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
 
@@ -136,6 +140,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
     Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
     Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
+    Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');
     Route::delete('hackathon/deleteTodoList/{id}', 'TodoListController@destroy')->name('hackathon.deleteTodoList');
 
     //waiting list
@@ -143,6 +148,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
     
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
+
+
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -642,10 +649,43 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate_view_form');
     Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate_execute');
 
+    /* 
+     Templates Routes */
+    Route::prefix('admin')->group(function () {
+        // Define specific routes BEFORE resource routes to avoid conflicts
+        Route::get('notification-templates/variables', 'NotificationTemplateController@getVariables')->name('notification-templates.variables');
+        Route::get('notification-templates/{notificationTemplate}/preview', 'NotificationTemplateController@preview')->name('notification-templates.preview');
+        Route::post('notification-templates/{notificationTemplate}/clone', 'NotificationTemplateController@clone')->name('notification-templates.clone');
+        Route::post('notification-templates/{notificationTemplate}/test-send', 'NotificationTemplateController@testSend')->name('notification-templates.test-send');
+        
+        // Resource routes come last
+        Route::resource('notification-templates', 'NotificationTemplateController');
+        
+        /* Notification Triggers Routes - MOVED INSIDE DASHBOARD GROUP */
+        // Define specific routes BEFORE resource routes to avoid conflicts
+        Route::get('notification-triggers/events', 'NotificationTriggerController@getEvents')->name('notification-triggers.events');
+        Route::get('notification-triggers/recipient-types', 'NotificationTriggerController@getRecipientRuleTypes')->name('notification-triggers.recipient-types');
+        Route::get('notification-triggers/sample-conditions', 'NotificationTriggerController@getSampleConditions')->name('notification-triggers.sample-conditions');
+        Route::post('notification-triggers/{notificationTrigger}/toggle-active', 'NotificationTriggerController@toggleActive')->name('notification-triggers.toggle-active');
+        Route::post('notification-triggers/{notificationTrigger}/clone', 'NotificationTriggerController@clone')->name('notification-triggers.clone');
+        Route::post('notification-triggers/{notificationTrigger}/test', 'NotificationTriggerController@test')->name('notification-triggers.test');
+        
+        // Resource routes come last
+        Route::resource('notification-triggers', 'NotificationTriggerController');
+    });
+
+
+
      /* Start of Activities Routes */
     Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
     Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
     Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
+    
+    // Security actions for suspicious logins
+    Route::post('/activities/force-logout', [ActivityControlller::class, 'forceLogout'])->name('activities.force-logout');
+    Route::post('/activities/reset-password', [ActivityControlller::class, 'resetPassword'])->name('activities.reset-password');
+    Route::post('/activities/block-ip', [ActivityControlller::class, 'blockIp'])->name('activities.block-ip');
+    Route::get('/activities/load-more', [ActivityControlller::class, 'loadMoreActivities'])->name('activities.load-more');
     /* End of Activities Routes */
 
 

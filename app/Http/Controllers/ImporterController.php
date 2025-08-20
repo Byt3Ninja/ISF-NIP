@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Cycle;
 use App\State;
+use App\Sector;
 use App\Company;
 use App\Country;
 use Carbon\Carbon;
@@ -54,7 +55,10 @@ class ImporterController extends Controller
                 return response()->json(['success' => false, 'message' => 'Empty or invalid CSV file.'], 400);
             }
 
-            $headers = array_map('trim', $headers);
+            $headers = array_map(function ($header) {
+                return preg_replace('/^[\x{FEFF}\x{200B}]+/u', '', trim($header));
+            }, $headers);
+            $normalizedHeaders = array_map('strtolower', $headers);
             $data = [];
             $errors = [];
 
@@ -79,22 +83,32 @@ class ImporterController extends Controller
             }
 
             Log::info('Sample Row', ['row' => $data[0] ?? 'No data']);
-
+            $typeColumnIndex = array_search('type', $normalizedHeaders);
+            if ($typeColumnIndex === false) {
+                $errors[] = __('admin.missing_program_type');
+                return response()->json([
+                    'success' => false,
+                    'message' => __('admin.missing_program_type'),
+                    'errors' => $errors
+                ], 400);
+            }
             foreach ($data as $index => $row) {
                 $rowErrors = [];
 
                 // Cycle validations
-                if (isset($row['Program Name']) && empty(trim($row['Program Name']))) {
+                if (empty(trim($row['Program Name']))) {
                     $rowErrors[] = __('admin.missing_program_name');
                 } elseif (isset($row['Program Name']) && strlen(trim($row['Program Name'])) > 255) {
                     $rowErrors[] = __('admin.program_name_too_long');
                 }
 
-            if (isset($row['Type']) && empty(trim($row['Type']))) {
-                $rowErrors[] = "Missing program type";
-            } elseif (isset($row['Type']) && !in_array(trim($row['Type']), ['General_Program', 'Hackathon'])) {
-                $rowErrors[] = "Invalid program type; must be one of: General_Program,Hackathon";
-            }
+               $typeValue = $row[$headers[$typeColumnIndex]] ?? null;
+                if (is_null($typeValue) || empty(trim($typeValue))) {
+                    $rowErrors[] = __('admin.missing_program_type');
+                } elseif (!in_array(trim($typeValue), ['General_Program', 'Hackathon'])) {
+                    $rowErrors[] = __('admin.invalid_program_type', ['valid_types' => 'General_Program, Hackathon']);
+                }
+
 
                 $startDate = null;
                 $endDate = null;
@@ -437,6 +451,52 @@ class ImporterController extends Controller
                     continue;
                 }
 
+                $sectorId = null;
+                if (isset($mappings['sector']) && !empty($row[$rowKeys[$mappings['sector']]])) {
+                    $sectorName = trim($row[$rowKeys[$mappings['sector']]]);
+                    if (!empty($sectorName)) {
+                        Log::info('Processing sector for company', ['sector_name' => $sectorName, 'row_number' => $index + 2]);
+                        $sector = Sector::updateOrCreate(
+                            ['name_en' => $sectorName],
+                            [
+                                'name_ar' => $sectorName,
+                                'updated_at' => Carbon::now()
+                            ]
+                        );
+                        $sectorId = $sector->id;
+                        $sectorCache[$sectorName] = $sectorId;
+                    } else {
+                        $results['skipped']++;
+                        $results['skipped_rows'][] = "Row " . ($index + 2) . ": Empty sector name";
+                        continue;
+                    }
+                }
+
+                $targetedMarket = null;
+                if (isset($mappings['targeted_market']) && !empty($row[$rowKeys[$mappings['targeted_market']]])) {
+                    $marketNames = array_map('trim', explode(',', $row[$rowKeys[$mappings['targeted_market']]]));
+                    $marketIds = [];
+                    foreach ($marketNames as $marketName) {
+                        if (!empty($marketName)) {
+                            if (!isset($countryCache[$marketName])) {
+                                Log::info('Processing targeted market country', ['country_name' => $marketName]);
+                                $country = Country::updateOrCreate(
+                                    ['name_en' => $marketName],
+                                    [
+                                        'name_ar' => $marketName,
+                                        'updated_at' => Carbon::now()
+                                    ]
+                                );
+                                $countryCache[$marketName] = $country->id;
+                            }
+                            $marketIds[] = (string) $countryCache[$marketName];
+                        }
+                    }
+                    if (!empty($marketIds)) {
+                        $targetedMarket = json_encode($marketIds);
+                    }
+                }
+
                 $companyData = [
                     'cycle' => $cycleId,
                     'country_id' => $countryId,
@@ -445,10 +505,10 @@ class ImporterController extends Controller
                     'address_en' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
                     'address_ar' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
                     'industries' => isset($mappings['industries']) ? trim($row[$rowKeys[$mappings['industries']]]) : null,
-                    'sector' => isset($mappings['sector']) ? trim($row[$rowKeys[$mappings['sector']]]) : null,
+                    'sector' => $sectorId,
                     'years_of_operations' => isset($mappings['years_of_operations']) ? trim($row[$rowKeys[$mappings['years_of_operations']]]) : null,
                     'product_or_service' => isset($mappings['product_or_service']) ? trim($row[$rowKeys[$mappings['product_or_service']]]) : null,
-                    'targeted_market' => isset($mappings['targeted_market']) ? trim($row[$rowKeys[$mappings['targeted_market']]]) : null,
+                    'targeted_market' => $targetedMarket,
                     'est_date' => $estDate,
                 ];
 
@@ -468,6 +528,8 @@ class ImporterController extends Controller
                 // Process Founder
                 $userData = [
                     'company_id' => $company->id,
+                    'country_id' => $countryId,
+                    'state_id' => $stateId,
                     'email' => $email,
                     'first_name_en' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
                     'first_name_ar' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
@@ -482,7 +544,7 @@ class ImporterController extends Controller
 
                 $existingUser = User::where('email', $email)->first();
                 if (!$existingUser) {
-                    $userData['password'] = bcrypt('password');
+                    $userData['password'] = bcrypt('123456789');
                 }
 
                 $user = User::updateOrCreate(

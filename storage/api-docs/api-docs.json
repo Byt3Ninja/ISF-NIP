@@ -544,6 +544,359 @@
                 ]
             }
         },
+        "/api/company/profile": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update authenticated user's company profile",
+                "description": "Updates the authenticated startup's profile with detailed business info, team, milestones, documents, etc.",
+                "operationId": "updateCompany",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Flick Tech"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "country_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "state_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "sector_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "stage_id": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "categories[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Smart Village"
+                                    },
+                                    "yearsOfOperations": {
+                                        "type": "string",
+                                        "example": "3"
+                                    },
+                                    "productOrService": {
+                                        "type": "string",
+                                        "example": "AI Platform for Startups"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "info@flicktech.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+20123456789"
+                                    },
+                                    "countryCode": {
+                                        "description": "Phone country code",
+                                        "type": "string",
+                                        "example": "+20"
+                                    },
+                                    "countryCodeWA": {
+                                        "description": "WhatsApp country code",
+                                        "type": "string",
+                                        "example": "+20"
+                                    },
+                                    "whatsapp": {
+                                        "type": "string",
+                                        "example": "+20123456789"
+                                    },
+                                    "website": {
+                                        "type": "string",
+                                        "example": "https://flicktech.com"
+                                    },
+                                    "googleMapUrl": {
+                                        "type": "string",
+                                        "example": "https://goo.gl/maps/xyz123"
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "example": "https://linkedin.com/company/flicktech"
+                                    },
+                                    "x": {
+                                        "type": "string",
+                                        "example": "https://x.com/flicktech"
+                                    },
+                                    "facebook": {
+                                        "type": "string",
+                                        "example": "https://facebook.com/flicktech"
+                                    },
+                                    "youtube": {
+                                        "type": "string",
+                                        "example": "https://youtube.com/@flicktech"
+                                    },
+                                    "instagram": {
+                                        "type": "string",
+                                        "example": "https://instagram.com/flicktech"
+                                    },
+                                    "tiktok": {
+                                        "type": "string",
+                                        "example": "https://tiktok.com/@flicktech"
+                                    },
+                                    "aboutStartup": {
+                                        "type": "string"
+                                    },
+                                    "aboutProblem": {
+                                        "type": "string"
+                                    },
+                                    "aboutMarketOpportunities": {
+                                        "type": "string"
+                                    },
+                                    "aboutCompetitors": {
+                                        "type": "string"
+                                    },
+                                    "aboutMonetization": {
+                                        "type": "string"
+                                    },
+                                    "aboutChallenges": {
+                                        "type": "string"
+                                    },
+                                    "sustainabilityFeatures[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "EGP"
+                                    },
+                                    "preMoneyEvaluation": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1000000
+                                    },
+                                    "raisedFund": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50000
+                                    },
+                                    "fundingTarget": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 200000
+                                    },
+                                    "targetMarket[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "businessType": {
+                                        "type": "string"
+                                    },
+                                    "financialPlanAttachment": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "teamNumber": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "workingTeamDetails": {
+                                        "type": "string"
+                                    },
+                                    "founders[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Ahmed"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email"
+                                                },
+                                                "linkedin": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "shareholders[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "ownership": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "investors[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "investmentType": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "pitchDeckFile": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "pitchDeckVideoUrl": {
+                                        "type": "string",
+                                        "example": "https://youtube.com/watch?v=xyz"
+                                    },
+                                    "documents[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "businessModel": {
+                                        "type": "string"
+                                    },
+                                    "businessModelDescription": {
+                                        "type": "string"
+                                    },
+                                    "businessPlanAttachment": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "haveStartup": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Yes",
+                                            "No"
+                                        ]
+                                    },
+                                    "CreatedTax": {
+                                        "type": "boolean"
+                                    },
+                                    "CommercialRegister": {
+                                        "type": "string"
+                                    },
+                                    "TaxCard": {
+                                        "type": "string"
+                                    },
+                                    "Country_Register_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Company profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Company"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Company profile updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/countries": {
             "get": {
                 "tags": [
@@ -690,6 +1043,306 @@
                                                 },
                                                 "type": "object"
                                             }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Create new currency",
+                "description": "Stores a new currency with code, name, symbol, rate, and optional flag.",
+                "operationId": "storeCurrency",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "currencyCode",
+                                    "currencyName",
+                                    "currencySymbol",
+                                    "exchangeRateToUsd"
+                                ],
+                                "properties": {
+                                    "currencyCode": {
+                                        "type": "string",
+                                        "maxLength": 3,
+                                        "example": "USD"
+                                    },
+                                    "currencyName": {
+                                        "type": "string",
+                                        "example": "US Dollar"
+                                    },
+                                    "currencySymbol": {
+                                        "type": "string",
+                                        "example": "$"
+                                    },
+                                    "exchangeRateToUsd": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "flag": {
+                                        "description": "Currency flag image (optional)",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Currency created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency created successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Currency"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/currencies-all": {
+            "get": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Get all currencies (paginated)",
+                "description": "Returns paginated currencies with optional enabled filter.",
+                "operationId": "getCurrenciesPaginated",
+                "parameters": [
+                    {
+                        "name": "enabled",
+                        "in": "query",
+                        "description": "Filter by enabled status (1 = enabled, 0 = disabled)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of currencies",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Currency"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/currencies?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/currencies/{id}": {
+            "post": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Update currency",
+                "description": "Updates an existing currency by ID.",
+                "operationId": "updateCurrency",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the currency to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "currencyCode": {
+                                        "type": "string",
+                                        "example": "USD"
+                                    },
+                                    "currencyName": {
+                                        "type": "string",
+                                        "example": "US Dollar"
+                                    },
+                                    "currencySymbol": {
+                                        "type": "string",
+                                        "example": "$"
+                                    },
+                                    "exchangeRateToUsd": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1
+                                    },
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "flag": {
+                                        "description": "Currency flag image (optional)",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Currency updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency updated successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Currency"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Delete currency",
+                "description": "Deletes a currency by ID.",
+                "operationId": "deleteCurrency",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the currency to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Currency deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency deleted successfully"
+                                        },
+                                        "data": {
+                                            "type": "null"
                                         }
                                     },
                                     "type": "object"
@@ -2080,6 +2733,870 @@
                 ]
             }
         },
+        "/api/messages": {
+            "get": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "List messages with filtering, search, and pagination",
+                "operationId": "0236e77c6ebe14b822188027b9205fee",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "inbox",
+                                "outbox",
+                                "draft",
+                                "trash",
+                                "starred"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "read",
+                                "unread"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "starred",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "createdAt",
+                                "title",
+                                "status"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Messages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Messages retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Send a new message or save as draft",
+                "description": "Creates a new message to recipients or saves it as a draft based on the draft flag.",
+                "operationId": "storeMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "userTypeValue",
+                                    "userId",
+                                    "title",
+                                    "subject",
+                                    "draft"
+                                ],
+                                "properties": {
+                                    "userTypeValue": {
+                                        "description": "0: same org, 1: company, 2: specific users, 3: by org id",
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "userId": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            103,
+                                            104
+                                        ]
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Team Standup Notes"
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "example": "Summary of today's meeting"
+                                    },
+                                    "draft": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message sent or draft saved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Sent Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No recipients found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No Recipients Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Permanently delete trashed messages",
+                "description": "Force deletes one or more trashed messages. Only works on messages already moved to trash.",
+                "operationId": "permanentlyDeleteMessages",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "description": "Single message ID to permanently delete",
+                                                "type": "integer",
+                                                "example": 55
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "description": "Array of message IDs to permanently delete",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer"
+                                                },
+                                                "example": [
+                                                    55,
+                                                    56,
+                                                    57
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Messages permanently deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Messages deleted permanently"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No accessible messages found or not trashed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No accessible messages found"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/messages/reply": {
+            "post": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Reply to a message",
+                "description": "Creates a reply to an existing message.",
+                "operationId": "replyMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "messageId",
+                                    "subject",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "messageId": {
+                                        "type": "integer",
+                                        "example": 45
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "example": "Re: Project Update"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Thanks for the update, looks good!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reply sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reply Sent Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/toggle-status": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Toggle read/unread status of messages",
+                "description": "Updates the read status for one or more messages by IDs.",
+                "operationId": "toggleMessageStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "messageIds",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "messageIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            45,
+                                            46
+                                        ]
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "read",
+                                            "unread"
+                                        ],
+                                        "example": "read"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Status Updated Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/star": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Toggle star status of messages",
+                "description": "Updates the starred status for one or more messages by IDs.",
+                "operationId": "toggleStar",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "messageId",
+                                    "starred"
+                                ],
+                                "properties": {
+                                    "messageId": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 45
+                                        },
+                                        "example": [
+                                            45,
+                                            46
+                                        ]
+                                    },
+                                    "starred": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message star status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Star Status Updated Successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Not Found"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/{id}": {
+            "get": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Get single message by ID",
+                "description": "Fetch a single message with full details. Marks message as read if the current user is the receiver.",
+                "operationId": "getSingleMessage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Message ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message Not Found"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/messages/trash": {
+            "patch": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Move messages to trash",
+                "description": "Move one or more messages to the trash folder. Accepts a single ID or an array of IDs.",
+                "operationId": "moveToTrash",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "description": "Single message ID",
+                                                "type": "integer",
+                                                "example": 61
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "messageIds"
+                                        ],
+                                        "properties": {
+                                            "messageIds": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer"
+                                                },
+                                                "example": [
+                                                    61,
+                                                    62
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Partial success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Some messages moved to trash successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "trashedCount": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "failedIds": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer"
+                                                    },
+                                                    "example": [
+                                                        3,
+                                                        4
+                                                    ]
+                                                },
+                                                "errors": {
+                                                    "type": "object",
+                                                    "example": {
+                                                        "3": "Message not found",
+                                                        "4": "Permission denied"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No accessible messages found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No accessible messages found"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "invalidIds": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer"
+                                                    },
+                                                    "example": [
+                                                        1,
+                                                        2
+                                                    ]
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation Error"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "messageIds": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "Message IDs must be an array"
+                                                    ]
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/organizations": {
             "get": {
                 "tags": [
@@ -2507,19 +4024,19 @@
                 ]
             }
         },
-        "/api/v1/users/{user_id}/permissions": {
+        "/api/v1/{role}/permissions": {
             "get": {
                 "tags": [
                     "Permissions"
                 ],
-                "summary": "Get specified user's permissions (Admin only)",
+                "summary": "Get permissions based on Role (Admin only)",
                 "description": "Returns the specified user's roles and permissions grouped by module. Admin only.",
-                "operationId": "a23cfd278922d02379631675415c7cae",
+                "operationId": "7290946f4835f322f56aec9fa0bd46fa",
                 "parameters": [
                     {
                         "name": "user_id",
                         "in": "path",
-                        "description": "User ID to fetch permissions for",
+                        "description": "Role ID to fetch permissions for",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -3601,38 +5118,47 @@
                 ]
             }
         },
-        "/api/roles": {
+        "/api/v1/programs/{programId}/summary": {
             "get": {
                 "tags": [
-                    "Roles"
+                    "Programs"
                 ],
-                "summary": "Get list of available roles",
-                "description": "Returns a list of all roles. Only accessible by Admin users.",
-                "operationId": "getRoles",
+                "summary": "Get summary report for a program",
+                "description": "Returns KPIs, evaluation completion, average score, and step progress.",
+                "operationId": "getProgramSummary",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "List of roles returned successfully",
+                        "description": "Summary data returned",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
+                                        "kpis": {
+                                            "type": "object"
                                         },
-                                        "data": {
+                                        "programInfo": {
+                                            "type": "object"
+                                        },
+                                        "programStages": {
                                             "type": "array",
                                             "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Mentor"
-                                                    }
-                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "finalStatusDistribution": {
+                                            "type": "array",
+                                            "items": {
                                                 "type": "object"
                                             }
                                         }
@@ -3643,24 +5169,363 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Only accessible by Admin",
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/performance": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get company performance by sector and stage",
+                "operationId": "getProgramPerformance",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sector_id",
+                        "in": "query",
+                        "description": "Filter by sector ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "stage_id",
+                        "in": "query",
+                        "description": "Filter by stage ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Performance data by sector and stage",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
+                                        "filters": {
+                                            "type": "object"
                                         },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Access denied."
+                                        "companies": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "chartData": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/mentorship": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get mentorship performance data",
+                "operationId": "getMentorshipReport",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "Program ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "mentor_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "company_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentorship data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "kpis": {
+                                            "type": "object"
+                                        },
+                                        "filters": {
+                                            "type": "object"
+                                        },
+                                        "mentorshipByCompany": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "mentorPerformance": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/workshops": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get workshops, performance, and surveys",
+                "operationId": "getWorkshopStatistics",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "trainer_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "workshop_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "workshop_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Workshops and performance stats",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "kpis": {
+                                            "type": "object"
+                                        },
+                                        "filters": {
+                                            "type": "object"
+                                        },
+                                        "workshops": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "companyPerformance": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "surveyResponses": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/final-evaluation": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Get final evaluation report for a program",
+                "description": "Returns detailed scoring, evaluators' progress, and chart data for a specific program.",
+                "operationId": "getFinalEvaluation",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "The ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by evaluation status (e.g., Highest Rated, Good Performance, Needs Improvement)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_score",
+                        "in": "query",
+                        "description": "Minimum score to filter evaluations",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Final evaluation data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "evaluations": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "evaluators": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "summary": {
+                                            "type": "object"
+                                        },
+                                        "chartData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Program not found"
                     }
                 },
                 "security": [
@@ -3723,6 +5588,49 @@
                 "responses": {
                     "200": {
                         "description": "List of states",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/stages": {
+            "get": {
+                "tags": [
+                    "Stages"
+                ],
+                "summary": "Get all stages",
+                "operationId": "1a7ece5b5899b72b39acbfb53c589cd1",
+                "responses": {
+                    "200": {
+                        "description": "List of stages",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4255,671 +6163,6 @@
                     }
                 }
             }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get a specific user's information",
-                "description": "Returns the profile data of the specified user including their role",
-                "operationId": "getUserById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "firstName": {
-                                                    "type": "string"
-                                                },
-                                                "lastName": {
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "type": "string"
-                                                },
-                                                "role": {
-                                                    "type": "string"
-                                                },
-                                                "imgUrl": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/image.jpg"
-                                                },
-                                                "haveCompany": {
-                                                    "type": "boolean"
-                                                },
-                                                "createdAt": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update an existing user",
-                "description": "Admins can update a user's profile information and role.",
-                "operationId": "b166772cec9714067040e77cf14beeba",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "User ID to update",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string",
-                                        "example": "Ahmed"
-                                    },
-                                    "lastName": {
-                                        "type": "string",
-                                        "example": "Ali"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "ahmed@example.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01012345678"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female"
-                                        ],
-                                        "example": "male"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "role": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "haveCompany": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "imgUrl": {
-                                        "type": "string",
-                                        "example": "https://example.com/uploads/avatar.jpg"
-                                    },
-                                    "createdAt": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-07-15 09:30:00"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "active"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "User updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User updated successfully."
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "firstName": {
-                                                    "type": "string",
-                                                    "example": "Ahmed"
-                                                },
-                                                "lastName": {
-                                                    "type": "string",
-                                                    "example": "Ali"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "ahmed@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "01012345678"
-                                                },
-                                                "role": {
-                                                    "type": "string",
-                                                    "example": "Manager"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only admins can update users"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    },
-                    "404": {
-                        "description": "User not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "List users with filters (Admin and OrganizationManager only)",
-                "description": "Returns a paginated list of users, filtered by role or search query. Excludes current authenticated user.",
-                "operationId": "getUsers",
-                "parameters": [
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "description": "Filter users by role (e.g. Admin, User, Mentor)",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Search by name, email, or phone",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number for pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User list",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "firstName": {
-                                                        "type": "string",
-                                                        "example": "Ahmed"
-                                                    },
-                                                    "lastName": {
-                                                        "type": "string",
-                                                        "example": "Mohamed"
-                                                    },
-                                                    "email": {
-                                                        "type": "string",
-                                                        "example": "ahmed@example.com"
-                                                    },
-                                                    "gender": {
-                                                        "type": "string",
-                                                        "example": "male"
-                                                    },
-                                                    "phone": {
-                                                        "type": "string",
-                                                        "example": "01012345678"
-                                                    },
-                                                    "role": {
-                                                        "type": "string",
-                                                        "example": "User"
-                                                    },
-                                                    "haveCompany": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "imgUrl": {
-                                                        "type": "string",
-                                                        "example": "https://example.com/image.jpg"
-                                                    },
-                                                    "createdAt": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2025-07-09T10:00:00"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "meta": {
-                                            "properties": {
-                                                "currentPage": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "lastPage": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                },
-                                                "total": {
-                                                    "type": "integer",
-                                                    "example": 25
-                                                },
-                                                "path": {
-                                                    "type": "string",
-                                                    "example": "http://api.example.com/api/users"
-                                                },
-                                                "links": {
-                                                    "properties": {
-                                                        "first": {
-                                                            "type": "string"
-                                                        },
-                                                        "last": {
-                                                            "type": "string"
-                                                        },
-                                                        "prev": {
-                                                            "type": "string",
-                                                            "nullable": true
-                                                        },
-                                                        "next": {
-                                                            "type": "string",
-                                                            "nullable": true
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Access forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Access forbidden / غير مصرح بالدخول"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Create a new user",
-                "description": "Admins can create a new user with basic profile and role. Sends a welcome email.",
-                "operationId": "9fea6f2adcb69614c521a7733358382d",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "firstName",
-                                    "lastName",
-                                    "email",
-                                    "phone",
-                                    "gender",
-                                    "password",
-                                    "password_confirmation",
-                                    "role"
-                                ],
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string",
-                                        "example": "Ahmed"
-                                    },
-                                    "lastName": {
-                                        "type": "string",
-                                        "example": "Ali"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "ahmed@example.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01012345678"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "enum": [
-                                            "male",
-                                            "female"
-                                        ],
-                                        "example": "male"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret123"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret123"
-                                    },
-                                    "role": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "imgUrl": {
-                                        "type": "string",
-                                        "example": "https://example.com/uploads/avatar.jpg"
-                                    },
-                                    "createdAt": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-07-15 09:30:00"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "active"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "User created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User created successfully."
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "firstName": {
-                                                    "type": "string",
-                                                    "example": "Ahmed"
-                                                },
-                                                "lastName": {
-                                                    "type": "string",
-                                                    "example": "Ali"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "ahmed@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "01012345678"
-                                                },
-                                                "role": {
-                                                    "type": "string",
-                                                    "example": "User"
-                                                },
-                                                "haveCompany": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "imgUrl": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/uploads/avatar.jpg"
-                                                },
-                                                "createdAt": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-07-15 09:30:00"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "active"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Only admins can create users"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users/{id}/deactivate": {
-            "patch": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Deactivate a user account",
-                "description": "Deactivates a user account by setting status to 'inactive'. Admins only. Cannot deactivate self or super_admin.",
-                "operationId": "deactivateUser",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the user to deactivate",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 5
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User deactivated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User has been deactivated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (e.g. deactivating self or super_admin)",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You cannot deactivate your own account."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
         }
     },
     "components": {
@@ -4931,23 +6174,25 @@
                         "type": "integer",
                         "example": 1
                     },
+                    "name": {
+                        "type": "string",
+                        "example": "Flick Tech"
+                    },
                     "logo": {
                         "type": "string",
                         "format": "url",
                         "example": "https://example.com/logo.png"
                     },
-                    "name": {
-                        "type": "string",
-                        "example": "Flick Tech"
-                    },
                     "sector": {
                         "type": "string",
                         "example": "Technology"
                     },
-                    "establishmentDate": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "2020-01-15"
+                    "businessCategories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Technology"
+                        }
                     },
                     "state": {
                         "type": "string",
@@ -4961,18 +6206,196 @@
                         "type": "string",
                         "example": "Egypt"
                     },
-                    "organization": {
+                    "address": {
+                        "type": "string",
+                        "example": "123 Nile St."
+                    },
+                    "establishmentDate": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-01-15"
+                    },
+                    "yearsOfOperations": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "productOrService": {
+                        "type": "string",
+                        "example": "Mobile payment solution"
+                    },
+                    "infoCompany": {
+                        "type": "string",
+                        "example": "Leading fintech startup."
+                    },
+                    "aboutProblem": {
+                        "type": "string",
+                        "example": "Lack of financial inclusion."
+                    },
+                    "aboutMarketOpportunity": {
+                        "type": "string",
+                        "example": "Large unbanked population."
+                    },
+                    "aboutCompetitors": {
+                        "type": "string",
+                        "example": "PayMob, Fawry."
+                    },
+                    "aboutMonetization": {
+                        "type": "string",
+                        "example": "Transaction fees and subscriptions."
+                    },
+                    "aboutChallenges": {
+                        "type": "string",
+                        "example": "Regulatory compliance."
+                    },
+                    "idea": {
+                        "type": "string",
+                        "example": "Build a secure fintech wallet."
+                    },
+                    "problem": {
+                        "type": "string",
+                        "example": "People lack access to banking."
+                    },
+                    "solution": {
+                        "type": "string",
+                        "example": "An inclusive digital wallet."
+                    },
+                    "teamNum": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "workingTeamSummary": {
+                        "type": "string",
+                        "example": "Experienced fintech professionals."
+                    },
+                    "stage": {
                         "properties": {
                             "id": {
                                 "type": "integer",
-                                "example": 12
+                                "example": 3
                             },
                             "name": {
                                 "type": "string",
-                                "example": "Flat6Labs"
+                                "example": "Growth"
                             }
                         },
                         "type": "object"
+                    },
+                    "fundingStage": {
+                        "type": "string",
+                        "example": "Series A"
+                    },
+                    "revenueGenerating": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "currentlyFundraising": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "desiredFundingAmount": {
+                        "type": "number",
+                        "example": 500000
+                    },
+                    "raisedFund": {
+                        "type": "number",
+                        "example": 200000
+                    },
+                    "equityOffered": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10.5
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "PreMoneyValuation": {
+                        "type": "number",
+                        "example": 1500000
+                    },
+                    "targetedMarket": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Egypt"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "businessType": {
+                        "type": "string",
+                        "example": "B2B"
+                    },
+                    "financialPlan": {
+                        "type": "string",
+                        "example": "Detailed 3-year plan."
+                    },
+                    "financialPlanAttachment": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/plan.pdf"
+                    },
+                    "achievedMilestones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "MVP Launch"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Launched beta version."
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "plannedMilestones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Scale to 3 countries"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Expand operations."
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "archivedMilestones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Seed Round Closed"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Closed $200K round."
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "Industries": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Fintech"
+                        }
                     },
                     "founders": {
                         "type": "array",
@@ -4985,6 +6408,50 @@
                                 "role": {
                                     "type": "string",
                                     "example": "Founder"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "ahmed@example.com"
+                                },
+                                "linkedin": {
+                                    "type": "string",
+                                    "example": "https://linkedin.com/in/ahmed"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "shareholders": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Sara Ali"
+                                },
+                                "role": {
+                                    "type": "string",
+                                    "example": "Co-Founder"
+                                },
+                                "ownership": {
+                                    "type": "number",
+                                    "example": 20
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "investors": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "XYZ Capital"
+                                },
+                                "investmentType": {
+                                    "type": "string",
+                                    "example": "Angel Investor"
                                 }
                             },
                             "type": "object"
@@ -4994,10 +6461,6 @@
                         "type": "array",
                         "items": {
                             "properties": {
-                                "id": {
-                                    "type": "integer",
-                                    "example": 1
-                                },
                                 "name": {
                                     "type": "string",
                                     "example": "No Poverty"
@@ -5005,6 +6468,94 @@
                             },
                             "type": "object"
                         }
+                    },
+                    "documents": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "url",
+                            "example": "https://example.com/docs/file1.pdf"
+                        }
+                    },
+                    "pitchDeck": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/pitch.pdf"
+                    },
+                    "pitchDeckVideo": {
+                        "type": "string",
+                        "example": "https://youtube.com/watch?v=abc123"
+                    },
+                    "businessPlan": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://example.com/business-plan.pdf"
+                    },
+                    "pitchDeckSummary": {
+                        "type": "string",
+                        "example": "Our plan to reach 1M users."
+                    },
+                    "businessModel": {
+                        "type": "string",
+                        "example": "Freemium + Subscription"
+                    },
+                    "businessModelDescription": {
+                        "type": "string",
+                        "example": "Users start free, then upgrade."
+                    },
+                    "productPhoto": {
+                        "type": "string",
+                        "example": "https://example.com/photo.png"
+                    },
+                    "CreatedTax": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "CommercialRegister": {
+                        "type": "string",
+                        "example": "123456"
+                    },
+                    "TaxCard": {
+                        "type": "string",
+                        "example": "654321"
+                    },
+                    "countryRegister": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Egypt"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "info@company.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+201234567890"
+                    },
+                    "countryCode": {
+                        "type": "string",
+                        "example": "+20"
+                    },
+                    "whatsapp": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "countryCodeWA": {
+                        "type": "string",
+                        "example": "+20"
+                    },
+                    "googleMapUrl": {
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://goo.gl/maps/xyz"
                     },
                     "socialLinks": {
                         "properties": {
@@ -5045,6 +6596,40 @@
                             }
                         },
                         "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Currency": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "currencyCode": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "currencyName": {
+                        "type": "string",
+                        "example": "US Dollar"
+                    },
+                    "currencySymbol": {
+                        "type": "string",
+                        "example": "$"
+                    },
+                    "exchangeRateToUsd": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "flag": {
+                        "type": "string",
+                        "example": "http://yourdomain.com/icons/flags/us.png"
                     }
                 },
                 "type": "object"
@@ -5132,8 +6717,8 @@
                 },
                 "type": "object",
                 "example": {
-                    "user_id": 12,
-                    "roles": [
+                    "roleId": 12,
+                    "roleName": [
                         "Admin"
                     ],
                     "permissions": {
@@ -5303,6 +6888,20 @@
                 },
                 "type": "object"
             },
+            "Role": {
+                "title": "Role",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Admin"
+                    }
+                },
+                "type": "object"
+            },
             "MentorshipSessionResource": {
                 "title": "Completed Mentorship Session",
                 "properties": {
@@ -5433,6 +7032,10 @@
             "description": "Schedules"
         },
         {
+            "name": "Messages",
+            "description": "Messages"
+        },
+        {
             "name": "Organizations",
             "description": "Organizations"
         },
@@ -5449,12 +7052,12 @@
             "description": "Programs"
         },
         {
-            "name": "Roles",
-            "description": "Roles"
-        },
-        {
             "name": "Sectors",
             "description": "Sectors"
+        },
+        {
+            "name": "Stages",
+            "description": "Stages"
         },
         {
             "name": "Mentorship Sessions",
@@ -5463,10 +7066,6 @@
         {
             "name": "Steps",
             "description": "Steps"
-        },
-        {
-            "name": "Users",
-            "description": "Users"
         }
     ]
 }

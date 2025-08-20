@@ -73,8 +73,26 @@
                                         {{ __('audit.properties') }}
                                     </th>
                                     <td id="encode">
-                                        <a href="#" onclick="myJSEscape('{{$auditLog->properties}}')">
-                                        {{ $auditLog->properties }}</a>
+                                        @php
+                                         $properties = json_decode($auditLog->properties, true);
+                                        @endphp
+
+                                        @if(is_array($properties))
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach($properties as $key => $value)
+                                         <li>
+                                          <strong>{{ ucfirst($key) }}:</strong>
+                                          @if(is_array($value) || is_object($value))
+                                             <pre class="mb-0">{{ json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                           @else
+                                             {{ $value }}
+                                          @endif
+                                         </li>
+                                          @endforeach
+                                        </ul>
+                                        @else
+                                           <span>{{ $auditLog->properties }}</span>
+                                       @endif
                                     </td>
                                 </tr>
                                 <tr>

@@ -6,136 +6,6 @@
 
 <!-- Custom CSS (Combined & Refined) -->
 <style>
-  .kpi-card,
-  .kpi-card-sm {
-    background-color: #ffffff;
-    border: 1px solid #e9ecef;
-    border-radius: 0.75rem;
-    text-align: center;
-    padding: 1.2rem 1rem;
-    margin-bottom: 1.5rem;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
-
-  .kpi-card:hover,
-  .kpi-card-sm:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  .kpi-icon {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .kpi-value,
-  .kpi-value-sm {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #1a3a6e;
-  }
-
-  .kpi-label,
-  .kpi-label-sm {
-    font-size: 0.9rem;
-    color: #6c757d;
-    font-weight: 600;
-  }
-
-  .kpi-card-sm {
-    padding: 1rem;
-  }
-
-  .kpi-value-sm {
-    font-size: 1.6rem;
-  }
-
-  .table thead th {
-    background-color: #e9ecef;
-    color: #495057;
-    font-weight: 600;
-    text-align: center;
-    vertical-align: middle;
-    white-space: nowrap;
-  }
-
-  .table tbody td {
-    vertical-align: middle;
-    text-align: center;
-    font-size: 0.95rem;
-  }
-
-  .table .text-right-align {
-    text-align: right;
-  }
-
-  .table .company-name {
-    text-align: right;
-    font-weight: 500;
-  }
-
-  .table .notes-col {
-    text-align: right;
-    min-width: 200px;
-  }
-
-  .table .comments-col {
-    text-align: right;
-    font-size: 0.9rem;
-    min-width: 250px;
-  }
-
-  .table .score-col {
-    font-weight: 600;
-    min-width: 90px;
-  }
-
-  .table .rank-col {
-    font-weight: bold;
-    min-width: 50px;
-  }
-
-  .table .rank-col .fa-medal {
-    color: #ffc107;
-  }
-
-  .table .rank-col .fa-award {
-    color: #adb5bd;
-  }
-
-  .table .rank-col .fa-bronze {
-    color: #cd7f32;
-  }
-
-  .rating-badge {
-    font-size: 0.9em;
-    padding: 0.4em 0.7em;
-    font-weight: 600;
-    display: inline-block;
-    min-width: 55px;
-  }
-
-  .status-badge {
-    font-size: 0.85em;
-    padding: 0.4em 0.7em;
-  }
-
-  .pass-fail-icon {
-    font-size: 1.4rem;
-  }
-
-  .progress {
-    height: 1rem;
-    font-size: 0.75rem;
-    background-color: #e9ecef;
-    border-radius: 0.375rem;
-  }
-
-  .progress-bar {
-    font-weight: bold;
-    color: #fff;
-  }
-
   .chart-container {
     position: relative;
     min-height: 280px;
@@ -216,818 +86,175 @@
   }
 </style>
 @stop
+
+@php
+  $dashboardTabs = collect([
+    ['summary-tab', '#summary-tab-pane', 'fas fa-file-alt', __('admin.Program Summary'), false],
+    ['performance-tab', '#performance-tab-pane', 'fas fa-chart-line', __('admin.Startup Performance'), false],
+    ['mentorship-tab', '#mentorship-tab-pane', 'fas fa-people-arrows', __('admin.Mentorship & Advisory'), false],
+    ['workshops-tab', '#workshops-tab-pane', 'fas fa-person-chalkboard', __('admin.Workshops'), false],
+    ['final-eval-tab', '#final-eval-tab-pane', 'fas fa-trophy', __('admin.Final Evaluation'), false],
+  ])->map(function ($tab) {
+    return [
+      'id'     => $tab[0],
+      'target' => $tab[1],
+      'icon'   => $tab[2],
+      'label'  => $tab[3],
+      'active' => $tab[4],
+    ];
+  });
+
+  // Get array of sector company counts as strings for charting, filtering out null/undefined and < 1
+  $sectorCounts = array_values(
+    $sectorsData->filter(function($sector) {
+      return !is_null($sector->companies_count) && $sector->companies_count >= 1;
+    })->map(function($sector) {
+      return (string) $sector->companies_count;
+    })->toArray()
+  );
+
+  $sectorLabels = array_values(
+    $sectorsData->filter(function($sector) {
+      $name = app()->getLocale() == 'en' ? $sector->name_en : $sector->name_ar;
+      return !is_null($name) && $sector->companies_count >= 1;
+    })->map(function($sector) {
+      return (string) (app()->getLocale() == 'en' ? $sector->name_en : $sector->name_ar);
+    })->toArray()
+  );
+  @endphp
+
 @section('content')
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold">{{ __('admin.Startup Program Dashboard') }}</h4>
+
+    <div class="d-flex align-items-center mb-4">
+      <i class="ti ti-dashboard text-primary fs-3 me-2"></i>
+      <h4 class="fw-bold mb-0">
+        {{ __('admin.Program Report') }} - {{ $cycle->title }}
+      </h4>
+    </div>
 
     <div class="card card-body">
       <!-- Tab Navigation -->
       <ul class="nav nav-tabs border-bottom mb-8 pb-4" id="mainDashboardTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-tab-pane"
-            type="button" role="tab" aria-controls="summary-tab-pane" aria-selected="true">
-            <i class="fas fa-file-alt me-2"></i> {{ __('admin.Program Summary') }}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance-tab-pane"
-            type="button" role="tab" aria-controls="performance-tab-pane" aria-selected="false">
-            <i class="fas fa-chart-line me-2"></i> {{ __('admin.Startup Performance') }}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="mentorship-tab" data-bs-toggle="tab" data-bs-target="#mentorship-tab-pane"
-            type="button" role="tab" aria-controls="mentorship-tab-pane" aria-selected="false">
-            <i class="fas fa-people-arrows me-2"></i> {{ __('admin.Mentorship & Advisory') }}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="workshops-tab" data-bs-toggle="tab" data-bs-target="#workshops-tab-pane"
-            type="button" role="tab" aria-controls="workshops-tab-pane" aria-selected="false">
-            <i class="fas fa-person-chalkboard me-2"></i> {{ __('admin.Workshops') }}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="final-eval-tab" data-bs-toggle="tab" data-bs-target="#final-eval-tab-pane"
-            type="button" role="tab" aria-controls="final-eval-tab-pane" aria-selected="false">
-            <i class="fas fa-trophy me-2"></i> {{ __('admin.Final Evaluation') }}
-          </button>
-        </li>
+        @foreach($dashboardTabs as $tab)
+          <li class="nav-item" role="presentation">
+            <button 
+                class="nav-link {{ $tab['active'] ? 'active' : '' }}"
+                id="{{ $tab['id'] }}"
+                data-bs-toggle="tab"
+                data-bs-target="{{ $tab['target'] }}"
+                type="button"
+                role="tab"
+                aria-controls="{{ ltrim($tab['target'], '#') }}"
+                aria-selected="{{ $tab['active'] ? 'true' : 'false' }}"
+            >
+                <i class="{{ $tab['icon'] }} me-2"></i> {{ $tab['label'] }}
+            </button>
+          </li>
+        @endforeach
       </ul>
+
 
       <!-- Tab Content -->
       <div class="tab-content p-0" id="mainDashboardTabsContent">
-
-        <!-- ========================== -->
-        <!-- 1. Program Summary Tab Pane -->
-        <!-- ========================== -->
-        <div class="tab-pane fade show active" id="summary-tab-pane" role="tabpanel" aria-labelledby="summary-tab"
-          tabindex="0">
-          {{-- <h3 class="section-title mt-3">Program Overview</h3> --}}
-          <!-- KPIs Row -->
-          <div class="row justify-content-center mb-4">
-            <div class="col-lg col-md-4 col-sm-6">
-              <div class="kpi-card">
-                <i class="fas fa-building-flag kpi-icon text-primary"></i>
-                <div class="kpi-value" id="summaryTotalStartups">{{ $totalStartups }}</div>
-                <div class="kpi-label">{{ __('admin.Total Startups') }}</div>
-              </div>
-            </div>
-            <div class="col-lg col-md-4 col-sm-6">
-              <div class="kpi-card">
-                <i class="fas fa-user-tie kpi-icon text-info"></i>
-                <div class="kpi-value" id="summaryTotalMentors">{{ $totalMentors }}</div>
-                <div class="kpi-label">{{ __('admin.Total Mentors') }}</div>
-              </div>
-            </div>
-            <div class="col-lg col-md-4 col-sm-6">
-              <div class="kpi-card">
-                <i class="fas fa-chalkboard-user kpi-icon text-success"></i>
-                <div class="kpi-value" id="summaryTotalWorkshops">{{ $totalWorkshops }}</div>
-                <div class="kpi-label">{{ __('admin.Total Workshops') }}</div>
-              </div>
-            </div>
-            <div class="col-lg col-md-4 col-sm-6">
-              <div class="kpi-card">
-                <i class="fas fa-star kpi-icon text-warning"></i>
-                 <div class="kpi-value">{{ $averageFinalScore }}</div>
-                 <div class="kpi-label">{{ __('admin.Average Final Score') }}</div>
-              </div>
-            </div>
-            <div class="col-lg col-md-4 col-sm-6">
-              <div class="kpi-card">
-                <i class="fas fa-check-circle kpi-icon text-danger"></i>
-                <div class="kpi-value" id="summaryEvaluationsComplete">{{ $evaluationCompletion }}%</div>
-                <div class="kpi-label">{{ __('admin.Evaluation Completion') }}</div>
-              </div>
-            </div>
+        @foreach($dashboardTabs as $tab)
+          <div class="tab-pane fade {{ $tab['active'] ? 'show active' : '' }}" id="{{ ltrim($tab['target'], '#') }}" role="tabpanel" aria-labelledby="{{ $tab['id'] }}">
+            <!-- Tab content goes here -->
+            @if($tab['id'] === 'summary-tab')
+              @include('admin.programs.partials._program_summary_tab')
+            @elseif($tab['id'] === 'performance-tab')
+              @include('admin.programs.partials._startup_performance_tab')
+            @elseif($tab['id'] === 'mentorship-tab')
+              @include('admin.programs.partials._mentorship_advisory_tab')
+            @elseif($tab['id'] === 'workshops-tab')
+              @include('admin.programs.partials._workshops_tab')
+            @elseif($tab['id'] === 'final-eval-tab')
+              @include('admin.programs.partials._final_evaluation_tab')
+            @endif
           </div>
-
-          <hr>
-
-          <div class="row mt-4">
-            <div class="col-md-6">
-              <div class="card card-body border h-100 d-flex flex-column">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i
-                    class="fas fa-tasks text-primary me-2"></i> {{ __('admin.Program Status') }}</h4>
-                <div>
-                  <div class="py-8">
-                    <h6 class="mt-3 fw-bold">{{ __('admin.Key Program Stages') }}:</h6>
-                    <ul class="list-unstyled">
-                       @foreach($steps as $step)
-                       <li class="mb-2">
-                         @php
-                          $iconClass = match($loop->iteration) {
-                           1, 2, 3 => 'fas fa-check-circle text-success',
-                           4 => 'fas fa-spinner fa-spin text-primary',
-                           default => 'far fa-circle text-muted',
-                         };
-                        @endphp
-                     <i class="{{ $iconClass }} me-2"></i> {{ $step->title }}
-                      </li>
-                   @endforeach
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="card card-body border h-100">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i
-                    class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.Status Distribution') }}</h4>
-                <div class="chart-container" style="height: 250px; background-color: #f8f9fa;">
-                  <canvas id="summaryStatusDistributionChart"></canvas>
-                </div>
-                <div class="w-100">
-                  <h6 class="mt-4 fw-bold">{{ __('admin.Results Summary') }}:</h6>
-                  <ul class="list-group list-group-flush">
-                    <li class="list-group-item" id="summaryTopCompanies"><i class="fas fa-trophy text-muted"></i>
-                     {{ __('admin.Highest Rated') }}: {{ $statusDistribution['Highest Rated'] }}</li>
-                    <li class="list-group-item" id="summaryGoodCompanies"><i class="fas fa-thumbs-up"
-                        style="color:#28a745"></i> {{ __('admin.Good Performance') }}: {{ $statusDistribution['Good Performance'] }}</li>
-                    <li class="list-group-item" id="summaryImprovementCompanies"><i class="fas fa-flag"
-                        style="color:#dc3545"></i> {{ __('admin.Needs Improvement') }}: {{ $statusDistribution['Needs Improvement'] }}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ==================================== -->
-        <!-- 2. Startup Performance Tab Pane     -->
-        <!-- ==================================== -->
-        <div class="tab-pane fade" id="performance-tab-pane" role="tabpanel" aria-labelledby="performance-tab"
-          tabindex="0">
-          <!-- Filters for this specific report -->
-          <div class="bg-label-light p-4 rounded border mb-6">
-            <h5 class=""><i class="fas fa-filter"></i> {{ __('admin.Filter Options (Performance)') }}  </h5>
-            <form class="row g-3 align-items-end performance-filter-form" method="GET" action="{{ route('programs.report', $cycle->id) }}">
-                  <div class="col-md-3 col-sm-6">
-                    <label for="perfFilterSector" class="form-label fw-semibold">{{ __('admin.Sector') }}</label>
-                    <select class="form-select select2" id="perfFilterSector" name="sector">
-                       <option selected value="">{{ __('admin.All') }}</option>
-                       @foreach ($sectorsLabel as $sector)
-                          <option value="{{ $sector->name_en }}" {{ request('sector') == $sector->name_en ? 'selected' : '' }}>
-                             {{ $sector->{'name_'.$l} }}
-                          </option>
-                       @endforeach
-                   </select>
-                </div>
-
-              <div class="col-md-3 col-sm-6">
-                    <label for="perfFilterStage" class="form-label fw-semibold">{{ __('admin.Stage') }}</label>
-                    <select class="form-select select2" id="perfFilterStage" name="stage">
-                       <option selected value="">{{ __('admin.All') }}</option>
-                        @foreach ($stages as $stage)
-                          <option value="{{ $stage->name_en }}" {{ request('stage') == $stage->name_en ? 'selected' : '' }}>
-                            {{ $stage->{'name_' . $l} }}
-                          </option>
-                       @endforeach
-                    </select>
-               </div>
-
-              {{-- <div class="col-md-2 col-sm-6"> <label for="perfFilterMinRating" class="form-label fw-semibold">{{ __('admin.Min Rating') }}</label>
-                <input type="number" class="form-control" id="perfFilterMinRating" min="1" max="5" step="0.1"
-                  placeholder="e.g., 3.5">
-              </div> --}}
-              {{-- <div class="col-md-2 col-sm-6"> <label for="perfFilterMinProgress" class="form-label fw-semibold">{{ __('admin.Min Progress') }}
-                  (%)</label>
-                <input type="number" class="form-control form-control" id="perfFilterMinProgress" min="0" max="100"
-                  step="5" placeholder="e.g., 50">
-              </div> --}}
-              <div class="col-md-2 col-sm-12 text-start mt-3 mt-md-0"> <button type="submit"
-                  class="btn btn-primary w-100"><i class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button> </div>
-            </form>
-          </div>
-          <!-- Content from performance report -->
-          <div class="row mt-4 ">
-            <div class="col-12 mb-8">
-              <div class="row">
-                <div class="col-md-6">
-                  <!-- Chart 1: Startups by Sector -->
-                  <div class="card card-body border">
-                    <h4 class="mb-6 fw-semibold border-bottom border-2 border-primary"><i
-                        class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.Distribution by Sector') }}</h4>
-                    <div class="chart-container">
-                      <canvas id="perfSectorDistributionChart"></canvas>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <!-- Chart 2: Average Progress by Stage -->
-                  <div class="card card-body border">
-                    <h4 class="mb-6 fw-semibold border-bottom border-2 border-primary"><i
-                        class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Average Progress by Stage') }}</h4>
-                    <div class="chart-container">
-                      <canvas id="perfProgressByStageChart"></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="card card-body border">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i
-                    class="fas fa-list text-primary me-2"></i> {{ __('admin.Startup Performance List') }}</h4>
-                <div class="table-responsive">
-                  <!-- Copied Performance Table Structure Here -->
-                  <table class="table table-striped table-hover align-middle performance-table">
-                    <thead>
-                      <tr>
-                        <th class="text-center">#</th>
-                        <th class="text-center">{{ __('admin.company name') }}</th>
-                        <th class="text-center">{{ __('admin.Sector') }}</th>
-                        <th class="text-center">{{ __('admin.Stage') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($companies as $index => $company)
-                           <tr>
-                              <th class="text-center">{{ $index + 1 }}</th>
-                              <td class="text-center">{{ $company->{'name_'.$l} }}</td>
-                              <td class="text-center">{{ $company->sectoR?->{'name_'.$l} ?? '-' }}</td>
-                              <td class="text-center">{{ $company->stagE->{'name_'.$l} ?? '-' }}</td>
-                           </tr>
-                        @endforeach
-                    </tbody>
-                  </table>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ==================================== -->
-        <!-- 3. Mentorship & Advisory Tab Pane    -->
-        <!-- ==================================== -->
-        <div class="tab-pane fade" id="mentorship-tab-pane" role="tabpanel" aria-labelledby="mentorship-tab"
-          tabindex="0">
-          <!-- Filters for this specific report -->
-          <div class="bg-label-light p-4 rounded-3">
-            <h5 class="fw-semibold"><i class="fas fa-filter"></i>
-              {{ __('admin.Filter Options (Mentorship)') }}</h5>
-            <form class="row g-3 align-items-end mentorship-filter-form" method="GET" action="{{ route('programs.report',$cycle->id) }}">
-              <div class="col-md-3"><label for="mentorFilterMentor" class="form-label">{{ __('admin.Mentor') }}</label>
-                   <select class="form-select select2" id="mentorFilterMentor" name="mentor">
-                    <option value="">{{ __('admin.All') }}</option>
-                        @foreach($mentors as $mentor)
-                             <option value="{{ $mentor->id }}" {{ request('mentor') == $mentor->id ? 'selected' : '' }}>{{ $mentor->name }}</option>
-                        @endforeach
-                  </select>
-              </div>
-              @if (count($companies) > 0)
-              <div class="col-md-3"><label for="mentorFilterCompany" class="form-label">{{ __('admin.Company') }}</label>
-                <select class="form-select select2" id="mentorFilterCompany" name="company">
-                    <option value="">{{ __('admin.All') }}</option>
-                        @foreach($companies as $company)
-                          <option value="{{ $company->id }}" {{ request('company') == $company->id ? 'selected' : '' }}>{{ $company->{'name_'.app()->getLocale()}  }}</option>
-                        @endforeach
-                </select>
-              </div>
-              @endif
-              <div class="col-md-3"><label for="mentorFilterDateStart" class="form-label">{{ __('admin.From Date') }}</label><input
-                  type="date" class="form-control" id="mentorFilterDateStart" name="zoom_date"></div>
-              <div class="col-md-3 text-start"><button type="submit" class="btn btn-primary w-50"><i
-                    class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button></div>
-            </form>
-          </div>
-          <!-- Content from mentorship report -->
-          <!-- KPIs Row -->
-          <div class="row justify-content-center mb-4 mt-4">
-            <div class="col-lg-3 col-md-6">
-              <div class="kpi-card-sm"> <i class="fas fa-users-gear kpi-icon text-primary"></i>
-                <div class="kpi-value-sm">{{ $mentorshipRequests->count() }}</div>
-                <div class="kpi-label-sm">{{ __('admin.Total Sessions') }}</div>
-              </div>
-            </div>
-            @php
-            $totalMinutes = $mentorshipRequests->sum('period');
-            $totalHours = $totalMinutes / 60;
-            @endphp
-
-            <div class="col-lg-3 col-md-6">
-              <div class="kpi-card-sm"> <i class="fas fa-clock kpi-icon text-success"></i>
-                <div class="kpi-value-sm"> +{{ number_format($totalHours, 1) }} </div>
-                <div class="kpi-label-sm">{{ __('admin.Total Hours') }}</div>
-              </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <div class="kpi-card-sm"> <i class="fas fa-star kpi-icon text-warning"></i>
-                <div class="kpi-value-sm">{{ number_format($mentorshipRequests->avg('rating')) }}</div>
-                <div class="kpi-label-sm">{{ __('admin.Average Rating') }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="row mt-2">
-            <div class="col-lg-7">
-              <!-- Table 1: Mentorship Details per Company -->
-              @php
-                 $groupedByCompany = $mentorshipRequests->groupBy('user_id');
-              @endphp
-
-              <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-building-user text-primary me-2"></i> 
-                  {{ __('admin.Mentorship Details by Company') }}
-                </h4>
-                <div class="table-responsive">
-                  <!-- Copied Mentorship Table 1 Structure Here -->
-                  <table class="table table-hover align-middle mentorship-company-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">{{ __('admin.company name') }}</th>
-                        <th scope="col">{{ __('admin.Mentor') }}</th>
-                        <th scope="col">{{ __('admin.Sessions') }}</th>
-                        <th scope="col">{{ __('admin.Hours') }}</th>
-                        <th scope="col">{{ __('admin.Mentor Rating') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($groupedByCompany as $userId => $requests)
-                         @php
-                          $company = $requests->first()->user->company;
-                          $mentor = $requests->first()->mentor;
-                          $totalSessions = $requests->count();
-                          $totalMinutes = $requests->sum('period');
-                          $totalHours = $totalMinutes / 60;
-                          $avgRating = $requests->whereNotNull('rating')->avg('rating');
-                        @endphp
-                      <tr>
-                          <td class="text-right-align">{{ $company?->{'name_' . app()->getLocale()} }}</td>
-                          <td>{{ $mentor->first_name . ' ' . $mentor->last_name ?? 'N/A' }}</td>
-                          <td>{{ $totalSessions }}</td>
-                          <td>{{ number_format($totalHours, 1) }}</td>
-                          <td>
-                              <span class="badge bg-label-{{ $avgRating >= 4.5 ? 'success' : 'primary' }}">
-                                  {{ number_format($avgRating, 1) }}/5
-                             </span>
-                           </td>
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <!-- Table 2: Mentor Performance -->
-                     @php
-                        $groupedByMentor = $mentorshipRequests->groupBy('mentor_id');
-                     @endphp
-
-               <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-tie text-primary me-2"></i> {{ __('admin.Mentor Performance') }}</h4>
-                <div class="table-responsive">
-                  <!-- Copied Mentorship Table 2 Structure Here -->
-                  <table class="table table-hover align-middle mentorship-mentor-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">{{ __('admin.Mentor') }}</th>
-                        <th scope="col">{{ __('admin.Total Sessions') }}</th>
-                        <th scope="col">{{ __('admin.Total Hours') }}</th>
-                        <th scope="col">{{ __('admin.Average Rating') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach($groupedByMentor as $mentorId => $requests)
-                       @php
-                        $mentor = $requests->first()->mentor;
-                        $totalSessions = $requests->count();
-                        $totalMinutes = $requests->sum('period');
-                        $totalHours = $totalMinutes / 60;
-                        $avgRating = $requests->whereNotNull('rating')->avg('rating');
-                        @endphp
-                      <tr>
-                          <td class="text-right-align">{{ $mentor->name ?? 'N/A' }}</td>
-                          <td>{{ $totalSessions }}</td>
-                          <td>{{ $totalHours }}</td>
-                          <td>
-                            <span class="badge bg-label-{{ $avgRating >= 4.5 ? 'success' : 'primary' }}">
-                                {{ number_format($avgRating, 1) }}/5
-                            </span>
-                          </td>
-                      </tr>
-                    @endforeach
-                     
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-5">
-              <!-- Chart 1: Session Distribution -->
-              <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary">
-                  <i class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.Session Distribution') }}
-              </h4>
-                <div class="chart-container">
-                  <canvas id="mentorSessionsChart"></canvas>
-                </div>
-              </div>
-              <!-- Chart 2: Mentor Average Rating -->
-              <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i>{{ __('admin.Mentor Average Ratings') }}</h4>
-                <div class="chart-container">
-                  <canvas id="mentorRatingChart"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ==================================== -->
-        <!-- 4. Workshops Tab Pane               -->
-        <!-- ==================================== -->
-        <div class="tab-pane fade" id="workshops-tab-pane" role="tabpanel" aria-labelledby="workshops-tab" tabindex="0">
-          <!-- Filters for this specific report -->
-          <div class="bg-label-light p-4 rounded-3">
-            <h5 class="fw-semibold"><i class="fas fa-filter"></i>
-              {{ __('admin.Filter Options (Workshops)') }}</h5>
-            <form class="row g-3 align-items-end workshops-filter-form" method="GET" action="{{ route('programs.report',$cycle->id) }}">
-              @if (count($trainerNames) > 0)
-              <div class="col-md-3"><label for="wsFilterTrainer" class="form-label">{{ __('admin.Trainer') }}</label><select
-                  class="form-select select2" id="wsFilterTrainer" name="trainer">
-                  <option selected value="">{{ __('admin.All') }}</option>
-                    @foreach ($trainerNames as $trainer)
-                      <option value="{{ $trainer }}" {{ request('trainer') == $trainer ? 'selected' : '' }}>{{ $trainer }}</option>
-                    @endforeach
-                </select></div>
-              @endif
-              <div class="col-md-3"><label for="wsFilterWorkshop" class="form-label">{{ __('admin.Workshop Name') }}</label>
-                <input type="text" class="form-control" id="wsFilterWorkshop" name="workshop_name"></div>
-              <div class="col-md-3"><label for="wsFilterType" class="form-label">{{ __('admin.Workshop Type') }}</label>
-                <select class="form-select select2" id="wsFilterType"name="type">
-                  <option selected value="">{{ __('admin.All') }}</option>
-                    <option value="online" {{ request('type') == 'online' ? 'selected' : '' }}>{{ __('admin.Live Training') }}</option>
-                    <option value="offline" {{ request('type') == 'offline' ? 'selected' : '' }}>{{ __('admin.In-Person') }}</option>
-                    <option value="sessions" {{ request('type') == 'sessions' ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
-                </select></div>
-              <div class="col-md-3 text-start"><button type="submit" class="btn btn-primary w-50"><i
-                    class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button></div>
-            </form>
-          </div>
-          <!-- Content from workshops report -->
-          <!-- KPIs Row -->
-          <div class="row justify-content-center mb-4 mt-4">
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <div class="kpi-card-sm"><i class="fas fa-chalkboard-user kpi-icon text-primary"></i>
-                <div class="kpi-value-sm">{{ $totalWorkshops }}</div>
-                <div class="kpi-label-sm">{{ __('admin.Total Workshops') }}</div>
-              </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <div class="kpi-card-sm"><i class="fas fa-clock kpi-icon text-success"></i>
-                <div class="kpi-value-sm">+{{ $totalSessionHours }}</div>
-                <div class="kpi-label-sm">{{ __('admin.Total Hours') }}</div>
-              </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <div class="kpi-card-sm"><i class="fas fa-video kpi-icon text-warning"></i>
-                <div class="kpi-value-sm">{{ $zoomWorkshops }}</div>
-                <div class="kpi-label-sm">{{ __('admin.Live Workshops') }}</div>
-              </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <div class="kpi-card-sm"><i class="fas fa-users kpi-icon text-info"></i>
-                <div class="kpi-value-sm">{{ $inPersonWorkshops }}</div>
-                <div class="kpi-label-sm">{{ __('admin.In-Person Workshops') }}</div>
-              </div>
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <div class="kpi-card-sm"><i class="fas fa-file-upload kpi-icon text-success"></i>
-                <div class="kpi-value-sm">{{ $uploadedMaterials }}</div>
-                  <div class="kpi-label-sm">{{ __('admin.Uploaded Materials') }}</div>
-            </div>
+        @endforeach
       </div>
-              
-          </div>
-          <div class="row mt-2">
-            <div class="col-lg-7">
-              <!-- Workshop Details Table -->
-              <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-list-check text-primary me-2"></i> {{ __('admin.Workshop Details') }}</h4>
-                </div>
-                <div class="table-responsive">
-                  <!-- Copied Workshop Table 1 Structure Here -->
-                 <table id="workshopTable" class="table table-hover align-middle workshop-details-table">
-
-                    <thead>
-                      <tr>
-                        <th class="text-center">{{ __('admin.Workshop Name') }}</th>
-                        <th class="text-center">{{ __('admin.Trainer') }}</th>
-                        <th class="text-center">{{ __('admin.Participants') }}</th>
-                        <th class="text-center">{{ __('admin.type') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                     @foreach ($workshops as $ws)
-                       <tr>
-                         <td class="text-center">{{ $ws->title }}</td>
-                         <td class="text-center">{{ $ws->trainer_name ?? '-' }}</td>
-                         <td>@if($ws->type == 'sessions' &&  $ws->reports->count() > 0)
-                                 {{ $ws->reports->count() ?? '-' }}
-                              @else
-                                 {{  '-' }}
-                            @endif
-                         </td>
-                          <td class="text-center"> <span class="badge {{ $ws->type === 'sessions' ? 'bg-secondary' : ($ws->type === 'online' ? 'bg-info' : 
-                              'bg-label-warning text-dark') }}">
-                             {{ $ws->type === 'sessions' ? 'Live Training' : 
-                              ($ws->type === 'sessions' ? 'Online' : 
-                               'In-Person') }}
-                        </span>
-                        </td>
-          
-                        </tr>
-                 
-                    @endforeach
-                              
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <!-- Company Performance Table -->
-              <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-graduation-cap text-primary me-2"></i> {{ __('admin.Company Performance') }}</h4>
-                <div class="table-responsive">
-                  <!-- Copied Workshop Table 2 Structure Here -->
-                  <table class="table table-hover align-middle workshop-company-perf-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">{{ __('admin.company name') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @forelse($companies as $company)
-                          <tr>
-                             <td>{{ $company->{'name_'.$l} }}</td>
-                             </tr>
-                              @empty
-                                <tr>
-                                  <td colspan="3">{{ __('admin.No companies found') }}</td>
-                                </tr>
-                               @endforelse
-                     
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-5">
-              <!-- Chart 1: Workshop Type Distribution -->
-              <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.Workshop Type Distribution') }}</h4>
-                <div class="chart-container">
-                  <canvas id="workshopTypeChart"></canvas>
-                </div>
-              </div>
-              <div>
-  <h4 class="fw-semibold border-bottom border-2 border-primary">
-    <i class="fas fa-poll text-primary me-2"></i> {{ __('admin.Survey Results') }}
-  </h4>
-
-  @if ($surveyResponses->isEmpty())
-    <p class="text-muted text-center p-3 border rounded">
-      <i class="fas fa-info-circle me-1"></i> {{ __('admin.No survey responses found') }}
-    </p>
-  @else
-    <div class="table-responsive">
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>{{ __('admin.User') }}</th>
-            <th>{{ __('admin.Responses') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach ($surveyResponses as $response)
-            <tr>
-              <td>{{ $response->user->first_name_en . $response->user->last_name_en ?? '-' }}</td>
-              <td>
-                @php
-                  $decodedResponses = json_decode($response->responses, true);
-                @endphp
-
-                @if (is_array($decodedResponses))
-                  <ul>
-                    @foreach ($decodedResponses as $responseItem)
-                      <li>
-                        <strong>{{ $responseItem['question'] }}:</strong>
-                        @php
-                          $selectedAnswer = collect($responseItem['answers'])->firstWhere('status', true);
-                        @endphp
-                        @if ($selectedAnswer)
-                          {{ $selectedAnswer['text'] }}
-                        @endif
-                      </li>
-                    @endforeach
-                  </ul>
-                @else
-                  <span class="text-muted">{{ '-' }}</span>
-                @endif
-              </td>
-            </tr>
-          @endforeach
-        </tbody>
-      </table>
+      <!-- /tab-content -->
     </div>
-  @endif
-</div>
-
-</div>
- </div>
   </div>
+  <!-- /container-fluid -->
+@stop
 
-        <!-- ==================================== -->
-        <!-- 5. Final Evaluation Tab Pane        -->
-        <!-- ==================================== -->
-        <div class="tab-pane fade" id="final-eval-tab-pane" role="tabpanel" aria-labelledby="final-eval-tab" tabindex="0">
-    <!-- Filters for this specific report -->
-    <div class="bg-label-light p-4 rounded-3">
-        <h5 class="fw-semibold"><i class="fas fa-filter"></i> {{ __('admin.Filter Options (Final)') }}</h5>
-        <form class="row g-2 align-items-end final-eval-filter-form" method="GET" action="{{ route('programs.report', $cycle->id) }}">
-            <div class="col-md-4">
-                <label for="feFilterStatus" class="form-label">{{ __('admin.Status') }}</label>
-                <select class="form-select select2" id="feFilterStatus" name="status">
-                    <option value="">{{ __('admin.All') }}</option>
-                    <option value="Highest Rated" {{ request('status') == 'Highest Rated' ? 'selected' : '' }}>{{ __('admin.Highest Rated') }}</option>
-                    <option value="Good Performance" {{ request('status') == 'Good Performance' ? 'selected' : '' }}>{{ __('admin.Good Performance') }}</option>
-                    <option value="Needs Improvement" {{ request('status') == 'Needs Improvement' ? 'selected' : '' }}>{{ __('admin.Needs Improvement') }}</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="feFilterMinScore" class="form-label">{{ __('admin.Minimum Score') }}</label>
-                <input type="number" class="form-control" id="feFilterMinScore" name="min_score" min="0" max="100" step="5" value="{{ request('min_score') }}" placeholder="e.g., 70">
-            </div>
-            <div class="col-md-4 text-start">
-                <button type="submit" class="btn btn-primary w-50"><i class="fas fa-search meវ
-                search me-2"></i> {{ __('admin.Search') }}</button>
-            </div>
-        </form>
-    </div>
-    <!-- Content from final evaluation report -->
-    <div class="row mt-4">
-        <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-clipboard-list me-2 text-primary"></i> {{ __('admin.Final Company Evaluations') }}</h4>
-            </div>
-            <div class="table-responsive">
-                <table id="finalEvalTable" class="table table-striped table-hover align-middle final-eval-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">{{ __('admin.Rank') }}</th>
-                            <th scope="col">{{ __('admin.company_name') }}</th>
-                            <th scope="col">{{ __('admin.Total Score') }}</th>
-                            <th scope="col">{{ __('admin.Judge Comments (Summary)') }}</th>
-                            <th scope="col">{{ __('admin.Status') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                         @forelse ($companyEvaluations as $index => $eval)
-                      <tr>
-                        {{-- <td class="text-center rank-col">
-                          {{ $index + 1 }}
-                          @if ($index == 0)
-                            <i class="fas fa-medal text-gold"></i>
-                          @elseif ($index == 1)
-                            <i class="fas fa-award text-silver"></i>
-                          @elseif ($index == 2)
-                            <i class="fas fa-bronze text-bronze"></i>
-                          @endif
-                        </td> --}}
-                        {{-- <td class="text-right-align">{{ $eval['company_name'] }}</td>
-                        <td class="text-center score-col">{{ $eval['total_score'] }} / 100</td>
-                        <td class="text-right-align comments-col">{{ $eval['comments'] }}</td>
-                        <td class="text-center">
-                          <span class="badge bg-label-{{ $eval['status'] == 'Highest Rated' ? 'success' : ($eval['status'] == 'Good Performance' ? 'primary' : 'danger') }} status-badge">
-                            {{ __($eval['status']) }}
-                          </span>
-                        </td> --}}
-                      </tr>
-                    @empty
-                      {{--  <tr>
-                        <td colspan="5" class="text-center">{{ __('admin.No evaluations found') }}</td>
-                      </tr>  --}}
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <!-- Chart: Score Distribution -->
-            <div class="mt-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-chart-bar text-primary me-2"></i> {{ __('admin.Score Distribution') }}</h4>
-                <div class="chart-container">
-                    <canvas id="finalEvalScoreDistributionChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <!-- Evaluator Status -->
-            <div class="mb-4">
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-user-check text-primary me-2"></i> {{ __('admin.Evaluator Status') }}</h4>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>{{ __('admin.Evaluator Name') }}</th>
-                                <th>{{ __('admin.Total Evaluations') }}</th>
-                                <th>{{ __('admin.Published') }}</th>
-                                <th>{{ __('admin.Draft') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($evaluatorStatus as $evaluator)
-                                <tr>
-                                    <td>{{ $evaluator['evaluator_name'] }}</td>
-                                    <td>{{ $evaluator['total_evaluations'] }}</td>
-                                    <td>{{ $evaluator['published_evaluations'] }}</td>
-                                    <td>{{ $evaluator['draft_evaluations'] }}</td>
-                                </tr>
-                            @endforeach
-                            @if ($evaluatorStatus->isEmpty())
-                                <tr>
-                                    <td colspan="4" class="text-center">{{ __('admin.No evaluators found') }}</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- Results Summary -->
-            <div>
-                <h4 class="fw-semibold border-bottom border-2 border-primary"><i class="fas fa-bullseye text-primary me-2"></i> {{ __('admin.Final Results Summary') }}</h4>
-                <h6 class="mb-2 fw-bold text-success">{{ __('admin.Highest Rated') }}:</h6>
-                <ul class="summary-list" id="feTopCompaniesList">
-                    {{-- @foreach ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->take(3) as $eval)
-                        <li><i class="fas fa-star"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score'] }}/100)</small></li>
-                    @endforeach
-                    @if ($companyEvaluations->where('status', 'Highest Rated')->where('evaluation_status', 1)->isEmpty())
-                        <li>{{ __('admin.No companies found') }}</li>
-                    @endif --}}
-                </ul>
-                <h6 class="mt-4 mb-2 fw-bold text-danger">{{ __('admin.Needs Improvement') }}:</h6>
-                <ul class="summary-list" id="feImprovementCompaniesList">
-                    {{-- @foreach ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1) as $eval)
-                        <li><i class="fas fa-wrench"></i> {{ $eval['company_name'] }} <small>({{ $eval['total_score'] }}/100)</small></li>
-                    @endforeach --}}
-                    {{-- @if ($companyEvaluations->where('status', 'Needs Improvement')->where('evaluation_status', 1)->isEmpty())
-                        <li>{{ __('admin.No companies found') }}</li>
-                    @endif --}}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-    
-
-
-    </div> <!-- /tab-content -->
-    </div>
-
-
-
-  </div><!-- /container-fluid -->
-
-  @stop
-
-  @section('scripts')
+@section('scripts')
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@stop
 
-  @stop
 
-
-  @section('pagescripts')
+@section('pagescripts')
   <!-- Combined & Organized JavaScript -->
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const currentLanguage = document.documentElement.lang || 'en';
-    const ctx = document.getElementById('summaryStatusDistributionChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'doughnut', 
-      data: {
-        labels: currentLanguage === 'ar' ? ['جيد', 'يحتاج إلى تحسين', 'ممتاز'] : ['Good', 'Needs Improvement', 'Excellent'],
-        datasets: [{
-          label: 'Status Distribution',
-          data: [10, 5, 15],
-          backgroundColor: ['#28a745', '#dc3545', '#007bff'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-          },
-        },
+    document.addEventListener('DOMContentLoaded', function () {
+      const tabKey = 'mainDashboardActiveTab';
+      const tabEl = document.getElementById('mainDashboardTabs');
+
+      // Get stored active tab ID or default to first tab's ID
+      let activeTabId = localStorage.getItem(tabKey);
+      if (!activeTabId && tabEl) {
+        const firstTabBtn = tabEl.querySelector('button[data-bs-toggle="tab"]');
+        if (firstTabBtn) {
+            activeTabId = firstTabBtn.id;
+        }
+      }
+
+      // Show the stored (or default) active tab
+      if (activeTabId) {
+        const tabTriggerEl = document.querySelector(`#${activeTabId}`);
+        if (tabTriggerEl) {
+            const tab = new bootstrap.Tab(tabTriggerEl);
+            tab.show();
+        }
+      }
+
+      // Save active tab ID on tab change
+      if (tabEl) {
+        tabEl.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
+            button.addEventListener('shown.bs.tab', function (event) {
+                localStorage.setItem(tabKey, event.target.id);
+            });
+        });
       }
     });
-  });
-</script>
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const currentLanguage = document.documentElement.lang || 'en';
+      const ctx = document.getElementById('summaryStatusDistributionChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'doughnut', 
+        data: {
+          labels: currentLanguage === 'ar' ? ['أعلى التقييمات', 'أعلى الأداء', 'أعلى التحسيسات', 'لم يتم التقييم'] : ['Highest Rated', 'Good Performance', 'Needs Improvement', 'Not Evaluated'],
+          datasets: [{
+            label: 'Status Distribution',
+            data: @json(array_values($statusDistribution)),
+            backgroundColor: [
+                '#28A745', // Highest Rated
+                '#39DA8A', // Good Performance
+                '#DC3545', // Needs Improvement
+                '#616060', // Not Evaluated
+            ],
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+            },
+          },
+        }
+      });
+    });
+  </script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -1056,16 +283,62 @@
                     };
                 });
 
-                // Chart 1: Sector Distribution
-                const sectors = [...new Set(performanceData.map(s => s.sector))];
-                const sectorCounts = sectors.map(sector => performanceData.filter(s => s.sector === sector).length);
+                // Chart 1: Sector Distribution (Chart at the start, legend at the end)
                 const ctxPerfSector = document.getElementById('perfSectorDistributionChart')?.getContext('2d');
-                 if(ctxPerfSector) {
-                    new Chart(ctxPerfSector, {
-                        type: 'doughnut', data: { labels: sectors, datasets: [{ label: '{{ __('admin.company_counts') }}', data: sectorCounts, backgroundColor: chartColors, borderColor: chartBorderColors, borderWidth: 1 }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: chartFont } }, tooltip: { bodyFont: chartFont, titleFont: chartFont } } }
-                    });
-                 }
+                if(ctxPerfSector) {
+                  // Calculate total startups
+                  const totalStartups = @json($sectorCounts).reduce((sum, val) => sum + parseInt(val), 0);
+
+                  // Custom plugin to show total in center
+                  const centerTextPlugin = {
+                  id: 'centerText',
+                  afterDraw(chart) {
+                    const {ctx, chartArea: {left, right, top, bottom, width, height}} = chart;
+                    ctx.save();
+                    ctx.font = 'bold 1.2rem Cairo, Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#212529';
+                    const centerX = left + width / 2;
+                    const centerY = top + height / 2;
+                    ctx.fillText(totalStartups, centerX, centerY - 8);
+                    ctx.font = '0.9rem Cairo, Arial, sans-serif';
+                    ctx.fillStyle = '#6c757d';
+                    const label = document.documentElement.lang === 'ar' ? 'إجمالي الشركات' : 'Total Startups';
+                    ctx.fillText(label, centerX, centerY + 14);
+                    ctx.restore();
+                  }
+                  };
+
+                  new Chart(ctxPerfSector, {
+                  type: 'doughnut',
+                  data: {
+                    labels: @json($sectorLabels),
+                    datasets: [{
+                    label: '{{ __('admin.company_counts') }}',
+                    data: @json($sectorCounts),
+                    backgroundColor: chartColors,
+                    borderColor: chartBorderColors,
+                    borderWidth: 1
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                    legend: {
+                      position: 'right', // Move legend to the end (right)
+                      labels: { font: chartFont }
+                    },
+                    tooltip: {
+                      bodyFont: chartFont,
+                      titleFont: chartFont
+                    }
+                    }
+                  },
+                  plugins: [centerTextPlugin]
+                  });
+                }
 
                 // Chart 2: Progress by Stage
                 const stages = ['الفكرة', 'النموذج الأولي', 'السوق', 'النمو', 'التوسع'];
@@ -1079,7 +352,7 @@
                 const ctxPerfProgress = document.getElementById('perfProgressByStageChart')?.getContext('2d');
                 if(ctxPerfProgress) {
                      new Chart(ctxPerfProgress, {
-                        type: 'bar', data: { labels: activeStages, datasets: [{ label: 'متوسط التقدم (%)', data: activeStageAvgProgress, backgroundColor: chartColors, borderColor: chartBorderColors, borderWidth: 1 }] },
+                        type: 'bar', data: { labels: activeStages, datasets: [{ label: 'متوسط التقدم (%)', data: activeStageAvgProgress, backgroundColor: chartColors, borderColor: chartBorderColors, borderWidth: 1, barThickness: 40 }] },
                         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, ticks: { font: chartFont, callback: v => v + '%' } }, x: { ticks: { font: chartFont } } }, plugins: { legend: { display: false }, tooltip: { bodyFont: chartFont, titleFont: chartFont, callbacks: { label: c => c.dataset.label + ': ' + c.parsed.y + '%' } } } }
                     });
                 }
@@ -1108,45 +381,46 @@
     // Chart 1: Top 5 Mentors
     const ctx1 = document.getElementById('mentorSessionsChart');
     new Chart(ctx1, {
-        type: 'bar',
-        data: {
-            labels: mentorNames,
-            datasets: [{
-                label: '{{ __('admin.Number_of_sessions') }}',
-                data: mentorSessionsArray,
-                backgroundColor: chartColors,
-                borderColor: chartColors,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                    }
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    font: {
-                        size: 16
-                    }
-                },
-                legend: {
-                    display: false
-                }
+      type: 'bar',
+      data: {
+        labels: mentorNames,
+        datasets: [{
+          label: '{{ __('admin.Number_of_sessions') }}',
+          data: mentorSessionsArray,
+          backgroundColor: chartColors,
+          borderColor: chartColors,
+          borderWidth: 1,
+          barThickness: 40 // Fixed bar width
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
             }
+          },
+          x: {
+            title: {
+              display: true,
+            }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            font: {
+              size: 16
+            }
+          },
+          legend: {
+            display: false
+          }
         }
+      }
     });
 
     // Chart 2: Average Ratings Per Mentor
@@ -1159,7 +433,8 @@
                 data: mentorAvgRatingsArray,
                 backgroundColor: chartColors,
                 borderColor: chartColors,
-                borderWidth: 1
+                borderWidth: 1,
+                barThickness: 40 // Fixed bar width
             }]
         },
         options: {
@@ -1283,13 +558,7 @@
         });
 
         // Chart: Score Distribution
-        const scoreBins = [
-            { label: '90-100', min: 90, max: 100, count: 0 },
-            { label: '80-89', min: 80, max: 89.9, count: 0 },
-            { label: '70-79', min: 70, max: 79.9, count: 0 },
-            { label: '60-69', min: 60, max: 69.9, count: 0 },
-            { label: '< 60', min: 0, max: 59.9, count: 0 }
-        ];
+        const scoreBins = @json($scoreDistribution);
         finalEvalData.forEach(item => {
             if (item.score !== null) {
                 for (const bin of scoreBins) {
@@ -1350,7 +619,7 @@
                     const avgScore = evaluatedCount > 0 ? (scores.reduce((a, b) => a + b, 0) / evaluatedCount).toFixed(1) : '--';
 
                     // Update KPI
-                    document.getElementById('summaryAvgFinalScore').textContent = avgScore;
+                    // document.getElementById('summaryAvgFinalScore').textContent = avgScore;
 
                     // Status Distribution Chart
                     const statusCounts = { 'Highest Rated': 1, 'Good Performance': 2, 'Needs Improvement': 4 };

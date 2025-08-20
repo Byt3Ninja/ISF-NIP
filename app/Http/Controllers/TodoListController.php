@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\TodoList;
 use App\Team_member;
 use Illuminate\Http\Request;
+use App\Mail\TaskAssignedMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TodoListController extends Controller
 {
@@ -52,12 +55,20 @@ class TodoListController extends Controller
         $todoList->status = 'To Do';
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
-        $todoList->cycle_id = $user->company->cycle;
-        $todoList->step_id = $user->company->step;
+        $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;
+        $todoList->step_id = $user->team_member->teamFormation->user->company->step;
         $todoList->user_id = $user->id;
         $todoList->team_formation_id = $team_member[0]->team_formation_id;
         $todoList->team_member_id = $team_member[0]->id;
         $todoList->save();
+
+        $assignedUser = User::find($assignee);
+
+        if ($assignedUser && $assignedUser->email) {
+            Mail::to($assignedUser->email)->queue(new TaskAssignedMail($assignedUser, $todoList));
+            
+        }
+
 
         return response()->json(['success' => true, 'message' => __("admin.Task_added_successfully.")]);
         
@@ -104,10 +115,17 @@ class TodoListController extends Controller
         $todoList->status = 'To Do';
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
-        $todoList->cycle_id = $user->company->cycle;
-        $todoList->step_id = $user->company->step;
+        $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;
+        $todoList->step_id = $user->team_member->teamFormation->user->company->step;
         $todoList->user_id = $user->id;
         $todoList->save();
+
+        $assignedUser = User::find($assignee);
+
+        if ($assignedUser && $assignedUser->email) {
+            Mail::to($assignedUser->email)->queue(new TaskAssignedMail($assignedUser, $todoList));
+            
+        }
 
         return response()->json(['success' => true, 'message' => __("admin.Task_updated_successfully.")]);
          
@@ -121,6 +139,13 @@ class TodoListController extends Controller
         $todoList = TodoList::find($id);
         $todoList->delete();
         return response()->json(['success' => true, 'message' => __("admin.Task_deleted_successfully.")]);
+    }
+
+    public function changeTodoStatus(Request $request){
+        $todoList = TodoList::find($request->id);
+        $todoList->status = $request->status;
+        $todoList->save();
+        return response()->json(['success' => true, 'message' => __("admin.Task_status_updated_successfully.")]);
     }
 
 
