@@ -2884,6 +2884,18 @@
                     "registered"
                    
                 ]
+            },
+            {
+                "name": "hackathon.EdittodoListStatus",
+                "description": " Edit Todo List Status in Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
             }
         ]
     },

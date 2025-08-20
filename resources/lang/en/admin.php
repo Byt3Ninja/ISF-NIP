@@ -2297,5 +2297,6 @@ return [
 	'IP_blocked_successfully' => 'IP blocked successfully',
 	'User_forcefully_logged_out' => 'User forcefully logged out',
 	'New_Password' => 'New Password',
-	'Reset_Password_Caution' => 'Please save this password and share it with the user securely.'
+	'Reset_Password_Caution' => 'Please save this password and share it with the user securely.',
+	'Task_status_updated_successfully' => 'Task status updated successfully',
 ];

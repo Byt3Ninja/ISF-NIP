@@ -616,7 +616,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                             <li class="list-group-item border-0 px-2 py-2">
                               <div class="d-flex justify-content-between align-items-start">
                                 <div class="form-check flex-grow-1">
-                                  <input class="form-check-input me-2" type="checkbox" value="" id="task{{ $task->tl_id }}"
+                                  <input class="form-check-input me-2" type="checkbox" value="done" id="task{{ $task->tl_id }}"
                                     @if($task->tl_status == "Done") checked @endif>
                                   <label class="form-check-label" for="task{{ $task->tl_id }}"
                                     @if($task->tl_status == "Done") style="text-decoration: line-through;" @endif>
@@ -629,6 +629,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     </small>
                                   </label>
                                 </div>
+                                @if($team_Formation_leader OR $task->tl_assignee_id == auth()->user()->id) 
                                 <div class="btn-group btn-group-sm ms-2">
                                   <button class="btn btn-outline-secondary btn-sm" 
                                     onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->assignee_name_en }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}')"
@@ -641,6 +642,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     <i class="ti ti-trash"></i>
                                   </button>
                                 </div>
+                                @endif
                               </div>
                             </li>
                           @endforeach
@@ -1069,19 +1071,24 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <label for="taskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة' }}</label>
             <input type="text" class="form-control" name="title" id="taskTitle" required>
           </div>
+          
           <div class="mb-3">
             <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
             <select class="form-select" id="taskAssignee" name="assignee">
               <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
-              @if(isset($teamData['members']))
-                @foreach($teamData['members'] as $member)
-                  <option value="{{ $member['id'] }}">
-                    {{ $l == 'en' ? $member['name'] : $member['name_ar'] }}
+               @if($team_Formation_leader) 
+              @if(isset($team_members))
+                @foreach($team_members as $member)
+                  <option value="{{ $member->tm_id }}">
+                    {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
                   </option>
                 @endforeach
               @endif
+              @endif
             </select>
           </div>
+          
+
           <div class="mb-3">
             <label for="taskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق' }}</label>
             <input type="date" name="due_date" class="form-control datepicker" id="taskDueDate">
@@ -1132,19 +1139,25 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <label for="EtaskTitle" class="form-label">{{ $l == 'en' ? 'Task Title' : 'عنوان المهمة' }}</label>
             <input type="text" class="form-control" name="title" id="EtaskTitle" required>
           </div>
-          <div class="mb-3">
-            <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
-            <select class="form-select" id="EtaskAssignee" name="assignee">
-              <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
-              @if(isset($teamData['members']))
-                @foreach($teamData['members'] as $member)
-                  <option value="{{ $member['id'] }}">
-                    {{ $l == 'en' ? $member['name'] : $member['name_ar'] }}
-                  </option>
-                @endforeach
-              @endif
-            </select>
-          </div>
+        
+            
+            <div class="mb-3">
+              <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
+              <select class="form-select" id="EtaskAssignee" name="assignee">
+                <option value="You" selected >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+                @if($team_Formation_leader)
+                @if(isset($team_members))
+                  @foreach($team_members as $member)
+                    <option value="{{ $member->tm_id }}" >
+                      {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
+                    </option>
+                  @endforeach
+                @endif
+                @endif
+              </select>
+            </div>
+          
+
           <div class="mb-3">
             <label for="EtaskDueDate" class="form-label">{{ $l == 'en' ? 'Due Date' : 'تاريخ الاستحقاق' }}</label>
             <input type="date" name="due_date" class="form-control datepicker" id="EtaskDueDate">
