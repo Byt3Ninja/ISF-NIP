@@ -114,8 +114,8 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "4" && !auth()->user()->hasRole('admin')) {
-                    dd('sdasdas');
+                if ($data['role'] == "4" && !auth()?->user()?->hasRole('admin')) {
+               
                     UsersBio::create([
                         'user_id' => $user->id,
                         'bio_en' => $data['bio_en'],
