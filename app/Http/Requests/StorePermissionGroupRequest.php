@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\ApiResponder;
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 class StorePermissionGroupRequest extends FormRequest
 {
+	use ApiResponder;
 	/**
 	 * Determine if the user is authorized to make this request.
 	 *
@@ -27,12 +30,25 @@ class StorePermissionGroupRequest extends FormRequest
 			'name' => [
 				'string',
 				'required',
-				'unique:permission_groups,name'
+				'unique:permission_groups,name',
+				'max:100'
 			],
 			'description' => [
 				'sometimes',
 				'nullable',
+				'max:250'
 			]
 		];
 	}
+
+	   protected function failedValidation(Validator $validator)
+    {
+        if ($this->expectsJson()) {
+        throw new HttpResponseException(
+            $this->validationError(__('api.validation_error'), 422, $validator->errors())
+         );
+      }
+
+        parent::failedValidation($validator);
+    }
 }

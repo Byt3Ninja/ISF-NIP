@@ -90,11 +90,6 @@ class UserService
 
         if($user->hasRole('Judger')){
                $user->notify(new WelcomeJudgerNotification($user));
-        }elseif( $user->hasRole('organizationmanager')){
-                $org_owner= $user->organization();
-               
-                Mail::to($user->email)->queue(new OrganizationCreatedMail($org_owner,$user, $data['password']));
-
         }else{
 
              Mail::to(users: $user->email)->queue(new WelcomeUserMail($user, $data['password']));
