@@ -10,7 +10,6 @@ use App\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreUserApiRequest;
 use App\Http\Requests\UpdateUserApiRequest;
 use App\Http\Requests\User\UserFilterRequest;
 use App\Http\Requests\User\UserIdRequest;
@@ -75,8 +74,8 @@ class UserController extends Controller
               return $this->created(new UserResource($result['data']),__('api.user_created'));
             }
 
-            return $this->error($result['message'] ?? __('api.user_create_failed'), 
-                $result['status_code'] ?? 400, 
+            return $this->serverError(__('api.user_create_failed'), 
+                $result['status_code'] ?? 500, 
                 $result['data'] ?? null
             );
 
@@ -97,7 +96,7 @@ class UserController extends Controller
                  return $this->success(new UserResource($result['user']), [], __('api.user_updated'));
             }
 
-            return $this->error($result['message'], $result['status']);
+            return $this->serverError(__('api.user_update_failed'), $result['status']);
         }
 
 
