@@ -52,7 +52,7 @@ class TodoListController extends Controller
         $todoList = new TodoList;
         $todoList->title = $request->title;
         $todoList->description = $request->description;
-        $todoList->status = 'To Do';
+        $todoList->status = 'todo';
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
         $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;
@@ -112,7 +112,7 @@ class TodoListController extends Controller
         $todoList = TodoList::find($request->id);
         $todoList->title = $request->title;
         $todoList->description = $request->description;
-        $todoList->status = 'To Do';
+        $todoList->status = 'todo';
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
         $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;

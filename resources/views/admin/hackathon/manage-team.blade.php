@@ -612,6 +612,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
                       <ul class="list-group list-group-flush" id="taskList">
                         @if(isset($todoList) && $todoList->count() > 0)
+                        {{ dd($todoList) }}
                           @foreach($todoList as $task)
                             <li class="list-group-item border-0 px-2 py-2" id="task-{{ $task->tl_id }}">
                               <div class="d-flex justify-content-between align-items-start">
@@ -639,6 +640,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     </small>
                                   </label>
                                 </div>
+                                
                                 @if($team_Formation_leader OR $task->tl_assignee_id == auth()->user()->id) 
                                 <div class="btn-group btn-group-sm ms-2">
                                   <button class="btn btn-outline-secondary btn-sm" 
