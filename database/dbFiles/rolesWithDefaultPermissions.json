@@ -7082,6 +7082,154 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "Chat System",
+        "description": "Chat and messaging functionality",
+        "permissions": [
+            {
+                "name": "chat.messages",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.groups",
+                "description": "View Chat Groups",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.create_group",
+                "description": "Create Chat Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.add_user",
+                "description": "Add User to Chat Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.remove_user",
+                "description": "Remove User from Chat Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.exit_group",
+                "description": "Exit Chat Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.delete_group",
+                "description": "Delete Chat Group",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.send_message",
+                "description": "Send Chat Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.delete_message",
+                "description": "Delete Chat Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.search_users",
+                "description": "Search Users for Chat",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.create_conversation",
+                "description": "Create New Chat Conversation",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "chat.conversation_messages",
+                "description": "View Conversation Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            }
+        ]
     }
 
 ]

@@ -646,7 +646,7 @@ class HackathonController extends Controller
                 $forms .= " AND CYC.organization_id = ? ";
                 $params[] = $user->organization_id;
             }
-
+            $forms .= " ORDER BY FD.created_at";
             $forms = DB::select($forms, $params);
             $forms = collect($forms);
             
