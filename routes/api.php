@@ -21,6 +21,7 @@ use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
 
@@ -106,6 +107,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/', [MessageController::class, 'forceDelete']);
     });
     Route::get('/stages', [StageController::class, 'index']);
+    Route::prefix('v1')->group(function () {
+    Route::apiResource('permissions', PermissionController::class);
+    Route::apiResource('permission-groups', PermissionGroupController::class);
+});
 
 
     // جروبات
