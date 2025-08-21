@@ -54,7 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [ProfileController::class, 'me']);
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
-    Route::get('/roles', [RoleController::class, 'index']);
+    Route::apiResource('/roles',RoleController::class);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
