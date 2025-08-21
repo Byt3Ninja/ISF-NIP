@@ -92,4 +92,5 @@ return [
    'Messages_deleted_permanently' => 'Messages Deleted Permanently',
    'user_create_failed' => 'Failed to Create User',
    'user_update_failed'=> 'Failed to Update User',
+   'role_deleted' => 'Role Deleted Successfully',
 ];

@@ -42,4 +42,18 @@ class RoleController extends Controller
 
     return response()->json($roles, 400);
 }
+
+public function destroy($id)
+{
+    if (!auth()->user()->ableTo('roles.destroy')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $role = Role::find($id);
+    if (!$role) {
+        return $this->notFound(__('api.role_not_found'));
+    }
+
+    $role->delete();
+    return $this->success(null, [], __('api.role_deleted'));
+}
 }

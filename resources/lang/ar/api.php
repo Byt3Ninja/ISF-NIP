@@ -90,4 +90,5 @@ return [
  'Messages_deleted_permanently' => 'تم حذف الرسائل بنجاح',
  'user_create_failed' => 'فشل إنشاء المستخدم',
  'user_update_failed' => 'فشل تحديث المستخدم',
+ 'role_deleted' => 'تم حذف الصلاحية بنجاح',	 
 ];
