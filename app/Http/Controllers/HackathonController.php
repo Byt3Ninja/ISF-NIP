@@ -97,27 +97,11 @@ class HackathonController extends Controller
          });
 
          
-        $pastHackathons_q = $hackathons->where('status', 'Finished')
+        $pastHackathons = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
 
-        // عدد العناصر في كل صفحة
-        $perPage = 5;
-
-        // الصفحة الحالية
-        $page = request()->get('page', 1);
-
-        // قص البيانات على حسب الصفحة
-        $currentPageItems = $pastHackathons_q->slice(($page - 1) * $perPage, $perPage)->values();
-
-        // عمل الـ Paginator
-        $pastHackathons = new LengthAwarePaginator(
-            $currentPageItems,
-            $pastHackathons_q->count(),
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+       
         
         $hackathons = $hackathons->reject(function ($item) {
             return $item['status'] === 'Finished';

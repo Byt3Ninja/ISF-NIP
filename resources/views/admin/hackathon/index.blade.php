@@ -158,7 +158,7 @@
               @include('admin.hackathon.partials.hackathon-item', ['hackathon' => $hackathon, 'l' => $l])
               @endforeach
 
-              {{ $pastHackathons->links() }}
+              
             </div>
           </div>
         </div>
