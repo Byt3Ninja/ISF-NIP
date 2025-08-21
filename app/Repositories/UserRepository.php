@@ -6,13 +6,14 @@ use App\Role;
 use App\User;
 use App\Country;
 use App\UsersBio;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UserRepository
 {
@@ -151,7 +152,7 @@ class UserRepository
 
                     $user->save();
 
-                    return $user->fresh();
+                   return $user->fresh(['roles']);
             });
 
 
@@ -295,11 +296,26 @@ class UserRepository
         try{
 
         
-    $roles= Role::all();
+        $roles= Role::all();
+        $rolesData = $roles->map(function ($role) {
+        $users = User::role($role->name)->get();
+
+        return [
+                'id'         => $role->id,
+                'name'       => $role->name,
+                'totalUsers' => $users->count(),
+                'avatars'    => $users->map(function ($user) {
+                    return $user->img_url 
+                        ? Storage::disk('public_uploads')->url($user->img_url) 
+                        : null;
+                })->filter()->values()->toArray(),
+            ];
+        });
+
             return [
                 'success' => true,
                 'message' => 'Roles List successfully',
-                'data'    => $roles,
+                'data'    => $rolesData,
                 'errors'  => null
                 ];
         } catch (\Throwable $e) {
