@@ -218,7 +218,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                   {{-- : {{ __('admin.Submit code, share the demo, and complete documentation story.') }} --}}
                   @endif
                 </td>
-                <td>{{ __('admin.'.$project->region) }}</td>
+                <td>{{$project->region ? __('admin.'.$project->region) : '' }}</td>
                 <td>
                   <div class="progress mb-2" style="height: 22px; background-color: #f1f3f4; border-radius: 12px;">
                     <div 
@@ -381,7 +381,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                         <div class="col-md-6">
                           <div class="mb-3">
                             <label class="form-label fw-bold">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
-                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ __('admin.'.$project->region) }}</p>
+                            <p class="form-control-plaintext border p-2 rounded bg-light">{{ $project->region ? __('admin.'.$project->region) : '' }}</p>
                           </div>
                           
                           <div class="mb-3">
@@ -533,7 +533,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $project->team_leader }}</td>
                 <td>{{ $project->eamil }}</td>
                 <td>{{ $project->phone }}</td>
-                <td>{{ __('admin.'.$project->region) }}</td>
+                <td>{{$project->region ? __('admin.'.$project->region) : '' }}</td>
                 <td>
                   <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
                     {{ $l == 'en' ? 'View' : 'عرض' }}
@@ -594,7 +594,7 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $notproject->team_leader }}</td>
                 <td>{{ $notproject->email }}</td>
                 <td>{{ $notproject->phone }}</td>
-                <td>{{ __('admin.'.$notproject->region) }}</td>
+                <td>{{$notproject->region ? __('admin.'.$notproject->region) : '' }}</td>
                 {{-- <td>
                   <a target="_blank" title="view" href="/dashboard/hackathon/viewSubmission/{{ $project->step_id }}/{{ $project->user_id }}" class="btn btn-label-primary btn-sm">
                     {{ $l == 'en' ? 'View' : 'عرض' }}
