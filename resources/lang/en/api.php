@@ -92,4 +92,11 @@ return [
    'Messages_deleted_permanently' => 'Messages Deleted Permanently',
    'user_create_failed' => 'Failed to Create User',
    'user_update_failed'=> 'Failed to Update User',
+   'role_deleted' => 'Role Deleted Successfully',
+   'permission_created' => 'Permission Created Successfully',
+   'permission_group_created' => 'Permission Group Created Successfully',
+   'permission_updated' => 'Permission Updated Successfully',
+   'permission_group_updated' => 'Permission Group Updated Successfully',
+   'permission_group_not_found' => 'Permission Group Not Found',
+   'permission_not_found' => 'Permission Not Found',
 ];

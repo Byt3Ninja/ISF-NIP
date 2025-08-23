@@ -110,6 +110,25 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('judger/screening/evaluation/save_draft', 'Judger\JudgerScreeningController@save_evaluation_draft')->name('screening.evaluate_save_draft');
     Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
 
+    // Chat
+    Route::get('chat', 'ChatController@index');
+    
+    // Chat API routes (using web session authentication)
+    Route::get('chat/messages', 'ChatController@messages')->name('chat.messages');
+    Route::get('chat/conversations/{conversationId}/messages', 'ChatController@getConversationMessages')->name('chat.conversation_messages');
+    Route::post('chat/conversations', 'ChatController@createOrGetConversation')->name('chat.create_conversation');
+    Route::get('chat/messages/{messageId}', 'ChatController@getMessage')->name('chat.get_message'); // For real-time broadcasting
+    Route::get('chat/groups', 'ChatController@myGroups')->name('chat.groups');
+    Route::post('chat/groups', 'ChatController@createGroup')->name('chat.create_group');
+    Route::post('chat/groups/{groupId}/add-user', 'ChatController@addUser')->name('chat.add_user');
+    Route::post('chat/groups/{groupId}/remove-user', 'ChatController@removeUser')->name('chat.remove_user');
+    Route::post('chat/groups/{groupId}/exit', 'ChatController@exitGroup')->name('chat.exit_group');
+    Route::delete('chat/groups/{groupId}', 'ChatController@deleteGroup')->name('chat.delete_group');
+    Route::post('chat/messages', 'ChatController@sendMessage')->name('chat.send_message');
+    Route::post('chat/groups/{groupId}/messages', 'ChatController@sendMessage')->name('chat.send_group_message');
+    Route::delete('chat/messages/{messageId}', 'ChatController@deleteMessage')->name('chat.delete_message');
+    Route::get('chat/users/search', 'ChatController@searchUser')->name('chat.search_users');
+
     // Hackathon Routes
     Route::get('hackathon', 'HackathonController@index')->name('hackathon.view');
     Route::get('hackathon/{id}/manage', 'HackathonController@manage')->name('hackathon.manageTeam');

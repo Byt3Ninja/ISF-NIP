@@ -4,9 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Auth;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Traits\ApiResponder;
 class UpdatePermissionRequest extends FormRequest
 {
+    use ApiResponder;
     public function authorize()
     {
         return true;
@@ -16,7 +19,7 @@ class UpdatePermissionRequest extends FormRequest
         return [
             'name' => [
                 'string',
-                'required',
+                'sometimes',
                 'unique:permissions,name,' . request()->permission->id,
             ],
             'permission_group_id' => [
@@ -29,5 +32,16 @@ class UpdatePermissionRequest extends FormRequest
                 'nullable',
             ]
         ];
+    }
+
+     protected function failedValidation(Validator $validator)
+    {
+        if ($this->expectsJson()) {
+        throw new HttpResponseException(
+            $this->validationError(__('api.validation_error'), 422, $validator->errors())
+         );
+      }
+
+        parent::failedValidation($validator);
     }
 }

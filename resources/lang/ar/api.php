@@ -90,4 +90,11 @@ return [
  'Messages_deleted_permanently' => 'تم حذف الرسائل بنجاح',
  'user_create_failed' => 'فشل إنشاء المستخدم',
  'user_update_failed' => 'فشل تحديث المستخدم',
+ 'role_deleted' => 'تم حذف الصلاحية بنجاح',
+ 'permission_created' => 'تم إنشاء الصلاحية بنجاح',
+ 'permission_group_created' => 'تم إنشاء مجموعة الصلاحية بنجاح',
+ 'permission_updated' => 'تم تحديث الصلاحية بنجاح',
+ 'permission_group_updated' => 'تم تحديث مجموعة الصلاحية بنجاح',
+ 'permission_group_not_found' => 'مجموعة الصلاحية غير موجودة',
+ 'permission_not_found' => 'الصلاحية غير موجودة',
 ];
