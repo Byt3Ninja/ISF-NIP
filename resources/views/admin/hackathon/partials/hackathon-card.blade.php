@@ -69,8 +69,8 @@
                   @endif
                 @else
                   @if($team && $team->isEmpty() )
-                    
-                      @if($stypeStep?->first()->stype == 1 && $hackathon['cycle_id'] == $user_cycle_id )
+                    {{-- {{ dd($user->team_member) }} --}}
+                      @if($user->team_member == null OR ($stypeStep?->first()->stype == 1 && $hackathon['cycle_id'] == $user_cycle_id ))
 
                         <button type="button" class="btn btn-warning" style="flex: 1;" disabled><i class="ti ti-users me-1"></i>{{ $l ==
                           'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
