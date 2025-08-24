@@ -51,7 +51,7 @@
 				<div class="card-header border-bottom d-flex justify-content-between align-items-center">
 					<h5 class="card-title mb-0">{{ __('admin.Job_List') }}</h5>
 					<div class="d-flex align-items-center">
-						<a href="{{-- route('queue.run.once') --}}" class="btn btn-primary me-3">
+						<a href="{{ route('queue.run.once') }}" class="btn btn-primary me-3">
 							<i class="ti ti-mobiledata me-2"></i>
 							{{ __('admin.RunQueueOnce') }}
 						</a>
