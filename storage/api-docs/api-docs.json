@@ -4524,6 +4524,10 @@
                                                     "format": "url",
                                                     "example": "https://example.com/uploads/user.png"
                                                 },
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
                                                 "firstName": {
                                                     "type": "string",
                                                     "example": "Ahmed"
