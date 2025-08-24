@@ -99,4 +99,6 @@ return [
    'permission_group_updated' => 'Permission Group Updated Successfully',
    'permission_group_not_found' => 'Permission Group Not Found',
    'permission_not_found' => 'Permission Not Found',
+   'permission_group_deleted' => 'Permission Group Deleted Successfully',
+   'permission_deleted' => 'Permission Deleted Successfully',
 ];
