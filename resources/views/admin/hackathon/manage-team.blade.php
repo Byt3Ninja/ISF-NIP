@@ -316,6 +316,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               </div>
             </div>
             @elseif($members >= $maxMembers)
+            @php
+              $deletemembers = $team_Formation_raw->whereIn('tm_acceptInvition', ['join', 'pending'])->delete();
+            @endphp
             <div class="alert alert-success d-flex align-items-center">
               <i class="ti ti-check-circle me-2"></i>
               <div>
