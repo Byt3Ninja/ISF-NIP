@@ -235,6 +235,7 @@ public function update(UpdatePermissionRequest $request,$id)
         'permission_group_id' => $request->filled('permission_group_id') ? $request->permission_group_id : $permission->permission_group_id,
     ]);
     app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+    $permission->refresh();
     return $this->success($permission,[],__('api.permission_updated'));
 }
 

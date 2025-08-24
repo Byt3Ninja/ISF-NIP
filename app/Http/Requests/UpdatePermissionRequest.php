@@ -20,7 +20,7 @@ class UpdatePermissionRequest extends FormRequest
             'name' => [
                 'string',
                 'sometimes',
-                'unique:permissions,name,' . request()->permission->id,
+                'unique:permissions,name,' . $this->route('permission'),
             ],
             'permission_group_id' => [
                 'nullable',
