@@ -2320,5 +2320,6 @@ return [
 	'Retrying_job' => 'Retrying job...',
 	'Please_wait_while_the_job_is_being_re_queued' => 'Please wait while the job is being re-queued',
 	'Job_has_been_re_queued_successfully' => 'Job has been re-queued successfully',
-	'Exception' => 'Exception'
+	'Exception' => 'Exception',
+	'No_jobs_found' => 'No jobs found',
 ];
