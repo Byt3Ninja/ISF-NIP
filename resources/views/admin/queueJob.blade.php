@@ -13,13 +13,13 @@
 			@endif
 
 			@php
-			// This data should be prepared in your controller for better practice.
+			// Calculate job counts from the actual data
+			$jobCounts = $jobs->groupBy('status')->map->count();
 			$countCards = [
-				['count' => 157, 'text' => 'admin.Completed', 'icon' => 'ti-circle-check', 'color' => 'success', 'status' =>
-				'Completed'],
-				['count' => 12, 'text' => 'admin.Pending', 'icon' => 'ti-clock', 'color' => 'secondary', 'status' => 'Pending'],
-				['count' => 5, 'text' => 'admin.Processing', 'icon' => 'ti-loader', 'color' => 'info', 'status' => 'Processing'],
-				['count' => 3, 'text' => 'admin.Failed', 'icon' => 'ti-circle-x', 'color' => 'danger', 'status' => 'Failed'],
+				['count' => $jobCounts->get('Completed', 0), 'text' => 'admin.Completed', 'icon' => 'ti-circle-check', 'color' => 'success', 'status' => 'Completed'],
+				['count' => $jobCounts->get('Pending', 0), 'text' => 'admin.Pending', 'icon' => 'ti-clock', 'color' => 'secondary', 'status' => 'Pending'],
+				['count' => $jobCounts->get('Processing', 0), 'text' => 'admin.Processing', 'icon' => 'ti-loader', 'color' => 'info', 'status' => 'Processing'],
+				['count' => $jobCounts->get('Failed', 0), 'text' => 'admin.Failed', 'icon' => 'ti-circle-x', 'color' => 'danger', 'status' => 'Failed'],
 			];
 			@endphp
 
@@ -93,9 +93,9 @@
 						<div class="col-md-2">
 							<select id="job-name-filter" class="form-select form-select-sm w-100">
 								<option value="" selected>{{ __('admin.All_Jobs') }}</option>
-								<option value="App\Jobs\SendWelcomeEmail">SendWelcomeEmail</option>
-								<option value="App\Jobs\ProcessPayment">ProcessPayment</option>
-								<option value="App\Jobs\GenerateReport">GenerateReport</option>
+								@foreach($jobs->pluck('displayName')->unique()->filter() as $jobName)
+								<option value="{{ $jobName }}">{{ $jobName }}</option>
+								@endforeach
 							</select>
 						</div>
 						<div class="col-md-2">
@@ -123,28 +123,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							@php
-							$mockJobs = [
-							(object)[ 'id' => '9a8b7c6d-5e4f-3a2b-1c0d-9f8e7d6c5b4a', 'displayName' => 'App\Jobs\SendWelcomeEmail',
-							'queue' => 'emails', 'status' => 'Completed', 'attempts' => 1, 'created_at' => now()->subMinutes(10),
-							'finished_at' => now()->subMinutes(9), 'payload' => json_encode(['userId' => 123, 'email' =>
-							'test@example.com'], JSON_PRETTY_PRINT), 'exception' => null, 'duration' => '60s' ],
-							(object)[ 'id' => '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d', 'displayName' => 'App\Jobs\ProcessPayment',
-							'queue' => 'default', 'status' => 'Failed', 'attempts' => 3, 'created_at' => now()->subDays(2),
-							'finished_at' => now()->subDays(2), 'payload' => json_encode(['orderId' => 456, 'amount' => 99.99],
-							JSON_PRETTY_PRINT), 'exception' => "Exception: Payment gateway timeout...", 'duration' => '15s' ],
-							(object)[ 'id' => 'c4b3a2d1-f6e5-b9a8-d7c6-e5f4a3b2c1d0', 'displayName' => 'App\Jobs\GenerateReport',
-							'queue' => 'reports', 'status' => 'Pending', 'attempts' => 0, 'created_at' => now()->subMinutes(1),
-							'finished_at' => null, 'payload' => json_encode(['type' => 'monthly', 'month' => '2024-08'],
-							JSON_PRETTY_PRINT), 'exception' => null, 'duration' => null ],
-							(object)[ 'id' => 'd1e2f3a4-b5c6-d7e8-f9a0-b1c2d3e4f5a6', 'displayName' => 'App\Jobs\ProcessPayment',
-							'queue' => 'default', 'status' => 'Processing', 'attempts' => 1, 'created_at' => now()->subSeconds(30),
-							'finished_at' => null, 'payload' => json_encode(['orderId' => 789, 'amount' => 49.99], JSON_PRETTY_PRINT),
-							'exception' => null, 'duration' => null ],
-							];
-							@endphp
-
-							@foreach ($mockJobs as $job)
+							@forelse ($jobs as $job)
 							@php
 							$status_classes = [ 'Pending' => 'bg-label-secondary', 'Processing' => 'bg-label-info', 'Completed' =>
 							'bg-label-success', 'Failed' => 'bg-label-danger' ];
@@ -164,11 +143,11 @@
 											data-bs-target="#jobDetailsModal" data-job-id="{{ $job->id }}"
 											data-job-name="{{ $job->displayName }}" data-job-status="{{ $job->status }}"
 											data-job-queue="{{ $job->queue }}" data-job-attempts="{{ $job->attempts }}"
-											data-job-duration="{{ $job->duration ?? 'N/A' }}"
+											data-job-duration="{{ 'N/A' }}"
 											data-job-created-at="{{ $job->created_at->toIso8601String() }}"
 											data-job-finished-at="{{ $job->finished_at ? $job->finished_at->toIso8601String() : 'N/A' }}"
 											data-job-payload="{{ htmlspecialchars($job->payload) }}"
-											data-job-exception="{{ htmlspecialchars($job->exception) }}">
+											data-job-exception="{{ htmlspecialchars($job->exception ?? '') }}">
 											<i class="ti ti-eye"></i>
 										</button>
 										@if ($job->status === 'Failed')
@@ -181,7 +160,11 @@
 									</div>
 								</td>
 							</tr>
-							@endforeach
+							@empty
+							<tr>
+								<td colspan="8" class="text-center">{{ __('admin.No_jobs_found') }}</td>
+							</tr>
+							@endforelse
 						</tbody>
 					</table>
 				</div>
