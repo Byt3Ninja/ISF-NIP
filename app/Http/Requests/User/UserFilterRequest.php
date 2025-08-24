@@ -26,6 +26,7 @@ class UserFilterRequest extends FormRequest
             'gender' => 'nullable|in:Male,Female',
             'role' => 'nullable|Exists:roles,name',
             'search' => 'nullable|string|max:255',
+            
         ];
     }
 }

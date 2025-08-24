@@ -68,18 +68,18 @@
                           <div class="row">
                             <div class="col-md-6">
                               <div class="form-group mb-4">
-                                <label class="fs-6 fw-semibold form-label mb-1" for="first_name_en">{{ __('admin.First Name') }}</label>
-                                <input name="firstName" type="text" class="form-control" id="first_name_en"
-                                  value="{{ old('first_name_en') }}" placeholder="{{ __('admin.First Name') }}" required
-                                  autocomplete="first_name_en" autofocus />
+                                <label class="fs-6 fw-semibold form-label mb-1" for="first_name">{{ __('admin.First Name') }}</label>
+                                <input name="first_name" type="text" class="form-control" id="first_name"
+                                  value="{{ old('first_name') }}" placeholder="{{ __('admin.First Name') }}" required
+                                  autocomplete="first_name" autofocus />
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="form-group mb-4">
-                                <label class="fs-6 fw-semibold form-label mb-1" for="last_name_en">{{ __('admin.Last Name') }}</label>
-                                <input value="{{ old('last_name_en') }}" name="lastName" type="text"
-                                  class="form-control" id="last_name_en" placeholder="{{ __('admin.Last Name') }}"
-                                  required autocomplete="last_name_en" />
+                                <label class="fs-6 fw-semibold form-label mb-1" for="last_name">{{ __('admin.Last Name') }}</label>
+                                <input value="{{ old('last_name') }}" name="last_name" type="text"
+                                  class="form-control" id="last_name" placeholder="{{ __('admin.Last Name') }}"
+                                  required autocomplete="last_name" />
                               </div>
                             </div>
                           </div>
