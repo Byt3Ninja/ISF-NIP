@@ -97,4 +97,6 @@ return [
  'permission_group_updated' => 'تم تحديث مجموعة الصلاحية بنجاح',
  'permission_group_not_found' => 'مجموعة الصلاحية غير موجودة',
  'permission_not_found' => 'الصلاحية غير موجودة',
+ 'permission_group_deleted' => 'تم حذف مجموعة الصلاحية بنجاح',
+ 'permission_deleted' => 'تم حذف الصلاحية بنجاح',
 ];
