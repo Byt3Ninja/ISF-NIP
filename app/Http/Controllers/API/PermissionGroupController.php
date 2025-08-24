@@ -37,7 +37,7 @@ class PermissionGroupController extends Controller
     $groups = $paginated->getCollection()->map(function ($group) {
         return [
             'id' => $group->id,
-            'title' => $group->name,
+            'name' => $group->name,
             'description' => $group->description,
             'permissionsCount' => $group->permissions_count,
         ];
@@ -126,5 +126,62 @@ class PermissionGroupController extends Controller
             'description' => $request->filled('description') ? $request->description : $permission_group->description,
         ]);
         return $this->success($permission_group,[],__('api.permission_group_updated'));
+    }
+    /**
+ * @OA\Delete(
+ *     path="/api/v1/permission-groups/{id}",
+ *     summary="Delete Permission Group",
+ *     description="Deletes a permission group by ID. Only accessible to users with 'permission-groups.destroy' permission.",
+ *     tags={"Permission Groups"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the permission group to delete",
+ *         @OA\Schema(type="integer", example=3)
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Permission group deleted successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Permission group deleted successfully"),
+ *             @OA\Property(property="data", type="null", example=null)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Forbidden"),
+ *             @OA\Property(property="data", type="object", example={})
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Permission group not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Permission group not found"),
+ *             @OA\Property(property="data", type="object", example={})
+ *         )
+ *     )
+ * )
+ */
+    public function destroy($id)
+    {
+        $user = auth()->user();
+        if (!$user->ableTo('permission-groups.destroy')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
+        $permission_group = permissionsGroup::find($id);
+        if(!$permission_group){
+            return $this->notFound(__('api.permission_group_not_found'));
+        }
+        $permission_group->delete();
+        return $this->success(null,[],__('api.permission_group_deleted'));
     }
 }

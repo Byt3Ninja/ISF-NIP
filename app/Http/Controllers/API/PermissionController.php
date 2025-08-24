@@ -136,9 +136,12 @@ public function index(Request $request)
     $permissions = $paginated->getCollection()->map(function ($perm) {
         return [
             'id' => $perm->id,
-            'title' => $perm->name,
+            'name' => $perm->name,
             'description' => $perm->description,
             'assignedTo' => $perm->roles->pluck('name'),
+            'permission_group_id' => $perm->permission_group_id,
+            'groupName' => $perm->permissionsGroup->name,
+            'is_core' => $perm->is_core,
         ];
     });
 
@@ -233,6 +236,65 @@ public function update(UpdatePermissionRequest $request,$id)
         'permission_group_id' => $request->filled('permission_group_id') ? $request->permission_group_id : $permission->permission_group_id,
     ]);
     app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+    $permission->refresh();
     return $this->success($permission,[],__('api.permission_updated'));
+}
+
+    /**
+ * @OA\Delete(
+ *     path="/api/v1/permissions/{id}",
+ *     summary="Delete Permission",
+ *     description="Deletes a permission group by ID. Only accessible to users with 'permissions.destroy' permission.",
+ *     tags={"Permissions"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the permission to delete",
+ *         @OA\Schema(type="integer", example=3)
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Permission deleted successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Permission deleted successfully"),
+ *             @OA\Property(property="data", type="null", example=null)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Forbidden"),
+ *             @OA\Property(property="data", type="object", example={})
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Permission not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Permission not found"),
+ *             @OA\Property(property="data", type="object", example={})
+ *         )
+ *     )
+ * )
+ */
+public function destroy($id)
+{
+        $user = auth()->user();
+        if (!$user->ableTo('permissions.destroy')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
+        $permission = Permission::find($id);
+        if(!$permission){
+            return $this->notFound(__('api.permission_not_found'));
+        }
+        $permission->delete();
+        return $this->success(null,[],__('api.permission_deleted'));
 }
 }
