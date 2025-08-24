@@ -2373,5 +2373,6 @@ return [
 	'Retrying_job' => 'إعادة محاولة الوظيفة...',
 	'Please_wait_while_the_job_is_being_re_queued' => 'يرجى الانتظار بينما يتم إعادة جدولة الوظيفة',
 	'Job_has_been_re_queued_successfully' => 'تمت إعادة جدولة الوظيفة بنجاح',
-	'Exception' => 'استثناء'
+	'Exception' => 'استثناء',
+	'No_jobs_found' => 'لم يتم العثور على وظائف',
 ];
