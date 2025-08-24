@@ -140,7 +140,8 @@ public function index(Request $request)
             'description' => $perm->description,
             'assignedTo' => $perm->roles->pluck('name'),
             'permission_group_id' => $perm->permission_group_id,
-            'groupName' => $perm->permissionsGroup->name
+            'groupName' => $perm->permissionsGroup->name,
+            'is_core' => $perm->is_core,
         ];
     });
 
