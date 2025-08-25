@@ -92,7 +92,13 @@
     <div class="row g-4 mb-8">
       @php
 	$user = Auth::user();
+ 
+  if($user->team_member != null){
 	$user_cycle_id = $user->team_member?->teamFormation?->user?->company?->cycle ?? null;
+  }else{
+	$user_cycle_id = $user->company?->cycle ?? null;
+  }
+
 	$isExistinghackathon = $user_cycle_id ? in_array($user_cycle_id, $hackathon_ids, true) : false;
       @endphp
 
