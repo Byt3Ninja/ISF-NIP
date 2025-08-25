@@ -40,6 +40,7 @@ class ProfileController extends Controller
  *                 property="data",
  *                 type="object",
  *                 @OA\Property(property="imgUrl", type="string", format="url", example="https://example.com/uploads/user.png"),
+ *                 @OA\Property(property="id", type="integer", example=1),
  *                 @OA\Property(property="firstName", type="string", example="Ahmed"),
  *                 @OA\Property(property="lastName", type="string", example="Mohamed"),
  *                 @OA\Property(property="gender", type="string", example="Male"),
@@ -392,6 +393,7 @@ private function getProfileData(User $user): array
 
     $data = [
         'imgUrl'           => $user->img_url,
+        'id'               => $user->id,
         'firstName'        => $user->first_name_en,
         'lastName'         => $user->last_name_en,
         'gender'           => $user->gender,

@@ -21,6 +21,7 @@ use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
 
@@ -57,6 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/companies', 'UserController@companies');
     Route::put('users/{user}/password', [UserController::class,'updatePassword']);
     Route::get('/roles', [RoleController::class, 'index']);
+
+    Route::apiResource('/roles',RoleController::class);
+
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
@@ -65,6 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/currencies', [CurrencyController::class, 'store']);
     Route::post('/currencies/{id}', [CurrencyController::class, 'update']);
     Route::delete('/currencies/{id}', [CurrencyController::class, 'destroy']);
+    Route::patch('currencies/exchange-rates', [CurrencyController::class, 'updateAllCurrency']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
     Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
@@ -108,6 +113,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/', [MessageController::class, 'forceDelete']);
     });
     Route::get('/stages', [StageController::class, 'index']);
+    Route::prefix('v1')->group(function () {
+    Route::apiResource('permissions', PermissionController::class);
+    Route::apiResource('permission-groups', PermissionGroupController::class);
+});
 
 
     // جروبات

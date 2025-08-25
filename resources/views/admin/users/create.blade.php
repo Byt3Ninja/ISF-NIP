@@ -101,8 +101,8 @@
                               <select class="form-select" required id="role" name='role'>
                                 <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
                                 @foreach ($roles as $role)
-                                <option value="{{ $role->id }}" {{ old('role') == $role->name ? 'selected' : '' }}>
-                                  {{ __('admin.' . $role->name) }}
+                                <option value="{{ $role['id'] }}" {{ old('role') == $role['name'] ? 'selected' : '' }}>
+                                  {{ __('admin.' . $role['name']) }}
                                 </option>
                                 @endforeach
                               </select>

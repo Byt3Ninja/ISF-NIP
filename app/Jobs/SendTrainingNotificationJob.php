@@ -69,10 +69,12 @@ class SendTrainingNotificationJob implements ShouldQueue
                     'join_url' => $this->join_url ?? 'Unknown Join URL',
                     'organization_name_en' => optional($step->cycle)->organization->name_en ?? 'Unknown Organization',
                     'organization_name_ar' => optional($step->cycle)->organization->name_ar ?? 'Unknown Organization',
+                    'Address' => $this->address ?? 'Unknown Address',
                 ];
 
                 try {
-                    Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail));
+                  Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail));
+                  
                     Log::info('Trainer notified: ' . $this->trainer_email);
                 } catch (\Throwable $th) {
                     Log::error('Failed to notify trainer: ' . $th->getMessage());

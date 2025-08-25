@@ -546,7 +546,37 @@ public function show($id)
         if (array_key_exists('state_id', $data)) $company->state_id = $data['state_id'];
         if (array_key_exists('sector_id', $data)) $company->sector = $data['sector_id'];
         if (array_key_exists('stage_id', $data)) $company->stage = $data['stage_id'];
-        if (isset($data['categories'])) $company->business_categories = json_encode($data['categories']);
+        if (isset($data['categories'])) {  
+         $allCategories = Company::static_categories();
+         $translated = [];
+
+        foreach ($data['categories'] as $key) {
+            $translationKey = match ($key) {
+                'food_beverage' => __('admin.categories.food_beverage'),
+                'technology' => __('admin.categories.technology'),
+                'app_website' => __('admin.categories.app_website'),
+                'housewares_home_design' => __('admin.categories.housewares_home_design'),
+                'health_wellness_nutrition' => __('admin.categories.health_wellness_nutrition'),
+                'fitness' => __('admin.categories.fitness'),
+                'sports' => __('admin.categories.sports'),
+                'beauty' => __('admin.categories.beauty'),
+                'clothing_fashion' => __('admin.categories.clothing_fashion'),
+                'toys_games' => __('admin.categories.toys_games'),
+                'children' => __('admin.categories.children'),
+                'entertainment_experiential' => __('admin.categories.entertainment_experiential'),
+                'pets' => __('admin.categories.pets'),
+                'music' => __('admin.categories.music'),
+                'holiday' => __('admin.categories.holiday'),
+                'other' => __('admin.categories.other'),
+                 default => null,
+                };
+
+             if ($translationKey) {
+                  $translated[] = $translationKey;
+                }
+            }
+          $company->business_categories = json_encode($translated);
+        }
         if (isset($data['address'])) $company->{"address_en"} = $data['address'];
         if (isset($data['yearsOfOperations'])) $company->years_of_operations = $data['yearsOfOperations'];
         if (isset($data['productOrService'])) $company->product_or_service = $data['productOrService'];

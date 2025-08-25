@@ -97,27 +97,11 @@ class HackathonController extends Controller
          });
 
          
-        $pastHackathons_q = $hackathons->where('status', 'Finished')
+        $pastHackathons = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
 
-        // عدد العناصر في كل صفحة
-        $perPage = 5;
-
-        // الصفحة الحالية
-        $page = request()->get('page', 1);
-
-        // قص البيانات على حسب الصفحة
-        $currentPageItems = $pastHackathons_q->slice(($page - 1) * $perPage, $perPage)->values();
-
-        // عمل الـ Paginator
-        $pastHackathons = new LengthAwarePaginator(
-            $currentPageItems,
-            $pastHackathons_q->count(),
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+       
         
         $hackathons = $hackathons->reject(function ($item) {
             return $item['status'] === 'Finished';
@@ -193,6 +177,8 @@ class HackathonController extends Controller
         $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
         $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
 
+        $team_Formation_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id)->first();
+
         $existInTeam = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'accepted')->pluck('user_id')->toArray();
         $pendingInvites = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'pending')->get();
         $placeholders = implode(',', array_fill(0, count($existInTeam), '?'));
@@ -248,7 +234,87 @@ class HackathonController extends Controller
             ];
         })->toArray();
 
-        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers'));
+        $todoList_q = "SELECT 
+                tl.id as tl_id,
+                tl.title as tl_title,
+                tl.description as tl_description,
+                tl.created_at as tl_created_at,
+                tl.due_date as tl_due_date,
+                tl.status as tl_status,
+                tl.assignee as tl_assignee_id,
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.user_id as tf_user_id,
+                tf.description as tf_description,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.team_formation_id as tm_team_formation_id,
+                tm.Name as tm_name,
+                tm.email as tm_email,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.isTeamLeader as tm_isTeamLeader,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                u.email as 'u_email',
+                u.img_url as 'u_img_url',
+                us.id as us_id,
+                concat(us.first_name_en, ' ', us.last_name_en) as 'assignee_name_en',
+                concat(us.first_name_ar, ' ', us.last_name_ar) as 'assignee_name_ar',
+                us.email as 'assignee_email',
+                us.img_url as 'assignee_img_url'
+            FROM 
+                todo_lists as tl
+            LEFT JOIN
+                team_formations as tf ON tf.id = tl.team_formation_id
+            LEFT JOIN
+                team_members as tm ON tm.id = tl.team_member_id
+            LEFT JOIN
+                users as u ON u.id = tl.user_id
+            LEFT JOIN
+                users as us ON us.id = tl.assignee
+            WHERE
+                tl.team_formation_id = ? 
+        ";
+        $todoList = collect(DB::select($todoList_q, [$id]));
+
+        $sharedFile_q = "SELECT 
+                sf.id as sf_id,
+                sf.file as sf_file,
+                sf.user_id as sf_user_id,
+                sf.description as sf_description,
+                sf.created_at as sf_created_at,
+                tf.id as tf_id,
+                tf.name as tf_name,
+                tf.user_id as tf_user_id,
+                tf.description as tf_description,
+                tm.id as tm_id,
+                tm.user_id as tm_user_id,
+                tm.team_formation_id as tm_team_formation_id,
+                tm.Name as tm_name,
+                tm.email as tm_email,
+                tm.acceptInvition as tm_acceptInvition,
+                tm.isTeamLeader as tm_isTeamLeader,
+                u.id as u_id,
+                concat(u.first_name_en, ' ', u.last_name_en) as 'user_name_en',
+                concat(u.first_name_ar, ' ', u.last_name_ar) as 'user_name_ar',
+                u.email as 'u_email',
+                u.img_url as 'u_img_url'
+            FROM 
+                shared_files as sf
+            LEFT JOIN
+                team_formations as tf ON tf.id = sf.team_formation_id
+            LEFT JOIN
+                team_members as tm ON tm.id = sf.team_member_id
+            LEFT JOIN
+                users as u ON u.id = sf.user_id
+            WHERE sf.team_formation_id = ? 
+        ORDER BY sf.created_at DESC";
+
+        $sharedFile = collect(DB::select($sharedFile_q, [$id]));
+        
+
+        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers', 'todoList', 'sharedFile', 'team_Formation_leader'));
     }
 
     public function myTeam()
@@ -580,7 +646,7 @@ class HackathonController extends Controller
                 $forms .= " AND CYC.organization_id = ? ";
                 $params[] = $user->organization_id;
             }
-
+            $forms .= " ORDER BY FD.created_at";
             $forms = DB::select($forms, $params);
             $forms = collect($forms);
             

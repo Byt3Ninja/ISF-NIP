@@ -7,6 +7,7 @@ use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
 use App\Http\Resources\CurrencyResource;
 use App\Http\Requests\StoreCurrencyApiRequest;
 use App\Http\Requests\UpdateCurrencyApiRequest;
@@ -307,4 +308,60 @@ class CurrencyController extends Controller
         $currency->delete();
         return $this->success(null, [], __('api.currency_deleted'));
     }
+/**
+ * @OA\Patch(
+ *     path="/api/currencies/exchange-rates",
+ *     summary="Update all exchange rates",
+ *     description="Fetches latest exchange rates (USD base) and updates all currencies except USD.",
+ *     operationId="updateExchangeRates",
+ *     tags={"Currencies"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Rates updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Exchange rates updated successfully")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Failed to update rates",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Failed to update currency exchange rates")
+ *         )
+ *     )
+ * )
+ */
+    public function updateAllCurrency()
+{
+    $user = auth()->user();
+    if (!$user->ableTo('currencies.rates_update_all')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    try {
+        $response = Http::timeout(10)->get('https://www.floatrates.com/daily/usd.json');
+
+        if (!$response->ok()) {
+            return $this->error(__('admin.FailedUpdate'), 500);
+        }
+
+        $data = $response->json();
+        $currencies = Currency::where('currency_code', '!=', 'USD')->get();
+
+        foreach ($currencies as $currency) {
+            $code = strtolower($currency->currency_code);
+            if (isset($data[$code])) {
+                $currency->exchange_rate_to_usd = $data[$code]['rate'];
+                $currency->last_updated = now();
+                $currency->save();
+            }
+        }
+
+        return $this->success(null, [], __('api.currencyRatesUpdated'));
+    } catch (\Exception $e) {
+        return $this->serverError(__('admin.FailedUpdate') . ': ' . $e->getMessage());
+    }
+}
 }

@@ -16,7 +16,7 @@ class PermissionResource extends JsonResource
     {
         $permissionsByGroup = [];
 
-        $permissions = $this->permissions;
+        $permissions = $this->getAllPermissions();
 
         foreach ($permissions as $permission) {
                 $groupName = optional($permission->permissionsGroup)->name ?? 'general';
