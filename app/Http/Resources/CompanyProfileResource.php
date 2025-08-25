@@ -68,31 +68,34 @@ class CompanyProfileResource extends JsonResource
             'name' => $this->{'name_'.$locale},
             'logo' => $this->logo ? url($this->logo) : null,
             'sector' => is_numeric($this->sector) ? optional($this->sectoR)->{"name_$locale"} : $this->sector,
-             'businessCategories' => collect(is_string($this->business_categories)
-                ? json_decode($this->business_categories, true)     : $this->business_categories
-            )->map(function ($value) {
-           $categoryMap = [
-            'food_beverage' => __('admin.categories.food_beverage'),
-            'technology' => __('admin.categories.technology'),
-            'app_website' => __('admin.categories.app_website'),
-            'housewares_home_design' => __('admin.categories.housewares_home_design'),
-            'health_wellness_nutrition' => __('admin.categories.health_wellness_nutrition'),
-            'fitness' => __('admin.categories.fitness'),
-            'sports' => __('admin.categories.sports'),
-            'beauty' => __('admin.categories.beauty'),
-            'clothing_fashion' => __('admin.categories.clothing_fashion'),
-            'toys_games' => __('admin.categories.toys_games'),
-            'children' => __('admin.categories.children'),
-            'entertainment_experiential' => __('admin.categories.entertainment_experiential'),
-            'pets' => __('admin.categories.pets'),
-            'music' => __('admin.categories.music'),
-            'holiday' => __('admin.categories.holiday'),
-            'other' => __('admin.categories.other'),
-         ];
+            'categories' =>  collect(
+                is_string($this->business_categories)
+                ? json_decode($this->business_categories, true)
+                : $this->business_categories
+                )->map(function ($value) {
+                 $categoryMap = [
+                    'food_beverage' => 'Food & Beverage',
+                    'technology' => 'Technology',
+                    'app_website' => 'App / Website',
+                    'housewares_home_design' => 'Housewares / Home Design',
+                    'health_wellness_nutrition' => 'Health / Wellness / Nutrition',
+                    'fitness' => 'Fitness',
+                    'sports' => 'Sports',
+                    'beauty' => 'Beauty',
+                    'clothing_fashion' => 'Clothing / Fashion',
+                    'toys_games' => 'Toys / Games',
+                    'children' => 'Children',
+                    'entertainment_experiential' => 'Entertainment / Experiential',
+                    'pets' => 'Pets',
+                    'music' => 'Music',
+                    'holiday' => 'Holiday',
+                    'other' => 'Other',
+                ];
 
-        $reverseMap = array_flip($categoryMap);
-        return $reverseMap[$value] ?? null;
-        })->filter()->values(),
+             $reverseMap = array_flip($categoryMap);
+
+            return $reverseMap[$value] ?? null;
+            })->filter()->values(),
             'state' => $this->state?->{'name_'.$locale},
             'city' => $this->city?->{'name_'.$locale},
             'country' => $this->country?->{'name_'.$locale},
