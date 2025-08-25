@@ -1353,6 +1353,58 @@
                 }
             }
         },
+        "/api/currencies/exchange-rates": {
+            "patch": {
+                "tags": [
+                    "Currencies"
+                ],
+                "summary": "Update all exchange rates",
+                "description": "Fetches latest exchange rates (USD base) and updates all currencies except USD.",
+                "operationId": "updateExchangeRates",
+                "responses": {
+                    "200": {
+                        "description": "Rates updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Exchange rates updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update rates",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to update currency exchange rates"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/dashboard": {
             "get": {
                 "tags": [
