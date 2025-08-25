@@ -239,7 +239,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
-
+              @if($leaderOrnot->count() > 0)
               @foreach ($team_Pinding as $index => $pendingMember)
               <li id="pendingMember{{ $pendingMember->tm_id }}"
                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
@@ -272,6 +272,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
+              @endif
             </ul>
             </div>
             <!-- Team Recruitment Section -->
@@ -319,7 +320,6 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             @php
               // $deletemembers = $team_Formation_raw->whereIn('tm_acceptInvition', ['join', 'pending'])->delete();
               $deletemembers = App\Team_member::whereIn('acceptInvition', ['join', 'pending'])->where('team_formation_id', $team_Formation_raw->first()->tf_id)->delete();
-
             @endphp
             <div class="alert alert-success d-flex align-items-center">
               <i class="ti ti-check-circle me-2"></i>
@@ -573,25 +573,27 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                             @endphp
                             
                             <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2">
-                              <div class="d-flex align-items-center">
-                                <i class="ti ti-file text-primary me-2"></i>
-                                <div>
-                                  <div class="small fw-medium">{{ $filename.".".$extension }}</div>
-                                  <div class="text-muted small">
-                                    {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
-                                  </div>
+                                <div class="d-flex align-items-center" style="min-width: 0;">
+                                    <i class="ti ti-file text-primary me-2"></i>
+                                    <div class="flex-grow-1 me-2" style="min-width: 0;">
+                                        <div class="small fw-medium text-truncate">
+                                            {{ $filename.".".$extension }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
-                              <div class="btn-group btn-group-sm">
-                                <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                  <i class="ti ti-download"></i>
-                                </a>
-                                @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
-                                  <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                    <i class="ti ti-trash"></i>
-                                  </button>
-                                @endif
-                              </div>
+                                <div class="btn-group btn-group-sm flex-shrink-0">
+                                    <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                        <i class="ti ti-download"></i>
+                                    </a>
+                                    @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    @endif
+                                </div>
                             </li>
                           @endforeach
                         @else
