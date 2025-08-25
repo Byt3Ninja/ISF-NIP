@@ -22,7 +22,7 @@
 				['count' => $jobCounts->get('Failed', 0), 'text' => 'admin.Failed', 'icon' => 'ti-circle-x', 'color' => 'danger', 'status' => 'Failed'],
 			];
 			@endphp
-
+		
 			<!-- Metrics Cards -->
 			<div class="row g-4 mb-4">
 				@foreach( $countCards as $card )
@@ -108,8 +108,11 @@
 							</button>
 						</div>
 					</div>
-
+					@if( $jobs->count() > 0 )
 					<table class="table table-hover" id="jobsTable">
+					@else
+					<table class="table table-hover">
+					@endif
 						<thead class="thead-dark">
 							<tr>
 								<th>{{ __('admin.ID') }}</th>
@@ -169,6 +172,7 @@
 					</table>
 				</div>
 			</div>
+
 		</div>
 	</div>
 </div>
