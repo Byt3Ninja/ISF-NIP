@@ -99,4 +99,5 @@ return [
  'permission_not_found' => 'الصلاحية غير موجودة',
  'permission_group_deleted' => 'تم حذف مجموعة الصلاحية بنجاح',
  'permission_deleted' => 'تم حذف الصلاحية بنجاح',
+ 'currencyRatesUpdated' => 'تم تحديث أسعار صرف العملات بنجاح',
 ];

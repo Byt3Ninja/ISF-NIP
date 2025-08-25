@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/currencies', [CurrencyController::class, 'store']);
     Route::post('/currencies/{id}', [CurrencyController::class, 'update']);
     Route::delete('/currencies/{id}', [CurrencyController::class, 'destroy']);
+    Route::patch('currencies/exchange-rates', [CurrencyController::class, 'updateAllCurrency']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
     Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
