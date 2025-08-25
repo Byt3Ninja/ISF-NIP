@@ -239,7 +239,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
-
+              @if($leaderOrnot->count() > 0)
               @foreach ($team_Pinding as $index => $pendingMember)
               <li id="pendingMember{{ $pendingMember->tm_id }}"
                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
@@ -272,6 +272,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
+              @endif
             </ul>
             </div>
             <!-- Team Recruitment Section -->
@@ -319,7 +320,6 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             @php
               // $deletemembers = $team_Formation_raw->whereIn('tm_acceptInvition', ['join', 'pending'])->delete();
               $deletemembers = App\Team_member::whereIn('acceptInvition', ['join', 'pending'])->where('team_formation_id', $team_Formation_raw->first()->tf_id)->delete();
-
             @endphp
             <div class="alert alert-success d-flex align-items-center">
               <i class="ti ti-check-circle me-2"></i>
