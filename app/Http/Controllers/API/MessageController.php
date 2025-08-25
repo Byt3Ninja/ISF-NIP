@@ -322,7 +322,7 @@ class MessageController extends Controller
         }
         $ids = is_array($request->messageIds) ? $request->messageIds : explode(',', $request->messageIds);
 
-        Messenger::whereIn('id', $ids)->update([
+        Messenger::whereIn('id', $ids)->where('receiver', $user->id)->update([
               'starred' => $request->starred === true ? 1 : 0
          ]);
         return $this->success(null, [], __('api.Message_star_status_updated'));
