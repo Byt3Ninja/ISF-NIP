@@ -77,7 +77,7 @@
               <optgroup label="{{ $sector_group->name }}">
                 @foreach ($sector_group->children as $sector)
                   <option value="{{ $sector->id }}" {{ optional($client->company)->sector == $sector->id ? 'Selected' : '' }}>
-                    {{ $sector->name }}
+                    {{ $sector->{'name_' . $l} }}
                   </option>
                 @endforeach
               </optgroup>
