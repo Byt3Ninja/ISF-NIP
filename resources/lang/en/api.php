@@ -101,4 +101,5 @@ return [
    'permission_not_found' => 'Permission Not Found',
    'permission_group_deleted' => 'Permission Group Deleted Successfully',
    'permission_deleted' => 'Permission Deleted Successfully',
+   'currencyRatesUpdated' => 'Currency Exchange Rates Updated Successfully',
 ];
