@@ -209,7 +209,11 @@ class HackathonController extends Controller
                 states as s ON u.state_id = s.id
             WHERE c.cycle = ?
         ";
-        $params = [$user->team_member->teamFormation->user->company->cycle];
+        if($user->team_member != null){
+            $params = [$user->team_member->teamFormation->user->company->cycle];
+        }else{
+            $params = [$user->company->cycle];
+        }
         if( count($existInTeam) > 0 )
         {
             $viewMember_q .= " AND u.id NOT IN ($placeholders)";
@@ -747,7 +751,7 @@ class HackathonController extends Controller
             return $team;
         });
         $teamsData = $teams->values()->all();
-
+       
         $allteams_q = "SELECT
                 tf.id as tf_id,
                 tf.name as tf_name,
@@ -1044,6 +1048,7 @@ class HackathonController extends Controller
                 return $winner;
             });
         }
+        
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
             'currentHackathon',
