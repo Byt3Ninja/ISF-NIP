@@ -124,7 +124,8 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
             $partial = $partials[$tab['target']] ?? null;
             // Tab visibility conditions
             $showTab = true;
-            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
+            // if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
+            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = true; }
             if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
             $showTab = false;
           @endphp
