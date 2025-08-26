@@ -67,7 +67,10 @@ class CompanyProfileResource extends JsonResource
             'id' => $this->id,
             'name' => $this->{'name_'.$locale},
             'logo' => $this->logo ? url($this->logo) : null,
-            'sector' => is_numeric($this->sector) ? optional($this->sectoR)->{"name_$locale"} : $this->sector,
+            'sector' => is_numeric($this->sector) && $this->sectoR ? [
+                 'id' => $this->sectoR->id,
+                 'name' => $this->sectoR->{"name_$locale"},
+                ] : ['id' => null, 'name' => $this->sector],
             'categories' =>  collect(
                 is_string($this->business_categories)
                 ? json_decode($this->business_categories, true)
@@ -96,9 +99,18 @@ class CompanyProfileResource extends JsonResource
 
             return $reverseMap[$value] ?? null;
             })->filter()->values(),
-            'state' => $this->state?->{'name_'.$locale},
-            'city' => $this->city?->{'name_'.$locale},
-            'country' => $this->country?->{'name_'.$locale},
+            'state' => $this->state ? [
+                'id' => $this->state->id,
+                'name' => $this->state->{"name_$locale"},
+            ] : null,
+            'city' => $this->city ? [
+                'id' => $this->city->id,
+                'name' => $this->city->{"name_$locale"},
+                ] : null,
+            'country' =>  $this->country ? [
+                 'id' => $this->country->id,
+                 'name' => $this->country->{"name_$locale"},
+                ] : null,
             'address' => $this->{"address_{$locale}"},
             'establishmentDate' => $this->est_date,
             'yearsOfOperations' => $this->years_of_operations,
