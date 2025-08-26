@@ -4349,7 +4349,70 @@
                 "operationId": "1a7bd7a14fb8b885ef401b2491200c7f",
                 "responses": {
                     "200": {
-                        "description": "List of permission groups"
+                        "description": "List of permission groups",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PermissionGroup"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://yourapi.test/api/v1/permission-groups?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string",
+                                                    "example": "http://yourapi.test/api/v1/permission-groups?page=5"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "example": "http://yourapi.test/api/v1/permission-groups?page=2",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4370,11 +4433,11 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "title",
+                                    "name",
                                     "description"
                                 ],
                                 "properties": {
-                                    "title": {
+                                    "name": {
                                         "type": "string",
                                         "example": "Program Management"
                                     },
@@ -4390,7 +4453,27 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permission group created successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/PermissionGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -4423,11 +4506,11 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "title",
+                                    "name",
                                     "description"
                                 ],
                                 "properties": {
-                                    "title": {
+                                    "name": {
                                         "type": "string"
                                     },
                                     "description": {
@@ -4441,7 +4524,27 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Updated"
+                        "description": "Updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permission group updated successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/PermissionGroup"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -7353,6 +7456,29 @@
                     "example": "view_program"
                 }
             },
+            "PermissionGroup": {
+                "title": "PermissionGroup",
+                "description": "Permission Group Resource",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Program Management"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Manage programs and related access"
+                    },
+                    "permissionsCount": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
             "Program": {
                 "title": "Program",
                 "properties": {
@@ -7591,9 +7717,6 @@
     },
     "tags": [
         {
-            "name": "Permission Groups"
-        },
-        {
             "name": "Authentication",
             "description": "Authentication"
         },
@@ -7640,6 +7763,10 @@
         {
             "name": "Permissions",
             "description": "Permissions"
+        },
+        {
+            "name": "Permission Groups",
+            "description": "Permission Groups"
         },
         {
             "name": "Profile",

@@ -306,9 +306,6 @@ class CompanyController extends Controller
 
     $limit = $request->get('limit', 10);
     $companies = $query->paginate($limit);
-    if ($companies->isEmpty()) {
-        return $this->error(__('api.companies_not_found'), 404);
-    }
 
     return $this->success(
         CompanyResource::collection($companies->items()),

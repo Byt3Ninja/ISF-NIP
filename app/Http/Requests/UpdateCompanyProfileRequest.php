@@ -104,6 +104,34 @@ class UpdateCompanyProfileRequest extends FormRequest
         );
     }
 
+  protected function prepareForValidation()
+{
+    if ($this->has('founders') && !is_null($this->input('founders.name'))) {
+        $this->merge([
+            'founders' => [$this->input('founders')],
+        ]);
+    }
+
+    if ($this->has('shareholders') && !is_null($this->input('shareholders.name'))) {
+        $this->merge([
+            'shareholders' => [$this->input('shareholders')],
+        ]);
+    }
+
+    if ($this->has('investors') && !is_null($this->input('investors.name'))) {
+        $this->merge([
+            'investors' => [$this->input('investors')],
+        ]);
+    }
+       foreach (['achievedMilestones', 'plannedMilestones', 'archivedMilestones'] as $field) {
+        if ($this->has($field) && !is_null($this->input($field . '.name'))) {
+            $this->merge([
+                $field => [$this->input($field)],
+            ]);
+        }
+    }
+}
+
     public function withValidator($validator)
 {
     $validator->after(function ($validator) {

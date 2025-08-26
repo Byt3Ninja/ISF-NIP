@@ -6,24 +6,62 @@ use App\permissionsGroup;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PermissionGroupResource;
 use App\Http\Requests\StorePermissionGroupRequest;
 use App\Http\Requests\UpdatePermissionGroupRequest;
 /**
- * @OA\Tag(name="Permission Groups")
+ * @OA\Schema(
+ *     schema="PermissionGroup",
+ *     title="PermissionGroup",
+ *     description="Permission Group Resource",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="Program Management"),
+ *     @OA\Property(property="description", type="string", example="Manage programs and related access"),
+ *     @OA\Property(property="permissionsCount", type="integer", example=5)
+ * )
  */
 class PermissionGroupController extends Controller
 {
     use ApiResponder;
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/permission-groups",
-     *     summary="List Permission Groups",
-     *     tags={"Permission Groups"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Response(response=200, description="List of permission groups")
-     * )
-     */
+   /**
+ * @OA\Get(
+ *     path="/api/v1/permission-groups",
+ *     summary="List Permission Groups",
+ *     tags={"Permission Groups"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of permission groups",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Success"),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="array",
+ *                 @OA\Items(ref="#/components/schemas/PermissionGroup")
+ *             ),
+ *             @OA\Property(
+ *                 property="meta",
+ *                 type="object",
+ *                 @OA\Property(property="total", type="integer", example=50),
+ *                 @OA\Property(property="page", type="integer", example=1),
+ *                 @OA\Property(property="limit", type="integer", example=10)
+ *             ),
+ *             @OA\Property(
+ *                 property="links",
+ *                 type="object",
+ *                 @OA\Property(property="first", type="string", example="http://yourapi.test/api/v1/permission-groups?page=1"),
+ *                 @OA\Property(property="last", type="string", example="http://yourapi.test/api/v1/permission-groups?page=5"),
+ *                 @OA\Property(property="prev", type="string", nullable=true, example=null),
+ *                 @OA\Property(property="next", type="string", nullable=true, example="http://yourapi.test/api/v1/permission-groups?page=2")
+ *             )
+ *         )
+ *     )
+ * )
+ */
   public function index(Request $request)
 {
     $user = auth()->user();
@@ -31,19 +69,11 @@ class PermissionGroupController extends Controller
             return $this->forbidden(__('api.forbidden'));
     }
     $perPage = $request->get('per_page', 10); 
-    $paginated = permissionsGroup::withCount('permissions')
-        ->paginate($perPage, ['id', 'name', 'description']);
+    $paginated = permissionsGroup::withCount('permissions')->paginate($perPage, ['id', 'name', 'description']);
 
-    $groups = $paginated->getCollection()->map(function ($group) {
-        return [
-            'id' => $group->id,
-            'name' => $group->name,
-            'description' => $group->description,
-            'permissionsCount' => $group->permissions_count,
-        ];
-    });
-
-    $paginated->setCollection($groups);
+   $paginated->setCollection(
+    collect(PermissionGroupResource::collection($paginated->getCollection())->resolve())
+);
 
     return $this->success(
         $paginated->items(),
@@ -63,23 +93,32 @@ class PermissionGroupController extends Controller
     );
 }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/permission-groups",
-     *     summary="Create Permission Group",
-     *     tags={"Permission Groups"},
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"title", "description"},
-     *             @OA\Property(property="title", type="string", example="Program Management"),
-     *             @OA\Property(property="description", type="string", example="Manage programs and related access")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Created")
-     * )
-     */
+   /**
+ * @OA\Post(
+ *     path="/api/v1/permission-groups",
+ *     summary="Create Permission Group",
+ *     tags={"Permission Groups"},
+ *     security={{"sanctum":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"name", "description"},
+ *             @OA\Property(property="name", type="string", example="Program Management"),
+ *             @OA\Property(property="description", type="string", example="Manage programs and related access")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Created",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Permission group created successfully"),
+ *             @OA\Property(property="data", ref="#/components/schemas/PermissionGroup")
+ *         )
+ *     )
+ * )
+ */
     public function store(StorePermissionGroupRequest $request)
     {
         $user = auth()->user();
@@ -90,27 +129,36 @@ class PermissionGroupController extends Controller
             'name' => $request->name,
             'description' => $request->description,
         ]);
-        return $this->created($group,__('api.permission_group_created'));
+        return $this->created(new PermissionGroupResource($group),__('api.permission_group_created'));
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/permission-groups/{id}",
-     *     summary="Update Permission Group",
-     *     tags={"Permission Groups"},
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"title", "description"},
-     *             @OA\Property(property="title", type="string"),
-     *             @OA\Property(property="description", type="string")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Updated")
-     * )
-     */
+   /**
+ * @OA\Put(
+ *     path="/api/v1/permission-groups/{id}",
+ *     summary="Update Permission Group",
+ *     tags={"Permission Groups"},
+ *     security={{"sanctum":{}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"name", "description"},
+ *             @OA\Property(property="name", type="string"),
+ *             @OA\Property(property="description", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Updated",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Permission group updated successfully"),
+ *             @OA\Property(property="data", ref="#/components/schemas/PermissionGroup")
+ *         )
+ *     )
+ * )
+ */
     public function update(UpdatePermissionGroupRequest $request,$id)
     {
         $user = auth()->user();
@@ -125,7 +173,7 @@ class PermissionGroupController extends Controller
             'name' => $request->filled('name') ? $request->name : $permission_group->name,
             'description' => $request->filled('description') ? $request->description : $permission_group->description,
         ]);
-        return $this->success($permission_group,[],__('api.permission_group_updated'));
+        return $this->success(new PermissionGroupResource($permission_group),[],__('api.permission_group_updated'));
     }
     /**
  * @OA\Delete(
