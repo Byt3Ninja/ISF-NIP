@@ -27,16 +27,14 @@ class CompanyProfileResource extends JsonResource
             'clean_water' => ['en' => 'Clean Water and Sanitation', 'ar' => 'المياه النظيفة والنظافة الصحية', 'id' => 6],
         ];
 
-        $sdgs = [];
-        if (is_array(json_decode($this->Sustainable_development))) {
-            foreach (json_decode($this->Sustainable_development) as $sdgKey) {
-                if (isset($sdgMap[$sdgKey])) {
-                    $sdgs[] = [
-                        'name' => $sdgMap[$sdgKey][$locale] ?? $sdgMap[$sdgKey]['en'],
-                    ];
-                }
-            }
-        }
+      $sdgs = [];
+       if (is_array(json_decode($this->Sustainable_development))) {
+          foreach (json_decode($this->Sustainable_development) as $sdgKey) {
+             if (isset($sdgMap[$sdgKey])) {
+                $sdgs[] = $sdgKey;
+              }
+          }
+     }
 
         $documents = [];
         if ($this->documents && is_array(json_decode($this->documents, true))) {
