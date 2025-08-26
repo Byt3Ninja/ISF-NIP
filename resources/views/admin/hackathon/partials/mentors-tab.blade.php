@@ -1,10 +1,19 @@
 <div class="card">
   @php
     $request = request();
+    if(auth()->user()->hasAnyRole('admin|organizationmanager')) {
+      if($id != null){
+      $request = new \Illuminate\Http\Request([
+        'cycleIdHackathon' => $id,
+      ]);
+      }else{
+        $request = request();
+      }
+    }
     $mentorsLists = showMintors($request);
 @endphp
   <div class="card-body">
-    <h4 class="card-title mb-4">{{ $l == 'en' ? 'Mentors and Judging Panel' : 'المرشدون ولجنة التحكيم' }}</h4>
+    <h4 class="card-title mb-4">{{ $l == 'en' ? 'Mentors' : 'المرشدون' }}</h4>
 
     <h3 class="h5 mb-3">{{ $l == 'en' ? 'Mentors' : 'المرشدون' }}</h3>
     <p class="text-muted mb-5">
@@ -133,7 +142,7 @@
                 @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
                 @php
                   $startup = auth()->user();
-                  $getCycle = $startup->company->cycledata;
+                  $getCycle = $startup->company?->cycledata;
                 @endphp
                 <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
                   onclick="request({{$mentor->id}},'{{optional($startup)->name }}', {{ $getCycle->organization_id }},{{ $getCycle->id }})"
@@ -141,20 +150,20 @@
                   {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                 </button>
                 @else
-
                 <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
                 @endif
-                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin'))
+                @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('organizationManager'))
                 @php
                 $startup = auth()->user();
-                $getCycle = $startup->company->cycledata;
+                $getCycle = $startup->company?->cycledata;
                 @endphp
                 <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow" data-bs-toggle="modal"
                   data-bs-target="#SendRequest" title="Add new request" onclick="request({{ $mentor->id }},
                     {{ optional($startup)->first_nam }} 
                     {{ optional($startup)->last_name }},
                     {{ $getCycle->organization_id }},
-                    {{ $getCycle->id }})">
+                    {{ $getCycle->id }} )">
+                   
                   {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                 </button>
                 @endif
