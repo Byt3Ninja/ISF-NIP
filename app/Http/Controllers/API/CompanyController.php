@@ -488,10 +488,10 @@ public function show($id)
      *                 @OA\Property(property="businessModelDescription", type="string"),
      *                 @OA\Property(property="businessPlanAttachment", type="string", format="binary"),
      *                 @OA\Property(property="haveStartup", type="string", enum={"Yes", "No"}),
-     *                 @OA\Property(property="CreatedTax", type="boolean"),
-     *                 @OA\Property(property="CommercialRegister", type="string"),
-     *                 @OA\Property(property="TaxCard", type="string"),
-     *                 @OA\Property(property="Country_Register_id", type="integer")
+     *                 @OA\Property(property="createdTax", type="boolean"),
+     *                 @OA\Property(property="commercialRegister", type="string"),
+     *                 @OA\Property(property="taxCard", type="string"),
+     *                 @OA\Property(property="country_Register_id", type="integer")
      *             )
      *         )
      *     ),
@@ -733,10 +733,10 @@ public function show($id)
 
         if (isset($data['haveStartup'])) {
          if ($data['haveStartup'] === 'Yes') {
-            $company->CreatedTax = $data['CreatedTax'] ?? 0;
-            $company->Commercial_Register = $data['CommercialRegister'] ?? null;
-            $company->Tax_Card = $data['TaxCard'] ?? null;
-            $company->Country_Register_id = $data['Country_Register_id'] ?? null;
+            $company->CreatedTax = $data['createdTax'] ?? 0;
+            $company->Commercial_Register = $data['commercialRegister'] ?? null;
+            $company->Tax_Card = $data['taxCard'] ?? null;
+            $company->Country_Register_id = $data['country_Register_id'] ?? null;
          } else {
             $company->CreatedTax = 0;
             $company->Commercial_Register = null;

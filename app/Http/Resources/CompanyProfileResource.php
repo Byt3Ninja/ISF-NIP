@@ -67,7 +67,10 @@ class CompanyProfileResource extends JsonResource
             'id' => $this->id,
             'name' => $this->{'name_'.$locale},
             'logo' => $this->logo ? url($this->logo) : null,
-            'sector' => is_numeric($this->sector) ? optional($this->sectoR)->{"name_$locale"} : $this->sector,
+            'sector' => is_numeric($this->sector) && $this->sectoR ? [
+                 'id' => $this->sectoR->id,
+                 'name' => $this->sectoR->{"name_$locale"},
+                ] : ['id' => null, 'name' => $this->sector],
             'categories' =>  collect(
                 is_string($this->business_categories)
                 ? json_decode($this->business_categories, true)
@@ -96,9 +99,18 @@ class CompanyProfileResource extends JsonResource
 
             return $reverseMap[$value] ?? null;
             })->filter()->values(),
-            'state' => $this->state?->{'name_'.$locale},
-            'city' => $this->city?->{'name_'.$locale},
-            'country' => $this->country?->{'name_'.$locale},
+            'state' => $this->state ? [
+                'id' => $this->state->id,
+                'name' => $this->state->{"name_$locale"},
+            ] : null,
+            'city' => $this->city ? [
+                'id' => $this->city->id,
+                'name' => $this->city->{"name_$locale"},
+                ] : null,
+            'country' =>  $this->country ? [
+                 'id' => $this->country->id,
+                 'name' => $this->country->{"name_$locale"},
+                ] : null,
             'address' => $this->{"address_{$locale}"},
             'establishmentDate' => $this->est_date,
             'yearsOfOperations' => $this->years_of_operations,
@@ -125,7 +137,7 @@ class CompanyProfileResource extends JsonResource
             'raisedFund' => $this->raised_fund,
             'equityOffered' => $this->equity_offered,
             'currency' => $this->Currency,
-            'PreMoneyValuation' => $this->Pre_money_Valuation,
+            'preMoneyValuation' => $this->Pre_money_Valuation,
             'targetedMarket' => collect(json_decode($this->targeted_market, true))
                 ->filter()
                 ->map(function ($countryId) use ($locale) {
@@ -155,7 +167,7 @@ class CompanyProfileResource extends JsonResource
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
-            'Industries' => json_decode($this->industries, true),
+            'industries' => json_decode($this->industries, true),
             'founders' => $this->teamMembers
                 ->where('TeamMember', 'Founder')
                 ->map(fn($f) => ['name' => $f->Name, 'role' => $f->TeamMember, 'email' => $f->Email,'linkedin' => $f->LinkedIn,])
@@ -191,7 +203,7 @@ class CompanyProfileResource extends JsonResource
             'businessModel' => $this->business_model,
             'businessModelDescription' => $this->business_model_description,
             'businessPlan' => $this->business_plan ? Storage::disk('pitch_deck')->url(ltrim(preg_replace('/^business_plan\//', '', $this->business_plan), '/')) : null,
-            'SustainableDevelopment' => $sdgs,
+            'sustainableDevelopment' => $sdgs,
             'pitchDeck' => $this->pitch_deck
              ? Storage::disk('pitch_deck')->url(
              ltrim(preg_replace('/^pitch_decks\//', '', $this->pitch_deck), '/')
@@ -205,9 +217,9 @@ class CompanyProfileResource extends JsonResource
             );
             })
              ->values(),
-             'CreatedTax' => (bool) $this->CreatedTax,
-             'CommercialRegister' => $this->Commercial_Register,
-             'TaxCard' => $this->Tax_Card,
+             'createdTax' => (bool) $this->CreatedTax,
+             'commercialRegister' => $this->Commercial_Register,
+             'taxCard' => $this->Tax_Card,
              'countryRegister' => $this->Country_Register_id
             ? [
               'id' => $this->Country_Register_id,
