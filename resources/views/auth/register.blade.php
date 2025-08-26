@@ -310,7 +310,7 @@
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
 
-                   @error('phone_code')
+                   @error('country_code')
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
                 </div>
