@@ -79,8 +79,10 @@ if (!function_exists('FormatDate')) {
         $rateSearch = $request->input('rateSearch');
         $ExpertiesSearch = $request->input('expertises');
         $linkedin = $request->input('linkedin');
+       
         if ($setting->mentor_list == 1) {
-            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
+           
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -131,7 +133,7 @@ if (!function_exists('FormatDate')) {
             }
         } else {
 
-            if (Auth::user()->hasanyRole('Admin')) {
+            if (Auth::user()->hasanyRole('Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -165,11 +167,13 @@ if (!function_exists('FormatDate')) {
                 // $mentors = User::role('mentor')->get();
                 return $mentorsLists;
             } else {
+               
                 return collect();
                 // return redirect()->route('core.dashboard_view');
             }
 
         }
+       
 
     }
 }

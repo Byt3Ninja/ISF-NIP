@@ -34,7 +34,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </div>
               <!-- Chat Button -->
-              <a href="/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
+              <a href="/dashboard/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
                 <i class="ti ti-message-circle me-1"></i>
                 {{ $l == 'en' ? 'Team Chat' : 'محادثة الفريق' }}
               </a>
