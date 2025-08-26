@@ -125,7 +125,7 @@ class CompanyProfileResource extends JsonResource
             'raisedFund' => $this->raised_fund,
             'equityOffered' => $this->equity_offered,
             'currency' => $this->Currency,
-            'PreMoneyValuation' => $this->Pre_money_Valuation,
+            'preMoneyValuation' => $this->Pre_money_Valuation,
             'targetedMarket' => collect(json_decode($this->targeted_market, true))
                 ->filter()
                 ->map(function ($countryId) use ($locale) {
@@ -155,7 +155,7 @@ class CompanyProfileResource extends JsonResource
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
-            'Industries' => json_decode($this->industries, true),
+            'industries' => json_decode($this->industries, true),
             'founders' => $this->teamMembers
                 ->where('TeamMember', 'Founder')
                 ->map(fn($f) => ['name' => $f->Name, 'role' => $f->TeamMember, 'email' => $f->Email,'linkedin' => $f->LinkedIn,])
@@ -191,7 +191,7 @@ class CompanyProfileResource extends JsonResource
             'businessModel' => $this->business_model,
             'businessModelDescription' => $this->business_model_description,
             'businessPlan' => $this->business_plan ? Storage::disk('pitch_deck')->url(ltrim(preg_replace('/^business_plan\//', '', $this->business_plan), '/')) : null,
-            'SustainableDevelopment' => $sdgs,
+            'sustainableDevelopment' => $sdgs,
             'pitchDeck' => $this->pitch_deck
              ? Storage::disk('pitch_deck')->url(
              ltrim(preg_replace('/^pitch_decks\//', '', $this->pitch_deck), '/')
@@ -205,9 +205,9 @@ class CompanyProfileResource extends JsonResource
             );
             })
              ->values(),
-             'CreatedTax' => (bool) $this->CreatedTax,
-             'CommercialRegister' => $this->Commercial_Register,
-             'TaxCard' => $this->Tax_Card,
+             'createdTax' => (bool) $this->CreatedTax,
+             'commercialRegister' => $this->Commercial_Register,
+             'taxCard' => $this->Tax_Card,
              'countryRegister' => $this->Country_Register_id
             ? [
               'id' => $this->Country_Register_id,
