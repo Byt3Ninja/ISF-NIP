@@ -68,8 +68,8 @@
 
               <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
-                  <i class="ti ti-filter me-2"></i>
-                  {{ $l == 'en' ? 'Filter' : 'تصفية' }}
+                  <i class="ti ti-search me-2"></i>
+                  {{ $l == 'en' ? 'Search' : 'ابحث' }}
                 </button>
               </div>
             </form>
