@@ -203,8 +203,8 @@
                       <select class="form-select select2 mb-3" required id="role" name='role'>
                         <option value="">{{ __('admin.Roles')}}</option>
                         @foreach($roles as $role)
-                        <option value="{{$role->id}}" {{ ($role->name == $currentRole)? "selected":"" }} >{{
-                          __('admin.'.$role->name) }}</option>
+                        <option value="{{$role['id']}}" {{ ($role['name'] == $currentRole)? "selected":"" }} >{{
+                          __('admin.'.$role['name']) }}</option>
                         @endforeach
                       </select>
                     </div>

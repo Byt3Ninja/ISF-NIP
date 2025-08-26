@@ -371,10 +371,10 @@ class MessageController extends Controller
     ]);
 
     if ($validator->fails()) {
-        return $this->error(
-            __('api.invalid_query_parameters'),
-            400,
-            $validator->errors()
+        return  $this->validationError(
+                __('api.validation_error'),
+                422,
+                $validator->errors()
         );
     }
     $type = $request->get('type');
