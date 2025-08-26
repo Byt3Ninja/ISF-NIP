@@ -775,7 +775,8 @@ class CyclesController extends Controller
 
                     if ($admin) {
 
-                        Mail::to($admin->email)->queue(new ProgramCreatedNotification($cycle, $admin));
+                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
+                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
 
                         $messenger = new Messenger();
                         $messenger->sender = auth()->id();

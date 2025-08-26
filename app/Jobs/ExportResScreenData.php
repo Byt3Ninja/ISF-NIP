@@ -10,8 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ExportMail;
+ 
 use App\Company;
 
 
@@ -124,8 +123,8 @@ class ExportResScreenData implements ShouldQueue
     $writer->save($tempFilePath);
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
-    Mail::to(auth()->user()->email)
-        ->queue(new ExportMail($tempFilePath, $fileName));
+    \Illuminate\Support\Facades\Notification::route('mail', auth()->user()->email)
+        ->notify(new \App\Notifications\ExportNotification($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

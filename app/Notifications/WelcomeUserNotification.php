@@ -5,12 +5,12 @@ namespace App\Notifications;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class WelcomeUserNotification extends Notification
+class WelcomeUserNotification extends Notification implements ShouldQueue
 {
     use Queueable;
  
@@ -38,20 +38,25 @@ class WelcomeUserNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-         $channels = [];
-    //check if user have a email 
-        if($notifiable->accept_email)
-        {
-            $channels [] = "mail";
+        $channels = [];
+        // Always store in database
+        $channels[] = 'database';
+
+        // WhatsApp if enabled for user and channel available
+        if (!empty($notifiable->accept_whatsapp)) {
+            $channels[] = WhatsAppChannel::class;
         }
 
-    if ($notifiable->accept_whatsapp) {
-        $channels[] = WhatsAppChannel::class; 
-    }
-        if($notifiable->accept_pusher)
-        {
-            $channels [] = 'broadcast';
+        // Pusher (broadcast) if enabled
+        if (!empty($notifiable->accept_pusher)) {
+            $channels[] = 'broadcast';
         }
+
+        // Email if user accepts OR default to email if nothing else (besides database) selected
+        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
+            $channels[] = 'mail';
+        }
+
         return $channels;
     }
 
@@ -75,12 +80,12 @@ class WelcomeUserNotification extends Notification
      * @param object $notifiable
      * @return array
      */
-    public function toWhatsapp(object $notifiable): array
+    public function toWhatsapp(object $notifiable): string
     {
-    return " " . __('email.welcome_email.dear') . ' ' . $this->notifiable->first_name_en .
-           ' ' . $this->notifiable->last_name_en . "\n" .
-           __('email.welcome_email.m1') . "\n" .
-           __('email.welcome_email.m2') . ' ' . $this->notifiable->email;
+        return " " . __('email.welcome_email.dear') . ' ' . ($notifiable->first_name_en ?? '') .
+               ' ' . ($notifiable->last_name_en ?? '') . "\n" .
+               __('email.welcome_email.m1') . "\n" .
+               __('email.welcome_email.m2') . ' ' . ($notifiable->email ?? '');
     }
 
 

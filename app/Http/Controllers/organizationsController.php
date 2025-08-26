@@ -14,8 +14,6 @@ use App\Company;
 use App\Organization;
 use App\Role as Roles;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OrganizationCreatedMail;
 use \Spatie\Permission\Models\Role as Role;
 use App\Http\Requests\UpdateClientProfileRequest;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -107,7 +105,8 @@ class organizationsController extends Controller
 		$user->save();
 
 
-		Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $password));
+		\Illuminate\Support\Facades\Notification::route('mail', $user->email)
+			->notify(new \App\Notifications\OrganizationCreatedNotification($organization, $user, $password));
 
 		return redirect()->route('organizations.index')->with(['msg' => 'StoredSuccessfully']);
 	}

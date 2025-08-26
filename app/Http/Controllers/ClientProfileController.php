@@ -17,7 +17,8 @@ use App\MentorshipTask;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Mail\ConfirmEmailUpdate;
+use App\Notifications\ConfirmEmailUpdateNotification;
+use Illuminate\Support\Facades\Notification;
 use App\Services\WhatsAppService;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\DB;
@@ -226,7 +227,8 @@ class ClientProfileController extends Controller
                     // إرسال رابط التحقق
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+                    Notification::route('mail', $user->new_email)
+                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
 
@@ -253,7 +255,8 @@ class ClientProfileController extends Controller
                     // إرسال رابط التحقق
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+                    Notification::route('mail', $user->new_email)
+                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
 

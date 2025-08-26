@@ -222,8 +222,9 @@ class OrganizationController extends Controller
             $user->organization_id = $organization->id;
             $user->save();
 
-            // Send email
-            Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $password));
+            // Send notification via preferred channels (mail by default)
+            \Illuminate\Support\Facades\Notification::route('mail', $user->email)
+                ->notify(new \App\Notifications\OrganizationCreatedNotification($organization, $user, $password));
             return $organization;
         });
 

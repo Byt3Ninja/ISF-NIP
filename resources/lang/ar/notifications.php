@@ -1,0 +1,59 @@
+<?php
+
+return [
+    'hackathon_invite' => [
+        'whatsapp' => 'تمت دعوتك للانضمام إلى فريق الهاكاثون ":team" بواسطة :leader. تحقق من بريدك للمزيد من التفاصيل.',
+        'broadcast' => 'تمت دعوتك للانضمام إلى فريق الهاكاثون ":team".',
+    ],
+
+    'startup_join' => [
+        'whatsapp' => 'تهانينا! لقد انضممت إلى :cycle. أهلاً بك من :app.',
+        'broadcast' => 'لقد انضممت إلى :cycle. أهلاً بك!',
+    ],
+
+    'welcome_judger' => [
+        'subject'   => 'مرحباً بك كحكم!',
+        'database'  => 'مرحباً بك في منصتنا كحكم!',
+        'broadcast' => 'مرحباً بك في منصتنا كحكم! يسعدنا انضمامك.',
+        'whatsapp'  => 'مرحباً، :name! تم إعداد حسابك كحكم بنجاح.',
+    ],
+
+    'welcome' => [
+        'subject'   => 'مرحباً!',
+        'database'  => 'مرحباً بك في منصتنا!',
+        'broadcast' => 'مرحباً بك في منصتنا! يسعدنا انضمامك.',
+        'whatsapp'  => 'مرحباً، :name! تم إعداد حسابك بنجاح.',
+    ],
+
+    'mentorship_request' => [
+        'whatsapp'  => 'لديك طلب إرشاد جديد من :startup.',
+        'broadcast' => 'تم استلام طلب إرشاد جديد من :startup.',
+    ],
+
+    'change_cycle' => [
+        'subject'   => 'تحديث تقدّم شركتك - انتقال المرحلة',
+        'database'  => 'تم تغيير المرحلة لـ :company من :from إلى :to بواسطة :org.',
+        'broadcast' => ':company انتقلت إلى مرحلة :to.',
+        'whatsapp'  => 'تحديث: :company انتقلت من :from إلى :to.',
+    ],
+
+    'new_training' => [
+        'broadcast' => 'تم نشر تدريب جديد ":title".',
+        'whatsapp'  => 'تدريب جديد متاح: :title.',
+    ],
+
+    'task' => [
+        'broadcast' => 'تحديث مهمة: :message',
+        'whatsapp'  => 'تحديث مهمة: :message',
+        'subject'   => 'تحديث مهمة',
+    ],
+
+    'mentorship_session' => [
+        'broadcast' => 'جلسة إرشاد: :title',
+        'whatsapp'  => ':greeting :line',
+    ],
+
+    'custom_email' => [
+        'subject' => 'بيانات الدخول لمنصة نمو السياحة',
+    ],
+];

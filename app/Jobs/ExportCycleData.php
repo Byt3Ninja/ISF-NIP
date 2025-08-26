@@ -11,8 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ExportMail;
 use App\Organization;
 use Symfony\Component\HttpFoundation\File\TemporaryFile;
 
@@ -103,8 +101,8 @@ class ExportCycleData implements ShouldQueue
     $writer->save($tempFilePath);
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
-    Mail::to($this->userEmail)
-        ->queue(new ExportMail($tempFilePath, $fileName));
+    \Illuminate\Support\Facades\Notification::route('mail', $this->userEmail)
+        ->notify(new \App\Notifications\ExportNotification($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

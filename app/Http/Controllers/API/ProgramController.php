@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Resources\ProgramResource;
-use App\Mail\ProgramCreatedNotification;
 use App\Http\Requests\StoreProgramRequest;
 use App\Http\Requests\UpdateProgramRequest;
 
@@ -176,7 +174,8 @@ class ProgramController extends Controller
 
                     if ($admin) {
 
-                        Mail::to($admin->email)->queue(new ProgramCreatedNotification($cycle, $admin));
+                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
+                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
 
                         $messenger = new Messenger();
                         $messenger->sender = auth()->id();
