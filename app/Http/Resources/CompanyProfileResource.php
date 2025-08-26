@@ -140,7 +140,7 @@ class CompanyProfileResource extends JsonResource
                 ->filter()
                 ->map(function ($countryId) use ($locale) {
                  $country = Country::find($countryId);
-                return $country ? ['id' => $country->id, 'name' => $country->{"name_$locale"}] : null;
+                return $country ? ['id' => $country->id, 'title' => $country->{"name_$locale"}] : null;
             })
             ->filter()
             ->values(),
