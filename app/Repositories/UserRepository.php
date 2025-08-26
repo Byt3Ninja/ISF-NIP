@@ -6,13 +6,14 @@ use App\Role;
 use App\User;
 use App\Country;
 use App\UsersBio;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UserRepository
 {
@@ -44,7 +45,7 @@ class UserRepository
         $query = $this->baseQuery();
 
         if (!empty($filters['gender'])) {
-            $query->where('gender', strtolower($filters['gender']));
+            $query->where('gender', $filters['gender']);
         }
 
         if (!empty($filters['haveCompany'])) {
@@ -76,10 +77,12 @@ class UserRepository
      * @param string $direction
      * @return LengthAwarePaginator
      */
-    public function paginate(Builder $query, int $perPage = 10, $direction = 'desc'): LengthAwarePaginator
+    public function paginate(Builder $query,  $perPage = 10, $page=null, $direction = 'desc'): LengthAwarePaginator
     {
-        return $query->orderBy('created_at', $direction)->paginate($perPage);
+    $page = $page ?? Paginator::resolveCurrentPage();
 
+    return $query->orderBy('created_at', $direction)
+                 ->paginate($perPage, ['*'], 'page', $page);
     }
 
     /**
@@ -95,9 +98,13 @@ class UserRepository
             $user = DB::transaction(function () use ($data) {
 
 
-                $user = User::create([
+                $user = User::create(attributes: [
                     'first_name_en' => $data['first_name'],
                     'last_name_en' => $data['last_name'],
+                    //this is a bug #1232
+                    'first_name_ar' => $data['first_name'],
+                    'last_name_ar' => $data['last_name'],
+                    //end bug
                     'email' => $data['email'],
                     'phone' => $data['phone'],
                     'country_code' => $data['country_code'],
@@ -112,8 +119,8 @@ class UserRepository
                         $user->img_url = $img_url;
                     }
 
-                if ($data['role'] == "4" && !auth()->user()->hasRole('admin')) {
-                    dd('sdasdas');
+                if ($data['role'] == "4" && !auth()?->user()?->hasRole('admin')) {
+               
                     UsersBio::create([
                         'user_id' => $user->id,
                         'bio_en' => $data['bio_en'],
@@ -149,7 +156,7 @@ class UserRepository
 
                     $user->save();
 
-                    return $user->fresh();
+                   return $user->fresh(['roles']);
             });
 
 
@@ -184,17 +191,25 @@ class UserRepository
             $updatedUser = DB::transaction(function () use ($user, $data) {
 
                 $user->phone = $data['phone'] ?? $user->phone;
-                $user->first_name_en = $data['firstName'] ?? $user->first_name_en;
-                $user->last_name_en = $data['lastName'] ?? $user->last_name_en;
-                $user->first_name_ar = $data['firstName'] ?? $user->first_name_ar;
-                $user->last_name_ar = $data['lastName'] ?? $user->last_name_ar;
+                $user->first_name_en = $data['first_name'] ?? $user->first_name_en;
+                $user->last_name_en = $data['last_name'] ?? $user->last_name_en;
                 $user->email = $data['email'] ?? $user->email;
                 $user->gender = $data['gender'] ?? $user->gender;
                 $user->status = $data['status'] ?? $user->status;
                 $user->country_id = $data['country_id'] ?? $user->country_id;
-                $user->HadCompany = $data['HaveCompany'] ?? $user->HadCompany;
+                $user->HaveCompany = $data['HaveCompany'] ?? $user->HaveCompany;
+                $user->houre_rate = $data['houre_rate'] ?? $user->houre_rate;
+                $user->state_id = $data['state_id'] ?? $user->state_id;
+                $user->city_id = $data['city_id'] ?? $user->city_id;
+                $user->title_en = $data['title_en'] ?? $user->title_en;
+                $user->title_ar = $data['title_ar'] ?? $user->title_ar;
+                $user->country_code = $data['country_code'] ?? $user->country_code;
 
-
+                    if (isset($data['img_url']) && $data['img_url']) {
+                        $img_url = $data['img_url'];
+                        $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                        $user->img_url = $img_url;
+                    }
 
                 if (!empty($data['password'])) {
                     $user->password = Hash::make($data['password']);
@@ -287,11 +302,26 @@ class UserRepository
         try{
 
         
-    $roles= Role::all();
+        $roles= Role::all();
+        $rolesData = $roles->map(function ($role) {
+        $users = User::role($role->name)->get();
+
+        return [
+                'id'         => $role->id,
+                'name'       => $role->name,
+                'totalUsers' => $users->count(),
+                'avatars'    => $users->map(function ($user) {
+                    return $user->img_url 
+                        ? Storage::disk('public_uploads')->url($user->img_url) 
+                        : null;
+                })->filter()->values()->toArray(),
+            ];
+        });
+
             return [
                 'success' => true,
                 'message' => 'Roles List successfully',
-                'data'    => $roles,
+                'data'    => $rolesData,
                 'errors'  => null
                 ];
         } catch (\Throwable $e) {
@@ -332,7 +362,12 @@ class UserRepository
     }
 
 
-
+    /**
+     * Summary of updatePassword
+     * @param \App\User $user
+     * @param array $data
+     * @return array{message: array|string|null, status: int, success: bool|array{message: string, status: int, success: bool}}
+     */
     public function updatePassword(User $user, array $data): array
     {
         try {
@@ -352,4 +387,195 @@ class UserRepository
             ];
         }
     }
+
+
+
+     /**
+      * Summary of getCompaniesForRegisteredUser
+      * @param \App\User $user
+      * @param array $filters
+      * @return array{companies: Builder[]|Collection<TKey, TValue>|\Illuminate\Database\Eloquent\Collection, errorMessage: string|null}
+      */
+     public function getCompaniesForRegisteredUser(User $user, array $filters): array
+    {
+        $l = app()->getLocale();
+        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+        $search = $filters['search'] ?? null;
+        $sector = $filters['sector'] ?? null;
+        $stage = $filters['stage'] ?? null;
+        $companies = collect();
+        $errorMessage = '';
+
+        $company = $user->company;
+        if ($company && $company->cycle != null) {
+            $companies = Company::where('organization_id', $user->organization_id)
+                ->where('cycle', $company->cycle)
+                ->when($search, function ($query) use ($search, $name) {
+                    $query->where($name, 'like', '%' . $search . '%');
+                })
+                ->when($sector, function ($query) use ($sector) {
+                    $query->where('sector', 'like', '%' . $sector . '%');
+                })
+                ->when($stage, function ($query) use ($stage) {
+                    $query->where('stage', 'like', '%' . $stage . '%');
+                })
+                ->where('id', $company->id)
+                ->get();
+        } else {
+            $errorMessage = $company && $company->cycle === null ? 'انت غير مشترك في البرامج الحالية' : null;
+        }
+
+        return ['companies' => $companies, 'errorMessage' => $errorMessage];
+    }
+    /**
+     * Summary of getCompaniesForOrgManager
+     * @param \App\User $user
+     * @param array $filters
+     * @return array{companies: mixed, errorMessage: string}
+     */
+    public function getCompaniesForOrgManager(User $user, array $filters): array
+    {
+        $l = app()->getLocale();
+        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+        $search = $filters['search'] ?? null;
+        $sector = $filters['sector'] ?? null;
+        $stage = $filters['stage'] ?? null;
+        $companies = collect();
+
+        $cycle_ids = Cycle::where('organization_id', $user->organization_id)->pluck('id');
+        $companies = Company::whereIn('cycle', $cycle_ids)
+            ->when($search, function ($query) use ($search, $name) {
+                $query->where($name, 'like', '%' . $search . '%');
+            })
+            ->when($sector, function ($query) use ($sector) {
+                $query->where('sector', 'like', '%' . $sector . '%');
+            })
+            ->when($stage, function ($query) use ($stage) {
+                $query->where('stage', 'like', '%' . $stage . '%');
+            })
+            ->get();
+
+        return ['companies' => $companies, 'errorMessage' => ''];
+    }
+    /**
+     * Summary of getCompaniesForMentor
+     * @param array $filters
+     * @return array{companies: Builder[]|\Illuminate\Database\Eloquent\Collection, errorMessage: string}
+     */
+    public function getCompaniesForMentor(array $filters): array
+    {
+        $l = app()->getLocale();
+        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+        $search = $filters['search'] ?? null;
+        $sector = $filters['sector'] ?? null;
+        $stage = $filters['stage'] ?? null;
+
+        $companies = Company::query()
+            ->when($search, function ($query) use ($search, $name) {
+                $query->where($name, 'like', '%' . $search . '%');
+            })
+            ->when($sector, function ($query) use ($sector) {
+                $query->where('sector', 'like', '%' . $sector . '%');
+            })
+            ->when($stage, function ($query) use ($stage) {
+                $query->where('stage', 'like', '%' . $stage . '%');
+            })
+            ->get();
+
+        return ['companies' => $companies, 'errorMessage' => ''];
+    }
+    /**
+     * Summary of getCompaniesForAdmin
+     * @param array $filters
+     * @return array{companies: Builder[]|\Illuminate\Database\Eloquent\Collection, errorMessage: string}
+     */
+    public function getCompaniesForAdmin(array $filters): array
+    {
+        $l = app()->getLocale();
+        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+        $search = $filters['search'] ?? null;
+        $sector = $filters['sector'] ?? null;
+        $stage = $filters['stage'] ?? null;
+        $organization = $filters['orgnization'] ?? null;
+
+        $query = Company::query();
+
+        if ($organization) {
+            $cycle_ids = Cycle::where('organization_id', $organization)->pluck('id');
+            $query->whereIn('cycle', $cycle_ids);
+        }
+
+        $companies = $query->when($search, function ($query) use ($search, $name) {
+            $query->where($name, 'like', '%' . $search . '%');
+        })
+            ->when($sector, function ($query) use ($sector) {
+                $query->where('sector', 'like', '%' . $sector . '%');
+            })
+            ->when($stage, function ($query) use ($stage) {
+                $query->where('stage', 'like', '%' . $stage . '%');
+            })
+            ->get();
+
+        return ['companies' => $companies, 'errorMessage' => ''];
+    }
+
+
+    /**
+     * Summary of importUsers
+     * @param array $userData
+     * @return array{message: string, success: bool}
+     */
+    public function importUsers(array $userData): array
+    {
+        try {
+            DB::beginTransaction();
+
+            foreach ($userData as $row) {
+                $user = User::create([
+                    'email'    => $row[1],
+                    'first_name_en'    => $row[2],
+                    'last_name_en'    => $row[3],
+                    'first_name_ar'    => $row[2],
+                    'last_name_ar'    => $row[3],
+                    'phone'         => $row[4] . "" . $row[5],
+                    'HaveCompany'    => (int)$row[8],
+                    'country_id'    => (int)$row[7],
+                    'organization_id'    => '18',
+                    'password' => Hash::make('123456789'),
+                    'email_verified_at' => now(),
+                ]);
+                $user->allotRole('Registered');
+
+                if (isset($row[8]) && (int)$row[8] == 1) {
+                    $company = Company::create([
+                        'country_id'    => (int)$row[7],
+                        'name_en'    => $row[9],
+                        'name_ar' => $row[9],
+                        'address_en' => $row[9],
+                        'address_ar' => $row[9],
+                        'country_code' => $row[4],
+                        'phone' => $row[5],
+                        'whatsapp' => (int)$row[5],
+                        'email' => $row[1],
+                        'cycle' => '58',
+                        'step' => '220',
+                        'approved' => '1',
+                        'approved_by' => '1',
+                        'institutions' => '0',
+                        'user_id' => $user->id,
+                    ]);
+
+                    $user->company_id = $company->id;
+                    $user->save();
+                }
+            }
+            DB::commit();
+            return ['success' => true, 'message' => 'تم رفع الشيت بنجاح!'];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('User import failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'فشل استيراد المستخدمين.'];
+        }
+    }
+
 }

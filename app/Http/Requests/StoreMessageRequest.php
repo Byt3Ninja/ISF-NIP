@@ -33,6 +33,15 @@ class StoreMessageRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation()
+{
+    $userId = $this->input('userId');
+
+    if (!is_array($userId)) {
+        $this->merge(['userId' => [$userId]]);
+    }
+}
+
      protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(

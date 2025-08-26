@@ -17,7 +17,12 @@
 if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 'type' => 'static'];
   }
-    if($user->team_member && $user->team_member->teamFormation && $user->team_member->teamFormation->user && $user->team_member->teamFormation->user->company && $currentHackathon['cycle_id'] == $user->team_member->teamFormation->user->company->cycle){
+  if($user->team_member != null){
+    $user_cycle_id =$user->team_member->teamFormation->user->company->cycle ?? null;
+  }else{
+    $user_cycle_id = $user->company->cycle ?? null;
+  }
+    if($currentHackathon['cycle_id'] == $user_cycle_id){
       $tabsDatastatic =  [
           // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
           // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
@@ -120,6 +125,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
             // Tab visibility conditions
             $showTab = true;
             // if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
+            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = true; }
             if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
             $showTab = false;
           @endphp
@@ -163,6 +169,175 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     </span>
   </div>
 </footer> --}}
+<div class="modal fade" id="sessionDetails" tabindex="-1" aria-labelledby="sessionDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header pb-4 px-12 bg-light">
+        <h5 class="modal-title" id="sessionDetailsLabel">{{ __('admin.session_details_label') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row px-4 pb-4">
+          <div class="col-md-8">
+            <div class="session-main-info mb-4">
+              <h4 class="mb-2 text-truncate" id="session-title"></h4>
+              <p class="text-muted text-truncate" id="session-desc"></p>
+              <div class="d-flex align-items-center mt-3">
+                <span class="badge bg-success text-white me-2">
+                  <i class="fas fa-video me-1"></i>
+                  <span id="session-type"></span> 
+                </span>
+                <span class="badge bg-label-info me-2" id="session-duration-badge">
+                  <i class="far fa-clock me-1"></i> 
+                  <span id="session-duration"></span>
+                </span>
+                {{-- <span class="badge bg-light text-dark">
+                  ID: #33
+                </span> --}}
+              </div>
+            </div>
+
+            <div class="session-details">
+              <div id="trainer-info-wrapper"> <!-- Add this wrapper -->
+                <div class="d-flex align-items-center py-3 border-bottom border-top">
+                  <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
+                    <i class="ti ti-school ti-lg text-dark"></i>
+                  </div>
+                  <div class="trainer-details mb-3" id="session-trainer-info">
+                    <h6 class="mb-1">
+                      {{ __('admin.Trainer Name') }}: <span id="session-trainer-name"></span>
+                    </h6>
+                    <small>
+                      <i class="fas fa-envelope me-1"></i>
+                      <strong>{{ __('admin.Trainer Email') }}:</strong>
+                      <a href="#" class="cursor-pointer" id="session-trainer-email"></a>
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div id="course-info-wrapper" style="display: none;">
+                <div class="d-flex align-items-center py-3 border-bottom border-top">
+                  <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border" id="circle-info">
+                    <i class="ti ti-book ti-lg text-dark"></i>
+                  </div>
+                  <div class="course-details mb-3" id="session-course-info">
+                    <h6 class="mb-1">
+                      {{ __('admin.Course Name') }}: 
+                    </h6>
+                    <span id="session-course-name"></span>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="row border-bottom" id="date-info">
+                <div id="date-only-col" class="col-md-6" style="display: none;">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.Date') }}</div>
+                    <div id="session-date"></div>
+                  </div>
+                </div>
+                <div id="start-date-col" class="col-md-6" style="display: none;">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.StartDate') }}</div>
+                    <div id="session-start-date"></div>
+                  </div>
+                </div>
+                <div id="end-date-col" class="col-md-6" style="display: none;">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-calendar-check me-2"></i>{{ __('admin.EndDate') }}</div>
+                    <div id="session-end-date"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row border-bottom" id="time-info" style="display: none;">
+                <div class="col-md-6">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-clock me-2"></i>{{ __('admin.Start Time') }}</div>
+                    <div id="session-start-time"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-clock me-2"></i>{{ __('admin.End Time') }}</div>
+                    <div id="session-end-time"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="py-3 border-bottom" id="location-info">
+                <div class="info-label" id="text-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
+                <a id="session-location" href="#" target="_blank" class="text-primary text-decoration-none line-clamp-2"></a>
+                <div id="session-address" class="text-muted"></div>
+              </div>
+
+              <div class="py-3 border-bottom" id="join-info">
+                <div class="info-label" id="join-link-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
+                <div class="d-flex align-items-center">
+                  <a id="join-link" href="#" class="text-primary text-decoration-none"
+                    target="_blank">
+                  </a>
+                  <div id="copy-link" style="display: none">
+                    <button class="btn btn-sm btn-outline-primary ms-2"
+                      onclick="copyToClipboard('#join-link')">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="py-3 border-bottom" id="zoom-info">
+                <div class="info-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.meeting_id') }}</div>
+                <div id="zoom-id" class="text-truncate"></div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 py-3 mt-4">
+              <div id="join-button" style="display: none;">
+                <button class="btn btn-primary">
+                  <i class="fas fa-video me-2"></i>
+                  {{ __('admin.Join') }}
+                </button>
+              </div>
+              <button id="cancel-button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-close me-2"></i>
+                {{ __('admin.Close') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            {{-- <div class="qr-code-container">
+              <h6 class="mb-3">امسح الرمز للانضمام</h6>
+              <img src="/api/placeholder/180/180" alt="QR Code" class="img-fluid mb-3"
+                style="border: 1px solid #ddd; padding: 5px;">
+              <div class="text-muted small">رمز الجلسة: https://qr.example.com/t/33-141-177</div>
+            </div> --}}
+
+            {{-- <div class="mt-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                  <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>معلومات إضافية</h6>
+                  <div class="small text-muted mb-2">
+                    <i class="fas fa-code me-1"></i> معرف التدريب: #141
+                  </div>
+                  <div class="small text-muted mb-2">
+                    <i class="fas fa-user me-1"></i> معرف المستخدم: #177
+                  </div>
+                  <div class="small text-muted mb-2">
+                    <i class="fas fa-check me-1"></i> آخر تحديث: ٤ أغسطس ٢٠٢٤
+                  </div>
+                </div>
+              </div>
+            </div> --}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('scripts')
@@ -424,6 +599,233 @@ let urlParams = new URLSearchParams(window.location.search);
         newUrl.searchParams.set('tab', tabId);
         window.history.replaceState({}, '', newUrl);
     });
+
+    function ShowDetails(trainingId) { // Renamed 'training' to 'trainingId' for clarity
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    // Select modal elements once for efficiency and clarity
+    const $modal = $('#sessionDetails');
+    const $title = $('#session-title');
+
+    const $dsc = $('#session-desc');
+    const $sessionType = $('#session-type');
+
+    const $location = $('#session-location');
+    const $address = $('#session-address');
+
+    const $trainerName = $('#session-trainer-name');
+    const $trainerEmailLink = $('#session-trainer-email');
+
+    const $datetime = $('#session-datetime');
+    const $sessionDate = $('#session-date');
+    const $sessionStartDate = $('#session-start-date');
+    const $sessionEndDate = $('#session-end-date');
+    const $sessionStartTime = $('#session-start-time');
+    const $sessionEndTime = $('#session-end-time');
+    const $sessionDuration = $('#session-duration');
+    const $zoomId = $('#zoom-id');
+
+    // Clear previous content (important if modal is reused)
+    $title.text('Training Details'); // Default title
+    $dsc.empty();
+    $location.empty();
+    $location.attr('href', '#'); // Reset location link
+    $address.empty();
+    $trainerName.empty();
+    $trainerEmailLink.empty();
+    $trainerEmailLink.attr('href', '#'); // Reset link
+    $datetime.empty();
+    $sessionStartTime.empty();
+    $sessionEndTime.empty();
+    $sessionDuration.empty();
+    $zoomId.empty();
+    $('#join-link').attr('href', '#'); // Reset link
+    $('#join-link').text(''); // Reset text
+    // --- End Reset ---
+
+    $.ajax({
+        type: "POST",
+        url: `/dashboard/trainings/getdsc/${trainingId}`, // Using template literal for cleaner URL
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        // dataType: 'json', // Explicitly expect JSON if your backend always sends it
+        success: function(response) {
+          console.log(response);
+            
+            // Reset all visibility states
+            $('#text-label').show();
+            $('#location-info').show();
+            $('#join-info').show();
+            $('#zoom-info').show();
+            $('#time-info').hide();
+            
+            // 1. Modal Title
+            if (response.title) {
+              $title.text(response.title);
+            }
+
+            // 2. Description
+            if (response.dsc) {
+              $dsc.html(response.dsc);
+            }
+
+            // 3. Session Type
+            if (response.type) {
+              if (response.type === 'sessions') {
+                $sessionType.text('{{ __('cycles.sessions') }}');
+              } else if (response.type === 'offline') {
+                $sessionType.text('{{ __('cycles.offline') }}');
+              } else if (response.type === 'online') {
+                $sessionType.text('{{ __('cycles.online') }}');
+              } else {
+                $sessionType.text('{{ __('admin.course') }}');
+              }
+            }
+
+            // 4. Location
+            if (response.type == 'offline') {
+              const locationText = response.training_location || response.location || '';
+              const addressText = response.training_Address || '';
+              
+              // Check if locationText is already a map link
+              const isMapLink = locationText.includes('google.com/maps') || locationText.includes('maps.google');
+              
+              // Set location text and make it clickable
+              if (isMapLink) {
+                // If locationText is already a map link, use it directly
+                $location.text(locationText);
+                $location.attr('href', locationText);
+                $address.text(addressText);
+           
+              } else if (addressText) {
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`;
+                $location.text(locationText);
+                $location.attr('href', mapUrl);
+                $address.text(addressText);
+              } else if (locationText) {
+                // Fallback to location name if address is not available
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationText)}`;
+                $location.text(locationText);
+                $location.attr('href', mapUrl);
+                $('#map-link-btn').attr('href', mapUrl);
+                $('#session-location-link').show();
+              } else {
+                $location.text('');
+                $location.attr('href', '#');
+              }
+            } else{
+              $('#text-label').hide();
+              $('#location-info').hide();
+            }
+
+            // 5. Trainer Details
+                if (response.type === 'sessions' || response.type === 'offline') {
+                  $('#trainer-info-wrapper').show();
+                  $('#session-duration-badge').show();
+                  $trainerName.text(response.trainer_name);
+                  $trainerEmailLink.text(response.trainer_email);
+                  $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
+            } else {
+             $('#trainer-info-wrapper').hide();
+              $('#session-duration-badge').hide();
+           }
+
+
+            // 6. Date and Time
+            if (response.date && (response.type === 'sessions' || response.type === 'offline')) {
+              $('#date-only-col').show();
+              $('#start-date-col').hide();
+              $('#end-date-col').hide();
+              $sessionDate.text(response.date);
+              
+              // Show time information for sessions and offline training
+              if (response.starttime || response.endtime) {
+                $('#time-info').show();
+                $sessionStartTime.text(response.starttime || '-');
+                $sessionEndTime.text(response.endtime || '-');
+              } else {
+                $('#time-info').hide();
+              }
+            } else {
+              $('#date-only-col').hide();
+              $('#start-date-col').show();
+              $('#end-date-col').show();
+              $('#time-info').hide();
+              
+              if (response.datetime1) {
+                $sessionStartDate.text(response.datetime1);
+              }
+              if (response.enddatetime) {
+                $sessionEndDate.text(response.enddatetime);
+              }
+            }
+
+            let duration = response.duration || '';
+
+            const startTime = response.starttime;
+            const endTime = response.endtime;
+            
+            // Calculate duration from time strings
+            if (startTime && endTime) {
+              const start = moment(startTime, 'h:mm A');
+              const end = moment(endTime, 'h:mm A');
+              
+              // Handle case where end time is next day
+              if (end.isBefore(start)) {
+                end.add(1, 'day');
+              }
+              
+              duration = end.diff(start, 'minutes');
+            }
+            
+            if (duration) {
+              $sessionDuration.text(duration + ' ' + '{{ __('admin.minutes') }}');
+            }
+
+            // 7. Duration
+            if (duration && (response.type === 'sessions' || response.type === 'offline')) {
+              $sessionDuration.text(duration + ' ' + '{{ __('admin.minutes') }}');
+            }
+
+            // 8. Join Link
+            if (response.type == 'sessions') {
+              $('#join-link').attr('href', response.join_url);
+              $('#join-link').text(response.join_url);
+              $('#join-button').show();
+              $('#copy-link').show();
+            } else {
+              $('#join-button').hide();
+              $('#copy-link').hide();
+              $('#join-link').hide();
+              $('#join-info').hide();
+            }
+
+            // 9. Zoom ID
+            if (response.type == 'sessions') {
+              $zoomId.text(response.zoom_id);
+            } else{
+              $('#zoom-info').hide();
+            }
+
+            // 10. Course
+            if (response.type === 'online' && response.course_Name) {
+              $('#course-info-wrapper').show();
+              $('#session-course-name').text(response.course_Name);
+            } else {
+              $('#course-info-wrapper').hide();
+            }
+
+            $modal.modal('show');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("AJAX Error:", textStatus, errorThrown);
+            console.error("Response Text:", jqXHR.responseText);
+            // Consider a more user-friendly error display, e.g., a toast notification or an error message in the modal
+            alert("An error occurred while fetching details. Please try again.");
+        }
+    });
+}
 </script>
 @stop
 

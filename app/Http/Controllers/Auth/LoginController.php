@@ -88,10 +88,10 @@ class LoginController extends Controller
     private function getLocationFromIP($ip)
     {
         try {
-        $response = Http::get("https://ipapi.co/{$ip}/json/");
+        $response = Http::get("https://ipwho.is/{$ip}");
         $data = $response->json();
 
-        return $data['country_name'] ?? 'Unknown Location';
+        return $data['country'] ?? 'Unknown Location';
     } catch (\Exception $e) {
         Log::error('Failed to get location: ' . $e->getMessage());
         return 'Unknown Location';

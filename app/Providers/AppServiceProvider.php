@@ -7,9 +7,10 @@ use App\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Broadcast;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Broadcast::routes();
         view()->composer('*', function ($view) {
             if (session()->has('locale')) {
                 \App::setLocale(session()->get('locale'));

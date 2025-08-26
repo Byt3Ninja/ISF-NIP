@@ -21,6 +21,7 @@ use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
 
@@ -54,7 +55,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [ProfileController::class, 'me']);
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
+    Route::get('users/companies', 'UserController@companies');
+    Route::put('users/{user}/password', [UserController::class,'updatePassword']);
     Route::get('/roles', [RoleController::class, 'index']);
+
+    Route::apiResource('/roles',RoleController::class);
+
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
@@ -63,9 +69,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/currencies', [CurrencyController::class, 'store']);
     Route::post('/currencies/{id}', [CurrencyController::class, 'update']);
     Route::delete('/currencies/{id}', [CurrencyController::class, 'destroy']);
+    Route::patch('currencies/exchange-rates', [CurrencyController::class, 'updateAllCurrency']);
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
-    Route::get('/v1/users/{user}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
     Route::post('/v1/availability', [ScheduleController::class, 'store']);
     Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
     Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);
@@ -85,6 +92,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('programs/{id}', [ProgramController::class, 'update']);
     Route::get('/v1/programs', [ProgramController::class, 'index']);
     Route::get('/v1/programs/{id}', [ProgramController::class, 'show']);
+    Route::get('/v1/programs/{programId}/reports/summary', [ProgramController::class, 'summary']);
+    Route::get('/v1/programs/{programId}/reports/performance', [ProgramController::class, 'performance']);
+    Route::get('/v1/programs/{programId}/reports/mentorship', [ProgramController::class, 'mentorship']);
+    Route::get('/v1/programs/{programId}/reports/workshops', [ProgramController::class, 'workshops']);
+    Route::get('/v1/programs/{programId}/reports/final-evaluation', [ProgramController::class, 'finalEvaluation']);
     Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
@@ -98,8 +110,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [MessageController::class, 'index']);
         Route::get('/{id}', [MessageController::class, 'show']);
         Route::patch('/trash', [MessageController::class, 'moveToTrash']);
+        Route::delete('/', [MessageController::class, 'forceDelete']);
     });
     Route::get('/stages', [StageController::class, 'index']);
+    Route::prefix('v1')->group(function () {
+    Route::apiResource('permissions', PermissionController::class);
+    Route::apiResource('permission-groups', PermissionGroupController::class);
+});
 
 
     // جروبات

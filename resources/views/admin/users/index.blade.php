@@ -54,9 +54,9 @@
                     <label class="mb-2" for="users-list-status">{{ __('admin.Gender') }}</label>
                     <fieldset class="form-group">
                     <select class="form-select select2" id="users-list-status" name="gender">
-                      <option value=" ">{{ __('admin.All') }}</option>
-                      <option value="male" {{ request('gender') == 'male' ? 'selected' : '' }}>{{ __('admin.Male') }}</option>
-                      <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>{{ __('admin.Female') }}</option>
+                      <option value="">{{ __('admin.All') }}</option>
+                      <option value="Male" {{ request('gender') == 'male' ? 'selected' : '' }}>{{ __('admin.Male') }}</option>
+                      <option value="Female" {{ request('gender') == 'female' ? 'selected' : '' }}>{{ __('admin.Female') }}</option>
                     </select>
                     </fieldset>
                   </div>

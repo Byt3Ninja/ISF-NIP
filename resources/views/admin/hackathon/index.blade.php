@@ -68,8 +68,8 @@
 
               <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
-                  <i class="ti ti-filter me-2"></i>
-                  {{ $l == 'en' ? 'Filter' : 'تصفية' }}
+                  <i class="ti ti-search me-2"></i>
+                  {{ $l == 'en' ? 'Search' : 'ابحث' }}
                 </button>
               </div>
             </form>
@@ -92,7 +92,13 @@
     <div class="row g-4 mb-8">
       @php
 	$user = Auth::user();
+ 
+  if($user->team_member != null){
 	$user_cycle_id = $user->team_member?->teamFormation?->user?->company?->cycle ?? null;
+  }else{
+	$user_cycle_id = $user->company?->cycle ?? null;
+  }
+
 	$isExistinghackathon = $user_cycle_id ? in_array($user_cycle_id, $hackathon_ids, true) : false;
       @endphp
 
@@ -153,13 +159,21 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body p-0">
-            <div class="list-group list-group-flush">
-              @foreach ($pastHackathons as $hackathon)
-              @include('admin.hackathon.partials.hackathon-item', ['hackathon' => $hackathon, 'l' => $l])
+            <div class="list-group list-group-flush" id="pastHackathonsList">
+              @foreach ($pastHackathons as $index => $hackathon)
+                <div class="past-hackathon-item" style="{{ $index > 3 ? 'display:none;' : '' }}">
+                  @include('admin.hackathon.partials.hackathon-item', ['hackathon' => $hackathon, 'l' => $l])
+                </div>
               @endforeach
-
-              {{ $pastHackathons->links() }}
             </div>
+            @if (count($pastHackathons) > 4)
+            <div class="text-center py-3">
+             <button id="loadMorePastHackathons" class="btn btn-outline-primary">
+               <span>{{ $l == 'en' ? 'Show More' : 'عرض المزيد' }}</span>
+               <i class="ti ti-chevron-down ms-2"></i>
+            </button>
+            </div>
+            @endif
           </div>
         </div>
       </div>
@@ -182,6 +196,35 @@
 @stop
 
 @section('pagescripts')
+ <script>
+  $(function() {
+    let shown = 4;
+    const total = {{ count($pastHackathons) }};
+    const $btn = $('#loadMorePastHackathons');
+
+    function updateButton() {
+      if (shown >= total) {
+        $btn.html('<span>{{ $l == "en" ? "Show Less" : "عرض أقل" }}</span><i class="ti ti-chevron-up ms-2"></i>');
+      } else {
+        $btn.html('<span>{{ $l == "en" ? "Show More" : "عرض المزيد" }}</span><i class="ti ti-chevron-down ms-2"></i>');
+      }
+    }
+    $btn.on('click', function() {
+      if (shown >= total) {
+        // Show less: hide all except first 4
+        $('.past-hackathon-item').slice(4).slideUp();
+        shown = 4;
+        updateButton();
+      } else {
+        // Show more: show next 4
+        $('.past-hackathon-item').slice(shown, shown + 4).slideDown();
+        shown += 4;
+        updateButton();
+      }
+    });
+    updateButton();
+  });
+</script>
 <script>
   // Initialize tooltips
     $(document).ready(function() {

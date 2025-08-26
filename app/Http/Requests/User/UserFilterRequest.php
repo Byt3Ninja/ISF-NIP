@@ -23,9 +23,10 @@ class UserFilterRequest extends FormRequest
     {
         return [
             'haveCompany'=> 'nullable|in:1,0',
-            'gender' => 'nullable|in:male,female',
+            'gender' => 'nullable|in:Male,Female',
             'role' => 'nullable|Exists:roles,name',
             'search' => 'nullable|string|max:255',
+            
         ];
     }
 }

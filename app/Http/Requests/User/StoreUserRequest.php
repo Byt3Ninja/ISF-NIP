@@ -3,9 +3,12 @@
 namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Traits\ApiResponder;
 class StoreUserRequest extends FormRequest
 {
+    use ApiResponder;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -35,12 +38,12 @@ class StoreUserRequest extends FormRequest
             'role' => 'required|exists:roles,id',
             'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
             'country_code' => 'required',
-      'bio_en'       => 'nullable|string',
-        'Linkedin'     => 'nullable|url',
-        'expertise'    => 'nullable|array',
-        'expertise.*'  => 'exists:expertises,id',
-        'title_en'     => 'nullable|string',
-    ];
+            'bio_en'       => 'nullable|string',
+            'Linkedin'     => 'nullable|url',
+            'expertise'    => 'nullable|array',
+            'expertise.*'  => 'exists:expertises,id',
+            'title_en'     => 'nullable|string',
+        ];
 
     // Apply mentor-required rules ONLY if:
     // - role is "Mentor"
@@ -53,6 +56,17 @@ class StoreUserRequest extends FormRequest
         $rules['title_en']    = 'required|string';
     }
     
+    }
+
+        protected function failedValidation(Validator $validator)
+    {
+        if ($this->expectsJson()) {
+        throw new HttpResponseException(
+            $this->validationError(__('api.validation_error'), 422, $validator->errors())
+         );
+      }
+
+        parent::failedValidation($validator);
     }
 
 }

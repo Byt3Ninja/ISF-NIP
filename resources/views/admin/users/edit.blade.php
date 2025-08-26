@@ -97,35 +97,22 @@
                       </span>
                     </div>
                     <div>
-                      <label for="first_name_en" class="form-label">{{ __('admin.English UserName')}}</label>
                       <div class="row">
                         <div class="col-md-6">
-                          <input value="{{ $user->first_name_en}}" name="first_name_en" type="text" class="form-control mb-3"
-                            id="first_name_en" style="direction: ltr;" placeholder="{{ __('admin.First Name') }}"
-                            required autocomplete="first_name_en" autofocus />
+                          <label for="first_name" class="form-label">{{ __(key: 'admin.First Name')}}</label>
+                          <input value="{{ $user->first_name_en}}" name="first_name" type="text" class="form-control mb-3"
+                            id="first_name" style="direction: ltr;" placeholder="{{ __('admin.First Name') }}"
+                            required autocomplete="first_name" autofocus />
                         </div>
                         <div class="col-md-6">
-                          <input value="{{ $user->last_name_en }}" name="last_name_en" type="text" class="form-control mb-3"
-                            id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
-                            autocomplete="last_name_en" />
+                          <label for="last_name" class="form-label">{{ __('admin.Last Name')}}</label>
+                          <input value="{{ $user->last_name_en }}" name="last_name" type="text" class="form-control"
+                            id="last_name" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
+                            autocomplete="last_name" />
                         </div>
                       </div>
                     </div>
-                    <div>
-                      <label for="first_name_ar" class="form-label">{{__('admin.Arabic UserName')}}</label>
-                      <div class="row">
-                        <div class="col-md-6">
-                          <input value="{{ $user->first_name_ar }}" name="first_name_ar" type="text"
-                            class="form-control mb-3" id="first_name_ar" style="direction: rtl;"
-                            placeholder="{{ __('admin.First Name') }}" required autocomplete="first_name_ar" autofocus />
-                        </div>
-                        <div class="col-md-6">
-                          <input value="{{ $user->last_name_ar }}" name="last_name_ar" type="text" class="form-control mb-3"
-                            id="last_name_ar" style="direction: rtl;" placeholder="{{ __('admin.Last Name') }}" required
-                            autocomplete="last_name_ar" />
-                        </div>
-                      </div>
-                    </div>
+         
                     <div>
                       <label class="form-label">{{ __('admin.Gender')}}</label>
                       <div class="d-flex">
@@ -158,15 +145,15 @@
                     </div>
                     <div>
                       <div class="row">
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                           <label for="title_ar" class="form-label">{{ __('admin.JobTitleAr') }}</label>
-                          <input type="text" class="form-control mb-3" id="title_ar" style="direction: rtl;"
+                          <input type="text" class="form-control mb-3" id="title_ar" 
                             placeholder="{{ __('admin.JobTitleAr') }}" value="{{ $user->title_ar }}" name="title_ar"
                             autocomplete="title_ar">
-                        </div>
+                        </div> --}}
                         <div class="col-md-6">
                           <label for="title_en" class="form-label">{{ __('admin.JobTitleEn') }}</label>
-                          <input type="text" class="form-control mb-3" id="title_en" style="direction: ltr;"
+                          <input type="text" class="form-control mb-3" id="title_en" style=""
                             placeholder="{{ __('admin.JobTitleEn') }}" value="{{ $user->title_en }}" name="title_en"
                             autocomplete="title_en">
                         </div>
@@ -216,8 +203,8 @@
                       <select class="form-select select2 mb-3" required id="role" name='role'>
                         <option value="">{{ __('admin.Roles')}}</option>
                         @foreach($roles as $role)
-                        <option value="{{$role->id}}" {{ ($role->name == $currentRole)? "selected":"" }} >{{
-                          __('admin.'.$role->name) }}</option>
+                        <option value="{{$role['id']}}" {{ ($role['name'] == $currentRole)? "selected":"" }} >{{
+                          __('admin.'.$role['name']) }}</option>
                         @endforeach
                       </select>
                     </div>
