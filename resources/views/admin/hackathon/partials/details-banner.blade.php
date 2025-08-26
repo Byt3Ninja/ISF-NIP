@@ -26,7 +26,7 @@
   if($user->team_member != null){
     $user_cycle_id = $user->team_member?->teamFormation?->user?->company?->cycle ?? null;
   }else{
-    $user_cycle_id = $user->company?->cycle ?? null;s
+    $user_cycle_id = $user->company?->cycle ?? null;
   }
   @endphp
   @if($user->team_member && $user->team_member->teamFormation && $user->team_member->teamFormation->user && $user->team_member->teamFormation->user->company && $currentHackathon['cycle_id'] == $user_cycle_id)
