@@ -9,7 +9,7 @@
   @else
     <div class="card">
       <div class="card-body">
-        @if($data_evi['start']->format('Y-m-d H:i:s') < date('Y-m-d H:i:s') && $data_evi['end']->format('Y-m-d H:i:s') > date('Y-m-d H:i:s'))
+        @if($data_evi['start']?->format('Y-m-d H:i:s') < date('Y-m-d H:i:s') && $data_evi['end']?->format('Y-m-d H:i:s') > date('Y-m-d H:i:s'))
           <h5 class="card-title">
             {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع والحلول' }}
           </h5>
@@ -201,7 +201,7 @@
           <div class="text-center">
             <h5 class="alert alert-danger">
               {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }},
-              {{ $l == 'en' ? 'will be opening on '. $data_evi['start']->format('F j, Y') : 'سوف يتم فتحها' .
+              {{ $l == 'en' ? 'will be opening on '. $data_evi['start']?->format('F j, Y') : 'سوف يتم فتحها' .
               $data_evi['start']->format('F j, Y') }}
             </h5>
           </div>
