@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PermissionResource;
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
+use App\Http\Resources\UserPermissionResource;
 
 /**
  * @OA\Schema(
@@ -131,24 +132,10 @@ public function index(Request $request)
     }
     $perPage = $request->get('per_page', 10);
 
-    $paginated = Permission::with(['roles:id,name'])->paginate($perPage);
-
-    $permissions = $paginated->getCollection()->map(function ($perm) {
-        return [
-            'id' => $perm->id,
-            'name' => $perm->name,
-            'description' => $perm->description,
-            'assignedTo' => $perm->roles->pluck('name'),
-            'permission_group_id' => $perm->permission_group_id,
-            'groupName' => $perm->permissionsGroup->name,
-            'is_core' => $perm->is_core,
-        ];
-    });
-
-    $paginated->setCollection($permissions);
+    $paginated = Permission::with(['roles:id,name','permissionsGroup'])->paginate($perPage);
 
     return $this->success(
-        $paginated->items(),
+        UserPermissionResource::collection($paginated->items()),
         [
             'meta' => [
                 'total' => $paginated->total(),
@@ -197,7 +184,7 @@ public function store(StorePermissionRequest $request)
         'permission_group_id' => $request->permission_group_id,
     ]);
     app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-    return $this->created($permission,__('api.permission_created'));
+    return $this->created(new UserPermissionResource($permission),__('api.permission_created'));
 }
 
 /**
@@ -237,7 +224,7 @@ public function update(UpdatePermissionRequest $request,$id)
     ]);
     app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
     $permission->refresh();
-    return $this->success($permission,[],__('api.permission_updated'));
+    return $this->success(new UserPermissionResource($permission),[],__('api.permission_updated'));
 }
 
     /**
