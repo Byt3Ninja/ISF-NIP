@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\ApiResponder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use App\Traits\ApiResponder;
+
 class UpdateCompanyProfileRequest extends FormRequest
 {
     use ApiResponder;
@@ -135,18 +137,32 @@ class UpdateCompanyProfileRequest extends FormRequest
     public function withValidator($validator)
 {
     $validator->after(function ($validator) {
-        $shareholders = $this->input('shareholders', []);
+        $shareholdersInput = $this->input('shareholders', []);
 
-        if (is_array($shareholders) && count($shareholders)) {
-            $totalOwnership = collect($shareholders)->sum(function ($item) {
-                return floatval($item['ownership'] ?? 0);
-            });
+        if (!is_array($shareholdersInput)) {
+            return;
+        }
 
-            if ($totalOwnership > 100) {
-                throw new \Illuminate\Http\Exceptions\HttpResponseException(
-                    $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
-                );
-            }
+        if (isset($shareholdersInput['name'])) {
+            $shareholdersInput = [$shareholdersInput];
+        }
+
+        $newOwnershipTotal = collect($shareholdersInput)->sum(function ($item) {
+            return floatval($item['ownership'] ?? 0);
+        });
+
+        $companyId = auth()->user()->company_id;
+
+        $existingOwnership = DB::table('team_members')->where('company_id', $companyId)
+            ->where('TeamMember', 'Shareholder')
+            ->sum('PresentagShereholder');
+
+        $totalOwnership = $existingOwnership + $newOwnershipTotal;
+
+        if ($totalOwnership > 100) {
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
+            );
         }
     });
 }
