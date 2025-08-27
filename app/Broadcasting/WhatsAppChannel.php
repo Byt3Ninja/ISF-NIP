@@ -33,7 +33,7 @@ class WhatsAppChannel
             return;
         }
 
-        $message = $notifiable->toWhatsapp($notifiable);
+        $message = $notification->toWhatsapp($notifiable);
 
         $this->whatsAppService->sendMessage($phone, $message);
     }

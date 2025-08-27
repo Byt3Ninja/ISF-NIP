@@ -51,6 +51,8 @@ return [
     'mentorship_session' => [
         'broadcast' => 'Mentorship session: :title',
         'whatsapp'  => ':greeting :line',
+        'database' => 'New mentorship session notification',
+        'subject' => 'Mentorship Session Update',
     ],
 
     'confirm_email_update' => [
@@ -80,5 +82,19 @@ return [
 
     'custom_email' => [
         'subject' => 'Login details for VI Portal',
+    ],
+
+    'task_assigned' => [
+        'subject' => 'Task Assigned',
+        'database' => 'A new task has been assigned to you',
+        'broadcast' => 'New task assigned: :title',
+        'whatsapp' => 'New task assigned: :title',
+    ],
+
+    'task_updated' => [
+        'subject' => 'Task Updated',
+        'database' => 'A task has been updated',
+        'broadcast' => 'Task updated: :title',
+        'whatsapp' => 'Task updated: :title',
     ],
 ];

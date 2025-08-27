@@ -51,9 +51,25 @@ return [
     'mentorship_session' => [
         'broadcast' => 'جلسة إرشاد: :title',
         'whatsapp'  => ':greeting :line',
+        'database' => 'إشعار جلسة إرشاد جديدة',
+        'subject' => 'تحديث جلسة الإرشاد',
     ],
 
     'custom_email' => [
         'subject' => 'بيانات الدخول لمنصة نمو السياحة',
+    ],
+
+    'task_assigned' => [
+        'subject' => 'مهمة مخصصة',
+        'database' => 'تم تعيين مهمة جديدة لك',
+        'broadcast' => 'مهمة جديدة مخصصة: :title',
+        'whatsapp' => 'مهمة جديدة مخصصة: :title',
+    ],
+
+    'task_updated' => [
+        'subject' => 'تم تحديث المهمة',
+        'database' => 'تم تحديث مهمة',
+        'broadcast' => 'تم تحديث المهمة: :title',
+        'whatsapp' => 'تم تحديث المهمة: :title',
     ],
 ];

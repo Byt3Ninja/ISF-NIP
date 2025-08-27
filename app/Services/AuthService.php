@@ -87,7 +87,7 @@ class AuthService
                 }
             }
 
-            Mail::to($user->email)->queue(new WelcomeUserMail($user, $data['password']));
+            $user->notify(new WelcomeUserNotification($user, $data['password']));
             DB::commit();
 
             $token = $user->createToken('auth-register')->plainTextToken;

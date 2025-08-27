@@ -3883,6 +3883,20 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+
+            {
+                "name": "user.notification_settings_update",
+                "description": "Update Own Profile Notification Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
             }
         ]
     },

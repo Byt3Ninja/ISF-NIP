@@ -2,15 +2,33 @@
 
 return [
 "welcome_email"=> [
-    'subject'=>'',
-    'dear'=> 'Dear',
-    'm1'=>'Your Account has been Successfully Created.',
-    'm2'=>'You can now log in to the platform using your registered email:',
-    'm3'=>"We're excited to have you on board. If you have any questions or need assistance,feel free to contact our support team.",
-    "m4"=> " You can reset your password by clicking the link below",
-    "m5"=> "Reset Password",
+    'subject'=> 'مرحبا بك في منصتنا',
+    'dear'=> 'عزيزي',
+    'm1'=>'يسعدنا انضمامك إلينا. إليك تفاصيل تسجيل الدخول الخاصة بك:',
+    'm2'=>'عنوان بريدك الإلكتروني هو:',
+    'm3'=>"يمكنك تسجيل الدخول إلى المنصة باستخدام الزر أدناه.",
     'best_regards'=>"Best regards,"
 ],
+'custom_mail'=> [
+    'welcome_title'=> 'مرحبا بك في هاكاثونات ومعسكرات نمو السياحة',
+    'dear_participant'=> 'عزيزي المشارك',
+    'welcome_message'=> 'مرحباً بك مستخدم فى منصتنا.',
+    'email'=> 'البريد الالكتروني',
+    'password_reset_message'=> 'يمكنك تعيين كلمة المرور الخاصة بك من خلال الضغط على الرابط التالي:',
+    'password_reset_link'=> 'إعادة تعيين كلمة المرور',
+    'guide_link'=> 'يرجي تحميل ملف الدليل الارشادي للمشارك من هنا',
+    'best_regards'=> 'أطيب التحيات،',
 
+],
+    'cycle_email' => [
+        'subject' => 'تحديث دورة الشركات الناشئة',
+        'title' => 'إشعار تقدم الشركة الناشئة',
+        'dear' => 'عزيزي',
+        'in_body_1' => 'تهانينا! لقد تقدمت شركتك الناشئة إلى المرحلة التالية.',
+        'in_body_2' => 'المرحلة السابقة: :last_step',
+        'in_body_3' => 'المرحلة الجديدة: :new_step',
+        'out_body_1' => 'نأسف لإبلاغك بأن شركتك الناشئة لم تتقدم إلى المرحلة التالية.',
+        'out_body_2' => 'شكرًا لجهودك ومشاركتك.',
+        'regards' => 'أطيب التحيات،',
+    ],
 ];
-
