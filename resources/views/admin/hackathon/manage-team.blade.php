@@ -1175,6 +1175,17 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 @endif
               </select>
             </div>
+
+            <div class="mb-3">
+              <label for="EtaskStatus" class="form-label">{{ $l == 'en' ? 'Status' : 'الحالة' }}</label>
+              <select class="form-select" id="EtaskStatus" name="statustodo">
+                <option value="todo"  >{{ $l == 'en' ? 'todo' : 'تم الانشاء' }}</option>
+                <option value="inprogress" >{{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}</option>
+                <option value="DONE" >{{ $l == 'en' ? 'DONE' : 'مكتملة' }}</option>
+              </select>
+            </div>
+               
+            
           
 
           <div class="mb-3">
@@ -2220,6 +2231,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const taskAssignee = document.getElementById('EtaskAssignee').value;
     const taskDueDate = document.getElementById('EtaskDueDate').value;
     const taskDescription = document.getElementById('EtaskDescription').value;
+    const taskStatus = document.getElementById('EtaskStatus').value;
 
     const taskModal = document.getElementById('EditTaskModal');
     const editingTaskId = taskModal.getAttribute('data-editing-task');
@@ -2239,6 +2251,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       title: taskTitle,
       assignee: taskAssignee,
       due_date: taskDueDate,
+      status: taskStatus,
       description: taskDescription
     };
 
