@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use App\Broadcasting\WhatsAppChannel;
 
-class MentorshipSession extends Notification
+class MentorshipSession extends Notification implements ShouldQueue
 {
     use Queueable;
     public $Message;
@@ -30,7 +32,26 @@ class MentorshipSession extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail','database'];
+        $channels = [];
+        // Always store in database
+        $channels[] = 'database';
+
+        // WhatsApp if enabled
+        if (!empty($notifiable->accept_whatsapp)) {
+            $channels[] = WhatsAppChannel::class;
+        }
+
+        // Pusher (broadcast) if enabled
+        if (!empty($notifiable->accept_pusher)) {
+            $channels[] = 'broadcast';
+        }
+
+        // Email if user accepts OR default to email if nothing else (besides database) selected
+        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**
@@ -59,5 +80,29 @@ class MentorshipSession extends Notification
         return [
             'message' =>$this->Message[4],
         ];
+    }
+
+    /**
+     * WhatsApp message content.
+     */
+    public function toWhatsapp(object $notifiable): string
+    {
+        // Expecting $this->Message indices: [0]=subject/title, [1]=greeting, [2]=line, [3]=url, [4]=database message
+        return __('notifications.mentorship_session.whatsapp', [
+            'greeting' => $this->Message[1] ?? '',
+            'line' => $this->Message[2] ?? '',
+        ]);
+    }
+
+    /**
+     * Broadcast payload.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
+            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? '']),
+            'time' => now()->toDateTimeString(),
+        ]);
     }
 }

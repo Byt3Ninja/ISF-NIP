@@ -384,7 +384,8 @@ class IndexController extends Controller
             // $users = User::where('email', 'ehabtarek86@gmail.com')->get(); 
         // dd($users);
             foreach ($users as $user) {
-                Mail::to($user->email)->queue(new CustomEmail($user));
+                \Illuminate\Support\Facades\Notification::route('mail', $user->email)
+                    ->notify(new \App\Notifications\CustomEmailNotification($user));
         }
             return response()->json([
                             'success' => true,

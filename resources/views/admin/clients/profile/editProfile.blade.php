@@ -64,6 +64,9 @@ array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
 $tabsList = collect($tabs)->map(function ($tab) {
 return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
 })->toArray();
+
+// Debug: Log the tabs structure
+// dd($tabsList);
 @endphp
 
 @section('content')
@@ -84,10 +87,8 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
                 role="tab" 
                 aria-controls="{{ $tab['target'] }}" 
                 aria-selected="true" 
-                @if (auth()->user()->hasRole('Mentor'))
-                  disabled="{{ $key > 3 ? 'true' : 'false' }}"
-                @else
-                  disabled="{{ $key > 3 ? 'true' : 'false' }}"
+                @if (in_array($tab['target'], ['billingSection', 'connectionsSection']))
+                  disabled="true"
                 @endif
               >
                 <i class="ti-sm ti ti-{{ $tab['icon'] }} me-1_5"></i>
@@ -140,6 +141,22 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
           </div>
           @endrole
           <!-- /Mentor fields -->
+
+          <!-- Notifications section -->
+          <div class="tab-pane fade" id="notificationsSection">
+            <div class="card">
+              <h5 class="card-header">
+                <i class="ti ti-bell me-1"></i>
+                {{ __('admin.Notification_Settings') }}
+              </h5>
+              @include('admin.clients.profile.partials._notification_settings_form')
+            </div>
+            <!-- Debug info -->
+            <div class="alert alert-info">
+              <strong>Debug:</strong> Notifications section loaded successfully
+            </div>
+          </div>
+          <!-- /Notifications section -->
         </div>
         <!-- /Tab Content -->
 
@@ -243,6 +260,47 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
 @section('pagescripts')
 <script>
   const lang = '{{ $l }}';
+  
+  // Debug: Check if notifications tab is working
+  $(document).ready(function() {
+    console.log('Profile page loaded');
+    
+    // Check if notifications tab exists
+    if ($('#notificationsSection').length) {
+      console.log('Notifications section found');
+    } else {
+      console.log('Notifications section NOT found');
+    }
+    
+    // Check if notifications tab link exists
+    if ($('a[href="#notificationsSection"]').length) {
+      console.log('Notifications tab link found');
+    } else {
+      console.log('Notifications tab link NOT found');
+    }
+    
+    // Test tab switching
+    $('a[href="#notificationsSection"]').on('click', function(e) {
+      console.log('Notifications tab clicked');
+    });
+    
+    // Initialize Bootstrap tabs manually if needed
+    var triggerTabList = [].slice.call(document.querySelectorAll('#notificationsSection'))
+    triggerTabList.forEach(function (triggerEl) {
+      var tabTrigger = new bootstrap.Tab(triggerEl)
+    });
+    
+    // Alternative: Force tab activation
+    $('a[href="#notificationsSection"]').on('click', function(e) {
+      e.preventDefault();
+      var target = $(this).attr('href');
+      $('.tab-pane').removeClass('show active');
+      $(target).addClass('show active');
+      $('.nav-link').removeClass('active');
+      $(this).addClass('active');
+      console.log('Notifications tab manually activated');
+    });
+  });
 </script>
 
 <!-- Page JS -->

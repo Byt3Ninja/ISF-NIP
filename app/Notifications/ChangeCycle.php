@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use App\Broadcasting\WhatsAppChannel;
 
-class ChangeCycle extends Notification
+class ChangeCycle extends Notification implements ShouldQueue
 {
     use Queueable;
     public $data;
@@ -28,7 +30,26 @@ class ChangeCycle extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        $channels = [];
+        // Always store in database for audit/history
+        $channels[] = 'database';
+
+        // WhatsApp if enabled
+        if (!empty($notifiable->accept_whatsapp)) {
+            $channels[] = WhatsAppChannel::class;
+        }
+
+        // Pusher (broadcast) if user accepts it
+        if (!empty($notifiable->accept_pusher)) {
+            $channels[] = 'broadcast';
+        }
+
+        // Email if user accepts it OR as default when nothing else is active
+        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**
@@ -40,7 +61,7 @@ class ChangeCycle extends Notification
 
         Log::info('Mail data:', ['last_step' => $this->data['last_step']]);
         return (new MailMessage)
-            ->subject('Your Startup Progress Update - Stage Transition Notification')
+            ->subject(__('notifications.change_cycle.subject'))
             ->markdown('emails.emailCycle', $this->data);
     }
 
@@ -52,10 +73,39 @@ class ChangeCycle extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'message' => 'The Step has been Changed For ' . ($this->data['company_name_en'] ?? 'N/A') .
-                ' from ' . ($this->data['last_step'] ?? 'Disappove') .
-                ' to ' . ($this->data['new_step'] ?? 'Disappove') .
-                ' by ' . ($this->data['organization_name_en'] ?? 'N/A'),
+            'message' => __('notifications.change_cycle.database', [
+                'company' => $this->data['company_name_en'] ?? 'N/A',
+                'from' => $this->data['last_step'] ?? 'N/A',
+                'to' => $this->data['new_step'] ?? 'N/A',
+                'org' => $this->data['organization_name_en'] ?? 'N/A',
+            ]),
         ];
+    }
+
+    /**
+     * WhatsApp message content.
+     */
+    public function toWhatsapp(object $notifiable): string
+    {
+        return __('notifications.change_cycle.whatsapp', [
+            'company' => $this->data['company_name_en'] ?? 'N/A',
+            'from' => $this->data['last_step'] ?? 'N/A',
+            'to' => $this->data['new_step'] ?? 'N/A',
+        ]);
+    }
+
+    /**
+     * Broadcast payload.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'subject' => __('notifications.change_cycle.subject'),
+            'message' => __('notifications.change_cycle.broadcast', [
+                'company' => $this->data['company_name_en'] ?? 'N/A',
+                'to' => $this->data['new_step'] ?? 'N/A',
+            ]),
+            'time' => now()->toDateTimeString(),
+        ]);
     }
 }

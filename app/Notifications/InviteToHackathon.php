@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use App\Broadcasting\WhatsAppChannel;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class InviteToHackathon extends Notification implements ShouldQueue
 {
@@ -24,7 +26,26 @@ class InviteToHackathon extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['mail'];
+        $channels = [];
+        // Always store in database
+        $channels[] = 'database';
+
+        // WhatsApp if enabled
+        if (!empty($notifiable->accept_whatsapp)) {
+            $channels[] = WhatsAppChannel::class;
+        }
+
+        // Pusher (broadcast) if enabled
+        if (!empty($notifiable->accept_pusher)) {
+            $channels[] = 'broadcast';
+        }
+
+        // Email if user accepts OR default to email if nothing else (besides database) selected
+        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toMail($notifiable)
@@ -40,5 +61,28 @@ class InviteToHackathon extends Notification implements ShouldQueue
             return (new MailMessage)
             ->subject(__('admin.Invitation_to_Join_a_Hackathon_Team'))
             ->markdown('emails.hackathon_inviteTeam', ['data' => $this->teamLeader, 'teamName' => $this->team_q, 'teamMember' => $this->teamMember]);
+    }
+
+    /**
+     * WhatsApp message.
+     */
+    public function toWhatsapp(object $notifiable): string
+    {
+        return __('notifications.hackathon_invite.whatsapp', [
+            'leader' => ($this->teamLeader->first_name_en ?? '').' '.($this->teamLeader->last_name_en ?? ''),
+            'team' => $this->team_q,
+        ]);
+    }
+
+    /**
+     * Broadcast payload.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
+            'time' => now()->toDateTimeString(),
+        ]);
     }
 }
