@@ -1024,30 +1024,7 @@ class HackathonController extends Controller
         if( $currentHackathon['announcement'] == true )
         {
             $teams = TeamFormation::teams( $id );
-            $teams = $teams->where('winner', 'selected')->values();
-            $winners = $teams->map(function( $team ) {
-                $winner = new stdClass;
-                $winner->id = $team->id;
-                $winner->name = $team->company->name;
-                $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
-                $winner->projectTitle = $team->project->name;
-                $winner->teamName = $team->name;
-                $winner->description = $team->project->description;
-                $leader = $team->members->where('isLeader', true)->first(); 
-                $winner->teamLeader = new stdClass;
-                $winner->teamLeader->name = $leader?->name;
-                $winner->teamLeader->role = $leader?->role;
-                $winner->teamLeader->image = $leader?->image;
-                $winner->teamMembers = $team->members->map(function( $team_member ) {
-                    $member = new stdClass;
-                    $member->name = $team_member->name;
-                    $member->role = $team_member->role;
-                    $member->image = $team_member->image;
-                    $member->isLeader = $team_member->isLeader == 1 ? true : false;
-                    return $member;
-                });
-                return $winner;
-            });
+            $teams = TeamFormation::winnersMapping( $teams );
         }
         
         return view('admin.hackathon.hackathon-details', compact(
@@ -2502,6 +2479,7 @@ class HackathonController extends Controller
         $hackathon->status = $l == 'en' ? $status : $status_ar;
         $hackathon->duration = $l == 'en' ? $duration : $duration_ar;
         $hackathon->announcement = $cycle->winners_announcement == 1 ? true : false;
+        $hackathon->visibility = $cycle->winners_visibility == 'private' ? 'private' : 'public';
         $hackathon->organization = new stdClass;
         $hackathon->organization->id = $cycle->organization_id;
         $hackathon->organization->name =  $cycle->{'organization_name_' . $l};
@@ -2555,8 +2533,10 @@ class HackathonController extends Controller
         DB::beginTransaction();
         try {
             $status = intval($request->announcementStatus);
+            $visiblity = $request->announcementVisibility == 'private' ? 'private' : 'public';
             DB::table('cycles')->where('id', $cycle->id)->update([
-                'winners_announcement' => $status
+                'winners_announcement' => $status,
+                'winners_visibility' => $visiblity
             ]);
             $winners = $request->winners;
             $teamsIds = array_keys($winners);

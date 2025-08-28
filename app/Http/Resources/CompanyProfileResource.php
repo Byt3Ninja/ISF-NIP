@@ -150,18 +150,21 @@ class CompanyProfileResource extends JsonResource
             'achievedMilestones' => $this->milestones
                 ->where('plan', 'Achieved_Milestones')
                  ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
             'plannedMilestones' => $this->milestones
                 ->where('plan', 'Planned_Milestones')
                 ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
             'archivedMilestones' => $this->milestones
                 ->where('plan', 'Archived_Milestones')
                 ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),

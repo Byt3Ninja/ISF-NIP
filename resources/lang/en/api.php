@@ -102,7 +102,7 @@ return [
    'permission_group_deleted' => 'Permission Group Deleted Successfully',
    'permission_deleted' => 'Permission Deleted Successfully',
    'currencyRatesUpdated' => 'Currency Exchange Rates Updated Successfully',
-   'milestonesDeleted' => 'Milestones Deleted Successfully',
+   'milestoneDeleted' => 'Milestone Deleted Successfully',
    'invalidMilestoneType' => 'Invalid Milestone Type',
    'investorNotFound' => 'Investor Not Found',
    'investorDeleted' => 'Investor Deleted Successfully',
@@ -110,4 +110,5 @@ return [
    'Shareholder deleted successfully' => 'Shareholder Deleted Successfully',
    'founderNotFound' => 'Founder Not Found',
    'founder deleted successfully' => 'Founder Deleted Successfully',
+   'milestoneNotFound' => 'Milestone Not Found',
 ];
