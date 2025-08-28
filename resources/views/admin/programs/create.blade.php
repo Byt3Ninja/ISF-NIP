@@ -12,11 +12,11 @@
   $id = request()->route('id');
   $ccycle = \App\Cycle::find(0);
   $tabs = [
-    ['id' => 'program_info', 'label' => 'Program Info', 'active' => true],
-    ['id' => 'program_guideline', 'label' => 'Program Guideline', 'active' => false],
-    ['id' => 'financial_policy', 'label' => 'Financial Policy', 'active' => false],
-    ['id' => 'legal_policy', 'label' => 'Legal Policy', 'active' => false],
-    ['id' => 'mentorship_request', 'label' => 'Mentorship Request', 'active' => false],
+    ['id' => 'program_info', 'label' => __('admin.program_info'), 'active' => true],
+    ['id' => 'program_guideline', 'label' => __('admin.program_guideline'), 'active' => false],
+    ['id' => 'financial_policy', 'label' => __('admin.financial_policy'), 'active' => false],
+    ['id' => 'legal_policy', 'label' => __('admin.legal_policy'), 'active' => false],
+    ['id' => 'mentorship_request', 'label' => __('admin.mentorship_request'), 'active' => false],
   ];
 @endphp
 
