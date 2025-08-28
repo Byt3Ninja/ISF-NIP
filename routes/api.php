@@ -46,9 +46,8 @@ Route::get('company', [RegistrationController::class, 'getCompany']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/expertises',[ExpertiseController::class, 'index']);
-Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('sanctum.custom')->group(function () {
     Route::get('/countries', [CountryController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
@@ -57,10 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::get('users/companies', 'UserController@companies');
     Route::put('users/{user}/password', [UserController::class,'updatePassword']);
-    Route::get('/roles', [RoleController::class, 'index']);
-
     Route::apiResource('/roles',RoleController::class);
-
+    Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::put('/profile/bio', [ProfileController::class, 'updateBio']);
