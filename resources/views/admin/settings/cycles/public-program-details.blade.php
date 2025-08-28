@@ -372,6 +372,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	<script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
 	<script src="/vuexy/assets/js/main.js"></script>
 
+	@include('includes.winnerModal', ['winners' => $winnersData])
 	<script>
 			// Set the date we're counting down to using the parsed PHP variable
 			var countDownDate = new Date("{{ $endDateForCountdown }}").getTime();
