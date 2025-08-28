@@ -428,6 +428,7 @@
 
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')
+    @stack('scripts')
     <!-- END: Page JS-->
   </body>
   <!-- END: Body-->

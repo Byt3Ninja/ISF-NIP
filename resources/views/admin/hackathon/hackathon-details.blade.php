@@ -345,7 +345,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.jQuery && $.fn.DataTable) {
-      $('.table').DataTable({
+      $('.table:not(.table-custom)').DataTable({
         paging: true,
         searching: true,
         ordering: true,
