@@ -12,6 +12,7 @@ use App\Company;
 use App\Formfield;
 use Carbon\Carbon;
 use App\Team_member;
+use App\ProjectLikes;
 use App\CyclesMentors;
 use App\TeamFormation;
 use App\ScreeningEvaluation;
@@ -1024,7 +1025,7 @@ class HackathonController extends Controller
         if( $currentHackathon['announcement'] == true )
         {
             $teams = TeamFormation::teams( $id );
-            $teams = TeamFormation::winnersMapping( $teams );
+            $winners = TeamFormation::winnersMapping( $teams );
         }
         
         return view('admin.hackathon.hackathon-details', compact(
@@ -2555,5 +2556,24 @@ class HackathonController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function likeProject(Request $request)
+    {
+        $user = auth()->user();
+        $teamProjectId = $request->teamProjectId;
+        $like = ProjectLikes::where('team_id', $teamProjectId)->where('user_id', $user->id)->first();
+        if( !empty( $like ) ) { $like->delete(); }
+        else
+        {
+            $like = new ProjectLikes;
+            $like->team_id = $teamProjectId;
+            $like->user_id = $user->id;
+            $like->save();
+        }
+        $total = ProjectLikes::where('team_id', $teamProjectId)->count();
+        return response()->json([
+            'total' => $total
+        ]);
     }
 }
