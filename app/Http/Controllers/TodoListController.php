@@ -96,6 +96,7 @@ class TodoListController extends Controller
      */
     public function update(Request $request)
     {   
+      
         $user = auth()->user();
         $request->validate([
            'title'    => 'required|string|max:255',
@@ -113,7 +114,7 @@ class TodoListController extends Controller
         $todoList = TodoList::find($request->id);
         $todoList->title = $request->title;
         $todoList->description = $request->description;
-        $todoList->status = 'todo';
+        $todoList->status = $request->status;
         $todoList->assignee = $assignee;
         $todoList->due_date = $request->due_date;
         $todoList->cycle_id = $user->team_member->teamFormation->user->company->cycle;
