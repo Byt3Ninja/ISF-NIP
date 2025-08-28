@@ -100,4 +100,12 @@ return [
  'permission_group_deleted' => 'تم حذف مجموعة الصلاحية بنجاح',
  'permission_deleted' => 'تم حذف الصلاحية بنجاح',
  'currencyRatesUpdated' => 'تم تحديث أسعار صرف العملات بنجاح',
+ 'milestonesDeleted' => 'تم حذف الإنجازات بنجاح',
+ 'invalidMilestoneType' => 'نوع الإنجاز غير صالح',
+ 'investorNotFound' => 'لم يتم العثور على المستثمر',
+ 'investorDeleted' => 'تم حذف المستثمر بنجاح',
+ 'ShareholderNotFound' => 'لم يتم العثور على الشريك',
+ 'Shareholder deleted successfully' => 'تم حذف الشريك بنجاح',
+ 'founderNotFound' => 'لم يتم العثور على المؤسس',
+ 'founder deleted successfully' => 'تم حذف المؤسس بنجاح',
 ];
