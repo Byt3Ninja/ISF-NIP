@@ -173,7 +173,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
     
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
-
+    Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
 
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');

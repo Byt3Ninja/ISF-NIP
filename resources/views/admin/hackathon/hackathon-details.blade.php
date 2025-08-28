@@ -375,6 +375,38 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 
 @section('pagescripts')
 <script>
+    $('.like-project-action').on('click', function (e) {
+      e.preventDefault();
+      let element = $(this);
+      let teamProjectId = element.data('project');
+      $.ajaxSetup({
+        headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),},
+      });
+
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/hackathon/likeProject",
+        data: {
+          teamProjectId: teamProjectId,
+        },
+        success: function (response) {
+          element.parent().find('.likes-count').text(response.total);
+          if( element.hasClass('fas') )
+          {
+            element.removeClass('fas');
+            element.addClass('far');
+          }
+          else if( element.hasClass('far') )
+          {
+            element.removeClass('far');
+            element.addClass('fas');
+          }
+        },
+        error: function (error) {
+          console.log("Error Occurred, like failed");
+        },
+      });
+    })
   function submitApplicationDetails() {
     if (!document.getElementById("dh-termsAndConditions").checked) {
       alert(
@@ -580,7 +612,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
       location.reload();
     }
   }
-let urlParams = new URLSearchParams(window.location.search);
+    let urlParams = new URLSearchParams(window.location.search);
     let tab = urlParams.get('tab');
 
     if (typeof(tab) !== 'undefined' && tab !== null) {
