@@ -9,7 +9,9 @@
               <select name="organization_id" class="form-select select2"
                 data-placeholder="{{ __('admin.Organization') }}">
                 <option value="">{{ __('admin.Organization') }}</option>
-                <option value="0">All</option>
+                @if(auth()->user()->hasAnyRole(['Admin']))
+                <option value="0">{{ __('admin.All') }}</option>
+                @endif
                 @php
                   if(auth()->user()->hasAnyRole(['organizationManager'])) {
                 $organizations = App\Organization::where('id',auth()->user()->organization_id)->get();
@@ -37,7 +39,7 @@
             <div class="col-12 col-md-6 col-lg-2">
               <select name="private" class="form-select select2" data-placeholder="{{ __('admin.Private') }}">
                 <option value="">{{ __('admin.Private') }}</option>
-                <option value="0">All</option>
+                <option value="0">{{ __('admin.All') }}</option>
                 <option value="Yes" {{ 'Yes' == request('private') ? 'selected' : '' }}> {{ __('admin.Yes') }}
                 </option>
                 <option value="No" {{ 'No' == request('private') ? 'selected' : '' }}> {{ __('admin.No') }}
