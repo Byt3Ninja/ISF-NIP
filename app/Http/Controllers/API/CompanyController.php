@@ -787,6 +787,10 @@ public function show($id)
  */
 public function deleteFounder($id)
 {
+    $user =  auth()->user();
+    if (!$user->ableTo('company.profile_teams_delete')) {
+       return $this->forbidden(__('api.forbidden'));
+    }
     $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Founder')->delete();
 
     if ($deleted) {
@@ -820,6 +824,10 @@ public function deleteFounder($id)
  */
 public function deleteShareholder($id)
 {
+    $user =  auth()->user();
+    if (!$user->ableTo('company.profile_teams_delete')) {
+       return $this->forbidden(__('api.forbidden'));
+    }
     $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Shareholder')->delete();
 
     if ($deleted) {
@@ -854,6 +862,10 @@ public function deleteShareholder($id)
  */
 public function deleteInvestor($id)
 {
+    $user =  auth()->user();
+    if (!$user->ableTo('company.profile_teams_delete')) {
+       return $this->forbidden(__('api.forbidden'));
+    }
     $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Investor')->delete();
 
     if ($deleted) {
@@ -864,48 +876,47 @@ public function deleteInvestor($id)
 }
 /**
  * @OA\Delete(
- *     path="/api/company/milestones/{type}",
- *     summary="Delete all milestones by type (achieved, planned, archived)",
+ *     path="/api/company/milestones/{id}",
+ *     summary="Delete a specific milestone by ID",
  *     tags={"Companies"},
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
- *         name="type",
+ *         name="id",
  *         in="path",
  *         required=true,
- *         description="Milestone type: achieved, planned, archived",
- *         @OA\Schema(type="string", enum={"achieved", "planned", "archived"})
+ *         description="Milestone ID",
+ *         @OA\Schema(type="integer")
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Milestones deleted successfully"
+ *         description="Milestone deleted successfully"
  *     ),
  *     @OA\Response(
- *         response=400,
- *         description="Invalid milestone type"
+ *         response=404,
+ *         description="Milestone not found"
  *     )
  * )
  */
-public function deleteMilestonesByType($type)
+public function deleteMilestone($id)
 {
-    $typeMap = [
-        'achieved' => 'Achieved_Milestones',
-        'planned' => 'Planned_Milestones',
-        'archived' => 'Archived_Milestones',
-    ];
+    $user = auth()->user();
 
-    if (!isset($typeMap[$type])) {
-        return $this->error([], [], __('api.invalidMilestoneType'), 400);
+    if (!$user->ableTo('company.profile_milestones_delete')) {
+        return $this->forbidden(__('api.forbidden'));
     }
 
-    $user = auth()->user();
-    $companyId = $user->company_id;
+    $milestone = DB::table('milestones')
+        ->where('Company_id', $user->company_id)
+        ->where('id', $id)
+        ->first();
 
-    $deleted = DB::table('milestones')
-        ->where('Company_id', $companyId)
-        ->where('plan', $typeMap[$type])
-        ->delete();
+    if (!$milestone) {
+        return $this->error([], [], __('api.milestoneNotFound'), 404);
+    }
 
-    return $this->success(null, [],__('api.milestonesDeleted'));
+    DB::table('milestones')->where('id', $id)->delete();
+
+    return $this->success(null, [], __('api.milestoneDeleted'));
 }
 
 }
