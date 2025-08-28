@@ -804,16 +804,16 @@
                                             "No"
                                         ]
                                     },
-                                    "CreatedTax": {
+                                    "createdTax": {
                                         "type": "boolean"
                                     },
-                                    "CommercialRegister": {
+                                    "commercialRegister": {
                                         "type": "string"
                                     },
-                                    "TaxCard": {
+                                    "taxCard": {
                                         "type": "string"
                                     },
-                                    "Country_Register_id": {
+                                    "country_Register_id": {
                                         "type": "integer"
                                     }
                                 },
@@ -888,6 +888,143 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/founder/{id}": {
+            "delete": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Delete a founder by ID",
+                "operationId": "418c2c945fbd89950e8f6dbd5b70f91b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Founder ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Founder deleted successfully"
+                    },
+                    "404": {
+                        "description": "Founder not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/shareholder/{id}": {
+            "delete": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Delete a shareholder by ID",
+                "operationId": "29131e28b5dd87cb1c8ef9c58be90823",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Shareholder ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shareholder deleted successfully"
+                    },
+                    "404": {
+                        "description": "Shareholder not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/investor/{id}": {
+            "delete": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Delete an investor by ID",
+                "operationId": "6c61a29e9cc1e39e7077b55d24d2ab7b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Investor ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Investor deleted successfully"
+                    },
+                    "404": {
+                        "description": "Investor not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/milestones/{type}": {
+            "delete": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Delete all milestones by type (achieved, planned, archived)",
+                "operationId": "5e792fcfa82bf659135ab787a249c5f8",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "description": "Milestone type: achieved, planned, archived",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "achieved",
+                                "planned",
+                                "archived"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Milestones deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid milestone type"
                     }
                 },
                 "security": [

@@ -85,6 +85,10 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/startups', [CompanyController::class, 'index']);
     Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
     Route::post('/company/profile', [CompanyController::class, 'update']);
+    Route::delete('/company/founder/{id}', [CompanyController::class, 'deleteFounder']);
+    Route::delete('/company/shareholder/{id}', [CompanyController::class, 'deleteShareholder']);
+    Route::delete('/company/investor/{id}', [CompanyController::class, 'deleteInvestor']);
+    Route::delete('/company/milestones/{type}', [CompanyController::class, 'deleteMilestonesByType']);
     Route::get('/sectors', [SectorController::class, 'index']);
     Route::get('/states', [SectorController::class, 'getStates']);
     Route::post('/programs', [ProgramController::class, 'store']);

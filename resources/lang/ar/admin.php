@@ -2386,4 +2386,9 @@ return [
 	'Job_has_been_re_queued_successfully' => 'تمت إعادة جدولة الوظيفة بنجاح',
 	'Exception' => 'استثناء',
 	'No_jobs_found' => 'لم يتم العثور على وظائف',
+	'program_info' => 'معلومات البرنامج',
+	'program_guideline' => 'سياسة البرنامج',
+	'financial_policy' => 'سياسة المالية',
+	'legal_policy' => 'سياسة قانونية',
+	'mentorship_request' => 'طلب جلسة ارشاد',
 ];

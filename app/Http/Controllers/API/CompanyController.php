@@ -762,4 +762,150 @@ public function show($id)
             __('api.companyUpdated')
             );
 }
+/**
+ * @OA\Delete(
+ *     path="/api/company/founder/{id}",
+ *     summary="Delete a founder by ID",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Founder ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Founder deleted successfully"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Founder not found"
+ *     )
+ * )
+ */
+public function deleteFounder($id)
+{
+    $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Founder')->delete();
+
+    if ($deleted) {
+        return $this->success(null, [],__('api.founder deleted successfully'));
+    }
+
+    return $this->notFound(__('api.founderNotFound'));
+}
+/**
+ * @OA\Delete(
+ *     path="/api/company/shareholder/{id}",
+ *     summary="Delete a shareholder by ID",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Shareholder ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Shareholder deleted successfully"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Shareholder not found"
+ *     )
+ * )
+ */
+public function deleteShareholder($id)
+{
+    $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Shareholder')->delete();
+
+    if ($deleted) {
+        return $this->success(null, [], __('api.Shareholder deleted successfully'));
+    }
+
+    return $this->notFound(__('api.ShareholderNotFound'));
+}
+
+/**
+ * @OA\Delete(
+ *     path="/api/company/investor/{id}",
+ *     summary="Delete an investor by ID",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Investor ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Investor deleted successfully"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Investor not found"
+ *     )
+ * )
+ */
+public function deleteInvestor($id)
+{
+    $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Investor')->delete();
+
+    if ($deleted) {
+        return $this->success(null, [], __('api.investorDeleted'));
+    }
+
+    return $this->notFound(__('api.investorNotFound'));
+}
+/**
+ * @OA\Delete(
+ *     path="/api/company/milestones/{type}",
+ *     summary="Delete all milestones by type (achieved, planned, archived)",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="type",
+ *         in="path",
+ *         required=true,
+ *         description="Milestone type: achieved, planned, archived",
+ *         @OA\Schema(type="string", enum={"achieved", "planned", "archived"})
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Milestones deleted successfully"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid milestone type"
+ *     )
+ * )
+ */
+public function deleteMilestonesByType($type)
+{
+    $typeMap = [
+        'achieved' => 'Achieved_Milestones',
+        'planned' => 'Planned_Milestones',
+        'archived' => 'Archived_Milestones',
+    ];
+
+    if (!isset($typeMap[$type])) {
+        return $this->error([], [], __('api.invalidMilestoneType'), 400);
+    }
+
+    $user = auth()->user();
+    $companyId = $user->company_id;
+
+    $deleted = DB::table('milestones')
+        ->where('Company_id', $companyId)
+        ->where('plan', $typeMap[$type])
+        ->delete();
+
+    return $this->success(null, [],__('api.milestonesDeleted'));
+}
+
 }

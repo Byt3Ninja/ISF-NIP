@@ -2333,4 +2333,8 @@ return [
 	'Job_has_been_re_queued_successfully' => 'Job has been re-queued successfully',
 	'Exception' => 'Exception',
 	'No_jobs_found' => 'No jobs found',
+	'program_info' => 'Program Info',
+	'program_guideline' => 'Program Guideline',
+	'financial_policy' => 'Financial Policy',
+	'legal_policy' => 'Legal Policy',
 ];
