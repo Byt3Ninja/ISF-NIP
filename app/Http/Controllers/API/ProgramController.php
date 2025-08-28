@@ -471,10 +471,6 @@ public function index(Request $request)
           $query->whereHas('steps');
         }
         $programs = $query->latest()->paginate($request->get('limit', 10));
-        // Check if there are no results
-        if ($programs->isEmpty()) {
-          return $this->notFound(__('api.programs_not_found'));
-        }
 
     return $this->success(
     ProgramResource::collection($programs->items()),

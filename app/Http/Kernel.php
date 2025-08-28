@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'locale' => \App\Http\Middleware\LocaleMiddleware::class,
         '2fa' => \App\Http\Middleware\LoginSecurityMiddleware::class,
+        'sanctum.custom' => \App\Http\Middleware\SanctumApiAuth::class,
     ];
 
     /**

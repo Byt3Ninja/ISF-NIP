@@ -23,6 +23,7 @@ use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\NextSessionsService;
+use Namu\WireChat\Models\Conversation;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -97,27 +98,11 @@ class HackathonController extends Controller
          });
 
          
-        $pastHackathons_q = $hackathons->where('status', 'Finished')
+        $pastHackathons = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
 
-        // عدد العناصر في كل صفحة
-        $perPage = 5;
-
-        // الصفحة الحالية
-        $page = request()->get('page', 1);
-
-        // قص البيانات على حسب الصفحة
-        $currentPageItems = $pastHackathons_q->slice(($page - 1) * $perPage, $perPage)->values();
-
-        // عمل الـ Paginator
-        $pastHackathons = new LengthAwarePaginator(
-            $currentPageItems,
-            $pastHackathons_q->count(),
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+       
         
         $hackathons = $hackathons->reject(function ($item) {
             return $item['status'] === 'Finished';
@@ -225,7 +210,11 @@ class HackathonController extends Controller
                 states as s ON u.state_id = s.id
             WHERE c.cycle = ?
         ";
-        $params = [$user->team_member->teamFormation->user->company->cycle];
+        if($user->team_member != null){
+            $params = [$user->team_member->teamFormation->user->company->cycle];
+        }else{
+            $params = [$user->company->cycle];
+        }
         if( count($existInTeam) > 0 )
         {
             $viewMember_q .= " AND u.id NOT IN ($placeholders)";
@@ -662,7 +651,7 @@ class HackathonController extends Controller
                 $forms .= " AND CYC.organization_id = ? ";
                 $params[] = $user->organization_id;
             }
-
+            $forms .= " ORDER BY FD.created_at";
             $forms = DB::select($forms, $params);
             $forms = collect($forms);
             
@@ -763,7 +752,7 @@ class HackathonController extends Controller
             return $team;
         });
         $teamsData = $teams->values()->all();
-
+       
         $allteams_q = "SELECT
                 tf.id as tf_id,
                 tf.name as tf_name,
@@ -1060,6 +1049,7 @@ class HackathonController extends Controller
                 return $winner;
             });
         }
+        
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
             'currentHackathon',
@@ -1199,6 +1189,7 @@ class HackathonController extends Controller
 
     public function createTeam(Request $request)
     {
+        
         $request->validate([
             'team_name' => 'required|string|max:50|unique:team_formations,name',
             'team_description' => 'nullable|string|max:1000',
@@ -1285,6 +1276,26 @@ class HackathonController extends Controller
         $team_member->company_id = $user->company_id; 
         $team_member->team_formation_id = $teamformation->id;
         $team_member->save();
+
+
+        if($teamformation){
+            $createChatGroup = Conversation::create([
+                'type' => 'group',
+                'name' => $request->team_name,
+                'description' => $request->team_description
+            ]);
+
+            // Add current user as admin
+            $createChatGroup->participants()->create([
+                'participantable_id' => auth()->id(),
+                'participantable_type' => get_class(auth()->user()),
+                'role' => 'admin'
+            ]);
+
+            $teamformation->group_id_chat = $createChatGroup->id;
+            $teamformation->save();
+
+        }
 
         return redirect()->back()->with('success', 'Team created successfully.');
     }
@@ -1523,6 +1534,28 @@ class HackathonController extends Controller
                     $allteamMember->save();
                 }
 
+                $conversation = Conversation::findOrFail($teams->group_id_chat);
+                $user = User::findOrFail($user->id);
+
+                // Check if user is already a participant
+                $existingParticipant = $conversation->participants()
+                    ->where('participantable_id', $user->id)
+                    ->where('participantable_type', get_class($user))
+                    ->exists();
+
+                if ($existingParticipant) {
+                    return redirect()->back()->with([
+                        'error' => 'User is already in this conversation'
+                    ], 400);
+                }
+
+                // Add user as participant
+                $conversation->participants()->create([
+                    'participantable_id' => $user->id,
+                    'participantable_type' => get_class($user),
+                    'role' => 'participant'
+                ]);
+
         return redirect()->back()->with('success', 'Invitation accepted successfully.');
     }
 
@@ -1586,6 +1619,25 @@ class HackathonController extends Controller
         }
         $teamMember->acceptInvition = 'removed';
         $teamMember->save();
+
+        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+        $groupId = $teams->group_id_chat;
+        $conversation = Conversation::findOrFail($groupId);
+            $user = User::findOrFail($teamMember->user_id);
+            
+            $participant = $conversation->participants()
+                ->where('participantable_id', $user->id)
+                ->where('participantable_type', get_class($user))
+                ->first();
+                
+            if (!$participant) {
+                return response()->json([
+                    'error' => 'User is not in this conversation'
+                ], 404);
+            }
+
+            $participant->delete();
+        
 
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
@@ -1651,6 +1703,29 @@ class HackathonController extends Controller
                     $allteamMember->acceptInvition = 'rejected';
                     $allteamMember->save();
                 }
+
+                $conversation = Conversation::findOrFail($teams->group_id_chat);
+                $user = User::findOrFail($teamMember->user_id);
+
+                // Check if user is already a participant
+                $existingParticipant = $conversation->participants()
+                    ->where('participantable_id', $user->id)
+                    ->where('participantable_type', get_class($user))
+                    ->exists();
+
+                if ($existingParticipant) {
+                    return redirect()->back()->with([
+                        'error' => 'User is already in this conversation'
+                    ], 400);
+                }
+
+                // Add user as participant
+                $conversation->participants()->create([
+                    'participantable_id' => $user->id,
+                    'participantable_type' => get_class($user),
+                    'role' => 'participant'
+                ]);
+
         return response()->json(['success' => true, 'message' => __("admin.Request_Approved_successfully.")]);
     }
 

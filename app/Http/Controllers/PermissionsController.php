@@ -71,8 +71,9 @@ class PermissionsController extends Controller
         return view('admin.permissions.edit', compact('permission', 'groups'));
     }
 
-    public function update(UpdatePermissionRequest $request, Permission $permission)
+    public function update(UpdatePermissionRequest $request, $id)
     {
+        $permission = Permission::find($id);
         $permission->name = $request->input('name', null);
         $permission->description = $request->input('description', null);
         $permission->is_core = $request->has('is_core') ? true : false;

@@ -313,7 +313,7 @@ class User extends Authenticatable implements MustVerifyEmail
     */
     public function canCreateGroups(): bool
     {
-      return $this->hasVerifiedEmail();
+      return $this->hasVerifiedEmail() === true;
     }
 
     /**

@@ -22,7 +22,14 @@
     </span>
     @endforeach
   </div>
-  @if($user->team_member && $user->team_member->teamFormation && $user->team_member->teamFormation->user && $user->team_member->teamFormation->user->company && $currentHackathon['cycle_id'] == $user->team_member->teamFormation->user->company->cycle)
+  @php
+  if($user->team_member != null){
+    $user_cycle_id = $user->team_member?->teamFormation?->user?->company?->cycle ?? null;
+  }else{
+    $user_cycle_id = $user->company?->cycle ?? null;
+  }
+  @endphp
+  @if($currentHackathon['cycle_id'] == $user_cycle_id)
     <div id="action-buttons-placeholder" class="mt-4">
       <!-- Buttons will be injected by JS -->
         @php

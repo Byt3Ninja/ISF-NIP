@@ -45,6 +45,7 @@ trait ApiResponder
         $response = [
             'success' => false,
             'message' => $message,
+            'code' => $statusCode
         ];
         if(isset($data)) $response['data'] = $data;
         foreach($extra as $key => $value) $response[$key] = $value;

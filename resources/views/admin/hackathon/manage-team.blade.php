@@ -34,7 +34,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </div>
               <!-- Chat Button -->
-              <a href="/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
+              <a href="/dashboard/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
                 <i class="ti ti-message-circle me-1"></i>
                 {{ $l == 'en' ? 'Team Chat' : 'محادثة الفريق' }}
               </a>
@@ -239,7 +239,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
-
+              @if($leaderOrnot->count() > 0)
               @foreach ($team_Pinding as $index => $pendingMember)
               <li id="pendingMember{{ $pendingMember->tm_id }}"
                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
@@ -272,6 +272,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
+              @endif
             </ul>
             </div>
             <!-- Team Recruitment Section -->
@@ -316,6 +317,10 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               </div>
             </div>
             @elseif($members >= $maxMembers)
+            @php
+              // $deletemembers = $team_Formation_raw->whereIn('tm_acceptInvition', ['join', 'pending'])->delete();
+              $deletemembers = App\Team_member::whereIn('acceptInvition', ['join', 'pending'])->where('team_formation_id', $team_Formation_raw->first()->tf_id)->delete();
+            @endphp
             <div class="alert alert-success d-flex align-items-center">
               <i class="ti ti-check-circle me-2"></i>
               <div>
@@ -568,25 +573,27 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                             @endphp
                             
                             <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2">
-                              <div class="d-flex align-items-center">
-                                <i class="ti ti-file text-primary me-2"></i>
-                                <div>
-                                  <div class="small fw-medium">{{ $filename.".".$extension }}</div>
-                                  <div class="text-muted small">
-                                    {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
-                                  </div>
+                                <div class="d-flex align-items-center" style="min-width: 0;">
+                                    <i class="ti ti-file text-primary me-2"></i>
+                                    <div class="flex-grow-1 me-2" style="min-width: 0;">
+                                        <div class="small fw-medium text-truncate">
+                                            {{ $filename.".".$extension }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
-                              <div class="btn-group btn-group-sm">
-                                <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                  <i class="ti ti-download"></i>
-                                </a>
-                                @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
-                                  <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                    <i class="ti ti-trash"></i>
-                                  </button>
-                                @endif
-                              </div>
+                                <div class="btn-group btn-group-sm flex-shrink-0">
+                                    <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                        <i class="ti ti-download"></i>
+                                    </a>
+                                    @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    @endif
+                                </div>
                             </li>
                           @endforeach
                         @else
@@ -612,14 +619,25 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
                       <ul class="list-group list-group-flush" id="taskList">
                         @if(isset($todoList) && $todoList->count() > 0)
+                        {{-- {{ dd($todoList) }} --}}
                           @foreach($todoList as $task)
-                            <li class="list-group-item border-0 px-2 py-2">
+                            <li class="list-group-item border-0 px-2 py-2" id="task-{{ $task->tl_id }}">
                               <div class="d-flex justify-content-between align-items-start">
                                 <div class="form-check flex-grow-1">
-                                  <input class="form-check-input me-2" type="checkbox" value="done" id="task{{ $task->tl_id }}"
-                                    @if($task->tl_status == "Done") checked @endif>
-                                  <label class="form-check-label" for="task{{ $task->tl_id }}"
-                                    @if($task->tl_status == "Done") style="text-decoration: line-through;" @endif>
+                                  <input 
+                                    id="task{{ $task->tl_id }}-checkbox"
+                                    class="form-check-input me-2" 
+                                    type="checkbox" 
+                                    value="{{ $task->tl_status }}" 
+                                    onchange="updateTaskStatus('{{ $task->tl_id }}', this.checked)"
+                                    @if($task->tl_status == "DONE") checked @endif
+                                  />
+                                  <label 
+                                    class="form-check-label" 
+                                    id="task{{ $task->tl_id }}-label"
+                                    for="task{{ $task->tl_id }}-checkbox" 
+                                    style="text-decoration: {{$task->tl_status == "DONE" ? 'line-through' : 'none'}}"
+                                  >
                                     <div class="fw-medium">{{ $task->tl_title }}</div>
                                     <small class="text-muted">
                                       {{ $l == 'en' ? 'Assigned to: '. $task->assignee_name_en : 'مُسند إلى: '. $task->assignee_name_en }}
@@ -629,6 +647,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     </small>
                                   </label>
                                 </div>
+                                
                                 @if($team_Formation_leader OR $task->tl_assignee_id == auth()->user()->id) 
                                 <div class="btn-group btn-group-sm ms-2">
                                   <button class="btn btn-outline-secondary btn-sm" 
@@ -1156,6 +1175,17 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 @endif
               </select>
             </div>
+
+            <div class="mb-3">
+              <label for="EtaskStatus" class="form-label">{{ $l == 'en' ? 'Status' : 'الحالة' }}</label>
+              <select class="form-select" id="EtaskStatus" name="statustodo">
+                <option value="todo"  >{{ $l == 'en' ? 'todo' : 'تم الانشاء' }}</option>
+                <option value="inprogress" >{{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}</option>
+                <option value="DONE" >{{ $l == 'en' ? 'DONE' : 'مكتملة' }}</option>
+              </select>
+            </div>
+               
+            
           
 
           <div class="mb-3">
@@ -1470,11 +1500,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       icon: 'warning',
       confirmButtonText: '{{ $l == 'en' ? 'Yes, leave team' : 'نعم، مغادرة الفريق' }}',
       cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      showCancelButton: true,
+      showConfirmButton: true,
       customClass: {
-        confirmButton: 'btn btn-danger me-2',
+        confirmButton: 'btn btn-danger',
         cancelButton: 'btn btn-label-secondary'
       },
-      reverseButtons: true,
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
@@ -1506,11 +1538,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       showCancelButton: true,
       confirmButtonText: '{{ $l == 'en' ? 'Yes, remove member' : 'نعم، إزالة العضو' }}',
       cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      showCancelButton: true,
+      showConfirmButton: true,
       customClass: {
-        confirmButton: 'btn btn-danger me-2',
+        confirmButton: 'btn btn-danger',
         cancelButton: 'btn btn-label-secondary'
       },
-      reverseButtons: true,
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
@@ -2012,11 +2046,15 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
       text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
       icon: 'warning',
+      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+      showConfirmButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
@@ -2193,6 +2231,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const taskAssignee = document.getElementById('EtaskAssignee').value;
     const taskDueDate = document.getElementById('EtaskDueDate').value;
     const taskDescription = document.getElementById('EtaskDescription').value;
+    const taskStatus = document.getElementById('EtaskStatus').value;
 
     const taskModal = document.getElementById('EditTaskModal');
     const editingTaskId = taskModal.getAttribute('data-editing-task');
@@ -2212,6 +2251,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       title: taskTitle,
       assignee: taskAssignee,
       due_date: taskDueDate,
+      status: taskStatus,
       description: taskDescription
     };
 
@@ -2287,14 +2327,18 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     }
 
     Swal.fire({
+      icon: 'warning',
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
       text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
       confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      showCancelButton: true,
+      showConfirmButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
@@ -2307,11 +2351,12 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         })
         .then(response => response.json())
         .then(data => {
-          if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
+          console.log('data', data);
+          if (data.success) {
             Swal.fire({
+              icon: 'success',
               title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
               text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
-              icon: 'success',
               confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
               showCancelButton: false,
               showConfirmButton: true,
@@ -2320,8 +2365,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               },
               buttonsStyling: false,
             }).then(() => {
-              // Reload the page after pressing OK
-              location.reload();
+              // Remove deleted task
+              $(`#task-${taskId}`).remove();
             });
           } else {
             Swal.fire({
@@ -2354,5 +2399,96 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       }
     });
   }
+
+  function updateTaskStatus(taskId, isChecked) {
+    console.log('updateTaskStatus called with:', taskId, isChecked);
+
+    if (typeof Swal === 'undefined') {
+      console.error('SweetAlert2 is not loaded!');
+      alert('Update functionality not available - SweetAlert2 not loaded');
+      return;
+    }
+
+    const status = isChecked ? 'DONE' : 'TODO';
+
+    Swal.fire({
+      title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+      text: `{{ $l == "en" ? "Do you want to mark the task as: " : "هل تريد وضع علامة على المهمة كـ: " }}${status}"?`,
+      icon: 'warning',
+      confirmButtonText: '{{ $l == "en" ? "Yes, update it!" : "نعم، قم بتحديثها!" }}',
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      showCancelButton: true,
+      showConfirmButton: true,
+      customClass: {
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("{{ url('/dashboard/hackathon/EdittodoListStatus') }}", {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status, id: taskId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Updated!" : "تم التحديث!" }}',
+              text: data.message || '{{ $l == "en" ? "Task status has been updated." : "تم تحديث حالة المهمة." }}',
+              icon: 'success',
+              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            }).then(() => {
+              // Get current task checkbox and label
+              const currentTaskCheckbox = $(`#task${taskId}-checkbox`);
+              const currentTaskLabel = currentTaskCheckbox.closest('.form-check').find('label');
+
+              // Update checkbox and label styles
+              currentTaskCheckbox.prop('checked', isChecked);
+              currentTaskLabel.css('text-decoration', isChecked ? 'line-through' : 'none');
+            });
+          } else {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+              text: data.message || '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
+              icon: 'error',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            });
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire({
+            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+            text: '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
+            icon: 'error',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+        });
+      }
+    });
+  }
+
 </script>
 @stop

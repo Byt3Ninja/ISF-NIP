@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\ApiResponder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use App\Traits\ApiResponder;
+
 class UpdateCompanyProfileRequest extends FormRequest
 {
     use ApiResponder;
@@ -88,10 +90,10 @@ class UpdateCompanyProfileRequest extends FormRequest
             'businessModelDescription' => 'nullable|string|max:200',
             'businessPlanAttachment' => 'nullable|file',
             'haveStartup' => 'nullable|in:Yes,No',
-            'CreatedTax' => 'required_if:haveStartup,Yes|boolean',
-            'CommercialRegister' => 'required_if:haveStartup,Yes|string|max:255',
-            'TaxCard' => 'required_if:haveStartup,Yes|string|max:255',
-            'Country_Register_id' => 'required_if:haveStartup,Yes|exists:countries,id',
+            'createdTax' => 'required_if:haveStartup,Yes|boolean',
+            'commercialRegister' => 'required_if:haveStartup,Yes|string|max:255',
+            'taxCard' => 'required_if:haveStartup,Yes|string|max:255',
+            'country_Register_id' => 'required_if:haveStartup,Yes|exists:countries,id',
             'countryCode' => 'nullable|string|max:10',
             'countryCodeWA' => 'nullable|string|max:10',
         ];
@@ -104,21 +106,63 @@ class UpdateCompanyProfileRequest extends FormRequest
         );
     }
 
+  protected function prepareForValidation()
+{
+    if ($this->has('founders') && !is_null($this->input('founders.name'))) {
+        $this->merge([
+            'founders' => [$this->input('founders')],
+        ]);
+    }
+
+    if ($this->has('shareholders') && !is_null($this->input('shareholders.name'))) {
+        $this->merge([
+            'shareholders' => [$this->input('shareholders')],
+        ]);
+    }
+
+    if ($this->has('investors') && !is_null($this->input('investors.name'))) {
+        $this->merge([
+            'investors' => [$this->input('investors')],
+        ]);
+    }
+       foreach (['achievedMilestones', 'plannedMilestones', 'archivedMilestones'] as $field) {
+        if ($this->has($field) && !is_null($this->input($field . '.name'))) {
+            $this->merge([
+                $field => [$this->input($field)],
+            ]);
+        }
+    }
+}
+
     public function withValidator($validator)
 {
     $validator->after(function ($validator) {
-        $shareholders = $this->input('shareholders', []);
+        $shareholdersInput = $this->input('shareholders', []);
 
-        if (is_array($shareholders) && count($shareholders)) {
-            $totalOwnership = collect($shareholders)->sum(function ($item) {
-                return floatval($item['ownership'] ?? 0);
-            });
+        if (!is_array($shareholdersInput)) {
+            return;
+        }
 
-            if ($totalOwnership > 100) {
-                throw new \Illuminate\Http\Exceptions\HttpResponseException(
-                    $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
-                );
-            }
+        if (isset($shareholdersInput['name'])) {
+            $shareholdersInput = [$shareholdersInput];
+        }
+
+        $newOwnershipTotal = collect($shareholdersInput)->sum(function ($item) {
+            return floatval($item['ownership'] ?? 0);
+        });
+
+        $companyId = auth()->user()->company_id;
+
+        $existingOwnership = DB::table('team_members')->where('company_id', $companyId)
+            ->where('TeamMember', 'Shareholder')
+            ->sum('PresentagShereholder');
+
+        $totalOwnership = $existingOwnership + $newOwnershipTotal;
+
+        if ($totalOwnership > 100) {
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
+            );
         }
     });
 }

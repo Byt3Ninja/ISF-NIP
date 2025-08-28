@@ -1123,43 +1123,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                     </li>
                   @endif
                 @endif
-                @if(auth()->user()->hasRole(['Admin', 'organizationManager']))
-                  <li class="nav-item has-treeview {{ request()->is('dashboard/admin/notification-*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('dashboard/admin/notification-*') ? 'active' : '' }}">
-                      <i class="nav-icon fas fa-bell"></i>
-                      <p>
-                        Notifications
-                        <i class="right fas fa-angle-left"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="{{ route('notification-templates.index') }}" class="nav-link {{ request()->routeIs('notification-templates.*') ? 'active' : '' }}">
-                          <i class="far fa-file-alt nav-icon"></i>
-                          <p>Templates</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="{{ route('notification-templates.create') }}" class="nav-link {{ request()->routeIs('notification-templates.create') ? 'active' : '' }}">
-                          <i class="far fa-plus-square nav-icon"></i>
-                          <p>Create Template</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="{{ route('notification-triggers.index') }}" class="nav-link {{ request()->routeIs('notification-triggers.*') ? 'active' : '' }}">
-                          <i class="far fa-play-circle nav-icon"></i>
-                          <p>Event Triggers</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="{{ route('notification-triggers.create') }}" class="nav-link {{ request()->routeIs('notification-triggers.create') ? 'active' : '' }}">
-                          <i class="far fa-plus nav-icon"></i>
-                          <p>Create Trigger</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                @endif
+
             </ul>
           </li>
         @endif
