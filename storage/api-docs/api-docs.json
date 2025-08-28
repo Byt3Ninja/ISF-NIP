@@ -996,35 +996,30 @@
                 ]
             }
         },
-        "/api/company/milestones/{type}": {
+        "/api/company/milestones/{id}": {
             "delete": {
                 "tags": [
                     "Companies"
                 ],
-                "summary": "Delete all milestones by type (achieved, planned, archived)",
-                "operationId": "5e792fcfa82bf659135ab787a249c5f8",
+                "summary": "Delete a specific milestone by ID",
+                "operationId": "54bc98203b1641181723d0087a0cb836",
                 "parameters": [
                     {
-                        "name": "type",
+                        "name": "id",
                         "in": "path",
-                        "description": "Milestone type: achieved, planned, archived",
+                        "description": "Milestone ID",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "enum": [
-                                "achieved",
-                                "planned",
-                                "archived"
-                            ]
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Milestones deleted successfully"
+                        "description": "Milestone deleted successfully"
                     },
-                    "400": {
-                        "description": "Invalid milestone type"
+                    "404": {
+                        "description": "Milestone not found"
                     }
                 },
                 "security": [
