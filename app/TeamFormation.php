@@ -218,4 +218,34 @@ class TeamFormation extends Model
 
         return $winnersData;
     }
+
+    public static function winnersMapping( $teams )
+    {
+        $teams = $teams->where('winner', 'selected')->values();
+        $winners = $teams->map(function( $team ) {
+            $winner = new stdClass;
+            $winner->id = $team->id;
+            $winner->name = $team->company->name;
+            $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
+            $winner->projectTitle = $team->project->name;
+            $winner->teamName = $team->name;
+            $winner->description = $team->project->description;
+            $leader = $team->members->where('isLeader', true)->first(); 
+            $winner->teamLeader = new stdClass;
+            $winner->teamLeader->name = $leader?->name;
+            $winner->teamLeader->role = $leader?->role;
+            $winner->teamLeader->image = $leader?->image;
+            $winner->teamMembers = $team->members->map(function( $team_member ) {
+                $member = new stdClass;
+                $member->name = $team_member->name;
+                $member->role = $team_member->role;
+                $member->image = $team_member->image;
+                $member->isLeader = $team_member->isLeader == 1 ? true : false;
+                return $member;
+            });
+            return $winner;
+        });
+
+        return $winners;
+    }
 }

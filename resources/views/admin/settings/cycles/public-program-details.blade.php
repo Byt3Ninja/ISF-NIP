@@ -277,28 +277,47 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				<ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0 px-0" role="tablist" id="hackathonTab">
 					@foreach( $pages as $tab )
 					<li class="nav-item {{ $l == 'en' ? 'me-3' : '' }}" role="presentation">
-							<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab"
-									data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab"
-									aria-controls="{{ $tab->code }}" aria-selected="false">
-									{{-- <i class="bi bi-list me-2"></i>  --}}
-									{{ $tab->title }}
-							</button>
+						<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab"
+							data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab"
+							aria-controls="{{ $tab->code }}" aria-selected="false">
+							{{-- <i class="bi bi-list me-2"></i>  --}}
+							{{ $tab->title }}
+						</button>
 					</li>
 					@endforeach
+					@if( $program->announced )
+					<li class="nav-item {{ $l == 'en' ? 'me-3' : '' }}" role="presentation">
+						<button class="nav-link rounded" id="results-winners-tab"
+							data-bs-toggle="tab" data-bs-target="#results-winners" type="button" role="tab"
+							aria-controls="results-winners" aria-selected="false">
+							{{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
+						</button>
+					</li>
+					@endif
 				</ul>
 
 				<div class="tab-content p-0 mb-12" id="hackathonTabContent">
-						<!-- Pages Tab -->
-						@foreach( $pages as $tab )
-						<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}"
-								role="tabpanel" aria-labelledby="{{ $tab->code }}-tab">
-								<div class="card">
-										<div class="card-body">
-												{!! $tab->content !!}
-										</div>
-								</div>
+					<!-- Pages Tab -->
+					@foreach( $pages as $tab )
+					<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}" role="tabpanel" aria-labelledby="{{ $tab->code }}-tab">
+						<div class="card">
+							<div class="card-body"> {!! $tab->content !!} </div>
 						</div>
-						@endforeach
+					</div>
+					@endforeach
+					@if( $program->announced )
+						<div class="tab-pane fade" id="results-winners" role="tabpanel" aria-labelledby="results-winners-tab">
+							<div class="card">
+								<div class="card-body">
+									@if( $program->visibility == 'public' )
+										@include('admin.hackathon.partials.winners-tab', ['winners' => $winnersData, 'currentHackathon' => $currentHackathon])
+									@else
+										<div class="text-center">{{ $l == 'en' ? 'This program results have been announced, please login to view' : 'تم الاعلان عن نتايج هذا البرنامج ,يرجى تسجيل الدخول لمشاهدة النتائج' }}</div>
+									@endif
+								</div>
+							</div>
+						</div>
+					@endif
 				</div>
 				@endif
 			</div>
