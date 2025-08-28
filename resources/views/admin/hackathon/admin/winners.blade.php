@@ -39,12 +39,25 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-10 col-lg-10 col-sm-12">
-              <div class="form-floating">
-                <select class="form-select" name="announcementStatus" id="announcementStatus" aria-label="Announcement Status">
-								  <option value="0" {{ $hackathon->announcement == false ? 'selected' : '' }}>{{ $l == 'en' ? 'Not Announced' : 'لم يتم الاعلان' }}</option>
-								  <option value="1" {{ $hackathon->announcement == true ? 'selected' : '' }}>{{ $l == 'en' ? 'Announced' : 'تم الاعلان' }}</option>
-							  </select>
-							  <label for="announcementStatus">{{ $l == 'en' ? 'Announcement Status' : 'حالة الاعلان' }}</label>
+              <div class="row">
+                <div class="col-6">
+									<div class="form-floating">
+										<select class="form-select" name="announcementStatus" id="announcementStatus" aria-label="Announcement Status">
+											<option value="0" {{ $hackathon->announcement == false ? 'selected' : '' }}>{{ $l == 'en' ? 'Not Announced' : 'لم يتم الاعلان' }}</option>
+											<option value="1" {{ $hackathon->announcement == true ? 'selected' : '' }}>{{ $l == 'en' ? 'Announced' : 'تم الاعلان' }}</option>
+										</select>
+										<label for="announcementStatus">{{ $l == 'en' ? 'Announcement Status' : 'حالة الاعلان' }}</label>
+									</div>
+                </div>
+                <div class="col-6">
+									<div class="form-floating">
+										<select class="form-select" name="announcementVisibility" id="announcementVisibility" aria-label="Announcement Visibility">
+											<option value="public" {{ $hackathon->visibility == 'public' ? 'selected' : '' }}>{{ $l == 'en' ? 'Show results to public' : 'اظهار نتايج للجميع' }}</option>
+											<option value="private" {{ $hackathon->visibility == 'private' ? 'selected' : '' }}>{{ $l == 'en' ? 'Restrict results to logged-in users' : 'عرض النتايج للمستخدمين المسجلين' }}</option>
+										</select>
+										<label for="announcementVisibility">{{ $l == 'en' ? 'Announcement Visibility' : 'رؤية الاعلان' }}</label>
+									</div>
+                </div>
               </div>
             </div>
             <div class="col-md-2 col-lg-2 col-sm-12">

@@ -2,12 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Cycle;
-use App\User;
-use App\Step;
-use App\Company;
-use App\Formfield;
-use App\Formdata;
+use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
@@ -85,7 +80,15 @@ class ExternalCyclesController extends Controller
 					$page->code = Str::random(5);
 					return $page;
 				});
-				return view('admin.settings.cycles.public-program-details', compact('program', 'pages', 'org_slug', 'program_slug'));
+				$winnersData = collect([]);
+        		if( $program->announced && $program->visibility == 'public' )
+				{
+					$teams = TeamFormation::teams( $program->id );
+					$winnersData = TeamFormation::winnersMapping( $teams );
+				}
+
+				$currentHackathon = ['announcement' => $program->announced == 1 ? true : false];
+				return view('admin.settings.cycles.public-program-details', compact('program', 'pages', 'org_slug', 'program_slug', 'winnersData', 'currentHackathon'));
 			} else { return response()->json(['msg' => 'This program is not public yet.', 'class' => 'danger']); }
 		}
 	}
@@ -336,6 +339,8 @@ class ExternalCyclesController extends Controller
 				'p.start',
 				'p.end',
 				'p.is_public',
+				'p.winners_announcement AS announced',
+				'p.winners_visibility AS visibility',
 				'o.name_en AS en_org_name',
 				'o.name_ar AS ar_org_name',
 			])
