@@ -103,7 +103,12 @@
                     </div>
                   @endif
                 </div>
-              </div>        
+              </div>
+              <div class="card-footer text-center">
+                <button class="btn btn-sm btn-outline-secondary open-details-modal" data-id="{{ $winner->id }}">
+                  {{ $l == 'en' ? 'Solution Details' : 'تفاصيل الحل' }}
+                </button>
+              </div>
             </div>
           </div>
         @endforeach
@@ -117,4 +122,54 @@
       </div>
     </div>
   @endif
+</div>
+
+@push('scripts')
+  @include('includes.winnerModal', ['winners' => $winners])
+  <script>
+    $(document).ready(function() {
+      var winners = @json( $winners );
+      $(document).on('click', '.open-details-modal', function(e) {
+        e.preventDefault();
+        let id = $(this).data('id');
+        let winner = winners.find(winner => winner.id == id);
+        if( typeof( winner ) !== 'undefined' )
+        {
+          $("#td-team").html(winner.teamName);
+          $("#td-project").html(winner.projectTitle);
+          $("#td-description").html(winner.description);
+
+          $("#solutionDetailsModal").modal('show');
+        }
+      });
+    });
+  </script>
+@endpush
+<div class="modal fade" id="solutionDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title border-bottom pb-3 w-100" id="solutionDetailsModalLabel"> {{ $l == 'en' ? 'Solution Details' : 'تفاصيل الحل' }} </h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-custom table-bordered">
+            <tbody>
+              <tr>
+                <td>{{ __('admin.Team Name') }}</td>
+                <td id="td-team"></td>
+              </tr>
+              <tr>
+                <td>{{ __('admin.Project Name') }}</td>
+                <td id="td-project"></td>
+              </tr>
+              <tr>
+                <td>{{ __('admin.description') }}</td>
+                <td id="td-description"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  </div>
 </div>
