@@ -172,20 +172,6 @@ public function withValidator($validator)
             if (count($names) !== count(array_unique($names))) {
                 $validator->errors()->add($field, __("api.duplicate_names_in_$field"));
             }
-
-            $planType = ucfirst(str_replace('Milestones', '_Milestones', $field));
-
-            foreach ($names as $name) {
-                $exists = DB::table('milestones')
-                    ->where('Company_id', $companyId)
-                    ->whereRaw('LOWER(name) = ?', [strtolower($name)])
-                    ->where('plan', $planType)
-                    ->exists();
-
-                if ($exists) {
-                    $validator->errors()->add($field, __("api.milestone_name_exists", ['name' => $name]));
-                }
-            }
         }
     });
 }

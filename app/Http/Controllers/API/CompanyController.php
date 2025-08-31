@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Company;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
+use App\Services\CompanyService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CompanyResource;
@@ -155,6 +156,12 @@ use App\Http\Requests\UpdateCompanyProfileRequest;
 class CompanyController extends Controller
 {
     use ApiResponder;
+    protected CompanyService $companyService;
+
+    public function __construct(CompanyService $companyService)
+    {
+        $this->companyService = $companyService;
+    }
     /**
  * @OA\Get(
  *     path="/api/startups",
@@ -242,70 +249,9 @@ class CompanyController extends Controller
     if (!$user->ableTo('users.view_companies')) {
        return $this->forbidden(__('api.forbidden'));
     }
+    $filters = $request->only(['sector', 'country', 'state', 'organization', 'programId', 'search', 'limit']);
 
-    $locale = app()->getLocale();
-    $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization']);
-
-    if ($user->hasRole('organizationManager')) {
-        $organizationId = $user->organization_id;
-        $query->whereHas('cycleRelation.organization', function ($q) use ($organizationId) {
-            $q->where('id', $organizationId);
-        });
-    }
-    
-    if ($request->filled('sector')) {
-        if (is_numeric($request->sector)) {
-            $query->where('sector', $request->sector);
-        } else {
-            $query->whereHas('sectoR', function ($q) use ($request, $locale) {
-                $q->where("name_{$locale}", 'like', "%{$request->sector}%");
-            });
-        }
-    }
-
-    if ($request->filled('country')) {
-    $query->whereHas('country', function ($q) use ($request, $locale) {
-        $q->where("name_{$locale}", 'like', "%{$request->country}%");
-    });
-    }
-
-    if ($request->filled('organization')) {
-    $query->whereHas('cycleRelation.organization', function ($q) use ($request, $locale) {
-        if (is_numeric($request->organization)) {
-            $q->where('id', $request->organization);
-        } else {
-            $q->where("name_{$locale}", 'like', "%{$request->organization}%");
-        }
-     });
-   }
-
-    if ($request->filled('state')) {
-            $query->whereHas('state', function ($q) use ($request, $locale) {
-                $q->where("name_{$locale}", 'like', "%{$request->state}%");
-            });
-    }
-    if ($request->filled('programId')) {
-        $query->where('cycle', $request->programId);
-    }
-
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($sub) use ($search, $locale) {
-            $sub->where("name_{$locale}", 'like', "%{$search}%")
-                ->orWhereHas('sectoR', function ($q) use ($search, $locale) {
-                    $q->where("name_{$locale}", 'like', "%{$search}%");
-                })
-               ->orWhereHas('city', function ($q) use ($search, $locale) {
-                    $q->where("name_{$locale}", 'like', "%{$search}%");
-                })
-                ->orWhereHas('teamMembers', function ($q) use ($search) {
-                    $q->where('Name', 'like', "%{$search}%");
-                });
-        });
-    }
-
-    $limit = $request->get('limit', 10);
-    $companies = $query->paginate($limit);
+    $companies = $this->companyService->getCompanies($filters, isApi: true);
 
     return $this->success(
         CompanyResource::collection($companies->items()),
@@ -313,14 +259,14 @@ class CompanyController extends Controller
             'meta' => [
                 'total' => $companies->total(),
                 'page' => $companies->currentPage(),
-                'limit' => (int) $limit            
+                'limit' => (int) $request->get('limit', 10),
             ],
             'links' => [
-            'first' => $companies->url(1),
-            'last' => $companies->url($companies->lastPage()),
-            'prev' => $companies->previousPageUrl(),
-            'next' => $companies->nextPageUrl(),
-        ],
+                'first' => $companies->url(1),
+                'last' => $companies->url($companies->lastPage()),
+                'prev' => $companies->previousPageUrl(),
+                'next' => $companies->nextPageUrl(),
+            ],
         ]
     );
 }
@@ -668,17 +614,30 @@ public function show($id)
             }
         }
 
-        foreach (['achievedMilestones', 'plannedMilestones', 'archivedMilestones'] as $type) {
-            if (!empty($data[$type])) {
-                foreach ($data[$type] as $milestone) {
-                    $company->milestones()->create([
-                        'plan' => ucfirst(str_replace('Milestones', '_Milestones', $type)),
-                        'name' => $milestone['name'],
-                        'description' => $milestone['description'],
-                    ]);
-                }
+     foreach (['achievedMilestones', 'plannedMilestones', 'archivedMilestones'] as $type) {
+      if (!empty($data[$type])) {
+        $planType = ucfirst(str_replace('Milestones', '_Milestones', $type));
+        foreach ($data[$type] as $milestone) {
+            $existing = $company->milestones()
+                ->where('name', $milestone['name'])
+                ->where('plan', $planType)
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'name' => $milestone['name'],
+                    'description' => $milestone['description'] ?? $existing->description,
+                ]);
+            } else {
+                $company->milestones()->create([
+                    'plan' => $planType,
+                    'name' => $milestone['name'],
+                    'description' => $milestone['description'],
+                ]);
             }
         }
+     }
+   }
 
         if (isset($data['pitchDeckFile'])) {
             $file = $data['pitchDeckFile'];

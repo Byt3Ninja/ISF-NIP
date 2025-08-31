@@ -23,6 +23,7 @@ use App\Events\WebMessage;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -39,9 +40,11 @@ class ClientCompanyController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    protected CompanyService $companyService;
+    public function __construct(CompanyService $companyService)
     {
         $this->middleware('auth');
+        $this->companyService = $companyService;
     }
     public function show($id)
     {
@@ -1413,5 +1416,11 @@ class ClientCompanyController extends Controller
     return response()->json(['success' => false, 'message' => 'الملف غير موجود.']);
 }
 
+    public function companies(Request $request)
+	{
+	    $filters = $request->only(['search', 'sector', 'stage', 'organization']);
+        $companies = $this->companyService->getCompanies($filters, isApi: false);
 
+	    return view('admin/users/companies', compact('companies'));
+	}
 }
