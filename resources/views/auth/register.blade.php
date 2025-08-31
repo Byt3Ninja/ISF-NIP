@@ -248,8 +248,8 @@
                 <div class="col-12 mb-3">
                   <label for="username" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="firstName" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en" autofocus />
-                    @error('firstName')
+                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name" autofocus />
+                    @error('first_name')
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
                   </div>
@@ -257,8 +257,8 @@
                 <div class="col-12 mb-3">
                   <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="lastName" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
-                    @error('lastName')
+                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name" />
+                    @error('last_name')
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
                   </div>
