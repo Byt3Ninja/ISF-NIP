@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Role;
 use App\User;
+use App\Cycle;
+use App\Company;
 use App\Country;
 use App\UsersBio;
 use Illuminate\Support\Collection;
