@@ -183,14 +183,6 @@ class UserController extends Controller
 		}
 	}
 
-	public function companies(Request $request)
-	{
-		$this->authorize('index', Auth::user());
-		$companies = $this->userService->getCompanies($request->all(), Auth::user())['companies'];
-		$errorMessage = $this->userService->getCompanies($request->all(), Auth::user())['errorMessage'];
-
-		return view('admin/users/companies', compact('companies', 'errorMessage'));
-	}
 	/**
 	 * Summary of showImportForm
 	 * @return array{select: array|string|null|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View}

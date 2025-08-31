@@ -109,4 +109,8 @@ return [
  'founderNotFound' => 'لم يتم العثور على المؤسس',
  'founder deleted successfully' => 'تم حذف المؤسس بنجاح',
  'milestoneNotFound' => 'لم يتم العثور على الإنجاز',
+ 'duplicate_names_in_achievedMilestones' => 'تم العثور على أسماء مكررة في الإنجازات المحققة.',
+ 'duplicate_names_in_plannedMilestones' => 'تم العثور على أسماء مكررة في الإنجازات المخطط لها.',
+ 'duplicate_names_in_archivedMilestones' => 'تم العثور على أسماء مكررة في الإنجازات المؤرشفة.',
+ 'milestone_name_exists' => 'اسم الإنجاز ":name" موجود بالفعل في هذه الفئة.',
 ];

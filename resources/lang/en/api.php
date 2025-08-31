@@ -111,4 +111,8 @@ return [
    'founderNotFound' => 'Founder Not Found',
    'founder deleted successfully' => 'Founder Deleted Successfully',
    'milestoneNotFound' => 'Milestone Not Found',
+   'duplicate_names_in_achievedMilestones' => 'Duplicate milestone names found in Achieved Milestones.',
+   'duplicate_names_in_plannedMilestones' => 'Duplicate milestone names found in Planned Milestones.',
+   'duplicate_names_in_archivedMilestones' => 'Duplicate milestone names found in Archived Milestones.',
+   'milestone_name_exists' => 'Milestone name ":name" already exists in this category.',
 ];
