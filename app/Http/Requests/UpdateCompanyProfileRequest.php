@@ -134,35 +134,58 @@ class UpdateCompanyProfileRequest extends FormRequest
     }
 }
 
-    public function withValidator($validator)
+public function withValidator($validator)
 {
     $validator->after(function ($validator) {
+        $companyId = auth()->user()->company_id;
+
         $shareholdersInput = $this->input('shareholders', []);
-
-        if (!is_array($shareholdersInput)) {
-            return;
-        }
-
         if (isset($shareholdersInput['name'])) {
             $shareholdersInput = [$shareholdersInput];
         }
 
-        $newOwnershipTotal = collect($shareholdersInput)->sum(function ($item) {
-            return floatval($item['ownership'] ?? 0);
-        });
+        $newOwnershipTotal = collect($shareholdersInput)->sum(fn($item) => floatval($item['ownership'] ?? 0));
 
-        $companyId = auth()->user()->company_id;
-
-        $existingOwnership = DB::table('team_members')->where('company_id', $companyId)
+        $existingOwnership = DB::table('team_members')
+            ->where('company_id', $companyId)
             ->where('TeamMember', 'Shareholder')
             ->sum('PresentagShereholder');
 
         $totalOwnership = $existingOwnership + $newOwnershipTotal;
 
         if ($totalOwnership > 100) {
-            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            throw new HttpResponseException(
                 $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
             );
+        }
+        foreach (['achievedMilestones', 'plannedMilestones', 'archivedMilestones'] as $field) {
+            $submittedMilestones = $this->input($field, []);
+
+            if (!is_array($submittedMilestones)) continue;
+
+            $names = collect($submittedMilestones)
+                ->pluck('name')
+                ->filter()
+                ->map(fn($name) => strtolower(trim($name)))
+                ->toArray();
+
+            if (count($names) !== count(array_unique($names))) {
+                $validator->errors()->add($field, __("api.duplicate_names_in_$field"));
+            }
+
+            $planType = ucfirst(str_replace('Milestones', '_Milestones', $field));
+
+            foreach ($names as $name) {
+                $exists = DB::table('milestones')
+                    ->where('Company_id', $companyId)
+                    ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+                    ->where('plan', $planType)
+                    ->exists();
+
+                if ($exists) {
+                    $validator->errors()->add($field, __("api.milestone_name_exists", ['name' => $name]));
+                }
+            }
         }
     });
 }
