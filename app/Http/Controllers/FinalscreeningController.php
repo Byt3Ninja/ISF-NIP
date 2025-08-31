@@ -92,6 +92,7 @@ class FinalscreeningController extends Controller
                 $email = $result->email;
                 
                 $data = [
+                    'role'=>'Judger',
                     'Type' => 'Final_Screening',
                     'name' => $name,
                     'email' => $email,
@@ -247,6 +248,7 @@ class FinalscreeningController extends Controller
                 $email = $result->email;
                 
                 $data = [
+                       'role'=>'Judger',
                     'Type' => 'Final_Screening',
                     'name' => $name,
                     'email' => $email,
