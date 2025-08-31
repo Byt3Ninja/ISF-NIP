@@ -36,6 +36,7 @@ class StoreUserRequest extends FormRequest
             'email' => 'email|required|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,id',
+            'gender'=>'required|in:Male,Female',
             'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
             'country_code' => 'required',
             'bio_en'       => 'nullable|string',
