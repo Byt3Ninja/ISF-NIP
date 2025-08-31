@@ -46,10 +46,10 @@ Route::get('company', [RegistrationController::class, 'getCompany']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/expertises',[ExpertiseController::class, 'index']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('sanctum.custom')->group(function () {
     Route::get('/countries', [CountryController::class, 'index']);
-    Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
