@@ -648,16 +648,16 @@ public function show($id)
             }
         }
 
-       if (!empty($data['shareholders'])) {
-       foreach ($data['shareholders'] as $shareholder) {
-         $company->teamMembers()->create([
+      if (!empty($data['shareholders'])) {
+      foreach ($data['shareholders'] as $shareholder) {
+        $company->teamMembers()->create([
             'Name' => $shareholder['name'],
             'RoleShereholder' => $shareholder['role'] ?? null,
-            'PresentagShereholder' => $shareholder['ownership'],
-            'TeamMember' => 'Shareholder'
-         ]);
-      }
-    }
+            'PresentagShereholder' => $shareholder['ownership'] ?? null,
+            'TeamMember' => 'Shareholder',
+        ]);
+     }
+   }
         if (!empty($data['investors'])) {
             foreach ($data['investors'] as $investor) {
                 $company->teamMembers()->create([
