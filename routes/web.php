@@ -353,7 +353,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Users  Manager routes
     Route::resource('users', 'UserController');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
-    Route::get('/companies', 'UserController@companies')->name('users.view_companies');
+    Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     //Cities
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');
