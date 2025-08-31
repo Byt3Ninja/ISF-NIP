@@ -49,7 +49,7 @@ class StoreUserRequest extends FormRequest
     // Apply mentor-required rules ONLY if:
     // - role is "Mentor"
     // - auth user is NOT an Admin
-    if ($this->input('role') === 'Mentor' && !auth()->user()->hasRole('Admin')) {
+    if ($this->input('role') == '4' && !auth()->user()->hasRole('Admin')) {
         $rules['bio_en']      = 'required|string';
         $rules['Linkedin']    = 'required|url';
         $rules['expertise']   = 'required|array';
