@@ -51,7 +51,7 @@ use App\Http\Requests\UpdateCompanyProfileRequest;
  *     @OA\Property(property="raisedFund", type="number", example=200000),
  *     @OA\Property(property="equityOffered", type="number", format="float", example=10.5),
  *     @OA\Property(property="currency", type="string", example="USD"),
- *     @OA\Property(property="PreMoneyValuation", type="number", example=1500000),
+ *     @OA\Property(property="preMoneyValuation", type="number", example=1500000),
  *     @OA\Property(
  *         property="targetedMarket",
  *         type="array",
@@ -76,7 +76,7 @@ use App\Http\Requests\UpdateCompanyProfileRequest;
  *         @OA\Property(property="name", type="string", example="Seed Round Closed"),
  *         @OA\Property(property="description", type="string", example="Closed $200K round.")
  *     )),
- *     @OA\Property(property="Industries", type="array", @OA\Items(type="string", example="Fintech")),
+ *     @OA\Property(property="industries", type="array", @OA\Items(type="string", example="Fintech")),
  * 
  *     @OA\Property(
  *         property="founders",
@@ -124,9 +124,9 @@ use App\Http\Requests\UpdateCompanyProfileRequest;
  *     @OA\Property(property="businessModel", type="string", example="Freemium + Subscription"),
  *     @OA\Property(property="businessModelDescription", type="string", example="Users start free, then upgrade."),
  *     @OA\Property(property="productPhoto", type="string", example="https://example.com/photo.png"),
- *     @OA\Property(property="CreatedTax", type="boolean", example=true),
- *     @OA\Property(property="CommercialRegister", type="string", example="123456"),
- *     @OA\Property(property="TaxCard", type="string", example="654321"),
+ *     @OA\Property(property="createdTax", type="boolean", example=true),
+ *     @OA\Property(property="commercialRegister", type="string", example="123456"),
+ *     @OA\Property(property="taxCard", type="string", example="654321"),
  *     @OA\Property(
  *         property="countryRegister",
  *         type="object",
@@ -791,7 +791,7 @@ public function deleteFounder($id)
     if (!$user->ableTo('company.profile_teams_delete')) {
        return $this->forbidden(__('api.forbidden'));
     }
-    $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Founder')->delete();
+    $deleted = DB::table('team_members')->where('id', $id)->where('Company_id', $user->company_id)->where('TeamMember', 'Founder')->delete();
 
     if ($deleted) {
         return $this->success(null, [],__('api.founder deleted successfully'));
@@ -828,7 +828,7 @@ public function deleteShareholder($id)
     if (!$user->ableTo('company.profile_teams_delete')) {
        return $this->forbidden(__('api.forbidden'));
     }
-    $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Shareholder')->delete();
+    $deleted = DB::table('team_members')->where('id', $id)->where('Company_id', $user->company_id)->where('TeamMember', 'Shareholder')->delete();
 
     if ($deleted) {
         return $this->success(null, [], __('api.Shareholder deleted successfully'));
@@ -866,7 +866,7 @@ public function deleteInvestor($id)
     if (!$user->ableTo('company.profile_teams_delete')) {
        return $this->forbidden(__('api.forbidden'));
     }
-    $deleted = DB::table('team_members')->where('id', $id)->where('TeamMember', 'Investor')->delete();
+    $deleted = DB::table('team_members')->where('id', $id)->where('Company_id', $user->company_id)->where('TeamMember', 'Investor')->delete();
 
     if ($deleted) {
         return $this->success(null, [], __('api.investorDeleted'));
@@ -911,7 +911,7 @@ public function deleteMilestone($id)
         ->first();
 
     if (!$milestone) {
-        return $this->error([], [], __('api.milestoneNotFound'), 404);
+        return $this->notFound(__('api.milestoneNotFound'));
     }
 
     DB::table('milestones')->where('id', $id)->delete();
