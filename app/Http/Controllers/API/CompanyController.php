@@ -339,26 +339,12 @@ class CompanyController extends Controller
 public function show($id)
 {
     $user = auth()->user();
-     if (!$user->ableToAny(['company.profile_view', 'company.profile_view_mine'])) {
-        return $this->forbidden(__('api.forbidden'));
-    }
-    $company = Company::with([
-        'country', 'state', 'city', 'teamMembers', 'sectoR'
-    ])->find($id);
-    
-    if (!$company) {
-        return $this->error(__('api.company_not_found'), 404);
-    }
-
-    if ($user->hasAnyRole(['Admin', 'organizationManager'])) {
-        return $this->success(new CompanyProfileResource($company));
-    }
-
-    if ($user->hasRole('Registered') && $user->company_id == $company->id) {
-        return $this->success(new CompanyProfileResource($company));
-    }
-
-     return $this->forbidden(__('api.forbidden'));
+    $response = $this->companyService->getCompanyProfile($id, $user);
+    return match ($response['type']) {
+            'success'   => $this->success($response['data']),
+            'not_found' => $this->error(__('api.company_not_found'), 404),
+            'forbidden' => $this->forbidden(__('api.forbidden')),
+      };
 }
  /**
      * @OA\Post(
@@ -483,199 +469,16 @@ public function show($id)
      */
   public function update(UpdateCompanyProfileRequest $request)
 {
-        $user = auth()->user();
-        if (!$user->ableTo('company.profile_update_mine')) {
-          return $this->forbidden(__('api.forbidden'));
-        }
-        $company = Company::with(['milestones', 'teamMembers', 'state', 'city', 'country', 'stage', 'sector'])
-        ->find($user->company_id);
-        if(!$company) {
-            return $this->notFound(__('api.company_not_found'));
-        }
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_update_mine')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+     $result = $this->companyService->updateCompanyProfile($request->validated(), $user);
 
-    DB::transaction(function () use ($request, $company, $user) {
-        $data = $request->validated();
-
-        if (isset($data['name'])) $company->{"name_en"} = $data['name'];
-        if (isset($data['country_id'])) $company->country_id = $data['country_id'];
-        if (array_key_exists('state_id', $data)) $company->state_id = $data['state_id'];
-        if (array_key_exists('sector_id', $data)) $company->sector = $data['sector_id'];
-        if (array_key_exists('stage_id', $data)) $company->stage = $data['stage_id'];
-        if (isset($data['categories'])) {  
-         $allCategories = Company::static_categories();
-         $translated = [];
-
-        foreach ($data['categories'] as $key) {
-            $translationKey = match ($key) {
-                'food_beverage' => __('admin.categories.food_beverage'),
-                'technology' => __('admin.categories.technology'),
-                'app_website' => __('admin.categories.app_website'),
-                'housewares_home_design' => __('admin.categories.housewares_home_design'),
-                'health_wellness_nutrition' => __('admin.categories.health_wellness_nutrition'),
-                'fitness' => __('admin.categories.fitness'),
-                'sports' => __('admin.categories.sports'),
-                'beauty' => __('admin.categories.beauty'),
-                'clothing_fashion' => __('admin.categories.clothing_fashion'),
-                'toys_games' => __('admin.categories.toys_games'),
-                'children' => __('admin.categories.children'),
-                'entertainment_experiential' => __('admin.categories.entertainment_experiential'),
-                'pets' => __('admin.categories.pets'),
-                'music' => __('admin.categories.music'),
-                'holiday' => __('admin.categories.holiday'),
-                'other' => __('admin.categories.other'),
-                 default => null,
-                };
-
-             if ($translationKey) {
-                  $translated[] = $translationKey;
-                }
-            }
-          $company->business_categories = json_encode($translated);
-        }
-        if (isset($data['address'])) $company->{"address_en"} = $data['address'];
-        if (isset($data['yearsOfOperations'])) $company->years_of_operations = $data['yearsOfOperations'];
-        if (isset($data['productOrService'])) $company->product_or_service = $data['productOrService'];
-        if (isset($data['countryCode'])) {
-            $company->country_code = $data['countryCode'];
-        }
-        if (isset($data['countryCodeWA'])) {
-           $company->country_code_w_a = $data['countryCodeWA'];
-        }
-        if ($request->hasFile('logo')) {
-            $image = $request->file('logo');
-            $img_path = $image->store('images/logo', 'public_uploads');
-            $img_url = Storage::disk('public_uploads')->url($img_path);
-        } else {
-         $img_url = $company->logo;
-        }
-        $company->logo = $img_url;
-
-       foreach (['email', 'phone', 'whatsapp', 'website', 'googleMapUrl', 'linkedin', 'x', 'facebook', 'youtube', 'instagram', 'tiktok'] as $field) {
-         if (isset($data[$field])) {
-            $column = match ($field) {
-             'x' => 'twitter',
-             'googleMapUrl' => 'google_map',
-             default => $field,
-            };
-            $company->{$column} = $data[$field];
-         }
-       }
-
-        foreach (['aboutStartup' => 'info_company', 'aboutProblem' => 'about_problem', 'aboutMarketOpportunities' => 'about_market_opportunity', 'aboutCompetitors' => 'about_competitors', 'aboutMonetization' => 'about_monetize', 'aboutChallenges' => 'about_challenges'] as $req => $col) {
-            if (isset($data[$req])) $company->{$col} = $data[$req];
-        }
-        if (isset($data['sustainabilityFeatures'])) {
-            $company->Sustainable_development = json_encode($data['sustainabilityFeatures']);
-        }
-
-        foreach ([
-            'currency' => 'Currency',
-            'preMoneyEvaluation' => 'Pre_money_Valuation',
-            'raisedFund' => 'raised_fund',
-            'fundingTarget' => 'desired_funding_amount',
-            'targetMarket' => 'targeted_market',
-            'businessType' => 'business_type',
-            'financialPlan' => 'financial_plan_description'
-        ] as $req => $col) {
-            if (isset($data[$req])) {
-                $company->{$col} = in_array($req, ['targetMarket']) ? json_encode($data[$req]) : $data[$req];
-            }
-        }
-
-        if (isset($data['financialPlanAttachment'])) {
-            $file = $data['financialPlanAttachment'];
-            $path = $file->storeAs(
-                $user->company_id . '/financial_plan/documents',
-                $file->getClientOriginalName(),
-                'pitch_deck'
-            );
-            $company->financial_plan = 'financial_plan/' . $path;
-        }
-
-        if (isset($data['teamNumber'])) $company->team_num = $data['teamNumber'];
-        if (isset($data['workingTeamDetails'])) $company->working_team_summary = $data['workingTeamDetails'];
-
-        if (isset($data['pitchDeckFile'])) {
-            $file = $data['pitchDeckFile'];
-            $path = $file->storeAs(
-                $user->company_id . '/pitch_decks/documents',
-                $file->getClientOriginalName(),
-                'pitch_deck'
-            );
-            $company->pitch_deck = 'pitch_decks/' . $path;
-        }
-
-        if (!empty($data['documents'])) {
-            $docs = json_decode($company->documents ?? '[]', true);
-            foreach ($data['documents'] as $doc) {
-                $path = $doc->storeAs(
-                    $user->company_id . '/pitch_decks/documents',
-                    $doc->getClientOriginalName(),
-                    'pitch_deck'
-                );
-                $docs[] = 'pitch_decks/' . $path;
-            }
-            $company->documents = json_encode($docs);
-        }
-
-        if (isset($data['pitchDeckVideoUrl'])) {
-            $company->pitch_deck_video = $data['pitchDeckVideoUrl'];
-        }
-
-        if (isset($data['businessModel'])) {
-            $company->business_model = $data['businessModel'];
-        }
-
-        if (isset($data['businessModelDescription'])) {
-            $company->business_model_description = $data['businessModelDescription'];
-        }
-
-        if (isset($data['businessPlanAttachment']) && $data['businessPlanAttachment']->isValid()) {
-            $file = $data['businessPlanAttachment'];
-            $originalName = $file->getClientOriginalName();
-
-            $folder = match (true) {
-                str_starts_with($file->getMimeType(), 'image/') => 'images',
-                str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                default => 'others',
-            };
-
-            $path = $user->company_id . '/business_plan/' . $folder . '/';
-            $file->storeAs($path, $originalName, ['disk' => 'pitch_deck']);
-            $company->business_plan = 'business_plan/' . $path . $originalName;
-        }
-
-        if (isset($data['haveStartup'])) {
-         if ($data['haveStartup'] === 'Yes') {
-            $company->CreatedTax = $data['createdTax'] ?? 0;
-            $company->Commercial_Register = $data['commercialRegister'] ?? null;
-            $company->Tax_Card = $data['taxCard'] ?? null;
-            $company->Country_Register_id = $data['country_Register_id'] ?? null;
-         } else {
-            $company->CreatedTax = 0;
-            $company->Commercial_Register = null;
-            $company->Tax_Card = null;
-            $company->Country_Register_id = null;
-         }
-        }
-        if (isset($data['financialPlanAttachment'])) {
-             $file = $data['financialPlanAttachment'];
-            $path = $file->storeAs(
-            $user->company_id . '/financial_plan/documents',
-            $file->getClientOriginalName(),
-            'pitch_deck'
-            );
-            $company->financial_plan = 'financial_plan/' . $path;
-        }
-
-           $company->save();
-    });
-
-        return $this->success(new CompanyProfileResource($company->fresh(['teamMembers', 'state', 'city', 'country', 'stage', 'sector'])),
-            [],
-            __('api.companyUpdated')
-            );
+     return match ($result['status']) {
+        'not_found' => $this->notFound(__('api.company_not_found')),
+        'success' => $this->success($result['company'], [], __('api.companyUpdated')),
+    };
 }
 /**
  * @OA\Delete(

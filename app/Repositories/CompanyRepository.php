@@ -92,6 +92,21 @@ class CompanyRepository
             : $query->get();
     }
 
+     public function findWithRelations($id)
+    {
+        return Company::with(['country', 'state', 'city', 'teamMembers', 'sectoR'])->find($id);
+    }
+
+    public function update(Company $company, array $data): bool
+    {
+        return $company->update($data);
+    }
+
+    public function save(Company $company): bool
+    {
+        return $company->save();
+    }
+
       public function createFounder(Company $company, array $data)
     {
         return $company->teamMembers()->create([
