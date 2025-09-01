@@ -1622,6 +1622,9 @@ class HackathonController extends Controller
 
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
         $groupId = $teams->group_id_chat;
+
+        if($groupId != null){
+        
         $conversation = Conversation::findOrFail($groupId);
             $user = User::findOrFail($teamMember->user_id);
             
@@ -1637,8 +1640,8 @@ class HackathonController extends Controller
             }
 
             $participant->delete();
+        }
         
-
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
 
