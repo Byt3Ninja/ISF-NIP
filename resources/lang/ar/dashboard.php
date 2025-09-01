@@ -168,4 +168,8 @@ return [
     'Hide schedule' => 'إخفاء المواعيد',
     'No mentorship sessions found' => 'لا توجد جلسات توجيهية',
     'No training sessions found' => 'لا توجد جلسات تدريبية',
+    'Invitation_has_expired' => 'تم انتهاء صلاحية الدعوة',
+    'Invitation_not_found' => 'الدعوة غير موجودة',
+    'Conversation_Chat_not_found' => 'محادثة الدردشة غير موجودة',
+    'Invitation_accepted_successfully' => 'تم قبول الدعوة بنجاح',
 ];

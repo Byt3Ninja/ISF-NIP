@@ -1371,6 +1371,25 @@ class HackathonController extends Controller
 
         $teamFormation->save();
 
+        if($teamFormation->group_id_chat == null){
+            $createChatGroup = Conversation::create([
+                'type' => 'group',
+                'name' => $request->team_name,
+                'description' => $request->team_description
+            ]);
+
+            // Add current user as admin
+            $createChatGroup->participants()->create([
+                'participantable_id' => auth()->id(),
+                'participantable_type' => get_class(auth()->user()),
+                'role' => 'admin'
+            ]);
+
+            $teamFormation->group_id_chat = $createChatGroup->id;
+            $teamFormation->save();
+
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Team information updated successfully.',
@@ -1453,7 +1472,7 @@ class HackathonController extends Controller
 
     public function acceptInvitation($id)
     {
-       
+      
         $user = Auth::user();
         $isExpired = Team_member::where('id', $id)
             ->where('acceptInvition', 'pending')
@@ -1466,14 +1485,14 @@ class HackathonController extends Controller
                 $isExpired->isTeamLeader = 0;
                 $isExpired->user_id = $user->id;
                 $isExpired->save();
-                return redirect()->back()->with('error', 'Invitation has expired.');
+                return redirect()->back()->with('error', 'Invitation_has_expired.');
             }
-                
-                $teamMember = Team_member::where('id', $id)
-                ->where('acceptInvition', 'pending')
-                ->first();
+            $teamMember = Team_member::where('id', $id)
+            ->where('acceptInvition', 'pending')
+            ->first();
+            
             if (!$teamMember) {
-                return redirect()->back()->with('error', 'Invitation not found.');
+                return redirect()->back()->with('error', 'Invitation_not_found.');
             }
 
             
@@ -1511,7 +1530,10 @@ class HackathonController extends Controller
                     $allteamMember->user_id = $user->id;
                     $allteamMember->save();
                 }
-
+               
+                if($teams->group_id_chat == null){
+                    return redirect()->back()->with('error', 'Conversation_Chat_not_found');
+                }
                 $conversation = Conversation::findOrFail($teams->group_id_chat);
                 $user = User::findOrFail($user->id);
 
@@ -1534,7 +1556,7 @@ class HackathonController extends Controller
                     'role' => 'participant'
                 ]);
 
-        return redirect()->back()->with('success', 'Invitation accepted successfully.');
+        return redirect()->back()->with('success', 'Invitation_accepted_successfully');
     }
 
     public function rejectInvitation($id)
