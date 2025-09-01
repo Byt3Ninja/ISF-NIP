@@ -182,30 +182,38 @@
               </a>
               @elseif($team->request_sent == false)
               @if($isExistingTeam == false)
-              <button onclick="joinTeam('{{ $team->id }}','{{ $team->name }}')" 
-                      class="btn btn-primary btn-sm flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                      style="transition: all 0.3s ease; border-radius: 8px;">
-                <i class="fas fa-plus"></i>
-                {{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}
-              </button>
+                @if($memberCount >= $maxAvatars)
+                  <button onclick="joinTeam('{{ $team->id }}','{{ $team->name }}')" 
+                          class="btn btn-primary btn-sm flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
+                          style="transition: all 0.3s ease; border-radius: 8px;">
+                    <i class="fas fa-plus"></i>
+                    {{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}
+                  </button>
+                @else
+
+                @endif
               @endif
               @elseif($isFull)
-              <button class="btn btn-secondary btn-sm flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold" 
-                      disabled style="border-radius: 8px;">
-                <i class="fas fa-ban"></i>
-                {{ $l == 'en' ? 'Full' : 'ممتلئ' }}
-              </button>
-              @elseif($isExistingTeam == false)
-              <form action="/dashboard/hackathon/RequestJoin" method="POST" class="flex-fill">
-                @csrf
-                <input type="hidden" name="id" value="{{ $team->id }}">
-                <button type="submit" 
-                        class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2 fw-semibold"
-                        style="transition: all 0.3s ease; border-radius: 8px;">
-                  <i class="fas fa-plus"></i>
-                  {{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}
+                <button class="btn btn-secondary btn-sm flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold" 
+                        disabled style="border-radius: 8px;">
+                  <i class="fas fa-ban"></i>
+                  {{ $l == 'en' ? 'Full' : 'ممتلئ' }}
                 </button>
-              </form>
+              @elseif($isExistingTeam == false)
+                @if($memberCount >= $maxAvatars)
+                  <form action="/dashboard/hackathon/RequestJoin" method="POST" class="flex-fill">
+                    @csrf
+                    <input type="hidden" name="id" value="{{ $team->id }}">
+                    <button type="submit" 
+                            class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2 fw-semibold"
+                            style="transition: all 0.3s ease; border-radius: 8px;">
+                      <i class="fas fa-plus"></i>
+                      {{ $l == 'en' ? 'Request to Join' : 'طلب الانضمام' }}
+                    </button>
+                  </form>
+                @else
+
+                @endif
               @endif
               @endif
             </div>
