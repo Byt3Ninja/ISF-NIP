@@ -86,7 +86,7 @@
                     <i class="ti ti-settings me-2 me-2"></i>
                     {{ $l == 'en' ? 'Create New Team' : 'كون فريقك' }}
                   </a>
-                @elseif($companyStep?->stype != 6)
+                @elseif($companyStep?->stype != 6 && $companyStep?->stype == 1)
                   <button type="button" class="btn btn-primary" style="flex: 1;"
                     onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
                     <i class="ti ti-send me-1"></i>
