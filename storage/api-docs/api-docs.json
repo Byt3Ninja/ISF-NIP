@@ -898,6 +898,62 @@
             }
         },
         "/api/company/founder/{id}": {
+            "put": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update a founder",
+                "operationId": "77bfff36a53426657e85f256eba6237c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Founder ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Name"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newemail@example.com"
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://linkedin.com/in/updated"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Founder updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Companies"
@@ -931,6 +987,60 @@
             }
         },
         "/api/company/shareholder/{id}": {
+            "put": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update a shareholder",
+                "operationId": "9e15cd35b52880a28047c772ed63d0aa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Shareholder ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Shareholder Name"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "New Role"
+                                    },
+                                    "ownership": {
+                                        "type": "number",
+                                        "example": 15.5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Shareholder updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Companies"
@@ -964,6 +1074,56 @@
             }
         },
         "/api/company/investor/{id}": {
+            "put": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update an investor",
+                "operationId": "809d9866111dc50cf4bc3bc0f0dedaaf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Investor ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated VC Name"
+                                    },
+                                    "investmentType": {
+                                        "type": "string",
+                                        "example": "Series A"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Investor updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Companies"
@@ -997,6 +1157,60 @@
             }
         },
         "/api/company/milestones/{id}": {
+            "put": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Update a milestone",
+                "operationId": "a645bd65da2a9c5b156ff63eeec3e556",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Milestone ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "plan": {
+                                        "type": "string",
+                                        "example": "Achieved_Milestones"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Milestone Title"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description of the milestone"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Milestone updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Companies"
@@ -1020,6 +1234,210 @@
                     },
                     "404": {
                         "description": "Milestone not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/founder": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Create a founder",
+                "operationId": "2db5f3cb7157124b4a6ec1b47a310b9e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "linkedin"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "linkedin": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://linkedin.com/in/johndoe"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Founder created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/shareholder": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Create a shareholder",
+                "operationId": "58577702e979e66fa53bcd3157e4f64b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "ownership"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Sarah Connor"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "Board Member"
+                                    },
+                                    "ownership": {
+                                        "type": "number",
+                                        "example": 25
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shareholder created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/investor": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Create an investor",
+                "operationId": "986623f197711d4cb841e216bd5a7ef7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "investmentType"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Sequoia Capital"
+                                    },
+                                    "investmentType": {
+                                        "type": "string",
+                                        "example": "Seed Funding"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Investor created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/company/milestones": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Create a milestone",
+                "operationId": "885b2049aeab902f686e6e6000308df3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "plan",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "plan": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Achieved_Milestones",
+                                            "Planned_Milestones",
+                                            "Archived_Milestones"
+                                        ],
+                                        "example": "Planned_Milestones"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Product Launch Q1"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Launching MVP to early users"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Milestone created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -7153,7 +7571,7 @@
                         "type": "string",
                         "example": "USD"
                     },
-                    "PreMoneyValuation": {
+                    "preMoneyValuation": {
                         "type": "number",
                         "example": 1500000
                     },
@@ -7234,7 +7652,7 @@
                             "type": "object"
                         }
                     },
-                    "Industries": {
+                    "industries": {
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -7351,15 +7769,15 @@
                         "type": "string",
                         "example": "https://example.com/photo.png"
                     },
-                    "CreatedTax": {
+                    "createdTax": {
                         "type": "boolean",
                         "example": true
                     },
-                    "CommercialRegister": {
+                    "commercialRegister": {
                         "type": "string",
                         "example": "123456"
                     },
-                    "TaxCard": {
+                    "taxCard": {
                         "type": "string",
                         "example": "654321"
                     },

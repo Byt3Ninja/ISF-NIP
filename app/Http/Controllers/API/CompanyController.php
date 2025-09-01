@@ -9,8 +9,20 @@ use App\Services\CompanyService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CompanyResource;
+use App\Http\Resources\FounderResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\InvestorResource;
+use App\Http\Resources\MilestoneResource;
+use App\Http\Requests\StoreFounderRequest;
+use App\Http\Requests\StoreInvestorRequest;
+use App\Http\Requests\UpdateFounderRequest;
+use App\Http\Resources\ShareholderResource;
+use App\Http\Requests\StoreMilestoneRequest;
+use App\Http\Requests\UpdateInvestorRequest;
+use App\Http\Requests\UpdateMilestoneRequest;
+use App\Http\Requests\StoreShareholderRequest;
 use App\Http\Resources\CompanyProfileResource;
+use App\Http\Requests\UpdateShareholderRequest;
 use App\Http\Requests\UpdateCompanyProfileRequest;
 
 /**
@@ -242,7 +254,7 @@ class CompanyController extends Controller
  *     )
  * )
  */
-
+  
     public function index(Request $request)
 {
     $user = auth()->user();
@@ -583,62 +595,6 @@ public function show($id)
         if (isset($data['teamNumber'])) $company->team_num = $data['teamNumber'];
         if (isset($data['workingTeamDetails'])) $company->working_team_summary = $data['workingTeamDetails'];
 
-        if (!empty($data['founders'])) {
-            foreach ($data['founders'] as $founder) {
-                $company->teamMembers()->create([
-                    'Name' => $founder['name'],
-                    'Email' => $founder['email'] ?? null,
-                    'LinkedIn' => $founder['linkedin'] ?? null,
-                    'TeamMember' => 'Founder',
-                ]);
-            }
-        }
-
-      if (!empty($data['shareholders'])) {
-      foreach ($data['shareholders'] as $shareholder) {
-        $company->teamMembers()->create([
-            'Name' => $shareholder['name'],
-            'RoleShereholder' => $shareholder['role'] ?? null,
-            'PresentagShereholder' => $shareholder['ownership'] ?? null,
-            'TeamMember' => 'Shareholder',
-        ]);
-     }
-   }
-        if (!empty($data['investors'])) {
-            foreach ($data['investors'] as $investor) {
-                $company->teamMembers()->create([
-                    'Name' => $investor['name'],
-                    'investorType' => $investor['investmentType'] ?? null,
-                    'TeamMember' => 'Investor'
-                ]);
-            }
-        }
-
-     foreach (['achievedMilestones', 'plannedMilestones', 'archivedMilestones'] as $type) {
-      if (!empty($data[$type])) {
-        $planType = ucfirst(str_replace('Milestones', '_Milestones', $type));
-        foreach ($data[$type] as $milestone) {
-            $existing = $company->milestones()
-                ->where('name', $milestone['name'])
-                ->where('plan', $planType)
-                ->first();
-
-            if ($existing) {
-                $existing->update([
-                    'name' => $milestone['name'],
-                    'description' => $milestone['description'] ?? $existing->description,
-                ]);
-            } else {
-                $company->milestones()->create([
-                    'plan' => $planType,
-                    'name' => $milestone['name'],
-                    'description' => $milestone['description'],
-                ]);
-            }
-        }
-     }
-   }
-
         if (isset($data['pitchDeckFile'])) {
             $file = $data['pitchDeckFile'];
             $path = $file->storeAs(
@@ -745,18 +701,16 @@ public function show($id)
  * )
  */
 public function deleteFounder($id)
-{
+{ 
     $user =  auth()->user();
     if (!$user->ableTo('company.profile_teams_delete')) {
        return $this->forbidden(__('api.forbidden'));
     }
-    $deleted = DB::table('team_members')->where('id', $id)->where('Company_id', $user->company_id)->where('TeamMember', 'Founder')->delete();
+    $deleted = $this->companyService->deleteFounder($user->company_id, $id);
 
-    if ($deleted) {
-        return $this->success(null, [],__('api.founder deleted successfully'));
-    }
-
-    return $this->notFound(__('api.founderNotFound'));
+    return $deleted
+        ? $this->success(null, [], __('api.founder deleted successfully'))
+        : $this->notFound(__('api.founderNotFound'));
 }
 /**
  * @OA\Delete(
@@ -782,18 +736,16 @@ public function deleteFounder($id)
  * )
  */
 public function deleteShareholder($id)
-{
+{  
     $user =  auth()->user();
     if (!$user->ableTo('company.profile_teams_delete')) {
        return $this->forbidden(__('api.forbidden'));
     }
-    $deleted = DB::table('team_members')->where('id', $id)->where('Company_id', $user->company_id)->where('TeamMember', 'Shareholder')->delete();
+    $deleted =  $this->companyService->deleteShareholder($user->company_id, $id);
 
-    if ($deleted) {
-        return $this->success(null, [], __('api.Shareholder deleted successfully'));
-    }
-
-    return $this->notFound(__('api.ShareholderNotFound'));
+    return $deleted
+        ? $this->success(null, [], __('api.Shareholder deleted successfully'))
+        : $this->notFound(__('api.ShareholderNotFound'));
 }
 
 /**
@@ -825,13 +777,11 @@ public function deleteInvestor($id)
     if (!$user->ableTo('company.profile_teams_delete')) {
        return $this->forbidden(__('api.forbidden'));
     }
-    $deleted = DB::table('team_members')->where('id', $id)->where('Company_id', $user->company_id)->where('TeamMember', 'Investor')->delete();
+    $deleted =  $this->companyService->deleteInvestor($user->company_id, $id);
 
-    if ($deleted) {
-        return $this->success(null, [], __('api.investorDeleted'));
-    }
-
-    return $this->notFound(__('api.investorNotFound'));
+    return $deleted
+        ? $this->success(null, [], __('api.investorDeleted'))
+        : $this->notFound(__('api.investorNotFound'));
 }
 /**
  * @OA\Delete(
@@ -864,18 +814,266 @@ public function deleteMilestone($id)
         return $this->forbidden(__('api.forbidden'));
     }
 
-    $milestone = DB::table('milestones')
-        ->where('Company_id', $user->company_id)
-        ->where('id', $id)
-        ->first();
+    $milestone = $this->companyService->findMilestone($user->company_id, $id);
 
     if (!$milestone) {
         return $this->notFound(__('api.milestoneNotFound'));
     }
 
-    DB::table('milestones')->where('id', $id)->delete();
+    $this->companyService->deleteMilestone($id);
 
     return $this->success(null, [], __('api.milestoneDeleted'));
+}
+/**
+ * @OA\Post(
+ *     path="/api/company/founder",
+ *     summary="Create a founder",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"name", "email", "linkedin"},
+ *             @OA\Property(property="name", type="string", example="John Doe"),
+ *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+ *             @OA\Property(property="linkedin", type="string", format="url", example="https://linkedin.com/in/johndoe")
+ *         )
+ *     ),
+ *     @OA\Response(response=201, description="Founder created successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+public function storeFounder(StoreFounderRequest $request)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_teams_add')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $founder = $this->companyService->createFounder($request->validated());
+    return $this->created(new FounderResource($founder), __('api.founder_created'));
+}
+
+/**
+ * @OA\Put(
+ *     path="/api/company/founder/{id}",
+ *     summary="Update a founder",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Founder ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", example="Updated Name"),
+ *             @OA\Property(property="email", type="string", format="email", example="newemail@example.com"),
+ *             @OA\Property(property="linkedin", type="string", format="url", example="https://linkedin.com/in/updated")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Founder updated successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+public function updateFounder(UpdateFounderRequest $request, $id)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_teams_edit')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $founder = $this->companyService->updateFounder($id, $request->validated());
+    return $this->success(new FounderResource($founder),[], __('api.founder_updated'));
+}
+
+/**
+ * @OA\Post(
+ *     path="/api/company/shareholder",
+ *     summary="Create a shareholder",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"name", "ownership"},
+ *             @OA\Property(property="name", type="string", example="Sarah Connor"),
+ *             @OA\Property(property="role", type="string", example="Board Member"),
+ *             @OA\Property(property="ownership", type="number", example=25)
+ *         )
+ *     ),
+ *     @OA\Response(response=201, description="Shareholder created successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+public function storeShareholder(StoreShareholderRequest $request)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_teams_add')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $shareholder = $this->companyService->createShareholder($request->validated());
+    return $this->created(new ShareholderResource($shareholder), __('api.shareholder_created'));
+}
+
+/**
+ * @OA\Put(
+ *     path="/api/company/shareholder/{id}",
+ *     summary="Update a shareholder",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Shareholder ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", example="Updated Shareholder Name"),
+ *             @OA\Property(property="role", type="string", example="New Role"),
+ *             @OA\Property(property="ownership", type="number", example=15.5)
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Shareholder updated successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+
+public function updateShareholder(UpdateShareholderRequest $request, $id)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_teams_edit')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $shareholder = $this->companyService->updateShareholder($id, $request->validated());
+    return $this->success(new ShareholderResource($shareholder),[], __('api.shareholder_updated'));
+}
+
+/**
+ * @OA\Post(
+ *     path="/api/company/investor",
+ *     summary="Create an investor",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"name", "investmentType"},
+ *             @OA\Property(property="name", type="string", example="Sequoia Capital"),
+ *             @OA\Property(property="investmentType", type="string", example="Seed Funding")
+ *         )
+ *     ),
+ *     @OA\Response(response=201, description="Investor created successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+public function storeInvestor(StoreInvestorRequest $request)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_teams_add')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $investor = $this->companyService->createInvestor($request->validated());
+    return $this->created(new InvestorResource($investor), __('api.investor_created'));
+}
+
+/**
+ * @OA\Put(
+ *     path="/api/company/investor/{id}",
+ *     summary="Update an investor",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Investor ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", example="Updated VC Name"),
+ *             @OA\Property(property="investmentType", type="string", example="Series A")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Investor updated successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+
+public function updateInvestor(UpdateInvestorRequest $request, $id)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_teams_edit')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $investor = $this->companyService->updateInvestor($id, $request->validated());
+    return $this->success(new InvestorResource($investor),[], __('api.investor_updated'));
+}
+
+/**
+ * @OA\Post(
+ *     path="/api/company/milestones",
+ *     summary="Create a milestone",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"plan", "name"},
+ *             @OA\Property(property="plan", type="string", enum={"Achieved_Milestones","Planned_Milestones","Archived_Milestones"}, example="Planned_Milestones"),
+ *             @OA\Property(property="name", type="string", example="Product Launch Q1"),
+ *             @OA\Property(property="description", type="string", example="Launching MVP to early users")
+ *         )
+ *     ),
+ *     @OA\Response(response=201, description="Milestone created successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+public function storeMilestone(StoreMilestoneRequest $request)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_milestones_add')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $milestone = $this->companyService->createMilestone($request->validated());
+    return $this->created(new MilestoneResource($milestone), __('api.milestone_created'));
+}
+
+/**
+ * @OA\Put(
+ *     path="/api/company/milestones/{id}",
+ *     summary="Update a milestone",
+ *     tags={"Companies"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Milestone ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         @OA\JsonContent(
+ *             @OA\Property(property="plan", type="string", example="Achieved_Milestones"),
+ *             @OA\Property(property="name", type="string", example="Updated Milestone Title"),
+ *             @OA\Property(property="description", type="string", example="Updated description of the milestone")
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Milestone updated successfully"),
+ *     @OA\Response(response=422, description="Validation error")
+ * )
+ */
+public function updateMilestone(UpdateMilestoneRequest $request, $id)
+{
+    $user = auth()->user();
+    if (!$user->ableTo('company.profile_milestones_edit')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $milestone = $this->companyService->updateMilestone($id, $request->validated());
+    return $this->success(new MilestoneResource($milestone),[], __('api.milestone_updated'));
 }
 
 }
