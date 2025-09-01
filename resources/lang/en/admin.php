@@ -2326,4 +2326,5 @@ return [
 	'program_guideline' => 'Program Guideline',
 	'financial_policy' => 'Financial Policy',
 	'legal_policy' => 'Legal Policy',
+	'Conversation_Chat_not_found' => 'Conversation Chat not found',
 ];
