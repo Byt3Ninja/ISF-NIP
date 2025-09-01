@@ -85,9 +85,17 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/startups', [CompanyController::class, 'index']);
     Route::get('/v1/startups/{id}', [CompanyController::class, 'show']);
     Route::post('/company/profile', [CompanyController::class, 'update']);
+    Route::post('/company/founder', [CompanyController::class, 'storeFounder']);
+    Route::put('/company/founder/{id}', [CompanyController::class, 'updateFounder']);
     Route::delete('/company/founder/{id}', [CompanyController::class, 'deleteFounder']);
+    Route::post('/company/shareholder', [CompanyController::class, 'storeShareholder']);
+    Route::put('/company/shareholder/{id}', [CompanyController::class, 'updateShareholder']);
     Route::delete('/company/shareholder/{id}', [CompanyController::class, 'deleteShareholder']);
+    Route::post('/company/investor', [CompanyController::class, 'storeInvestor']);
+    Route::put('/company/investor/{id}', [CompanyController::class, 'updateInvestor']);
     Route::delete('/company/investor/{id}', [CompanyController::class, 'deleteInvestor']);
+    Route::post('/company/milestones', [CompanyController::class, 'storeMilestone']);
+    Route::put('/company/milestones/{id}', [CompanyController::class, 'updateMilestone']);
     Route::delete('/company/milestones/{id}', [CompanyController::class, 'deleteMilestone']);
     Route::get('/sectors', [SectorController::class, 'index']);
     Route::get('/states', [SectorController::class, 'getStates']);

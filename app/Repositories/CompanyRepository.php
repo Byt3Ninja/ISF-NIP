@@ -1,9 +1,12 @@
 <?php
 namespace App\Repositories;
 
-use App\Company;
 use App\Cycle;
+use App\Company;
+use App\Milestone;
+use App\Team_member;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompanyRepository
@@ -88,4 +91,136 @@ class CompanyRepository
             ? $query->paginate($filters['limit'] ?? 10)
             : $query->get();
     }
+
+     public function findWithRelations($id)
+    {
+        return Company::with(['country', 'state', 'city', 'teamMembers', 'sectoR'])->find($id);
+    }
+
+    public function update(Company $company, array $data): bool
+    {
+        return $company->update($data);
+    }
+
+    public function save(Company $company): bool
+    {
+        return $company->save();
+    }
+
+      public function createFounder(Company $company, array $data)
+    {
+        return $company->teamMembers()->create([
+            'Name' => $data['name'],
+            'Email' => $data['email'] ?? null,
+            'LinkedIn' => $data['linkedin'] ?? null,
+            'TeamMember' => 'Founder',
+        ]);
+    }
+
+    public function updateFounder(Team_member $founder, array $data)
+    {
+        $founder->update([
+         'Name' => $data['name'] ?? $founder->Name,
+         'Email' => $data['email'] ?? $founder->Email,
+         'LinkedIn' => $data['linkedin'] ?? $founder->LinkedIn,
+     ]);
+    return $founder;
+    }
+
+    public function createShareholder(Company $company, array $data)
+    {
+        return $company->teamMembers()->create([
+            'Name' => $data['name'],
+            'RoleShereholder' => $data['role'] ?? null,
+            'PresentagShereholder' => $data['ownership'],
+            'TeamMember' => 'Shareholder',
+        ]);
+    }
+
+    public function updateShareholder(Team_member $shareholder, array $data)
+    {
+       $shareholder->update([
+        'Name' => $data['name'] ?? $shareholder->Name,
+        'RoleShereholder' => $data['role'] ?? $shareholder->RoleShereholder,
+        'PresentagShereholder' => $data['ownership'] ?? $shareholder->PresentagShereholder,
+      ]);
+       return $shareholder;
+    }
+
+    public function createInvestor(Company $company, array $data)
+    {
+        return $company->teamMembers()->create([
+            'Name' => $data['name'],
+            'investorType' => $data['investmentType'] ?? null,
+            'TeamMember' => 'Investor',
+        ]);
+    }
+
+    public function updateInvestor(Team_member $investor, array $data)
+    {
+        $investor->update([
+        'Name' => $data['name'] ?? $investor->Name,
+        'investorType' => $data['investmentType'] ?? $investor->investorType,
+      ]);
+      return $investor;
+    }
+
+    public function createMilestone(Company $company, array $data)
+    {
+        return $company->milestones()->create([
+            'plan' => $data['plan'],
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+        ]);
+    }
+
+    public function updateMilestone(Milestone $milestone, array $data)
+    {
+        $milestone->update([
+          'plan' => $data['plan'] ?? $milestone->plan,
+          'name' => $data['name'] ?? $milestone->name,
+          'description' => $data['description'] ?? $milestone->description,
+        ]);
+        return $milestone;
+    }
+
+    public function deleteFounder(int $companyId, int $id): bool
+{
+    return DB::table('team_members')
+        ->where('id', $id)
+        ->where('Company_id', $companyId)
+        ->where('TeamMember', 'Founder')
+        ->delete();
+}
+
+public function deleteShareholder(int $companyId, int $id): bool
+{
+    return DB::table('team_members')
+        ->where('id', $id)
+        ->where('Company_id', $companyId)
+        ->where('TeamMember', 'Shareholder')
+        ->delete();
+}
+
+public function deleteInvestor(int $companyId, int $id): bool
+{
+    return DB::table('team_members')
+        ->where('id', $id)
+        ->where('Company_id', $companyId)
+        ->where('TeamMember', 'Investor')
+        ->delete();
+}
+
+public function findMilestone(int $companyId, int $id): ?object
+{
+    return DB::table('milestones')
+        ->where('Company_id', $companyId)
+        ->where('id', $id)
+        ->first();
+}
+
+public function deleteMilestone(int $id): bool
+{
+    return DB::table('milestones')->where('id', $id)->delete();
+}
 }

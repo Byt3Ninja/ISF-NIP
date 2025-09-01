@@ -1,7 +1,13 @@
 <?php
 namespace App\Services;
 
+use App\Company;
+use App\Milestone;
+use App\Team_member;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\CompanyRepository;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\CompanyProfileResource;
 
 class CompanyService
 {
@@ -16,5 +22,277 @@ class CompanyService
     {
         return $this->companyRepository->getCompanies($filters, $isApi);
     }
+
+    public function getCompanyProfile($id, $user)
+    {
+        if (!$user->ableToAny(['company.profile_view', 'company.profile_view_mine'])) {
+            return [ 'type' => 'forbidden' ];
+        }
+
+        $company = $this->companyRepository->findWithRelations($id);
+
+        if (!$company) {
+            return [ 'type' => 'not_found' ];
+        }
+
+        if (
+            $user->hasAnyRole(['Admin', 'organizationManager']) ||
+            ($user->hasRole('Registered') && $user->company_id == $company->id)
+        ) {
+            return [
+                'type' => 'success',
+                'data' => new CompanyProfileResource($company)
+            ];
+        }
+
+        return [ 'type' => 'forbidden' ];
+    }
+
+     public function updateCompanyProfile(array $data, $user)
+    {
+        $company = $this->companyRepository->findWithRelations($user->company_id);
+        if (!$company) {
+            return ['status' => 'not_found'];
+        }
+
+        DB::transaction(function () use ($data, $company, $user) {
+
+            if (isset($data['name'])) $company->name_en = $data['name'];
+            if (isset($data['country_id'])) $company->country_id = $data['country_id'];
+            if (array_key_exists('state_id', $data)) $company->state_id = $data['state_id'];
+            if (array_key_exists('sector_id', $data)) $company->sector = $data['sector_id'];
+
+            if (isset($data['categories'])) {
+                $translated = [];
+                foreach ($data['categories'] as $key) {
+                    $translationKey = __("admin.categories.$key");
+                    if ($translationKey) {
+                        $translated[] = $translationKey;
+                    }
+                }
+                $company->business_categories = json_encode($translated);
+            }
+
+            // Basic Info
+            $company->address_en = $data['address'] ?? $company->address_en;
+            $company->years_of_operations = $data['yearsOfOperations'] ?? $company->years_of_operations;
+            $company->product_or_service = $data['productOrService'] ?? $company->product_or_service;
+            $company->stage = $data['stage_id'] ?? $company->stage;
+
+            // Logo
+            if (!empty($data['logo'])) {
+                $image = $data['logo'];
+                $img_path = $image->store('images/logo', 'public_uploads');
+                $company->logo = Storage::disk('public_uploads')->url($img_path);
+            }
+
+            // Social Links
+            foreach (['email', 'phone', 'whatsapp', 'website', 'googleMapUrl', 'linkedin', 'x', 'facebook', 'youtube', 'instagram', 'tiktok'] as $field) {
+                if (isset($data[$field])) {
+                    $column = match ($field) {
+                        'x' => 'twitter',
+                        'googleMapUrl' => 'google_map',
+                        default => $field,
+                    };
+                    $company->{$column} = $data[$field];
+                }
+            }
+
+            // About Fields
+            foreach ([
+                'aboutStartup' => 'info_company',
+                'aboutProblem' => 'about_problem',
+                'aboutMarketOpportunities' => 'about_market_opportunity',
+                'aboutCompetitors' => 'about_competitors',
+                'aboutMonetization' => 'about_monetize',
+                'aboutChallenges' => 'about_challenges'
+            ] as $req => $col) {
+                if (isset($data[$req])) $company->{$col} = $data[$req];
+            }
+
+            // Sustainability
+            if (isset($data['sustainabilityFeatures'])) {
+                $company->Sustainable_development = json_encode($data['sustainabilityFeatures']);
+            }
+
+            // Financial and Business
+            foreach ([
+                'currency' => 'Currency',
+                'preMoneyEvaluation' => 'Pre_money_Valuation',
+                'raisedFund' => 'raised_fund',
+                'fundingTarget' => 'desired_funding_amount',
+                'targetMarket' => 'targeted_market',
+                'businessType' => 'business_type',
+                'financialPlan' => 'financial_plan_description'
+            ] as $req => $col) {
+                if (isset($data[$req])) {
+                    $company->{$col} = in_array($req, ['targetMarket']) ? json_encode($data[$req]) : $data[$req];
+                }
+            }
+
+            // File uploads (financialPlanAttachment, pitchDeckFile, documents, businessPlanAttachment)
+            $this->handleFileUploads($company, $data, $user);
+
+            // Team details
+            $company->team_num = $data['teamNumber'] ?? $company->team_num;
+            $company->working_team_summary = $data['workingTeamDetails'] ?? $company->working_team_summary;
+
+            // Business Model
+            $company->business_model = $data['businessModel'] ?? $company->business_model;
+            $company->business_model_description = $data['businessModelDescription'] ?? $company->business_model_description;
+
+            // Startup status
+            if (isset($data['haveStartup'])) {
+                if ($data['haveStartup'] === 'Yes') {
+                    $company->CreatedTax = $data['createdTax'] ?? 0;
+                    $company->Commercial_Register = $data['commercialRegister'] ?? null;
+                    $company->Tax_Card = $data['taxCard'] ?? null;
+                    $company->Country_Register_id = $data['country_Register_id'] ?? null;
+                } else {
+                    $company->CreatedTax = 0;
+                    $company->Commercial_Register = null;
+                    $company->Tax_Card = null;
+                    $company->Country_Register_id = null;
+                }
+            }
+
+            $this->companyRepository->save($company);
+        });
+
+        return [
+            'status' => 'success',
+            'company' => new CompanyProfileResource($company->fresh(['teamMembers', 'state', 'city', 'country', 'stage', 'sector']))
+        ];
+    }
+
+    protected function handleFileUploads(Company $company, array $data, $user): void
+    {
+        if (!empty($data['pitchDeckFile'])) {
+            $file = $data['pitchDeckFile'];
+            $path = $file->storeAs($user->company_id . '/pitch_decks/documents', $file->getClientOriginalName(), 'pitch_deck');
+            $company->pitch_deck = 'pitch_decks/' . $path;
+        }
+
+        if (!empty($data['financialPlanAttachment'])) {
+            $file = $data['financialPlanAttachment'];
+            $path = $file->storeAs($user->company_id . '/financial_plan/documents', $file->getClientOriginalName(), 'pitch_deck');
+            $company->financial_plan = 'financial_plan/' . $path;
+        }
+
+        if (!empty($data['documents'])) {
+            $existing = json_decode($company->documents ?? '[]', true);
+            foreach ($data['documents'] as $doc) {
+                $path = $doc->storeAs($user->company_id . '/pitch_decks/documents', $doc->getClientOriginalName(), 'pitch_deck');
+                $existing[] = 'pitch_decks/' . $path;
+            }
+            $company->documents = json_encode($existing);
+        }
+
+        if (!empty($data['businessPlanAttachment']) && $data['businessPlanAttachment']->isValid()) {
+            $file = $data['businessPlanAttachment'];
+            $folder = match (true) {
+                str_starts_with($file->getMimeType(), 'image/') => 'images',
+                str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                default => 'others',
+            };
+
+            $path = $user->company_id . '/business_plan/' . $folder . '/';
+            $file->storeAs($path, $file->getClientOriginalName(), ['disk' => 'pitch_deck']);
+            $company->business_plan = 'business_plan/' . $path . $file->getClientOriginalName();
+        }
+
+        if (isset($data['pitchDeckVideoUrl'])) {
+            $company->pitch_deck_video = $data['pitchDeckVideoUrl'];
+        }
+    }
+
+     public function createFounder(array $data)
+    {
+        $company = auth()->user()->company;
+        return $this->companyRepository->createFounder($company, $data);
+    }
+
+    public function updateFounder(int $id, array $data)
+    {
+        $founder = Team_member::where('id', $id)
+            ->where('Company_id', auth()->user()->company_id)
+            ->where('TeamMember', 'Founder')
+            ->firstOrFail();
+
+        return $this->companyRepository->updateFounder($founder, $data);
+    }
+
+    public function createShareholder(array $data)
+    {
+        $company = auth()->user()->company;
+        return $this->companyRepository->createShareholder($company, $data);
+    }
+
+    public function updateShareholder(int $id, array $data)
+    {
+        $shareholder = Team_member::where('id', $id)
+            ->where('Company_id', auth()->user()->company_id)
+            ->where('TeamMember', 'Shareholder')
+            ->firstOrFail();
+
+        return $this->companyRepository->updateShareholder($shareholder, $data);
+    }
+
+    public function createInvestor(array $data)
+    {
+        $company = auth()->user()->company;
+        return $this->companyRepository->createInvestor($company, $data);
+    }
+
+    public function updateInvestor(int $id, array $data)
+    {
+        $investor = Team_member::where('id', $id)
+            ->where('Company_id', auth()->user()->company_id)
+            ->where('TeamMember', 'Investor')
+            ->firstOrFail();
+
+        return $this->companyRepository->updateInvestor($investor, $data);
+    }
+
+    public function createMilestone(array $data)
+    {
+        $company = auth()->user()->company;
+        return $this->companyRepository->createMilestone($company, $data);
+    }
+
+    public function updateMilestone(int $id, array $data)
+    {
+        $milestone = Milestone::where('id', $id)
+            ->where('Company_id', auth()->user()->company_id)
+            ->firstOrFail();
+
+        return $this->companyRepository->updateMilestone($milestone, $data);
+    }
+
+    public function deleteFounder(int $companyId, int $id): bool
+{
+    return $this->companyRepository->deleteFounder($companyId, $id);
+}
+
+public function deleteShareholder(int $companyId, int $id): bool
+{
+    return $this->companyRepository->deleteShareholder($companyId, $id);
+}
+
+public function deleteInvestor(int $companyId, int $id): bool
+{
+    return $this->companyRepository->deleteInvestor($companyId, $id);
+}
+
+public function findMilestone(int $companyId, int $id): ?object
+{
+    return $this->companyRepository->findMilestone($companyId, $id);
+}
+
+public function deleteMilestone(int $id): bool
+{
+    return $this->companyRepository->deleteMilestone($id);
+}
 }
 
