@@ -13,7 +13,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrganizationCreatedMail;
+use App\Services\OrganizationService;
 use App\Http\Resources\OrganizationResource;
+use App\Repositories\OrganizationRepository;
 use App\Http\Requests\StoreOrganizationRequest;
 use App\Http\Requests\UpdateOrganizationRequest;
 /**
@@ -39,6 +41,10 @@ use App\Http\Requests\UpdateOrganizationRequest;
 class OrganizationController extends Controller
 {
     use ApiResponder;
+    public function __construct(
+        protected OrganizationService $organizationService,
+        protected OrganizationRepository $organizationRepo,
+    ) {}
    /**
  * @OA\Get(
  *     path="/api/organizations",
@@ -93,45 +99,13 @@ class OrganizationController extends Controller
  */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        if (!$user->ableTo('organizations.index')) {
-            return $this->forbidden(__('api.forbidden'));
-        }
+        $this->authorize('viewAny', Organization::class);
+        $status = $request->get('status');
+        $data = $this->organizationService->listOrganizations($status);
 
-     $query = Organization::with(['user.company', 'cycles']);
-
-     $statusFilterApplied = false;
-     $status = null;
-
-     if ($request->has('status')) {
-        $status = (int) $request->get('status');
-        if (in_array($status, [0, 1])) {
-            $query->where('status', $status);
-            $statusFilterApplied = true;
-        }
-     }
-
-     $organizations = $query->get();
-
-       if ($statusFilterApplied) {
-         $totalOrganizations = Organization::where('status', $status)->count();
-         $totalActive = $status == 1 ? $totalOrganizations : 0;
-         $totalInactive = $status == 0 ? $totalOrganizations : 0;
-      } else {
-         $totalOrganizations = Organization::count();
-         $totalActive = Organization::where('status', 1)->count();
-         $totalInactive = Organization::where('status', 0)->count();
-     }
-
-       return $this->success(
-            OrganizationResource::collection($organizations),
-            [
-                'meta' => [
-                    'totalOrganizations' => $totalOrganizations,
-                    'totalActiveOrganizations' => $totalActive,
-                    'totalInactiveOrganizations' => $totalInactive,
-                ]
-            ]
+        return $this->success(
+            OrganizationResource::collection($data['organizations']),
+            ['meta' => $data['counts']]
         );
      }
 
@@ -173,65 +147,20 @@ class OrganizationController extends Controller
  */
     public function store(StoreOrganizationRequest $request)
 {
-    $user = Auth::user();
-    if (!$user->ableToAny(['organizations.create', 'organizations.store'])) {
-        return $this->forbidden(__('api.forbidden'));
-    }
-    $data = $request->validated();
+    $this->authorize('create', Organization::class);
     $img_url = '/images/background/logo.png';
-
-    try {
         if ($request->hasFile('imgUrl')) {
-            $image = $request->file('imgUrl');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('organizations/'), $imageName);
-            $img_url = 'organizations/' . $imageName;
+            $file = $request->file('imgUrl');
+            $filename = 'organizations/' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('organizations'), basename($filename));
+            $img_url = $filename;
         }
- 
-        $organization = DB::transaction(function () use ($data, $img_url, $request) {
-            $password = $data['password'];
-
-            $user = User::create([
-                'first_name_en' => $data['firstName'],
-                'last_name_en'  => $data['lastName'],
-                'first_name_ar' => $data['firstName'],
-                'last_name_ar'  => $data['lastName'],
-                'email'         => $data['email'],
-                'gender'        => $data['gender'],
-                'phone'         => $data['phone'],
-                'HaveCompany'   => 0,
-                'password'      => bcrypt($password),
-                'country_code' => $request->countryCode
-            ]);
-
-            $role = Role::firstOrCreate(
-                ['default_for' => 'organizationManager'],
-                ['name' => 'organizationManager', 'guard_name' => 'web']
-            );
-
-            $user->allotRole($role->default_for);
-
-            $organization = new Organization();
-            $organization->name_en = $data['name'];
-            $organization->name_ar = $data['name'];
-            $organization->img_url = $img_url;
-            $organization->status = $data['status'];
-            $organization->user_id = $user->id;
-            $organization->save();
-
-            $user->organization_id = $organization->id;
-            $user->save();
-
-            // Send email
-            Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $password));
-            return $organization;
-        });
-
-        return $this->created(new OrganizationResource($organization), __('api.organizationCreated'), [], 201);
-
-    } catch (\Throwable $e) {
-        return $this->error(__('api.organizationCreationFailed'), 500);
-    }
+        $org = $this->organizationService->createOrganization(
+            $request->validated(),
+            $img_url,
+            $request->countryCode
+        );
+        return $this->created(new OrganizationResource($org), __('api.organizationCreated'));
 }
 
 /**
@@ -278,61 +207,12 @@ class OrganizationController extends Controller
  */
 public function update(UpdateOrganizationRequest $request, $id)
 {
-    $user = Auth::user();
-    if (!$user->ableToAny(['organizations.edit', 'organizations.update'])) {
-        return $this->forbidden(__('api.forbidden'));
-    }
-    $organization = Organization::find($id);
-    if (empty($organization)) {
-        return $this->error(__('api.organizationNotFound'), 404);
-    }
-    $user = $organization->user;
+    $org = $this->organizationRepo->find($id);
+    if (!$org) return $this->notFound(__('api.organizationNotFound'));
+    $this->authorize('update', $org);
 
-    $data = $request->validated();
-    $img_url = $organization->img_url ?? '/images/background/logo.png';
-
-    try {
-        if ($request->hasFile('imgUrl')) {
-            $image = $request->file('imgUrl');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('organizations/'), $imageName);
-            $img_url = 'organizations/' . $imageName;
-        }
-
-        DB::transaction(function () use ($organization, $user, $data, $img_url) {
-            $organization->update([
-                'name_en' => $data['name'] ?? $organization->name_en,
-                'name_ar' => $data['name'] ?? $organization->name_ar,
-                'img_url' => $img_url,
-                'status' => $data['status'] ?? $organization->status,
-            ]);
-
-            $user->first_name_en = $data['firstName'] ?? $user->first_name_en;
-            $user->last_name_en  = $data['lastName'] ?? $user->last_name_en;
-            $user->first_name_ar = $data['firstName'] ?? $user->first_name_ar;
-            $user->last_name_ar  = $data['lastName'] ?? $user->last_name_ar;
-            $user->gender        = $data['gender'] ?? $user->gender;
-            $user->phone         = $data['phone'] ?? $user->phone;
-            $user->organization_id = $organization->id;
-            $user->country_code   = $data['countryCode'] ?? $user->country_code;
-
-            if (!empty($data['email']) && $data['email'] !== $user->email) {
-                $user->email = $data['email'];
-            }
-
-            if (!empty($data['password'])) {
-                $user->password = bcrypt($data['password']);
-            }
-
-            $user->save();
-            return $organization;
-        });
-        $organization->refresh();
-        return $this->success(new OrganizationResource($organization), [],__('api.organizationUpdated'));
-
-    } catch (\Throwable $e) {
-        return $this->error(__('api.organizationUpdateFailed'), 500);
-    }
+    $org = $this->organizationService->updateOrganization($org,$request->validated(),$request->file('imgUrl'));
+    return $this->success(new OrganizationResource($org),[], __('api.organizationUpdated'));
 }
 
 /**
@@ -368,37 +248,14 @@ public function update(UpdateOrganizationRequest $request, $id)
  */
 public function destroy($id)
 {
-    $user = Auth::user();
-    if (!$user->ableTo('organizations.destroy')) {
-        return $this->forbidden(__('api.forbidden'));
+   $org = $this->organizationRepo->findWithCycles($id);
+   if (!$org) return $this->notFound(__('api.organizationNotFound'));
+   $this->authorize('delete', $org);
+   $result = $this->organizationService->deleteOrganization($org);
+   if ($result === true) {
+        return $this->success(null, [], __('api.organizationDeleted'));
     }
-
-    $organization = Organization::with(['cycles', 'cycles.companies'])->find($id);
-    if (!$organization) {
-        return $this->notFound(__('api.organizationNotFound'));
-    }
-
-    $hasCycles = $organization->cycles()->exists();
-    $hasCompanies = $organization->cycles->flatMap->companies->isNotEmpty();
-
-    if ($hasCycles || $hasCompanies) {
-        $organization->delete();
-
-        Log::warning('Organization soft deleted due to active dependencies.', [
-            'organization_id' => $organization->id,
-            'has_cycles' => $hasCycles,
-            'has_companies' => $hasCompanies,
-            'performed_by' => auth()->id(),
-        ]);
-
-
-        return $this->error(__('api.Organization cannot be deleted'), 400);
-    }
-      
-    $organization->forceDelete();
-
-    return $this->success(null, [],__('api.organizationDeleted'));
-   
+    return $this->error(__('api.Organization cannot be deleted'), 400); 
 }
 
 }

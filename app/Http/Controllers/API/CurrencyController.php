@@ -5,10 +5,12 @@ namespace App\Http\Controllers\API;
 use App\Currency;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
+use App\Services\CurrencyService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use App\Http\Resources\CurrencyResource;
+use App\Repositories\CurrencyRepository;
 use App\Http\Requests\StoreCurrencyApiRequest;
 use App\Http\Requests\UpdateCurrencyApiRequest;
 /**
@@ -26,7 +28,15 @@ use App\Http\Requests\UpdateCurrencyApiRequest;
  */
 class CurrencyController extends Controller
 {
-     use ApiResponder;
+    use ApiResponder;
+    protected $service;
+    protected $repo;
+
+    public function __construct(CurrencyService $service, CurrencyRepository $repo)
+    {
+        $this->service = $service;
+        $this->repo = $repo;
+    }
      /**
  * @OA\Get(
  *     path="/api/currencies",
@@ -56,9 +66,7 @@ class CurrencyController extends Controller
 
     public function index()
     {
-        $currencies = DB::table('currencies')->where('enabled', 1)->get();
-
-        return $this->success(CurrencyResource::collection($currencies));
+        return $this->success(CurrencyResource::collection($this->service->getEnabledCurrencies()));
     }
     /**
  * @OA\Get(
@@ -105,40 +113,32 @@ class CurrencyController extends Controller
  */
     public function currencies(Request $request)
     {
-        $user = auth()->user();
-        if (!$user->ableTo('currencies.index')) {
-            return $this->forbidden(__('api.forbidden'));
-        }
-        $query = DB::table('currencies');
+        $this->authorize('viewAny', Currency::class);
+        $limit = $request->get('limit', 10);
+        $enabled = $request->has('enabled') ? $request->boolean('enabled') : null;
 
-        if ($request->has('enabled')) {
-         $enabled = $request->boolean('enabled');
-            $query->where('enabled', $enabled);
-         }
-
-         $limit = $request->get('limit', 10);
-         $currencies = $query->orderByDesc('last_updated')->paginate($limit);
+        $currencies = $this->service->paginateCurrencies($limit, $enabled);
 
         if ($currencies->isEmpty()) {
-         return $this->notFound(__('api.currencies_not_found'));
+            return $this->notFound(__('api.currencies_not_found'));
         }
 
-     return $this->success(
-        CurrencyResource::collection($currencies->items()),
-        [
-            'meta' => [
-                'total' => $currencies->total(),
-                'page' => $currencies->currentPage(),
-                'limit' => $currencies->perPage(),
-            ],
-            'links' => [
-                'first' => $currencies->url(1),
-                'last' => $currencies->url($currencies->lastPage()),
-                'prev' => $currencies->previousPageUrl(),
-                'next' => $currencies->nextPageUrl(),
-            ],
-        ]
-     );
+        return $this->success(
+            CurrencyResource::collection($currencies->items()),
+            [
+                'meta' => [
+                    'total' => $currencies->total(),
+                    'page' => $currencies->currentPage(),
+                    'limit' => $currencies->perPage(),
+                ],
+                'links' => [
+                    'first' => $currencies->url(1),
+                    'last' => $currencies->url($currencies->lastPage()),
+                    'prev' => $currencies->previousPageUrl(),
+                    'next' => $currencies->nextPageUrl(),
+                ],
+            ]
+        );
     }
     /**
  * @OA\Post(
@@ -176,27 +176,9 @@ class CurrencyController extends Controller
 
      public function store(StoreCurrencyApiRequest $request)
     {
-        $user = auth()->user();
-        if (!$user->ableToAny(['currencies.create', 'currencies.store'])) {
-          return $this->forbidden(__('api.forbidden'));
-        }
-        $currency = new Currency();
-        $currency->currency_code = $request->currencyCode;
-        $currency->currency_name = $request->currencyName;
-        $currency->currency_symbol = $request->currencySymbol;
-        $currency->exchange_rate_to_usd = $request->exchangeRateToUsd;
-        $currency->enabled = $request->enabled ?? 0;
-
-        if ($request->hasFile('flag')) {
-            $file = $request->file('flag');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('icons/flags'), $filename);
-            $currency->flag = 'icons/flags/' . $filename;
-        }
-
-        $currency->save();
-
-        return $this->created(new CurrencyResource($currency),__('api.Currency_created'));
+        $this->authorize('create', Currency::class);
+        $currency = $this->service->store($request->validated(), $request->file('flag'));
+        return $this->created(new CurrencyResource($currency), __('api.Currency_created'));
     }
 
     /**
@@ -240,34 +222,14 @@ class CurrencyController extends Controller
  */
     public function update(UpdateCurrencyApiRequest $request, $id)
     {
-        $user = auth()->user();
-        if (!$user->ableToAny(['currencies.edit', 'currencies.update'])) {
-          return $this->forbidden(__('api.forbidden'));
+        $currency = $this->repo->find($id);
+        if (!$currency) {
+            return $this->notFound(__('api.currency_not_found'));
         }
-       $currency = Currency::find($id);
+        $this->authorize('update', $currency);
+        $updated = $this->service->update($currency, $request->validated(), $request->file('flag'));
 
-       if (!$currency) {
-        return $this->notFound(__('api.currency_not_found'));
-       }
-
-        $currency->currency_code = $request->has('currencyCode') ? $request->currencyCode : $currency->currency_code;
-        $currency->currency_name = $request->has('currencyName') ? $request->currencyName : $currency->currency_name;
-        $currency->currency_symbol = $request->has('currencySymbol') ? $request->currencySymbol : $currency->currency_symbol;
-        $currency->exchange_rate_to_usd = $request->has('exchangeRateToUsd') ? $request->exchangeRateToUsd : $currency->exchange_rate_to_usd;
-        $currency->enabled = $request->has('enabled') ? $request->enabled : $currency->enabled;
-
-        // Handle file upload if flag is provided
-        if ($request->hasFile('flag')) {
-            $file = $request->file('flag');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('icons/flags'), $filename);
-            $currency->flag = 'icons/flags/' . $filename;
-        }
-
-        $currency->last_updated = now();
-        $currency->save();
-
-      return $this->success(new CurrencyResource($currency), [], __('api.Currency_updated'));
+        return $this->success(new CurrencyResource($updated), [], __('api.Currency_updated'));
     }
 
     /**
@@ -297,15 +259,13 @@ class CurrencyController extends Controller
  */
     public function destroy($id)
     {
-        $user = auth()->user();
-        if (!$user->ableTo('currencies.destroy')) {
-            return $this->forbidden(__('api.forbidden'));
-        }
-        $currency = Currency::find($id);
+        $currency = $this->repo->find($id);
         if (!$currency) {
             return $this->notFound(__('api.currency_not_found'));
         }
-        $currency->delete();
+
+        $this->authorize('delete', $currency);
+        $this->service->delete($currency);
         return $this->success(null, [], __('api.currency_deleted'));
     }
 /**
@@ -335,33 +295,14 @@ class CurrencyController extends Controller
  */
     public function updateAllCurrency()
 {
-    $user = auth()->user();
-    if (!$user->ableTo('currencies.rates_update_all')) {
-        return $this->forbidden(__('api.forbidden'));
+    $this->authorize('updateRates', Currency::class);
+
+    $success = $this->service->updateExchangeRates();
+
+    if (!$success) {
+        return $this->serverError(__('admin.FailedUpdate'));
     }
 
-    try {
-        $response = Http::timeout(10)->get('https://www.floatrates.com/daily/usd.json');
-
-        if (!$response->ok()) {
-            return $this->error(__('admin.FailedUpdate'), 500);
-        }
-
-        $data = $response->json();
-        $currencies = Currency::where('currency_code', '!=', 'USD')->get();
-
-        foreach ($currencies as $currency) {
-            $code = strtolower($currency->currency_code);
-            if (isset($data[$code])) {
-                $currency->exchange_rate_to_usd = $data[$code]['rate'];
-                $currency->last_updated = now();
-                $currency->save();
-            }
-        }
-
-        return $this->success(null, [], __('api.currencyRatesUpdated'));
-    } catch (\Exception $e) {
-        return $this->serverError(__('admin.FailedUpdate') . ': ' . $e->getMessage());
-    }
+    return $this->success(null, [], __('api.currencyRatesUpdated'));
 }
 }

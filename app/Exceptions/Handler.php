@@ -8,6 +8,7 @@ use Sentry\Laravel\Facade as Sentry;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Auth\Access\AuthorizationException;
 
 
 class Handler extends ExceptionHandler
@@ -49,6 +50,10 @@ class Handler extends ExceptionHandler
             'success' => false,
             'message' => 'The Request method is not allowed'
         ], 405);
+    }
+
+    if ($exception instanceof AuthorizationException) {
+            return $this->forbidden(__('api.forbidden'));
     }
 
     return parent::render($request, $exception);

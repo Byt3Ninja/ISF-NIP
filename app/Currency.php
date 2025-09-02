@@ -10,5 +10,5 @@ class Currency extends Model
     public $timestamps = false;
     use HasFactory;
 
-    protected $fillable = ['currency_code','currency_name','currency_symbol','exchange_rate_to_usd'];
+    protected $fillable = ['currency_code','currency_name','currency_symbol','exchange_rate_to_usd','flag'];
 }
