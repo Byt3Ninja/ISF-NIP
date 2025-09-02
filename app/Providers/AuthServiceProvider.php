@@ -4,6 +4,8 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 
+use App\Currency;
+use App\Organization;
 use App\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -18,6 +20,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         User::class => \App\Policies\UserPolicy::class,
+        Organization::class => \App\Policies\OrganizationPolicy::class,
+        Currency::class => \App\Policies\CurrencyPolicy::class
 
     ];
 
