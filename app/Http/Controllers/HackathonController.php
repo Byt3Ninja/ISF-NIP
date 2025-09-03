@@ -1641,7 +1641,6 @@ class HackathonController extends Controller
 
             $participant->delete();
         }
-        
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
 
