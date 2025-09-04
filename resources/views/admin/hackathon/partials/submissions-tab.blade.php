@@ -20,7 +20,7 @@
         <button type="submit" class="btn btn-sm btn-label-primary"><i class="ti ti-search"></i></button>
       </div>
     </form>
-    <table class="table">
+    <table class="table table-custom">
       <thead class="table-light">
         <tr>
           <th scope="col">{{ $l == 'en' ? 'Submitter' : 'المستخدم' }}</th>

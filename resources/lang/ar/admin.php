@@ -2391,4 +2391,5 @@ return [
 	'financial_policy' => 'سياسة المالية',
 	'legal_policy' => 'سياسة قانونية',
 	'mentorship_request' => 'طلب جلسة ارشاد',
+	'Conversation_Chat_not_found' => 'لم يتم العثور على المحادثة',
 ];

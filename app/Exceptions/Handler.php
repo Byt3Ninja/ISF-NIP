@@ -3,15 +3,18 @@
 namespace App\Exceptions;
 
 use Throwable;
-use Sentry\Laravel\Facade as Sentry;
+use App\Traits\ApiResponder;
 //use Sentry\Laravel\Facade\Sentry;
+use Sentry\Laravel\Facade as Sentry;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 
 class Handler extends ExceptionHandler
 {
+    use ApiResponder;
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -49,6 +52,10 @@ class Handler extends ExceptionHandler
             'success' => false,
             'message' => 'The Request method is not allowed'
         ], 405);
+    }
+
+    if ($exception instanceof AuthorizationException) {
+            return $this->forbidden(__('api.forbidden'));
     }
 
     return parent::render($request, $exception);

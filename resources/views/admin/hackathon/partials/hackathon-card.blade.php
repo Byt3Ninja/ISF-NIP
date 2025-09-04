@@ -62,10 +62,14 @@
                       {{ __('admin.ApplyHackathon') }}
                     </button>
                   @else
+                    @if($hackathon['exist_step'] = false)
                     <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
                       <i class="ti ti-send me-1"></i>
                       <span class="text-nowrap">{{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}</span>
                     </button>
+                    @else
+
+                    @endif
                   @endif
                 @else
                 
@@ -98,12 +102,16 @@
                       {{ __('admin.ApplyHackathon') }}
                     </button>
                   @else
-                    <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
-                      <i class="ti ti-send me-1"></i>
-                      <span class="text-nowrap">
-                        {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
-                      </span>
-                    </button>
+                    @if($hackathon['cycle_id'] == $user_cycle_id)
+                      <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
+                        <i class="ti ti-send me-1"></i>
+                        <span class="text-nowrap">
+                          {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                        </span>
+                      </button>
+                    @else
+
+                    @endif
                   @endif
 
                   

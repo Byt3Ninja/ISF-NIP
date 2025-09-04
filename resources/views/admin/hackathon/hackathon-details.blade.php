@@ -348,7 +348,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
       $('.table:not(.table-custom)').DataTable({
         paging: true,
         searching: true,
-        ordering: true,
+        ordering: $('.table').hasClass('table-custom') ? false : true,
         order: [[0, 'desc']],
         language: {
           @if($l == 'ar')

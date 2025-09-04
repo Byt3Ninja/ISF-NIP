@@ -168,4 +168,8 @@ return [
     'Hide schedule' => 'Hide schedule',
     'No mentorship sessions found' => 'No mentorship sessions found',
     'No training sessions found' => 'No training sessions found',
+    'Invitation_has_expired' => 'Invitation has expired',
+    'Invitation_not_found' => 'Invitation not found',
+    'Conversation_Chat_not_found' => 'Conversation Chat not found',
+    'Invitation_accepted_successfully' => 'Invitation accepted successfully',
 ];
