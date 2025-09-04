@@ -24,6 +24,8 @@ use App\Http\Controllers\API\Mentors\MentorController;
 use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
+use App\Http\Controllers\NotificationSettingsController;
+use App\Http\Controllers\TestNotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +109,21 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/v1/programs/{programId}/reports/workshops', [ProgramController::class, 'workshops']);
     Route::get('/v1/programs/{programId}/reports/final-evaluation', [ProgramController::class, 'finalEvaluation']);
     Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
+    
+    // Notification Settings Routes
+    Route::get('/notification-settings', [NotificationSettingsController::class, 'getNotificationSettings']);
+    Route::put('/notification-settings', [NotificationSettingsController::class, 'updateNotificationSettings']);
+    Route::get('/users/{userId}/notification-settings', [NotificationSettingsController::class, 'getUserNotificationSettings']);
+    
+    // Test Notification Routes
+    Route::get('/test/notifications/settings', [TestNotificationController::class, 'getUserNotificationSettings']);
+    Route::post('/test/notifications/task', [TestNotificationController::class, 'testTaskNotification']);
+    Route::post('/test/notifications/welcome', [TestNotificationController::class, 'testWelcomeNotification']);
+    Route::post('/test/notifications/training', [TestNotificationController::class, 'testTrainingNotification']);
+    Route::post('/test/notifications/mentorship', [TestNotificationController::class, 'testMentorshipRequestNotification']);
+    Route::post('/test/notifications/bulk', [TestNotificationController::class, 'testBulkNotification']);
+    Route::post('/test/notifications/channels', [TestNotificationController::class, 'testSpecificChannels']);
+    
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);

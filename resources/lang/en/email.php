@@ -1,0 +1,60 @@
+<?php
+ 
+return [
+    'welcome_email' => [
+        'subject' => 'Welcome to Our Platform!',
+        'dear' => 'Dear',
+        'm1' => 'We are excited to have you on board. Here are your login details:',
+        'm2' => 'Your email address is:',
+        'm3' => 'You can log in to the platform using the button below.',
+        'best_regards' => 'Best regards,',
+    ],
+    'custom_mail' => [
+        'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
+        'dear_participant' => 'Dear Participant',
+        'welcome_message' => 'Welcome as a user on our platform.',
+        'email' => 'Email',
+        'password_reset_message' => 'You can set your password by clicking the following link:',
+        'password_reset_link' => 'Reset Password',
+        'guide_link' => 'Please download the participant\'s guide from here',
+        'best_regards' => 'Best regards,',
+    ],
+    'cycle_email' => [
+        'subject' => 'Startup Cycle Update',
+        'title' => 'Startup Progress Notification',
+        'dear' => 'Dear',
+        'in_body_1' => 'We are pleased to inform you that your startup :company_name, has successfully transitioned from the :last_step to the :new_step. This advancement reflects your hard work and commitment to growth.',
+        'in_body_2' => 'Please log in to your dashboard on our virtual incubator platform to view detailed feedback and the next steps recommended for your continued success. Should you have any questions or require further assistance, feel free to reach out to us.',
+        'in_body_3' => 'Congratulations on reaching this significant milestone! We look forward to seeing your continued progress and success.',
+        'out_body_1' => 'We regret to inform you that your startup did not progress to the next stage.',
+        'out_body_2' => 'Thank you for your efforts and participation.',
+        'regards' => 'Best regards,',
+    ],
+
+    'trainer_email' => [
+        'subject' => 'New Trainer Assignment',
+        'title' => 'Kindly note you have a new online trainingsession, with Title :',
+        'dear' => 'Dear',
+        'session_start' => 'Session will start at',
+        'link' => 'Link',
+        'map_link' => 'Google Map Link',
+        'address' => 'Address',
+        'regards' => 'Best regards,',
+    ],
+
+    'verify_email' => [
+        'subject' => 'Verify Your Email Account',
+        'greeting' => 'Dear Innovator',
+        'in_body_1' => "We're thrilled to have you on board at GrowthLabs, where your ideas can grow and flourish.",
+        'in_body_2' => "You're just one step away from accessing a world of resources, mentorship, and a vibrant community of like-minded individuals.",
+        'action_text' => 'Activate Your Account',
+        'in_body_3' => 'To dive into your GrowthLabs journey, please confirm your email address by clicking the button below. This ensures a secure and personalized experience for you on our platform.',
+        'in_body_4' => "Didn't sign up for GrowthLabs? If you received this email by mistake, there's no need to worry. No further action is needed, and you won't receive any more emails from us.",
+        'in_body_5' => "Welcome to the beginning of something great. We can't wait to see what you'll achieve.",
+        'regards' => 'Warmest Regards,',
+        'team' => 'The GrowthLabs Team',
+        'trouble_clicking' => 'If you’re having trouble clicking the "Activate Your Account" button, copy and paste the URL below into your web browser: :link ',
+        'if_trouble' => 'If you have trouble clicking the button, please copy and paste the URL below into your web browser:',
+    ],
+
+];
