@@ -277,7 +277,7 @@
                   <div class="input-group input-group-merge">
                     <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" />
                     <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                                                       @error('password')
+                  @error('password')
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
                   </div>
@@ -287,7 +287,9 @@
                   <div class="input-group input-group-merge">
                     <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" />
                     <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                
+                    @error('password_confirmation')
+                    <small class="text-danger">{{ $message }}</small>
+                  @enderror
                   </div>
                 </div>
                 <div class="col-12 mb-4">
@@ -310,7 +312,7 @@
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
 
-                   @error('phone_code')
+                   @error('country_code')
                     <small class="text-danger">{{ $message }}</small>
                   @enderror
                 </div>

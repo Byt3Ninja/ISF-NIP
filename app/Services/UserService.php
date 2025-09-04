@@ -103,8 +103,7 @@ class UserService
         if($user->hasRole('Judger')){
                $user->notify(new WelcomeJudgerNotification($user));
         }else{
-
-             Mail::to(users: $user->email)->queue(new WelcomeUserMail($user, $data['password']));
+             $user->notify(new WelcomeUserNotification($user, $data['password']));
         }
 
 
