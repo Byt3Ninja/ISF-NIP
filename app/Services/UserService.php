@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\OrganizationCreatedMail;
 use App\Notifications\WelcomeJudgerNotification;
+use App\Notifications\WelcomeUserNotification;
 use App\User;
 use App\Mail\WelcomeUserMail;
 use App\Repositories\UserRepository;
@@ -106,11 +107,11 @@ class UserService
              $user->notify(new WelcomeUserNotification($user, $data['password']));
         }
 
-
+        return $result;
         }
 
 
-        return $result;
+
 
 
         } catch (\Throwable $e) {
