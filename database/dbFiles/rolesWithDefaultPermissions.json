@@ -5680,28 +5680,36 @@
                 "description": "View SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             },
             {
                 "name": "swot.generate",
                 "description": "Generate SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             },
             {
                 "name": "swot.save",
                 "description": "Save SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             },
             {
                 "name": "swot.export",
                 "description": "Export SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             }
         ]
     },

@@ -1397,7 +1397,7 @@ return [
 	'Search team members' => 'Search Team Members',
 	'Search programs' => 'Search Programs',
 	'swot_error' => 'Please Complete the Following Fields From Your Profile Before Generating the SWOT Analysis:',
-	'swot_generated' => 'تم إنشاء تحليل SWOT بنجاح',
+	'swot_generated' => 'SWOT Analysis Generated Successfully',
 	'Success!' => 'Success!',
 	'Error!' => 'Error!',
 	'No_LinkedIn' => 'No LinkedIn',
