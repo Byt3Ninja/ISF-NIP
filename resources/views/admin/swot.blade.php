@@ -19,7 +19,7 @@
     <button id="generate-swot" class="btn btn-warning mt-4">{{__('admin.generate')}}</button>
 
      <!-- Export to PDF -->
-     <a href="{{ route('swot.export') }}" class="btn btn-success mt-3 ms-4">{{__('admin.export')}}</a>
+     <a href="{{ route('swot.export') }}" class="btn btn-danger mt-3 ms-4">{{__('admin.export')}}</a>
 
     <form action="{{ route('swot.save') }}" method="POST">
         @csrf
@@ -113,7 +113,6 @@ document.getElementById('generate-swot').addEventListener('click', function () {
         }
     })
     .catch(error => {
-        console.error("Error generating SWOT:", error);
         
         let errorMessageDiv = document.createElement('div');
         errorMessageDiv.className = 'alert alert-danger mt-3';
