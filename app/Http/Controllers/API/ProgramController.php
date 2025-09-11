@@ -8,12 +8,16 @@ use Carbon\Carbon;
 use App\ScreeningEvaluation;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
+use App\Services\ProgramService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\CompanyResource;
 use App\Http\Resources\ProgramResource;
 use App\Http\Requests\StoreProgramRequest;
 use App\Http\Requests\UpdateProgramRequest;
+use App\Http\Requests\GetProgramMentorsRequest;
+use App\Http\Requests\GetProgramStartupsRequest;
 use App\{Cycle, Sector, Stage, ScreeningEvaluationResults, SurveyResponses};
 
 /**
@@ -61,7 +65,13 @@ use App\{Cycle, Sector, Stage, ScreeningEvaluationResults, SurveyResponses};
  */
 class ProgramController extends Controller
 {
-     use ApiResponder;
+    use ApiResponder;
+
+    protected $programService;
+    public function __construct(ProgramService $programService)
+    {
+        $this->programService = $programService;
+    }
    /**
  * @OA\Post(
  *     path="/api/programs",
@@ -1235,4 +1245,293 @@ public function finalEvaluation(string $programId, Request $request)
     ]);
 }
 
+/**
+ * @OA\Get(
+ *     path="/api/v1/programs/{programId}/mentors",
+ *     summary="Retrieve Program Mentors",
+ *     description="Get a paginated list of mentors assigned to a specific program. Only accessible by Admins and Organization Managers.",
+ *     operationId="getProgramMentors",
+ *     tags={"Programs"},
+ *     security={{"bearerAuth": {}}},
+ * 
+ *     @OA\Parameter(
+ *         name="programId",
+ *         in="path",
+ *         required=true,
+ *         description="The ID of the program",
+ *         @OA\Schema(type="integer", example=1234)
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         required=false,
+ *         description="Pagination page number",
+ *         @OA\Schema(type="integer", default=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="limit",
+ *         in="query",
+ *         required=false,
+ *         description="Number of items per page",
+ *         @OA\Schema(type="integer", default=10)
+ *     ),
+ *     @OA\Parameter(
+ *         name="search",
+ *         in="query",
+ *         required=false,
+ *         description="Search mentors by name, bio, or expertise",
+ *         @OA\Schema(type="string", example="Product")
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=200,
+ *         description="Mentors retrieved successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Mentors retrieved successfully"),
+ *             @OA\Property(property="data", type="array",
+ *                 @OA\Items(
+ *                     @OA\Property(property="id", type="integer", example=128),
+ *                     @OA\Property(property="name", type="string", example="John Philip"),
+ *                     @OA\Property(property="imgUrl", type="string", example="http://localhost:8000/uploads/users/avatar.jpg"),
+ *                     @OA\Property(property="title", type="string", example="Senior Mentor"),
+ *                     @OA\Property(property="email", type="string", example="mentor@example.com"),
+ *                     @OA\Property(property="bio", type="string", example="Experienced startup mentor"),
+ *                     @OA\Property(property="specialization", type="string", example="Fintech, SaaS"),
+ *                     @OA\Property(property="linkedin", type="string", example="https://linkedin.com/in/mentor"),
+ *                     @OA\Property(property="joinedAt", type="string", format="date-time", example="2025-09-11T08:16:48.352018Z"),
+ *                     @OA\Property(property="rating", type="number", format="float", example=4.2),
+ *                     @OA\Property(
+ *                         property="mentorExpertises",
+ *                         type="array",
+ *                         @OA\Items(type="string", example="Product Development")
+ *                     ),
+ *                     @OA\Property(property="programCount", type="integer", example=3),
+ *                     @OA\Property(property="role", type="string", example="Mentor")
+ *                 )
+ *             ),
+ *             @OA\Property(property="meta", type="object",
+ *                 @OA\Property(property="total", type="integer", example=25),
+ *                 @OA\Property(property="page", type="integer", example=1),
+ *                 @OA\Property(property="limit", type="integer", example=10),
+ *                 @OA\Property(property="totalPages", type="integer", example=3)
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden - User does not have permission",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Forbidden")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Program not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Program not found")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad request (invalid pagination)",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Invalid pagination parameters")
+ *         )
+ *     )
+ * )
+ */
+
+public function mentors(GetProgramMentorsRequest $request, $programId)
+{
+    if(!$request->user()->ableTo('mentorships.requests_list')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+    $page = $request->input('page', 1);
+    $limit = $request->input('limit', 10);
+    $search = $request->input('search');
+
+    $mentors = $this->programService->getProgramMentors($programId, $search, $page, $limit);
+
+    if ($mentors instanceof \Illuminate\Http\JsonResponse) {
+        return $mentors;
+    }
+
+    if ($mentors->isEmpty()) {
+        return $this->success([], [
+            'meta' => [
+                'total' => 0,
+                'page' => $page,
+                'limit' => $limit,
+                'totalPages' => 0
+            ]
+        ], __('api.noMentorsFound'));
+    }
+
+    return $this->success($mentors->items(), [
+        'meta' => [
+            'total' => $mentors->total(),
+            'page' => $mentors->currentPage(),
+            'limit' => $mentors->perPage(),
+            'totalPages' => $mentors->lastPage()
+        ]
+    ], __('api.mentorsRetrieved'));
+}
+
+/**
+ * @OA\Get(
+ *     path="/api/v1/programs/{programId}/startups",
+ *     summary="List startups in a program",
+ *     description="Returns a paginated list of startups associated with a specific program",
+ *     tags={"Programs"},
+ *     operationId="getProgramStartups",
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\Parameter(
+ *         name="programId",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the program",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         required=false,
+ *         description="Pagination page number",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="limit",
+ *         in="query",
+ *         required=false,
+ *         description="Number of items per page",
+ *         @OA\Schema(type="integer", example=10)
+ *     ),
+ *     @OA\Parameter(
+ *         name="search",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by name or sector",
+ *         @OA\Schema(type="string", example="Fintech")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="Startups retrieved successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Startups retrieved successfully"),
+ *             @OA\Property(property="data", type="array", @OA\Items(
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="logo", type="string", example="https://example.com/logos/techstartup.jpg"),
+ *                 @OA\Property(property="name", type="string", example="TechStartup Inc."),
+ *                 @OA\Property(property="sector", type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="Technology")
+ *                 ),
+ *                 @OA\Property(property="establishmentDate", type="string", format="date-time", example="2023-06-15T00:00:00Z"),
+ *                 @OA\Property(property="state", type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="California")
+ *                 ),
+ *                 @OA\Property(property="city", type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="San Francisco")
+ *                 ),
+ *                 @OA\Property(property="country", type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="United States")
+ *                 ),
+ *                 @OA\Property(property="sdgs", type="array", @OA\Items(
+ *                     @OA\Property(property="name", type="string", example="Quality Education")
+ *                 )),
+ *                 @OA\Property(property="SustainableDevelopment", type="array", @OA\Items(
+ *                     @OA\Property(property="name", type="string", example="No Poverty")
+ *                 )),
+ *                 @OA\Property(property="socialLinks", type="object",
+ *                     @OA\Property(property="website", type="string", example="https://techstartup.com"),
+ *                     @OA\Property(property="linkedin", type="string", example="https://linkedin.com/company/techstartup"),
+ *                     @OA\Property(property="x", type="string", example="https://twitter.com/techstartup"),
+ *                     @OA\Property(property="facebook", type="string", example="https://facebook.com/techstartup"),
+ *                     @OA\Property(property="youtube", type="string", example=null),
+ *                     @OA\Property(property="instagram", type="string", example="https://instagram.com/techstartup"),
+ *                     @OA\Property(property="tiktok", type="string", example=null)
+ *                 ),
+ *                 @OA\Property(property="founders", type="array", @OA\Items(
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="Jane Doe"),
+ *                     @OA\Property(property="email", type="string", example="jane@techstartup.com"),
+ *                     @OA\Property(property="role", type="string", example="Founder"),
+ *                     @OA\Property(property="linkedin", type="string", example="https://linkedin.com/in/janedoe")
+ *                 ))
+ *             )),
+ *             @OA\Property(property="meta", type="object",
+ *                 @OA\Property(property="total", type="integer", example=15),
+ *                 @OA\Property(property="page", type="integer", example=1),
+ *                 @OA\Property(property="limit", type="integer", example=10),
+ *                 @OA\Property(property="totalPages", type="integer", example=2)
+ *             )
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="Program not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Program not found")
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid query parameters",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Invalid pagination parameters")
+ *         )
+ *     )
+ * )
+ */
+
+public function startups(GetProgramStartupsRequest $request, $programId)
+{
+    if (!$request->user()->ableTo('cycles.users_manage')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    $page = $request->input('page', 1);
+    $limit = $request->input('limit', 10);
+    $search = $request->input('search');
+
+    $startups = $this->programService->getProgramStartups($programId, $search, $page, $limit);
+
+    if ($startups instanceof \Illuminate\Http\JsonResponse) {
+        return $startups;
+    }
+
+    if ($startups->isEmpty()) {
+        return $this->success([], [
+            'meta' => [
+                'total' => 0,
+                'page' => $page,
+                'limit' => $limit,
+                'totalPages' => 0
+            ]
+        ], __('api.noStartupsFound'));
+    }
+
+    return $this->success(CompanyResource::collection($startups->items()), [
+        'meta' => [
+            'total' => $startups->total(),
+            'page' => $startups->currentPage(),
+            'limit' => $startups->perPage(),
+            'totalPages' => $startups->lastPage()
+        ]
+    ], __('api.startupsRetrieved'));
+}
 }
