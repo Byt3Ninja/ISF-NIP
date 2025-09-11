@@ -58,7 +58,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::get('users/companies', 'UserController@companies');
     Route::put('users/{user}/password', [UserController::class,'updatePassword']);
-    Route::apiResource('/roles',RoleController::class);
+    Route::apiResource('roles',RoleController::class);
     Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
@@ -72,6 +72,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
     Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::put('/v1/{roleId}/permissions', [RoleController::class, 'updatePermissions']);
     Route::post('/v1/availability', [ScheduleController::class, 'store']);
     Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
     Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);

@@ -118,4 +118,7 @@ return [
  'milestone_created' => 'تم إنشاء الإنجاز بنجاح',
  'milestone_updated' => 'تم تحديث الإنجاز بنجاح',
  'investor_already_exists' => 'المستثمر موجود بالفعل',
+ 'role_exists' => 'الدور موجودة بالفعل',
+ 'role_created' => 'تم إنشاء الدور بنجاح',
+ 'role_updated' => 'تم تحديث الدور بنجاح',
 ];

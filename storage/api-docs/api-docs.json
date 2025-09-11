@@ -6797,6 +6797,260 @@
                 ]
             }
         },
+        "/api/roles": {
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role with permissions",
+                "description": "Creates a new role and assigns specific permissions. Requires appropriate authorization.",
+                "operationId": "createRole",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "permissions"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Content Manager"
+                                    },
+                                    "permissions": {
+                                        "type": "object",
+                                        "example": {
+                                            "content": [
+                                                "content.create",
+                                                "content.edit",
+                                                "content.view"
+                                            ],
+                                            "users": [
+                                                "users.view"
+                                            ],
+                                            "dashboard": [
+                                                "dashboard.view"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Role created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Role created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "roleId": {
+                                                    "type": "integer",
+                                                    "example": 123
+                                                },
+                                                "roleName": {
+                                                    "type": "string",
+                                                    "example": "Content Manager"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Role for managing content"
+                                                },
+                                                "permissions": {
+                                                    "type": "object",
+                                                    "example": {
+                                                        "content": [
+                                                            "content.create",
+                                                            "content.edit"
+                                                        ],
+                                                        "users": [
+                                                            "users.view"
+                                                        ]
+                                                    }
+                                                },
+                                                "createdAt": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updatedAt": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation failed or missing fields"
+                    },
+                    "409": {
+                        "description": "Role with this name already exists"
+                    },
+                    "422": {
+                        "description": "Invalid permissions specified"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/{roleId}/permissions": {
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Update role permissions",
+                "description": "Updates the name, description, or permissions of an existing role. Requires proper authorization.",
+                "operationId": "updateRolePermissions",
+                "parameters": [
+                    {
+                        "name": "roleId",
+                        "in": "path",
+                        "description": "The ID of the role to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Senior Content Manager"
+                                    },
+                                    "permissions": {
+                                        "type": "object",
+                                        "example": {
+                                            "content": [
+                                                "content.create",
+                                                "content.edit",
+                                                "content.view",
+                                                "content.delete"
+                                            ],
+                                            "users": [
+                                                "users.view",
+                                                "users.list",
+                                                "users.edit"
+                                            ],
+                                            "dashboard": [
+                                                "dashboard.view",
+                                                "dashboard.analytics"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Role updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Role permissions updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "roleId": {
+                                                    "type": "integer",
+                                                    "example": 123
+                                                },
+                                                "roleName": {
+                                                    "type": "string",
+                                                    "example": "Senior Content Manager"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Updated role description"
+                                                },
+                                                "permissions": {
+                                                    "type": "object",
+                                                    "example": {
+                                                        "content": [
+                                                            "content.create",
+                                                            "content.edit",
+                                                            "content.view",
+                                                            "content.delete"
+                                                        ],
+                                                        "users": [
+                                                            "users.view",
+                                                            "users.list",
+                                                            "users.edit"
+                                                        ],
+                                                        "dashboard": [
+                                                            "dashboard.view",
+                                                            "dashboard.analytics"
+                                                        ]
+                                                    }
+                                                },
+                                                "updatedAt": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request or invalid body"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    },
+                    "422": {
+                        "description": "Invalid permissions"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/sectors": {
             "get": {
                 "tags": [

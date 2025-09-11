@@ -120,4 +120,7 @@ return [
    'milestone_created' => 'Milestone Created Successfully',
    'milestone_updated' => 'Milestone Updated Successfully',
    'investor_already_exists' => 'Investor Already Exists',
+   'role_exists' => 'Role Already Exists',
+   'role_created' => 'Role Created Successfully',
+   'role_updated' => 'Role Updated Successfully',
 ];
