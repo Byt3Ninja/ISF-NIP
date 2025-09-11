@@ -123,4 +123,9 @@ return [
    'role_exists' => 'Role Already Exists',
    'role_created' => 'Role Created Successfully',
    'role_updated' => 'Role Updated Successfully',
+   'mentorsRetrieved' => 'Mentors Retrieved Successfully',
+   'noMentorsFound' => 'No Mentors Found For This Program',
+   'startupsRetrieved' => 'Startups Retrieved Successfully',
+   'noStartupsFound' => 'No Startups Found for This Program',
+   'invalid_query' => 'Invalid Query Parameters',
 ];

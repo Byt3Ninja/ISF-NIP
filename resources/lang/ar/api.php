@@ -121,4 +121,9 @@ return [
  'role_exists' => 'الدور موجودة بالفعل',
  'role_created' => 'تم إنشاء الدور بنجاح',
  'role_updated' => 'تم تحديث الدور بنجاح',
+ 'mentorsRetrieved' => 'تم تحديث المرشدين بنجاح',
+ 'noMentorsFound' => 'لا يوجد مرشدون لهذا البرنامج',
+ 'startupsRetrieved' => 'تم ارجاع الشركات بنجاح',
+ 'noStartupsFound' => 'لا يوجد شركات لهذا البرنامج',
+ 'invalid_query' => 'معلومات البحث غير صالحة',
 ];

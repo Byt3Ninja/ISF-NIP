@@ -6671,6 +6671,533 @@
                 ]
             }
         },
+        "/api/v1/programs/{programId}/mentors": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "Retrieve Program Mentors",
+                "description": "Get a paginated list of mentors assigned to a specific program. Only accessible by Admins and Organization Managers.",
+                "operationId": "getProgramMentors",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "The ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1234
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Pagination page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search mentors by name, bio, or expertise",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Product"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentors retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mentors retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 128
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "John Philip"
+                                                    },
+                                                    "imgUrl": {
+                                                        "type": "string",
+                                                        "example": "http://localhost:8000/uploads/users/avatar.jpg"
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Senior Mentor"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "mentor@example.com"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Experienced startup mentor"
+                                                    },
+                                                    "specialization": {
+                                                        "type": "string",
+                                                        "example": "Fintech, SaaS"
+                                                    },
+                                                    "linkedin": {
+                                                        "type": "string",
+                                                        "example": "https://linkedin.com/in/mentor"
+                                                    },
+                                                    "joinedAt": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-11T08:16:48.352018Z"
+                                                    },
+                                                    "rating": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 4.2
+                                                    },
+                                                    "mentorExpertises": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "Product Development"
+                                                        }
+                                                    },
+                                                    "programCount": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "Mentor"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User does not have permission",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Forbidden"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request (invalid pagination)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid pagination parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/programs/{programId}/startups": {
+            "get": {
+                "tags": [
+                    "Programs"
+                ],
+                "summary": "List startups in a program",
+                "description": "Returns a paginated list of startups associated with a specific program",
+                "operationId": "getProgramStartups",
+                "parameters": [
+                    {
+                        "name": "programId",
+                        "in": "path",
+                        "description": "ID of the program",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Pagination page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Filter by name or sector",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Fintech"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Startups retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Startups retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "logo": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/logos/techstartup.jpg"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "TechStartup Inc."
+                                                    },
+                                                    "sector": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Technology"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "establishmentDate": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-06-15T00:00:00Z"
+                                                    },
+                                                    "state": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "California"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "city": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "San Francisco"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "country": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "United States"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "sdgs": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Quality Education"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "SustainableDevelopment": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "No Poverty"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "socialLinks": {
+                                                        "properties": {
+                                                            "website": {
+                                                                "type": "string",
+                                                                "example": "https://techstartup.com"
+                                                            },
+                                                            "linkedin": {
+                                                                "type": "string",
+                                                                "example": "https://linkedin.com/company/techstartup"
+                                                            },
+                                                            "x": {
+                                                                "type": "string",
+                                                                "example": "https://twitter.com/techstartup"
+                                                            },
+                                                            "facebook": {
+                                                                "type": "string",
+                                                                "example": "https://facebook.com/techstartup"
+                                                            },
+                                                            "youtube": {
+                                                                "type": "string",
+                                                                "example": null
+                                                            },
+                                                            "instagram": {
+                                                                "type": "string",
+                                                                "example": "https://instagram.com/techstartup"
+                                                            },
+                                                            "tiktok": {
+                                                                "type": "string",
+                                                                "example": null
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "founders": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Jane Doe"
+                                                                },
+                                                                "email": {
+                                                                    "type": "string",
+                                                                    "example": "jane@techstartup.com"
+                                                                },
+                                                                "role": {
+                                                                    "type": "string",
+                                                                    "example": "Founder"
+                                                                },
+                                                                "linkedin": {
+                                                                    "type": "string",
+                                                                    "example": "https://linkedin.com/in/janedoe"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Program not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Program not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid pagination parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/roles": {
             "get": {
                 "tags": [
