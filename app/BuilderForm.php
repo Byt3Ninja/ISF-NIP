@@ -28,4 +28,9 @@ class BuilderForm extends Model
     public function organization(){
         return $this->belongsTo(Organization::class,'organization_id');
     }
+
+    public function steps()
+{
+    return $this->hasMany(Step::class, 'data', 'id');
+}
 }

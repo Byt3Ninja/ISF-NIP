@@ -126,4 +126,10 @@ return [
  'startupsRetrieved' => 'تم ارجاع الشركات بنجاح',
  'noStartupsFound' => 'لا يوجد شركات لهذا البرنامج',
  'invalid_query' => 'معلومات البحث غير صالحة',
+ 'step_created' => 'تم إنشاء المرحلة بنجاح',
+ 'step_not_found'=> 'المرحلة غير موجودة',
+ 'step_updated' => 'تم تحديث المرحلة بنجاح',
+ 'step_deleted' => 'تم حذف المرحلة بنجاح',
+ 'steps_reordered_successfully' => 'تم ترتيب المراحل بنجاح',
+ 'step_order_changed_successfully' => 'تم تغيير ترتيب المرحلة بنجاح',
 ];

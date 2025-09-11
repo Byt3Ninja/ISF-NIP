@@ -128,4 +128,10 @@ return [
    'startupsRetrieved' => 'Startups Retrieved Successfully',
    'noStartupsFound' => 'No Startups Found for This Program',
    'invalid_query' => 'Invalid Query Parameters',
+   'step_created' => 'Step Created Successfully',
+   'step_not_found'=> 'Step Not Found',
+   'step_updated' => 'Step Updated Successfully',
+   'step_deleted' => 'Step Deleted Successfully',
+   'steps_reordered_successfully' => 'Steps Reordered Successfully',
+   'step_order_changed_successfully' => 'Step Order Changed Successfully',
 ];
