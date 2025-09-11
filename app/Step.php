@@ -20,6 +20,7 @@ class Step extends Model
 	// use Auditable;
 	public static $module = 'Program Step';
 	protected $casts = ['from'  => 'date:Y-m-d', 'to' => 'date:Y-m-d',];
+    protected $guarded = [];
 	public function cycle()
 	{
 		return $this->belongsTo(Cycle::class,'cycle_id');

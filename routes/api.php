@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StepController;
 use App\Http\Controllers\API\UserController;
@@ -20,12 +21,12 @@ use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
+use App\Http\Controllers\TestNotificationController;
 use App\Http\Controllers\API\Mentors\MentorController;
 use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
-use App\Http\Controllers\API\Startup\MentorshipSessionController;
 use App\Http\Controllers\NotificationSettingsController;
-use App\Http\Controllers\TestNotificationController;
+use App\Http\Controllers\API\Startup\MentorshipSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -130,7 +131,14 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
+    Route::post('/v1/programs/{programId}/steps', [StepController::class, 'createStep']);
+    Route::put('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'updateStep']);
+    Route::delete('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'deleteStep']);
+    Route::patch('v1/programs/{programId}/steps/reorder', [StepController::class, 'reorderSteps']);
+    Route::patch('v1/programs/{programId}/steps/{stepId}/change-order', [StepController::class, 'changeStepOrder']);
+    Route::get('/v1/step-types', [StepController::class, 'getStepTypes']);
     Route::apiResource('steps', StepController::class);
+    Route::get('/v1/forms', [FormController::class, 'index']);
     Route::prefix('messages')->group(function () {
         Route::post('/', [MessageController::class, 'store']);
         Route::post('/reply', [MessageController::class, 'reply']); 
