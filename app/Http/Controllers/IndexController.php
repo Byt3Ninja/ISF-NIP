@@ -393,4 +393,47 @@ class IndexController extends Controller
 
     }
 
+    public function reminderMentorShipRequest()
+	{
+		$l = app()->getLocale();
+		$data = [];
+		$mentorshipRequests = MentorshipRequest::get();
+
+		foreach ($mentorshipRequests as $request) {
+			if ($request->cycle && $request->cycle->is_active_Rminder == 1) {
+				$hours = $request->cycle->hours_Rminder;
+				$diffInHours = now()->diffInHours($request->zoom_date, false);
+				if ($diffInHours > 0 && $diffInHours <= $hours) {
+					$data['date'] = $request->zoom_date->format('Y-m-d H:i:s');
+					$data['company_name'] = $request->user->company->{'name_'. $l};
+					$data['Mentorname'] = $request->mentor->first_name_en . " " . $request->mentor->last_name_en;
+					$data['period'] = $request->period;
+					$date['title'] = $request->title;
+					$data['join_url'] = $request->join_url;
+					$data['start_url'] = $request->start_url;
+					if($request->approved == 'No'){
+						$data['status'] = 'Rejected';
+					}elseif($request->approved == 'Yes'){
+						$data['status'] = 'Approved';
+					}else{
+						$data['status'] = 'Pending';
+					}
+					if ($request->mentor) {
+						$request->mentor->notify(
+							new MentorshipRequestNotification($data, 'Reminder')
+						);
+					}
+
+					if ($request->user) {
+						$request->user->notify(
+							new MentorshipRequestNotification($data)
+						);
+					}
+				}
+			}
+		}
+
+		return response()->json(['state' => 'success'], 200);
+	}
+
 }

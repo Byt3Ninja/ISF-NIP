@@ -195,6 +195,15 @@
         let _public = $(this).val();
         if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
     });
+
+   $(document).on('change', '#reminder_enabled', function() {
+        if ($(this).is(':checked')) {
+            $('#hours_reminder').show();
+        } else {
+            $('#hours_reminder').hide();
+        }
+    });
+
     // Handle image upload and reset
     document.querySelector('.upload-img').addEventListener('click', function () {
       document.querySelector('.program-image-input').click();

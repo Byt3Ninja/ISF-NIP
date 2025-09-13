@@ -27,6 +27,8 @@ Route::get('default-permissions', function () {
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
 
 Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
+Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequest')->name('mentors.reminderMentorShipRequest');
+
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -483,7 +485,6 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
-    Route::get('/reminderMentorShipRequest', 'MentorsController@reminderMentorShipRequest')->name('mentors.reminderMentorShipRequest');
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 

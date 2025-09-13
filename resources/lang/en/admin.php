@@ -2338,4 +2338,6 @@ return [
 	'financial_policy' => 'Financial Policy',
 	'legal_policy' => 'Legal Policy',
 	'Conversation_Chat_not_found' => 'Conversation Chat not found',
+	'Reminder' => 'Reminder',
+	'Hours_Reminder' => 'Hours Reminder',
 ];
