@@ -69,7 +69,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 throw $th;
             }
             // Broadcast the RequestMentorship event
-            broadcast(new RequestMentorship($data));
+            // broadcast(new RequestMentorship($data));
             $phoneNumber = $mentor->country_code_w_a . $mentor->whatsapp;
             $Massage = "Dear " . $mentor->name . ",
  				'" . $data['company_name'] . "' has sent you a mentorship request, request will start: " . $data['date'] . ",Thanks from " . env('APP_NAME');
@@ -107,6 +107,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 Check your account to join the session ";
                 $whatsAppService = app()->make(\App\Services\WhatsAppService::class);
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
+                // $result = new MentorshipRequestNotification($data);
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
             /// Notify Startup Owner
@@ -123,6 +124,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
                     $user->notify($MSG);
+
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
