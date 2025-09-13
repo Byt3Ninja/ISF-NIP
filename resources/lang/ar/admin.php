@@ -2392,4 +2392,6 @@ return [
 	'legal_policy' => 'سياسة قانونية',
 	'mentorship_request' => 'طلب جلسة ارشاد',
 	'Conversation_Chat_not_found' => 'لم يتم العثور على المحادثة',
+	'Reminder' => 'تذكير',
+	'Hours_Reminder' => 'ساعات التذكير',
 ];
