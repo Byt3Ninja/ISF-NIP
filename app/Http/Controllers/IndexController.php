@@ -6,6 +6,7 @@ use App\User;
 use App\Company;
 use App\Messages;
 use App\Settings;
+use App\ReminderLog;
 use GuzzleHttp\Client;
 use App\Mail\CustomEmail;
 use App\Events\WebMessage;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Client\RequestException;
 use App\Http\Controllers\WhatsAppSessionController;
+use App\Notifications\MentorshipRequestNotification;
 
 class IndexController extends Controller
 {
@@ -431,7 +433,44 @@ class IndexController extends Controller
 					}
 				}
 			}
-		}
+
+             if ($request->cycle && $request->cycle->is_active_Rminder == 1) {
+                $status = 'sent';
+             }elseif($request->cycle && $request->cycle->is_active_Rminder == 0){
+                $status = 'skipped';
+             }else{
+                $status = 'failed';
+             }
+             $user = User::find($request->mentor_id);
+              $channel = [];
+              if($user->accept_whatsapp == 1){
+                $channel[] = 'whatsapp';
+              }if($user->accept_email == 1){
+                $channel[] = 'email';
+              }if($user->accept_pusher == 1){
+                $channel[] = 'in-app';
+              }
+              $channel = implode(',', $channel);
+            if ($request->mentor) {
+                ReminderLog::create([
+                    'user_id' => $user->id,
+                    'type' => 'Mentor',
+                    'cycle_id' => $request->cycle->id,
+                    'channel' => $channel,
+                    'status' => $status
+                ]);
+		    }
+            if ($request->user) {
+                ReminderLog::create([
+                    'user_id' => $request->user->id,
+                    'type' => 'User',
+                    'cycle_id' => $request->cycle->id,
+                    'channel' => $channel,
+                    'status' => $status
+                ]);
+
+            }
+    }
 
 		return response()->json(['state' => 'success'], 200);
 	}
