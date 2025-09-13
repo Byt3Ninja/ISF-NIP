@@ -298,7 +298,6 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     });
 
 
-
     Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('security.2fa.phone_save_session');
     Route::post('/send-code', 'ClientProfileController@sendCode')->name('security.2fa_code_send');
     Route::post('/verify-code', 'ClientProfileController@verifyCode')->name('security.2fa_code_verify');
@@ -484,6 +483,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+    Route::get('/reminderMentorShipRequest', 'MentorsController@reminderMentorShipRequest')->name('mentors.reminderMentorShipRequest');
+
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
@@ -625,6 +626,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorship_tasks.comment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorship_tasks.update_special');
+
     });
 
 
