@@ -160,7 +160,7 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
                             <div class="d-flex justify-content-between align-items-center gap-3">
                               <div class="form-check d-flex align-items-center gap-2 w-px-100 h-px-40 mt-4 mt-md-0">
                                 <input class="form-check-input" type="checkbox" name="permissions[]"
-                                  value="{{ $permission->id }}" id="permission-{{ $permission->name }}"
+                                  value="{{ $permission->name }}" id="permission-{{ $permission->name }}"
                                   onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'" />
                                 <label class="form-check-label" for="permission-{{ $permission->name }}">
                                   {{ __('admin.Select') }}

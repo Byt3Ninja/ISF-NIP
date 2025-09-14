@@ -18,7 +18,7 @@ class ProgramService
         $this->programRepository = $programRepository;
     }
 
-   public function getProgramMentors($programId, $search = null, $page = 1, $limit = 10)
+   public function getProgramMentors($programId, $search = null, $page = 1, $limit = 10, $sort = 'joinedAt', $order = 'desc')
 {
     $program = $this->programRepository->findById($programId);
 
@@ -71,7 +71,14 @@ class ProgramService
         'users_bio.linkedin',
         'cm.created_at'
     );
+    $allowedSorts = ['rating', 'joinedAt', 'first_name_en', 'last_name_en'];
+    if (!in_array($sort, $allowedSorts)) {
+        $sort = 'joinedAt';
+    }
 
+    $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+    $query->orderBy($sort, $order);
     $mentors = $query->paginate($limit, ['*'], 'page', $page);
 
     $mentorIds = $mentors->pluck('id')->toArray();
@@ -115,7 +122,7 @@ class ProgramService
     return $mentors->setCollection($finalMentors);
 }
 
-public function getProgramStartups($programId, $search = null, $page = 1, $limit = 10): mixed
+public function getProgramStartups($programId, $search = null, $page = 1, $limit = 10, $sort = 'id', $order = 'desc'): mixed
 {
     $program = $this->programRepository->findById($programId);
 
@@ -143,6 +150,13 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
               ->orWhere('name_ar', 'like', "%$search%");
         });
     }
+    $allowedSorts = ['id', 'name_en', 'name_ar', 'est_date', 'created_at'];
+    if (!in_array($sort, $allowedSorts)) {
+        $sort = 'id';
+    }
+
+    $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
+    $query->orderBy($sort, $order);
 
     return $query->paginate($limit, ['*'], 'page', $page);
 }
