@@ -14,7 +14,7 @@ class FormService
 
    public function getAvailableForms(array $filters = [])
 {
-    $forms = $this->formRepo->getAllFormsWithSteps();
+    $forms = $this->formRepo->getAllFormsWithSteps($filters);
 
     return $forms->map(function ($form) use ($filters) {
         $stepTypes = $form->steps

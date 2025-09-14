@@ -611,7 +611,7 @@ public function updateRoleWithPermissions(int $id, array $data)
         if (isset($data['permissions'])) {
             $flattened = collect($data['permissions'])->flatten()->toArray();
             $permissions = Permission::whereIn('name', $flattened)->pluck('id')->toArray();
-            $role->permissions()->sync($permissions);
+            $role->permissions()->syncWithoutDetaching($permissions);
             app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         }
 

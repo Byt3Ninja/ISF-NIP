@@ -18,6 +18,7 @@ class FormListRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'search' => 'nullable|string|max:100',
             'stepType' => 'nullable|string|in:Custom Form,Screening,Mentorship,Training,Final evaluation,Team Formation'
         ];
     }

@@ -287,14 +287,16 @@ class UserService
 {
     try {
         $role = $this->userRepository->updateRoleWithPermissions($id, $data);
-
+        $permissionsByGroup = $role->permissions
+            ->groupBy('group')
+            ->map(fn($items) => $items->pluck('name')->values());
         return [
             'success' => true,
             'message' => __('api.role_updated'),
             'data' => [
                 'roleId' => $role->id,
                 'roleName' => $role->name,
-                'permissions' => collect($data['permissions'])->filter(fn($group) => count($group) > 0),
+                'permissions' => $permissionsByGroup,
                 'updatedAt' => $role->updated_at->toIso8601String(),
             ],
         ];

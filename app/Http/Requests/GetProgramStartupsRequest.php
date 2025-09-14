@@ -28,6 +28,8 @@ class GetProgramStartupsRequest extends FormRequest
             'page' => 'integer|min:1|gt:0',
             'limit' => 'integer|min:1|max:100|gt:0',
             'search' => 'nullable|string',
+            'sort' => 'nullable|in:id,name_en,name_ar,establishmentDate,created_at',
+            'order' => 'nullable|in:asc,desc',
         ];
     }
         protected function failedValidation(Validator $validator)

@@ -28,6 +28,8 @@ class GetProgramMentorsRequest extends FormRequest
             'page' => 'integer|min:1|gt:0',
             'limit' => 'integer|min:1|max:100|gt:0',
             'search' => 'nullable|string',
+            'sort' => 'nullable|in:rating,joinedAt,first_name_en,last_name_en',
+            'order' => 'nullable|in:asc,desc',
         ];
     }
 
