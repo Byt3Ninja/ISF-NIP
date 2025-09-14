@@ -1353,8 +1353,10 @@ public function mentors(GetProgramMentorsRequest $request, $programId)
     $page = $request->input('page', 1);
     $limit = $request->input('limit', 10);
     $search = $request->input('search');
+    $sort = $request->input('sort', 'joinedAt');
+    $order = $request->input('order', 'desc');
 
-    $mentors = $this->programService->getProgramMentors($programId, $search, $page, $limit);
+    $mentors = $this->programService->getProgramMentors($programId, $search, $page, $limit, $sort, $order);
 
     if ($mentors instanceof \Illuminate\Http\JsonResponse) {
         return $mentors;
@@ -1507,8 +1509,10 @@ public function startups(GetProgramStartupsRequest $request, $programId)
     $page = $request->input('page', 1);
     $limit = $request->input('limit', 10);
     $search = $request->input('search');
+    $sort = $request->input('sort', 'id');   
+    $order = $request->input('order', 'desc'); 
 
-    $startups = $this->programService->getProgramStartups($programId, $search, $page, $limit);
+    $startups = $this->programService->getProgramStartups($programId, $search, $page, $limit, $sort, $order);
 
     if ($startups instanceof \Illuminate\Http\JsonResponse) {
         return $startups;

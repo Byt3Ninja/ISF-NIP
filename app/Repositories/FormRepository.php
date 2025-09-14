@@ -6,9 +6,15 @@ use Illuminate\Support\Facades\DB;
 
 class FormRepository
 {
-    public function getAllFormsWithSteps()
+    public function getAllFormsWithSteps(array $filters = [])
 {
-    return BuilderForm::with('steps')->get();
+    $query = BuilderForm::with('steps');
+
+    if (!empty($filters['search'])) {
+        $query->where('form_name', 'like', '%' . $filters['search'] . '%');
+    }
+
+    return $query->get();
 }
 
 }
