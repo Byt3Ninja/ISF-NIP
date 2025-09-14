@@ -6336,6 +6336,38 @@
                 "default_for": [
                     "organizationmanager"
                 ]
+            },
+
+            {
+                "name": "mentorship.schedule_store",
+                "description": " Add Mentorship Schedule",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+            {
+                "name": "mentorship.schedule_update",
+                "description": " Update Mentorship Schedule",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+            "name": "mentorship.schedule_destroy",
+                "description": " Delete Mentorship Schedule",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },

@@ -460,6 +460,13 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('/queue-jobs', 'QueueJobController@index')->name('queue.jobs');
     Route::get('/run-queue-once', 'QueueJobController@runOnce')->name('queue.run.once');
 
+
+    //MentorShip Schedule
+    Route::get('mentorshipschedule ', 'MentorshipScheduleController@index')->name('mentorship.schedule');
+    Route::post('mentorshipschedule/store', 'MentorshipScheduleController@store')->name('mentorship.schedule_store');
+    Route::post('mentorshipschedule/update', 'MentorshipScheduleController@update')->name('mentorship.schedule_update');
+    Route::post('mentorshipschedule/destroy', 'MentorshipScheduleController@destroy')->name('mentorship.schedule_destroy');
+
     //Screening
     Route::get('screening', 'ScreeningController@index');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');

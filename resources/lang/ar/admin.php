@@ -2394,4 +2394,8 @@ return [
 	'Conversation_Chat_not_found' => 'لم يتم العثور على المحادثة',
 	'Reminder' => 'تذكير',
 	'Hours_Reminder' => 'ساعات التذكير',
+	'Value' => 'قيمة',
+	'Unit' => 'وحدة',
+	'Active' => 'نشط',
+	'Schedule' => 'جدول',
 ];

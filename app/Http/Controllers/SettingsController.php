@@ -811,6 +811,7 @@ class SettingsController extends Controller
     	})->sort();
 		$invitations = Invitation::where('organization_id', $organization->id)->get();
 		$role = Role::where('name', 'organizationManager')->first();
+		
         return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations'));
     }
 

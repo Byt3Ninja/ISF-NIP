@@ -2340,4 +2340,8 @@ return [
 	'Conversation_Chat_not_found' => 'Conversation Chat not found',
 	'Reminder' => 'Reminder',
 	'Hours_Reminder' => 'Hours Reminder',
+	'Value' => 'Value',
+	'Unit' => 'Unit',
+	'Active' => 'Active',
+	'Schedule' => 'Schedule',
 ];
