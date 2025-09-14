@@ -113,4 +113,11 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
             'time' => now()->toDateTimeString(),
         ]);
     }
+
+    public function afterSend($notifiable)
+    {
+        Log::info("Notification sent to user {$notifiable->id}", [
+            'type' => static::class,
+        ]);
+    }
 }

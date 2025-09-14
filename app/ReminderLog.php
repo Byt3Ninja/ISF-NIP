@@ -29,8 +29,8 @@ class ReminderLog extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function program()
+    public function cycle()
     {
-        return $this->belongsTo(Program::class);
+        return $this->belongsTo(Cycle::class);
     }
 }
