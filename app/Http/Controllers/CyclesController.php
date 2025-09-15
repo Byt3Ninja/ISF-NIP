@@ -271,7 +271,7 @@ class CyclesController extends Controller
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250|unique:cycles,title,' . $id,
-                'description' => 'required|string|max:2000',
+                'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
                 'public_slug' => 'required_if:is_public,1',
                 'start' => 'required|date',
@@ -658,7 +658,7 @@ class CyclesController extends Controller
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
-                'description' => 'required|string|max:2000',
+                'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
                 'public_slug' => 'required_if:is_public,1',
                 'start' => 'required|date|before:end',

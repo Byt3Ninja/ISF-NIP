@@ -811,10 +811,51 @@ class SettingsController extends Controller
     	})->sort();
 		$invitations = Invitation::where('organization_id', $organization->id)->get();
 		$role = Role::where('name', 'organizationManager')->first();
+
+		
 		
         return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations'));
     }
 
+	public function ReminderLogs(Request $request) {
+							if(auth()->user()->hasRole('organizationManager')) {
+                                $cycles = \App\Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
+                                $ReminderLogs = \App\ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+                            }elseif(auth()->user()->hasRole('Admin')) {
+                                $ReminderLogs = \App\ReminderLog::all();
+                            }else{
+                                $ReminderLogs = [];
+                            }
+
+							 $query = $ReminderLogs;
+
+        if ($request->filled('program')) {
+            $query->where('cycle_id', $request->program);
+        }
+
+        if ($request->filled('user')) {
+            $query->where('user_id', $request->user);
+        }
+
+        if ($request->filled('channel')) {
+            $query->where('channel', 'like', '%'. $request->channel. '%');
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : Carbon::minValue();
+            $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : Carbon::now();
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+		$ReminderLogs = $query->get();
+    
+
+		return view('admin.organizations.ReminderLogs', compact('ReminderLogs'));
+	}
     public function generalSetting(Request $request)
     {
          $request->validate([

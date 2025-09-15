@@ -886,6 +886,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
+      <li class="{{ Request::is('dashboard/organizations/ReminderLogs*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('organization.ReminderLogs') }}">
+          <i class="menu-icon tf-icons ti ti-alarm"></i>
+          <div>{{ __('admin.ReminderLogs') }}</div>
+        </a>
+      </li>
       @if ($_user->ableTo('importer.index'))
             <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
                 <a href="{{ route('importer.index') }}" class="menu-link">

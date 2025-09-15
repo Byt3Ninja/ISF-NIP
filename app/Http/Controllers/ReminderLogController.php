@@ -18,7 +18,7 @@ class ReminderLogController extends Controller
         $query = ReminderLog::with(['user','program']);
 
         if ($request->filled('program_id')) {
-            $query->where('program_id', $request->program_id);
+            $query->where('cycle_id', $request->program_id);
         }
 
         if ($request->filled('user_id')) {
@@ -89,8 +89,10 @@ class ReminderLogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ReminderLog $reminderLog)
+    public function destroy(Request $request)
     {
-        //
+        $reminderLog = ReminderLog::find($request->id);
+        $reminderLog->delete();
+        return back();
     }
 }

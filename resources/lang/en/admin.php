@@ -2344,4 +2344,12 @@ return [
 	'Unit' => 'Unit',
 	'Active' => 'Active',
 	'Schedule' => 'Schedule',
+	'ReminderLogs' => 'Reminder Logs',
+	'Channel' => 'Channel',
+	'skipped' => 'Skipped',
+	'failed' => 'Failed',
+	'sent' => 'Sent',
+	'in-app' => 'In-App',
+	'Display_all_reminder_logs' => 'Display All Reminder Logs',
+	
 ];
