@@ -7295,6 +7295,62 @@
                 ]
             }
         ]
+    },
+    {
+       "name": "Mentorship Dashboard",
+       "description": "View and analyze mentorship program reports and statistics",
+       "permissions": [
+     {
+      "name": "dashboard.summary",
+      "description": "View mentorship summary KPIs",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin","organizationmanager"]
+    },
+    {
+      "name": "dashboard.weekly_trends",
+      "description": "View weekly mentorship trends",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin","organizationmanager"]
+    },
+    {
+      "name": "dashboard.mentor_hours",
+      "description": "View mentor hours contributed",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin","organizationmanager"]
+    },
+    {
+      "name": "dashboard.mentor_performance",
+      "description": "Analyze mentor performance",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "dashboard.startup_engagement",
+      "description": "View startup engagement metrics",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "dashboard.trends_by_program",
+      "description": "View program-based mentorship trends",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "dashboard.peak_activity",
+      "description": "View mentorship peak activity times",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
     }
+  ]
+    }
+
 
 ]

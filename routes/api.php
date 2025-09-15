@@ -27,6 +27,7 @@ use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
 use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
+use App\Http\Controllers\API\MentorshipReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -153,6 +154,15 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::prefix('v1')->group(function () {
     Route::apiResource('permissions', PermissionController::class);
     Route::apiResource('permission-groups', PermissionGroupController::class);
+});
+    Route::prefix('dashboard')->group(function () {
+    Route::get('/summary', [MentorshipReportController::class, 'summary']);
+    Route::get('/weekly-trends', [MentorshipReportController::class, 'weeklyTrends']);
+    Route::get('/mentor-hours', [MentorshipReportController::class, 'mentorHours']);
+    Route::get('/mentor-performance', [MentorshipReportController::class, 'mentorPerformance']);
+    Route::get('/startup-engagement', [MentorshipReportController::class, 'startupEngagement']);
+    Route::get('/trends/by-program', [MentorshipReportController::class, 'trendsByProgram']);
+    Route::get('/trends/peak-activity', [MentorshipReportController::class, 'peakActivity']);
 });
 
 

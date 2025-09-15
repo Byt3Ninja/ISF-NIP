@@ -3438,6 +3438,373 @@
                 ]
             }
         },
+        "/api/dashboard/summary": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get mentorship summary KPIs",
+                "description": "Returns high-level statistics about mentorship.",
+                "operationId": "getMentorshipSummary",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Summary data retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Summary data retrieved successfully",
+                                    "data": {
+                                        "totalMentors": 25,
+                                        "activeMentors": 18,
+                                        "requests": 120,
+                                        "approvedSessions": 100,
+                                        "completedSessions": 90,
+                                        "totalHours": 150.5,
+                                        "completionRate": 90,
+                                        "avgDuration": 60,
+                                        "avgAttendance": 90
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/weekly-trends": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get weekly mentorship trends",
+                "operationId": "getWeeklyTrends",
+                "parameters": [
+                    {
+                        "name": "weeks",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "example": 8
+                        }
+                    },
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Weekly trends retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Weekly trends retrieved successfully",
+                                    "data": {
+                                        "labels": [
+                                            "W30",
+                                            "W31",
+                                            "W32",
+                                            "W33"
+                                        ],
+                                        "requests": [
+                                            10,
+                                            15,
+                                            12,
+                                            18
+                                        ],
+                                        "approvals": [
+                                            8,
+                                            14,
+                                            11,
+                                            17
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/mentor-hours": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get mentor hours",
+                "operationId": "getMentorHours",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mentor hours retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Mentor hours retrieved successfully",
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "name": "John Doe",
+                                            "hours": 15.5
+                                        },
+                                        {
+                                            "id": 2,
+                                            "name": "Jane Smith",
+                                            "hours": 12
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/mentor-performance": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get mentor performance statistics",
+                "operationId": "getMentorPerformance",
+                "responses": {
+                    "200": {
+                        "description": "Mentor performance data",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Mentor performance retrieved successfully",
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "name": "John Doe",
+                                            "programs": "Startup Bootcamp, Growth Launch",
+                                            "requests": 20,
+                                            "approved": 18,
+                                            "completed": 17,
+                                            "hours": 25,
+                                            "attendance": 94.4,
+                                            "rating": 4.7,
+                                            "completion_rate": 94.4
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/startup-engagement": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get startup engagement",
+                "operationId": "getStartupEngagement",
+                "responses": {
+                    "200": {
+                        "description": "Startup engagement data",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Startup engagement retrieved successfully",
+                                    "data": [
+                                        {
+                                            "id": 5,
+                                            "name": "Ahmed Youssef",
+                                            "company": "SmartTech",
+                                            "programs": "Startup Sprint",
+                                            "requests": 10,
+                                            "completed": 9,
+                                            "hours": 9.5,
+                                            "attendance": 90,
+                                            "rating": 4.5
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/trends-by-program": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get trends by program",
+                "operationId": "getTrendsByProgram",
+                "responses": {
+                    "200": {
+                        "description": "Trends grouped by program",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Trends by program retrieved successfully",
+                                    "data": [
+                                        {
+                                            "program": "Startup Sprint",
+                                            "total": 50
+                                        },
+                                        {
+                                            "program": "Growth Launch",
+                                            "total": 30
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/peak-activity": {
+            "get": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get peak activity by weekday",
+                "operationId": "getPeakActivity",
+                "responses": {
+                    "200": {
+                        "description": "Peak activity retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "success": true,
+                                    "message": "Peak activity retrieved successfully",
+                                    "data": {
+                                        "Monday": 15,
+                                        "Tuesday": 20,
+                                        "Wednesday": 25,
+                                        "Thursday": 10,
+                                        "Friday": 5
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/messages": {
             "get": {
                 "tags": [
@@ -9790,6 +10157,10 @@
         {
             "name": "Schedules",
             "description": "Schedules"
+        },
+        {
+            "name": "Mentorship Report",
+            "description": "Mentorship Report"
         },
         {
             "name": "Messages",
