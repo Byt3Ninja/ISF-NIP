@@ -1960,6 +1960,7 @@ class HackathonController extends Controller
                 tl.description as tl_description,
                 tl.status as tl_status,
                 tl.due_date as tl_due_date,
+                tl.team_formation_id as tl_team_formation_id,
                 tl.created_at as tl_created_at,
                 tl.updated_at as tl_updated_at,
                 u_creator.id as creator_id,
@@ -2075,6 +2076,7 @@ class HackathonController extends Controller
                 $task->title = $todo->tl_title;
                 $task->description = $todo->tl_description;
                 $task->status = $todo->tl_status;
+                $task->team_formation_id = $todo->tl_team_formation_id;
                 $task->due_date = $todo->tl_due_date;
                 $task->created_at = $todo->tl_created_at;
                 $task->updated_at = $todo->tl_updated_at;
