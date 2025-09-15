@@ -33,8 +33,14 @@
 	<div class="container-xxl flex-grow-1 container-p-y">
 		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
+		
+			@if( isset($newhackathon) && $newhackathon )
+			@if(now()->diffInDays($newhackathon->created_at) < 1)
 			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
 			<br>
+			@endif
+					@endif
+
 		@endif
 		<div class="content-body">
 			@if( session()->has('success') )

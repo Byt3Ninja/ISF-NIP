@@ -12,6 +12,7 @@ use App\Company;
 use App\Formfield;
 use Carbon\Carbon;
 use App\Team_member;
+use App\ProjectLikes;
 use App\CyclesMentors;
 use App\TeamFormation;
 use App\ScreeningEvaluation;
@@ -1024,30 +1025,7 @@ class HackathonController extends Controller
         if( $currentHackathon['announcement'] == true )
         {
             $teams = TeamFormation::teams( $id );
-            $teams = $teams->where('winner', 'selected')->values();
-            $winners = $teams->map(function( $team ) {
-                $winner = new stdClass;
-                $winner->id = $team->id;
-                $winner->name = $team->company->name;
-                $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
-                $winner->projectTitle = $team->project->name;
-                $winner->teamName = $team->name;
-                $winner->description = $team->project->description;
-                $leader = $team->members->where('isLeader', true)->first(); 
-                $winner->teamLeader = new stdClass;
-                $winner->teamLeader->name = $leader?->name;
-                $winner->teamLeader->role = $leader?->role;
-                $winner->teamLeader->image = $leader?->image;
-                $winner->teamMembers = $team->members->map(function( $team_member ) {
-                    $member = new stdClass;
-                    $member->name = $team_member->name;
-                    $member->role = $team_member->role;
-                    $member->image = $team_member->image;
-                    $member->isLeader = $team_member->isLeader == 1 ? true : false;
-                    return $member;
-                });
-                return $winner;
-            });
+            $winners = TeamFormation::winnersMapping( $teams );
         }
         
         return view('admin.hackathon.hackathon-details', compact(
@@ -1393,6 +1371,25 @@ class HackathonController extends Controller
 
         $teamFormation->save();
 
+        if($teamFormation->group_id_chat == null){
+            $createChatGroup = Conversation::create([
+                'type' => 'group',
+                'name' => $request->team_name,
+                'description' => $request->team_description
+            ]);
+
+            // Add current user as admin
+            $createChatGroup->participants()->create([
+                'participantable_id' => auth()->id(),
+                'participantable_type' => get_class(auth()->user()),
+                'role' => 'admin'
+            ]);
+
+            $teamFormation->group_id_chat = $createChatGroup->id;
+            $teamFormation->save();
+
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Team information updated successfully.',
@@ -1475,7 +1472,7 @@ class HackathonController extends Controller
 
     public function acceptInvitation($id)
     {
-       
+      
         $user = Auth::user();
         $isExpired = Team_member::where('id', $id)
             ->where('acceptInvition', 'pending')
@@ -1488,14 +1485,14 @@ class HackathonController extends Controller
                 $isExpired->isTeamLeader = 0;
                 $isExpired->user_id = $user->id;
                 $isExpired->save();
-                return redirect()->back()->with('error', 'Invitation has expired.');
+                return redirect()->back()->with('error', 'Invitation_has_expired.');
             }
-                
-                $teamMember = Team_member::where('id', $id)
-                ->where('acceptInvition', 'pending')
-                ->first();
+            $teamMember = Team_member::where('id', $id)
+            ->where('acceptInvition', 'pending')
+            ->first();
+            
             if (!$teamMember) {
-                return redirect()->back()->with('error', 'Invitation not found.');
+                return redirect()->back()->with('error', 'Invitation_not_found.');
             }
 
             
@@ -1533,7 +1530,10 @@ class HackathonController extends Controller
                     $allteamMember->user_id = $user->id;
                     $allteamMember->save();
                 }
-
+               
+                if($teams->group_id_chat == null){
+                    return redirect()->back()->with('error', 'Conversation_Chat_not_found');
+                }
                 $conversation = Conversation::findOrFail($teams->group_id_chat);
                 $user = User::findOrFail($user->id);
 
@@ -1556,7 +1556,7 @@ class HackathonController extends Controller
                     'role' => 'participant'
                 ]);
 
-        return redirect()->back()->with('success', 'Invitation accepted successfully.');
+        return redirect()->back()->with('success', 'Invitation_accepted_successfully');
     }
 
     public function rejectInvitation($id)
@@ -1622,6 +1622,9 @@ class HackathonController extends Controller
 
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
         $groupId = $teams->group_id_chat;
+
+        if($groupId != null){
+        
         $conversation = Conversation::findOrFail($groupId);
             $user = User::findOrFail($teamMember->user_id);
             
@@ -1637,8 +1640,7 @@ class HackathonController extends Controller
             }
 
             $participant->delete();
-        
-
+        }
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
 
@@ -2502,6 +2504,7 @@ class HackathonController extends Controller
         $hackathon->status = $l == 'en' ? $status : $status_ar;
         $hackathon->duration = $l == 'en' ? $duration : $duration_ar;
         $hackathon->announcement = $cycle->winners_announcement == 1 ? true : false;
+        $hackathon->visibility = $cycle->winners_visibility == 'private' ? 'private' : 'public';
         $hackathon->organization = new stdClass;
         $hackathon->organization->id = $cycle->organization_id;
         $hackathon->organization->name =  $cycle->{'organization_name_' . $l};
@@ -2555,8 +2558,10 @@ class HackathonController extends Controller
         DB::beginTransaction();
         try {
             $status = intval($request->announcementStatus);
+            $visiblity = $request->announcementVisibility == 'private' ? 'private' : 'public';
             DB::table('cycles')->where('id', $cycle->id)->update([
-                'winners_announcement' => $status
+                'winners_announcement' => $status,
+                'winners_visibility' => $visiblity
             ]);
             $winners = $request->winners;
             $teamsIds = array_keys($winners);
@@ -2575,5 +2580,24 @@ class HackathonController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function likeProject(Request $request)
+    {
+        $user = auth()->user();
+        $teamProjectId = $request->teamProjectId;
+        $like = ProjectLikes::where('team_id', $teamProjectId)->where('user_id', $user->id)->first();
+        if( !empty( $like ) ) { $like->delete(); }
+        else
+        {
+            $like = new ProjectLikes;
+            $like->team_id = $teamProjectId;
+            $like->user_id = $user->id;
+            $like->save();
+        }
+        $total = ProjectLikes::where('team_id', $teamProjectId)->count();
+        return response()->json([
+            'total' => $total
+        ]);
     }
 }

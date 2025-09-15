@@ -244,7 +244,13 @@
           icon: 'warning',
           title: '{{ $l == 'en' ? 'Terms Required' : 'الشروط مطلوبة' }}',
           text: '{{ $l == 'en' ? 'Please agree to the terms and conditions.' : 'يرجى الموافقة على الشروط والأحكام.' }}',
-          confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}'
+          confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+          showCancelButton: false,
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
         });
         return;
       }
@@ -254,7 +260,13 @@
         icon: 'success',
         title: '{{ $l == 'en' ? 'Application Submitted!' : 'تم إرسال الطلب!' }}',
         text: '{{ $l == 'en' ? 'Your application has been submitted successfully! You will be redirected to the hackathon details page.' : 'تم إرسال طلبك بنجاح! سيتم توجيهك إلى صفحة تفاصيل الهاكثون.' }}',
-        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}'
+        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       }).then((result) => {
         // Close modal
         $('#applyModal1').modal('hide');

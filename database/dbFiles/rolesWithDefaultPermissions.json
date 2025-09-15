@@ -3883,6 +3883,20 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+
+            {
+                "name": "user.notification_settings_update",
+                "description": "Update Own Profile Notification Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
+                ]
             }
         ]
     },
@@ -3921,6 +3935,17 @@
                 "default_for": [
                     "admin",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "mentors.reminderMentorShipRequest",
+                "description": "Send Reminder to Mentor",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
                 ]
             }
         ]
@@ -5666,28 +5691,36 @@
                 "description": "View SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             },
             {
                 "name": "swot.generate",
                 "description": "Generate SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             },
             {
                 "name": "swot.save",
                 "description": "Save SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             },
             {
                 "name": "swot.export",
                 "description": "Export SWOT Analysis",
                 "guard_name": "web",
                 "is_core": 0,
-                "default_for": []
+                "default_for": [
+                    "registered"
+                ]
             }
         ]
     },
@@ -6301,6 +6334,38 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
+                    "organizationmanager"
+                ]
+            },
+
+            {
+                "name": "mentorship.schedule_store",
+                "description": " Add Mentorship Schedule",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+
+            {
+                "name": "mentorship.schedule_update",
+                "description": " Update Mentorship Schedule",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+            "name": "mentorship.schedule_destroy",
+                "description": " Delete Mentorship Schedule",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
                     "organizationmanager"
                 ]
             }
@@ -7230,6 +7295,125 @@
                 ]
             }
         ]
+    },
+    {
+       "name": "Mentorship Dashboard",
+       "description": "View and analyze mentorship program reports and statistics",
+       "permissions": [
+     {
+      "name": "dashboard.summary",
+      "description": "View mentorship summary KPIs",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin","organizationmanager"]
+     },
+    {
+      "name": "dashboard.weekly_trends",
+      "description": "View weekly mentorship trends",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin","organizationmanager"]
+    },
+    {
+      "name": "dashboard.mentor_hours",
+      "description": "View mentor hours contributed",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin","organizationmanager"]
+    },
+    {
+      "name": "dashboard.mentor_performance",
+      "description": "Analyze mentor performance",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "dashboard.startup_engagement",
+      "description": "View startup engagement metrics",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "dashboard.trends_by_program",
+      "description": "View program-based mentorship trends",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "dashboard.peak_activity",
+      "description": "View mentorship peak activity times",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
     }
+    ]
+    },
+    {
+     "name": "Training Dashboard",
+     "description": "View and analyze training program reports and statistics",
+     "permissions": [
+    {
+      "name": "training.summary",
+      "description": "View training summary KPIs",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.session_types",
+      "description": "View training session type counts",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.monthly_trends",
+      "description": "View monthly training session trends",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.type_breakdown",
+      "description": "View session type distribution breakdown",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.hours_trend",
+      "description": "View training hours trend per month",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.trainers",
+      "description": "Analyze trainer performance and contribution",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.topics",
+      "description": "Analyze training topics and engagement",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.recent_sessions",
+      "description": "View list of recent training sessions",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    }
+   ]
+}
+
+
 
 ]

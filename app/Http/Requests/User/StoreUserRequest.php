@@ -36,6 +36,7 @@ class StoreUserRequest extends FormRequest
             'email' => 'email|required|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,id',
+            'gender'=>'required|in:Male,Female',
             'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
             'country_code' => 'required',
             'bio_en'       => 'nullable|string',
@@ -48,7 +49,7 @@ class StoreUserRequest extends FormRequest
     // Apply mentor-required rules ONLY if:
     // - role is "Mentor"
     // - auth user is NOT an Admin
-    if ($this->input('role') === 'Mentor' && !auth()->user()->hasRole('Admin')) {
+    if ($this->input('role') == '4' && !auth()->user()->hasRole('Admin')) {
         $rules['bio_en']      = 'required|string';
         $rules['Linkedin']    = 'required|url';
         $rules['expertise']   = 'required|array';

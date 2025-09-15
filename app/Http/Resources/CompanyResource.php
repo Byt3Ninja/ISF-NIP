@@ -39,14 +39,29 @@ class CompanyResource extends JsonResource
             'id' => $this->id,
             'logo' => $this->logo ? url($this->logo) : null,
             'name' => $locale === 'ar' ? $this->name_ar : $this->name_en,
-            'sector' => is_numeric($this->sector) ? optional($this->sectoR)->{'name_' . $locale} : $this->sector,
+            'sector' => is_numeric($this->sector) ? [
+                'id' => $this->sectoR?->id,
+                'name' => $this->sectoR?->{'name_' . $locale},
+                ] : [
+                    'id' => null,
+                    'name' => $this->sector,
+                ],
+            'state' => $this->state ? [
+                'id' => $this->state->id,
+                'name' => $this->state->{'name_'.$locale},
+            ] : null,
+            'city' => $this->city ? [
+                'id' => $this->city->id,
+                'name' => $this->city->{'name_'.$locale},
+            ] : null,
+            'country' => $this->country ? [
+                'id' => $this->country->id,
+                'name' => $this->country->{'name_'.$locale},
+            ] : null,
             'establishmentDate' => $this->est_date,
-            'state' => $this->state?->{'name_'.$locale},
-            'city' => $this->city?->{'name_'.$locale},
-            'country' => $this->country?->{'name_'.$locale},
             'founders' => $this->teamMembers
                 ->where('TeamMember', 'Founder')
-                ->map(fn($f) => ['name' => $f->Name, 'role' => $f->TeamMember])
+                ->map(fn($f) => ['name' => $f->Name, 'email' => $f->Email,'role' => $f->TeamMember,'linkedin' => $f->LinkedIn])
                 ->values(),
             'sdgs' => $sdgs,
             'socialLinks' => [

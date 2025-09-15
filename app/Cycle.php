@@ -101,6 +101,7 @@ class Cycle extends Model
                 'c.start',
                 'c.end',
                 'c.winners_announcement',
+                'c.winners_visibility',
                 'o.id AS organization_id',
                 'o.name_ar AS organization_name_ar',
                 'o.name_en AS organization_name_en',

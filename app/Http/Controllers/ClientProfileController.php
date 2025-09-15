@@ -17,8 +17,10 @@ use App\MentorshipTask;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Mail\ConfirmEmailUpdate;
+use App\Notifications\ConfirmEmailUpdateNotification;
+use Illuminate\Support\Facades\Notification;
 use App\Services\WhatsAppService;
+use App\Services\NotificationSettingsService;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -37,10 +39,11 @@ class ClientProfileController extends Controller
      *
      * @return void
      */
-    public function __construct(WhatsAppService $whatsAppService)
+    public function __construct(WhatsAppService $whatsAppService, NotificationSettingsService $notificationSettingsService)
     {
         $this->middleware('auth');
         $this->whatsAppService = $whatsAppService;
+        $this->notificationSettingsService = $notificationSettingsService;
     }
     /**
      * Show the form for editing the specified resource.
@@ -226,7 +229,8 @@ class ClientProfileController extends Controller
                     // إرسال رابط التحقق
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+                    Notification::route('mail', $user->new_email)
+                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
 
@@ -253,7 +257,8 @@ class ClientProfileController extends Controller
                     // إرسال رابط التحقق
                     $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
-                    Mail::to($user->new_email)->queue(new ConfirmEmailUpdate($verificationUrl));
+                    Notification::route('mail', $user->new_email)
+                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
 
@@ -686,5 +691,36 @@ class ClientProfileController extends Controller
         return redirect('/dashboard/myProfile')->with('success', "2FA is now disabled.");
     }
 
+    /**
+     * Update notification settings
+     */
+    public function updateNotificationSettings(Request $request)
+    {
+        try {
+            $request->validate([
+                'accept_email' => 'boolean',
+                'accept_whatsapp' => 'boolean',
+                'accept_pusher' => 'boolean',
+            ]);
 
+            $settings = $request->only(['accept_email', 'accept_whatsapp', 'accept_pusher']);
+            
+            // Set defaults if not provided
+            $settings['accept_email'] = $settings['accept_email'] ?? true;
+            $settings['accept_whatsapp'] = $settings['accept_whatsapp'] ?? false;
+            $settings['accept_pusher'] = $settings['accept_pusher'] ?? false;
+
+            $updated = $this->notificationSettingsService->updateNotificationSettings($settings);
+            
+            if ($updated) {
+                return redirect('/dashboard/myProfile')->with('success', 'Notification settings updated successfully');
+            }
+
+            return redirect('/dashboard/myProfile')->with('error', 'Failed to update notification settings');
+
+        } catch (\Exception $e) {
+            Log::channel('system_exceptions')->info('Exception updating notification settings:', [$e]);
+            return redirect('/dashboard/myProfile')->with('error', 'An error occurred while updating notification settings');
+        }
+    }
 }

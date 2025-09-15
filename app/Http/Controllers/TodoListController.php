@@ -7,6 +7,7 @@ use App\TodoList;
 use App\Team_member;
 use Illuminate\Http\Request;
 use App\Mail\TaskAssignedMail;
+use App\Notifications\TaskNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -124,8 +125,11 @@ class TodoListController extends Controller
         $assignedUser = User::find($assignee);
 
         if ($assignedUser && $assignedUser->email) {
-            Mail::to($assignedUser->email)->queue(new TaskAssignedMail($assignedUser, $todoList));
-            
+            $assignedUser->notify(new TaskNotification([
+                'action' => 'task_updated',
+                'message' => __('admin.Task_updated_successfully.'),
+                'task' => $todoList
+            ]));
         }
 
         return response()->json(['success' => true, 'message' => __("admin.Task_updated_successfully.")]);

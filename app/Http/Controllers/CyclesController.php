@@ -355,6 +355,8 @@ class CyclesController extends Controller
                     $image->move(public_path('programs/'), $imageName);
                     $cycle->img_url = 'programs/' . $imageName;
                 }
+                    $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
+                    $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
 
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
@@ -652,6 +654,7 @@ class CyclesController extends Controller
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
+            
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
@@ -750,6 +753,10 @@ class CyclesController extends Controller
                     $cycle->img_url = 'programs/' . $imageName;
                     
                 }
+                
+                $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
+                $cycle->hours_Rminder = $request->hours_reminder;
+
                 $cycle->save();
 
                 if (auth()->user()->hasRole('OrganizationManager')) {
@@ -775,7 +782,8 @@ class CyclesController extends Controller
 
                     if ($admin) {
 
-                        Mail::to($admin->email)->queue(new ProgramCreatedNotification($cycle, $admin));
+                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
+                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
 
                         $messenger = new Messenger();
                         $messenger->sender = auth()->id();

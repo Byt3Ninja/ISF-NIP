@@ -150,29 +150,33 @@ class CompanyProfileResource extends JsonResource
             'achievedMilestones' => $this->milestones
                 ->where('plan', 'Achieved_Milestones')
                  ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
             'plannedMilestones' => $this->milestones
                 ->where('plan', 'Planned_Milestones')
                 ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
             'archivedMilestones' => $this->milestones
                 ->where('plan', 'Archived_Milestones')
                 ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->name,
                     'description' => $m->description,
                 ])->values(),
             'industries' => json_decode($this->industries, true),
             'founders' => $this->teamMembers
                 ->where('TeamMember', 'Founder')
-                ->map(fn($f) => ['name' => $f->Name, 'role' => $f->TeamMember, 'email' => $f->Email,'linkedin' => $f->LinkedIn,])
+                ->map(fn($f) => ['id' => $f->id, 'name' => $f->Name, 'role' => $f->TeamMember, 'email' => $f->Email,'linkedin' => $f->LinkedIn,])
                 ->values(),
             'shareholders' => $this->teamMembers
                 ->whereNotNull('PresentagShereholder')
                 ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->Name,
                     'role' => $m->RoleShereholder,
                     'ownership' => $m->PresentagShereholder,
@@ -180,6 +184,7 @@ class CompanyProfileResource extends JsonResource
             'investors' => $this->teamMembers
                 ->whereNotNull('investorType')
                 ->map(fn($m) => [
+                    'id' => $m->id,
                     'name' => $m->Name,
                     'investmentType' => $m->investorType,
                 ])->values(),

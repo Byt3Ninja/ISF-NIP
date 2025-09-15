@@ -133,7 +133,7 @@
                           @foreach ($sector_group->children as $sector)
                             <option value="{{ $sector->name_en }}" 
                                     {{ $sector->name_en == request('sector') ? 'selected' : '' }}>
-                              {{ $sector->name }}
+                              {{ $sector->{'name_' . $l}  }}
                             </option>
                           @endforeach
                         </optgroup>

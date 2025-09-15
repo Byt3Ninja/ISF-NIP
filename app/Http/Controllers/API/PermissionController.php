@@ -73,7 +73,8 @@ class PermissionController extends Controller
     public function myPermissions(Request $request)
     {
         $user = $request->user();
-        return $this->success(new PermissionResource($user));
+        $role = $user->roles()->with('permissions.permissionsGroup')->first();
+        return $this->success(new PermissionResource($role));
     }
 
     /**

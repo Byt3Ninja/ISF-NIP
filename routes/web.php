@@ -1,5 +1,7 @@
 <?php
 
+use App\Notifications\WelcomeUserNotification;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
@@ -14,13 +16,19 @@ use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
-Route::get('test', function () {});
+Route::get('test', function () {
+    $user = User::find(1); 
+$user->notify(new WelcomeUserNotification($user,'12345'));
+});
+
 Route::get('default-permissions', function () {
     App\Permission::default_permissions();
 });
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
 
 Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
+Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequest')->name('mentors.reminderMentorShipRequest');
+
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -167,7 +175,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
     
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
-
+    Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
 
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
@@ -274,6 +282,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/myProfile', 'ClientProfileController@update')->name('user.profile_update_basic');
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('user.profile_update_bio');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
+Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
@@ -289,7 +298,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
             return redirect('/dashboard');
         })->name('security.2fa_verify_login')->middleware('2fa');
     });
-
 
 
     Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('security.2fa.phone_save_session');
@@ -353,7 +361,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Users  Manager routes
     Route::resource('users', 'UserController');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
-    Route::get('/companies', 'UserController@companies')->name('users.view_companies');
+    Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     //Cities
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');
@@ -452,6 +460,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/queue-jobs', 'QueueJobController@index')->name('queue.jobs');
     Route::get('/run-queue-once', 'QueueJobController@runOnce')->name('queue.run.once');
 
+
+    //MentorShip Schedule
+    Route::get('mentorshipschedule ', 'MentorshipScheduleController@index')->name('mentorship.schedule');
+    Route::post('mentorshipschedule/store', 'MentorshipScheduleController@store')->name('mentorship.schedule_store');
+    Route::post('mentorshipschedule/update', 'MentorshipScheduleController@update')->name('mentorship.schedule_update');
+    Route::post('mentorshipschedule/destroy', 'MentorshipScheduleController@destroy')->name('mentorship.schedule_destroy');
+
     //Screening
     Route::get('screening', 'ScreeningController@index');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
@@ -477,6 +492,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
@@ -618,6 +634,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorship_tasks.comment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorship_tasks.update_special');
+
     });
 
 

@@ -623,35 +623,43 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                           @foreach($todoList as $task)
                             <li class="list-group-item border-0 px-2 py-2" id="task-{{ $task->tl_id }}">
                               <div class="d-flex justify-content-between align-items-start">
-                                <div class="form-check flex-grow-1">
-                                  <input 
-                                    id="task{{ $task->tl_id }}-checkbox"
-                                    class="form-check-input me-2" 
-                                    type="checkbox" 
-                                    value="{{ $task->tl_status }}" 
-                                    onchange="updateTaskStatus('{{ $task->tl_id }}', this.checked)"
-                                    @if($task->tl_status == "DONE") checked @endif
-                                  />
-                                  <label 
-                                    class="form-check-label" 
-                                    id="task{{ $task->tl_id }}-label"
-                                    for="task{{ $task->tl_id }}-checkbox" 
-                                    style="text-decoration: {{$task->tl_status == "DONE" ? 'line-through' : 'none'}}"
-                                  >
-                                    <div class="fw-medium">{{ $task->tl_title }}</div>
-                                    <small class="text-muted">
-                                      {{ $l == 'en' ? 'Assigned to: '. $task->assignee_name_en : 'مُسند إلى: '. $task->assignee_name_en }}
-                                      @if($task->tl_due_date)
-                                        - {{ $l == 'en' ? 'Due: ' . $task->tl_due_date : 'موعد الانتهاء: ' . $task->tl_due_date }}
-                                      @endif
-                                    </small>
-                                  </label>
+                                <div class="flex-grow-1">
+                                  <div class="d-flex align-items-center mb-2">
+                                    <span class="fw-medium me-2">{{ $task->tl_title }}</span>
+                                    @php
+                                      $statusClass = 'secondary';
+                                      $statusText = 'Todo';
+                                      $statusIcon = 'ti-circle';
+                                      
+                                      if($task->tl_status == 'DONE') {
+                                        $statusClass = 'success';
+                                        $statusText = $l == 'en' ? 'Done' : 'مكتملة';
+                                        $statusIcon = 'ti-check';
+                                      } elseif($task->tl_status == 'inprogress') {
+                                        $statusClass = 'warning';
+                                        $statusText = $l == 'en' ? 'In Progress' : 'قيد التنفيذ';
+                                        $statusIcon = 'ti-progress';
+                                      } else {
+                                        $statusText = $l == 'en' ? 'Todo' : 'مهمة';
+                                      }
+                                    @endphp
+                                    <span class="badge bg-label-{{ $statusClass }} rounded-pill py-1 px-2">
+                                      <i class="ti {{ $statusIcon }} ti-16px me-1"></i>
+                                      {{ $statusText }}
+                                    </span>
+                                  </div>
+                                  <small class="text-muted">
+                                    {{ $l == 'en' ? 'Assigned to: '. $task->assignee_name_en : 'مُسند إلى: '. $task->assignee_name_en }}
+                                    @if($task->tl_due_date)
+                                      - {{ $l == 'en' ? 'Due: ' . $task->tl_due_date : 'موعد الانتهاء: ' . $task->tl_due_date }}
+                                    @endif
+                                  </small>
                                 </div>
                                 
                                 @if($team_Formation_leader OR $task->tl_assignee_id == auth()->user()->id) 
                                 <div class="btn-group btn-group-sm ms-2">
                                   <button class="btn btn-outline-secondary btn-sm" 
-                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->assignee_name_en }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}')"
+                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->tl_assignee_id }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}', '{{ $task->tl_status }}')"
                                     title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                     <i class="ti ti-edit"></i>
                                   </button>
@@ -1093,7 +1101,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           
           <div class="mb-3">
             <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
-            <select class="form-select" id="taskAssignee" name="assignee">
+            <select class="form-select" id="taskAssignee" name="assignee" required>
+              <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
               <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
                @if($team_Formation_leader) 
               @if(isset($team_members))
@@ -1104,6 +1113,21 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 @endforeach
               @endif
               @endif
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="taskStatus" class="form-label">{{ $l == 'en' ? 'Status' : 'الحالة' }}</label>
+            <select class="form-select" id="taskStatus" name="status">
+              <option value="todo">
+                {{ $l == 'en' ? 'Todo' : 'مهمة' }}
+              </option>
+              <option value="inprogress">
+                {{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}
+              </option>
+              <option value="DONE">
+                {{ $l == 'en' ? 'Done' : 'مكتملة' }}
+              </option>
             </select>
           </div>
           
@@ -1162,8 +1186,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             
             <div class="mb-3">
               <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
-              <select class="form-select" id="EtaskAssignee" name="assignee">
-                <option value="You" selected >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+              <select class="form-select" id="EtaskAssignee" name="assignee" required>
+                <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
+                <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
                 @if($team_Formation_leader)
                 @if(isset($team_members))
                   @foreach($team_members as $member)
@@ -1179,9 +1204,18 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <div class="mb-3">
               <label for="EtaskStatus" class="form-label">{{ $l == 'en' ? 'Status' : 'الحالة' }}</label>
               <select class="form-select" id="EtaskStatus" name="statustodo">
-                <option value="todo"  >{{ $l == 'en' ? 'todo' : 'تم الانشاء' }}</option>
-                <option value="inprogress" >{{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}</option>
-                <option value="DONE" >{{ $l == 'en' ? 'DONE' : 'مكتملة' }}</option>
+                <option value="todo">
+                  <i class="ti ti-circle me-1"></i>
+                  {{ $l == 'en' ? 'Todo' : 'مهمة' }}
+                </option>
+                <option value="inprogress">
+                  <i class="ti ti-progress me-1"></i>
+                  {{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}
+                </option>
+                <option value="DONE">
+                  <i class="ti ti-check me-1"></i>
+                  {{ $l == 'en' ? 'Done' : 'مكتملة' }}
+                </option>
               </select>
             </div>
                
@@ -1207,7 +1241,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         </button>
         <button type="button" class="btn btn-primary" onclick="updateTask()">
           <span class="btn-text">
-            <i class="ti ti-device-floppy me-1"></i>
+            <i class="ti ti-pencil me-1"></i>
             {{ $l == 'en' ? 'Update Task' : 'تحديث المهمة' }}
           </span>
           <span class="btn-spinner d-none">
@@ -2125,31 +2159,59 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const taskAssignee = document.getElementById('taskAssignee').value;
     const taskDueDate = document.getElementById('taskDueDate').value;
     const taskDescription = document.getElementById('taskDescription').value;
+    const taskStatus = document.getElementById('taskStatus').value;
 
     if (!taskTitle) {
       Swal.fire({
         icon: 'warning',
         title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
         text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       });
       return;
     }
 
-    const formData = {
-      title: taskTitle,
-      assignee: taskAssignee,
-      due_date: taskDueDate,
-      description: taskDescription
-    };
+    if (!taskAssignee) {
+      Swal.fire({
+        icon: 'warning',
+        title: '{{ $l == "en" ? "Assignee Required" : "المسؤول مطلوب" }}',
+        text: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+      return;
+    }
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+    // Create FormData instead of JSON
+    const formData = new FormData();
+    formData.append('title', taskTitle);
+    formData.append('assignee', taskAssignee);
+    formData.append('due_date', taskDueDate);
+    formData.append('description', taskDescription);
+    formData.append('status', taskStatus);
+    formData.append('_token', csrfToken);
 
     fetch('/dashboard/hackathon/AddtodoList', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -2205,15 +2267,16 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     });
   }
 
-  function editTask(taskId, taskTitle, taskAssignee, taskDueDate, taskDescription) {
-    console.log('editTask called with:', taskId, taskTitle, taskAssignee, taskDueDate);
+  function editTask(taskId, taskTitle, taskAssigneeId, taskDueDate, taskDescription, taskStatus) {
+    console.log('editTask called with:',taskAssigneeId);
     
     try {
       // Pre-fill the modal with existing task data
       document.getElementById('EtaskTitle').value = taskTitle;
-      document.getElementById('EtaskAssignee').value = taskAssignee;
+      document.getElementById('EtaskAssignee').value = taskAssigneeId || 'You';
       document.getElementById('EtaskDueDate').value = taskDueDate || '';
       document.getElementById('EtaskDescription').value = taskDescription || '';
+      document.getElementById('EtaskStatus').value = taskStatus || 'todo';
       
       // Store the task ID for updating
       document.getElementById('EditTaskModal').setAttribute('data-editing-task', taskId);
@@ -2241,30 +2304,70 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         icon: 'warning',
         title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
         text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       });
       return;
     }
 
-    const formData = {
-      id: editingTaskId,
-      title: taskTitle,
-      assignee: taskAssignee,
-      due_date: taskDueDate,
-      status: taskStatus,
-      description: taskDescription
-    };
+    if (!taskAssignee) {
+      Swal.fire({
+        icon: 'warning',
+        title: '{{ $l == "en" ? "Assignee Required" : "المسؤول مطلوب" }}',
+        text: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+      return;
+    }
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+    // Create FormData instead of JSON
+    const formData = new FormData();
+    formData.append('id', editingTaskId);
+    formData.append('title', taskTitle);
+    formData.append('assignee', taskAssignee);
+    formData.append('due_date', taskDueDate);
+    formData.append('status', taskStatus);
+    formData.append('description', taskDescription);
+    formData.append('_token', csrfToken);
+
+    console.log('Sending form data...');
 
     fetch('/dashboard/hackathon/EdittodoList', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+        // Don't set Content-Type for FormData, let browser set it
       },
-      body: JSON.stringify(formData)
+      body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    })
     .then(data => {
+      console.log('Response data:', data);
+      
       if (data.success === true) {
         Swal.fire({
           icon: 'success',
@@ -2301,11 +2404,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       }
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Fetch error details:', error);
+      console.error('Error message:', error.message);
+      
       Swal.fire({
         icon: 'error',
-        title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-        text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+        title: '{{ $l == "en" ? "Connection Error" : "خطأ في الاتصال" }}',
+        text: '{{ $l == "en" ? "Failed to connect to the server. Please check your internet connection and try again." : "فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى." }}',
         confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
         showCancelButton: false,
         showConfirmButton: true,

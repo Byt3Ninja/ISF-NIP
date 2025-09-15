@@ -177,7 +177,7 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
                                   class="form-check-input" 
                                   type="checkbox" 
                                   name="permissions[]" 
-                                  value="{{ $permission->id }}" 
+                                  value="{{ $permission->name }}" 
                                   id="permission-{{ $permission->name }}"
                                   {{ $permission->checked ? 'checked' : '' }} 
                                   onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'"

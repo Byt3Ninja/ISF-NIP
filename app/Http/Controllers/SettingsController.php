@@ -18,7 +18,8 @@ use App\Invitation;
 use App\Organization;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
-use App\Mail\UserInvitation;
+use App\Notifications\UserInvitationNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -26,7 +27,6 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-
 
 class SettingsController extends Controller
 {
@@ -811,6 +811,7 @@ class SettingsController extends Controller
     	})->sort();
 		$invitations = Invitation::where('organization_id', $organization->id)->get();
 		$role = Role::where('name', 'organizationManager')->first();
+		
         return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations'));
     }
 
@@ -943,7 +944,8 @@ class SettingsController extends Controller
 		if ($invitation) {
 			$invitation->expires_at = now()->addDays(2);
 			$invitation->save();
-			Mail::to($request->email)->queue(new UserInvitation($invitation));
+			Notification::route('mail', $request->email)
+                ->notify(new UserInvitationNotification($invitation));
 			return back()->with('message', 'InvitationSent');
 		}
 
@@ -957,7 +959,8 @@ class SettingsController extends Controller
 				$invitation->save();
 
 				// Send invitation email
-				Mail::to($request->email)->queue(new UserInvitation($invitation));
+				Notification::route('mail', $request->email)
+                ->notify(new UserInvitationNotification($invitation));
 
 				return back()->with('message', 'InvitationSent');
 	}
@@ -1038,7 +1041,8 @@ class SettingsController extends Controller
 		$invitation->expires_at = now()->addDays(2);
 		$invitation->save();
 
-		Mail::to($invitation->email)->queue(new UserInvitation($invitation));
+		        Notification::route('mail', $invitation->email)
+            ->notify(new UserInvitationNotification($invitation));
 
 		return back()->with('message', 'InvitationResent');
 	}

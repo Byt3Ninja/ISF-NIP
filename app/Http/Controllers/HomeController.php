@@ -3065,8 +3065,8 @@ class HomeController extends Controller
             $service = Service::find($request->id);
 
             if ($service && $service->vendor_email) {
-                // Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
-                Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
+                // Create anonymous notifiable for vendor email
+                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
             }
 
             return response()->json(['state' => 'success']);
