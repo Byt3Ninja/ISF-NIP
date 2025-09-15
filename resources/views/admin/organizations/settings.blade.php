@@ -25,7 +25,6 @@
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
     ['Schedule', 'ti-brand-slack', __('admin.Schedule')],
-    ['ReminderLogs', 'ti-alarm', __('admin.ReminderLogs')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
   })->toArray();
@@ -117,9 +116,7 @@
                       @case('Schedule')
                       @include('partials.forms.schedule')
                       @break
-                      @case('ReminderLogs')
-                      @include('admin.organizations.partials.ReminderLogs')
-                      @break
+                    
                   @endswitch
                 </div>
               </div>

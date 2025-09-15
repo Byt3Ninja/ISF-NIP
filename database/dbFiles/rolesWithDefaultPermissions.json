@@ -6368,6 +6368,26 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "organization.ReminderLogs",
+                "description": " Show Reminders Logs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "organization.distroyReminderLogs",
+                "description": " Delete Reminders Logs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },

@@ -411,7 +411,7 @@ class IndexController extends Controller
                     $hours = $schedule->value;
                     $diffInHours = now()->diffInHours($request->zoom_date, false);
 
-                    if ($diffInHours > 0 && $diffInHours <= $hours) {
+                    if ($diffInHours > 0 && $diffInHours == $hours) {
                         $data['date']        = $request->zoom_date->format('Y-m-d H:i:s');
                         $data['company_name']= $request->user->company->{'name_' . $l};
                         $data['Mentorname']  = $request->mentor->first_name_en . " " . $request->mentor->last_name_en;

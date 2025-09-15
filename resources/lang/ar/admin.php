@@ -2398,4 +2398,12 @@ return [
 	'Unit' => 'وحدة',
 	'Active' => 'نشط',
 	'Schedule' => 'جدول',
+	'ReminderLogs' => 'سجلات التذاكر',
+	'Channel' => 'قناة',
+	'skipped' => 'تخطى',
+	'sent' => 'تم الارسال',
+	'failed' => 'فشل',
+	'in-app' => 'في التطبيق',
+	'Display_all_reminder_logs' => 'اظهار جميع سجلات التذاكر',
+	
 ];
