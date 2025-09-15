@@ -145,7 +145,7 @@
 													<label class="form-label fs-6 mb-2 fw-bold">
 														{{ __('admin.Category') }}
 													</label>
-													<select class="ascategory_id form-select select2" name="ascategory_id"
+													<select class="ascategory_id form-select" name="ascategory_id"
 														data-placeholder="{{ $l == 'en' ? 'Choose category' : 'اختر القسم' }}"
 													>
 														<option value="" disabled selected>
@@ -162,7 +162,7 @@
 													<label class="form-label fs-6 mb-2 fw-bold">
 														{{ __('admin.SubName') }}
 													</label>
-													<select class="subcategory_id form-select select2" name="subcategory_id"
+													<select class="subcategory_id form-select" name="subcategory_id"
 														data-placeholder="{{ $l == 'en' ? 'Choose Subcategory' : 'اختر القسم الفرعي' }}"
 													>
 														<option value="" disabled selected>
@@ -175,9 +175,9 @@
 												</div>
 											</div>
 											<div class="col-12">
-												<fieldset class="form-group questions-type">
+												<fieldset class="form-group">
 													<label class="fs-6 form-label mb-2 fw-bold" for="category_id">{{ __('admin.questionCategory')}}</label>
-													<select class="select2 form-select" name="category_id" id="category_id" required>
+													<select class="select2 form-select" name="category_id" id="category_id">
 														@foreach( $organizations->first()->questionsCategories as $category )
 															<option value="{{ $category['id'] }}" {{ old('category_id') == $category['id'] ? 'selected' : '' }}>{{ $category['title'] }}</option>
 														@endforeach
@@ -434,7 +434,7 @@
 			});
 		});
 
-		$(document).ready(function() { handleChangeType(); handleChangeQuestionType(); });
+		$(document).ready(function() { handleChangeType(); });
 
 		$(document).ready(function() {
 
