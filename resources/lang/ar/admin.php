@@ -2405,5 +2405,6 @@ return [
 	'failed' => 'فشل',
 	'in-app' => 'في التطبيق',
 	'Display_all_reminder_logs' => 'اظهار جميع سجلات التذاكر',
+	'mentorship_request' => 'طلب جلسة ارشاد',
 	
 ];
