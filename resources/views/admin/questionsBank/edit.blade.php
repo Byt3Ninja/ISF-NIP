@@ -440,7 +440,7 @@
 			});
 		});
 
-		$(document).ready(function() { handleChangeType(); handleChangeQuestionType(); });
+		$(document).ready(function() { handleChangeType() });
 
 		$(document).ready(function() {
 
