@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\StepController;
 use App\Http\Controllers\API\UserController;
@@ -20,12 +21,14 @@ use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
+use App\Http\Controllers\TestNotificationController;
 use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\TrainingReportController;
 use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
-use App\Http\Controllers\API\Startup\MentorshipSessionController;
+use App\Http\Controllers\API\MentorshipReportController;
 use App\Http\Controllers\NotificationSettingsController;
-use App\Http\Controllers\TestNotificationController;
+use App\Http\Controllers\API\Startup\MentorshipSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,7 +61,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::get('users/companies', 'UserController@companies');
     Route::put('users/{user}/password', [UserController::class,'updatePassword']);
-    Route::apiResource('/roles',RoleController::class);
+    Route::apiResource('roles',RoleController::class);
     Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
     Route::post('/profile', [ProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
@@ -72,6 +75,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/v1/mentors/{mentor}', [MentorController::class, 'show']);
     Route::get('/v1/users/me/permissions', [PermissionController::class, 'myPermissions']);
     Route::get('/v1/{role}/permissions', [PermissionController::class, 'userPermissions']);
+    Route::put('/v1/{roleId}/permissions', [RoleController::class, 'updatePermissions']);
     Route::post('/v1/availability', [ScheduleController::class, 'store']);
     Route::put('/v1/availability/{user_id}', [ScheduleController::class, 'update']);
     Route::delete('/v1/availability/{id}', [ScheduleController::class, 'destroy']);
@@ -108,6 +112,8 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/v1/programs/{programId}/reports/mentorship', [ProgramController::class, 'mentorship']);
     Route::get('/v1/programs/{programId}/reports/workshops', [ProgramController::class, 'workshops']);
     Route::get('/v1/programs/{programId}/reports/final-evaluation', [ProgramController::class, 'finalEvaluation']);
+    Route::get('/v1/programs/{programId}/mentors', [ProgramController::class, 'mentors']);
+    Route::get('v1/programs/{programId}/startups', [ProgramController::class, 'startups']);
     Route::post('/mentorship-sessions', [MentorshipSessionController::class, 'addMentorshipSession']);
     
     // Notification Settings Routes
@@ -127,7 +133,14 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
+    Route::post('/v1/programs/{programId}/steps', [StepController::class, 'createStep']);
+    Route::put('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'updateStep']);
+    Route::delete('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'deleteStep']);
+    Route::patch('v1/programs/{programId}/steps/reorder', [StepController::class, 'reorderSteps']);
+    Route::patch('v1/programs/{programId}/steps/{stepId}/change-order', [StepController::class, 'changeStepOrder']);
+    Route::get('/v1/step-types', [StepController::class, 'getStepTypes']);
     Route::apiResource('steps', StepController::class);
+    Route::get('/v1/forms', [FormController::class, 'index']);
     Route::prefix('messages')->group(function () {
         Route::post('/', [MessageController::class, 'store']);
         Route::post('/reply', [MessageController::class, 'reply']); 
@@ -142,6 +155,25 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::prefix('v1')->group(function () {
     Route::apiResource('permissions', PermissionController::class);
     Route::apiResource('permission-groups', PermissionGroupController::class);
+});
+    Route::prefix('dashboard')->group(function () {
+    Route::get('/summary', [MentorshipReportController::class, 'summary']);
+    Route::get('/weekly-trends', [MentorshipReportController::class, 'weeklyTrends']);
+    Route::get('/mentor-hours', [MentorshipReportController::class, 'mentorHours']);
+    Route::get('/mentor-performance', [MentorshipReportController::class, 'mentorPerformance']);
+    Route::get('/startup-engagement', [MentorshipReportController::class, 'startupEngagement']);
+    Route::get('/trends/by-program', [MentorshipReportController::class, 'trendsByProgram']);
+    Route::get('/trends/peak-activity', [MentorshipReportController::class, 'peakActivity']);
+});
+Route::prefix('training')->group(function () {
+    Route::get('summary', [TrainingReportController::class, 'summary']);
+    Route::get('session-types', [TrainingReportController::class, 'sessionTypes']);
+    Route::get('monthly-trends', [TrainingReportController::class, 'monthlyTrends']);
+    Route::get('type-breakdown', [TrainingReportController::class, 'typeBreakdown']);
+    Route::get('hours-trend', [TrainingReportController::class, 'hoursTrend']);
+    Route::get('trainers', [TrainingReportController::class, 'trainers']);
+    Route::get('topics', [TrainingReportController::class, 'topics']);
+    Route::get('sessions/recent', [TrainingReportController::class, 'recentSessions']);
 });
 
 

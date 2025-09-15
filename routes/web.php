@@ -27,6 +27,8 @@ Route::get('default-permissions', function () {
 Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
 
 Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
+Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequest')->name('mentors.reminderMentorShipRequest');
+
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -298,7 +300,6 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     });
 
 
-
     Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('security.2fa.phone_save_session');
     Route::post('/send-code', 'ClientProfileController@sendCode')->name('security.2fa_code_send');
     Route::post('/verify-code', 'ClientProfileController@verifyCode')->name('security.2fa_code_verify');
@@ -459,6 +460,13 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('/queue-jobs', 'QueueJobController@index')->name('queue.jobs');
     Route::get('/run-queue-once', 'QueueJobController@runOnce')->name('queue.run.once');
 
+
+    //MentorShip Schedule
+    Route::get('mentorshipschedule ', 'MentorshipScheduleController@index')->name('mentorship.schedule');
+    Route::post('mentorshipschedule/store', 'MentorshipScheduleController@store')->name('mentorship.schedule_store');
+    Route::post('mentorshipschedule/update', 'MentorshipScheduleController@update')->name('mentorship.schedule_update');
+    Route::post('mentorshipschedule/destroy', 'MentorshipScheduleController@destroy')->name('mentorship.schedule_destroy');
+
     //Screening
     Route::get('screening', 'ScreeningController@index');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
@@ -484,6 +492,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
@@ -625,6 +634,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorship_tasks.comment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorship_tasks.update_special');
+
     });
 
 

@@ -24,6 +24,8 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
+    ['Schedule', 'ti-brand-slack', __('admin.Schedule')],
+    ['ReminderLogs', 'ti-alarm', __('admin.ReminderLogs')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
   })->toArray();
@@ -112,6 +114,12 @@
                     @case('WhatsApp')
                       @include('partials.forms.whatsapp-settings-form')
                       @break
+                      @case('Schedule')
+                      @include('partials.forms.schedule')
+                      @break
+                      @case('ReminderLogs')
+                      @include('admin.organizations.partials.ReminderLogs')
+                      @break
                   @endswitch
                 </div>
               </div>
@@ -128,6 +136,58 @@
 
 @section('pagescripts')
 <script>
+  $(document).ready(function() {
+   $('#addSchedule').click(function() {
+        let value = $('#value').val();
+        let unit = $('#unit').val();
+
+      $.ajax({
+          url: "{{ route('mentorship.schedule_store') }}",
+          type: "POST",
+          data: {
+              value: value,
+              unit: unit,
+              _token: "{{ csrf_token() }}" // مهم جداً في POST
+          },
+          success: function(response) {
+              alert('Schedule saved successfully');
+              console.log(response);
+          },
+          error: function(xhr) {
+              console.error(xhr.responseText);
+              alert('Error while saving schedule');
+          }
+        });
+      });
+
+       $(document).on('change', '.toggle-active', function() {
+          let id = $(this).data('id');
+          let is_active = $(this).is(':checked') ? 1 : 0;
+          let value = $(this).data('value');
+          let unit = $(this).data('unit');
+
+          $.ajax({
+              url: "{{ route('mentorship.schedule_update') }}",
+              type: "POST",
+              data: {
+                  _token: "{{ csrf_token() }}",
+                  id: id,
+                  is_active: is_active,
+                  value: value,
+                  unit: unit
+              },
+              success: function(response) {
+                  console.log("Updated:", response);
+              },
+              error: function(xhr) {
+                  alert("Error updating status");
+                  console.error(xhr.responseText);
+              }
+          });
+      });
+
+    });
+
 class WhatsAppAuthenticator {
   constructor() {
     this.pollingInterval = 3000; // 3 seconds

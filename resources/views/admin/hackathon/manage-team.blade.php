@@ -659,7 +659,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                 @if($team_Formation_leader OR $task->tl_assignee_id == auth()->user()->id) 
                                 <div class="btn-group btn-group-sm ms-2">
                                   <button class="btn btn-outline-secondary btn-sm" 
-                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->assignee_name_en }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}', '{{ $task->tl_status }}')"
+                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->tl_assignee_id }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}', '{{ $task->tl_status }}')"
                                     title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                     <i class="ti ti-edit"></i>
                                   </button>
@@ -2267,13 +2267,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     });
   }
 
-  function editTask(taskId, taskTitle, taskAssignee, taskDueDate, taskDescription, taskStatus) {
-    console.log('editTask called with:', taskId, taskTitle, taskAssignee, taskDueDate, taskStatus);
+  function editTask(taskId, taskTitle, taskAssigneeId, taskDueDate, taskDescription, taskStatus) {
+    console.log('editTask called with:',taskAssigneeId);
     
     try {
       // Pre-fill the modal with existing task data
       document.getElementById('EtaskTitle').value = taskTitle;
-      document.getElementById('EtaskAssignee').value = taskAssignee;
+      document.getElementById('EtaskAssignee').value = taskAssigneeId || 'You';
       document.getElementById('EtaskDueDate').value = taskDueDate || '';
       document.getElementById('EtaskDescription').value = taskDescription || '';
       document.getElementById('EtaskStatus').value = taskStatus || 'todo';

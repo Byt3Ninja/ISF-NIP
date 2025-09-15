@@ -39,7 +39,9 @@ class RolesController extends Controller
 	public function store(StoreRoleRequest $request)
 	{
 		$role = Role::create($request->all());
-		$role->permissions()->sync($request->input('permissions', []));
+		$permissionNames = $request->input('permissions_flat');
+    	$permissionIds = Permission::whereIn('name', $permissionNames)->pluck('id');
+		$role->permissions()->sync($permissionIds);
 		app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 		return redirect()->route('roles.index');
 	}
@@ -72,7 +74,9 @@ class RolesController extends Controller
 	public function update(UpdateRoleRequest $request, Role $role)
 	{
 		$role->update($request->all());
-		$role->permissions()->sync($request->input('permissions', []));
+		$permissionNames = $request->input('permissions_flat', []);
+    	$permissionIds = Permission::whereIn('name', $permissionNames)->pluck('id')->toArray();
+		$role->permissions()->sync($permissionIds);
 		app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 		return redirect()->route('roles.edit', [$role->id])->with('success', 'Saved');
 	}

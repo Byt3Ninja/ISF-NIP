@@ -8,6 +8,7 @@ use App\Cycle;
 use App\Company;
 use App\Country;
 use App\UsersBio;
+use App\Permission;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -579,5 +580,43 @@ class UserRepository
             return ['success' => false, 'message' => 'فشل استيراد المستخدمين.'];
         }
     }
+
+  public function createRoleWithPermissions(array $data)
+{
+    return DB::transaction(function () use ($data) {
+        $role = Role::create([
+            'name' => $data['name'],
+        ]);
+
+        $flattened = collect($data['permissions'])->flatten()->toArray();
+        $permissions = Permission::whereIn('name', $flattened)->pluck('id')->toArray();
+
+        $role->permissions()->sync($permissions);
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        return $role->load('permissions');
+    });
+}
+
+public function updateRoleWithPermissions(int $id, array $data)
+{
+    return DB::transaction(function () use ($id, $data) {
+        $role = Role::findOrFail($id);
+
+        if (isset($data['name'])) {
+            $role->name = $data['name'];
+        }
+
+        $role->save();
+        if (isset($data['permissions'])) {
+            $flattened = collect($data['permissions'])->flatten()->toArray();
+            $permissions = Permission::whereIn('name', $flattened)->pluck('id')->toArray();
+            $role->permissions()->syncWithoutDetaching($permissions);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        }
+
+        return $role->load('permissions');
+    });
+}
 
 }

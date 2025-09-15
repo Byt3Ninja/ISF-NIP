@@ -144,6 +144,7 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
               @case('WhatsApp')
               @include('partials.forms.whatsapp-settings-form')
               @break
+              
               @endswitch
             </div>
           </div>
@@ -168,6 +169,11 @@ return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
       $('#state_id').change(function() {
         getCities($(this).val());
       });
+
+     
+
+     
+        
     });
 
     function getStates(country_id) {

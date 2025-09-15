@@ -350,6 +350,14 @@
             let _public = $(this).val();
             if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
         });
+
+        $(document).on('change', '#reminder_enabled', function() {
+        if ($(this).is(':checked')) {
+            $('#hours_reminder').show();
+        } else {
+            $('#hours_reminder').hide();
+        }
+    });
         // Set Language
         const lang = '{{ $l }}';
 
@@ -1222,6 +1230,10 @@
                         $('#type').val(1);
                         $('#organization').val(response.organization_id ?? '');
                         $('#allow_non_company').prop('checked', response.allow_non_company == 1);
+                        $('#reminder_enabled').prop('checked', response.is_active_Rminder == 1);
+                        if( response.is_active_Rminder == 1){
+                            $('#hours_reminder').show();
+                        }
                         $('#auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1);
 
                         if (response.private) {

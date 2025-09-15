@@ -2,24 +2,27 @@
 
 namespace App\Notifications;
 
+use Log;
 use Illuminate\Bus\Queueable;
+use App\Broadcasting\WhatsAppChannel;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
-use App\Broadcasting\WhatsAppChannel;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public $data;
+    public $reminder;
     /**
      * Create a new notification instance.
      */
-    public function __construct($data)
+    public function __construct($data, $reminder = null)
     {
         $this->data = $data;
+        $this->reminder = $reminder;
     }
 
     /**
@@ -56,9 +59,16 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        if($this->reminder == 'Reminder'){
+            return (new MailMessage)
+            ->subject( __('emails.mentorship_request_reminder.subject', ['startup' => $this->data['company_name']]))
+            ->markdown('emails.mentorship_request_reminder', ['data' => $this->data]);
+           Log::info('Mail data:', ['company_name' => $this->data['company_name']]);
+        }else{
+            return (new MailMessage)
             ->subject(__('admin.mentorship_request_subject', ['startup' => $this->data['company_name']]))
             ->markdown('emails.mentorship_request', ['data' => $this->data]);
+        }
     }
 
     /**
@@ -101,6 +111,13 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
             'subject' => __('admin.mentorship_request_subject', ['startup' => $this->data['company_name'] ?? '']),
             'message' => __('notifications.mentorship_request.broadcast', ['startup' => $this->data['company_name'] ?? '']),
             'time' => now()->toDateTimeString(),
+        ]);
+    }
+
+    public function afterSend($notifiable)
+    {
+        Log::info("Notification sent to user {$notifiable->id}", [
+            'type' => static::class,
         ]);
     }
 }

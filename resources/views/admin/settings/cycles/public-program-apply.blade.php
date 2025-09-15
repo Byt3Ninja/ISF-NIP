@@ -561,15 +561,46 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 									datePicker();
 									stepper.to(3); // Jump to the third step (Application)
 								} else {
-									Swal.fire({ title: '{{ $l == "ar" ? "خطأ" : "Error" }}', text: response.message, icon: 'error' });
+									Swal.fire({ 
+										icon: 'error',
+										title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+										text: response.message,
+										showCancelButton: false,
+										showConfirmButton: true,
+										customClass: {
+											confirmButton: 'btn btn-primary',
+											cancelButton: 'btn btn-label-secondary'
+										},
+										buttonsStyling: false,
+									});
 								}
 							} else {
-								Swal.fire({ title: '{{ $l == "ar" ? "خطأ" : "Error" }}', text: response.message, icon: 'error' });
+								Swal.fire({ 
+									icon: 'error',
+									title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+									text: response.message,
+									showCancelButton: false,
+									showConfirmButton: true,
+									customClass: {
+										confirmButton: 'btn btn-primary',
+									},
+									buttonsStyling: false,
+								});
 							}
 						},
 						error: function(error) {
 							console.log(error);
-							Swal.fire({ title: '{{ $l == "ar" ? "خطأ" : "Error" }}', text: 'Error validating email. Please try again.', icon: 'error' });
+							Swal.fire({
+								icon: 'error',
+								title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+								text: 'Error validating email. Please try again.',
+								showCancelButton: false,
+								showConfirmButton: true,
+								customClass: {
+									confirmButton: 'btn btn-primary',
+								},
+								buttonsStyling: false,
+							});
 						}
 					});
 				} else {

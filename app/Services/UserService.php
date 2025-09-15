@@ -259,4 +259,61 @@ class UserService
         }
     }
 
+     public function createRole(array $data)
+    {
+        try {
+            $role = $this->userRepository->createRoleWithPermissions($data);
+
+            return [
+                'success' => true,
+                'message' => __('api.role_created'),
+                'data' => [
+                    'roleId' => $role->id,
+                    'roleName' => $role->name,
+                    'permissions' => collect($data['permissions'])->filter(fn($group) => count($group) > 0),
+                    'createdAt' => $role->created_at->toIso8601String(),
+                    'updatedAt' => $role->updated_at->toIso8601String(),
+                ],
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    public function updateRolePermissions(int $id, array $data)
+{
+    try {
+        $role = $this->userRepository->updateRoleWithPermissions($id, $data);
+        $permissionsByGroup = $role->permissions
+            ->groupBy('group')
+            ->map(fn($items) => $items->pluck('name')->values());
+        return [
+            'success' => true,
+            'message' => __('api.role_updated'),
+            'data' => [
+                'roleId' => $role->id,
+                'roleName' => $role->name,
+                'permissions' => $permissionsByGroup,
+                'updatedAt' => $role->updated_at->toIso8601String(),
+            ],
+        ];
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return [
+            'success' => false,
+            'message' => __('api.role_not_found'),
+            'status' => 404,
+        ];
+    } catch (\Exception $e) {
+        return [
+            'success' => false,
+            'message' => 'Server error: ' . $e->getMessage(),
+            'status' => 500,
+        ];
+    }
+}
+
+
 }

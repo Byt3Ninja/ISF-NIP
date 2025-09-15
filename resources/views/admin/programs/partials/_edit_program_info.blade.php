@@ -153,5 +153,21 @@
       </label>
       <input class="form-check-input" type="checkbox" id="private" name="private" />
     </div>
+
+     <div class="form-check form-switch mb-6">
+      <label class="form-check-label" for="private-link">
+        {{ __('admin.Reminder') }}
+      </label>
+      <input class="form-check-input" type="checkbox" id="reminder_enabled" name="reminder_enabled" />
+      
+    </div>
+
+    <div class="mb-6" id="hours_reminder" style="display: none;">
+      <div class="form-group public-data-form-fields">
+        <label class="form-label" for="public_slug">{{ __('admin.Hours_Reminder') }}: </label>
+        <input type="text" id="hours_reminder_input" name="hours_reminder" class="form-control" value="{{ $ccycle?->hours_Rminder }}" placeholder="{{ __('admin.Hours_Reminder') }}">
+      </div>
+    </div>
+
   </div>
 </div>
