@@ -19,7 +19,13 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://front.growthlabs.app'],
+    'allowed_origins' => [
+        'https://front.growthlabs.app',
+        'http://localhost:3000',
+        'https://localhost:3000',
+        'http://localhost:3000',
+        'https://localhost:3001',
+    ],
 
     'allowed_origins_patterns' => [],
 
