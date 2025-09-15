@@ -23,11 +23,12 @@ use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\TestNotificationController;
 use App\Http\Controllers\API\Mentors\MentorController;
+use App\Http\Controllers\API\TrainingReportController;
 use App\Http\Controllers\API\PermissionGroupController;
 use App\Http\Controllers\API\Mentors\ScheduleController;
+use App\Http\Controllers\API\MentorshipReportController;
 use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\API\Startup\MentorshipSessionController;
-use App\Http\Controllers\API\MentorshipReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -163,6 +164,16 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/startup-engagement', [MentorshipReportController::class, 'startupEngagement']);
     Route::get('/trends/by-program', [MentorshipReportController::class, 'trendsByProgram']);
     Route::get('/trends/peak-activity', [MentorshipReportController::class, 'peakActivity']);
+});
+Route::prefix('training')->group(function () {
+    Route::get('summary', [TrainingReportController::class, 'summary']);
+    Route::get('session-types', [TrainingReportController::class, 'sessionTypes']);
+    Route::get('monthly-trends', [TrainingReportController::class, 'monthlyTrends']);
+    Route::get('type-breakdown', [TrainingReportController::class, 'typeBreakdown']);
+    Route::get('hours-trend', [TrainingReportController::class, 'hoursTrend']);
+    Route::get('trainers', [TrainingReportController::class, 'trainers']);
+    Route::get('topics', [TrainingReportController::class, 'topics']);
+    Route::get('sessions/recent', [TrainingReportController::class, 'recentSessions']);
 });
 
 

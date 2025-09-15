@@ -9277,6 +9277,477 @@
                     }
                 ]
             }
+        },
+        "/api/training/summary": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get overall training KPIs summary",
+                "operationId": "aedf03a0e027348f0971d3cce4cf7c2b",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "totalSessions": 106,
+                                    "totalHours": 59.5,
+                                    "zoomSessions": 35,
+                                    "onlineSessions": 52,
+                                    "offlineSessions": 19,
+                                    "zoomShare": 33,
+                                    "avgPerSession": 0.56,
+                                    "completionRate": 84,
+                                    "avgAttendance": 78
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/session-types": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get breakdown of training session types",
+                "operationId": "8e400740447e62942ecc74ee04a55714",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "online": 52,
+                                    "offline": 19,
+                                    "sessions": 35
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/monthly-trends": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get monthly session counts",
+                "operationId": "c6d3b91692cf3816d3fdca5c5c16c7e4",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "Jan": 14,
+                                    "Feb": 16,
+                                    "Mar": 18
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/type-breakdown": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get session type distribution",
+                "operationId": "12d0113c800dadcd82cf3ceadc8398cd",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "labels": [
+                                        "Zoom",
+                                        "Online",
+                                        "Offline"
+                                    ],
+                                    "counts": [
+                                        35,
+                                        17,
+                                        19
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/hours-trend": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get trend of training hours by month",
+                "operationId": "042b87f6c967e6e33013a63b15e2755f",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {},
+                                "example": {
+                                    "Jan": 4.5,
+                                    "Feb": 9.75,
+                                    "Mar": 5.25
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/trainers": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get trainer performance data",
+                "operationId": "a0772875257ce3183bc51bbc01d7fd68",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "example": {
+                                            "name": "A. Nabil",
+                                            "sessions": 18,
+                                            "hours": 10.5,
+                                            "attendees": 27
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/topics": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get topic-based analysis",
+                "operationId": "b3ac703fd11a3d11e84488c06024845d",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "example": {
+                                            "name": "Mentorship Skills",
+                                            "sessions": 32,
+                                            "avgAttendees": 28,
+                                            "completion": 91
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/training/sessions/recent": {
+            "get": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get recent training sessions",
+                "operationId": "379c1446f6f70a81dcd4c15181904685",
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "query",
+                        "description": "Filter by program title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Start date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "End date in YYYY-MM-DD format",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "example": {
+                                            "id": 1,
+                                            "date": "2025-09-15 14:00",
+                                            "title": "Business Model Canvas",
+                                            "type": "Zoom",
+                                            "trainer": "Ahmed Yassin",
+                                            "attendees": 25,
+                                            "duration": 1.5
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -10205,6 +10676,10 @@
         {
             "name": "Steps",
             "description": "Steps"
+        },
+        {
+            "name": "Training Reports",
+            "description": "Training Reports"
         }
     ]
 }

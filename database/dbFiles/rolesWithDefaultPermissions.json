@@ -7306,7 +7306,7 @@
       "guard_name": "web",
       "is_core": 0,
       "default_for": ["admin","organizationmanager"]
-    },
+     },
     {
       "name": "dashboard.weekly_trends",
       "description": "View weekly mentorship trends",
@@ -7349,8 +7349,71 @@
       "is_core": 0,
       "default_for": ["admin", "organizationmanager"]
     }
-  ]
+    ]
+    },
+    {
+     "name": "Training Dashboard",
+     "description": "View and analyze training program reports and statistics",
+     "permissions": [
+    {
+      "name": "training.summary",
+      "description": "View training summary KPIs",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.session_types",
+      "description": "View training session type counts",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.monthly_trends",
+      "description": "View monthly training session trends",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.type_breakdown",
+      "description": "View session type distribution breakdown",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.hours_trend",
+      "description": "View training hours trend per month",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.trainers",
+      "description": "Analyze trainer performance and contribution",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.topics",
+      "description": "Analyze training topics and engagement",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "training.recent_sessions",
+      "description": "View list of recent training sessions",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager"]
     }
+   ]
+}
+
 
 
 ]
