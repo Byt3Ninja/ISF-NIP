@@ -172,4 +172,5 @@ return [
     'Invitation_not_found' => 'الدعوة غير موجودة',
     'Conversation_Chat_not_found' => 'محادثة الدردشة غير موجودة',
     'Invitation_accepted_successfully' => 'تم قبول الدعوة بنجاح',
+    'Invitation_not_found' => 'الدعوة غير موجودة',
 ];
