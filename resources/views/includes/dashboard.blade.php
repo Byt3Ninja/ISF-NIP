@@ -33,12 +33,21 @@
 	<div class="container-xxl flex-grow-1 container-p-y">
 		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
+		@php
+		$user = Auth::user();
+			if($user->team_member->teamFormation->user->company->cycle == null){
+				$cycle = $user->company->cycle;
+			}else{
+				$cycle = $user->team_member->teamFormation->user->company->cycle;
+			}
+		@endphp
 		
 			@if( isset($newhackathon) && $newhackathon )
-			@if(now()->diffInDays($newhackathon->created_at) < 1)
+			{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
+			
 			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
 			<br>
-			@endif
+			
 					@endif
 
 		@endif
