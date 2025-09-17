@@ -2254,7 +2254,9 @@ class HomeController extends Controller
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
 
-
+        if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor')){
+            
+        
         $user = Auth::user();
 			if($user->team_member->teamFormation->user->company->cycle == null){
 				$cycle = $user->company->cycle;
@@ -2277,7 +2279,7 @@ class HomeController extends Controller
         
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
-        
+        }
 
         $team_member_q = "SELECT 
                         tm.id as 'tm_id',

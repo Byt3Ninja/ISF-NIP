@@ -36,15 +36,13 @@
 		@php
 		
 		@endphp
-		
+		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
 			@if( isset($newhackathon) && $newhackathon )
 			{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
-			
 			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
 			<br>
-			
 					@endif
-
+		@endif
 		@endif
 		<div class="content-body">
 			@if( session()->has('success') )
