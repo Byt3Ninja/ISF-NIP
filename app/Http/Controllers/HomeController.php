@@ -2254,8 +2254,27 @@ class HomeController extends Controller
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
 
-        $newhackathon_q = "SELECT * FROM cycles WHERE `type` = 'hackathon' ORDER BY created_at DESC LIMIT 1";
-        $newhackathon = DB::select($newhackathon_q);
+
+        $user = Auth::user();
+			if($user->team_member->teamFormation->user->company->cycle == null){
+				$cycle = $user->company->cycle;
+			}else{
+				$cycle = $user->team_member->teamFormation->user->company->cycle;
+			}
+            $params = [];
+        $newhackathon_q = "SELECT *
+        FROM 
+        cycles
+         WHERE `type` = 'hackathon' ";
+
+         if($cycle != null){
+            $newhackathon_q .= "AND id = ? ";
+            $params[] = $cycle;
+         }
+
+         $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+        $newhackathon = DB::select($newhackathon_q, $params);
+        
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
         
