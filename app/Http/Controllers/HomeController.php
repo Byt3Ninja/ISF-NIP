@@ -2258,6 +2258,7 @@ class HomeController extends Controller
             
         
         $user = Auth::user();
+        if($user->team_member != null){
 			if($user->team_member->teamFormation->user->company->cycle == null){
 				$cycle = $user->company->cycle;
 			}else{
@@ -2279,7 +2280,11 @@ class HomeController extends Controller
         
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
+        }else{
+            $data['newhackathon'] = null;
         }
+        }
+        
 
         $team_member_q = "SELECT 
                         tm.id as 'tm_id',
