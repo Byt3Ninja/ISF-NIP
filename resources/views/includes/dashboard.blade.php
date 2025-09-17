@@ -701,10 +701,31 @@
 													</td>
 													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
 													<td> 
-														<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
-															<i class="ti ti-brand-zoom me-2"></i>
-															{{ __('dashboard.Join now') }}
-														</a>
+														@php
+															$now = date('Y-m-d H:i');
+															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+															@endphp
+														@if ($session->approved == 'Yes')
+															@if($now >= $start_time )
+															@if($now <= $end_time)
+															<span class="warning">
+																<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																	<i class="ti ti-brand-zoom me-2"></i>
+																	{{ __('dashboard.Join now') }}
+																</a>
+															</span>
+															@else
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+															@endif
+															@else 
+																<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
+															@endif
+														@elseif($session->approved == 'No')
+															{{ __('admin.No') }}
+														@else
+															{!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
+														@endif
 													</td>
 												</tr>
 												@endforeach
