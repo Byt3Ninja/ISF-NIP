@@ -67,6 +67,14 @@ class User extends Authenticatable implements MustVerifyEmail
                 // throw $th;
             }
         }
+        else
+        {
+            if( empty( $this->email_verified_at ) )
+            {
+                $this->email_verified_at = now();
+                $this->save();
+            }
+        }
 	}
 
     /**
@@ -204,10 +212,10 @@ class User extends Authenticatable implements MustVerifyEmail
         if( !empty( $_role ) )
         {
             $id = $_role->id;
+            RoleUsers::updateOrCreate(
+                ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
+            );
         }
-        RoleUsers::updateOrCreate(
-            ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
-        );
     }
     
     public function hasRole( $name ) 
