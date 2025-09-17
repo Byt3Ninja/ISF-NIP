@@ -57,16 +57,4 @@ return [
         'if_trouble' => 'If you have trouble clicking the button, please copy and paste the URL below into your web browser:',
     ],
 
-    'mentorship_request_reminder' => [
-        'subject' => 'Mentorship Request Reminder',
-        'title' => 'Mentorship Request Reminder',
-        'dear' => 'Dear',
-        'in_body_1' => 'Reminder Your mentorship on ',
-        'in_body_2' => 'Link To Start ',
-        'in_body_3' => 'Link To Join ',
-        'in_body_4' => ' Status ',
-        'regards' => 'Best regards,',
-        'Mentorship_Request' => 'Mentorship Request',
-    ],
-
 ];
