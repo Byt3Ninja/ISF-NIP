@@ -6380,7 +6380,7 @@
                 ]
             },
             {
-                "name": "organization.distroyReminderLogs",
+                "name": "organization.destroyReminderLogs",
                 "description": " Delete Reminders Logs",
                 "guard_name": "web",
                 "is_core": 0,

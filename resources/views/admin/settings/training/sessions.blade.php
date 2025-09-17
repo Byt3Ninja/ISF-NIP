@@ -35,6 +35,16 @@
       border-radius: 0;
     }
   }
+
+  /* Spinning icon animation */
+  .spinner-icon {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 @stop
 
@@ -632,7 +642,7 @@
             {{ __('cycles.Cancel') }}
             <i class="ti ti-circle-x ms-2"></i>
           </button>
-          <button type="submit" class="btn btn-primary w-px-100">
+          <button type="submit" class="btn btn-primary">
             {{ __('cycles.Submit') }}
             <i class="ti ti-circle-check ms-2"></i>
           </button>
@@ -739,8 +749,8 @@
               {{ __('cycles.Cancel') }}
               <i class="ti ti-circle-x ms-2"></i>
             </button>
-            <button type="submit" class="btn btn-primary w-px-100">
-              {{ __('cycles.Save') }}
+            <button type="submit" class="btn btn-primary">
+              {{ __('cycles.Edit') }}
               <i class="ti ti-circle-check ms-2"></i>
             </button>
           </div>
@@ -896,6 +906,7 @@
       const timeFromValue = $(`${formId} #flatpickr-time-from`).val();
       const timeToValue = $(`${formId} #flatpickr-time-to`).val();
       const titleValue = $(`${formId} #title`).val();
+      const submitBtn = $(`${formId} button[type="submit"]`);
     
       if (typeValue === 'online') {
         if (!dateRangeValue) {
@@ -933,6 +944,9 @@
         }
       }  
 
+      // If validation passes, disable button and show spinner
+      submitBtn.prop('disabled', true);
+      submitBtn.find('i').removeClass('ti-circle-check').addClass('ti-loader-2 spinner-icon');
     });
 
     $('#addSessionForm #select-type').on('change', function(e) {
@@ -1006,6 +1020,7 @@
       const timeFromValue = $(`${formId} #flatpickr-time-from`).val();
       const timeToValue = $(`${formId} #flatpickr-time-to`).val();
       const titleValue = $(`${formId} #title`).val();
+      const submitBtn = $(`${formId} button[type="submit"]`);
       // console.log('titleValue', titleValue);
       
       let isValid = true;
@@ -1041,6 +1056,10 @@
       }
       
       if (isValid) {
+        // Disable button and show spinner before submitting
+        submitBtn.prop('disabled', true);
+        submitBtn.find('i').removeClass('ti-circle-check').addClass('ti-loader-2 spinner-icon');
+        
         // Submit the form if all validations pass
         this.submit();
       }
@@ -1102,6 +1121,35 @@
     $('#editSessionForm .flatpickr-date').flatpickr({
       monthSelectorType: 'static',
       minDate: "today",
+    });
+
+    // Reset button state when modals are closed
+    function resetSubmitButton(formId) {
+      const submitBtn = $(`${formId} button[type="submit"]`);
+      submitBtn.prop('disabled', false);
+      submitBtn.find('i').removeClass('ti-loader-2 spinner-icon').addClass('ti-circle-check');
+    }
+
+    // Reset submit button state when modals are hidden
+    $('#addsession').on('hidden.bs.modal', function() {
+      resetSubmitButton('#addSessionForm');
+    });
+
+    $('#editsession').on('hidden.bs.modal', function() {
+      resetSubmitButton('#editSessionForm');
+    });
+
+    // Also reset button state on validation errors
+    $('#addSessionForm input, #addSessionForm select, #addSessionForm textarea').on('input change', function() {
+      if ($(this).hasClass('is-invalid')) {
+        resetSubmitButton('#addSessionForm');
+      }
+    });
+
+    $('#editSessionForm input, #editSessionForm select, #editSessionForm textarea').on('input change', function() {
+      if ($(this).hasClass('is-invalid')) {
+        resetSubmitButton('#editSessionForm');
+      }
     });
 
     // $('#startTime').flatpickr({

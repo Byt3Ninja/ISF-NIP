@@ -254,8 +254,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('organization.users_invite');
     Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('organization.users_invitations_resend');
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');
-    Route::get('organizations/settings/ReminderLogs', 'SettingsController@ReminderLogs')->name('organization.ReminderLogs');
-    Route::post('organizations/ReminderLogs/distroy', 'ReminderLogController@distroy')->name('organization.distroyReminderLogs');
+    Route::get('organizations/settings/reminder-logs', 'SettingsController@ReminderLogs')->name('organization.ReminderLogs');
+    Route::post('organizations/reminder-logs/destroy', 'ReminderLogController@destroy')->name('organization.destroyReminderLogs');
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');

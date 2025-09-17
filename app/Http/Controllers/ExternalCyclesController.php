@@ -128,13 +128,26 @@ class ExternalCyclesController extends Controller
 				if( $_step == 'register' )
 				{
 					$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-					$fields_ids = Formfield::where('step_id', $step->id)->select('id')->pluck('id')->toArray();
+					$formFields = Formfield::where('step_id', $step->id)->get();
+					$fields_ids = $formFields->pluck('id')->toArray();
 					$fields = $step->fields()->orderBy('form_fields.id', 'asc')->get();
-					$fields = $fields->map(function( $field, $loop ) {
+					$builderFields = DB::table('builder_fields')->whereIn('builder_form_id', $formFields->pluck('builder_forms_id')->unique()->toArray())->get();
+					$fields = $fields->map(function( $field, $loop ) use ( $builderFields ) {
+						$options = $field->pivot->options ? json_decode($field->pivot->options) : null;
+						$label = trim( strtolower( $options?->label ?? '' ) );
+						$check = $builderFields->filter(function( $item ) use ( $label ) {
+							$_options = is_string( $item->options ) ? json_decode( $item->options ) : $item->options;
+							$_label = trim( strtolower( $_options?->label ?? '' ) );
+							return $label == $_label;
+						})->where('field_id', $field->pivot->field_id)->where('builder_form_id', $field->pivot->builder_forms_id)->first();
+						if( !empty( $check ) )
+						{
+							if( is_string( $check->options ) ) { $options = json_decode( $check->options ); }
+						}
 						$output = new stdClass;
 						$output->field_name = 'field_' . $field->pivot->id;
 						$output->type = $field->field_type;
-						$output->options = $field->pivot->options ? json_decode($field->pivot->options) : null;
+						$output->options = $options;
 						$output->id_for = 'input-fld-'. $loop;
 						return $output;
 					});
@@ -207,7 +220,8 @@ class ExternalCyclesController extends Controller
 						'api_token' => $request_token
 					]);
 					$user->save();
-					$user->allotRole('Registered');
+					$user->allotRole('registered');
+					$user->sendEmailVerificationNotification();
 					$company = new Company();
 
                 	$company->name_en = $user->first_name_en . " " . $user->last_name_en;

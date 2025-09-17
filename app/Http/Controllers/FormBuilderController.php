@@ -109,7 +109,7 @@ class FormBuilderController extends Controller
                 $common_data = [
                     'id' => $field->id,
                     'label'=> $field->options->label,
-                    'isRequired'=> $field->options->validation->required == 1? true : false,
+                    'isRequired'=> intval( $field?->options?->validation?->required ) == 1 ? true : false,
                 ];
 
                 return [array_merge($common_data, $field_config_data)];

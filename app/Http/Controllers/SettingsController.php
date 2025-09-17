@@ -854,7 +854,7 @@ class SettingsController extends Controller
 		$ReminderLogs = $query->get();
     
 
-		return view('admin.organizations.ReminderLogs', compact('ReminderLogs'));
+		return view('admin.organizations.reminder_logs', compact('ReminderLogs'));
 	}
     public function generalSetting(Request $request)
     {
