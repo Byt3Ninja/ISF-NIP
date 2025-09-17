@@ -2265,8 +2265,8 @@ class HomeController extends Controller
             }else{
                 $cycle = null;
             }
-                $cycleType = Cycle::where('id', $cycle)->first();
-           if($cycleType?->type == 'hackathon'){
+                
+           
             $params = [];
         $newhackathon_q = "SELECT *
         FROM 
@@ -2281,11 +2281,12 @@ class HomeController extends Controller
              $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
              $newhackathon = DB::select($newhackathon_q);
         }
-    }else{
+        
+        $cycleType = Cycle::where('id', $cycle)->first();
+    if(isset($cycleType) && $cycleType->type != 'hackathon'){
         $newhackathon_q = "SELECT *
                             FROM cycles
                             WHERE `type` = 'hackathon'
-                            AND `end` >= NOW()
                             AND deleted_at IS NULL
                             ORDER BY `start` DESC
                             LIMIT 1";
