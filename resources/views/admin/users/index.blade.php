@@ -97,7 +97,7 @@
                         {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}</a></td>
                     <td style="font-size: small;">{{ $user->email }}</td>
                     <td style="font-size: small;">{{ $user->phone }}</td>
-                    <td style="font-size: small;">{{ __('admin.' . $user->gender) }}</td>
+                    <td style="font-size: small;">{{ trim( $user->gender ) ? __('admin.' . $user->gender) : '-' }}</td>
                     <td style="font-size: small;">
                       {{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not
                       Verified' }}</td>
