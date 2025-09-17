@@ -2258,12 +2258,12 @@ class HomeController extends Controller
             
         
         $user = Auth::user();
+        $cycle = $user->company->cycle;
         if($user->team_member != null){
-			if($user->team_member->teamFormation->user->company->cycle == null){
-				$cycle = $user->company->cycle;
-			}else{
+			if($user->team_member->teamFormation->user->company->cycle != null){
 				$cycle = $user->team_member->teamFormation->user->company->cycle;
 			}
+           
             $params = [];
         $newhackathon_q = "SELECT *
         FROM 
