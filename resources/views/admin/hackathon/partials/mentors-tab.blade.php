@@ -6,11 +6,16 @@
       $request = new \Illuminate\Http\Request([
         'cycleIdHackathon' => $id,
       ]);
-      }else{
-        $request = request();
+      }
+    }else{
+     if($id != null){
+      $request = new \Illuminate\Http\Request([
+        'cycleIdHackathon' => $user->team_member->teamFormation->user->company->cycle ?? null,
+      ]);
       }
     }
     $mentorsLists = showMintors($request);
+  
 @endphp
   <div class="card-body">
     <h4 class="card-title mb-4">{{ $l == 'en' ? 'Mentors' : 'المرشدون' }}</h4>
