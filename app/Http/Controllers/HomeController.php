@@ -2283,10 +2283,12 @@ class HomeController extends Controller
         }
     }else{
         $newhackathon_q = "SELECT *
-                            FROM 
-                            cycles
-                            WHERE `type` = 'hackathon' ";
-        $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                            FROM cycles
+                            WHERE `type` = 'hackathon'
+                            AND `end` >= NOW()
+                            AND deleted_at IS NULL
+                            ORDER BY `start` DESC
+                            LIMIT 1";
         $newhackathon = DB::select($newhackathon_q);
     }
         
