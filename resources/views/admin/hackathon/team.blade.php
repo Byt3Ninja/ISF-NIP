@@ -510,7 +510,7 @@
         @endif
 
         {{-- Tasks Tab --}}
-        @if($team->todo_lists[0]->team_formation_id == auth()->user()->team_member->team_formation_id)
+        @if($team->todo_lists[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
         @if(count($team->todo_lists) > 0)
         <div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
           <div class="row">
