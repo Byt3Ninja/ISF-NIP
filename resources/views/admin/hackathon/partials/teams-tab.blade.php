@@ -181,8 +181,9 @@
                 {{ $l == 'en' ? 'View My Team' : 'مشاهدة فريقي' }}
               </a>
               @elseif($team->request_sent == false)
+              
               @if($isExistingTeam == false)
-                @if($memberCount >= $maxAvatars)
+                @if($maxAvatars >= $memberCount)
                   <button onclick="joinTeam('{{ $team->id }}','{{ $team->name }}')" 
                           class="btn btn-primary btn-sm flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
                           style="transition: all 0.3s ease; border-radius: 8px;">
