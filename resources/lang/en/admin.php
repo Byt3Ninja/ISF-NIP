@@ -2350,7 +2350,7 @@ return [
 	'failed' => 'Failed',
 	'sent' => 'Sent',
 	'in-app' => 'In-App',
-	'Display_all_reminder_logs' => 'Display All Reminder Logs',
 	'mentorship_request' => 'Mentorship Request',
-	
+	'UnauthorizedAccess' => 'Unauthorized Access',
+	'NotFound' => 'Not Found',
 ];

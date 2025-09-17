@@ -880,13 +880,13 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
 
       @if ($_user->hasAnyRole('organizationManager'))
       @if ($_user->ableTo('settings.organization_manage',$permissions))
-      <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/organizations/settings*') && !Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('settings.organization_manage') }}">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
-      <li class="{{ Request::is('dashboard/organizations/ReminderLogs*') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('organization.ReminderLogs') }}">
           <i class="menu-icon tf-icons ti ti-alarm"></i>
           <div>{{ __('admin.ReminderLogs') }}</div>
