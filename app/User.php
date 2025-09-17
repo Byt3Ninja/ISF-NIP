@@ -330,7 +330,12 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function team_member()
     {
-        return $this->hasOne(Team_member::class, 'user_id');
+        return $this->hasOne(Team_member::class, 'user_id')->where('acceptInvition', 'accepted');
+    }
+
+    public function teamLeader()
+    {
+        return $this->hasOne(Team_member::class, 'user_id')->where('isTeamLeader', 1);
     }
     /**
      * Get all group conversations the user is a participant in.

@@ -1503,9 +1503,21 @@ class HackathonController extends Controller
                 $teamMember->isTeamLeader = 0;
                 $teamMember->user_id = $user->id;
                 $teamMember->save();
-
-                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
             
+                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+                if($teams->group_id_chat == null){
+                    $team_leader = Team_member::where('team_formation_id', $teams->id)->where('isTeamLeader', 1)->first();
+                    $conversation = Conversation::create([
+                        'name' => $team_leader->teamFormation->name,
+                        'description' => $team_leader->teamFormation->description,
+                        'type' => 'group',
+                    ]);
+                    $teams->group_id_chat = $conversation->id;
+                    $teams->save();
+                }
+                $conversation = Conversation::findOrFail($teams->group_id_chat);
+                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+               
 
             $count_team_q = Team_member::where('team_formation_id', $teams->id)->get();
             $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
@@ -1679,6 +1691,18 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
+            $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+                if($teams->group_id_chat == null){
+                    $team_leader = Team_member::where('team_formation_id', $teams->id)->where('isTeamLeader', 1)->first();
+                    $conversation = Conversation::create([
+                        'name' => $team_leader->teamFormation->name,
+                        'description' => $team_leader->teamFormation->description,
+                        'type' => 'group',
+                    ]);
+                    $teams->group_id_chat = $conversation->id;
+                    $teams->save();
+                }
+            $conversation = Conversation::findOrFail($teams->group_id_chat);
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
         $count_team_q = Team_member::where('team_formation_id', $teams->id)
             ->get();
@@ -1706,7 +1730,7 @@ class HackathonController extends Controller
                     $allteamMember->save();
                 }
 
-                $conversation = Conversation::findOrFail($teams->group_id_chat);
+                
                 $user = User::findOrFail($teamMember->user_id);
 
                 // Check if user is already a participant

@@ -51,6 +51,7 @@ class UpdateUserApiRequest extends FormRequest
         'city_id' => 'nullable|exists:cities,id',
         'houre_rate' => 'nullable|numeric',
         'title_en' => 'nullable|string|max:100',
+        'email_verified_at' => 'nullable|date',
     ];
     }
        protected function failedValidation(Validator $validator)

@@ -132,8 +132,9 @@ class UserController extends Controller
 	 */
 	public function update(UpdateUserApiRequest $request, User $user)
 	{
+
 			$this->authorize('update', Auth::user());
-			
+		
 			$result=$this->userService->update($user,$request->all());
 
 

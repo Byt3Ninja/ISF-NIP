@@ -172,4 +172,5 @@ return [
     'Invitation_not_found' => 'Invitation not found',
     'Conversation_Chat_not_found' => 'Conversation Chat not found',
     'Invitation_accepted_successfully' => 'Invitation accepted successfully',
+    'Invitation_not_found' => 'Invitation not found',
 ];

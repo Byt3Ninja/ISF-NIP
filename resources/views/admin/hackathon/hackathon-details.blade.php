@@ -17,8 +17,9 @@
 if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 'type' => 'static'];
   }
+  // dd($user->team_member->teamFormation->user->company->cycle);
   if($user->team_member != null){
-    $user_cycle_id =$user->team_member->teamFormation->user->company->cycle ?? null;
+    $user_cycle_id = $user->team_member->teamFormation->user->company->cycle ?? null;
   }else{
     $user_cycle_id = $user->company->cycle ?? null;
   }
