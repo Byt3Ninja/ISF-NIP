@@ -34,12 +34,7 @@
 		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
 		@php
-		$user = Auth::user();
-			if($user->team_member->teamFormation->user->company->cycle == null){
-				$cycle = $user->company->cycle;
-			}else{
-				$cycle = $user->team_member->teamFormation->user->company->cycle;
-			}
+		
 		@endphp
 		
 			@if( isset($newhackathon) && $newhackathon )
