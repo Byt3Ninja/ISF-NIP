@@ -2266,7 +2266,7 @@ class HomeController extends Controller
                 $cycle = null;
             }
                 $cycleType = Cycle::where('id', $cycle)->first();
-           if($cycleType->type == 'hackathon'){
+           if($cycleType?->type == 'hackathon'){
             $params = [];
         $newhackathon_q = "SELECT *
         FROM 
