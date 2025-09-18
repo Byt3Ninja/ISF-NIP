@@ -2404,7 +2404,7 @@ return [
 	'sent' => 'تم الارسال',
 	'failed' => 'فشل',
 	'in-app' => 'في التطبيق',
-	'Display_all_reminder_logs' => 'اظهار جميع سجلات التذاكر',
 	'mentorship_request' => 'طلب جلسة ارشاد',
-	
+	'UnauthorizedAccess' => 'دخول غير مصرح به',
+	'NotFound' => 'غير موجود',
 ];

@@ -253,7 +253,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 				<div class="hackathon-banner text-center shadow">
 					<div class="banner-content">
 						<h1 class="display-5 fw-bold text-black" id="hackathon-main-title"> {{ $program->title }} </h1>
-						<p class="lead fw-semibold line-clamp-2">{{ $program->description }}</p>
+						<p class="lead fw-semibold line-clamp-5">{{ $program->description }}</p>
 						<p class="lead fw-semibold" id="hackathon-dates-location">
 							<i class="ti ti-calendar-event me-2"></i>
 							{{ $program->ranges }}

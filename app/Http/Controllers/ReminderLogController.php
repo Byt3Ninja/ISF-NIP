@@ -91,8 +91,38 @@ class ReminderLogController extends Controller
      */
     public function destroy(Request $request)
     {
-        $reminderLog = ReminderLog::find($request->id);
-        $reminderLog->delete();
-        return back();
+        try {
+            $reminderLog = ReminderLog::find($request->id);
+            
+            if (!$reminderLog) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reminder log not found'
+                ], 404);
+            }
+            
+            $reminderLog->delete();
+            
+            // Check if it's an AJAX request
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reminder log deleted successfully'
+                ]);
+            }
+            
+            // For non-AJAX requests, redirect back with success message
+            return back()->with('message', 'Reminder log deleted successfully');
+            
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error deleting reminder log: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->with('message2', 'Error deleting reminder log');
+        }
     }
 }
