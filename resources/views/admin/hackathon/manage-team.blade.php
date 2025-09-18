@@ -1183,16 +1183,16 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <input type="text" class="form-control" name="title" id="EtaskTitle" required>
           </div>
         
-            
+            {{-- @dd($team_members->first()?->tm_id) --}}
             <div class="mb-3">
               <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
               <select class="form-select" id="EtaskAssignee" name="assignee" required>
                 <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
-                <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+                <option value="You" >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
                 @if($team_Formation_leader)
                 @if(isset($team_members))
                   @foreach($team_members as $member)
-                    <option value="{{ $member->tm_id }}" >
+                    <option value="{{ $member->tm_id }}" {{ $member->tm_id == $team_Formation_leader ? 'selected' : '' }} >
                       {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
                     </option>
                   @endforeach
@@ -2271,9 +2271,15 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     console.log('editTask called with:',taskAssigneeId);
     
     try {
+      let currentUserId = {{ auth()->user()->id }};s
+      if (taskAssigneeId == currentUserId) {
+          document.getElementById('EtaskAssignee').value = 'You';
+      } else {
+          document.getElementById('EtaskAssignee').value = taskAssigneeId || '';
+      }
       // Pre-fill the modal with existing task data
       document.getElementById('EtaskTitle').value = taskTitle;
-      document.getElementById('EtaskAssignee').value = taskAssigneeId || 'You';
+      // document.getElementById('EtaskAssignee').valsue = taskAssigneeId || 'You';
       document.getElementById('EtaskDueDate').value = taskDueDate || '';
       document.getElementById('EtaskDescription').value = taskDescription || '';
       document.getElementById('EtaskStatus').value = taskStatus || 'todo';
