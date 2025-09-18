@@ -2284,6 +2284,7 @@ class HomeController extends Controller
                                 $newhackathon_q .= "AND `end` > now() ";
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
                                 $newhackathon = DB::select($newhackathon_q);
+                                
                             }
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
