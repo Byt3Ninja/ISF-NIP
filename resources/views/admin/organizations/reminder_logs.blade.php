@@ -39,8 +39,19 @@
       <section class="row">
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="card-title primary">{{__('admin.ReminderLogs')}}</h4>
+              <div class="card-title-elements">
+                <div class="dropdown">
+                  <button class="btn btn-outline-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-download me-1"></i> {{ __('admin.Export') }}
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="export-csv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="export-excel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                  </ul>
+                </div>
+              </div>
             </div>
             <hr style="margin:-10px 0 5px 0;">
             <div class="card-body">
@@ -71,7 +82,6 @@
                   </div>
                   @endif
 
-
                   <div class="col-6 col-md-3 col-lg-2">
                     <input class="form-control datepicker" placeholder="{{ __('admin.StartDate') }}" name="date_from"
                       value="{{ request('date_from') }}" />
@@ -83,23 +93,23 @@
                   </div>
 
                   <div class="col-12 col-md-6 col-lg-2">
-                    <select name="channel" class="form-select select2" data-placeholder="{{ __('admin.Channel') }}">
-
-                      <option value="">{{ __('admin.All') }}</option>
-                      <option value="whatsapp" {{ 'whatsapp'==request('channel') ? 'selected' : '' }}> {{
-                        __('admin.Whatsapp') }}
+                    <select name="channel" class="form-select select2" data-placeholder="{{ $l == 'en' ? 'Select channel' : 'اختر قناة' }}">
+                      <option value="">{{ $l == 'en' ? 'All Channels' : 'جميع القنوات' }}</option>
+                      <option value="whatsapp" {{ 'whatsapp'==request('channel') ? 'selected' : '' }}>
+                         {{ __('admin.Whatsapp') }}
                       </option>
-                      <option value="email" {{ 'email'==request('channel') ? 'selected' : '' }}> {{ __('admin.Email') }}
+                      <option value="email" {{ 'email'==request('channel') ? 'selected' : '' }}>
+                         {{ __('admin.Email') }}
                       </option>
-                      <option value="in-app" {{ 'in-app'==request('channel') ? 'selected' : '' }}> {{ __('admin.in-app')
-                        }}
+                      <option value="in-app" {{ 'in-app'==request('channel') ? 'selected' : '' }}> 
+                        {{ __('admin.in-app') }}
                       </option>
                     </select>
                   </div>
 
                   <div class="col-12 col-md-6 col-lg-2">
-                    <select name="user" class="form-select" data-placeholder="{{ __('admin.All') }}">
-                      <option value="">{{ __('admin.All') }}</option>
+                    <select name="user" class="form-select select2" data-placeholder="{{ $l == 'en' ? 'Select user' : 'اختر مستخدمًا' }}">
+                      <option value="">{{ $l == 'en' ? 'All Users' : 'جميع المستخدمين' }}</option>
                       @foreach (\App\User::role(['mentor', 'registered'])->get() as $user)
                       <option value="{{ $user->id }}" {{ request('user')==$user->id ? 'selected' : '' }}>
                         {{ $user->{'first_name_' . app()->getLocale()} }} {{ $user->{'last_name_' . app()->getLocale()}
@@ -110,9 +120,9 @@
                   </div>
 
                   <div class="col-12 col-md-6 col-lg-2">
-                    <select name="program" class="form-select select2" data-placeholder="{{ __('admin.Program') }}">
+                    <select name="program" class="form-select select2" data-placeholder="{{ $l == 'en' ? 'Select program' : 'اختر برنامجًا' }}">
 
-                      <option value="">{{ __('admin.All') }}</option>
+                      <option value="">{{ $l == 'en' ? 'All Programs' : 'جميع البرامج' }}</option>
                       @foreach(\App\Cycle::WhereIn('id', $ReminderLogs->pluck('cycle_id'))->get() as $program)
                       <option value="{{ $program->id }}" {{ $program->id == request('program') ? 'selected' : '' }}> {{
                         $program->title }}
@@ -122,9 +132,16 @@
                     </select>
                   </div>
                   <div class="col-12 col-md-6 col-lg-2">
-                    <button class="btn btn-primary" type="submit">
-                      <i class="ti ti-search me-2"></i> {{ __('admin.Search') }}
-                    </button>
+                    <div class="d-flex flex-wrap flex-md-nowrap gap-2 align-items-center">
+                      <button class="btn btn-primary" type="submit">
+                        <i class="ti ti-search me-2"></i> {{ __('admin.Search') }}
+                      </button>
+                      @if(request()->query())
+                      <button class="btn btn-label-secondary" type="button" onclick="window.location.href='{{ request()->url() }}'">
+                        <i class="ti ti-refresh me-2"></i> {{ __('admin.Reset') }}
+                      </button>
+                      @endif
+                    </div>
                   </div>
                 </div>
               </form>
@@ -186,10 +203,44 @@
 @stop
 
 @section('pagescripts')
+<!-- DataTables Buttons Extension -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
 <script>
   // Initialize DataTable
   $(document).ready(function() {
+    flatpickr(".datepicker", {
+      dateFormat: "Y-m-d",
+      allowInput: true,
+    });
+
     var table = $('.table').DataTable({
+      dom: 'Bfrtip',
+      buttons: [
+        {
+          extend: 'csvHtml5',
+          text: '<i class="ti ti-file-text"></i> CSV',
+          className: 'd-none',
+          filename: 'reminder_logs_' + new Date().toISOString().slice(0, 10),
+          exportOptions: {
+            columns: [0, 1, 2, 3, 4, 5] // Exclude the Actions column
+          }
+        },
+        {
+          extend: 'excelHtml5',
+          text: '<i class="ti ti-file-spreadsheet"></i> Excel',
+          className: 'd-none',
+          filename: 'reminder_logs_' + new Date().toISOString().slice(0, 10),
+          exportOptions: {
+            columns: [0, 1, 2, 3, 4, 5] // Exclude the Actions column
+          }
+        }
+      ],
       @if ($l == 'ar')
 				"language": {
 					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
@@ -215,6 +266,17 @@
 					}
 				}
 			@endif
+    });
+
+    // Connect custom dropdown buttons to DataTable export buttons
+    $('#export-csv').on('click', function(e) {
+      e.preventDefault();
+      table.button('.buttons-csv').trigger();
+    });
+
+    $('#export-excel').on('click', function(e) {
+      e.preventDefault();
+      table.button('.buttons-excel').trigger();
     });
 
     // Delete reminder log
