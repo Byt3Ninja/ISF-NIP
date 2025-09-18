@@ -2257,45 +2257,34 @@ class HomeController extends Controller
         if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor')){
             
         
-        $user = Auth::user();
+                $user = Auth::user();
 			if(isset($user->team_member) && $user->team_member->teamFormation->user->company->cycle != null){
 				$cycle = $user->team_member->teamFormation->user->company->cycle;
-            }elseif(isset($user->company) && $cycle = $user->company->cycle != null){
-                $cycle = $cycle = $user->company->cycle;
-            }else{
-                $cycle = null;
+            }elseif($user->company->cycle != null){
+                    $cycle = $user->company->cycle;
+                    $cycleType = Cycle::where('id', $cycle)->first();
+                    if($cycleType->type != 'Hackathon'){
+                        $cycle = null;
+                    }else{
+                        $cycle = $user->company->cycle;
+                    }
             }
-                
-           
             $params = [];
         $newhackathon_q = "SELECT *
-        FROM 
-        cycles
-         WHERE `type` = 'hackathon' ";
-         if($cycle != null){
-            $newhackathon_q .= "AND id = ? ";
-            $params[] = $cycle;
-            $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
-           $newhackathon = DB::select($newhackathon_q, $params);
-         }else{
-             $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
-             $newhackathon = DB::select($newhackathon_q);
-        }
-        
-        $cycleType = Cycle::where('id', $cycle)->first();
-    if(isset($cycleType) && $cycleType->type != 'hackathon'){
-        $newhackathon_q = "SELECT *
-                            FROM cycles
-                            WHERE `type` = 'hackathon'
-                            AND deleted_at IS NULL
-                            ORDER BY `start` DESC
-                            LIMIT 1";
-        $newhackathon = DB::select($newhackathon_q);
-    }
-        
+                            FROM 
+                            cycles
+                            WHERE `type` = 'hackathon' ";
+                            if($cycle != null){
+                                $newhackathon_q .= "AND id = ? ";
+                                $params[] = $cycle;
+                                $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                            $newhackathon = DB::select($newhackathon_q, $params);
+                            }else{
+                                $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                                $newhackathon = DB::select($newhackathon_q);
+                            }
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
-        
         }
         
 
