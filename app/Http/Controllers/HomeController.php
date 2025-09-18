@@ -2260,7 +2260,7 @@ class HomeController extends Controller
                 $user = Auth::user();
 			if(isset($user->team_member) && $user->team_member->teamFormation->user->company->cycle != null){
 				$cycle = $user->team_member->teamFormation->user->company->cycle;
-            }elseif($user->company->cycle != null){
+            }elseif(isset($user->company) && $user->company->cycle != null){
                     $cycle = $user->company->cycle;
                     $cycleType = Cycle::where('id', $cycle)->first();
                     if($cycleType->type != 'Hackathon'){
