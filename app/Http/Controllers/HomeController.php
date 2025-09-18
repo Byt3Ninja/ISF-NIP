@@ -2280,6 +2280,7 @@ class HomeController extends Controller
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
                             $newhackathon = DB::select($newhackathon_q, $params);
                             }else{
+                                $newhackathon_q .= "AND `start` < now() ";
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
                                 $newhackathon = DB::select($newhackathon_q);
                             }
