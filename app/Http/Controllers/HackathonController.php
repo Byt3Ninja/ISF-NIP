@@ -12,6 +12,7 @@ use App\Company;
 use App\Formfield;
 use Carbon\Carbon;
 use App\Team_member;
+use App\Conversation;
 use App\ProjectLikes;
 use App\CyclesMentors;
 use App\TeamFormation;
@@ -24,10 +25,10 @@ use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\NextSessionsService;
-use App\Conversation;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Notifications\StatusHackathonInvitation;
 
 class HackathonController extends Controller
 {
@@ -1488,8 +1489,8 @@ class HackathonController extends Controller
                 return redirect()->back()->with('error', 'Invitation_has_expired.');
             }
             $teamMember = Team_member::where('id', $id)
-            ->where('acceptInvition', 'pending')
-            ->first();
+                    ->whereIn('acceptInvition', ['pending', 'join'])
+                    ->first();
             
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation_not_found.');
@@ -1568,6 +1569,10 @@ class HackathonController extends Controller
                     'role' => 'participant'
                 ]);
 
+                $userteam = User::where('id', $teamMember->user_id)->first();
+                $leader = User::findOrFail($teams ->user_id);
+                 $leader->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'Accept'));
+
         return redirect()->back()->with('success', 'Invitation_accepted_successfully');
     }
 
@@ -1590,8 +1595,10 @@ class HackathonController extends Controller
             }
                 
                 $teamMember = Team_member::where('id', $id)
-                ->where('acceptInvition', 'pending')
+                ->whereIn('acceptInvition', ['pending', 'join'])
                 ->first();
+
+              
 
             $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
             $count_team_q = Team_member::where('team_formation_id', $teams->id)
@@ -1617,7 +1624,10 @@ class HackathonController extends Controller
                 $teamMember->user_id = $user->id;
                 $teamMember->save();
 
-                
+                $userteam = User::where('id', $teamMember->user_id)->first();
+                $leader = User::findOrFail($teams ->user_id);
+               
+                 $leader->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'Reject'));
 
         return redirect()->back()->with('success', 'Invitation rejected successfully.');
     }

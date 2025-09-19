@@ -2353,4 +2353,7 @@ return [
 	'mentorship_request' => 'Mentorship Request',
 	'UnauthorizedAccess' => 'Unauthorized Access',
 	'NotFound' => 'Not Found',
+	'Status_Invitation' => 'Status Invitation',
+	'Accept_Invitation' => 'Accept Invitation',
+	'Reject_Invitation' => 'Reject Invitation',
 ];

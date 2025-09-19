@@ -2319,7 +2319,7 @@ class HomeController extends Controller
                         users as u ON u.id = tf.user_id
                     WHERE tm.Email = ? 
                     AND tm.TeamMember = 'hackathon' 
-                    AND tm.acceptInvition = 'pending' ";
+                    AND tm.acceptInvition IN ('pending', 'join') ";
         $team_member = DB::select($team_member_q, [$user->email]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;

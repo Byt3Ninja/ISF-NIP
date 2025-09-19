@@ -2407,4 +2407,7 @@ return [
 	'mentorship_request' => 'طلب جلسة ارشاد',
 	'UnauthorizedAccess' => 'دخول غير مصرح به',
 	'NotFound' => 'غير موجود',
+	'Status_Invitation' => ' حالة الدعوة ',
+	'Accept_Invitation' => 'قبول الدعوة',
+	'Reject_Invitation' => 'رفض دعوة',
 ];
