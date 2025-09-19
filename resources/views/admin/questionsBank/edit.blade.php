@@ -312,23 +312,27 @@
 					$('.assessment-type').hide();
 					$('#explanation_QA').hide();
 					$('.questions-type').hide();
+					$('#category_id').attr('required', true);
 				} else if (selectedGroupValue === 'quiz') {
 					$('#survey-type-section').hide();
 					$('.assessment-type').hide();
 					$('#explanation_QA').hide();
 					$('.questions-type').show();
 					$('#answers-section').show();
+					$('#category_id').attr('required', true);
 				} else if (selectedGroupValue === 'assessment') {
 					$('#survey-type-section').hide();
 					$('.assessment-type').show();
 					$('#explanation_QA').show();
 					$('.questions-type').hide();
 					$('#answers-section').show();
+					$('#category_id').removeAttr('required');
 				} else {
 					$('#survey-type-section').hide();
 					$('.assessment-type').show();
 					$('#explanation_QA').show();
 					$('.questions-type').show();
+					$('#category_id').removeAttr('required');
 				}
 			};
 
