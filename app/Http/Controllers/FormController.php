@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use stdClass;
-use App\Field;
-use App\BuilderForm;
-use App\BuilderField;
-use App\Organization;
 use Illuminate\Http\Request;
+use App\Exports\SubmissionsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\{Validator, DB, Mail};
+use App\{Field, Formdata, BuilderForm, BuilderField, Organization};
 
 class FormController extends Controller
 {
-    public function index() {
+    public function index()
+    {
       $user = Auth::user();
   
       $data = [];
@@ -50,74 +50,30 @@ class FormController extends Controller
           $data->submissions = $filteredSteps->count();
           $data->status = 'active' ?? 'null';
         return $data;
-    });
+      });
 
-   
-
-
-
-    // return response()->json($data);
+      // return response()->json($data);
       return view('admin.settings.forms.index', compact('data'));
     }
     
-    public function submissions() {
-      $user = Auth::user();
-      $data = [];
-      $l = app()->getLocale();
-      $forms = "SELECT 
-      FD.company_id as 'FD_company_id',
-      FD.user_id as 'FD_user_id',
-      FD.step_id as 'FD_step_id',
-      FD.created_at as 'FD_created_at',
-      FD.updated_at as 'FD_updated_at',
-      FD.deleted_at as 'FD_deleted_at',
-      C.name_en as 'C_name_en',
-      C.name_ar as 'C_name_ar',
-      C.id as 'C_id',
-      Concat(U.first_name_en, ' ', U.last_name_en) as 'user_name_en',
-      Concat(U.first_name_ar, ' ', U.last_name_ar) as 'user_name_ar',
-      U.id as 'U_id',
-      S.title as 'S_title',
-      S.id as 'S_id',
-      S.cycle_id as 'S_cycle_id',
-      CYC.title as 'CYC_title',
-      CYC.id as 'CYC_id',
-      CYC.organization_id as 'CYC_organization_id',
-      O.name_en as 'O_name_en',
-      O.name_ar as 'O_name_ar',
-      O.id as 'O_id'
-      FROM form_data as FD 
-      LEFT JOIN companies as C ON C.id = FD.company_id
-      LEFT JOIN users as U ON U.id = FD.user_id
-      LEFT JOIN steps as S ON S.id = FD.step_id
-      LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
-      LEFT JOIN organizations as O ON O.id = CYC.organization_id
-      WHERE FD.deleted_at IS NULL";
-      if($user->organization_id != null){
-      $forms .= " AND CYC.organization_id = ? ";
-      $forms = DB::select($forms, [$user->organization_id]);
-      }else{
-      $forms = DB::select($forms);
-      }
-     $forms = collect($forms);
-
-  $C = 1;
-  $grouped = $forms->groupBy('FD_step_id');
-
-  $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
-    $first = $group->first();
-    $item = new stdClass;
-    $item->submission_id = $C++;
-    $item->step_id = $stepId;
-    $item->startup_name = $first->{'C_name_' . $l};
-    $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
-    $item->step_name = $first->S_title;
-    $item->program_name = $first->CYC_title;
-    $item->organization_name = $first->O_name_en;
-    $item->created_at = $first->FD_created_at;
-    return $item;
-  })->values()->all();
+    public function submissions()
+    {
+      $request = request();
+      $data = Formdata::formsData( $request )->all();
       return view('admin.settings.forms.form-submissions.index', compact('data'));
+    }
+
+    public function export( $type )
+    {
+      $tail = 'xlsx';
+      $type = strtolower( $type );
+      $type = in_array( $type, ['csv', 'excel'] ) ? $type : 'excel';
+      if( $type == 'csv' ) { $tail = 'csv'; } elseif( $type == 'excel' ) { $tail = 'xlsx'; } else { return abort(404); }
+      $request = request();
+      $data = Formdata::formsData( $request );
+
+      $date = date('Y_m_d_H_i_s');
+      return Excel::download(new SubmissionsExport( $data ), 'form_submissions_' . $date . '.' . $tail);
     }
   
     public function submissionDetails(Request $request, $id) {
