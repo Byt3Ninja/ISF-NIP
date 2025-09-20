@@ -309,6 +309,21 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 						<div class="tab-pane fade" id="results-winners" role="tabpanel" aria-labelledby="results-winners-tab">
 							<div class="card">
 								<div class="card-body">
+
+									 <div class="fb-share-button" 
+									data-href="{{url()->current()}}" 
+									data-layout="button_count">
+									</div>
+									<script type="IN/Share" data-url="{{url()->current()}}"></script>
+									<a class="twitter-share-button"
+									href="https://twitter.com/intent/tweet?text={{url()->current()}}"
+									data-size="large" target="_blank">
+									Tweet(X)</a>
+
+									<button type="button" class="btn btn-outline-secondary" onclick="copyLink('{{url()->current()}}')">
+										<i class="bi bi-link-45deg"></i> Copy Link
+									</button>
+
 									@if( $program->visibility == 'public' )
 										@include('admin.hackathon.partials.winners-tab', ['winners' => $winnersData, 'currentHackathon' => $currentHackathon])
 									@else
@@ -373,6 +388,25 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	<script src="/vuexy/assets/js/main.js"></script>
 
 	@include('includes.winnerModal', ['winners' => $winnersData])
+	<div id="fb-root"></div>
+	<script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+<script type="IN/Share" data-url="https://www.linkedin.com"></script>
+
+
+<script>(function(d, s, id) {
+var js, fjs = d.getElementsByTagName(s)[0];
+if (d.getElementById(id)) return;
+js = d.createElement(s); js.id = id;
+js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
+fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script>
+function copyLink(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        alert("Link copied!");
+    });
+}
+</script>
 	<script>
 			// Set the date we're counting down to using the parsed PHP variable
 			var countDownDate = new Date("{{ $endDateForCountdown }}").getTime();

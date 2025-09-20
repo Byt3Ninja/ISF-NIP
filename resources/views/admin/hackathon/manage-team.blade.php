@@ -1191,13 +1191,12 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 <option value="You" >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
                 @if(isset($team_Formation_leader) && !empty($team_members))
                   @foreach($team_members as $member)
-                      <option value="{{ $member->tm_id }}" 
+                      <option value="{{ $member->tm_id }}"
                           {{ $member->tm_id == $team_Formation_leader ? 'selected' : '' }}>
                           {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
                       </option>
                   @endforeach
               @endif
-
               </select>
             </div>
 
