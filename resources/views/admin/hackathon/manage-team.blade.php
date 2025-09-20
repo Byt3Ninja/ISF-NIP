@@ -1189,15 +1189,15 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               <select class="form-select" id="EtaskAssignee" name="assignee" required>
                 <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
                 <option value="You" >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
-                @if($team_Formation_leader)
-                @if(isset($team_members))
+                @if(isset($team_Formation_leader) && !empty($team_members))
                   @foreach($team_members as $member)
-                    <option value="{{ $member->tm_id }}" {{ $member->tm_id == $team_Formation_leader ? 'selected' : '' }} >
-                      {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
-                    </option>
+                      <option value="{{ $member->tm_id }}" 
+                          {{ $member->tm_id == $team_Formation_leader ? 'selected' : '' }}>
+                          {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
+                      </option>
                   @endforeach
-                @endif
-                @endif
+              @endif
+
               </select>
             </div>
 
@@ -2271,7 +2271,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     console.log('editTask called with:',taskAssigneeId);
     
     try {
-      let currentUserId = {{ auth()->user()->id }};s
+      let currentUserId = {{ auth()->user()->id }};
       if (taskAssigneeId == currentUserId) {
           document.getElementById('EtaskAssignee').value = 'You';
       } else {
