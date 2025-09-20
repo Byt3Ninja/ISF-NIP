@@ -1,4 +1,4 @@
-@extends('emails.layouts.app')
+@extends('emails.layouts.master')
 @section('content')
 
                                                     <table border="0" cellpadding="0" cellspacing="0"
