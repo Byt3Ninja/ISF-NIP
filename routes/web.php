@@ -431,6 +431,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('forms-list', 'FormController@index')->name('forms.index');
 
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
+    Route::get('forms-submissions/export/{type}', 'FormController@export');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
 
     //BuilderForm Builder
