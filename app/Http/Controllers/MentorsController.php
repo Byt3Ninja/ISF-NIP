@@ -745,7 +745,7 @@ class MentorsController extends Controller
 							DB::raw("'Session' AS type"),
 							DB::raw("'Mentorship session' AS notes")
 						]);
-			$my = $my->merge($sessions);
+			// $my = $my->merge($sessions);
 				return response()->json($my);
 			} elseif ($type == 4) {
 				$values = ['type' => $request->type, 'days' => json_encode($request->days), 'dfrom' => $request->dfrom, 'dto' => $request->dto, 'tfrom' => $request->tfrom, 'tto' => $request->tto, 'notes' => $request->notes];
