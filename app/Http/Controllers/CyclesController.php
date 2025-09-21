@@ -755,7 +755,7 @@ class CyclesController extends Controller
                 }
                 
                 $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
-                $cycle->hours_Rminder = $request->hours_reminder;
+                $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
 
                 $cycle->save();
 
