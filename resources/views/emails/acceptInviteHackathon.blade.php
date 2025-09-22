@@ -20,9 +20,12 @@
                                                     <p style="margin: 0;"> </p>
                                                     @if($status== 'Accept')
                                                     <p style="margin: 0;">{{__('email.hackathon_email.in_body_1') }}</p>
-                                                    @else
+                                                    @elseif($status== 'Reject')
                                                     <p style="margin: 0;">{{__('email.hackathon_email.in_body_2')}}</p>
+                                                    @elseif($status== 'cancelled')
+                                                    <p style="margin: 0;">{{__('email.hackathon_email.in_body_4')}}</p>
                                                     @endif
+
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">{{__('email.hackathon_email.in_body_3')}} {{ $teams->name }}</p>
                                                     <p style="margin: 0;"> </p>
