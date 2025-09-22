@@ -31,7 +31,7 @@ class MentorProgramController extends Controller
               return $now >= $step->from && $now <= $step->to; 
           })->count();
 
-          $sessionsWithoutTasks = $cycle->mentorshipRequests->filter(function ($request) {
+          $sessionsWithoutTasks = $cycle->mentorshipRequests->where('zoom_date', '>', now())->filter(function ($request) {
             return $request->tasks->where('status', 'pending')->isEmpty();
         })->count();
 
