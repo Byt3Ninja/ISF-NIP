@@ -455,7 +455,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
           alert(
             `{{ $l == "en" ? "Join request sent to team" : "تم إرسال طلب الانضمام إلى فريق" }} "${teamName}".`
           );
-          window.location.href = window.location.href;
+          // window.location.href = window.location.href;
         })
         .catch((error) => {
           alert(

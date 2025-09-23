@@ -443,6 +443,7 @@
         </div>
 
         {{-- Files Tab --}}
+        @if(isset($team->shared_files[0]) && $team->shared_files[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
         @if(count($team->shared_files) > 0)
         <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
           <div class="row">
@@ -507,6 +508,7 @@
             @endforeach
           </div>
         </div>
+        @endif
         @endif
 
         {{-- Tasks Tab --}}
