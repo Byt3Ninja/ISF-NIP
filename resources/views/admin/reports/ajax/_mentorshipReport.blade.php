@@ -72,7 +72,7 @@
             </div>
             <h4 class="mb-0">{{ $approved_sessions_count }}</h4>
           </div>
-          <p class="mb-1">{{ __('cycles.approved requests') }}</p>
+          <p class="mb-1">{{ __('cycles.Approved Requests') }}</p>
         </div>
       </div>
     </a>
@@ -87,7 +87,7 @@
             </div>
             <h4 class="mb-0">{{ $disapproved_sessions_count }}</h4>
           </div>
-          <p class="mb-1">{{ __('cycles.disapproved requests') }}</p>
+          <p class="mb-1">{{ __('cycles.Disapproved Requests') }}</p>
         </div>
       </div>
     </a>
