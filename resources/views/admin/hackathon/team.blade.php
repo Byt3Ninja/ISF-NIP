@@ -443,7 +443,7 @@
         </div>
 
         {{-- Files Tab --}}
-        @if(isset($team->shared_files[0]) && $team->shared_files[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
+        {{-- @if(isset($team->shared_files[0]) && $team->shared_files[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id) --}}
         @if(count($team->shared_files) > 0)
         <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
           <div class="row">
@@ -509,7 +509,7 @@
           </div>
         </div>
         @endif
-        @endif
+        {{-- @endif --}}
 
         {{-- Tasks Tab --}}
         @if(isset($team->todo_lists[0]) && $team->todo_lists[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
