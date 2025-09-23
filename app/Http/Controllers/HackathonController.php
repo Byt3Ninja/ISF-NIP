@@ -1688,7 +1688,7 @@ class HackathonController extends Controller
         if (count($teamMember) >= $maxMembers) {
             return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
         }
-    
+    dd($teams);
                 $teamMember = new Team_member;
                 $teamMember->acceptInvition = 'join';
                 $teamMember->Email = $user->email;
