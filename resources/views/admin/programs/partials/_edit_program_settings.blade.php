@@ -37,7 +37,7 @@
   <!-- Hours Reminder -->
   <div class="col-md-6" id="hours_reminder" style="display: none;">
     <div class="form-group public-data-form-fields">
-      <label class="form-label fs-6 fw-semibold" for="public_slug">{{ __('admin.Hours_Reminder') }}: </label>
+      <label class="form-label fs-6 fw-semibold" for="hours_reminder_input">{{ __('admin.Hours_Reminder') }}: </label>
       <input type="number" min="1" id="hours_reminder_input" name="hours_reminder" class="form-control"
         value="{{ $ccycle?->hours_Rminder }}" placeholder="{{ __('admin.Hours_Reminder') }}">
       <div class="invalid-feedback"></div>
@@ -69,7 +69,7 @@
       </small>
 
       <input type="hidden" name="type" id="type">
-      <input type="hidden" name="cycleid" id="cycleid" value="0">
+      <input type="hidden" name="cycleid" id="cycleid" value="{{ isset( $cycle ) ? $cycle->id : 0 }}">
       <input type="hidden" name="organization_id" value="@if(isset($cycle)) {{ optional($cycle)->organization_id }} @else 0 @endif">
     </div>
   </div>
@@ -96,15 +96,22 @@
   <div class="col-12">
     <div class="form-group mb-4" id="public_slug_div">
       <label class="form-label fs-6 fw-semibold" for="public_slug">{{ __('cycles.Public URL') }}: </label>
-      <input type="text" id="public_slug" name="public_slug" class="form-control" value="{{ $ccycle?->public_slug }}"
-        placeholder="{{ __('cycles.Public URL placeholder') }}">
-      <div class="invalid-feedback"></div>
+      <div class="input-group">
+        <input type="text" id="public_slug" name="public_slug" class="form-control" value="{{ $ccycle?->public_slug }}" placeholder="{{ __('cycles.Public URL placeholder') }}">
+        <button id="public_slug_validate" title="Validate URL" class="input-group-text btn btn-outline-secondary" id="public_slug-addon1">
+          <i class="fas fa-fw fa-sm fa-refresh"></i>
+        </button>
+        <div id="public_slug_invalid_feedback" class="invalid-feedback"></div>
+        <div id="public_slug_valid_feedback" class="valid-feedback"></div>
+      </div>
     </div>
   </div>
 </div>
 
 @push('scripts')
   <script>
+    var validating = false;
+    var require_validation = true;
     // Show/hide public slug field based on is_public value
     $(document).on('change', '#is_public', function() {
       let _public = $(this).val();
@@ -116,6 +123,106 @@
         $('#public_slug').removeClass('is-invalid');
         $('#public_slug').siblings('.invalid-feedback').text('');
       }
+    });
+
+    $(document).on('input', '#public_slug', function() {
+      require_validation = true;
+      if( require_validation === true )
+      {
+        $('#public_slug').removeClass('is-invalid');
+        $('#public_slug').removeClass('is-valid');
+        setTimeout(function() {
+          $('#public_slug').siblings('.invalid-feedback').html('');
+          $('#public_slug').siblings('.valid-feedback').html('');
+        }, 60);
+      }
+    });
+
+    $(document).on('click', '#public_slug_validate', function(e) {
+      e.preventDefault();
+      if( validating === false )
+      {
+        let slug = $.trim( $('#public_slug').val() );
+        let title = $.trim( $('#title').val() );
+        if( slug != '' )
+        {
+          let ids = [slug];
+          let btn = $(this);
+          validating = true;
+          btn.prop('disabled', true);
+          btn.attr('title', 'Validating...');
+          btn.html('<i class="fas fa-fw fa-sm fa-refresh fa-spin"></i>');
+          $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+          $.ajax({
+            type: "POST",
+            url: "/dashboard/cycles/validate-url",
+            data: {
+              "slug": slug,
+              "title": title,
+              "id": {{ isset( $ccycle ) ? $ccycle->id : 0 }},
+            },
+            success: function(response) {
+              validating = false;
+              btn.prop('disabled', false);
+              btn.attr('title', 'Validate URL');
+              btn.html('<i class="fas fa-fw fa-sm fa-refresh"></i>');
+
+              if( response.status )
+              {
+                require_validation = false;
+                $('#public_slug').removeClass('is-invalid');
+                $('#public_slug').addClass('is-valid');
+                $('#public_slug').val( response.slug );
+                setTimeout(function() {
+                  $('#public_slug').siblings('.valid-feedback').html(response.message);
+                }, 120);
+              }
+              else
+              {
+                require_validation = false;
+                $('#public_slug').removeClass('is-valid');
+                $('#public_slug').addClass('is-invalid');
+                let msg = response.message;
+                msg += `<ul>`;
+                  $.each(response.slugs, function(key, value) {
+                    msg += `<li> <a class="use-suggested-slug text-danger" href="javascript:void(0);"> ${value} </a></li>`;
+                  });
+                msg += `</ul>`;
+                setTimeout(function() {
+                  $('#public_slug').siblings('.invalid-feedback').html(msg);
+                }, 120);
+              }
+            },
+            error: function(error) {
+              validating = false;
+              btn.prop('disabled', false);
+              btn.attr('title', 'Validate URL');
+              btn.html('<i class="fas fa-fw fa-sm fa-refresh"></i>');
+
+              require_validation = false;
+              $('#public_slug').removeClass('is-valid');
+              $('#public_slug').addClass('is-invalid');
+              setTimeout(function() {
+                $('#public_slug').siblings('.invalid-feedback').html(error.responseJSON.message);
+              }, 120);
+            }
+          });
+        }
+      }
+    });
+
+    $(document).on('click', '.use-suggested-slug', function(e) {
+      e.preventDefault();
+      let slug = $.trim( $(this).text() );
+      $('#public_slug').val(slug);
+      validating = false;
+      require_validation = false;
+      $('#public_slug').removeClass('is-invalid');
+      $('#public_slug').removeClass('is-valid');
+      setTimeout(function() {
+        $('#public_slug').siblings('.invalid-feedback').html('');
+        $('#public_slug').siblings('.valid-feedback').html('');
+      }, 60);
     });
 
     // Show/hide hours reminder field based on reminder_enabled checkbox

@@ -246,6 +246,11 @@ class CyclesController extends Controller
     public function modify(Request $request)
     {
 
+        $isEdit = false;
+        $isCreate = false;
+        if( $request->has('typeedit') && $request->has('id') && intval( $request->id ) > 0 ) { $isEdit = true; }
+        if( $request->has('typecreate') && !$request->has('id') ) { $isCreate = true; }
+
         if ($request->cycleid == null && isset($request->typeedit)) {
             $id = $request->id;
             $type = $request->typeedit;
@@ -254,6 +259,7 @@ class CyclesController extends Controller
             $type = $request->type;
         }
 
+        if( $isEdit == true ) { $id = intval( $request->id ); }
         if ($request->has('date_range')) {
 
             $dates = explode(' - ', $request->date_range);
@@ -266,20 +272,24 @@ class CyclesController extends Controller
             ]);
         }
 
-        if ($type == 1) {
+        if ($type == 1 || $isEdit == true) {
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250|unique:cycles,title,' . $id,
                 'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1',
+                'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
                 'start' => 'required|date',
                 'end' => 'required|date',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+            ], [
+                'public_slug.required_if' => __('cycles.Public URL required'),
+                'public_slug.unique' => __('cycles.Public URL already exist'),
+                'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
             ]);
 
             $cycle = Cycle::find($id);
@@ -660,7 +670,7 @@ class CyclesController extends Controller
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1',
+                'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
@@ -668,6 +678,10 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_type' => ['required', 'in:General_Program,Hackathon'],
+            ], [
+                'public_slug.required_if' => __('cycles.Public URL required'),
+                'public_slug.unique' => __('cycles.Public URL already exist'),
+                'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
             ]);
 
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
@@ -806,6 +820,69 @@ class CyclesController extends Controller
         }
     }
 
+    public function validateURL(Request $request)
+    {
+        $title = trim( $request->title );
+        $slug = Str::slug( $request->slug );
+
+        $slugsList = DB::table('cycles')
+            ->select([
+                'id',
+                'public_slug'
+            ])
+            ->whereNotNull('public_slug')
+            ->when($request->has('id') && $request->id != 0, function ($q) use ($request) {
+                return $q->where('id', '!=', $request->id);
+            })
+            ->get();
+
+        $slugs = $slugsList->pluck('public_slug')->toArray();
+
+        if( !in_array( $slug, $slugs ) ) { return response()->json(['status' => true, 'slug' => $slug, 'message' => __('cycles.Public URL available')]); }
+        else
+        {
+            $availableSlugs = [];
+            $baseSlug = Str::slug( $title );
+            if( preg_match('/^(.*?)-(\d+)$/', $slug, $matches ) )
+            {
+                $base = $matches[1];
+                $num  = (int) $matches[2];
+            }
+            else
+            {
+                $base = $slug;
+                $num  = 0;
+            }
+            $i = $num + 1;
+            while( count( $availableSlugs ) < 5 )
+            {
+                $newSlug = $base . '-' . $i;
+                if( !in_array( $newSlug, $slugs ) ) { $availableSlugs[] = $newSlug; }
+                $i++;
+            }
+
+            if( preg_match('/^(.*?)-(\d+)$/', $baseSlug, $matchings ) )
+            {
+                $base = $matchings[1];
+                $num  = (int) $matchings[2];
+            }
+            else
+            {
+                $base = $baseSlug;
+                $num  = 0;
+            }
+            $i = $num + 1;
+            $availableSlugs2 = [];
+            while( count( $availableSlugs2 ) < 5 )
+            {
+                $newSlug = $base . '-' . $i;
+                if( !in_array( $newSlug, $slugs ) ) { $availableSlugs2[] = $newSlug; }
+                $i++;
+            }
+            $availableSlugs = array_merge( $availableSlugs, $availableSlugs2 );
+            return response()->json(['status' => false, 'message' => __('cycles.Public URL not available', ['slug' => $request->slug]), 'slugs' => $availableSlugs]);
+        }
+    }
 
     function view($c, Request $request)
     {

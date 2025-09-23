@@ -76,7 +76,7 @@
         </div>
 
         <div class="card p-4 p-md-8">
-            <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
+            <form id="modify-app-form" action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="tab_id" value="1">
                 <input type="hidden" name="id" id="cycleid" value="{{ $id }}">
@@ -883,12 +883,13 @@ $(document).ready(function() {
     
     // All validations passed, set action and submit the form
     $('#action_type').val('create'); // Use 'create' instead of 'publish' for new programs
-    
+
     // Make sure cycleid is set to 0 for new programs
-    $('#cycleid').val('0');
+    $('#cycleid').val('{{ isset($ccycle) ? $ccycle->id : 0 }}');
     
     // Submit the form
-    $('#hidden-submit-btn').click();
+    $('#modify-app-form').submit();
+    // $('#hidden-submit-btn').click();
   });
 
   // Tab click handler - prevent direct navigation to disabled tabs
@@ -949,7 +950,7 @@ $(document).ready(function() {
       }
       
       // Ensure cycleid is set correctly for new programs
-      $('#cycleid').val('0');
+      $('#cycleid').val('{{ isset($ccycle) ? $ccycle->id : 0 }}');
     }
   });
 

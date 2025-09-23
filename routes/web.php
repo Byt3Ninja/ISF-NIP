@@ -454,6 +454,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
     
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
+    Route::post('cycles/validate-url', 'CyclesController@validateURL');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
     Route::post('cycles/save', 'CyclesController@saveForm');
     Route::get('cycles/my/{id}', 'CyclesController@my')->name('cycles.list_mine');
