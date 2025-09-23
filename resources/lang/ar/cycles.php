@@ -491,6 +491,9 @@ return [
     'Unable to load company details' => 'غير قادر على تحميل تفاصيل الشركة',
     'Founder' => 'المؤسس',
     'Startup' => 'الشركة الناشئة',
-    'Startup Details' => 'تفاصيل الشركة الناشئة'
+    'Startup Details' => 'تفاصيل الشركة الناشئة',
+    'visibility' => 'الرؤية',
+    'Mentorship_Settings' => 'إعدادات الإرشاد',
+    'Save & Next' => 'حفظ والتالي',
   ];
 
