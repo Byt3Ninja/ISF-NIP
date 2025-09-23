@@ -495,5 +495,8 @@ return [
     'Unable to load company details' => 'Unable to load company details',
     'Founder' => 'Founder',
     'Startup' => 'Startup',
-    'Startup Details' => 'Startup Details'
+    'Startup Details' => 'Startup Details',
+    'visibility' => 'Visibility',
+    'Mentorship_Settings' => 'Mentorship Settings',
+    'Save & Next' => 'Save & Next',
   ];

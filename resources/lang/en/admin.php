@@ -2356,4 +2356,5 @@ return [
 	'Status_Invitation' => 'Status Invitation',
 	'Accept_Invitation' => 'Accept Invitation',
 	'Reject_Invitation' => 'Reject Invitation',
+	'Program_Settings' => 'Program Settings',
 ];

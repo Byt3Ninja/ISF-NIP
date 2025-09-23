@@ -1092,7 +1092,8 @@ class HackathonController extends Controller
         return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
-    public function hackathonSubmissions($id) {
+    public function hackathonSubmissions($id) 
+    {
       $user = Auth::user();
       $data = [];
       $l = app()->getLocale();
@@ -1399,7 +1400,8 @@ class HackathonController extends Controller
         ]);
     }
 
-    public function invitation(Request $request){
+    public function invitation(Request $request)
+    {
         $request->validate([
             'memberEmail' => 'required|email',
             'user_id' => 'nullable|exists:users,id',
@@ -1467,6 +1469,12 @@ class HackathonController extends Controller
         }
         $teamMember->acceptInvition = 'cancelled';
         $teamMember->save();
+
+        $userteam = User::where('id', $teamMember->user_id)->first();
+        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+
+        // Send cancel invitation email logic here
+         $user->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'cancelled'));
 
         return response()->json(['success' => true, 'message' => __("admin.Invitation_cancelled_successfully.")]);
     }

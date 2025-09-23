@@ -2410,4 +2410,5 @@ return [
 	'Status_Invitation' => ' حالة الدعوة ',
 	'Accept_Invitation' => 'قبول الدعوة',
 	'Reject_Invitation' => 'رفض دعوة',
+	'program_settings' => 'إعدادات البرنامج',
 ];
