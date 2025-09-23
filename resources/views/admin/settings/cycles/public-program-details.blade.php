@@ -468,6 +468,38 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 
 	<script>
+		$(document).on('click', '.like-project-action', function(e) {
+			e.preventDefault();
+			let element = $(this);
+			let teamProjectId = element.data('project');
+			$.ajaxSetup({
+				headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),},
+			});
+
+			$.ajax({
+				type: "POST",
+				url: "/dashboard/hackathon/likeProject",
+				data: {
+					teamProjectId: teamProjectId,
+				},
+				success: function (response) {
+					element.parent().find('.likes-count').text(response.total);
+					if( element.hasClass('fas') )
+					{
+						element.removeClass('fas');
+						element.addClass('far');
+					}
+					else if( element.hasClass('far') )
+					{
+						element.removeClass('far');
+						element.addClass('fas');
+					}
+				},
+				error: function (error) {
+					console.log("Error Occurred, like failed");
+				},
+			});
+		});
 		function copyLink(url) {
 			navigator.clipboard.writeText(url).then(() => {
 				// Enhanced feedback for copy action
