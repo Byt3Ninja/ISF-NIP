@@ -34,7 +34,7 @@
 
   $tabs = [
     ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
-    ['id' => 'Program_Settings', 'label' => $labels['Program_Settings'], 'active' => false],
+    ['id' => 'program_settings', 'label' => $labels['Program_Settings'], 'active' => false],
     ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
   ];
 @endphp
