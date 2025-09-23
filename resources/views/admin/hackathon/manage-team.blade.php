@@ -1183,7 +1183,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <input type="text" class="form-control" name="title" id="EtaskTitle" required>
           </div>
         
-            {{-- @dd($team_members->first()?->tm_id) --}}
+            {{-- @dd($team_Formation_leader ) --}}
             <div class="mb-3">
               <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
               <select class="form-select" id="EtaskAssignee" name="assignee" required>
@@ -1192,7 +1192,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 @if(isset($team_Formation_leader) && !empty($team_members))
                   @foreach($team_members as $member)
                       <option value="{{ $member->tm_id }}"
-                          {{ $member->tm_id == $team_Formation_leader ? 'selected' : '' }}>
+                          {{ $member->tm_id == $team_Formation_leader->tf_user_id ? 'selected' : '' }}>
                           {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
                       </option>
                   @endforeach
