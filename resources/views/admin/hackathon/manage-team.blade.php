@@ -438,10 +438,18 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
+                  <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
+                    <div class="modal-body">
+                      @csrf
+                      <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+                      </div>
+                      <button type="submit" class="btn btn-sm btn-danger"><i class="ti ti-trash me-1"></i>{{ $l == 'en' ? 'Delete Team' : 'حذف الفريق' }}</button>
+                  </form>
                   <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal">
                     <i class="ti ti-edit me-1"></i>
                     {{ $l == 'en' ? 'Edit Team Info' : 'تعديل معلومات الفريق' }}
                   </button>
+                  
                   @endif
                   <a 
                     href="/dashboard/hackathon/team/{{ $team_Formation_raw->first()->tf_id }}"
@@ -703,6 +711,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      
       <form method="POST" action="/dashboard/hackathon/EditTeamInfo" id="editTeamInfoForm" enctype="multipart/form-data">
         <div class="modal-body">
           @csrf
