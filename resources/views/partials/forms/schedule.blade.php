@@ -52,7 +52,7 @@
             $schedules = [];
           }
           @endphp
-          @forelse ($schedules as $schedule)
+          @foreach ($schedules as $schedule)
           <tr id="schedule-row-{{ $schedule->id }}">
             <td>
               <span class="fw-medium">{{ $schedule->value }}</span>
@@ -122,17 +122,7 @@
               </div>
             </td>
           </tr>
-          @empty
-          <tr id="no-schedules-row">
-            <td colspan="5" class="text-center py-4">
-              <div class="d-flex flex-column align-items-center">
-                <i class="ti ti-calendar-off mb-2" style="font-size: 2rem; opacity: 0.5;"></i>
-                <p class="text-muted mb-0">{{ $l == 'en' ? 'No schedules found' : 'لا توجد جداول' }}</p>
-                <small class="text-muted">{{ $l == 'en' ? 'Click the Add Schedule button to create your first schedule' : 'انقر فوق زر إضافة جدول لإنشاء جدولك الأول' }}</small>
-              </div>
-            </td>
-          </tr>
-          @endforelse
+          @endforeach
         </tbody>
       </table>
     </div>
