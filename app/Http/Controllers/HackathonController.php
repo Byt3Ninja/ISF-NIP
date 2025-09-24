@@ -2197,6 +2197,8 @@ class HackathonController extends Controller
                 users as u ON tm.user_id = u.id
             WHERE
                 tf.cycle_id = ?
+            AND
+                tm.acceptInvition = 'accepted'
         ";
 
         $teams = collect(DB::select($teams_q, [$id]));

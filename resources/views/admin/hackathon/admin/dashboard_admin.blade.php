@@ -137,8 +137,8 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                     data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details')
                     }}</button>
 
-                  {{-- <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
-                    __('admin.message') }}</button> --}}
+                  <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
+                    __('admin.message') }}</button>
                 </td>
               </tr>
               @endforeach
