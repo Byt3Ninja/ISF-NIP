@@ -383,7 +383,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     //SendMessage
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('messages.send');
-    Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');;
+    Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');
+    Route::post('/sendteammessage','HackathonController@sendTeamMessage')->name('messages.send_team_message');
     Route::post('/sendReplymessage', 'MessengerController@sendReplyMessage')->name('messages.reply');
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('messages.recipients_list_by_program');
 

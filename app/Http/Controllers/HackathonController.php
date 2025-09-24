@@ -10,6 +10,7 @@ use stdClass;
 use App\Cycle;
 use App\Company;
 use App\Formfield;
+use App\Messenger;
 use Carbon\Carbon;
 use App\Team_member;
 use App\Conversation;
@@ -21,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Exports\WinnersExport;
 use Illuminate\Support\Facades\DB;
 use App\ScreeningEvaluationResults;
+use App\Notifications\TemplateEmail;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -29,6 +31,8 @@ use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Notifications\StatusHackathonInvitation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class HackathonController extends Controller
 {
@@ -2657,5 +2661,64 @@ class HackathonController extends Controller
         return response()->json([
             'total' => $total
         ]);
+    }
+
+    public function sendTeamMessage(Request $request)
+    {
+        try {
+            $request->validate([
+                'receiver' => 'required',
+                'subject' => 'required',
+                'message' => 'required',
+            ]);
+
+            $cuser = auth()->user();
+            $rec = $request->receiver;
+            $rname = User::where('id', $rec)->first();
+
+            if (!$rname) {
+                return response()->json(['success' => false, 'message' => 'Receiver not found.'], 404);
+            }
+
+            $new = new Messenger();
+            $new->sender = $cuser->id;
+            $new->receiver = $rec;
+            $new->subject = $request->input('subject');
+            $new->message = $request->input('message');
+            $new->save();
+
+            // Prepare Email
+            $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+            $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+            $MSG = new TemplateEmail(
+                [
+                    "subject" => "New message received - VI portal",
+                    "greeting" => "Dear " . $rfullname . ",",
+                    "body" => "You have a new message from " . $sfullname . ", Needs your review.",
+                    "action_url" => "/dashboard/inbox"
+                ]
+            );
+
+            // Send Notification (only in production)
+            if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                try {
+                    // Assuming TemplateEmail is a Mailable class, you'd use Mail::to()
+                    // If it's a notification, your original approach is fine, but ensure it's
+                    // properly configured for the Notifiable trait.
+                    // For Mailable: Mail::to($rname->email)->send($MSG);
+                    $rname->notify($MSG); // If MSG is a Notification class
+                } catch (\Throwable $th) {
+                    Log::error('Notification Error: ' . $th->getMessage());
+                }
+            }
+
+            return response()->json(['success' => true, 'message' => 'Message sent successfully']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error sending message: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 }

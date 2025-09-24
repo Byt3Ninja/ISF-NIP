@@ -428,6 +428,41 @@
 
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')
+
+    <script>
+      // Global SweetAlert2 configuration
+      const releaseSuccessAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'success',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+
+      const releaseFailureAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'error',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+    </script>
+
+
     @stack('scripts')
     <!-- END: Page JS-->
   </body>
