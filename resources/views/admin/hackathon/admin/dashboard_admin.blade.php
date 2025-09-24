@@ -136,9 +136,10 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                   <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
                     data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details')
                     }}</button>
-
+                    @php $leader_id = $team->members->where('is_leader', 1)->first()->id; @endphp
                   <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
                     __('admin.message') }}</button>
+
                 </td>
               </tr>
               @endforeach

@@ -10,6 +10,7 @@ use stdClass;
 use App\Cycle;
 use App\Company;
 use App\Formfield;
+use App\Messenger;
 use Carbon\Carbon;
 use App\Team_member;
 use App\Conversation;
@@ -21,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Exports\WinnersExport;
 use Illuminate\Support\Facades\DB;
 use App\ScreeningEvaluationResults;
+use App\Notifications\TemplateEmail;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -2657,5 +2659,51 @@ class HackathonController extends Controller
         return response()->json([
             'total' => $total
         ]);
+    }
+
+    public function sendTeamMessage(Request $request)
+    {
+        $request->validate([
+            'receiver' => 'required',
+            'subject' => 'required',
+            'message' => 'required',
+        ]);
+
+        $cuser = auth()->user();
+        $rec = $request->receiver;
+        $rname = User::where('id', $rec)->first();
+        try {
+                    $new = new Messenger();
+                    $new->sender = $cuser->id;
+                    $new->receiver = $rec;
+                    $new->subject = $request->input('subject');
+                    $new->message = $request->input('message');
+                    $new->save();
+
+                    // Prepare Email
+                    $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+                    $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+                    $MSG = new TemplateEmail;
+                    $MSG->Message = [
+                        "New message received - VI portal",
+                        "Dear " . $rfullname . ",",
+                        "You have a new message from " . $sfullname . ", Needs your review.",
+                        "/dashboard/inbox"
+                    ];
+
+                    // Send Notification (only in production)
+                    if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                        try {
+                            $rname->notify($MSG);
+                        } catch (\Throwable $th) {
+                            Log::error('Notification Error: ' . $th->getMessage());
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error: ' . $e->getMessage());
+                    return back()->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
+                }
+
+                return back()->with(['msg' => 'Message sent successfully', 'class' => 'success']);
     }
 }
