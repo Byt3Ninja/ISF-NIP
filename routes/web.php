@@ -143,6 +143,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('apply/{id}/hackathon', 'HackathonController@applyHackathon')->name('hackathon.apply');
     Route::get('submission/{id}/hackathon', 'HackathonController@hackathonSubmissions')->name('hackathon.hackathonSubmissions');
     Route::post('hackathon/createTeam', 'HackathonController@createTeam')->name('hackathon.createTeam');
+    Route::post('hackathon/deleteTeamInfo', 'HackathonController@deleteTeamInfo')->name('hackathon.deleteTeamInfo');
     Route::post('hackathon/invitation', 'HackathonController@invitation')->name('hackathon.invitation');
     Route::post('hackathon/cancelinvitation', 'HackathonController@cancelInvitation')->name('hackathon.Cancelinvitation');
     Route::patch('hackathon/acceptInvitation/{id}', 'HackathonController@acceptInvitation')->name('hackathon.acceptInvitation');

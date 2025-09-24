@@ -2896,7 +2896,20 @@
                     "registered"
                    
                 ]
+            },
+            {
+                "name": "hackathon.deleteTeamInfo",
+                "description": " Delete Team Info in Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                   
+                ]
             }
+
         ]
     },
     {
