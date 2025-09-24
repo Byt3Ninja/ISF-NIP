@@ -1460,6 +1460,19 @@ class HackathonController extends Controller
         return redirect()->back()->with('success', 'Invitation sent successfully.');
     }
 
+    public function deleteTeamInfo(Request $request)
+    {
+        
+        $teamFormation = TeamFormation::where('id', $request->team_formation_id)->where('user_id', Auth::user()->id)->first();
+        if (!$teamFormation) {
+            return response()->json(['success' => false, 'message' => __("admin.Team_not_found.")]);
+        }
+        $team_member = Team_member::where('team_formation_id', $teamFormation->id)->delete();
+       
+        $teamFormation->delete();
+        return redirect()->route('hackathon.view')->with('success', 'Team information deleted successfully.');
+    }
+
     public function cancelInvitation(Request $request)
     {
         $user = Auth::user();
