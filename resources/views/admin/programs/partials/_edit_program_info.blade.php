@@ -37,6 +37,10 @@
   @php
     $user = auth()->user();
   @endphp
+  @if ($user->hasRole('organizationManager'))
+  <input type="hidden" name="organization_id2" value="{{ $user->organization_id }}">
+  @endif
+
   <!-- Organizations -->
   @if (!$user->hasRole('organizationManager'))
   <div class="col-md-6">
