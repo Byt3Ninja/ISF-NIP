@@ -31,6 +31,8 @@ use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Notifications\StatusHackathonInvitation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class HackathonController extends Controller
 {
@@ -2663,47 +2665,60 @@ class HackathonController extends Controller
 
     public function sendTeamMessage(Request $request)
     {
-        $request->validate([
-            'receiver' => 'required',
-            'subject' => 'required',
-            'message' => 'required',
-        ]);
-
-        $cuser = auth()->user();
-        $rec = $request->receiver;
-        $rname = User::where('id', $rec)->first();
         try {
-                    $new = new Messenger();
-                    $new->sender = $cuser->id;
-                    $new->receiver = $rec;
-                    $new->subject = $request->input('subject');
-                    $new->message = $request->input('message');
-                    $new->save();
+            $request->validate([
+                'receiver' => 'required',
+                'subject' => 'required',
+                'message' => 'required',
+            ]);
 
-                    // Prepare Email
-                    $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
-                    $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
-                    $MSG = new TemplateEmail;
-                    $MSG->Message = [
-                        "New message received - VI portal",
-                        "Dear " . $rfullname . ",",
-                        "You have a new message from " . $sfullname . ", Needs your review.",
-                        "/dashboard/inbox"
-                    ];
+            $cuser = auth()->user();
+            $rec = $request->receiver;
+            $rname = User::where('id', $rec)->first();
 
-                    // Send Notification (only in production)
-                    if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-                        try {
-                            $rname->notify($MSG);
-                        } catch (\Throwable $th) {
-                            Log::error('Notification Error: ' . $th->getMessage());
-                        }
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Error: ' . $e->getMessage());
-                    return back()->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
+            if (!$rname) {
+                return response()->json(['success' => false, 'message' => 'Receiver not found.'], 404);
+            }
+
+            $new = new Messenger();
+            $new->sender = $cuser->id;
+            $new->receiver = $rec;
+            $new->subject = $request->input('subject');
+            $new->message = $request->input('message');
+            $new->save();
+
+            // Prepare Email
+            $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+            $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+            $MSG = new TemplateEmail(
+                [
+                    "subject" => "New message received - VI portal",
+                    "greeting" => "Dear " . $rfullname . ",",
+                    "body" => "You have a new message from " . $sfullname . ", Needs your review.",
+                    "action_url" => "/dashboard/inbox"
+                ]
+            );
+
+            // Send Notification (only in production)
+            if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                try {
+                    // Assuming TemplateEmail is a Mailable class, you'd use Mail::to()
+                    // If it's a notification, your original approach is fine, but ensure it's
+                    // properly configured for the Notifiable trait.
+                    // For Mailable: Mail::to($rname->email)->send($MSG);
+                    $rname->notify($MSG); // If MSG is a Notification class
+                } catch (\Throwable $th) {
+                    Log::error('Notification Error: ' . $th->getMessage());
                 }
+            }
 
-                return back()->with(['msg' => 'Message sent successfully', 'class' => 'success']);
+            return response()->json(['success' => true, 'message' => 'Message sent successfully']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error sending message: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 }

@@ -228,13 +228,13 @@
             }
 
             let program_id = '{{ isset($id) ? $id : ($ccycle->id ?? '') }}';
-            if( program_id )
-            {
+            // if( program_id )
+            // {
                 let name = $('#custom-page-name').val();
                 let content = $('#custom-page-content').val();
                 let visibility = $('#custom-page-visibility').val();
                 let data = {
-                    cycleId: program_id,
+                    cycleId: program_id ? program_id : undefined,
                     title: name,
                     content: content,
                     visibility: visibility
@@ -294,7 +294,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                            text: '{{ $l == 'ar' ? 'خطأ في إنشاء الصفحة. يرجى المحاولة مرة أخرى.' : 'Error creating page. Please try again.' }}',
+                            text: error?.message || '{{ $l == 'ar' ? 'خطأ في إنشاء الصفحة. يرجى المحاولة مرة أخرى.' : 'Error creating page. Please try again.' }}',
                             showCancelButton: false,
                             showConfirmButton: true,
                             confirmButtonText: "{{ __('admin.OK') }}",
@@ -305,20 +305,20 @@
                         });
                     }
                 });
-            } else { 
-                Swal.fire({
-                    icon: 'warning',
-                    title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
-                    text: '{{ $l == 'ar' ? 'يرجى تحديد دورة أولاً' : 'Please select a cycle first' }}',
-                    showCancelButton: false,
-                    showConfirmButton: true,
-                    confirmButtonText: "{{ __('admin.OK') }}",
-                    customClass: {
-                        confirmButton: 'btn btn-primary',
-                    },
-                    buttonsStyling: false,
-                });
-            }
+            // } else { 
+            //     Swal.fire({
+            //         icon: 'warning',
+            //         title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+            //         text: '{{ $l == 'ar' ? 'يرجى تحديد دورة أولاً' : 'Please select a cycle first' }}',
+            //         showCancelButton: false,
+            //         showConfirmButton: true,
+            //         confirmButtonText: "{{ __('admin.OK') }}",
+            //         customClass: {
+            //             confirmButton: 'btn btn-primary',
+            //         },
+            //         buttonsStyling: false,
+            //     });
+            // }
         });
 
         $(document).on('click', '#update_custom_page_btn', function(e) {
