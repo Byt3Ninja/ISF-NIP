@@ -1807,7 +1807,6 @@ return [
 	'SureDelete' => 'Are you sure you want to delete this item?',
 	'Recover' => 'You will not be able to recover this!',
 	'DYes' => 'Yes, Delete it!',
-	'No' => 'No, Cancel',
 	'Deleting' => 'Deleting',
 	'Deleted' => 'Deleted',
 	'FileDeleted' => 'Your file has been deleted.',
@@ -2357,4 +2356,7 @@ return [
 	'Accept_Invitation' => 'Accept Invitation',
 	'Reject_Invitation' => 'Reject Invitation',
 	'Program_Settings' => 'Program Settings',
+	'Industry_Settings' => 'Industry Settings',
+	'All_Genders' => 'All Genders',
+	'All_Roles' => 'All Roles',
 ];

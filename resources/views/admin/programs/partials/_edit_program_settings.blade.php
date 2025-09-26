@@ -1,47 +1,29 @@
 <div class="row">
-  <h5>{{ __('admin.Program_Settings') }}</h5>
+  <h5>{{ __('cycles.Program_Settings') }}</h5>
   <!-- External Participation -->
-  <div class="col-12">
+  <div class="col-12 mb-4">
     <div class="form-check form-switch">
       <label class="form-check-label" for="external-participation">
         {{ __('cycles.External_Participation_Label') }}
       </label>
       <input class="form-check-input" type="checkbox" id="allow_non_company" name="allow_non_company" />
     </div>
+      <small class="text-muted">
+        {{ __('cycles.External_Participation_Helper_Text') }}
+      </small>
   </div>
     
   <!-- Private Link -->
-  <div class="col-12">
+  <div class="col-12 mb-4">
     <div class="form-check form-switch">
       <label class="form-check-label" for="private-link">
         {{ __('cycles.Private Link') }}
       </label>
       <input class="form-check-input" type="checkbox" id="private" name="private" />
     </div>
-  </div>
-
-  <div class="col-12">
-    <div class="row">
-      <!-- Reminder -->
-      <div class="col-md-4">
-        <div class="form-check form-switch">
-          <label class="form-check-label" for="private-link">
-            {{ __('admin.Reminder') }}
-          </label>
-          <input class="form-check-input" type="checkbox" id="reminder_enabled" name="reminder_enabled" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Hours Reminder -->
-  <div class="col-md-6" id="hours_reminder" style="display: none;">
-    <div class="form-group public-data-form-fields">
-      <label class="form-label fs-6 fw-semibold" for="hours_reminder_input">{{ __('admin.Hours_Reminder') }}: </label>
-      <input type="number" min="1" id="hours_reminder_input" name="hours_reminder" class="form-control"
-        value="{{ $ccycle?->hours_Rminder }}" placeholder="{{ __('admin.Hours_Reminder') }}">
-      <div class="invalid-feedback"></div>
-    </div>
+     <small class="text-muted">
+        {{ __('cycles.Private_Link_Helper_Text') }}
+      </small>
   </div>
 
   <hr class="my-6" />
@@ -73,6 +55,72 @@
       <input type="hidden" name="organization_id" value="@if(isset($cycle)) {{ optional($cycle)->organization_id }} @else 0 @endif">
     </div>
   </div>
+
+  <hr class="my-6" />
+
+  <!-- Mentorship Reminder Settings -->
+  <h5>{{ __('cycles.Mentorship_Reminder_Settings') }}</h5>
+  <div class="col-12">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-check form-switch">
+          <label class="form-check-label" for="reminder_enabled">
+            {{ __('cycles.Enable_Mentorship_Reminders') }}
+          </label>
+          <input class="form-check-input" type="checkbox" id="reminder_enabled" @if(isset($cycle) && $cycle->reminder_enabled == 1) checked @endif name="reminder_enabled" />
+        </div>
+        @php
+          $cycle = $ccycle;
+          
+          $reminderoptional = DB::table('mentorship_schedules')
+    ->where('cycle_id', $cycle->id)
+    ->where('is_active', 1)
+    ->orderBy('value', 'desc') // عشان يرجع 24 الأول، بعده 6، بعده 1
+    ->get()
+    ->map(function ($reminder) {
+        return $reminder->value . '_' . $reminder->unit . '_before';
+    })
+    ->toArray();
+
+          $reminderOptions = ['24_hours_before', '6_hours_before', '1_hour_before'];
+        @endphp
+        <div id="hours_reminder" style="display: none;">
+          <div class="form-group d-flex align-items-center gap-6 mt-3">
+            <input type="hidden" name="reminder_times[]" value="1_hour_before" />
+            @foreach($reminderOptions as $option)
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  id="{{ $option }}" 
+                  name="reminder_times[]" 
+                  value="{{ $option }}"
+                  {{ in_array($option, $reminderoptional ?? []) ? 'checked' : '' }}
+                />
+                <label class="form-check-label text-nowrap" for="{{ $option }}">
+                  {{ __('cycles.' . $option) }}
+                </label>
+              </div>
+            @endforeach
+          </div>
+          <small class="text-muted">
+            {{ __('cycles.Mentorship_Reminders_Help_Text') }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hours Reminder -->
+  {{-- <div class="col-md-6" id="hours_reminder" style="display: none;">
+    <div class="form-group public-data-form-fields">
+      <label class="form-label fs-6 fw-semibold" for="hours_reminder_input">{{ __('admin.Hours_Reminder') }}: </label>
+      <input type="number" min="1" id="hours_reminder_input" name="hours_reminder" class="form-control"
+        value="{{ $ccycle?->hours_Rminder }}" placeholder="{{ __('admin.Hours_Reminder') }}">
+      <div class="invalid-feedback"></div>
+    </div>
+  </div> --}}
+
 
   <hr class="my-6" />
 
@@ -159,7 +207,7 @@
             data: {
               "slug": slug,
               "title": title,
-              "id": {{ isset( $ccycle ) ? $ccycle->id : 0 }},
+              "id": "{{ isset( $ccycle ) ? $ccycle->id : 0 }}",
             },
             success: function(response) {
               validating = false;
@@ -231,9 +279,9 @@
         $('#hours_reminder').show();
       } else {
         $('#hours_reminder').hide();
-        // Clear validation error when hiding
-        $('#hours_reminder_input').removeClass('is-invalid');
-        $('#hours_reminder_input').siblings('.invalid-feedback').text('');
+        // // Clear validation error when hiding
+        // $('#hours_reminder_input').removeClass('is-invalid');
+        // $('#hours_reminder_input').siblings('.invalid-feedback').text('');
       }
     });
     
@@ -282,14 +330,6 @@
       } else {
         $('#public_slug_div').hide();
         console.log('Hiding public slug div'); // Debug log
-      }
-      
-      // Initialize reminder field visibility
-      const reminderEnabled = $('#reminder_enabled').is(':checked');
-      if (reminderEnabled) {
-        $('#hours_reminder').show();
-      } else {
-        $('#hours_reminder').hide();
       }
     });
   </script>

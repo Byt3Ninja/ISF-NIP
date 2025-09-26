@@ -505,4 +505,13 @@ return [
     'visibility' => 'Visibility',
     'Mentorship_Settings' => 'Mentorship Settings',
     'Save & Next' => 'Save & Next',
+    'External_Participation_Helper_Text' => 'If enabled, startups not associated with any company can register for this program.',
+    'Private_Link_Helper_Text' => 'If enabled, the program will be accessible only via the private link provided below.',
+    'Mentorship_Reminder_Settings' => 'Mentorship Reminder Settings',
+    'Enable_Mentorship_Reminders' => 'Enable Mentorship Reminders',
+    'Mentorship_Reminders_Help_Text' => 'You can activate one or more reminder times. These settings apply to all mentorship sessions in the current program.',
+    '24_hours_before' => '24 hours before',
+    '6_hours_before' => '6 hours before',
+    '1_hour_before' => '1 hour before',
+    'Program_Settings' => 'Program Settings',
   ];

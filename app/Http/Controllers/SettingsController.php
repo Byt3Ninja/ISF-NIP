@@ -957,6 +957,11 @@ class SettingsController extends Controller
 
     }
 
+		public function industrySettings(Request $request)
+		{
+			return view('admin.settings.industry_settings');
+		} 
+
 	public function inviteUser(Request $request)
 	{
 			
