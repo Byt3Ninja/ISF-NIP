@@ -499,5 +499,14 @@ return [
     'visibility' => 'الرؤية',
     'Mentorship_Settings' => 'إعدادات الإرشاد',
     'Save & Next' => 'حفظ والتالي',
+    'External_Participation_Helper_Text' => 'إذا تم التفعيل، يمكن للشركات غير المرتبطة بأي منظمة التسجيل في هذا البرنامج.',
+    'Private_Link_Helper_Text' => 'إذا تم التفعيل، سيكون البرنامج متاحًا فقط عبر الرابط الخاص المقدم أدناه.',
+    'Mentorship_Reminder_Settings' => 'إعدادات تذكير الإرشاد',
+    'Enable_Mentorship_Reminders' => 'تفعيل تذكيرات الإرشاد',
+    'Mentorship_Reminders_Help_Text' => 'يمكنك تفعيل وقت أو أكثر من أوقات التذكير. تنطبق هذه الإعدادات على جميع جلسات الإرشاد في البرنامج الحالي.',
+    '24_hours_before' => 'قبل 24 ساعة',
+    '6_hours_before' => 'قبل 6 ساعات',
+    '1_hour_before' => 'قبل ساعة واحدة',
+    'Program_Settings' => 'إعدادات البرنامج',
   ];
 
