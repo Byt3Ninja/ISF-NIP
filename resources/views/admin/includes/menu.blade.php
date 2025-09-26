@@ -1029,8 +1029,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </li>
         </ul>
       </li>
-    @endif
 
+      @endif
+      
+    <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="/dashboard/industry-settings">
+        <i class="menu-icon tf-icons ti ti-augmented-reality"></i>
+        <div>{{ __('admin.Industry_Settings') }}</div>
+      </a>
+    </li>
     
     @if ($updateSittings->HomePage == true)
       @if ($_user->hasRole('Admin'))
