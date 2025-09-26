@@ -23,6 +23,7 @@ use http\Env\Response;
 use App\Finalscreening;
 use App\TrainingSession;
 use App\CycleCustomPages;
+use App\MentorshipSchedule;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use Illuminate\Validation\Rule;
@@ -246,6 +247,7 @@ class CyclesController extends Controller
     public function modify(Request $request)
     {
 
+       
         $isEdit = false;
         $isCreate = false;
         if( $request->has('typeedit') && $request->has('id') && intval( $request->id ) > 0 ) { $isEdit = true; }
@@ -366,9 +368,30 @@ class CyclesController extends Controller
                     $cycle->img_url = 'programs/' . $imageName;
                 }
                     $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
-                    $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
+                    // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
 
             $cycle->save();
+
+            if($request->reminder_enabled == 'on'){
+                $schedule = DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
+                    foreach ($request->reminder_times as $reminder) {
+                        [$value, $unit, $before] = explode('_', $reminder);
+                        DB::table('mentorship_schedules')->insert([
+                            'cycle_id' => $cycle->id,
+                            'value' => (int) $value,
+                            'unit' => $unit,
+                            'is_active' => 1,
+                            'organization_id' => $cycle->organization_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }else{
+                    DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
+                }
+
+
+           
             return redirect()->back()->with('message', 'Saved');
         } elseif ($type == 2) {
 
@@ -665,24 +688,24 @@ class CyclesController extends Controller
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
             
-            $request->validate([
-                'organization_id2' => 'required|exists:organizations,id',
-                'title' => 'required|string|max:250',
-                'description' => 'required|string|max:100',
-                'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
-                'start' => 'required|date|before:end',
-                'end' => 'required|date|after:start',
-                'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
-                'program_type' => ['required', 'in:General_Program,Hackathon'],
-            ], [
-                'public_slug.required_if' => __('cycles.Public URL required'),
-                'public_slug.unique' => __('cycles.Public URL already exist'),
-                'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
-            ]);
+            // $request->validate([
+            //     'organization_id2' => 'required|exists:organizations,id',
+            //     'title' => 'required|string|max:250',
+            //     'description' => 'required|string|max:100',
+            //     'is_public' => 'required|boolean',
+            //     'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
+            //     'start' => 'required|date|before:end',
+            //     'end' => 'required|date|after:start',
+            //     'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
+            //     'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+            //     'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
+            //     'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+            //     'program_type' => ['required', 'in:General_Program,Hackathon'],
+            // ], [
+            //     'public_slug.required_if' => __('cycles.Public URL required'),
+            //     'public_slug.unique' => __('cycles.Public URL already exist'),
+            //     'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
+            // ]);
 
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
             $slugs = $cycles->pluck('public_slug')->unique()->filter(function( $value ) { return !empty( $value ); })->values()->toArray();
@@ -767,11 +790,23 @@ class CyclesController extends Controller
                     $cycle->img_url = 'programs/' . $imageName;
                     
                 }
-                
                 $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
-                $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
-
+                // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
                 $cycle->save();
+                if($request->reminder_enabled == 'on'){
+                    foreach ($request->reminder_times as $reminder) {
+                        [$value, $unit, $before] = explode('_', $reminder);
+                        DB::table('mentorship_schedules')->insert([
+                            'cycle_id' => $cycle->id,
+                            'value' => (int) $value,
+                            'unit' => $unit,
+                            'is_active' => 1,
+                            'organization_id' => $cycle->organization_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
 
                 if (auth()->user()->hasRole('OrganizationManager')) {
                     $requiredFields = ['host', 'mail', 'mailpassword', 'port', 'encryption'];
