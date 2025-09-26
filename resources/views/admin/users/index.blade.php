@@ -20,55 +20,55 @@
     <div class="users-list-table">
       <div class="card">
         <div class="card-header">
-          <h4 class="card-title">{{__('admin.Users`s List')}}</h4>
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+            <h4 class="card-title mb-0">{{__('admin.Users`s List')}}</h4>
+            <div class="d-flex align-items-center">
+              <div class="dropdown me-2">
+                <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="ti ti-file-export me-1"></i> {{ __('admin.Export') }}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="exportDropdown">
+                  <a class="dropdown-item" href="javascript:void(0);" id="exportCsv">CSV</a>
+                  <a class="dropdown-item" href="javascript:void(0);" id="exportExcel">Excel</a>
+                </div>
+              </div>
+              <a href="{{ route('users.create') }}" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i>
+                {{ __('admin.Add New') }}
+              </a>
+            </div>
+          </div>
         </div>
         <div class="card-content">
           <div class="card-body">
-            <div class="users-list-filter px-1">
-              <form method="GET" action="{{ url()->current() }}">
-                <div class="row border rounded py-2 mb-2">
-                  <div class="col-12 col-sm-3 col-lg-3">
-                    <label class="mb-2" for="users-list-verified">{{ __('admin.HaveCompany') }}</label>
-                    <fieldset class="form-group">
-                    <select class="form-select select2" id="users-list-verified" name="haveCompany">
-                      <option value=" " {{ request('haveCompany') === null ? 'selected' : '' }}>{{ __('admin.All') }}</option>
-                      <option value="1" {{ request('haveCompany') === '1' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
-                      <option value="0" {{ request('haveCompany') === '0' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
-                    </select>
-
-                    </fieldset>
-                  </div>
-                  <div class="col-12 col-sm-3 col-lg-3">
-                    <label class="mb-2" for="users-list-role">{{ __('admin.Role') }}</label>
-                    <fieldset class="form-group">
-                      <select class="form-select select2" id="users-list-role" name="role">
-                        <option value=" "  >{{ __('admin.All') }}</option>
-                        @foreach (App\Role::get() as $role)
-                        <option value="{{ $role->name }}" {{ request('role') == $role->name ? 'selected' : '' }}>{{ __('admin.' . $role->name) }}</option>
-                        @endforeach
-                        <option value="Not Verified">{{ __('admin.NotVerified') }}</option>
-                      </select>
-                    </fieldset>
-                  </div>
-                  <div class="col-12 col-sm-3 col-lg-3">
-                    <label class="mb-2" for="users-list-status">{{ __('admin.Gender') }}</label>
-                    <fieldset class="form-group">
-                    <select class="form-select select2" id="users-list-status" name="gender">
-                      <option value="">{{ __('admin.All') }}</option>
-                      <option value="Male" {{ request('gender') == 'male' ? 'selected' : '' }}>{{ __('admin.Male') }}</option>
-                      <option value="Female" {{ request('gender') == 'female' ? 'selected' : '' }}>{{ __('admin.Female') }}</option>
-                    </select>
-                    </fieldset>
-                  </div>
-
-              </form>
-              <div class="col-12 col-sm-3 col-lg-2 offset-sm-2 offset-lg-1 d-flex align-items-end">
-                <a href="{{ route('users.create') }}" class="btn btn-primary">
-                  <i class="ti ti-plus me-1"></i>
-                  {{ __('admin.Add New') }}
-                </a>
+            <!-- Datatable filter configuration fields in a row -->
+            <div class="row" id="datatable-filters">
+              <div class="col-12 col-md-4 mb-2 mb-md-0">
+                <select class="form-select form-select-sm dt-filter" id="filter-haveCompany" data-column="6">
+                  <option value="" selected>{{ __('admin.HaveCompany') }}</option>
+                  <option value="Yes">{{ __('admin.Yes') }}</option>
+                  <option value="No">{{ __('admin.No') }}</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-4 mb-2 mb-md-0">
+                <select class="form-select form-select-sm dt-filter" id="filter-role" data-column="5">
+                  <option value="" selected>{{ __('admin.All_Roles') }}</option>
+                  @foreach (App\Role::get() as $role)
+                  <option value="{{ $role->name }}">{{ __('admin.' . $role->name) }}</option>
+                  @endforeach
+                  <option value="Not Verified">{{ __('admin.NotVerified') }}</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-4 mb-2 mb-md-0">
+                <select class="form-select form-select-sm dt-filter" id="filter-gender" data-column="4">
+                  <option value="" selected>{{ __('admin.All_Genders') }}</option>
+                  <option value="Male">{{ __('admin.Male') }}</option>
+                  <option value="Female">{{ __('admin.Female') }}</option>
+                </select>
               </div>
             </div>
+            <!-- /Datatable filter configuration fields -->
+
             <!-- datatable start -->
             <div class="table-responsive mt-2">
               <table id="users-list-datatable" class="table datatables-ajax">
@@ -92,16 +92,25 @@
                 <tbody>
                   @foreach ($users as $user)
                   <tr id="row_{{ $user->id }}">
-                    <td><a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a></td>
-                    <td style="font-size: small;"><a href="{{ route('users.edit', ['user' => $user->id]) }}">
-                        {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}</a></td>
+                    <td>
+                      <a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a>
+                    </td>
+                    <td style="font-size: small;">
+                      <a href="{{ route('users.edit', ['user' => $user->id]) }}">
+                        {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}
+                      </a>
+                    </td>
                     <td style="font-size: small;">{{ $user->email }}</td>
                     <td style="font-size: small;">{{ $user->phone }}</td>
-                    <td style="font-size: small;">{{ trim( $user->gender ) ? __('admin.' . $user->gender) : '-' }}</td>
-                    <td style="font-size: small;">
-                      {{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not
-                      Verified' }}</td>
-                    <td style="font-size: small;">{{ $user->company ? __('admin.Yes') : __('admin.No') }}</td>
+                    <td style="font-size: small;" data-search="{{ $user->gender }}" data-sort="{{ $user->gender }}">
+                      {{ trim($user->gender) ? __('admin.' . $user->gender) : '-' }}
+                    </td>
+                    <td style="font-size: small;" data-search="{{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}">
+                      {{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}
+                    </td>
+                    <td style="font-size: small;" data-search="{{ $user->company ? 'Yes' : 'No' }}">
+                      {{ $user->company ? __('admin.Yes') : __('admin.No') }}
+                    </td>
                     <td style="font-size: small;">{{ $user->created_at }}</td>
                     <td style="padding: 0px;font-size: small;">
                       @if( $_user->ableTo('users.destroy', $permissions) )
@@ -127,11 +136,10 @@
 <!-- END: Content-->
 @stop
 
-@section('scripts')
+@section('pagescripts')
 <script>
   $(document).ready(function() {
-    // Initialize DataTable
-    $('#users-list-datatable').DataTable({
+    var usersTable = $('#users-list-datatable').DataTable({
       responsive: true,
       pageLength: 10,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
@@ -154,17 +162,62 @@
         "zeroRecords": "{{ __('admin.No_matching_records_found') }}"
         @endif
       },
-      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-      displayLength: 10,
-      lengthMenu: [10, 25, 50, 75, 100],
-      order: [[0, 'desc']],
+      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      initComplete: function() {
+        $('.filters').append( $('#datatable-filters') );
+      },
       columnDefs: [
         {
           targets: [8], // Actions column
           orderable: false,
           searchable: false
         }
+      ],
+      buttons: [
+        {
+          extend: 'csv',
+          text: 'CSV',
+          className: 'd-none', // Hide default button, trigger via custom dropdown
+          exportOptions: {
+            columns: [0, 1, 2, 3, 4, 5, 6, 7] // Export these columns
+          }
+        },
+        {
+          extend: 'excel',
+          text: 'Excel',
+          className: 'd-none', // Hide default button, trigger via custom dropdown
+          exportOptions: {
+            columns: [0, 1, 2, 3, 4, 5, 6, 7] // Export these columns
+          }
+        }
       ]
+    });
+
+    // Custom filtering for DataTable
+    $('.dt-filter').on('change', function() {
+      var columnIdx = $(this).data('column');
+      var value = $(this).val();
+      
+      if (columnIdx == 4) { // Gender column - use exact match
+        if (value === '') {
+          usersTable.column(columnIdx).search('').draw();
+        } else {
+          // Use regex for exact match
+          usersTable.column(columnIdx).search('^' + $.fn.dataTable.util.escapeRegex(value) + '$', true, false).draw();
+        }
+      } else {
+        // Regular search for other columns
+        usersTable.column(columnIdx).search(value).draw();
+      }
+    });
+
+    // Handle export buttons
+    $('#exportCsv').on('click', function() {
+      usersTable.button('.buttons-csv').trigger();
+    });
+
+    $('#exportExcel').on('click', function() {
+      usersTable.button('.buttons-excel').trigger();
     });
 
     // Handle delete action
@@ -204,11 +257,11 @@
                 },
                 buttonsStyling: false,
               }).then(function() {
-                // Redirect to the index page
-                window.location.href = "{{ route('users.index') }}";
+                // Remove the row from DataTable
+                usersTable.row('#row_' + id).remove().draw();
+                // To avoid full page reload, if needed. If a full refresh is desired, uncomment the below.
+                // window.location.href = "{{ route('users.index') }}";
               });
-              // Remove the row from DataTable
-              $('#users-list-datatable').DataTable().row('#row_' + id).remove().draw();
             }
           ).fail(function(error) { 
             console.log(error);
@@ -222,37 +275,5 @@
       });
     });
   });
-
-
-
-  
-</script>
-<script>
-
-$(document).ready(function () {
-  $('.form-select').on('change', function () {
-    let params = new URLSearchParams(window.location.search);
-
-    $('.form-select').each(function () {
-      let key = $(this).attr('name');
-      let value = $(this).val();
-
-      if (key) {
-        if (value && value !== '') {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-    });
-
-    let newUrl = window.location.pathname;
-    let queryString = params.toString();
-    if (queryString) newUrl += '?' + queryString;
-
-    window.location.href = newUrl;
-  });
-});
-
 </script>
 @stop
