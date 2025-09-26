@@ -67,9 +67,21 @@
           <label class="form-check-label" for="reminder_enabled">
             {{ __('cycles.Enable_Mentorship_Reminders') }}
           </label>
-          <input class="form-check-input" type="checkbox" id="reminder_enabled" name="reminder_enabled" />
+          <input class="form-check-input" type="checkbox" id="reminder_enabled" @if(isset($cycle) && $cycle->reminder_enabled == 1) checked @endif name="reminder_enabled" />
         </div>
         @php
+          $cycle = $ccycle;
+          
+          $reminderoptional = DB::table('mentorship_schedules')
+    ->where('cycle_id', $cycle->id)
+    ->where('is_active', 1)
+    ->orderBy('value', 'desc') // عشان يرجع 24 الأول، بعده 6، بعده 1
+    ->get()
+    ->map(function ($reminder) {
+        return $reminder->value . '_' . $reminder->unit . '_before';
+    })
+    ->toArray();
+
           $reminderOptions = ['24_hours_before', '6_hours_before', '1_hour_before'];
         @endphp
         <div id="hours_reminder" style="display: none;">
@@ -83,7 +95,7 @@
                   id="{{ $option }}" 
                   name="reminder_times[]" 
                   value="{{ $option }}"
-                  {{ in_array($option, $ccycle?->reminder_times ?? []) ? 'checked' : '' }}
+                  {{ in_array($option, $reminderoptional ?? []) ? 'checked' : '' }}
                 />
                 <label class="form-check-label text-nowrap" for="{{ $option }}">
                   {{ __('cycles.' . $option) }}
