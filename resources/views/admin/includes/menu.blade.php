@@ -681,10 +681,17 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </a>
 
         <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/training/sessions') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/sessions">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Training sessions') }}</span>
+            </a>
+          </li>
+
+          <li class="{{ Request::is('dashboard/training/sessionsReport*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/training/sessionsReport">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Training_sessions_report') }}</span>
             </a>
           </li>
           

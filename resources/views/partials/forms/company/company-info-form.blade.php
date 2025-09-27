@@ -156,11 +156,11 @@
           </div>
           <div class="col-md-4 col-12 mb-3">
             <label class="form-label fs-6 fw-semibold mb-2" for="Commercial_Register">{{ __('admin.Commercial_Register') }} *</label>
-            <input class="form-control Commercial_Register" id="Commercial_Register" name="Commercial_Register" type="text" value="{{ $client->company ? $client->company->Commercial_Register : old('Commercial_Register') }}" style="direction: rtl;" placeholder="{{ __('admin.Commercial_Register') }} *" autocomplete="Commercial_Register">
+            <input class="form-control Commercial_Register" id="Commercial_Register" name="Commercial_Register" type="file" style="direction: rtl;" placeholder="{{ __('admin.Commercial_Register') }} *" autocomplete="Commercial_Register">
           </div>
           <div class="col-md-4 col-12 mb-3">
             <label class="form-label fs-6 fw-semibold mb-2" for="Tax_Card">{{ __('admin.Tax_Card') }} *</label>
-            <input class="form-control Tax_Card" id="Tax_Card" name="Tax_Card" type="text" value="{{ $client->company ? $client->company->Tax_Card : old('Tax_Card') }}" style="direction: rtl;" placeholder="{{ __('admin.Tax_Card') }} *" autocomplete="Tax_Card">
+            <input class="form-control Tax_Card" id="Tax_Card" name="Tax_Card" type="file" style="direction: rtl;" placeholder="{{ __('admin.Tax_Card') }} *" autocomplete="Tax_Card">
           </div>
         </div>
         <div class="col-md-6 col-12 mb-4">

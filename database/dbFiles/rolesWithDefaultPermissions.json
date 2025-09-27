@@ -5320,6 +5320,16 @@
                     "registered",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "trainings.sessions_report",
+                "description": " View Trainings Sessions Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },

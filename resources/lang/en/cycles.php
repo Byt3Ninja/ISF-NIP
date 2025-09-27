@@ -514,4 +514,9 @@ return [
     '6_hours_before' => '6 hours before',
     '1_hour_before' => '1 hour before',
     'Program_Settings' => 'Program Settings',
+    'Training_Step' => 'Training Steps',
+    'Trainer' =>  'Trainer',
+    'Training_Map/Link' =>  'Training Map/Link',
+    'Program' =>  'Program',
+    
   ];
