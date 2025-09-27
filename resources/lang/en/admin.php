@@ -2359,4 +2359,14 @@ return [
 	'Industry_Settings' => 'Industry Settings',
 	'All_Genders' => 'All Genders',
 	'All_Roles' => 'All Roles',
+	'Search_Pages' => 'Search Pages',
+	'Training_sessions_report' => 'Training Sessions Report',
+	'No_training_sessions_available' => 'No Training Sessions Available',
+	'Choose_Program' => 'Choose Program',
+	'Choose_Step' => 'Choose Step',
+	'Open' => 'Open',
+	'Judgers' => 'Judgers',
+	'Join_Date' => 'Join Date',
+	'No_judges_available' => 'No Judges Available',
+	
 ];

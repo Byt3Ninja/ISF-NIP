@@ -364,6 +364,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
     Route::resource('users', 'UserController');
+    Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     //Cities
@@ -549,6 +550,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
 
     Route::get('training/results/{id?}', 'TrainingController@results')->name('trainings.results_view');
     Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('trainings.sessions_list');
+    Route::get('training/sessionsReport', 'TrainingController@sessionsReport')->name('trainings.sessions_report');
+
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
     Route::post('training/delsession/{id}', 'TrainingController@delsession')->name('trainings.sessions_delete');
     Route::post('training/session', 'TrainingController@session')->name('trainings.sessions_view');

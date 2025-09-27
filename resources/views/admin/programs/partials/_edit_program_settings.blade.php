@@ -73,27 +73,28 @@
           $cycle = $ccycle;
           
           $reminderoptional = DB::table('mentorship_schedules')
-    ->where('cycle_id', $cycle->id)
-    ->where('is_active', 1)
-    ->orderBy('value', 'desc') // عشان يرجع 24 الأول، بعده 6، بعده 1
-    ->get()
-    ->map(function ($reminder) {
-        return $reminder->value . '_' . $reminder->unit . '_before';
-    })
-    ->toArray();
-
+                                ->where('cycle_id', $cycle->id)
+                                ->where('is_active', 1)
+                                ->orderBy('value', 'desc') // عشان يرجع 24 الأول، بعده 6، بعده 1
+                                ->get()
+                                ->map(function ($reminder) {
+                                    return $reminder->value . '_' . $reminder->unit . '_before';
+                                })
+                                ->toArray();
           $reminderOptions = ['24_hours_before', '6_hours_before', '1_hour_before'];
         @endphp
         <div id="hours_reminder" style="display: none;">
           <div class="form-group d-flex align-items-center gap-6 mt-3">
-            <input type="hidden" name="reminder_times[]" value="1_hour_before" />
+            
+            {{-- Container where hidden inputs will be injected --}}
+            <div id="reminder_times_container"></div>
+
             @foreach($reminderOptions as $option)
               <div class="form-check">
                 <input 
-                  class="form-check-input" 
+                  class="form-check-input reminder-checkbox" 
                   type="checkbox" 
                   id="{{ $option }}" 
-                  name="reminder_times[]" 
                   value="{{ $option }}"
                   {{ in_array($option, $reminderoptional ?? []) ? 'checked' : '' }}
                 />
@@ -331,6 +332,26 @@
         $('#public_slug_div').hide();
         console.log('Hiding public slug div'); // Debug log
       }
+
+      // Initialize hours reminder visibility
+      function updateReminderTimes() {
+        let container = $("#reminder_times_container");
+        container.empty(); // clear old hidden inputs
+
+        $(".reminder-checkbox:checked").each(function () {
+          $("<input>")
+            .attr("type", "hidden")
+            .attr("name", "reminder_times[]")
+            .val($(this).val())
+            .appendTo(container);
+        });
+      }
+
+      // update on change
+      $(document).on("change", ".reminder-checkbox", updateReminderTimes);
+
+      // run once on load (sync pre-checked)
+      updateReminderTimes();
     });
   </script>
 @endpush

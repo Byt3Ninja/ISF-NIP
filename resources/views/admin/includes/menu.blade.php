@@ -681,10 +681,17 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </a>
 
         <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/training/sessions') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/sessions">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Training sessions') }}</span>
+            </a>
+          </li>
+
+          <li class="{{ Request::is('dashboard/training/sessionsReport*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/training/sessionsReport">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Training_sessions_report') }}</span>
             </a>
           </li>
           
@@ -801,7 +808,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
    
     @if ($_user->hasAnyRole('organizationManager|Admin'))
      
-        <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <li class="{{ Request::is('*users*', 'dashboard/judger') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-users"></i>
             <div>{{ __('admin.Users') }}</div>
@@ -820,6 +827,14 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                 <span class="menu-item">{{ __('admin.List All') }}</span>
               </a>
             </li>
+
+            <li class="{{ Request::is('dashboard/judger') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('users.judger') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.Judgers') }}</span>
+              </a>
+            </li>
+            
             <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('users.view_companies') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>

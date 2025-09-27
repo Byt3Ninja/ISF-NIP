@@ -70,6 +70,7 @@
                       <th class="text-center">{{ __('admin.Startup') }}</th>
                       <th class="text-center">{{ __('admin.Prorgam_name') }}</th>
                       <th class="text-center">{{ __('admin.Orgranization') }}</th>
+                      <th class="text-center">{{ __('admin.Status') }}</th>
                       <th class="text-center">{{ __('admin.Session_date') }}</th>
                       <th class="text-center">{{ __('admin.Survey_Report') }}</th>
                     </tr>
@@ -78,6 +79,7 @@
                     @php
                         $c = 1;
                     @endphp
+                   
                     @foreach ($mentorRequests as $session)
                             @php
                               $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)->where('triggered_at', $session->id)->where('triggered_by', 'session')->first();
@@ -112,17 +114,24 @@
                           {{ $session->orgnization->{'name_' . $l} }}
                         </td>
                         <td class="text-center">
+                          @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
+                            <span class="badge bg-label-success">{{ __('admin.Completed') }}</span>
+                          @elseif(isset($available_surv))
+                            <span class="badge bg-label-danger">{{ __('admin.Open') }}</span>
+                          @endif
+                        </td>
+                        <td class="text-center">
                           {{ $session->zoom_date }}
                         </td>
                         
                         <td class="text-center">
                             
                             @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
-    <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
-@elseif(isset($available_surv))
-    {{-- <button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button> --}}
-    <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
-@endif
+                                <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
+                            @elseif(isset($available_surv))
+                                {{-- <button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button> --}}
+                                <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+                            @endif
 
                         </td>
                       </tr>
