@@ -212,4 +212,10 @@ class UserController extends Controller
 
 		return redirect()->back()->with('success', 'تم رفع الشيت بنجاح!');
 	}
+	public function judger()
+	{
+		$judgers = User::role('Judger')->get();
+
+		return view('admin/users/judgers', compact('judgers'));
+	}
 }

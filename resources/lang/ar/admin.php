@@ -2420,4 +2420,7 @@ return [
 	'Choose_Program' => 'اختر البرنامج',
 	'Choose_Step' => 'اختر المرحلة',
 	'Open' => 'مفتوح',
+	'Judgers' => 'المحكمون',
+	'Join_Date' => 'تاريخ الانضمام',
+	'No_judges_available' => 'لا يوجد محكمون متاحون',
 ];

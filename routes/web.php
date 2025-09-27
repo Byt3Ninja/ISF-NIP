@@ -364,6 +364,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
     Route::resource('users', 'UserController');
+    Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     //Cities
