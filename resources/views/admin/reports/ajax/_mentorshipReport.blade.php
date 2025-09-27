@@ -40,7 +40,7 @@
                 <i class="ti ti-calendar-event ti-28px"></i>
               </span>
             </div>
-            <h4 class="mb-0">{{ $mentorships_period }} </h4>
+            <h4 class="mb-0">{{ $total_sessions_count }} </h4>
           </div>
           <p class="mb-1">{{ __('admin.Mentorship requests') }}</p>
         </div>
@@ -55,7 +55,7 @@
                 <i class="ti ti-clock ti-28px"></i>
               </span>
             </div>
-            <h4 class="mb-0">{{ $total_sessions_count }}</h4>
+            <h4 class="mb-0">{{ $mentorships_period  }}</h4>
           </div>
           <p class="mb-1">{{ __('admin.Mentorship requests Duration') }}</p>
         </div>

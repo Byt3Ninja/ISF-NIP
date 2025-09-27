@@ -130,7 +130,7 @@ class ReportController extends Controller
         $data['Total_Survey'] = $data['available_surveys']->count();
         $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
         $data['Survey_NotDone'] = $data['available_surveys']->whereNull('responses')->count();
-      
+        
         return $data;
     }
 

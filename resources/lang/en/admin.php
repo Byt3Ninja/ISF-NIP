@@ -2364,4 +2364,5 @@ return [
 	'No_training_sessions_available' => 'No Training Sessions Available',
 	'Choose_Program' => 'Choose Program',
 	'Choose_Step' => 'Choose Step',
+	'Open' => 'Open',
 ];
