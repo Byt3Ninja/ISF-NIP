@@ -2414,4 +2414,5 @@ return [
 	'Industry_Settings' => 'إعدادات الصناعة',
 	'All_Genders' => 'جميع الأجناس',
 	'All_Roles' => 'جميع الأدوار',
+	'Search_Pages' => 'البحث في الصفحات',
 ];

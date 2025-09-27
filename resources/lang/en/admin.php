@@ -2359,4 +2359,5 @@ return [
 	'Industry_Settings' => 'Industry Settings',
 	'All_Genders' => 'All Genders',
 	'All_Roles' => 'All Roles',
+	'Search_Pages' => 'Search Pages',
 ];
