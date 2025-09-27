@@ -2419,4 +2419,5 @@ return [
 	'No_training_sessions_available' => 'لا يوجد جلسات تدريب متاحة',
 	'Choose_Program' => 'اختر البرنامج',
 	'Choose_Step' => 'اختر المرحلة',
+	'Open' => 'مفتوح',
 ];
