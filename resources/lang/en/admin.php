@@ -2365,4 +2365,8 @@ return [
 	'Choose_Program' => 'Choose Program',
 	'Choose_Step' => 'Choose Step',
 	'Open' => 'Open',
+	'Judgers' => 'Judgers',
+	'Join_Date' => 'Join Date',
+	'No_judges_available' => 'No Judges Available',
+	
 ];

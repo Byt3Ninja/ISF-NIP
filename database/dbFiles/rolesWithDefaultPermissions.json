@@ -1958,6 +1958,16 @@
                     "judger",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "users.judger",
+                "description": " List All Judger ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
