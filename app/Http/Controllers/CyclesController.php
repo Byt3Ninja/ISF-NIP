@@ -688,6 +688,7 @@ class CyclesController extends Controller
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
             
+            
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',

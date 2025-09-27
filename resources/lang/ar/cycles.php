@@ -508,5 +508,9 @@ return [
     '6_hours_before' => 'قبل 6 ساعات',
     '1_hour_before' => 'قبل ساعة واحدة',
     'Program_Settings' => 'إعدادات البرنامج',
+    'Training_Step' => 'مرحله التدريب',
+    'Trainer' => 'المدرب',
+    'Training_Map/Link' => 'خريطة /رابط',
+    'Program' => 'برنامج',
   ];
 

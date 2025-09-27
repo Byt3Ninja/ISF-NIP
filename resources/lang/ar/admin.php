@@ -2415,4 +2415,8 @@ return [
 	'All_Genders' => 'جميع الأجناس',
 	'All_Roles' => 'جميع الأدوار',
 	'Search_Pages' => 'البحث في الصفحات',
+	'Training_sessions_report' => 'تقرير جلسات التدريب',
+	'No_training_sessions_available' => 'لا يوجد جلسات تدريب متاحة',
+	'Choose_Program' => 'اختر البرنامج',
+	'Choose_Step' => 'اختر المرحلة',
 ];
