@@ -2,12 +2,7 @@
 
 @section('style')
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
   <style>
     #contentWrapper {
@@ -45,9 +40,8 @@
       ['team-info', 'ti-users', $l == 'en' ? 'Team Info' : ' الفريق'],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      // ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
-      // ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
+      ['classification', 'ti-apps', $l == 'en' ? 'Classification' : ' التصنيف '],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -90,7 +84,7 @@
             @foreach ($tabs as $key => $tab)
             <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
               <a 
-              id="company-tab"
+                  id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link py-3"
                   data-bs-toggle="tab"
@@ -126,8 +120,8 @@
           <!-- / Alert -->
 
           @foreach ($tabs as $index => $tab)
-          <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
-            @switch($tab['target'])
+            <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
+              @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break
@@ -149,14 +143,11 @@
                 @case('company-milestones')
                   @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
                 @break
-                {{-- @case('company-social')
-                  @include('partials.forms.company.company-social', ['heading' => $tab['label']])
-                @break --}}
-                {{-- @case('about_problem')
-                  @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
-                @break --}}
                 @case('business_model')
                   @include('partials.forms.company.business_model', ['heading' => $tab['label']])
+                @break
+                @case('classification')
+                  @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
                 @break
               @endswitch
             </div>
@@ -173,17 +164,12 @@
 
 @section('scripts')
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
   <!-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> -->
 @stop
 
@@ -193,7 +179,6 @@
   </script>
   <script src="/app-assets/js/1.js"></script>
 
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
   <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
   {{-- <script src="/vuexy/assets/js/founder-form.js"></script> --}}
@@ -219,7 +204,7 @@
       const pitchTabs = document.querySelectorAll('#pitch-tab');
       const tabs = document.querySelectorAll('#company-tab');
       const mobileTabs = document.querySelectorAll('#mobile-company-tab');
-      const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const tabsContent = document.querySelectorAll('#company-tab-content > .tab-pane');
       const pitchContent = document.querySelectorAll('#pitch-tab-content .tab-pane');
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
       const activePitchTab = localStorage.getItem('activePitchTab');
@@ -281,6 +266,8 @@
       });
 
       tabsContent.forEach((tab, index) => {
+        console.log('Active Company Tab from localStorage:', activeCompanyTab);
+        console.log('Current Tab Index:', index);
         if (!activeCompanyTab) {
           tabsContent[0].classList.add('show', 'active');
           return;
