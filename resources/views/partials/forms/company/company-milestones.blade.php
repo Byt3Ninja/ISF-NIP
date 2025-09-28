@@ -446,13 +446,4 @@
       </div>
     </div>
   </div>
-
-
-
 </div>
-
-<script>
-  function resetForm(form) {
-    form.reset();
-  }
-</script>
