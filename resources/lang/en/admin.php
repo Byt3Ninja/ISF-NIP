@@ -501,7 +501,7 @@ return [
 	'Mentorship done Request' => 'Mentorship Done Requests Count',
 	'Mentorship pending Request' => 'Mentorship pending Requests Count',
 	'Zoom Training Sessions Count' => 'Training Sessions (Online)',
-	'Online Training Sessions Count' => 'Training sessions ( Online ) count',
+	'Online Training Sessions Count' => 'Online Training',
 	'Offline Training Sessions Count' => 'Training Sessions ( Offline )',
 	'startup not complete the form' => 'Startup Not Complete the Form',
 	'Mentorship done requests Duration' => 'Mentorship Done Requests Duration',
