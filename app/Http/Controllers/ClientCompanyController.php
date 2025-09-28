@@ -844,8 +844,9 @@ class ClientCompanyController extends Controller
 
             if( $result ) {
                 if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
-                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
-            } else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
+
+                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
+            } else { return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();

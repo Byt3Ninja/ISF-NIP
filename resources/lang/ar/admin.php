@@ -945,8 +945,8 @@ return [
 	'Skill Development' => ' تطوير المهارات ',
 	'Shipping and Delivery' => 'الشحن والتوصيل',
 	'Request_successfully_added_Startup' => 'تم تسجيل الطلب، سيتم ابلاغك فور الموافقة علي الطلب',
-	'Commercial_Register' => ' رقم السجل التجاري',
-	'Tax_Card' => ' رقم البطاقة الضريبية ',
+	'Commercial_Register' => 'مرفق السجل التجاري',
+	'Tax_Card' => 'مرفق البطاقة الضريبية',
 	'Have_Rgister_Company' => 'هل تم تأسيس الشركة ؟',
 	'Country_Register' => ' البلد التى تم التأسيس فيها ',
 	'organizationmanager' => ' مدير مؤسسه ',
@@ -2423,4 +2423,6 @@ return [
 	'Judgers' => 'المحكمون',
 	'Join_Date' => 'تاريخ الانضمام',
 	'No_judges_available' => 'لا يوجد محكمون متاحون',
+	'Startup_Info_Updated_Successfully' => 'تم تحديث بيانات الشركة الناشئة بنجاح',
+	'Startup_Info_Updated_Failed' => 'فشل تحديث بيانات الشركة الناشئة',
 ];

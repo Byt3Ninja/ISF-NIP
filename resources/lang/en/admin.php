@@ -965,9 +965,9 @@ return [
 	'E-Learning' => 'E-Learning',
 	'Skill Development' => 'Skill Development',
 	'Request_successfully_added_Startup' => 'Request successfully added',
-	'Commercial_Register' => 'Commercial Register No. ',
-	'Tax_Card' => 'Tax Card No. ',
-	'Have_Rgister_Company' => 'Have Rgister Startup',
+	'Commercial_Register' => 'Commercial register attachement',
+	'Tax_Card' => 'Tax card attachement',
+	'Have_Rgister_Company' => 'Have Registered Startup',
 	'Country_Register' => 'Where you registered ?',
 	'organizationmanager' => 'Organization Manager',
 	'boardTitlePending' => 'Pending',
@@ -2368,5 +2368,6 @@ return [
 	'Judgers' => 'Judgers',
 	'Join_Date' => 'Join Date',
 	'No_judges_available' => 'No Judges Available',
-	
+	'Startup_Info_Updated_Successfully' => 'Startup Info Updated Successfully',	
+	'Startup_Info_Updated_Failed' => 'Startup Info Update Failed',
 ];
