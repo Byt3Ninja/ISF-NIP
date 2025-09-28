@@ -2425,4 +2425,6 @@ return [
 	'No_judges_available' => 'لا يوجد محكمون متاحون',
 	'Startup_Info_Updated_Successfully' => 'تم تحديث بيانات الشركة الناشئة بنجاح',
 	'Startup_Info_Updated_Failed' => 'فشل تحديث بيانات الشركة الناشئة',
+	'Filter_by_status' => 'تصفية حسب الحالة',
+	'No_surveys_found' => 'لا توجد استبيانات متاحه',
 ];

@@ -1,3 +1,4 @@
+<div id="mentor-survey-report">
 <div class="col-12">
     <div class="row g-6">
       <!-- Card Border Shadow -->
@@ -20,7 +21,7 @@
       
     </div>
   </div>
-  
+
   <div class="col-12 mt-10">
     <div class="row">
       <div class="col-md-12">
@@ -32,6 +33,16 @@
           <div class="card-body">
             <div class="card">
               <div class="table-responsive">
+                <div class="mb-3">
+                  <form id="mentorSurveyFilterForm">
+                    <label for="statusFilter" class="form-label">{{ __('admin.Filter_by_status') }}:</label>
+                    <select class="form-select w-auto d-inline-block" id="statusFilter" name="status">
+                      <option value="all" {{ (request('status') ?? 'all') == 'all' ? 'selected' : '' }}>{{ __('admin.All') }}</option>
+                      <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>{{ __('admin.Open') }}</option>
+                      <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.Completed') }}</option>
+                   </select>
+                  </form>
+                </div>
                 <table class="table" id="userstable">
                   <thead class="bg-label-secondary">
                     <tr>
@@ -50,9 +61,17 @@
                         $c = 1;
                     @endphp
                    
+                 @if($mentorRequests->isEmpty())
+                  <tr>
+                   <td colspan="8" class="text-center">
+                    {{ __('admin.No_surveys_found') }}
+                  </td>
+                  </tr>
+                @endif
                     @foreach ($mentorRequests as $session)
                             @php
-                              $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)->where('triggered_at', $session->id)->where('triggered_by', 'session')->first();
+                                $key = $session->mentor_id . '-' . $session->id;
+                                $available_surv = $available_surveys_map[$key] ?? null;
                             @endphp
                       <tr>
                         <td class="text-center">{{ $c++ }}</td>
@@ -156,4 +175,36 @@
 		</div>
 	</div>
 </div>
+</div>
+<script>
+function bindStatusFilterEvent() {
+    const filter = document.getElementById('statusFilter');
+    if (!filter) return;
+
+    filter.addEventListener('change', function () {
+        let status = this.value;
+
+        fetch(`{{ route('reports.view.ajax', ['type' => 'mentorSurveys']) }}?status=${status}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.value === 1) {
+                document.getElementById('mentor-survey-report').innerHTML = data.view;
+
+                bindStatusFilterEvent();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+}
+
+bindStatusFilterEvent();
+</script>
+
+
   

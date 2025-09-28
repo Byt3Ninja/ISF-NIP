@@ -2370,4 +2370,6 @@ return [
 	'No_judges_available' => 'No Judges Available',
 	'Startup_Info_Updated_Successfully' => 'Startup Info Updated Successfully',	
 	'Startup_Info_Updated_Failed' => 'Startup Info Update Failed',
+	'Filter_by_status' => 'Filter by Status',
+	'No_surveys_found' => 'No Surveys Found',
 ];
