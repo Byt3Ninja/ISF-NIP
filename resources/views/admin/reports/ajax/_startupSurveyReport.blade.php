@@ -1,7 +1,7 @@
 <div class="col-12">
   <div class="row g-6">
     <!-- Card Border Shadow -->
-    <a href="/dashboard/users#search=Mentor" class="col-lg-3 col-sm-6">
+    <a href="#" class="col-lg-3 col-sm-6">
       <div class="card card-border-shadow-primary h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -13,36 +13,6 @@
             <h4 class="mb-0">{{ $Total_Survey }}</h4>
           </div>
           <p class="mb-1">{{ __('admin.Total_Servey') }}</p>
-        </div>
-      </div>
-    </a>
-    <a href="/dashboard/users#search=Mentor" class="col-lg-3 col-sm-6">
-      <div class="card card-border-shadow-secondary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-secondary">
-                <i class="ti ti-search ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $Survey_Done }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Done') }}</p>
-        </div>
-      </div>
-    </a>
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-3 col-sm-6">
-      <div class="card card-border-shadow-warning h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-warning">
-                <i class="ti ti-calendar-event ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $Survey_NotDone }} </h4>
-          </div>
-          <p class="mb-1">{{ __('admin.NotDone') }}</p>
         </div>
       </div>
     </a>

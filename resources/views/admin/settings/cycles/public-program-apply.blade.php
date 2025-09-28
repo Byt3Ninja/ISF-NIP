@@ -330,19 +330,19 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 												<div class="row">
 													<div class="col-md-6 mb-3">
 														<label for="register-email" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
-														<input type="email" class="form-control" id="register-email" name="register-email" placeholder="{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}" disabled required>
+														<input type="email" class="form-control" id="register-email" name="register-email" placeholder="{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}" disabled>
 														<div id="register-email-feedback" class="invalid-feedback"></div>
 													</div>
 												</div>
 												<div class="row">
 													<div class="col-md-6 mb-3">
 														<label for="register-first-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'الاسم الأول' : 'First Name' }}</label>
-														<input type="text" class="form-control" id="register-first-name" name="register-first-name" placeholder="{{ $l == 'ar' ? 'أدخل الاسم الأول' : 'Enter first name' }}" required>
+														<input type="text" class="form-control" id="register-first-name" name="register-first-name" placeholder="{{ $l == 'ar' ? 'أدخل الاسم الأول' : 'Enter first name' }}">
 														<div id="register-first-name-feedback" class="invalid-feedback"></div>
 													</div>
 													<div class="col-md-6 mb-3">
 														<label for="register-last-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
-														<input type="text" class="form-control" id="register-last-name" name="register-last-name" placeholder="{{ $l == 'ar' ? 'أدخل اسم العائلة' : 'Enter last name' }}" required>
+														<input type="text" class="form-control" id="register-last-name" name="register-last-name" placeholder="{{ $l == 'ar' ? 'أدخل اسم العائلة' : 'Enter last name' }}">
 														<div id="register-last-name-feedback" class="invalid-feedback"></div>
 													</div>
 												</div>
@@ -492,7 +492,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 													if (value.options.label) {
 														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
 													}
-													fields += `<select class="form-select" id="${value.id_for}" name='${value.field_name}' required>`;
+													fields += `<select class="form-select" id="${value.id_for}" name='${value.field_name}'>`;
 													fields += `<option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>`;
 													$.each(value.options.values.split(','), function(key, option) {
 														fields += `<option value="${option}">${option}</option>`;
@@ -508,7 +508,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 													if (value.options.label) {
 														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
 													}
-													fields += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${value.options.rows}" required></textarea>`;
+													fields += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${value.options.rows}"></textarea>`;
 													fields += `<div class="invalid-feedback">${value.options.label} required</div>`;
 													fields += `</div>`;
 													break;
@@ -521,7 +521,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 													}
 													fields += `<div class="d-flex flex-column">`;
 													fields += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" required>`;
-													fields += `<div class="invalid-feedback">${value.options.label} required</div>`;
+													fields += `<div class="invalid-feedback">${value.options.label}</div>`;
 													fields += `</div>`;
 													fields += `</div>`;
 													break;
@@ -536,7 +536,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 																class="form-control ${value.options.type == 'date' ? 'datepicker' : ''}"
 																id="${value.id_for}"
 																name="${value.field_name}"
-																value="" required />`;
+																value="" />`;
 													fields += `<div class="invalid-feedback">${value.options.label} required</div>`;
 													fields += `</div>`;
 												}

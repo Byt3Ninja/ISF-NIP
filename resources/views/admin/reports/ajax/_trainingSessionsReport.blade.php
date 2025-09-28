@@ -1,6 +1,6 @@
 <div class="col-12">
   <div class="row g-6">
-    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+    <a href="{{ route('trainings.sessions_report') }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-primary h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -16,7 +16,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+    <a href="{{ route('trainings.sessions_report') }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-secondary h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -32,7 +32,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+    <a href="{{ route('trainings.sessions_report', ['type' => 'sessions']) }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-warning h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -48,7 +48,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+    <a href="{{ route('trainings.sessions_report', ['type' => 'offline']) }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-danger h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -64,7 +64,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+    <a href="{{ route('trainings.sessions_report', ['type' => 'online']) }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-success h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">

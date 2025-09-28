@@ -252,16 +252,7 @@
       </li>
       @endif
     @endif
-    @if ($_user->hasAnyRole('Registered|Mentor|organizationManager|Judger'))
-      @if( $_user->ableTo('users.view_companies', $permissions) )
-      <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="{{ route('users.view_companies') }}">
-          <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
-          <span class="menu-item">{{ __('admin.Companies') }}</span>
-        </a>
-      </li>
-      @endif
-    @endif
+  
     @if ($_user->hasAnyRole('Mentor|Registered|Admin'))
       @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
@@ -271,6 +262,17 @@
         </a>
       </li>
       @endif
+    @endif
+
+    @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager|Judger'))
+    @if( $_user->ableTo('users.view_companies', $permissions) )
+     <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('users.view_companies') }}">
+          <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
+          <span class="menu-item">{{ __('admin.Companies') }}</span>
+        </a>
+      </li>
+    @endif
     @endif
 
     @if ($_user->hasAnyRole('Mentor'))
@@ -835,12 +837,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               </a>
             </li>
             
-            <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('users.view_companies') }}">
-                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.Companies') }}</span>
-              </a>
-            </li>
+         
             <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
               <a href="{{ route('roles.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-user-cog"></i>

@@ -203,13 +203,6 @@
 @stop
 
 @section('pagescripts')
-<!-- DataTables Buttons Extension -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
 <script>
   // Initialize DataTable
@@ -313,7 +306,7 @@
             if (response.success) {
               row.remove().draw(false); // Use false to stay on the same page
               Swal.fire({
-                text: response.message || "{{__('admin.DeletedSuccessfully')}}",
+                text: "{{__('admin.DeletedSuccessfully')}}",
                 icon: "success",
                 confirmButtonText: "{{ __('admin.OK') }}",
                 customClass: {

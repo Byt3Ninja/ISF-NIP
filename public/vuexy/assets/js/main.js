@@ -702,7 +702,7 @@ if (document.getElementById('layout-menu')) {
 //   });
 // }
 
-document.getElementById('menuSearch').addEventListener('input', function() {
+document.getElementById('menuSearch')?.addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase();
     const menuItems = document.querySelectorAll('#menuGrid .nav-item');
     
