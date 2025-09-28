@@ -2365,11 +2365,12 @@ return [
 	'Choose_Program' => 'Choose Program',
 	'Choose_Step' => 'Choose Step',
 	'Open' => 'Open',
-	'Judgers' => 'Judgers',
+	'Judgers' => 'Judges',
 	'Join_Date' => 'Join Date',
 	'No_judges_available' => 'No Judges Available',
 	'Startup_Info_Updated_Successfully' => 'Startup Info Updated Successfully',	
 	'Startup_Info_Updated_Failed' => 'Startup Info Update Failed',
 	'Filter_by_status' => 'Filter by Status',
 	'No_surveys_found' => 'No Surveys Found',
+	'Judge`s List' => 'Judge`s List',
 ];

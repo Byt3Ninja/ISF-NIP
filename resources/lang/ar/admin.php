@@ -2427,4 +2427,5 @@ return [
 	'Startup_Info_Updated_Failed' => 'فشل تحديث بيانات الشركة الناشئة',
 	'Filter_by_status' => 'تصفية حسب الحالة',
 	'No_surveys_found' => 'لا توجد استبيانات متاحه',
+	'Judge`s List' => 'قائمة المحكمون',
 ];
