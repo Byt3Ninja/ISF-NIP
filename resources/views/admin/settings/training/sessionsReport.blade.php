@@ -204,12 +204,12 @@
                           {{ FormatDate($session->enddatetime, 'Y-m-d HH:i') ?? '-' }}
                           @endif
                         </td>
+                        @php
+                          $hours = floor($session->duration / 60);
+                          $minutes = $session->duration % 60;
+                        @endphp
                         <td>
-                            @if($session->duration < 60)
-                                {{ $session->duration ?? 0 }} {{ __('cycles.Minutes') }}
-                            @else
-                                {{ round($session->duration / 60, 2) }} {{ __('cycles.Hours') }}
-                            @endif
+                           {{ sprintf('%02d:%02d', $hours, $minutes) }}
                         </td>
                         <td>{{ $session->step->cycle->title }}</td>                     
                         <td>{{ $session->step->title }}</td>
