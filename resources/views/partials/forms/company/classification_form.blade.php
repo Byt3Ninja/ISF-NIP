@@ -1,6 +1,8 @@
 <div class="card">
   <div class="card-header">
-    <h4 class="card-title">{{ $heading }} (Sectors & Technologies)</h4>    
+    <h5 class="card-title">
+      {{ $heading }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
+    </h5>    
   </div>
   <div class="card-body">
     <form 
@@ -13,7 +15,9 @@
       <fieldset class="row">
         <div class="col-md-6">
           <div class="form-group mb-6">
-            <label for="industry" class="form-label fs-6 fw-semibold">Industry</label>
+            <label for="industry" class="form-label fs-6 fw-semibold">
+              {{ $l == 'en' ? 'Industry' : 'الصناعة' }}
+            </label>
             <select id="industry" class="form-select select2" name="industry" required>
               {{-- <option value="" selected disabled>Select industry</option> --}}
               <option selected>Agritech</option>
@@ -33,47 +37,83 @@
               <option>Manufacturing</option>
               <option>Creative Arts</option>
             </select>
-            <small class="text-muted">You can assign multiple sectors or technologies to one industry.</small>
-            <div class="error" id="industryErr" style="display:none;">Please select an industry</div>
+            <small class="text-muted">
+              {{ $l == 'en' ? 'You can assign multiple sectors or technologies to one industry.' : 'يمكنك تعيين قطاعات أو تقنيات متعددة لصناعة واحدة.' }}
+            </small>
+            <div class="error" id="industryErr" style="display:none;">
+              {{ $l == 'en' ? 'Please select an industry' : 'يرجى اختيار صناعة' }}
+            </div>
           </div>
         </div>
     
         <div class="col-md-6">
           <div class="form-group mb-6">
-            <label for="refId" class="form-label fs-6 fw-semibold">Reference ID (optional)</label>
+            <label for="refId" class="form-label fs-6 fw-semibold">
+              {{ $l == 'en' ? 'Reference ID (optional)' : 'معرف المرجع (اختياري)' }}
+            </label>
             <input id="refId" class="form-control" name="refId" type="text" placeholder="e.g., PRG-2025-001" />
-            <small class="text-muted">Use to link classification to program or company.</small>
+            <small class="text-muted">
+              {{ $l == 'en' ? 'Use to link classification to program or company.' : 'استخدمه لربط التصنيف بالبرنامج أو الشركة.' }}
+            </small>
           </div>
         </div>
       </fieldset>
     
       <div class="col-12">
         <div class="form-group mb-6">
-          <label for="sectors" id="sectorsLabel" class="form-label fs-6 fw-semibold d-block">Sectors</label>
-          <small class="text-muted">Pick one or more. Select Other to add a custom sector.</small>
+          <label for="sectors" id="sectorsLabel" class="form-label fs-6 fw-semibold d-block">
+            {{ $l == 'en' ? 'Sectors' : 'القطاعات' }}
+          </label>
+          <small class="text-muted">
+            {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom sector.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة قطاع مخصص.' }}
+          </small>
           <div class="row mt-4" id="sectorList" aria-label="Sector list">
             <!-- sectors populated by JS based on dataset and selected industry -->
           </div>
-          <input id="sectorOther" class="form-control" name="sectorOther" type="text" placeholder="Type other sector" style="display:none" />
-          <div class="error" id="sectorErr" style="display:none;">Select at least one sector</div>
+          <input 
+            id="sectorOther" 
+            class="form-control" 
+            name="sectorOther" 
+            type="text" 
+            placeholder="{{ $l == 'en' ? 'Type other sector' : 'اكتب قطاعًا آخر' }}" 
+            style="display:none" 
+          />
+          <div class="error" id="sectorErr" style="display:none;">
+            {{ $l == 'en' ? 'Select at least one sector' : 'حدد قطاعًا واحدًا على الأقل' }}
+          </div>
         </div>
       </div>
     
       <div class="col-12">
         <div class="form-group mb-6">
-          <label for="technologies" id="technologiesLabel" class="form-label fs-6 fw-semibold d-block">Technologies used</label>
-          <small class="text-muted mb-4">Tag all that apply. Select Other to add a custom technology.</small>
+          <label for="technologies" id="technologiesLabel" class="form-label fs-6 fw-semibold d-block">
+            {{ $l == 'en' ? 'Technologies used' : 'التقنيات المستخدمة' }}
+          </label>
+          <small class="text-muted mb-4">
+            {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom technology.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة تقنية مخصصة.' }}
+          </small>
           <div class="row mt-4" id="techList" aria-label="Technology list">
             <!-- technologies populated by JS based on dataset -->
           </div>
-          <input id="techOther" class="form-control" name="techOther" type="text" placeholder="Type other technology" style="display:none" />
-          <div class="error" id="techErr" style="display:none;">Select at least one technology</div>
+          <input 
+            id="techOther" 
+            class="form-control" 
+            name="techOther" 
+            type="text" 
+            placeholder="{{ $l == 'en' ? 'Type other technology' : 'اكتب تقنية أخرى' }}" 
+            style="display:none" 
+          />
+          <div class="error" id="techErr" style="display:none;">
+            {{ $l == 'en' ? 'Select at least one technology' : 'حدد تقنية واحدة على الأقل' }}
+          </div>
         </div>
       </div>
     
       <div class="col-12 mt-12">
         <div class="d-flex gap-2 justify-content-end">
-          <button type="submit" class="btn btn-primary">Save classification</button>
+          <button type="submit" class="btn btn-primary">
+            {{ $l == 'en' ? 'Save Classification' : 'حفظ التصنيف' }}
+          </button>
         </div>
       </div>
     </form>
@@ -326,8 +366,13 @@ $(document).ready(function() {
 
   // Update labels based on selected industry
   function updateLabels(industry) {
-    $('#sectorsLabel').text(`Choose sectors for ${industry}`);
-    $('#technologiesLabel').text(`Choose technologies used for ${industry}`);
+    @if ($l == 'ar')
+      $('#sectorsLabel').text(`اختر القطاعات لـ ${industry}`);
+      $('#technologiesLabel').text(`اختر التقنيات المستخدمة لـ ${industry}`);
+    @else
+      $('#sectorsLabel').text(`Choose sectors for ${industry}`);
+      $('#technologiesLabel').text(`Choose technologies used for ${industry}`);
+    @endif
   }
 
   // Render sectors based on selected industry
@@ -491,12 +536,12 @@ $(document).ready(function() {
     const techOtherChecked = $('input[name="technologies"][value="Other"]').is(':checked');
 
     if (sectorOtherChecked && !$sectorOtherEl.val().trim()) {
-      $sectorErr.text('Please specify the other sector').show();
+      $sectorErr.text('{{ $l == "en" ? "Please specify the other sector" : "يرجى تحديد القطاع الآخر" }}').show();
       isValid = false;
     }
 
     if (techOtherChecked && !$techOtherEl.val().trim()) {
-      $techErr.text('Please specify the other technology').show();
+      $techErr.text('{{ $l == "en" ? "Please specify the other technology" : "يرجى تحديد التقنية الأخرى" }}').show();
       isValid = false;
     }
 
