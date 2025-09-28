@@ -484,7 +484,7 @@ return [
 	'Mentorship done Request' => 'عدد الجلسات المنتهية',
 	'Zoom Training Sessions Count' => ' جلسات التدريب ( اونلاين )',
 	'Online Training Sessions Count' => 'عدد جلسات التدريب ( تعليمي )',
-	'Offline Training Sessions Count' => 'عدد جلسات التدريب ( تقليدي )',
+	'Offline Training Sessions Count' => ' جلسات التدريب ( اوفلاين )',
 	'startup not complete the form' => 'الشركة لم تكمل النموذج بعد',
 	'Mentorship done requests Duration' => 'عدد ساعات الجلسات المنتهية',
 	'judge Sessions' => 'جلسات التحكيم و المراجعة',
