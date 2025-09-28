@@ -111,7 +111,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+    <a href="{{ route('trainings.sessions_report', ['cycle' => $cycle->id]) }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-warning h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
