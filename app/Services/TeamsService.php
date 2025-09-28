@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\User;
 use App\Settings;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
@@ -482,22 +483,18 @@ class TeamsService implements OnlineMeetingServiceInterface
     }
 
 
-    public function toZoomTimeFormat(string $dateTime, $duration = null)
+    public function toZoomTimeFormat($timestamp, $duration = null)
     {
-        try {
-            if (is_null($duration)) {
-                $date = new \DateTime($dateTime);
-                return $date->format('Y-m-d\TH:i:s.u\Z');
-            } else {
-                $date = new \DateTime($dateTime);
-                $interval = new \DateInterval('PT' . $duration . 'M');
-                $date->add($interval);
-
-                return $date->format('Y-m-d\TH:i:s.u\Z');
-            }
-        } catch (\Exception $e) {
-            Log::error('Teams->TimeFormat : ' . $e->getMessage());
-            return '';
+        if (!is_numeric($timestamp)) {
+            return null;
         }
+
+        $start = Carbon::createFromTimestamp($timestamp)->utc();
+
+        if ($duration) {
+         return $start->copy()->addMinutes($duration)->toIso8601String();
+        }
+
+        return $start->toIso8601String();
     }
 }
