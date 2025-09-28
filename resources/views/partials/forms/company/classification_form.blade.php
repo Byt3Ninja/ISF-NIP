@@ -13,7 +13,7 @@
       novalidate
     >
       <fieldset class="row">
-        <div class="col-md-6">
+        <div class="col-12">
           <div class="form-group mb-6">
             <label for="industry" class="form-label fs-6 fw-semibold">
               {{ $l == 'en' ? 'Industry' : 'الصناعة' }}
@@ -43,18 +43,6 @@
             <div class="error" id="industryErr" style="display:none;">
               {{ $l == 'en' ? 'Please select an industry' : 'يرجى اختيار صناعة' }}
             </div>
-          </div>
-        </div>
-    
-        <div class="col-md-6">
-          <div class="form-group mb-6">
-            <label for="refId" class="form-label fs-6 fw-semibold">
-              {{ $l == 'en' ? 'Reference ID (optional)' : 'معرف المرجع (اختياري)' }}
-            </label>
-            <input id="refId" class="form-control" name="refId" type="text" placeholder="e.g., PRG-2025-001" />
-            <small class="text-muted">
-              {{ $l == 'en' ? 'Use to link classification to program or company.' : 'استخدمه لربط التصنيف بالبرنامج أو الشركة.' }}
-            </small>
           </div>
         </div>
       </fieldset>
@@ -461,8 +449,6 @@ $(document).ready(function() {
     $sectorErr.hide();
     $techErr.hide();
   }
-
-  // Event Handlers
   
   // Industry selection change
   $industryEl.on('change', function() {
@@ -500,10 +486,6 @@ $(document).ready(function() {
     if ($(this).val().trim()) {
       $techErr.hide();
     }
-  });
-
-  $('#refId').on('input', function() {
-    // Optionally, you can add validation for refId here
   });
 
   // Form submission
