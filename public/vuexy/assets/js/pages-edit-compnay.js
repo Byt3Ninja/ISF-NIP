@@ -46,10 +46,12 @@ const translations = {
       stringOnly: 'Business type accepts Arabic and English letters only'
     },
     Commercial_Register: {
-      numeric: 'Commercial Register should contain numbers only'
+      format: 'Invalid file format. Only PDF, PNG, or JPEG is allowed.',
+      size: 'File size exceeds 10 MB. Please upload a smaller file.'
     },
     Tax_Card: {
-      numeric: 'Tax Card should contain numbers only'
+      format: 'Invalid file format. Only PDF, PNG, or JPEG is allowed.',
+      size: 'File size exceeds 10 MB. Please upload a smaller file.'
     }
   },
   ar: {
@@ -95,10 +97,12 @@ const translations = {
       stringOnly: 'نوع العمل يقبل الحروف العربية والإنجليزية فقط'
     },
     Commercial_Register: {
-      numeric: 'يجب أن يحتوي السجل التجاري على أرقام فقط'
+      format: 'تنسيق الملف غير صالح. يُسمح فقط بملفات PDF أو PNG أو JPEG.',
+      size: 'يتجاوز حجم الملف 10 ميجابايت. يرجى تحميل ملف أصغر.'
     },
     Tax_Card: {
-      numeric: 'يجب أن يحتوي البطاقة الضريبية على أرقام فقط'
+      format: 'تنسيق الملف غير صالح. يُسمح فقط بملفات PDF أو PNG أو JPEG.',
+      size: 'يتجاوز حجم الملف 10 ميجابايت. يرجى تحميل ملف أصغر.'
     }
   }
 };
@@ -269,15 +273,21 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       Commercial_Register: {
         validators: {
-          numeric: {
-            message: translations[lang].Commercial_Register.numeric
+          file: {
+            extension: 'pdf,png,jpeg',
+            type: 'application/pdf,image/png,image/jpeg',
+            maxSize: 10 * 1024 * 1024, // 10 MB
+            message: translations[lang].Commercial_Register.format
           }
         }
       },
       Tax_Card: {
         validators: {
-          numeric: {
-            message: translations[lang].Tax_Card.numeric
+          file: {
+            extension: 'pdf,png,jpeg',
+            type: 'application/pdf,image/png,image/jpeg',
+            maxSize: 10 * 1024 * 1024, // 10 MB
+            message: translations[lang].Tax_Card.format
           }
         }
       }
