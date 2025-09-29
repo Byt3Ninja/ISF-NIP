@@ -2373,4 +2373,8 @@ return [
 	'Filter_by_status' => 'Filter by Status',
 	'No_surveys_found' => 'No Surveys Found',
 	'Judge`s List' => 'Judge`s List',
+	'File_is_not_valid' => 'File is not valid',
+	'Invalid_file_type' => 'Invalid file type',
+	'File_size_must_be_less_than_10MB' => 'File size must be less than 10MB',
+	'resultsReport' => 'Results Report',
 ];
