@@ -15,8 +15,7 @@ use App\User;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ExportMail;
+ 
 
 class ExportFTSData implements ShouldQueue
 {
@@ -157,8 +156,8 @@ class ExportFTSData implements ShouldQueue
     $writer->save($tempFilePath);
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
-    Mail::to($userEmail)
-        ->queue(new ExportMail($tempFilePath, $fileName));
+    \Illuminate\Support\Facades\Notification::route('mail', $userEmail)
+        ->notify(new \App\Notifications\ExportNotification($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

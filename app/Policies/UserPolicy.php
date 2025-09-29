@@ -53,7 +53,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->ableTo('users.update');
+        return $user->ableToAny(['users.edit', 'users.update']);
     }
 
     /**
@@ -62,6 +62,16 @@ class UserPolicy
     public function deactivate(User $user, User $model): bool
     {
         return $user->ableToAny(['users.edit', 'users.update']);
+    }
+    /**
+     * Determine whether the user can update the model.
+     * @param \App\User $user
+     * @param \App\User $model
+     * @return bool
+     */
+    public function updatePassword(User $user, User $model): bool
+    {
+        return $user->ableTo('users.update');
     }
 
     /**

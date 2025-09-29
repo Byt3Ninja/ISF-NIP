@@ -119,13 +119,82 @@
       @endif
     @endauth
 
-   @if (auth()->user()->hasAnyrole('Registered','Mentor'))
+    @auth
+      <script>
+        console.log('User roles:', @json(auth()->user()->roles->pluck('name')));
+        console.log('Has Registered role:', @json(auth()->user()->hasRole('Registered')));
+        console.log('Has Mentor role:', @json(auth()->user()->hasRole('Mentor')));
+        console.log('Has any role (Registered|Mentor):', @json(auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor')));
+      </script>
+    @endauth
+
+   @if (auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor'))
+      <script>console.log('Echo script section executing - user has correct role');</script>
       <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
       <script>
+        console.log('Pusher script executed');
         const pusherConfig = @json(getPusherConfig());
-        // console.log("pusherConfig", pusherConfig);
+        console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
+        
+        console.log('Pusher credentials:', { pusherAppKey, pusherCluster });
+        
+        // Ensure Pusher is available globally
+        window.Pusher = Pusher;
+        console.log('Pusher loaded:', typeof Pusher, Pusher);
+        
+        // Load Laravel Echo dynamically to ensure proper loading
+        (function() {
+          console.log('Starting Echo dynamic load...');
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/laravel-echo@1.17.1/dist/echo.iife.js';
+          script.onload = function() {
+            console.log('Echo script loaded successfully');
+            console.log('typeof Echo after load:', typeof Echo);
+            console.log('window.Echo before init:', window.Echo);
+            
+            // Initialize Laravel Echo after script loads
+            if (typeof Echo !== 'undefined') {
+              try {
+                console.log('Attempting to initialize Echo...');
+                window.Echo = new Echo({
+                  broadcaster: 'pusher',
+                  key: pusherAppKey,
+                  cluster: pusherCluster,
+                  forceTLS: true,
+                  auth: {
+                    headers: {
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                  }
+                });
+                console.log('Echo initialized successfully:', window.Echo);
+                
+                // Test Echo connection
+                window.Echo.connector.pusher.connection.bind('connected', () => {
+                  console.log('Pusher connection established successfully');
+                });
+                
+                window.Echo.connector.pusher.connection.bind('error', (error) => {
+                  console.error('Pusher connection error:', error);
+                });
+                
+                // Trigger custom event to notify chat that Echo is ready
+                window.dispatchEvent(new CustomEvent('EchoReady'));
+              } catch (error) {
+                console.error('Error initializing Echo:', error);
+              }
+            } else {
+              console.error('Echo constructor not available after script load');
+            }
+          };
+          script.onerror = function(e) {
+            console.error('Failed to load Laravel Echo script:', e);
+          };
+          console.log('Appending Echo script to head...');
+          document.head.appendChild(script);
+        })();
         // Pusher.logToConsole = true;
 
         const pusher = new Pusher(pusherAppKey, {
@@ -236,6 +305,79 @@
       </script>
     @endif
 
+    {{-- Fallback Echo loading for all authenticated users (for testing) --}}
+    @auth
+      <script>
+        // If Echo wasn't loaded above due to role restrictions, load it anyway for testing
+        setTimeout(function() {
+          if (typeof window.Echo === 'undefined') {
+            console.log('Loading Echo fallback for testing...');
+            
+            // Load Pusher first if not already loaded
+            if (typeof window.Pusher === 'undefined') {
+              const pusherScript = document.createElement('script');
+              pusherScript.src = 'https://js.pusher.com/8.2.0/pusher.min.js';
+              pusherScript.onload = function() {
+                window.Pusher = Pusher;
+                console.log('Pusher loaded via fallback');
+                loadEchoFallback();
+              };
+              document.head.appendChild(pusherScript);
+            } else {
+              loadEchoFallback();
+            }
+            
+            function loadEchoFallback() {
+              const script = document.createElement('script');
+              script.src = 'https://cdn.jsdelivr.net/npm/laravel-echo@1.17.1/dist/echo.iife.js';
+              script.onload = function() {
+                console.log('Echo loaded via fallback');
+                
+                if (typeof Echo !== 'undefined') {
+                  try {
+                    // Get real Pusher config
+                    const pusherConfig = @json(getPusherConfig());
+                    console.log('Initializing Echo with config:', pusherConfig);
+                    
+                    window.Echo = new Echo({
+                      broadcaster: 'pusher',
+                      key: pusherConfig.PUSHER_APP_KEY,
+                      cluster: pusherConfig.PUSHER_APP_CLUSTER,
+                      forceTLS: true,
+                      auth: {
+                        headers: {
+                          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                      }
+                    });
+                    
+                    console.log('Echo initialized via fallback with real credentials:', window.Echo);
+                    
+                    // Test Echo connection
+                    window.Echo.connector.pusher.connection.bind('connected', () => {
+                      console.log('Pusher connection established successfully');
+                    });
+                    
+                    window.Echo.connector.pusher.connection.bind('error', (error) => {
+                      console.error('Pusher connection error:', error);
+                    });
+                    
+                    window.dispatchEvent(new CustomEvent('EchoReady'));
+                  } catch (error) {
+                    console.error('Error initializing Echo fallback:', error);
+                  }
+                }
+              };
+              script.onerror = function(e) {
+                console.error('Failed to load Echo fallback:', e);
+              };
+              document.head.appendChild(script);
+            }
+          }
+        }, 1000);
+      </script>
+    @endauth
+
     @hasanyrole('Admin|Manager')
       <script
         src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
@@ -286,6 +428,42 @@
 
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')
+
+    <script>
+      // Global SweetAlert2 configuration
+      const releaseSuccessAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'success',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+
+      const releaseFailureAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'error',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+    </script>
+
+
+    @stack('scripts')
     <!-- END: Page JS-->
   </body>
   <!-- END: Body-->

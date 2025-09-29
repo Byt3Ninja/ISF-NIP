@@ -53,12 +53,12 @@ class CurrencyController extends Controller
             $currency->flag = $value->emoji;
         }
         // Handle file upload
-        // if ($request->hasFile('flag')) {
-        //     $file = $request->file('flag');
-        //     $filename = time() . '_' . $file->getClientOriginalName();
-        //     $file->move(public_path('icons/flags'), $filename);
-        //     $currency->flag = 'icons/flags/' . $filename;
-        // }
+        if ($request->hasFile('flag')) {
+            $file = $request->file('flag');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('icons/flags'), $filename);
+            $currency->flag = 'icons/flags/' . $filename;
+        }
         $currency->save();
 
         return redirect()->route('currencies.index')->with('msg', 'currencyCreated');

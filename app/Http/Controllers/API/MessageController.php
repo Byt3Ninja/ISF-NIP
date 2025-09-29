@@ -322,7 +322,7 @@ class MessageController extends Controller
         }
         $ids = is_array($request->messageIds) ? $request->messageIds : explode(',', $request->messageIds);
 
-        Messenger::whereIn('id', $ids)->update([
+        Messenger::whereIn('id', $ids)->where('receiver', $user->id)->update([
               'starred' => $request->starred === true ? 1 : 0
          ]);
         return $this->success(null, [], __('api.Message_star_status_updated'));
@@ -371,10 +371,10 @@ class MessageController extends Controller
     ]);
 
     if ($validator->fails()) {
-        return $this->error(
-            __('api.invalid_query_parameters'),
-            400,
-            $validator->errors()
+        return  $this->validationError(
+                __('api.validation_error'),
+                422,
+                $validator->errors()
         );
     }
     $type = $request->get('type');
@@ -424,8 +424,8 @@ class MessageController extends Controller
         ], $drafts->total() ? __('api.messages_retrieved_successfully') : __('api.no_messages_found'));
     }
 
-    $query = Messenger::query();
-    $query->where(function ($q) use ($user) {
+   $query = $type === 'trash' ? Messenger::onlyTrashed(): Messenger::query();
+   $query->where(function ($q) use ($user) {
         $q->where('receiver', $user->id)
           ->orWhere('sender', $user->id);
     });
@@ -443,8 +443,6 @@ class MessageController extends Controller
         $query->where('sender', $user->id);
     } elseif ($type === 'starred') {
         $query->where('receiver', $user->id)->where('starred', 1);
-    } elseif ($type === 'trash') {
-        $query->onlyTrashed();
     }
 
     if ($request->filled('status')) {
@@ -466,10 +464,10 @@ class MessageController extends Controller
 
     $messages = $query->paginate($limit, ['*'], 'page', $page);
 
-    $data = $messages->map(function ($msg) use ($user) {
+    $data = $messages->map(function ($msg) use ($user,$type) {
         return [
             'id'        => $msg->id,
-            'type'      => $msg->sender == $user->id ? 'outbox' : 'inbox',
+            'type' => $type ?? ($msg->sender == $user->id ? 'outbox' : 'inbox'),
             'subject'   => $msg->subject,
             'message'     => $msg->message,
             'createdBy' => $msg->sender == $user->id ? $user->name : optional($msg->senderUser)->name,

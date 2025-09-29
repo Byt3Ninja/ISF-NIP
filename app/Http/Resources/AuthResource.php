@@ -23,7 +23,7 @@ class AuthResource extends JsonResource
             'phone'     => $this->country_code . $this->phone,
             'imgUrl'    => $this->img_url ? Storage::disk('public_uploads')->url($this->img_url) : null,
             'role'      => $this->getRoleNames()->first(),
-            'startupId ' => $this->HaveCompany == 1 && $this->company ? $this->company->id : null,
+            'startupId' => $this->HaveCompany == 1 && $this->company ? $this->company->id : null,
         ];
     }
 }

@@ -46,10 +46,17 @@ const translations = {
       stringOnly: 'Business type accepts Arabic and English letters only'
     },
     Commercial_Register: {
-      numeric: 'Commercial Register should contain numbers only'
+      format: 'Invalid file format. Only PDF, PNG, or JPEG is allowed.',
+      size: 'File size exceeds 10 MB. Please upload a smaller file.',
+      required: 'Please upload the Commercial Register.'
     },
     Tax_Card: {
-      numeric: 'Tax Card should contain numbers only'
+      format: 'Invalid file format. Only PDF, PNG, or JPEG is allowed.',
+      size: 'File size exceeds 10 MB. Please upload a smaller file.',
+      required: 'Please upload the Tax Card.'
+    },
+    Country_Register: {
+      notEmpty: 'Please select country of registration'
     }
   },
   ar: {
@@ -95,10 +102,17 @@ const translations = {
       stringOnly: 'نوع العمل يقبل الحروف العربية والإنجليزية فقط'
     },
     Commercial_Register: {
-      numeric: 'يجب أن يحتوي السجل التجاري على أرقام فقط'
+      format: 'تنسيق الملف غير صالح. يُسمح فقط بملفات PDF أو PNG أو JPEG.',
+      size: 'يتجاوز حجم الملف 10 ميجابايت. يرجى تحميل ملف أصغر.',
+      required: 'يرجى رفع السجل التجاري'
     },
     Tax_Card: {
-      numeric: 'يجب أن يحتوي البطاقة الضريبية على أرقام فقط'
+      format: 'تنسيق الملف غير صالح. يُسمح فقط بملفات PDF أو PNG أو JPEG.',
+      size: 'يتجاوز حجم الملف 10 ميجابايت. يرجى تحميل ملف أصغر.',
+      required: 'يرجى رفع البطاقة الضريبية'
+    },
+    Country_Register: {
+      notEmpty: 'الرجاء اختيار دولة التسجيل'
     }
   }
 };
@@ -155,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const businessCategories = document.querySelectorAll('input[name="business_categories[]"]');
   const otherCategoryField = document.getElementById('other-category-field');
   const stateField = document.getElementById('state_id');
+  const createdTaxSelect = document.getElementById('CreatedTax');
 
   const validationConfig = {
     fields: {
@@ -269,15 +284,115 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       Commercial_Register: {
         validators: {
-          numeric: {
-            message: translations[lang].Commercial_Register.numeric
+          callback: {
+            callback: function (input) {
+              const createdTax = document.getElementById('CreatedTax');
+              if (createdTax && createdTax.value === '1') {
+                const fileInput = input.element;
+                const existingFileInput = document.querySelector('input[name="Commercial_Register_value"]');
+                
+                // Check if file exists (new upload OR existing file)
+                const hasNewFile = fileInput.files && fileInput.files.length > 0;
+                const hasExistingFile = existingFileInput && existingFileInput.value;
+                
+                if (!hasNewFile && !hasExistingFile) {
+                  return {
+                    valid: false,
+                    message: translations[lang].Commercial_Register.required
+                  };
+                }
+                
+                // If new file is selected, validate format and size
+                if (hasNewFile) {
+                  const file = fileInput.files[0];
+                  const allowedExtensions = ['pdf', 'png', 'jpeg', 'jpg'];
+                  const fileExtension = file.name.split('.').pop().toLowerCase();
+                  
+                  if (!allowedExtensions.includes(fileExtension)) {
+                    return {
+                      valid: false,
+                      message: translations[lang].Commercial_Register.format
+                    };
+                  }
+                  
+                  if (file.size > 10 * 1024 * 1024) { // 10 MB
+                    return {
+                      valid: false,
+                      message: translations[lang].Commercial_Register.size
+                    };
+                  }
+                }
+              }
+              
+              return { valid: true };
+            }
           }
         }
       },
       Tax_Card: {
         validators: {
-          numeric: {
-            message: translations[lang].Tax_Card.numeric
+          callback: {
+            callback: function (input) {
+              const createdTax = document.getElementById('CreatedTax');
+              if (createdTax && createdTax.value === '1') {
+                const fileInput = input.element;
+                const existingFileInput = document.querySelector('input[name="Tax_Card_value"]');
+                
+                // Check if file exists (new upload OR existing file)
+                const hasNewFile = fileInput.files && fileInput.files.length > 0;
+                const hasExistingFile = existingFileInput && existingFileInput.value;
+                
+                if (!hasNewFile && !hasExistingFile) {
+                  return {
+                    valid: false,
+                    message: translations[lang].Tax_Card.required
+                  };
+                }
+                
+                // If new file is selected, validate format and size
+                if (hasNewFile) {
+                  const file = fileInput.files[0];
+                  const allowedExtensions = ['pdf', 'png', 'jpeg', 'jpg'];
+                  const fileExtension = file.name.split('.').pop().toLowerCase();
+                  
+                  if (!allowedExtensions.includes(fileExtension)) {
+                    return {
+                      valid: false,
+                      message: translations[lang].Tax_Card.format
+                    };
+                  }
+                  
+                  if (file.size > 10 * 1024 * 1024) { // 10 MB
+                    return {
+                      valid: false,
+                      message: translations[lang].Tax_Card.size
+                    };
+                  }
+                }
+              }
+              
+              return { valid: true };
+            }
+          }
+        }
+      },
+      Country_Register: {
+        validators: {
+          callback: {
+            callback: function (input) {
+              const createdTax = document.getElementById('CreatedTax');
+              if (createdTax && createdTax.value === '1') {
+                // Country_Register is required when CreatedTax is "Yes"
+                const value = input.value || '';
+                if (value === '') {
+                  return {
+                    valid: false,
+                    message: translations[lang].Country_Register.notEmpty
+                  };
+                }
+              }
+              return { valid: true };
+            }
           }
         }
       }
@@ -374,6 +489,28 @@ document.addEventListener('DOMContentLoaded', function () {
   if (editInfoForm) {
     const formValidation = FormValidation.formValidation(editInfoForm, validationConfig);
 
+    // Initialize Select2 for Country_Register if not already initialized
+    const countryRegisterSelect = document.getElementById('Country_Register');
+    if (countryRegisterSelect && !$(countryRegisterSelect).hasClass('select2-hidden-accessible')) {
+      $(countryRegisterSelect).select2({
+        placeholder: countryRegisterSelect.getAttribute('data-placeholder') || 'Select Country',
+        allowClear: true
+      });
+    }
+
+    // Handle Select2 validation for Country_Register
+    if (countryRegisterSelect) {
+      $(countryRegisterSelect).on('select2:select select2:unselect select2:clear', function() {
+        // Revalidate the field when Select2 value changes
+        formValidation.revalidateField('Country_Register');
+      });
+      
+      // Also handle regular change event as backup
+      $(countryRegisterSelect).on('change', function() {
+        formValidation.revalidateField('Country_Register');
+      });
+    }
+
     // Initial check for Other category visibility
     const checkOtherCategoryVisibility = () => {
       const isOtherSelected = Array.from(businessCategories).some(cat => (cat.value === 'Other' || cat.value === 'أخرى') && cat.checked);
@@ -393,8 +530,48 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     };
 
+    // Function to handle file validation based on CreatedTax value
+    const handleFileValidation = () => {
+      const createdTaxValue = createdTaxSelect ? createdTaxSelect.value : '0';
+      
+      if (createdTaxValue === '1') {
+        // Enable file validation when CreatedTax is "Yes"
+        formValidation.enableValidator('Commercial_Register', 'callback');
+        formValidation.enableValidator('Tax_Card', 'callback');
+        formValidation.enableValidator('Country_Register', 'callback');
+      } else {
+        // Disable file validation when CreatedTax is "No"
+        formValidation.disableValidator('Commercial_Register', 'callback');
+        formValidation.disableValidator('Tax_Card', 'callback');
+        formValidation.disableValidator('Country_Register', 'callback');
+        
+        // Clear any existing validation errors
+        formValidation.resetField('Commercial_Register');
+        formValidation.resetField('Tax_Card');
+        formValidation.resetField('Country_Register');
+      }
+    };
+
     // Check initial state
     checkOtherCategoryVisibility();
+    handleFileValidation();
+
+    // Add event listener to CreatedTax select
+    if (createdTaxSelect) {
+      createdTaxSelect.addEventListener('change', function() {
+        handleFileValidation();
+        
+        // Revalidate the file fields when CreatedTax changes
+        formValidation.revalidateField('Commercial_Register');
+        formValidation.revalidateField('Tax_Card');
+        formValidation.revalidateField('Country_Register');
+        
+        // Force revalidation for Select2 fields
+        setTimeout(() => {
+          formValidation.revalidateField('Country_Register');
+        }, 100);
+      });
+    }
 
     // Add event listener to business categories checkboxes
     businessCategories.forEach(category => {
@@ -426,6 +603,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     });
+
+    // Add event listeners to file inputs to revalidate when files are selected
+    const commercialRegisterInput = document.getElementById('Commercial_Register');
+    const taxCardInput = document.getElementById('Tax_Card');
+
+    if (commercialRegisterInput) {
+      commercialRegisterInput.addEventListener('change', function() {
+        formValidation.revalidateField('Commercial_Register');
+      });
+    }
+
+    if (taxCardInput) {
+      taxCardInput.addEventListener('change', function() {
+        formValidation.revalidateField('Tax_Card');
+      });
+    }
+
+    if (countryRegisterSelect) {
+      // For Select2, we need to listen to select2 events instead of regular change events
+      $(countryRegisterSelect).on('select2:select select2:unselect select2:clear', function() {
+        formValidation.revalidateField('Country_Register');
+      });
+      
+      // Also handle regular change event as backup
+      $(countryRegisterSelect).on('change', function() {
+        formValidation.revalidateField('Country_Register');
+      });
+      
+      // Additional trigger for when the validation needs to be updated
+      $(countryRegisterSelect).on('select2:close', function() {
+        setTimeout(() => {
+          formValidation.revalidateField('Country_Register');
+        }, 50);
+      });
+    }
   }
 
   if (editDescForm) {

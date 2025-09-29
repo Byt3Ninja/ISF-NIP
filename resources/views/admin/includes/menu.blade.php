@@ -252,16 +252,7 @@
       </li>
       @endif
     @endif
-    @if ($_user->hasAnyRole('Registered|Mentor|organizationManager|Judger'))
-      @if( $_user->ableTo('users.view_companies', $permissions) )
-      <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="{{ route('users.view_companies') }}">
-          <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
-          <span class="menu-item">{{ __('admin.Companies') }}</span>
-        </a>
-      </li>
-      @endif
-    @endif
+  
     @if ($_user->hasAnyRole('Mentor|Registered|Admin'))
       @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
@@ -271,6 +262,17 @@
         </a>
       </li>
       @endif
+    @endif
+
+    @if ($_user->hasAnyRole('Admin|Registered|Mentor|organizationManager|Judger'))
+    @if( $_user->ableTo('users.view_companies', $permissions) )
+     <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('users.view_companies') }}">
+          <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
+          <span class="menu-item">{{ __('admin.Companies') }}</span>
+        </a>
+      </li>
+    @endif
     @endif
 
     @if ($_user->hasAnyRole('Mentor'))
@@ -572,10 +574,16 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <div>{{ __('admin.Manage') }}</div>
             </a>
           </li>
-          <li class="{{ Request::is('dashboard/screening/results*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/screening/results') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/screening/results">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <div> {{ __('admin.Results') }}</div>
+            </a>
+          </li>
+           <li class="{{ Request::is('dashboard/screening/resultsReport') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/screening/resultsReport">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <div> {{ __('admin.resultsReport') }}</div>
             </a>
           </li>
         </ul>
@@ -681,10 +689,17 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </a>
 
         <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/training/sessions') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/sessions">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Training sessions') }}</span>
+            </a>
+          </li>
+
+          <li class="{{ Request::is('dashboard/training/sessionsReport*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/training/sessionsReport">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Training_sessions_report') }}</span>
             </a>
           </li>
           
@@ -801,7 +816,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
    
     @if ($_user->hasAnyRole('organizationManager|Admin'))
      
-        <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <li class="{{ Request::is('*users*', 'dashboard/judger') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-users"></i>
             <div>{{ __('admin.Users') }}</div>
@@ -820,12 +835,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                 <span class="menu-item">{{ __('admin.List All') }}</span>
               </a>
             </li>
-            <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
-              <a class="menu-link" href="{{ route('users.view_companies') }}">
+
+            <li class="{{ Request::is('dashboard/judger') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('users.judger') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                <span class="menu-item">{{ __('admin.Companies') }}</span>
+                <span class="menu-item">{{ __('admin.Judgers') }}</span>
               </a>
             </li>
+            
+         
             <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
               <a href="{{ route('roles.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-user-cog"></i>
@@ -880,10 +898,16 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
 
       @if ($_user->hasAnyRole('organizationManager'))
       @if ($_user->ableTo('settings.organization_manage',$permissions))
-      <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/organizations/settings*') && !Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('settings.organization_manage') }}">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
+        </a>
+      </li>
+      <li class="{{ Request::is('dashboard/organizations/settings/reminder-logs') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('organization.ReminderLogs') }}">
+          <i class="menu-icon tf-icons ti ti-alarm"></i>
+          <div>{{ __('admin.ReminderLogs') }}</div>
         </a>
       </li>
       @if ($_user->ableTo('importer.index'))
@@ -1023,8 +1047,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </li>
         </ul>
       </li>
-    @endif
 
+      @endif
+      
+    <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="/dashboard/industry-settings">
+        <i class="menu-icon tf-icons ti ti-augmented-reality"></i>
+        <div>{{ __('admin.Industry_Settings') }}</div>
+      </a>
+    </li>
     
     @if ($updateSittings->HomePage == true)
       @if ($_user->hasRole('Admin'))
@@ -1123,43 +1154,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                     </li>
                   @endif
                 @endif
-                @if(auth()->user()->hasRole(['Admin', 'organizationManager']))
-                  <li class="nav-item has-treeview {{ request()->is('dashboard/admin/notification-*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('dashboard/admin/notification-*') ? 'active' : '' }}">
-                      <i class="nav-icon fas fa-bell"></i>
-                      <p>
-                        Notifications
-                        <i class="right fas fa-angle-left"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="{{ route('notification-templates.index') }}" class="nav-link {{ request()->routeIs('notification-templates.*') ? 'active' : '' }}">
-                          <i class="far fa-file-alt nav-icon"></i>
-                          <p>Templates</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="{{ route('notification-templates.create') }}" class="nav-link {{ request()->routeIs('notification-templates.create') ? 'active' : '' }}">
-                          <i class="far fa-plus-square nav-icon"></i>
-                          <p>Create Template</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="{{ route('notification-triggers.index') }}" class="nav-link {{ request()->routeIs('notification-triggers.*') ? 'active' : '' }}">
-                          <i class="far fa-play-circle nav-icon"></i>
-                          <p>Event Triggers</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="{{ route('notification-triggers.create') }}" class="nav-link {{ request()->routeIs('notification-triggers.create') ? 'active' : '' }}">
-                          <i class="far fa-plus nav-icon"></i>
-                          <p>Create Trigger</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                @endif
+
             </ul>
           </li>
         @endif

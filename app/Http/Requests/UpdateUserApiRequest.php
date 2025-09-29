@@ -28,8 +28,8 @@ class UpdateUserApiRequest extends FormRequest
     $userId = $this->route('user')?->id;
 
     return [
-        'firstName' => ['nullable', 'string', 'max:255'],
-        'lastName' => ['nullable', 'string', 'max:255'],
+        'first_name' => ['nullable', 'string', 'max:255'],
+        'last_name' => ['nullable', 'string', 'max:255'],
         'email' => [
             'nullable',
             'email',
@@ -51,7 +51,7 @@ class UpdateUserApiRequest extends FormRequest
         'city_id' => 'nullable|exists:cities,id',
         'houre_rate' => 'nullable|numeric',
         'title_en' => 'nullable|string|max:100',
-        'title_ar' => 'nullable|string|max:100',
+        'email_verified_at' => 'nullable|date',
     ];
     }
        protected function failedValidation(Validator $validator)

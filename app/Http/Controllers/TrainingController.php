@@ -801,7 +801,7 @@ class TrainingController extends Controller
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
 			$join = $onlineMeeting['data']['join_url'];
-			$passcode = $onlineMeeting['data']['passcode'];
+			$passcode = $onlineMeeting['data']['passcode'] ?? null;
 
 			$data = [
 				'type' => $type,
@@ -1340,6 +1340,49 @@ class TrainingController extends Controller
 			return response()->json(['message' => 'youareNotRegisterAttendece']);
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@attendanceOffline: ' . $e->getMessage());
+		}
+	}
+
+	public function sessionsReport(Request $request)
+	{
+		
+		try {
+			$organization_id = auth()->user()->organization_id;
+
+			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->whereHas('cycle', function ($query) use ($organization_id) {
+					$query->where('organization_id', $organization_id);
+				});
+			})->where('stype', 4)->get();
+			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
+			$online = Training::get();
+			if ($request->type != 0) {
+				$sessions = $sessions->where('type', $request->type);
+			}
+			
+			if ($request->cycle != 0) {
+				$cycleId = $request->cycle;
+				// $sessions = $sessions->where('type', $request->type);
+				$sessions = $sessions->whereHas('step', function ($q) use ($cycleId) {
+					$q->where('cycle_id', $cycleId);
+				});
+			
+			}
+			
+			
+			if ($request->dateFrom != 0) {
+				$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
+			}
+
+			if ($request->dateTo != 0) {
+				$sessions = $sessions->where('datetime', '<=', $request->dateTo);
+			}
+
+			$sessions = $sessions->get();
+			
+			return view('admin/settings/training/sessionsReport', compact('sessions'));
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
 		}
 	}
 }

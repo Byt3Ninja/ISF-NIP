@@ -62,15 +62,20 @@
                       {{ __('admin.ApplyHackathon') }}
                     </button>
                   @else
+                    @if($hackathon['exist_step'] = false)
                     <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
                       <i class="ti ti-send me-1"></i>
                       <span class="text-nowrap">{{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}</span>
                     </button>
+                    @else
+
+                    @endif
                   @endif
                 @else
+                
                   @if($team && $team->isEmpty() )
-                    
-                      @if($stypeStep?->first()->stype == 1 && $hackathon['cycle_id'] == $user_cycle_id )
+                   
+                      @if($user->team_member == null && ($stypeStep?->first()->stype == 1 && $hackathon['cycle_id'] == $user_cycle_id ))
 
                         <button type="button" class="btn btn-warning" style="flex: 1;" disabled><i class="ti ti-users me-1"></i>{{ $l ==
                           'en' ? ' Wait for Approval' : ' انتظر موافقة المسئول' }}</button>
@@ -79,6 +84,7 @@
 
                       @endif
                   @else
+                  
                   @if($hackathon['team_formation_id'] != null)
                     <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success"
                       style="flex: 1;"><i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}</a>
@@ -96,12 +102,17 @@
                       {{ __('admin.ApplyHackathon') }}
                     </button>
                   @else
-                    <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
-                      <i class="ti ti-send me-1"></i>
-                      <span class="text-nowrap">
-                        {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
-                      </span>
-                    </button>
+                  {{-- @dd($hackathon['cycle_id'], $user_cycle_id)
+                    @if($hackathon['cycle_id'] == $user_cycle_id) --}}
+                      <button type="button" class="btn btn-primary" style="flex: 1;" disabled>
+                        <i class="ti ti-send me-1"></i>
+                        <span class="text-nowrap">
+                          {{ __('admin.ApplyHackathon') }} - {{ $l == 'en' ? 'No Forms' : ' لا يوجد نموذج' }}
+                        </span>
+                      </button>
+                    {{-- @else --}}
+
+                    {{-- @endif --}}
                   @endif
 
                   

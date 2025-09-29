@@ -22,7 +22,14 @@
     </span>
     @endforeach
   </div>
-  @if($user->team_member && $user->team_member->teamFormation && $user->team_member->teamFormation->user && $user->team_member->teamFormation->user->company && $currentHackathon['cycle_id'] == $user->team_member->teamFormation->user->company->cycle)
+  @php
+  if($user->team_member != null){
+    $user_cycle_id = $user->team_member?->teamFormation?->user?->company?->cycle ?? null;
+  }else{
+    $user_cycle_id = $user->company?->cycle ?? null;
+  }
+  @endphp
+  @if($currentHackathon['cycle_id'] == $user_cycle_id)
     <div id="action-buttons-placeholder" class="mt-4">
       <!-- Buttons will be injected by JS -->
         @php
@@ -79,7 +86,7 @@
                     <i class="ti ti-settings me-2 me-2"></i>
                     {{ $l == 'en' ? 'Create New Team' : 'كون فريقك' }}
                   </a>
-                @elseif($companyStep?->stype != 6)
+                @elseif($companyStep?->stype != 6 && $companyStep?->stype == 1)
                   <button type="button" class="btn btn-primary" style="flex: 1;"
                     onclick="window.location.href='/dashboard/apply/{{ $currentHackathon['step_id'] }}/hackathon'">
                     <i class="ti ti-send me-1"></i>

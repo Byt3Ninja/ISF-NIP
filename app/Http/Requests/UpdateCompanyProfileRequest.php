@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\ApiResponder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use App\Traits\ApiResponder;
+
 class UpdateCompanyProfileRequest extends FormRequest
 {
     use ApiResponder;
@@ -66,32 +67,18 @@ class UpdateCompanyProfileRequest extends FormRequest
             'financialPlanAttachment' => 'nullable|file',
             'teamNumber' => 'nullable|integer',
             'workingTeamDetails' => 'nullable|string',
-            'founders' => 'nullable|array',
-            'founders.*.name' => 'required|string',
-            'founders.*.email' => 'nullable|email',
-            'founders.*.linkedin' => 'nullable|url',
-            'shareholders' => 'nullable|array',
-            'shareholders.*.name' => 'string',
-            'shareholders.*.role' => 'nullable|string',
-            'shareholders.*.ownership' => 'nullable|numeric',
-            'investors' => 'nullable|array',
-            'investors.*.name' => 'string',
-            'investors.*.investmentType' => 'nullable|string',
             'pitchDeckFile' => 'nullable|file',
             'pitchDeckVideoUrl' => 'nullable|url',
             'documents' => 'nullable|array',
             'documents.*' => 'file|mimes:doc,docx,pdf|max:2048',
-            'achievedMilestones' => 'nullable|array',
-            'plannedMilestones' => 'nullable|array',
-            'archivedMilestones' => 'nullable|array',
             'businessModel' => 'nullable|string|max:100',
             'businessModelDescription' => 'nullable|string|max:200',
             'businessPlanAttachment' => 'nullable|file',
             'haveStartup' => 'nullable|in:Yes,No',
-            'CreatedTax' => 'required_if:haveStartup,Yes|boolean',
-            'CommercialRegister' => 'required_if:haveStartup,Yes|string|max:255',
-            'TaxCard' => 'required_if:haveStartup,Yes|string|max:255',
-            'Country_Register_id' => 'required_if:haveStartup,Yes|exists:countries,id',
+            'createdTax' => 'required_if:haveStartup,Yes|boolean',
+            'commercialRegister' => 'required_if:haveStartup,Yes|string|max:255',
+            'taxCard' => 'required_if:haveStartup,Yes|string|max:255',
+            'country_Register_id' => 'required_if:haveStartup,Yes|exists:countries,id',
             'countryCode' => 'nullable|string|max:10',
             'countryCodeWA' => 'nullable|string|max:10',
         ];
@@ -104,22 +91,4 @@ class UpdateCompanyProfileRequest extends FormRequest
         );
     }
 
-    public function withValidator($validator)
-{
-    $validator->after(function ($validator) {
-        $shareholders = $this->input('shareholders', []);
-
-        if (is_array($shareholders) && count($shareholders)) {
-            $totalOwnership = collect($shareholders)->sum(function ($item) {
-                return floatval($item['ownership'] ?? 0);
-            });
-
-            if ($totalOwnership > 100) {
-                throw new \Illuminate\Http\Exceptions\HttpResponseException(
-                    $this->error(__('api.total_shareholder_ownership_exceeded'), 400)
-                );
-            }
-        }
-    });
-}
 }

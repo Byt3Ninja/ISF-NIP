@@ -67,6 +67,14 @@ class User extends Authenticatable implements MustVerifyEmail
                 // throw $th;
             }
         }
+        else
+        {
+            if( empty( $this->email_verified_at ) )
+            {
+                $this->email_verified_at = now();
+                $this->save();
+            }
+        }
 	}
 
     /**
@@ -204,10 +212,10 @@ class User extends Authenticatable implements MustVerifyEmail
         if( !empty( $_role ) )
         {
             $id = $_role->id;
+            RoleUsers::updateOrCreate(
+                ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
+            );
         }
-        RoleUsers::updateOrCreate(
-            ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
-        );
     }
     
     public function hasRole( $name ) 
@@ -313,7 +321,7 @@ class User extends Authenticatable implements MustVerifyEmail
     */
     public function canCreateGroups(): bool
     {
-      return $this->hasVerifiedEmail();
+      return $this->hasVerifiedEmail() === true;
     }
 
     /**
@@ -330,7 +338,12 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function team_member()
     {
-        return $this->hasOne(Team_member::class, 'user_id');
+        return $this->hasOne(Team_member::class, 'user_id')->where('acceptInvition', 'accepted');
+    }
+
+    public function teamLeader()
+    {
+        return $this->hasOne(Team_member::class, 'user_id')->where('isTeamLeader', 1);
     }
     /**
      * Get all group conversations the user is a participant in.

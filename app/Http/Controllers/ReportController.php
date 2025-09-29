@@ -60,7 +60,7 @@ class ReportController extends Controller
                 break;
                 
             case 'mentorSurveys':
-                $data = $this->mentorSurveyReport();
+                $data = $this->mentorSurveyReport($request->get('status', 'all'));
                 $view = '_mentorSurvey';
                 break;
 
@@ -115,6 +115,7 @@ class ReportController extends Controller
     }
  // =============> ajax report MentorSurvey <=============
     protected function mentorSurveyReport(){
+        $status = request('status', 'all'); 
         $data['mentorRequests'] =  MentorshipRequest::all();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
             return SurveyResponses::where('user_id', $request->mentor_id)
@@ -126,11 +127,30 @@ class ReportController extends Controller
 
         $surveyScope = SurveyScopes::whereIn('type', ['mentor', 'both'])->get();
         $data['available_surveys'] = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+
+        $surveyMap = [];
+        foreach ($data['available_surveys'] as $survey) {
+        $key = $survey->user_id . '-' . $survey->triggered_at;
+        $surveyMap[$key] = $survey;
+        }
+        $data['available_surveys_map'] = $surveyMap;
+        if (in_array($status, ['open', 'completed'])) {
+        $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) use ($data, $status) {
+        $key = $request->mentor_id . '-' . $request->id;
+        $survey = $data['available_surveys_map'][$key] ?? null;
+
+        if (!$survey) return false;
+
+        $isCompleted = $survey->responses && count($survey->responses) > 0;
+
+        return $status === 'completed' ? $isCompleted : !$isCompleted;
+    });
+}
         // ==============> counts <=================
         $data['Total_Survey'] = $data['available_surveys']->count();
         $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
         $data['Survey_NotDone'] = $data['available_surveys']->whereNull('responses')->count();
-      
+        
         return $data;
     }
 

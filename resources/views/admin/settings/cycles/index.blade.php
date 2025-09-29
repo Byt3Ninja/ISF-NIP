@@ -556,6 +556,7 @@
   const errors = {
     title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
     description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
+    descriptionMaxLength: currentLang == 'en' ? 'Description must not exceed 100 characters.' : 'يجب ألا يتجاوز الوصف 100 حرف.', 
     teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.'
   };
 
@@ -591,6 +592,11 @@
 
   if (!stepDescription.value.trim()) {
     showError(stepDescription, errors.description);
+    return false;
+  }
+
+  if (stepDescription.value.length > 100) {
+    showError(stepDescription, errors.descriptionMaxLength);
     return false;
   }
 

@@ -162,24 +162,4 @@ class WhatsAppService
         }
     }
 
-    // private function getChatId($phoneNumber)
-// {
-//     $sessionId = 'ehabwhats';
-//     $apiKey = env('WAPI_KEY');
-
-    //     $response = Http::withHeaders([
-//         'x-api-key' => $apiKey
-//     ])->post("https://wapi.growthlabs.app/client/getNumberId/{$sessionId}", [
-//         'number' => $phoneNumber
-//     ]);
-
-    //     return $response->json('result._serialized');
-// }
-
-
-
-
-
-
-
 }

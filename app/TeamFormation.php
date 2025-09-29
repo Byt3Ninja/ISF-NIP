@@ -81,6 +81,7 @@ class TeamFormation extends Model
                 'ser.evaluation_id AS evaluation_id',
                 'se.step_id AS step_id',
                 'stp.title AS step_title',
+                'pl.user_id AS like_user_id',
             ])
             ->leftJoin('team_members AS tm', 'tm.team_formation_id', '=', 'tf.id')
             ->leftJoin('users AS u', 'u.id', '=', 'tm.user_id')
@@ -88,6 +89,7 @@ class TeamFormation extends Model
             ->leftJoin('screening_evaluation_results AS ser', 'ser.company_id', '=', 'c.id')
             ->leftJoin('screening_evaluation AS se', 'ser.evaluation_id', '=', 'se.id')
             ->leftJoin('steps AS stp', 'stp.id', '=', 'se.step_id')
+            ->leftJoin('project_likes AS pl', 'pl.team_id', '=', 'tf.id')
             ->where('tf.cycle_id', $cycleId)
             ->where('tm.acceptInvition', 'accepted')
             ->get();
@@ -129,6 +131,9 @@ class TeamFormation extends Model
             $team->step_title = $groupedTeam->whereNotNull('step_title')->map(function($x) {
                 return $x->step_title;
             })->unique()->first();
+            $team->likes = $groupedTeam->whereNotNull('like_user_id')->map(function($x) {
+                return $x->like_user_id;
+            })->unique();
             return $team;
         })->values();
 
@@ -217,5 +222,36 @@ class TeamFormation extends Model
         });
 
         return $winnersData;
+    }
+
+    public static function winnersMapping( $teams )
+    {
+        $teams = $teams->where('winner', 'selected')->values();
+        $winners = $teams->map(function( $team ) {
+            $winner = new stdClass;
+            $winner->id = $team->id;
+            $winner->name = $team->company->name;
+            $winner->logo = $team->img ? asset($team->img) : 'https://placehold.co/400x200?text=' . urlencode($team->name);
+            $winner->projectTitle = $team->project->name;
+            $winner->teamName = $team->name;
+            $winner->description = $team->project->description;
+            $leader = $team->members->where('isLeader', true)->first(); 
+            $winner->teamLeader = new stdClass;
+            $winner->teamLeader->name = $leader?->name;
+            $winner->teamLeader->role = $leader?->role;
+            $winner->teamLeader->image = $leader?->image;
+            $winner->teamMembers = $team->members->map(function( $team_member ) {
+                $member = new stdClass;
+                $member->name = $team_member->name;
+                $member->role = $team_member->role;
+                $member->image = $team_member->image;
+                $member->isLeader = $team_member->isLeader == 1 ? true : false;
+                return $member;
+            });
+            $winner->likes = $team->likes;
+            return $winner;
+        });
+
+        return $winners;
     }
 }

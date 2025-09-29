@@ -18,7 +18,8 @@ use App\Invitation;
 use App\Organization;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
-use App\Mail\UserInvitation;
+use App\Notifications\UserInvitationNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -26,7 +27,6 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-
 
 class SettingsController extends Controller
 {
@@ -811,9 +811,51 @@ class SettingsController extends Controller
     	})->sort();
 		$invitations = Invitation::where('organization_id', $organization->id)->get();
 		$role = Role::where('name', 'organizationManager')->first();
+
+		
+		
         return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations'));
     }
 
+	public function ReminderLogs(Request $request) {
+							if(auth()->user()->hasRole('organizationManager')) {
+                                $cycles = \App\Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
+                                $ReminderLogs = \App\ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+                            }elseif(auth()->user()->hasRole('Admin')) {
+                                $ReminderLogs = \App\ReminderLog::all();
+                            }else{
+                                $ReminderLogs = [];
+                            }
+
+							 $query = $ReminderLogs;
+
+        if ($request->filled('program')) {
+            $query->where('cycle_id', $request->program);
+        }
+
+        if ($request->filled('user')) {
+            $query->where('user_id', $request->user);
+        }
+
+        if ($request->filled('channel')) {
+            $query->where('channel', 'like', '%'. $request->channel. '%');
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $from = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : Carbon::minValue();
+            $to = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : Carbon::now();
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+		$ReminderLogs = $query->get();
+    
+
+		return view('admin.organizations.reminder_logs', compact('ReminderLogs'));
+	}
     public function generalSetting(Request $request)
     {
          $request->validate([
@@ -915,6 +957,11 @@ class SettingsController extends Controller
 
     }
 
+		public function industrySettings(Request $request)
+		{
+			return view('admin.settings.industry_settings');
+		} 
+
 	public function inviteUser(Request $request)
 	{
 			
@@ -943,7 +990,8 @@ class SettingsController extends Controller
 		if ($invitation) {
 			$invitation->expires_at = now()->addDays(2);
 			$invitation->save();
-			Mail::to($request->email)->queue(new UserInvitation($invitation));
+			Notification::route('mail', $request->email)
+                ->notify(new UserInvitationNotification($invitation));
 			return back()->with('message', 'InvitationSent');
 		}
 
@@ -957,7 +1005,8 @@ class SettingsController extends Controller
 				$invitation->save();
 
 				// Send invitation email
-				Mail::to($request->email)->queue(new UserInvitation($invitation));
+				Notification::route('mail', $request->email)
+                ->notify(new UserInvitationNotification($invitation));
 
 				return back()->with('message', 'InvitationSent');
 	}
@@ -1038,7 +1087,8 @@ class SettingsController extends Controller
 		$invitation->expires_at = now()->addDays(2);
 		$invitation->save();
 
-		Mail::to($invitation->email)->queue(new UserInvitation($invitation));
+		        Notification::route('mail', $invitation->email)
+            ->notify(new UserInvitationNotification($invitation));
 
 		return back()->with('message', 'InvitationResent');
 	}

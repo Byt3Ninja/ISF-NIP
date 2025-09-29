@@ -3,13 +3,11 @@
 namespace App\Jobs;
 
 use App\Company;
-use App\Mail\ExportMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Log;
@@ -111,8 +109,8 @@ class ExportCycleCompData implements ShouldQueue
     $writer->save($tempFilePath);
 
     // إرسال الملف كمرفق عبر البريد الإلكتروني
-    Mail::to(auth()->user()->email)
-        ->queue(new ExportMail($tempFilePath, $fileName));
+    \Illuminate\Support\Facades\Notification::route('mail', auth()->user()->email)
+        ->notify(new \App\Notifications\ExportNotification($tempFilePath, $fileName));
 
     // حذف الملف المؤقت
     unlink($tempFilePath);

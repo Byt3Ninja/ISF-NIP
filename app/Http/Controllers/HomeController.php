@@ -2254,10 +2254,41 @@ class HomeController extends Controller
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
 
-        $newhackathon_q = "SELECT * FROM cycles WHERE `type` = 'hackathon' ORDER BY created_at DESC LIMIT 1";
-        $newhackathon = DB::select($newhackathon_q);
+        if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor')){
+            
+        
+                $user = Auth::user();
+			if(isset($user->team_member) && $user->team_member->teamFormation->user->company->cycle != null){
+				$cycle = $user->team_member->teamFormation->user->company->cycle;
+            }elseif(isset($user->company) && $user->company->cycle != null){
+                    $cycle = $user->company->cycle;
+                    $cycleType = Cycle::where('id', $cycle)->first();
+                    if($cycleType->type != 'Hackathon'){
+                        $cycle = null;
+                    }else{
+                        $cycle = $user->company->cycle;
+                    }
+            }
+            $params = [];
+        $newhackathon_q = "SELECT *
+                            FROM 
+                            cycles
+                            WHERE `type` = 'hackathon' ";
+                            if($cycle != null){
+                                $newhackathon_q .= "AND id = ? ";
+                                $params[] = $cycle;
+                                $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                            $newhackathon = DB::select($newhackathon_q, $params);
+                            }else{
+                                $newhackathon_q .= "AND `start` < now() ";
+                                $newhackathon_q .= "AND `end` > now() ";
+                                $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                                $newhackathon = DB::select($newhackathon_q);
+                                
+                            }
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
+        }
         
 
         $team_member_q = "SELECT 
@@ -2288,7 +2319,7 @@ class HomeController extends Controller
                         users as u ON u.id = tf.user_id
                     WHERE tm.Email = ? 
                     AND tm.TeamMember = 'hackathon' 
-                    AND tm.acceptInvition = 'pending' ";
+                    AND tm.acceptInvition IN ('pending', 'join') ";
         $team_member = DB::select($team_member_q, [$user->email]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;
@@ -3065,8 +3096,8 @@ class HomeController extends Controller
             $service = Service::find($request->id);
 
             if ($service && $service->vendor_email) {
-                // Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
-                Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
+                // Create anonymous notifiable for vendor email
+                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
             }
 
             return response()->json(['state' => 'success']);

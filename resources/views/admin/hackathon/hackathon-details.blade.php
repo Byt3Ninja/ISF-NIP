@@ -17,7 +17,13 @@
 if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 'type' => 'static'];
   }
-    if($user->team_member && $user->team_member->teamFormation && $user->team_member->teamFormation->user && $user->team_member->teamFormation->user->company && $currentHackathon['cycle_id'] == $user->team_member->teamFormation->user->company->cycle){
+  // dd($user->team_member->teamFormation->user->company->cycle);
+  if($user->team_member != null){
+    $user_cycle_id = $user->team_member->teamFormation->user->company->cycle ?? null;
+  }else{
+    $user_cycle_id = $user->company->cycle ?? null;
+  }
+    if($currentHackathon['cycle_id'] == $user_cycle_id){
       $tabsDatastatic =  [
           // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
           // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
@@ -119,7 +125,8 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
             $partial = $partials[$tab['target']] ?? null;
             // Tab visibility conditions
             $showTab = true;
-            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
+            // if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
+            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = true; }
             if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
             $showTab = false;
           @endphp
@@ -339,10 +346,10 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.jQuery && $.fn.DataTable) {
-      $('.table').DataTable({
+      $('.table:not(.table-custom)').DataTable({
         paging: true,
         searching: true,
-        ordering: true,
+        ordering: $('.table').hasClass('table-custom') ? false : true,
         order: [[0, 'desc']],
         language: {
           @if($l == 'ar')
@@ -369,6 +376,38 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 
 @section('pagescripts')
 <script>
+    $('.like-project-action').on('click', function (e) {
+      e.preventDefault();
+      let element = $(this);
+      let teamProjectId = element.data('project');
+      $.ajaxSetup({
+        headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),},
+      });
+
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/hackathon/likeProject",
+        data: {
+          teamProjectId: teamProjectId,
+        },
+        success: function (response) {
+          element.parent().find('.likes-count').text(response.total);
+          if( element.hasClass('fas') )
+          {
+            element.removeClass('fas');
+            element.addClass('far');
+          }
+          else if( element.hasClass('far') )
+          {
+            element.removeClass('far');
+            element.addClass('fas');
+          }
+        },
+        error: function (error) {
+          console.log("Error Occurred, like failed");
+        },
+      });
+    })
   function submitApplicationDetails() {
     if (!document.getElementById("dh-termsAndConditions").checked) {
       alert(
@@ -574,7 +613,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
       location.reload();
     }
   }
-let urlParams = new URLSearchParams(window.location.search);
+    let urlParams = new URLSearchParams(window.location.search);
     let tab = urlParams.get('tab');
 
     if (typeof(tab) !== 'undefined' && tab !== null) {

@@ -20,6 +20,7 @@ class Step extends Model
 	// use Auditable;
 	public static $module = 'Program Step';
 	protected $casts = ['from'  => 'date:Y-m-d', 'to' => 'date:Y-m-d',];
+    protected $guarded = [];
 	public function cycle()
 	{
 		return $this->belongsTo(Cycle::class,'cycle_id');
@@ -32,7 +33,7 @@ class Step extends Model
 
 	public function fields()
 	{
-		return ( $this->belongsToMany('App\Field', 'form_fields')->withPivot('id', 'options'));
+		return ( $this->belongsToMany('App\Field', 'form_fields')->withPivot('id', 'options', 'builder_forms_id'));
 	}
 
 	public function formData(){

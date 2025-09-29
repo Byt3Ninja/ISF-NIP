@@ -40,7 +40,7 @@
                 <i class="ti ti-calendar-event ti-28px"></i>
               </span>
             </div>
-            <h4 class="mb-0">{{ $mentorships_period }} </h4>
+            <h4 class="mb-0">{{ $total_sessions_count }} </h4>
           </div>
           <p class="mb-1">{{ __('admin.Mentorship requests') }}</p>
         </div>
@@ -55,7 +55,7 @@
                 <i class="ti ti-clock ti-28px"></i>
               </span>
             </div>
-            <h4 class="mb-0">{{ $total_sessions_count }}</h4>
+            <h4 class="mb-0">{{ $mentorships_period  }}</h4>
           </div>
           <p class="mb-1">{{ __('admin.Mentorship requests Duration') }}</p>
         </div>
@@ -72,7 +72,7 @@
             </div>
             <h4 class="mb-0">{{ $approved_sessions_count }}</h4>
           </div>
-          <p class="mb-1">{{ __('cycles.approved requests') }}</p>
+          <p class="mb-1">{{ __('cycles.Approved Requests') }}</p>
         </div>
       </div>
     </a>
@@ -87,7 +87,7 @@
             </div>
             <h4 class="mb-0">{{ $disapproved_sessions_count }}</h4>
           </div>
-          <p class="mb-1">{{ __('cycles.disapproved requests') }}</p>
+          <p class="mb-1">{{ __('cycles.Disapproved Requests') }}</p>
         </div>
       </div>
     </a>

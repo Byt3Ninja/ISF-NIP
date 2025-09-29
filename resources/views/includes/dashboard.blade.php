@@ -33,8 +33,16 @@
 	<div class="container-xxl flex-grow-1 container-p-y">
 		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
+		@php
+		
+		@endphp
+		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
+			@if( isset($newhackathon) && $newhackathon )
+			{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
 			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
 			<br>
+					@endif
+		@endif
 		@endif
 		<div class="content-body">
 			@if( session()->has('success') )
@@ -691,10 +699,31 @@
 													</td>
 													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
 													<td> 
-														<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
-															<i class="ti ti-brand-zoom me-2"></i>
-															{{ __('dashboard.Join now') }}
-														</a>
+														@php
+															$now = date('Y-m-d H:i');
+															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+															@endphp
+														@if ($session->approved == 'Yes')
+															@if($now >= $start_time )
+															@if($now <= $end_time)
+															<span class="warning">
+																<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																	<i class="ti ti-brand-zoom me-2"></i>
+																	{{ __('dashboard.Join now') }}
+																</a>
+															</span>
+															@else
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+															@endif
+															@else 
+																<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
+															@endif
+														@elseif($session->approved == 'No')
+															{{ __('admin.No') }}
+														@else
+															{!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
+														@endif
 													</td>
 												</tr>
 												@endforeach

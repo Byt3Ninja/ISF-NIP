@@ -34,7 +34,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </div>
               <!-- Chat Button -->
-              <a href="/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
+              <a href="/dashboard/chat" class="btn btn-white" id="openTeamChatBtn" data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Open Team Chat' : 'فتح محادثة الفريق' }}">
                 <i class="ti ti-message-circle me-1"></i>
                 {{ $l == 'en' ? 'Team Chat' : 'محادثة الفريق' }}
               </a>
@@ -239,7 +239,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
-
+              @if($leaderOrnot->count() > 0)
               @foreach ($team_Pinding as $index => $pendingMember)
               <li id="pendingMember{{ $pendingMember->tm_id }}"
                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
@@ -272,6 +272,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
+              @endif
             </ul>
             </div>
             <!-- Team Recruitment Section -->
@@ -316,6 +317,10 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               </div>
             </div>
             @elseif($members >= $maxMembers)
+            @php
+              // $deletemembers = $team_Formation_raw->whereIn('tm_acceptInvition', ['join', 'pending'])->delete();
+              $deletemembers = App\Team_member::whereIn('acceptInvition', ['join', 'pending'])->where('team_formation_id', $team_Formation_raw->first()->tf_id)->delete();
+            @endphp
             <div class="alert alert-success d-flex align-items-center">
               <i class="ti ti-check-circle me-2"></i>
               <div>
@@ -433,10 +438,18 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
+                  <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
+                    <div class="modal-body">
+                      @csrf
+                      <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+                      </div>
+                      <button type="submit" class="btn btn-sm btn-danger"><i class="ti ti-trash me-1"></i>{{ $l == 'en' ? 'Delete Team' : 'حذف الفريق' }}</button>
+                  </form>
                   <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal">
                     <i class="ti ti-edit me-1"></i>
                     {{ $l == 'en' ? 'Edit Team Info' : 'تعديل معلومات الفريق' }}
                   </button>
+                  
                   @endif
                   <a 
                     href="/dashboard/hackathon/team/{{ $team_Formation_raw->first()->tf_id }}"
@@ -568,25 +581,27 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                             @endphp
                             
                             <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2">
-                              <div class="d-flex align-items-center">
-                                <i class="ti ti-file text-primary me-2"></i>
-                                <div>
-                                  <div class="small fw-medium">{{ $filename.".".$extension }}</div>
-                                  <div class="text-muted small">
-                                    {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
-                                  </div>
+                                <div class="d-flex align-items-center" style="min-width: 0;">
+                                    <i class="ti ti-file text-primary me-2"></i>
+                                    <div class="flex-grow-1 me-2" style="min-width: 0;">
+                                        <div class="small fw-medium text-truncate">
+                                            {{ $filename.".".$extension }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
-                              <div class="btn-group btn-group-sm">
-                                <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
-                                  <i class="ti ti-download"></i>
-                                </a>
-                                @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
-                                  <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
-                                    <i class="ti ti-trash"></i>
-                                  </button>
-                                @endif
-                              </div>
+                                <div class="btn-group btn-group-sm flex-shrink-0">
+                                    <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                        <i class="ti ti-download"></i>
+                                    </a>
+                                    @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    @endif
+                                </div>
                             </li>
                           @endforeach
                         @else
@@ -612,27 +627,47 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
                       <ul class="list-group list-group-flush" id="taskList">
                         @if(isset($todoList) && $todoList->count() > 0)
+                        {{-- {{ dd($todoList) }} --}}
                           @foreach($todoList as $task)
-                            <li class="list-group-item border-0 px-2 py-2">
+                            <li class="list-group-item border-0 px-2 py-2" id="task-{{ $task->tl_id }}">
                               <div class="d-flex justify-content-between align-items-start">
-                                <div class="form-check flex-grow-1">
-                                  <input class="form-check-input me-2" type="checkbox" value="done" id="task{{ $task->tl_id }}"
-                                    @if($task->tl_status == "Done") checked @endif>
-                                  <label class="form-check-label" for="task{{ $task->tl_id }}"
-                                    @if($task->tl_status == "Done") style="text-decoration: line-through;" @endif>
-                                    <div class="fw-medium">{{ $task->tl_title }}</div>
-                                    <small class="text-muted">
-                                      {{ $l == 'en' ? 'Assigned to: '. $task->assignee_name_en : 'مُسند إلى: '. $task->assignee_name_en }}
-                                      @if($task->tl_due_date)
-                                        - {{ $l == 'en' ? 'Due: ' . $task->tl_due_date : 'موعد الانتهاء: ' . $task->tl_due_date }}
-                                      @endif
-                                    </small>
-                                  </label>
+                                <div class="flex-grow-1">
+                                  <div class="d-flex align-items-center mb-2">
+                                    <span class="fw-medium me-2">{{ $task->tl_title }}</span>
+                                    @php
+                                      $statusClass = 'secondary';
+                                      $statusText = 'Todo';
+                                      $statusIcon = 'ti-circle';
+                                      
+                                      if($task->tl_status == 'DONE') {
+                                        $statusClass = 'success';
+                                        $statusText = $l == 'en' ? 'Done' : 'مكتملة';
+                                        $statusIcon = 'ti-check';
+                                      } elseif($task->tl_status == 'inprogress') {
+                                        $statusClass = 'warning';
+                                        $statusText = $l == 'en' ? 'In Progress' : 'قيد التنفيذ';
+                                        $statusIcon = 'ti-progress';
+                                      } else {
+                                        $statusText = $l == 'en' ? 'Todo' : 'مهمة';
+                                      }
+                                    @endphp
+                                    <span class="badge bg-label-{{ $statusClass }} rounded-pill py-1 px-2">
+                                      <i class="ti {{ $statusIcon }} ti-16px me-1"></i>
+                                      {{ $statusText }}
+                                    </span>
+                                  </div>
+                                  <small class="text-muted">
+                                    {{ $l == 'en' ? 'Assigned to: '. $task->assignee_name_en : 'مُسند إلى: '. $task->assignee_name_en }}
+                                    @if($task->tl_due_date)
+                                      - {{ $l == 'en' ? 'Due: ' . $task->tl_due_date : 'موعد الانتهاء: ' . $task->tl_due_date }}
+                                    @endif
+                                  </small>
                                 </div>
+                                
                                 @if($team_Formation_leader OR $task->tl_assignee_id == auth()->user()->id) 
                                 <div class="btn-group btn-group-sm ms-2">
                                   <button class="btn btn-outline-secondary btn-sm" 
-                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->assignee_name_en }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}')"
+                                    onclick="editTask('{{ $task->tl_id }}', '{{ $task->tl_title }}', '{{ $task->tl_assignee_id }}', '{{ $task->tl_due_date }}', '{{ $task->tl_description }}', '{{ $task->tl_status }}')"
                                     title="{{ $l == 'en' ? 'Edit Task' : 'تعديل المهمة' }}">
                                     <i class="ti ti-edit"></i>
                                   </button>
@@ -676,6 +711,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      
       <form method="POST" action="/dashboard/hackathon/EditTeamInfo" id="editTeamInfoForm" enctype="multipart/form-data">
         <div class="modal-body">
           @csrf
@@ -1074,7 +1110,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           
           <div class="mb-3">
             <label for="taskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
-            <select class="form-select" id="taskAssignee" name="assignee">
+            <select class="form-select" id="taskAssignee" name="assignee" required>
+              <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
               <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
                @if($team_Formation_leader) 
               @if(isset($team_members))
@@ -1085,6 +1122,21 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 @endforeach
               @endif
               @endif
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="taskStatus" class="form-label">{{ $l == 'en' ? 'Status' : 'الحالة' }}</label>
+            <select class="form-select" id="taskStatus" name="status">
+              <option value="todo">
+                {{ $l == 'en' ? 'Todo' : 'مهمة' }}
+              </option>
+              <option value="inprogress">
+                {{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}
+              </option>
+              <option value="DONE">
+                {{ $l == 'en' ? 'Done' : 'مكتملة' }}
+              </option>
             </select>
           </div>
           
@@ -1140,22 +1192,42 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <input type="text" class="form-control" name="title" id="EtaskTitle" required>
           </div>
         
-            
+            {{-- @dd($team_Formation_leader ) --}}
             <div class="mb-3">
               <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
-              <select class="form-select" id="EtaskAssignee" name="assignee">
-                <option value="You" selected >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
-                @if($team_Formation_leader)
-                @if(isset($team_members))
+              <select class="form-select" id="EtaskAssignee" name="assignee" required>
+                <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
+                <option value="You" >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+                @if(isset($team_Formation_leader) && !empty($team_members))
                   @foreach($team_members as $member)
-                    <option value="{{ $member->tm_id }}" >
-                      {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
-                    </option>
+                      <option value="{{ $member->tm_id }}"
+                          {{ $member->tm_id == $team_Formation_leader->tf_user_id ? 'selected' : '' }}>
+                          {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
+                      </option>
                   @endforeach
-                @endif
-                @endif
+              @endif
               </select>
             </div>
+
+            <div class="mb-3">
+              <label for="EtaskStatus" class="form-label">{{ $l == 'en' ? 'Status' : 'الحالة' }}</label>
+              <select class="form-select" id="EtaskStatus" name="statustodo">
+                <option value="todo">
+                  <i class="ti ti-circle me-1"></i>
+                  {{ $l == 'en' ? 'Todo' : 'مهمة' }}
+                </option>
+                <option value="inprogress">
+                  <i class="ti ti-progress me-1"></i>
+                  {{ $l == 'en' ? 'In Progress' : 'قيد التنفيذ' }}
+                </option>
+                <option value="DONE">
+                  <i class="ti ti-check me-1"></i>
+                  {{ $l == 'en' ? 'Done' : 'مكتملة' }}
+                </option>
+              </select>
+            </div>
+               
+            
           
 
           <div class="mb-3">
@@ -1177,7 +1249,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         </button>
         <button type="button" class="btn btn-primary" onclick="updateTask()">
           <span class="btn-text">
-            <i class="ti ti-device-floppy me-1"></i>
+            <i class="ti ti-pencil me-1"></i>
             {{ $l == 'en' ? 'Update Task' : 'تحديث المهمة' }}
           </span>
           <span class="btn-spinner d-none">
@@ -1470,11 +1542,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       icon: 'warning',
       confirmButtonText: '{{ $l == 'en' ? 'Yes, leave team' : 'نعم، مغادرة الفريق' }}',
       cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      showCancelButton: true,
+      showConfirmButton: true,
       customClass: {
-        confirmButton: 'btn btn-danger me-2',
+        confirmButton: 'btn btn-danger',
         cancelButton: 'btn btn-label-secondary'
       },
-      reverseButtons: true,
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
@@ -1506,11 +1580,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       showCancelButton: true,
       confirmButtonText: '{{ $l == 'en' ? 'Yes, remove member' : 'نعم، إزالة العضو' }}',
       cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      showCancelButton: true,
+      showConfirmButton: true,
       customClass: {
-        confirmButton: 'btn btn-danger me-2',
+        confirmButton: 'btn btn-danger',
         cancelButton: 'btn btn-label-secondary'
       },
-      reverseButtons: true,
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
@@ -2012,11 +2088,15 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
       text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
       icon: 'warning',
+      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+      showConfirmButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
@@ -2087,31 +2167,59 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const taskAssignee = document.getElementById('taskAssignee').value;
     const taskDueDate = document.getElementById('taskDueDate').value;
     const taskDescription = document.getElementById('taskDescription').value;
+    const taskStatus = document.getElementById('taskStatus').value;
 
     if (!taskTitle) {
       Swal.fire({
         icon: 'warning',
         title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
         text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       });
       return;
     }
 
-    const formData = {
-      title: taskTitle,
-      assignee: taskAssignee,
-      due_date: taskDueDate,
-      description: taskDescription
-    };
+    if (!taskAssignee) {
+      Swal.fire({
+        icon: 'warning',
+        title: '{{ $l == "en" ? "Assignee Required" : "المسؤول مطلوب" }}',
+        text: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+      return;
+    }
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+    // Create FormData instead of JSON
+    const formData = new FormData();
+    formData.append('title', taskTitle);
+    formData.append('assignee', taskAssignee);
+    formData.append('due_date', taskDueDate);
+    formData.append('description', taskDescription);
+    formData.append('status', taskStatus);
+    formData.append('_token', csrfToken);
 
     fetch('/dashboard/hackathon/AddtodoList', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -2167,15 +2275,22 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     });
   }
 
-  function editTask(taskId, taskTitle, taskAssignee, taskDueDate, taskDescription) {
-    console.log('editTask called with:', taskId, taskTitle, taskAssignee, taskDueDate);
+  function editTask(taskId, taskTitle, taskAssigneeId, taskDueDate, taskDescription, taskStatus) {
+    console.log('editTask called with:',taskAssigneeId);
     
     try {
+      let currentUserId = {{ auth()->user()->id }};
+      if (taskAssigneeId == currentUserId) {
+          document.getElementById('EtaskAssignee').value = 'You';
+      } else {
+          document.getElementById('EtaskAssignee').value = taskAssigneeId || '';
+      }
       // Pre-fill the modal with existing task data
       document.getElementById('EtaskTitle').value = taskTitle;
-      document.getElementById('EtaskAssignee').value = taskAssignee;
+      // document.getElementById('EtaskAssignee').valsue = taskAssigneeId || 'You';
       document.getElementById('EtaskDueDate').value = taskDueDate || '';
       document.getElementById('EtaskDescription').value = taskDescription || '';
+      document.getElementById('EtaskStatus').value = taskStatus || 'todo';
       
       // Store the task ID for updating
       document.getElementById('EditTaskModal').setAttribute('data-editing-task', taskId);
@@ -2193,6 +2308,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const taskAssignee = document.getElementById('EtaskAssignee').value;
     const taskDueDate = document.getElementById('EtaskDueDate').value;
     const taskDescription = document.getElementById('EtaskDescription').value;
+    const taskStatus = document.getElementById('EtaskStatus').value;
 
     const taskModal = document.getElementById('EditTaskModal');
     const editingTaskId = taskModal.getAttribute('data-editing-task');
@@ -2202,29 +2318,70 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         icon: 'warning',
         title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
         text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
       });
       return;
     }
 
-    const formData = {
-      id: editingTaskId,
-      title: taskTitle,
-      assignee: taskAssignee,
-      due_date: taskDueDate,
-      description: taskDescription
-    };
+    if (!taskAssignee) {
+      Swal.fire({
+        icon: 'warning',
+        title: '{{ $l == "en" ? "Assignee Required" : "المسؤول مطلوب" }}',
+        text: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
+        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        showCancelButton: false,
+        showConfirmButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+      return;
+    }
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+    // Create FormData instead of JSON
+    const formData = new FormData();
+    formData.append('id', editingTaskId);
+    formData.append('title', taskTitle);
+    formData.append('assignee', taskAssignee);
+    formData.append('due_date', taskDueDate);
+    formData.append('status', taskStatus);
+    formData.append('description', taskDescription);
+    formData.append('_token', csrfToken);
+
+    console.log('Sending form data...');
 
     fetch('/dashboard/hackathon/EdittodoList', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+        // Don't set Content-Type for FormData, let browser set it
       },
-      body: JSON.stringify(formData)
+      body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    })
     .then(data => {
+      console.log('Response data:', data);
+      
       if (data.success === true) {
         Swal.fire({
           icon: 'success',
@@ -2261,11 +2418,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       }
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Fetch error details:', error);
+      console.error('Error message:', error.message);
+      
       Swal.fire({
         icon: 'error',
-        title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-        text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+        title: '{{ $l == "en" ? "Connection Error" : "خطأ في الاتصال" }}',
+        text: '{{ $l == "en" ? "Failed to connect to the server. Please check your internet connection and try again." : "فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى." }}',
         confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
         showCancelButton: false,
         showConfirmButton: true,
@@ -2287,14 +2446,18 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     }
 
     Swal.fire({
+      icon: 'warning',
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
       text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
       confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      showCancelButton: true,
+      showConfirmButton: true,
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
     }).then((result) => {
       if (result.isConfirmed) {
         fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
@@ -2307,11 +2470,12 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         })
         .then(response => response.json())
         .then(data => {
-          if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
+          console.log('data', data);
+          if (data.success) {
             Swal.fire({
+              icon: 'success',
               title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
               text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
-              icon: 'success',
               confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
               showCancelButton: false,
               showConfirmButton: true,
@@ -2320,8 +2484,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               },
               buttonsStyling: false,
             }).then(() => {
-              // Reload the page after pressing OK
-              location.reload();
+              // Remove deleted task
+              $(`#task-${taskId}`).remove();
             });
           } else {
             Swal.fire({
@@ -2354,5 +2518,96 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       }
     });
   }
+
+  function updateTaskStatus(taskId, isChecked) {
+    console.log('updateTaskStatus called with:', taskId, isChecked);
+
+    if (typeof Swal === 'undefined') {
+      console.error('SweetAlert2 is not loaded!');
+      alert('Update functionality not available - SweetAlert2 not loaded');
+      return;
+    }
+
+    const status = isChecked ? 'DONE' : 'TODO';
+
+    Swal.fire({
+      title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+      text: `{{ $l == "en" ? "Do you want to mark the task as: " : "هل تريد وضع علامة على المهمة كـ: " }}${status}"?`,
+      icon: 'warning',
+      confirmButtonText: '{{ $l == "en" ? "Yes, update it!" : "نعم، قم بتحديثها!" }}',
+      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      showCancelButton: true,
+      showConfirmButton: true,
+      customClass: {
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-label-secondary'
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("{{ url('/dashboard/hackathon/EdittodoListStatus') }}", {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status, id: taskId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Updated!" : "تم التحديث!" }}',
+              text: data.message || '{{ $l == "en" ? "Task status has been updated." : "تم تحديث حالة المهمة." }}',
+              icon: 'success',
+              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            }).then(() => {
+              // Get current task checkbox and label
+              const currentTaskCheckbox = $(`#task${taskId}-checkbox`);
+              const currentTaskLabel = currentTaskCheckbox.closest('.form-check').find('label');
+
+              // Update checkbox and label styles
+              currentTaskCheckbox.prop('checked', isChecked);
+              currentTaskLabel.css('text-decoration', isChecked ? 'line-through' : 'none');
+            });
+          } else {
+            Swal.fire({
+              title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+              text: data.message || '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
+              icon: 'error',
+              showCancelButton: false,
+              showConfirmButton: true,
+              customClass: {
+                confirmButton: 'btn btn-primary',
+              },
+              buttonsStyling: false,
+            });
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire({
+            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+            text: '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
+            icon: 'error',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+        });
+      }
+    });
+  }
+
 </script>
 @stop

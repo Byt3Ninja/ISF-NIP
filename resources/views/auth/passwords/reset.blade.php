@@ -293,7 +293,7 @@
                 message: translations[lang].password.stringLength
               },
               regexp: {
-                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
+                regexp:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/,
                 message: translations[lang].password.strong
               }
             }
@@ -309,7 +309,7 @@
                 message: translations[lang].password_confirmation.stringLength
               },
               regexp: {
-                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/,
+                regexp:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/,
                 message: translations[lang].password_confirmation.strong
               },
               identical: {

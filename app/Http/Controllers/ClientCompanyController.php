@@ -23,6 +23,7 @@ use App\Events\WebMessage;
 use App\ScreeningEvaluation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Services\CompanyService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -39,9 +40,11 @@ class ClientCompanyController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    protected CompanyService $companyService;
+    public function __construct(CompanyService $companyService)
     {
         $this->middleware('auth');
+        $this->companyService = $companyService;
     }
     public function show($id)
     {
@@ -425,6 +428,8 @@ class ClientCompanyController extends Controller
                     'business_categories' => 'nullable|array',
                     'business_categories.*' => ['string', Rule::in($allCategories)],
                     'other_category' => 'nullable|string|max:255',
+                    'Commercial_Register' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+                    'Tax_Card' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
                 ], [
                     'name_en.required' => __('admin.Name is required'),
                     'country_id.required' => __('admin.Country is required'),
@@ -437,6 +442,12 @@ class ClientCompanyController extends Controller
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
+                    'Commercial_Register.file'     => __('admin.File_is_not_valid'),
+                    'Commercial_Register.mimes'    => __('admin.Invalid_file_type'),
+                    'Commercial_Register.max'      => __('admin.File_size_must_be_less_than_10MB'),
+                    'Tax_Card.file'     => __('admin.File_is_not_valid'),
+                    'Tax_Card.mimes'    => __('admin.Invalid_file_type'),
+                    'Tax_Card.max'      => __('admin.File_size_must_be_less_than_10MB'),
                 ]);
 
                 // Handle "Other" category logic
@@ -461,12 +472,33 @@ class ClientCompanyController extends Controller
                 }
                 else
                 {
+                    if( $request->hasFile('Commercial_Register') )
+                    {
+                        $file = $request->file('Commercial_Register');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/documents/'; // بدون documents
+                        
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'document'
+                        ]);
+                        $Commercial_Register = '/documents/' . $path . $originalName;
+                    }else { $Commercial_Register = $company->Commercial_Register ?? 'null'; }
+                    if( $request->hasFile('Tax_Card') )
+                    {
+                        $file = $request->file('Tax_Card');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/documents/';
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'document'
+                        ]);
+                        $Tax_Card = '/documents/'. $path . $originalName;
+                    } else { $Tax_Card = $company->Tax_Card ?? 'null'; }
                     $CreatedTax = $data['CreatedTax'];
                     $cuntryReg = $data['Country_Register'];
-                    $Commercial_Register = $data['Commercial_Register'];
-                    $Tax_Card = $data['Tax_Card'];
+                    // $Commercial_Register = $data['Commercial_Register'];
+                    // $Tax_Card = $data['Tax_Card'];
                 }
-
                 $result->name_en = $data['name_en'];
                 $result->name_ar = $data['name_en'];
                 $result->country_id = $data['country_id'];
@@ -826,8 +858,9 @@ class ClientCompanyController extends Controller
 
             if( $result ) {
                 if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
-                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
-            } else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
+
+                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
+            } else { return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
@@ -1413,5 +1446,11 @@ class ClientCompanyController extends Controller
     return response()->json(['success' => false, 'message' => 'الملف غير موجود.']);
 }
 
+    public function companies(Request $request)
+	{
+	    $filters = $request->only(['search', 'sector', 'stage', 'organization']);
+        $companies = $this->companyService->getCompanies($filters, isApi: false);
 
+	    return view('admin/users/companies', compact('companies'));
+	}
 }
