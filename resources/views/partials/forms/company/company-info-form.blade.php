@@ -170,6 +170,8 @@
               placeholder="{{ __('admin.Commercial_Register') }} *"
             />
 
+            <input type="hidden" name="Commercial_Register_value" value="{{ $client->company ? $client->company->Commercial_Register : '' }}">
+
             @if ($client->company && $client->company->Commercial_Register)
               <div class="mt-2 d-flex align-items-center gap-2">
                 @php
@@ -218,6 +220,8 @@
               type="file"
               placeholder="{{ __('admin.Tax_Card') }} *"
             />
+
+            <input type="hidden" name="Tax_Card_value" value="{{ $client->company ? $client->company->Tax_Card : '' }}">
 
             @if ($client->company && $client->company->Tax_Card)
               <div class="mt-2 d-flex align-items-center gap-2">

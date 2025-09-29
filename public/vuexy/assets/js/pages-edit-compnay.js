@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Check if file exists (new upload OR existing file)
                 const hasNewFile = fileInput.files && fileInput.files.length > 0;
-                const hasExistingFile = existingFileInput && existingFileInput.value === 'exists';
+                const hasExistingFile = existingFileInput && existingFileInput.value;
                 
                 if (!hasNewFile && !hasExistingFile) {
                   return {
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Check if file exists (new upload OR existing file)
                 const hasNewFile = fileInput.files && fileInput.files.length > 0;
-                const hasExistingFile = existingFileInput && existingFileInput.value === 'exists';
+                const hasExistingFile = existingFileInput && existingFileInput.value;
                 
                 if (!hasNewFile && !hasExistingFile) {
                   return {
