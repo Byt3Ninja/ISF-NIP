@@ -266,8 +266,6 @@
       });
 
       tabsContent.forEach((tab, index) => {
-        console.log('Active Company Tab from localStorage:', activeCompanyTab);
-        console.log('Current Tab Index:', index);
         if (!activeCompanyTab) {
           tabsContent[0].classList.add('show', 'active');
           return;

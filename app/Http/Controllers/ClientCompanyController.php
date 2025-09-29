@@ -466,25 +466,31 @@ class ClientCompanyController extends Controller
                 {
                     if( $request->hasFile('Commercial_Register') )
                     {
-                        $Commercial_Register_q = $request->file('Commercial_Register');
-                        $Commercial_Register_N = $Commercial_Register_q->store('images/logo', 'public_uploads');
-                        $Commercial_Register = Storage::disk('public_uploads')->url($Commercial_Register_N);
-                    } 
-                    else { $Commercial_Register = $company->Commercial_Register ?? 'null'; }
-
+                        $file = $request->file('Commercial_Register');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/documents/'; // بدون documents
+                        
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'document'
+                        ]);
+                        $Commercial_Register = 'documents/' . $path . $originalName;
+                    }else { $Commercial_Register = $company->Commercial_Register ?? 'null'; }
                     if( $request->hasFile('Tax_Card') )
                     {
-                        $Tax_Card_q = $request->file('Tax_Card');
-                        $Tax_Card_N = $Tax_Card_q->store('images/logo', 'public_uploads');
-                        $Tax_Card = Storage::disk('public_uploads')->url($Tax_Card_N);
-                    } 
-                    else { $Tax_Card = $company->Tax_Card ?? 'null'; }
+                        $file = $request->file('Tax_Card');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/documents/';
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'document'
+                        ]);
+                        $Tax_Card = 'documents/'. $path . $originalName;
+                    } else { $Tax_Card = $company->Tax_Card ?? 'null'; }
                     $CreatedTax = $data['CreatedTax'];
                     $cuntryReg = $data['Country_Register'];
                     // $Commercial_Register = $data['Commercial_Register'];
                     // $Tax_Card = $data['Tax_Card'];
                 }
-
                 $result->name_en = $data['name_en'];
                 $result->name_ar = $data['name_en'];
                 $result->country_id = $data['country_id'];
