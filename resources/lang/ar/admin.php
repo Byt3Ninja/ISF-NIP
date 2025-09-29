@@ -2428,4 +2428,8 @@ return [
 	'Filter_by_status' => 'تصفية حسب الحالة',
 	'No_surveys_found' => 'لا توجد استبيانات متاحه',
 	'Judge`s List' => 'قائمة المحكمون',
+	'File_is_not_valid' => 'الملف غير صالح',
+	'Invalid_file_type' => 'نوع الملف غير صالح',
+	'File_size_must_be_less_than_10MB' => 'حجم الملف يجب ان يكون اقل من 10MB',
+	'resultsReport' => 'تقرير النتائج',
 ];

@@ -574,10 +574,16 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <div>{{ __('admin.Manage') }}</div>
             </a>
           </li>
-          <li class="{{ Request::is('dashboard/screening/results*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/screening/results') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/screening/results">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <div> {{ __('admin.Results') }}</div>
+            </a>
+          </li>
+           <li class="{{ Request::is('dashboard/screening/resultsReport') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/screening/resultsReport">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <div> {{ __('admin.resultsReport') }}</div>
             </a>
           </li>
         </ul>

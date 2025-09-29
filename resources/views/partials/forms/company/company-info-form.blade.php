@@ -169,6 +169,7 @@
               type="file"
               placeholder="{{ __('admin.Commercial_Register') }} *"
             />
+            
 
             <input type="hidden" name="Commercial_Register_value" value="{{ $client->company ? $client->company->Commercial_Register : '' }}">
 

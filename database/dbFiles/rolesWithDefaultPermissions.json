@@ -3527,7 +3527,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor"
+                    "mentor",
+                    "registered"
                 ]
             },
             {
@@ -4726,6 +4727,16 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": []
+            },
+            {
+                "name": "screening.results_report",
+                "description": " All Screening Results Report ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
