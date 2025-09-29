@@ -539,4 +539,5 @@ return [
     'Online_Training_Added_Successfully' => 'Online training added successfully.',
     'Online_Session_Added_Successfully' => 'Online session added successfully.',
     'Offline_Session_Added_Successfully' => 'Offline session added successfully.',
+    'View_Location' => 'View Location',
   ];

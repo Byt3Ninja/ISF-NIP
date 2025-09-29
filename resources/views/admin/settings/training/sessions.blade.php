@@ -248,6 +248,13 @@
                             <i class="ti ti-qrcode"></i>
                           </button>
                         @endif
+
+                        @if ($session->training_location)
+                          <a href="{{ $session->training_location }}" class="btn btn-icon btn-label-primary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Location') }}">
+                            <i class="ti ti-map-pin"></i>
+                          </a>
+                        @endif
+
                         <a href="/dashboard/training/Attendance-offline/{{ $session->id }}" class="btn btn-icon btn-label-dark rounded-circle">
                           <i class="ti ti-calendar-check"></i>
                         </a>

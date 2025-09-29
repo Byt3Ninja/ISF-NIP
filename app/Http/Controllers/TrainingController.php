@@ -693,7 +693,7 @@ class TrainingController extends Controller
 				$address  = $request->training_Address ?? 'No Address';
 				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
-				return back()->with(['message' => 'Offline_Session_Added_Successfully', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Offline_Session_Added_Successfully'), 'class' => 'success']);
 			} else {
 				return back()->with(['message' => 'Can\'t add session', 'class' => 'danger']);
 			}

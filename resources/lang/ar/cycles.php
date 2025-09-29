@@ -532,5 +532,6 @@ return [
     'Online_Training_Added_Successfully' => 'تمت إضافة التدريب عبر الإنترنت بنجاح.',
     'Online_Session_Added_Successfully' => 'تمت إضافة الجلسة عبر الإنترنت بنجاح.',
     'Offline_Session_Added_Successfully' => 'تمت إضافة الجلسة الحضورية بنجاح.',
+    'View_Location' => 'عرض الموقع',
   ];
 
