@@ -131,5 +131,42 @@ return [
 	'GOOGLE_CALENDAR_CLIENT_ID' => 'GOOGLE CALENDAR CLIENT ID',
 	'GOOGLE_CALENDAR_CLIENT_SECRET' => 'GOOGLE CALENDAR CLIENT SECRET',
 	'GOOGLE_CALENDAR_REDIRECT' => 'GOOGLE CALENDAR REDIRECT',
+
 	'Encryption' => 'Encryption',
+	'Industries' => 'Industries',
+	'Sectors' => 'Sectors',
+	'Technologies' => 'Technologies',
+	'Mapping' => 'Mapping',
+	'Json' => 'JSON',
+	
+	'Add_Industry' => 'Add industry',
+	'Import_JSON' => 'Import JSON',
+	'Export' => 'Export',
+	'Export_JSON' => 'Export JSON',
+	'Export_CSV' => 'Export CSV',
+	'Export_Excel' => 'Export Excel',
+	'Name' => 'Name',
+	'Actions' => 'Actions',
+	
+	'Industry' => 'Industry',
+	'Add_Sector' => 'Add sector',
+	'Add_Other' => 'Add Other',
+	'Sector' => 'Sector',
+	
+	'Add_Technology' => 'Add technology',
+	'Technology' => 'Technology',
+	
+	'Mapping_Preview' => 'Mapping preview',
+	'Mapping_Info_Message' => 'Select an industry to view its sectors. Technologies are global.',
+	
+	'JSON_Output' => 'JSON Output',
+	'Save_All' => 'Save all',
+	'Unsaved_Changes' => 'Unsaved changes',
+	'Rename' => 'Rename',
+	'New_Name' => 'New Name',
+	'Cancel' => 'Cancel',
+	'Confirm' => 'Confirm',
+	'Delete' => 'Delete',
+	'Up' => 'Up',
+	'Down' => 'Down',
 ];

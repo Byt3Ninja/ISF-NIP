@@ -130,4 +130,40 @@ return [
 	'whatsapp_api_key' => 'معرف حالة الواتساب',
 	'whatsApp_ACCESS_TOKEN' => 'رمز الوصول إلى واتساب',
 	'Encryption' => 'تشفير',
+	'Industries' => 'الصناعات',
+	'Sectors' => 'القطاعات',
+	'Technologies' => 'التقنيات',
+	'Mapping' => 'الخريطة',
+	'Json' => 'JSON',
+	
+	'Add_Industry' => 'إضافة صناعة',
+	'Import_JSON' => 'استيراد JSON',
+	'Export' => 'تصدير',
+	'Export_JSON' => 'تصدير JSON',
+	'Export_CSV' => 'تصدير CSV',
+	'Export_Excel' => 'تصدير Excel',
+	'Name' => 'الاسم',
+	'Actions' => 'الإجراءات',
+	
+	'Industry' => 'الصناعة',
+	'Add_Sector' => 'إضافة قطاع',
+	'Add_Other' => 'إضافة أخرى',
+	'Sector' => 'القطاع',
+	
+	'Add_Technology' => 'إضافة تقنية',
+	'Technology' => 'التقنية',
+	
+	'Mapping_Preview' => 'معاينة الخريطة',
+	'Mapping_Info_Message' => 'اختر صناعة لعرض قطاعاتها. التقنيات عامة.',
+	
+	'JSON_Output' => 'مخرجات JSON',
+	'Save_All' => 'حفظ الكل',
+	'Unsaved_Changes' => 'تغييرات غير محفوظة',
+	'Rename' => 'إعادة تسمية',
+	'New_Name' => 'اسم جديد',
+	'Cancel' => 'إلغاء',
+	'Confirm' => 'تأكيد',
+	'Delete' => 'حذف',
+	'Up' => 'للأعلى',
+	'Down' => 'للأسفل'
 ];
