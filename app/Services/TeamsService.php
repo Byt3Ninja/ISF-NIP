@@ -219,7 +219,9 @@ class TeamsService implements OnlineMeetingServiceInterface
             "lobbyBypassSettings" => [
                 "scope" => "everyone",
                 "isDialInBypassEnabled" => true
-            ]
+            ],
+             'allowRecording' => true,
+             'recordAutomatically' => true,
 
         ];
 
