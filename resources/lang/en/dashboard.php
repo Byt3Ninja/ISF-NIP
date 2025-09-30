@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'First screening'=>'Filtration',
+    'First screening'=>'Screening',
     'Final screening'=>'Evaluation',
     'Services' => 'Services',
     'newmessages' => 'New Messages',

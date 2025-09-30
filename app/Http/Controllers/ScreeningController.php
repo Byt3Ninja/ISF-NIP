@@ -860,4 +860,64 @@ class ScreeningController extends Controller
 			return response()->json(['error' => 'Failed to fetch users'], 500);
 		}
 	}
+
+	/**
+	 * Get the results report for screening evaluation
+	 *
+	 * This function will return the metadata for the results report
+	 * 
+	 * @return \Illuminate\Http\Response
+	 */
+	public function resultsReport()
+	{
+		$l = app()->getLocale();
+		$organization_id = auth()->user()->organization_id;
+
+		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+			return $q->whereHas('cycle', function ($query) use ($organization_id) {
+				$query->where('organization_id', $organization_id);
+			});
+		})->where('stype', 2)->orderBy('from')->get();
+		
+			$id = $steps->pluck('id')->first();
+			$cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->whereHas('cycle', function ($query) use ($organization_id) {
+					$query->where('organization_id', $organization_id);
+				});
+			})->where('stype', 2)->where('id', $id)->first();
+		
+		$metadata = ScreeningEvaluationResults::metadataReport($steps->pluck('id')->toArray());
+
+		$allCompanies = collect();
+		$_allSteps = collect();
+		$allJudges = collect();
+		$allResults = collect();
+		$_allCompanies = collect();
+		foreach ($metadata as $stepId => $data) {
+			$allCompanies = $allCompanies->concat($data['companies']);
+			$_allSteps = $_allSteps->concat($data['_steps']);
+			$allJudges = $allJudges->concat($data['judges']);
+			$allResults = $allResults->concat($data['results']);
+			$_allCompanies = $_allCompanies->concat($data['_companies']);
+		}
+		$allCompanies = $allCompanies->unique('id')->values();
+		$allJudges = $allJudges->unique('id')->values();
+		$_allCompanies = $_allCompanies->unique('id')->values();
+
+		$companies = $allCompanies;
+		$_steps = $_allSteps;
+		$judges = $allJudges;
+		$_companies = $_allCompanies;
+		$evaluation = $allResults;
+		$results = $allResults;
+		
+		$form = null;
+		if ($cstep) {
+			$form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+		}
+		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+
+		$_companies = $companies;
+		return view('admin.settings.screening.resultsReport', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', '_companies', 'evaluation', 'results'));
+	}
 }

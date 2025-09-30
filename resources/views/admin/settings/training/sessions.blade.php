@@ -51,273 +51,260 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-overlay"></div>
-    {{--
-    <h5 class="content-header-title float-left pr-1 mb-0">
-      {{ __('cycles.all online training steps') }}
-    </h5>
-    --}}
-    <div class="content-body">
-      <section id="multiple-column-form">
-        @if (session()->has('message'))
-        <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
-          role="alert">
-          {{ __(session()->get('message')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        @endif
-         @if (session()->has('message2'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-              {{ __('admin.' . session()->get('message2')) }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          @endif
-      </section>
-      @if (count($steps) > 0)
-      <section>
-        <div class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card mb-4">
-              <div class="card-header" style="padding-bottom: 15px;">
-                <h4 class="card-title">{{ __('cycles.Training Steps') }}</h4>
-              </div>
-              <hr>
-              @php
-              $cycleId = $steps->where('id', $id)->first()->cycle_id;
-              @endphp
-              <div class="card-body row">
-                <div class="col-12 col-lg-6">
-                  <div class="form-group">
-                    <label class="form-label fs-5 mb-2">{{ __('cycles.Select Step') }}</label>
-                    <select id="ccycle" class="select2 form-select"
-                      onchange="window.open('/dashboard/training/sessions/'+this.options[this.selectedIndex].value,'_self');">
-                      @foreach ($steps as $step)
-                      @php
-                      if ($step->id == $id) {
-                      $ccycle = $step->cycle->id;
-                      }
-                      @endphp
-                      <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>
-                        {{ $step->title }}
-                        ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m-Y') ??
-                        '-' }})
-                        - {{ optional(optional($step->cycle)->organization)->name }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                </div>
-                <div class="col-12 col-lg-6 mt-4 mt-lg-0">
-                  <div class="d-flex flex-wrap h-100 align-items-end gap-3">
-                    <button data-bs-toggle="modal" data-bs-target="#addsession" type="button"
-                      class="text-nowrap btn btn-label-primary">
-                      <i class="ti ti-plus me-2"></i> {{ __('cycles.Add new training') }}
-                    </button>
-                    <a class="text-nowrap btn btn-label-success"
-                      href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
-                      <i class="ti ti-pencil me-2"></i>{{ __('cycles.Cycle') }}
-                    </a>
-                    <a class="text-nowrap btn btn-label-dark" href="/dashboard/training/{{ $cycleId ?? 0 }}/surveys">
-                      <i class="ti ti-question-mark me-2"></i>{{ __('cycles.Manage Surveys') }}
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- Alert -->
+    @if (session()->has('message') || session()->has('message2'))
+     <x-alert 
+        type="{{ session()->get('class') ?? 'danger' }}"
+        message="{{ session()->has('message') ? __(session('message')) : __('admin.' . session('message2')) }}" 
+      />
+    @endif
+
+    <div class="card">
+      <!-- Heading & Actions -->
+      <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
+        <h4 class="card-title">{{ __('admin.Training sessions') }}</h4>
+        <div class="d-flex align-items-center gap-3">
+          <div class="btn-group">
+            <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
+            </button>
+            <ul class="dropdown-menu">
+              @foreach(['csv', 'excel'] as $key => $option)
+                <li>
+                  <a class="dropdown-item text-uppercase" href="javascript:void(0)" onclick="exportTraining('{{$option}}')">
+                    {{$option}}
+                  </a>
+                </li>
+              @endforeach
+            </ul>
           </div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="col-xl-12 col-md-12 col-sm-12">
-          <div class="card">
-            <div class="card-header">
-            </div>
-            <div class="card-body">
-              <div class="card-text">
-                <br>
-                <!-- Filter -->
-                <form method="GET" action="{{ route('trainings.sessions_list', $id) }}"
-                  class="row g-3 align-items-center">
-                  <div class="col-auto">
-                    <button class="btn btn-primary d-flex justify-content-center align-items-center"
-                      style="border-radius: 50%; width: 40px; height: 40px;" type="submit">
-                      <i class="ti ti-filter text-white"></i>
-                    </button>
-                  </div>
-
-                  <div class="col-auto">
-                    <select name="type" class="form-select">
-                      <option value="0">All</option>
-                      @php
-                      $Types = App\TrainingSession::select('type')->distinct()->get();
-                      @endphp
-                      @foreach ($Types as $Type)
-                      <option value="{{ $Type->type }}" {{ $Type->type == request('type') ? 'selected' : '' }}>
-                        {{ $Type->type }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-
-                  <div class="col-auto">
-                    <input type="text" name="dateFrom" value="{{ request('dateFrom') }}"
-                      class="form-control flatpickr-datefilter" placeholder="From">
-                  </div>
-
-                  <div class="col-auto">
-                    <input type="text" name="dateTo" value="{{ request('dateTo') }}"
-                      class="form-control flatpickr-datefilter" placeholder="To">
-                  </div>
-                </form>
-                <hr>
-                <div class="table-responsive">
-                  <table class="table mb-0" id="trainingtable">
-                    <thead class="bg-label-light">
-                      <tr>
-                        <th>#</th>
-                        <th>{{ __('cycles.Type') }}</th>
-                        <th>{{ __('cycles.Title') }}</th>
-                        <th>{{ __('cycles.Start') }}</th>
-                        <th>{{ __('cycles.End') }}</th>
-                        <th>{{ __('cycles.details') }}</th>
-                        <th>{{ __('cycles.Edit') }} | {{ __('cycles.Delete') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach ($sessions as $key => $session)
-                      <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>{{ __('cycles.' . $session->type) }}</td>
-                        <td>{{ $session->title }}</td>
-                        <td>
-                          @if($session->type == "online")
-                          {{ FormatDate($session->datetime, 'Y-m-d') ?? '-' }}
-                          @else
-                          {{ FormatDate($session->datetime, 'Y-m-d H:i') ?? '-' }}
-                          @endif
-                          
-                        </td>
-                        <td>
-                          @if($session->type == "online")
-                          {{ FormatDate($session->enddatetime, 'Y-m-d') ?? '-' }}
-                          @else
-                          {{ FormatDate($session->enddatetime, 'Y-m-d H:i') ?? '-' }}
-                          @endif
-                        </td>
-                        <td>
-                          @if ($session->type == 'sessions')
-                          {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
-                          <a href="{{ $session->start_url }}" target="_blank">
-                            <button title="Start Meeting" type="button"
-                              class="btn btn-icon btn-label-success rounded-circle waves-effect">
-                              <i class="ti ti-brand-zoom"></i></button></a> |
-                          <a href="{{ $session->join_url }}" target="_blank">
-                            <button title="Join only" type="button"
-                              class="btn btn-icon btn-label-info rounded-circle waves-effect">
-                              <i class="ti ti-user"></i></button></a> |
-                          @if( !empty( $session->zoom_passcode ) )
-                            <button data-passcode="{{ $session->zoom_passcode }}" title="Show Passcode" type="button"
-                              class="btn btn-icon btn-label-warning rounded-circle waves-effect show-passcode">
-                              <i class="ti ti-key"></i></button></a> |
-                          @endif
-                          <button title="View Report" type="button" data-bs-toggle="modal"
-                            data-bs-target="#reportModal{{ $session->id }}"
-                            class="btn btn-icon btn-label-warning rounded-circle waves-effect">
-                            <i class="ti ti-file-text"></i>
-                          </button>
-                          {{-- @endif --}}
-                          @elseif ($session->type == 'offline')
-                          <b>{{ __('cycles.trainer name') }}:</b>
-                          {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
-                          {{ $session->training_Address }} <br>
-                          @else
-                          <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display course contents') }}
-                          </a>
-                          @endif
-
-                        </td>
-                        <td>
-                          @if ($session->type == 'offline')
-                          @if ($session->QrCode != null)
-                          <button title="QRCode" class="btn btn-icon btn-label-warning rounded-circle waves-effect"
-                            data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}">
-                            <i class="ti ti-qrcode text-warning"></i></button>
-                          @else
-                          <button title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
-                            class="btn btn-icon btn-label-success rounded-circle waves-effect">
-                            <i class="ti ti-qrcode text-success"></i></button>
-                          @endif
-                          <a title="Attendance" href="/dashboard/training/Attendance-offline/{{ $session->id }}"
-                            class="btn btn-icon btn-label-dark rounded-circle waves-effect">
-                            <i class="ti ti-calendar-check text-dark"></i></a>
-                          @endif
-
-                          <button title="Edit" onclick="editme({{ $session->id }})" type="button"
-                            class="btn btn-icon btn-label-info rounded-circle waves-effect">
-                            <i class="ti ti-edit text-info"></i></button>&nbsp;
-                          {{-- @if( $session->datetime >= now() ) --}}
-                          <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
-                            class="btn btn-label-danger btn-icon rounded-circle waves-effect">
-                            <i class="ti ti-trash text-danger"></i></button>
-                          {{-- @endif --}}
-                        </td>
-                      </tr>
-                      <!-- المودال نفسه -->
-                      <div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1"
-                        aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="qrCodeModalLabel">QR Code</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                              <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
-
-                            </div>
-                            <div title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
-                              class="btn btn-label-info">
-                              {{ __('admin.Re_generate') }}</div>
-
-                          </div>
-                        </div>
-                      </div>
-                      @endforeach
-
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
-      @else
-      <div class="row">
-        <div class="col-12">
-          <div class="card card-body h-100 d-flex justify-content-center align-items-center">
-            <div class="d-flex flex-column align-items-center">
-              <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
-              <h6 class="text-center text-secondary w-75">
-                {{ __('admin.No_Session_Message') }}
-              </h6>
-              <div class="text-center">
-                <a href="/dashboard/cycles" class="btn btn-primary">
-                  <span class="mx-1">{{ __('admin.Go to Steps') }}</span>
-                  <i class="ti ti-arrow-{{$l == 'en' ? 'right' : 'left'}} ms-2"></i>
-                </a>
-              </div>
-            </div>
-          </div>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addsession" type="button">
+            <i class="ti ti-plus me-2"></i>{{ __('admin.Add_New') }}
+          </button>
         </div>
       </div>
-      @endif
+
+      <div class="card-body">
+        <!-- Table Filter -->
+        <div class="row d-flex justify-content-end mb-2" id="tblTraining-filters">
+          <div class="col-12 col-md-2">
+            <div class="from-group mb-2 mb-md-0">
+              <select class="form-select form-select-sm" id="type-filter">
+                <option value="" selected>{{ __('cycles.Select_Training_Type') }}</option>
+                @foreach(['Online_Training', 'Online_Session', 'Offline_Session'] as $type)
+                  <option value="{{ $type }}">{{ __('cycles.'.$type) }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="from-group mb-2 mb-md-0">
+              <select class="form-select form-select-sm" id="cycle-filter">
+                <option value="" selected>{{ __('cycles.Select_Cycle') }}</option>
+                @foreach($cycles as $cycle)
+                  <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="from-group mb-2 mb-md-0">
+              <select class="form-select form-select-sm" id="step-filter">
+                <option value="" selected>{{ __('cycles.Select_Step') }}</option>
+                @foreach ($steps as $step)
+                  <option value="{{ $step->id }}">{{ $step->title }}
+                @endforeach
+              </select>
+            </div>
+          </div>
+          <div class="col-12 col-md-2">
+            <div class="from-group mb-2 mb-md-0">
+              <input 
+                type="text" 
+                id="start-date-filter"
+                class="form-control form-control-sm datepicker"
+                placeholder="{{ __('cycles.Start_Date') }}"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-2">
+            <div class="from-group mb-2 mb-md-0">
+              <input 
+                type="text" 
+                id="end-date-filter" 
+                class="form-control form-control-sm datepicker"
+                placeholder="{{ __('cycles.End_Date') }}"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Data -->
+        <div class="table-responsive">
+          <table class="table table-hover" id="tblTraining">
+            <thead class="table-light">
+              <tr>
+                <th>{{ __('cycles.Title') }}</th>
+                <th>{{ __('cycles.Type') }}</th>
+                <th>{{ __('cycles.Program') }}</th>
+                <th>{{ __('cycles.Training_Step') }}</th>
+                <th>{{ __('cycles.Date_Time') }}</th>
+                <th>{{ __('cycles.details') }}</th>
+                <th>{{ __('cycles.Actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($sessions as $session)
+                <tr>
+                  {{-- Title --}}
+                  <td><small class="text-nowrap">{{ $session->title }}</small></td>
+
+                  {{-- Type (badge) --}}
+                  <td>
+                    <small class="badge bg-label-{{ $session->type == 'offline' ? 'primary' : ($session->type == 'sessions' ? 'info' : 'success') }}">
+                      {{ $session->type == 'offline' ? __('cycles.Offline_Session') : ($session->type == 'sessions' ? __('cycles.Online_Session') : __('cycles.Online_Training')) }}
+                    </small>
+                  </td>
+
+                  {{-- Program --}}
+                  <td><small class="text-nowrap">{{ $session->step->cycle->title }}</small></td>
+
+                  {{-- Training Step --}}
+                  <td><small class="text-nowrap">{{ $session->step->title }}</small></td>
+
+                  {{-- Date & Time --}}
+                  <td>
+                    <small class="text-nowrap">
+                     @php
+                        $startDate = FormatDate($session->datetime, 'Y-m-d');
+                        $endDate   = $session->enddatetime ? FormatDate($session->enddatetime, 'Y-m-d') : null;
+                        $startTime = FormatDate($session->datetime, 'H:i:s');
+                        $endTime   = $session->enddatetime ? FormatDate($session->enddatetime, 'H:i:s') : null;
+                      @endphp
+
+                      {{-- Show dates --}}
+                      @if($endDate && $endDate !== $startDate)
+                        {{ $startDate }} - {{ $endDate }}
+                      @else
+                        {{ $startDate }}
+                      @endif
+                    </small>
+                    <br>
+                    {{-- Show times --}}
+                    <small>
+                      @if($endTime && $endTime !== $startTime)
+                        {{ $startTime }} - {{ $endTime }}
+                      @else
+                        {{ $startTime }}
+                      @endif
+                    </small>
+                  </td>
+
+                  {{-- Details (Trainer + Address if offline) --}}
+                  <td>
+                    @if($session->type == "offline" || $session->type == "sessions")
+                      <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div> {{ $session->trainer_name }}<br>
+                      @if(!empty($session->training_Address))
+                        <small class="text-nowrap">{{ __('cycles.Training_Address') }}:</small> {{ $session->training_Address }}
+                      @endif
+                    {{-- @else
+                      <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div>
+                      <div class="text-nowrap">{{ $session->course->user->{'first_name_' . $l} }} {{ $session->course->user->{'last_name_' . $l} }}</div> --}}
+                    @endif
+                  </td>
+
+                  {{-- Actions --}}
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      {{-- Online session (Zoom) --}}
+                      @if ($session->type == 'sessions')
+                        @if ($session->start_url)
+                          <a href="{{ $session->start_url }}" target="_blank" class="btn btn-icon btn-label-success rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Start_Meeting') }}">
+                            <i class="ti ti-brand-zoom"></i>
+                          </a>
+                        @endif
+                        @if ($session->join_url)
+                          <a href="{{ $session->join_url }}" target="_blank" class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Join_Meeting') }}">
+                            <i class="ti ti-user"></i>
+                          </a>
+                        @endif
+                        @if(!empty($session->zoom_passcode))
+                          <button data-passcode="{{ $session->zoom_passcode }}" class="btn btn-icon btn-label-warning rounded-circle show-passcode">
+                            <i class="ti ti-key"></i>
+                          </button>
+                        @endif
+                        <button data-bs-toggle="modal" data-bs-target="#reportModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
+                          <i class="ti ti-file-text"></i>
+                        </button>
+                      @endif
+                      {{-- Offline session --}}
+                      @if ($session->type == 'offline')
+                        @if ($session->QrCode)
+                          <button data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
+                            <i class="ti ti-qrcode"></i>
+                          </button>
+                        @else
+                          <button onclick="createQrCode({{ $session->id }})" class="btn btn-icon btn-label-success rounded-circle">
+                            <i class="ti ti-qrcode"></i>
+                          </button>
+                        @endif
+
+                        @if ($session->training_location)
+                          <a href="{{ $session->training_location }}" class="btn btn-icon btn-label-primary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Location') }}">
+                            <i class="ti ti-map-pin"></i>
+                          </a>
+                        @endif
+
+                        <a href="/dashboard/training/Attendance-offline/{{ $session->id }}" class="btn btn-icon btn-label-dark rounded-circle">
+                          <i class="ti ti-calendar-check"></i>
+                        </a>
+                      @endif
+
+                      {{-- Online training --}}
+                      @if ($session->type == 'online')
+                        <a href="/dashboard/training/all/{{ $session->training_Address }}">
+                          <button class="btn btn-icon btn-label-dark rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Course') }}">
+                            <i class="ti ti-book"></i>
+                          </button>
+                        </a>
+                      @endif
+
+                      {{-- Common actions --}}
+                      <button onclick="editme({{ $session->id }})" class="btn btn-icon btn-label-info rounded-circle">
+                        <i class="ti ti-edit"></i>
+                      </button>
+                      <button onclick="deleteme({{ $session->id }})" class="btn btn-icon btn-label-danger rounded-circle">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                {{-- QR Modal --}}
+                <div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content bg-label-secondary h-100 h-md-auto">
+                      <div class="modal-header">
+                        <h5 class="modal-title">QR Code</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body text-center">
+                        <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
+                      </div>
+                      <div onclick="createQrCode({{ $session->id }})" class="btn btn-label-info">
+                        {{ __('admin.Re_generate') }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
-
 
 @foreach ($sessions as $session)
 <!-- Modal for Session Reports and Recordings -->
@@ -442,111 +429,8 @@
   </div>
 </div>
 @endforeach
-
-
-
-
-
-
-
-<!-- Edit Customer Modal -->
-{{-- <div class="modal fade" id="addsession" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-    <div class="modal-content">
-      <div class="modal-body">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        <div class="text-center mb-6">
-          <h4 class="mb-2">{{__('cycles.Add new training session')}} </h4>
-          <p>يمكنك من هنا التعديل امر الشغل</p>
-        </div>
-
-        <form method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
-          @csrf
-          <input type="hidden" name="step_id" value="{{$id}}" id="id">
-          <div class="form-group mb-3" id="ctype">
-            <label class="form-label fs-6 mb-1">{{__('cycles.Type')}}:</label>
-            <select name="type" class="select form-control" required
-              onchange="tchange(this.options[this.selectedIndex].value)">
-              <option value="online">{{__('cycles.online')}}</option>
-              <option value="sessions">{{__('cycles.sessions')}}</option>
-              <option value="offline">{{__('cycles.offline')}}</option>
-            </select>
-          </div>
-          <div class="form-group mb-3" id="online">
-            <label class="form-label fs-6 mb-1">{{__('cycles.select online')}}:</label>
-            <select name="online" class="select form-control" required id="conline">
-              @if (!$online)
-              <option>{{__('cycles.No saved training courses')}}</option>
-              @endif
-              @foreach ($online as $tr)
-              <option value="{{$tr->id}}">{{$tr->title}}</option>
-              @endforeach
-            </select>
-          </div>
-          <label class="form-label fs-6 mb-1">{{__('cycles.Session Title')}}</label>
-          <div class="form-group mb-3">
-            <input id="title" name="title" type="text" placeholder="{{__('cycles.Session Title')}}" class="form-control"
-              required>
-          </div>
-          <label class="form-label fs-6 mb-1">{{__('cycles.Add a description')}}:</label>
-          <div class="form-group mb-3">
-            <textarea class="form-control" id="dsc" name='dsc' rows="2"
-              placeholder="{{__('cycles.Write your description here')}}."></textarea>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label fs-6 mb-1">{{__('cycles.Date/Time')}}</label>
-            <input id="datetime" name="datetime" type="text" placeholder="{{__('cycles.Date/Time')}}"
-              class="form-control" required>
-          </div>
-          <div class="form-group mb-3" style="display: none;" id="enddatetime">
-            <label class="form-label fs-6 mb-1">{{__('cycles.End')}}</label>
-            <input id="enddate" name="enddatetime" type="text" placeholder="{{__('cycles.Date/Time')}}"
-              class="form-control">
-          </div>
-          <div class="form-group mb-3" style="display: none;" id="sessions">
-            <label class="form-label fs-6 mb-1">{{__('cycles.Session duration')}}:</label>
-            <select name="duration" class="select form-control" required>
-              <option value="30">30 {{__('cycles.Minutes')}}</option>
-              <option value="60" selected>1 {{__('cycles.Hour')}}</option>
-              <option value="120">2 {{__('cycles.Hours')}}</option>
-              <option value="180">3 {{__('cycles.Hours')}}</option>
-              <option value="240">4 {{__('cycles.Hours')}}</option>
-              <option value="300">5 {{__('cycles.Hours')}}</option>
-            </select>
-          </div>
-          <div class="form-group mb-3" id="trainer" style="display: none;">
-            <label class="form-label fs-6 mb-1">{{__('cycles.trainer name')}}</label>
-            <input name="trainer_name" type="text" placeholder="{{__('cycles.trainer name')}}" class="form-control">
-          </div>
-          <div class="form-group mb-3" id="trainer_email" style="display: none;">
-            <label class="form-label fs-6 mb-1">{{__('cycles.trainer email')}}</label>
-            <input name="trainer_email" type="text" placeholder="{{__('cycles.trainer email')}}" class="form-control">
-          </div>
-          <div class="form-group mb-3" id="location" style="display: none;">
-            <label class="form-label fs-6 mb-1">{{__('cycles.training location')}}</label>
-            <input name="location" type="text" placeholder="{{__('cycles.training location')}}" class="form-control">
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary ml-1">
-
-          <span class="d-none d-sm-block">{{__('cycles.Submit')}}</span>
-        </button>
-        </form>
-
-
-
-      </div>
-    </div>
-  </div>
-</div> --}}
-<!--/ Edit JO Modal -->
-
-
-
-
-
 <!-- END: Content-->
+
 <div class="modal fade" id="addsession" tabindex="-1" role="dialog" aria-labelledby="addsession" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content rounded p-0 p-md-4" id="modal-content">
@@ -760,43 +644,6 @@
   </div>
 </div>
 @endforeach
-
-
-<!-- المودال نفسه -->
-{{-- <div class="modal fade" id="Attendance" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="qrCodeModalLabel">{{ __('admin.Attendance') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>{{ __('admin.Traning_title') }}</th>
-              <th>{{ __('admin.Trainer_name') }}</th>
-              <th>{{ __('admin.Program_Name') }}</th>
-              <th>{{ __('admin.StartUp_name') }}</th>
-              <th>{{ __('admin.Attendance') }}</th>
-            </tr>
-          </thead>
-          <tbody class="Attendance_body">
-            <tr>
-              <td class="text-center Traning_title"></td>
-              <td class="text-center Trainer_name"></td>
-              <td class="text-center Program_Name"></td>
-              <td class="text-center StartUp_name"></td>
-              <td class="text-center Attendance"></td>
-            </tr>
-          </tbody>
-        </table>
-
-      </div>
-
-    </div>
-  </div>
-</div> --}}
 @stop
 
 @section('scripts')
@@ -807,28 +654,129 @@
 @stop
 
 @section('pagescripts')
-<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Initalize datepicker
+    $('.datepicker').flatpickr({
+      monthSelectorType: 'static',
+      allowInput: true,
+      onReady: function (selectedDates, dateStr, instance) {
+        let btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerHTML = "Clear";
+        btn.classList.add("btn", "btn-sm", "btn-outline-secondary", "mt-1");
+        btn.addEventListener("click", function () {
+          instance.clear(); // <-- clear flatpickr value
+          instance.close();
+          $('#tblTraining').DataTable().draw(); // refresh filter
+        });
+        instance.calendarContainer.appendChild(btn);
+      }
+    });
+    
+    // Initalize date table
+    let trainingTable = $('#tblTraining').DataTable({
+      pageLength: 10,
+      columnDefs: [{
+        orderable: false,
+        targets: [6]
+      }],
+      order: [[0, 'asc']],
+      language: {
+        @if ($l == 'ar')
+          sEmptyTable: "ليست هناك بيانات متاحة في الجدول",
+          sLoadingRecords: "جارٍ التحميل...",
+          sProcessing: "جارٍ التحميل...",
+          sLengthMenu: "أظهر _MENU_ مدخلات",
+          sZeroRecords: "لم يعثر على أية سجلات",
+          sInfo: "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+          sInfoEmpty: "يعرض 0 إلى 0 من أصل 0 سجل",
+          sInfoFiltered: "(منتقاة من مجموع _MAX_ مُدخل)",
+          sInfoPostFix: "",
+          sSearch: "ابحث:",
+          sUrl: "",
+          oPaginate: {
+            sFirst: "الأول",
+            sPrevious: "السابق",
+            sNext: "التالي",
+            sLast: "الأخير"
+          },
+          oAria: {
+            sSortAscending: ": تفعيل لترتيب العمود تصاعدياً",
+            sSortDescending: ": تفعيل لترتيب العمود تنازلياً"
+          }
+        @endif
+      },
+      buttons: [
+        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `tblTraining_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `tblTraining_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5] } }
+      ]
+    });
+
+    // ============ FILTER HANDLERS ============ //
+
+    // Type filter (column 1)
+    $('#type-filter').on('change', function () {
+      let val = this.value ? $('#type-filter option:selected').text().trim() : '';
+      trainingTable.column(1).search(val, true, false).draw();
+    });
+
+    // Cycle filter (column 2)
+    $('#cycle-filter').on('change', function () {
+      let val = this.value ? $('#cycle-filter option:selected').text().trim() : '';
+      trainingTable.column(2).search(val, true, false).draw();
+    });
+
+    // Step filter (column 3)
+    $('#step-filter').on('change', function () {
+      let val = this.value ? $('#step-filter option:selected').text().trim() : '';
+      trainingTable.column(3).search(val, true, false).draw();
+    });
+
+    // Date range filter (column 4)
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      let startDate = $('#start-date-filter').val();
+      let endDate   = $('#end-date-filter').val();
+
+      // Column 4 text (date/time)
+      let dateText = data[4] || "";
+
+      // Extract first date (format: YYYY-MM-DD …)
+      let match = dateText.match(/\d{4}-\d{2}-\d{2}/);
+      if (!match) return true; // no valid date in cell → keep row
+
+      let cellDateObj = new Date(match[0]);
+
+      // Convert filter inputs
+      let startOk = startDate ? new Date(startDate) <= cellDateObj : true;
+      let endOk   = endDate ? new Date(endDate) >= cellDateObj : true;
+
+      return startOk && endOk;
+    });
+
+    // Redraw when date inputs change
+    $('#start-date-filter, #end-date-filter').on('change', function () {
+      trainingTable.draw();
+    });
+
+
+    // Global export training function
+    window.exportTraining = function (format) {
+      if (!trainingTable) {
+        releaseFailureAlert({ message: 'No data available to export' });
+        return;
+      }
+      try {
+        trainingTable.button(`.buttons-${format}`).trigger();
+      } catch (error) {
+        console.error('Export error:', error);
+        releaseFailureAlert({ message: 'Failed to export data. Please try again.' });
+      }
+    }
+  });
+</script>
 
 <script>
-    // $(document).ready(function () {
-    //    function toggleOnlineDropdown() {
-    //       var selected = $('#select-type').val();
-    //    if (selected === 'online') {
-    //         $('#online-dropdown').show();
-    //    } else {
-    //      $('#online-dropdown').hide();
-    //    }
-    //  }
-
-    //   $('.select2').select2();
-
-    //   toggleOnlineDropdown();
-
-    //   $('#select-type').on('change', function () {
-    //     toggleOnlineDropdown();
-    //   });
-    // });
     $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
@@ -889,13 +837,6 @@
         $(this).next('.invalid-feedback').remove();
       }
     });
-    // $(`#editSessionForm #title`).on('change', function() {
-    //   const titleValue = $(this).val();
-    //   if (titleValue) {
-    //     $(this).removeClass('is-invalid');
-    //     $(this).next('.invalid-feedback').remove();
-    //   }
-    // });
     
     $('#addSessionForm').on('submit', function(e) {
       const formId = '#addSessionForm';
@@ -910,12 +851,12 @@
     
       if (typeValue === 'online') {
         if (!dateRangeValue) {
-          dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
+          dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">{{ __('cycles.Date_Range_Required') }}</div>');
           e.preventDefault();
           return;
         }
         if (!titleValue) {
-          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __('cycles.Title_Required') }}</div>');
           e.preventDefault();
           return;
         }
@@ -923,22 +864,22 @@
 
       if (typeValue === 'offline' || typeValue === 'sessions') {
        if (!dateValue) {
-          $(`${formId} .flatpickr-date`).addClass('is-invalid').after('<div class="invalid-feedback">Please select a date.</div>');
+          $(`${formId} .flatpickr-date`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __('cycles.Date_Required') }}</div>');
           e.preventDefault();
           return
         }
         if (!timeFromValue) {
-          $(`${formId} #flatpickr-time-from`).addClass('is-invalid').after('<div class="invalid-feedback">Please select a start time.</div>');
+          $(`${formId} #flatpickr-time-from`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __('cycles.Start_Time_Required') }}</div>');
           e.preventDefault();
           return
         }
         if (!timeToValue) {
-          $(`${formId} #flatpickr-time-to`).addClass('is-invalid').after('<div class="invalid-feedback">Please select an end time.</div>');
+          $(`${formId} #flatpickr-time-to`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __('cycles.End_Time_Required') }}</div>');
           e.preventDefault();
           return
         } 
         if (!titleValue) {
-          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __('cycles.Title_Required') }}</div>');
           e.preventDefault();
           return;
         }
@@ -1027,30 +968,30 @@
 
       if (typeValue === 'online') {
         if (!dateRangeValue) {
-          dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
+          dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">{{ __("cycles.Date_Range_Required") }}</div>');
           isValid = false;
         }
         if (!titleValue) {
-          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __("cycles.Title_Required") }}</div>');
           isValid = false;
         }
       }  
 
       if (typeValue === 'offline' || typeValue === 'sessions') {
         if (!dateValue) {
-          $(`${formId} .flatpickr-date`).addClass('is-invalid').after('<div class="invalid-feedback">Please select a date.</div>');
+          $(`${formId} .flatpickr-date`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __("cycles.Date_Required") }}</div>');
           isValid = false;
         }
         if (!timeFromValue) {
-          $(`${formId} #flatpickr-time-from`).addClass('is-invalid').after('<div class="invalid-feedback">Please select a start time.</div>');
+          $(`${formId} #flatpickr-time-from`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __("cycles.Start_Time_Required") }}</div>');
           isValid = false;
         }
         if (!timeToValue) {
-          $(`${formId} #flatpickr-time-to`).addClass('is-invalid').after('<div class="invalid-feedback">Please select an end time.</div>');
+          $(`${formId} #flatpickr-time-to`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __("cycles.End_Time_Required") }}</div>');
           isValid = false;
         } 
         if (!titleValue) {
-          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">{{ __("cycles.Title_Required") }}</div>');
           isValid = false;
         }
       }
@@ -1087,22 +1028,6 @@
         $('#editSessionForm #date-time').hide();
       }
     });
-
-    // $('#editSessionForm #date-range-picker').daterangepicker({
-    //   opens: isRtl ? 'left' : 'right',
-    //   drops: 'up',
-    //   autoUpdateInput: false
-    //   }).on('apply.daterangepicker', function(ev, picker) {
-    //     $('#editSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
-    //     $('#editSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
-    //     $('#editSessionForm #date-range-picker').val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-    //     $('#editSessionForm #date-range-picker').removeClass('is-invalid');
-    //     $('#editSessionForm #date-range-picker').next('.invalid-feedback').remove();
-    //   }).on('cancel.daterangepicker', function(ev, picker) {
-    //     $('#editSessionForm #date-range-picker').val('');
-    //     $('#editSessionForm #start').val('');
-    //     $('#editSessionForm #end').val('');
-    //   });
 
     $('#editSessionForm #flatpickr-time-from').flatpickr({
       enableTime: true,
@@ -1151,77 +1076,9 @@
         resetSubmitButton('#editSessionForm');
       }
     });
-
-    // $('#startTime').flatpickr({
-    //   enableTime: true,
-    //   noCalendar: true
-    // });
-
-    // $('#endTime').flatpickr({
-    //   enableTime: true,
-    //   noCalendar: true
-    // });
-
-    // $('#estartTime').flatpickr({
-    //   enableTime: true,
-    //   noCalendar: true
-    // });
-
-    // $('#eendTime').flatpickr({
-    //   enableTime: true,
-    //   noCalendar: true
-    // });
-    // $('.flatpickr-datefilter').flatpickr({
-    //   monthSelectorType: 'static',
-    // });
 </script>
 
 <script>
-  $(document).ready(function() {
-      $('#trainingtable').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "columnDefs": [{
-          "orderable": false,
-          "targets": [6]
-        }, ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
-    });
-</script>
-<script>
-  // $('#datetime,#enddate,#edatetime,#eenddate').datetimepicker({
-    //   timepicker: true,
-    //   format: 'Y-m-d H:i'
-    // });
-
   function deleteme(id) {
     let url = '/dashboard/training/delsession/' + id;
     let token = '{{ csrf_token() }}';
@@ -1270,41 +1127,6 @@
     });
 }
 
-    // function tchange(training) {
-    //   if (training === 'offline') {
-    //     $('#online').hide();
-    //     $('#startdatetime').show();
-    //     $('#enddatetime').show();
-    //     // $('#starttime').show();
-    //     // $('#endtime').show();
-    //     $('#sessions').hide();
-    //     $('#trainer').show();
-    //     $('#trainer_email').show();
-    //     $('#location').show();
-    //     $('#address').show();
-    //   } else if (training === 'sessions') {
-    //     $('#online').hide();
-    //     $('#enddatetime').show();
-    //     $('#startdatetime').show();
-    //     // $('#endtime').show();
-    //     $('#sessions').show();
-    //     $('#trainer').show();
-    //     $('#trainer_email').show();
-    //     $('#location').hide();
-    //     $('#address').hide();
-    //   } else {
-    //     $('#online').show();
-    //     $('#enddatetime').hide();
-    //     $('#startdatetime').hide();
-    //     $('#endtime').hide();
-    //     $('#sessions').hide();
-    //     $('#trainer').hide();
-    //     $('#trainer_email').hide();
-    //     $('#location').hide();
-    //     $('#address').hide();
-    //   }
-    // }
-
     function editme(training) {
       $.ajaxSetup({
         headers: {
@@ -1326,7 +1148,6 @@
           const endDate = dateRange.split(' - ')[1];
 
           $('#editSessionForm #select-type').val(type).trigger('change');
-
 
           $('#editSessionForm #title').show();
           $('#editSessionForm #id').val(response.id);
@@ -1392,75 +1213,6 @@
             $('#editSessionForm #location').hide();
             $('#editSessionForm #address').hide();
           }
-
-          // $('#ctype').hide();
-          // $('#etitle').val(response.title);
-          // $('#edsc').val(response.dsc);
-          // $('#edatetime').val(startDate);
-          // $('#estartTime').val(startTime);
-          // $('#sid').val(training);
-          // $('#stype').val(type);
-
-          // // // Time & Date
-          // // if (editBsRangePickerTime.length) {
-          // //   editBsRangePickerTime.daterangepicker({
-          // //     timePicker: true,
-          // //     timePickerIncrement: 30,
-          // //     locale: {
-          // //       format: 'MM/DD/YYYY h:mm A'
-          // //     },
-          // //     opens: isRtl ? 'left' : 'right'
-          // //   });
-          // // }
-
-          // if (type === 'offline') {
-          //   let endDate = response.enddatetime.split(' ')[0];
-          //   let endTime = response.enddatetime.split(' ')[1].substring(0, 5);
-          //   $('#sonline').hide();
-          //   // $('#senddatetime').show();
-          //   $('#estarttime').show();
-          //   $('#eendtime').show();
-          //   $('#ssessions').hide();
-          //   $('#strainer').show();
-          //   $('#strainer_email').show();
-          //   $('#slocation').show();
-          //   $('#saddress').show();
-          //   // $('#eenddate').val(response.enddatetime);
-          //   $('#edatetime').val(startDate);
-          //   $('#estartTime').val(startTime);
-          //   $('#eendTime').val(endTime);
-          //   $('#elocation').val(response.training_location);
-          //   $('#eaddress').val(response.training_Address);
-          //   $('#etrainer').val(response.trainer_name);
-          //   $('#etrainer_email').val(response.trainer_email);
-          // } else if (type === 'sessions') {
-          //   $('#sonline').hide();
-          //   // $('#senddatetime').hide();
-          //   $('#estarttime').show();
-          //   $('#eendtime').hide();
-          //   $('#ssessions').show();
-          //   $('#strainer').show();
-          //   $('#strainer_email').show();
-          //   $('#slocation').hide();
-          //   $('#saddress').hide();
-          //   $('#etrainer').val(response.trainer_name);
-          //   $('#etrainer_email').val(response.trainer_email);
-          //   $('#eduration').val(response.duration);
-          //   $('#elocation').val('');
-          //   $('#eaddress').val('');
-          // } else {
-          //   $('#sonline').show();
-          //   // $('#senddatetime').hide();
-          //   $('#estarttime').show();
-          //   $('#eendtime').hide();
-          //   $('#ssessions').hide();
-          //   $('#strainer').hide();
-          //   $('#strainer_email').hide();
-          //   $('#slocation').hide();
-          //   $('#saddress').hide();
-          //   $('#eonline').val(response.training_Address);
-          //   $('#etrainer').val('');
-          // }
           $('#editsession').modal('show');
         },
         error: function(error) {
@@ -1525,12 +1277,12 @@
           let attendanceHtml = "";
           response.attendances.forEach(function(att) {
             attendanceHtml += `<tr>
-        <td class="text-center">${att?.training_session?.title ?? 'غير متوفر'}</td> 
-        <td class="text-center">${att?.training_session?.trainer_name ?? 'غير متوفر'}</td> 
-        <td class="text-center">${att?.cycle?.title ?? 'غير متوفر'}</td> 
-        <td class="text-center">${att?.user?.first_name_en +" "+att?.user?.last_name_en +" <br> ( "+ att?.company?.name_en +" ) " ?? 'غير متوفر'}</td> 
-        <td class="text-center text-success">${formatDateTime(att?.created_at) ?? 'غير متوفر'}</td>
-    </tr>`;
+              <td class="text-center">${att?.training_session?.title ?? 'غير متوفر'}</td> 
+              <td class="text-center">${att?.training_session?.trainer_name ?? 'غير متوفر'}</td> 
+              <td class="text-center">${att?.cycle?.title ?? 'غير متوفر'}</td> 
+              <td class="text-center">${att?.user?.first_name_en +" "+att?.user?.last_name_en +" <br> ( "+ att?.company?.name_en +" ) " ?? 'غير متوفر'}</td> 
+              <td class="text-center text-success">${formatDateTime(att?.created_at) ?? 'غير متوفر'}</td>
+            </tr>`;
           });
 
           $(".Attendance_body").html(attendanceHtml);

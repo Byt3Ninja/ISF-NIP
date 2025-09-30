@@ -235,4 +235,186 @@ class ScreeningEvaluationResults extends Model
 			'comments' => $comments
 		];
 	}
+
+	public static function metadataReport($step_ids, $company_id = null)
+	{
+		$step_ids = is_array($step_ids) ? $step_ids : [$step_ids];
+
+		$steps = Step::whereIn('id', $step_ids)->get()->keyBy('id');
+		if ($steps->isEmpty()) {
+			return [
+				'judges' => collect(),
+				'_steps' => collect(),
+				'companies' => collect(),
+				'_companies' => collect(),
+				'evaluation' => collect(),
+				'results' => collect(),
+				'comments' => collect(),
+			];
+		}
+
+		$all_cycles = $steps->pluck('cycle_id')->unique()->toArray();
+		$all_companies = Company::whereIn('cycle', $all_cycles)->get();
+		$all_steps = Step::whereIn('cycle_id', $all_cycles)->orderBy('arr')->get();
+
+		$evaluations = ScreeningEvaluation::whereIn('step_id', $step_ids)->get()->keyBy('step_id');
+
+		$evaluation_ids = $evaluations->pluck('id')->filter()->values();
+		$all_results = self::whereIn('evaluation_id', $evaluation_ids)->get();
+
+		$comments_map = [];
+		if ($evaluation_ids->isNotEmpty()) {
+			$final_comments = ScreeningEvaluationCustomFields::whereIn('evaluation_id', $evaluation_ids)
+				->where('name', 'final_comment')
+				->with(['values'])
+				->get();
+
+			foreach ($final_comments as $comment) {
+				$comments_map[$comment->evaluation_id] = $comment->values ?? collect();
+			}
+		}
+
+		$output = [];
+
+		foreach ($steps as $step_id => $step) {
+			$evaluation = $evaluations->get($step_id);
+			$results = $all_results->where('evaluation_id', $evaluation?->id ?? null);
+
+			$comments = $comments_map[$evaluation?->id ?? null] ?? collect();
+
+			$companies = $all_companies->where('cycle', $step->cycle_id);
+
+		
+			if ($step->stype == 5) {
+				$finals = Finalscreening::where('step_id', $step_id)
+					->with(['company', 'company.users'])
+					->get()
+					->map(function ($f) {
+						$f->judgers_ids = array_map('intval', (array) $f->judges);
+						return $f;
+					});
+
+				$users_ids = $finals->pluck('judgers_ids')->flatten()->unique()->values();
+				$judges = User::whereIn('id', $users_ids)->get();
+			} else {
+				$screenings = Screening::where('step_id', $step_id)->with('user')->get();
+				$judges = $screenings->pluck('user')->unique('id');
+				$finals = $screenings; 
+			}
+
+
+			$l = app()->getLocale();
+			$judges = $judges->map(function ($user) use ($l) {
+				$judger = new \stdClass();
+				$judger->id = $user->id ?? 0;
+				$judger->name = ($user->{'first_name_' . $l} ?? '') . ' ' . ($user->{'last_name_' . $l} ?? '');
+				$judger->phone = $user->phone ?? '';
+				$judger->email = $user->email ?? '';
+				$judger->image_url = $user->image_url ?? '';
+				return $judger;
+			})->values();
+
+			foreach ($judges as $judge) {
+				if ($step->stype == 5) {
+					$startup_ids = $finals
+						->filter(fn($f) => in_array($judge->id, $f->judgers_ids))
+						->pluck('company.users')
+						->flatten()
+						->pluck('id')
+						->unique()
+						->toArray();
+
+					$judge->startups = $companies
+						->filter(fn($c) => $c->users->whereIn('id', $startup_ids)->isNotEmpty())
+						->pluck('id');
+				} elseif ($step->data != 'grouptogroup') {
+					$judge->startups = $companies->pluck('id');
+				} else {
+					$judge->startups = collect();
+				}
+			}
+			foreach ($judges as $judge) {
+				$judge->companies = collect();
+				foreach ($judge->startups as $cid) {
+					$company_results = $results->where('company_id', $cid)->where('user_id', $judge->id);
+					$status = $company_results->isEmpty() ? 'Not Evaluated' :
+						($company_results->contains('status', 0) ? 'Draft' : 'Published');
+
+					$judge->companies->push((object)[
+						'id' => $cid,
+						'status' => $status,
+						'results' => $company_results->values(),
+					]);
+				}
+			}
+			if ($evaluation && !empty($evaluation->categories)) {
+				foreach ($evaluation->categories as $criteria) {
+					$subCriteria = $criteria->subCriteria;
+					foreach ($judges as $judge) {
+						foreach ($judge->companies as $company) {
+							foreach ($company->results as $result) {
+								if (!isset($result->weighted_score)) $result->weighted_score = 0;
+								if (!isset($result->parent_criteria)) $result->parent_criteria = $result->criteria->parent_id ?? null;
+
+								$sub = $subCriteria->firstWhere('id', $result->criteria_id);
+								if ($sub) {
+									$weight = $sub->weight;
+									$result->weighted_score = (intval($result->score) / 5) * $weight;
+								}
+							}
+						}
+					}
+				}
+			}
+			$_companies = $companies->map(function ($company) use ($judges, $evaluation) {
+				$publishedJudges = $judges->filter(function ($judge) use ($company) {
+					return $judge->companies->where('id', $company->id)->where('status', 'Published')->isNotEmpty();
+				});
+
+				$scores = $publishedJudges->map(function ($judge) use ($company, $evaluation) {
+					$comp = $judge->companies->firstWhere('id', $company->id);
+					if (!$comp) return null;
+
+					$score = $comp->results->groupBy('parent_criteria')->sum(function ($group) use ($evaluation) {
+					$parentId = $group->first()->parent_criteria;
+
+
+					$groupWeight = 0;
+					if ($evaluation && $evaluation->categories) {
+						$cat = $evaluation->categories->firstWhere('id', $parentId);
+						$groupWeight = $cat?->weight ?? 0;
+					}
+
+					return $groupWeight * $group->sum('weighted_score');
+				});
+
+					return round($score * 100);
+				})->filter();
+
+				$avg = $scores->isEmpty() ? 0 : $scores->avg();
+				$company->average_score = $avg;
+				return $company;
+			});
+
+			foreach ($judges as $judge) {
+				foreach ($judge->companies as $company) {
+					$fullCompany = $_companies->firstWhere('id', $company->id);
+					if ($fullCompany) {
+						$company->score = $fullCompany->average_score;
+					}
+				}
+			}
+
+			$output[$step_id] = [
+				'judges' => $judges,
+				'_steps' => $all_steps->where('cycle_id', $step->cycle_id),
+				'companies' => $companies,
+				'_companies' => $_companies,
+				'evaluation' => $evaluation,
+				'results' => $results,
+				'comments' => $comments,
+			];
+		}
+		return $output;
+	}
 }

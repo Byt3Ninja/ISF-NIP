@@ -566,22 +566,25 @@ class TrainingController extends Controller
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
 			}
-			$sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
+			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
+			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC')->get();
+
+			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
+			
 			$online = Training::get();
-			if ($request->type != 0) {
-				$sessions = $sessions->where('type', $request->type);
-			}
-			if ($request->dateFrom != 0) {
-				$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
-			}
+			// if ($request->type != 0) {
+			// 	$sessions = $sessions->where('type', $request->type);
+			// }
+			// if ($request->dateFrom != 0) {
+			// 	$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
+			// }
 
-			if ($request->dateTo != 0) {
-				$sessions = $sessions->where('datetime', '<=', $request->dateTo);
-			}
+			// if ($request->dateTo != 0) {
+			// 	$sessions = $sessions->where('datetime', '<=', $request->dateTo);
+			// }
 
-			$sessions = $sessions->get();
 			// dd($sessions->toArray());
-			return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
+			return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'cycles', 'online'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
 		}
@@ -676,13 +679,13 @@ class TrainingController extends Controller
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
-				return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
+				return back()->with(['message' => 'Online_Session_Added_Successfully', 'class' => 'success']);
 			} elseif ($type == 'online') {
 				$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online);
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null, $addOrEdit);
 				}
-				return back()->with(['message' => 'Saved', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Online_Training_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'offline') {
 				$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email);
 				// ======> notify Trainer <=================
@@ -690,7 +693,7 @@ class TrainingController extends Controller
 				$address  = $request->training_Address ?? 'No Address';
 				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
-				return back()->with(['message' => 'Saved', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Offline_Session_Added_Successfully'), 'class' => 'success']);
 			} else {
 				return back()->with(['message' => 'Can\'t add session', 'class' => 'danger']);
 			}

@@ -16,7 +16,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/screening/results" class="col-lg-4 col-sm-6">
+    <a href="{{ route('screening.results_report')}}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-warning h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -151,7 +151,7 @@
     </div>
 
     <div class="row g-6">
-      <a href="/dashboard/final/results" class="col-lg-4 col-sm-6">
+      <a href="{{ route('screening.results_report', ['status' => 'not-evaluated']) }}" class="col-lg-4 col-sm-6">
         <div class="card card-border-shadow-primary h-100">
           <div class="card-body" style="display: grid; place-items: center;">
             <div class="d-flex align-items-center mb-2">
@@ -166,7 +166,7 @@
           </div>
         </div>
       </a>
-      <a href="/dashboard/screening/results" class="col-lg-4 col-sm-6">
+      <a href="{{ route('screening.results_report', ['status' => 'published']) }}" class="col-lg-4 col-sm-6">
         <div class="card card-border-shadow-primary h-100">
           <div class="card-body" style="display: grid; place-items: center;">
             <div class="d-flex align-items-center mb-2">

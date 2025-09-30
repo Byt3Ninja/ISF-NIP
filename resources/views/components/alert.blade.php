@@ -1,5 +1,5 @@
 <div class="alert alert-{{ $type }} alert-dismissible" role="alert">
-  {{ $message }}
+  {{ $message }} {{ Session::forget('msg') }}
   <button 
     type="button" 
     class="btn-close" 

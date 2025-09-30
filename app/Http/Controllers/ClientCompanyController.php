@@ -428,6 +428,8 @@ class ClientCompanyController extends Controller
                     'business_categories' => 'nullable|array',
                     'business_categories.*' => ['string', Rule::in($allCategories)],
                     'other_category' => 'nullable|string|max:255',
+                    'Commercial_Register' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+                    'Tax_Card' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
                 ], [
                     'name_en.required' => __('admin.Name is required'),
                     'country_id.required' => __('admin.Country is required'),
@@ -440,6 +442,12 @@ class ClientCompanyController extends Controller
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
+                    'Commercial_Register.file'     => __('admin.File_is_not_valid'),
+                    'Commercial_Register.mimes'    => __('admin.Invalid_file_type'),
+                    'Commercial_Register.max'      => __('admin.File_size_must_be_less_than_10MB'),
+                    'Tax_Card.file'     => __('admin.File_is_not_valid'),
+                    'Tax_Card.mimes'    => __('admin.Invalid_file_type'),
+                    'Tax_Card.max'      => __('admin.File_size_must_be_less_than_10MB'),
                 ]);
 
                 // Handle "Other" category logic
@@ -473,7 +481,7 @@ class ClientCompanyController extends Controller
                         $file->storeAs($path, $originalName, [
                             'disk' => 'document'
                         ]);
-                        $Commercial_Register = 'documents/' . $path . $originalName;
+                        $Commercial_Register = '/documents/' . $path . $originalName;
                     }else { $Commercial_Register = $company->Commercial_Register ?? 'null'; }
                     if( $request->hasFile('Tax_Card') )
                     {
@@ -484,7 +492,7 @@ class ClientCompanyController extends Controller
                         $file->storeAs($path, $originalName, [
                             'disk' => 'document'
                         ]);
-                        $Tax_Card = 'documents/'. $path . $originalName;
+                        $Tax_Card = '/documents/'. $path . $originalName;
                     } else { $Tax_Card = $company->Tax_Card ?? 'null'; }
                     $CreatedTax = $data['CreatedTax'];
                     $cuntryReg = $data['Country_Register'];
