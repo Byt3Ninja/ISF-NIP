@@ -6,7 +6,7 @@
     <div class="wrap">
       <!-- Navigation Pills -->
       @php
-        $pills = ['industries', 'sectors', 'technologies', 'mapping', 'json'];
+        $pills = ['industries', 'sectors', 'technologies'];
       @endphp
       <ul class="nav nav-pills mb-6" id="settingsTabs" role="tablist">
         @foreach($pills as $i => $p)
@@ -557,8 +557,17 @@ function openRenameModal(action, type, index, name) {
   currentModalIndex = index;
   currentModalName = name;
 
-  elements.renameModalLabel.text(`${action === 'add' ? '{{ __('settings.Add') }}' : '{{ __('settings.Rename') }}'} ${type.charAt(0).toUpperCase() + type.slice(1)}`);
-  elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add') }}' : '{{ __('settings.Rename') }}');
+  if (type === 'industry') {
+    elements.renameModalLabel.text('{{ __('settings.Add_Industry') }}');
+    elements.confirmActionBtn.text('{{ __('settings.Add_Industry') }}');
+  } else if (type === 'sector') {
+    elements.renameModalLabel.text('{{ __('settings.Add_Sector') }}');
+    elements.confirmActionBtn.text('{{ __('settings.Add_Sector') }}');
+  } else {
+    elements.renameModalLabel.text('{{ __('settings.Add_Technology') }}');
+    elements.confirmActionBtn.text('{{ __('settings.Add_Technology') }}');
+  }
+
   elements.renameInput.val(name || '');
   elements.renameModal.modal('show');
 }
@@ -959,19 +968,19 @@ dump();
 console.log('Industry Management System initialized');
 console.log('AJAX Configuration:', AJAX_CONFIG);
 console.log('Available endpoints:', Object.keys({
-  'GET /admin/industries': 'Get all industries',
-  'POST /admin/industries': 'Create new industry', 
-  'PUT /admin/industries/{id}': 'Update industry',
-  'DELETE /admin/industries/{id}': 'Delete industry',
-  'POST /admin/industries/reorder': 'Reorder industries',
-  'POST /admin/industries/sectors': 'Create new sector',
-  'PUT /admin/industries/sectors/{id}': 'Update sector',
-  'DELETE /admin/industries/sectors/{id}': 'Delete sector',
-  'POST /admin/industries/sectors/reorder': 'Reorder sectors',
-  'POST /admin/industries/technologies': 'Create new technology',
-  'PUT /admin/industries/technologies/{name}': 'Update technology',
-  'DELETE /admin/industries/technologies/{name}': 'Delete technology',
-  'POST /admin/industries/save-all': 'Save all changes' // import industries
+  'GET /industries': 'Get all industries',
+  'POST /industries': 'Create new industry', 
+  'PUT /industries/{id}': 'Update industry',
+  'DELETE /industries/{id}': 'Delete industry',
+  'POST /industries/reorder': 'Reorder industries',
+  'POST /industries/sectors': 'Create new sector',
+  'PUT /industries/sectors/{id}': 'Update sector',
+  'DELETE /industries/sectors/{id}': 'Delete sector',
+  'POST /industries/sectors/reorder': 'Reorder sectors',
+  'POST /industries/technologies': 'Create new technology',
+  'PUT /industries/technologies/{name}': 'Update technology',
+  'DELETE /industries/technologies/{name}': 'Delete technology',
+  'POST /industries/save-all': 'Save all changes' // import industries
 }));
 </script>
 @stop
