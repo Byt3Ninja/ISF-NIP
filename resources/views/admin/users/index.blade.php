@@ -74,14 +74,14 @@
               <table id="users-list-datatable" class="table datatables-ajax">
                 <thead>
                   <tr class="table-light">
-                    <th>#</th>
+                    <th>ID</th>
                     <th>{{ __('admin.Name') }}</th>
                     <th>{{ __('admin.Email') }}</th>
                     <th>{{ __('admin.Phone') }}</th>
                     <th>{{ __('admin.Gender') }}</th>
                     <th>{{ __('admin.Role') }}</th>
                     <th>{{ __('admin.HaveCompany') }}</th>
-                    <th>{{ __('admin.Date') }}</th>
+                    <th>{{ __('admin.CreatedAt') }}</th>
                     <th>
                       @if( $_user->ableTo('users.destroy', $permissions) )
                       {{ __('admin.Delete') }}
@@ -95,23 +95,23 @@
                     <td>
                       <a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a>
                     </td>
-                    <td style="font-size: small;">
+                    <td>
                       <a href="{{ route('users.edit', ['user' => $user->id]) }}">
-                        {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}
+                        <small>{{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}</small>
                       </a>
                     </td>
-                    <td style="font-size: small;">{{ $user->email }}</td>
-                    <td style="font-size: small;">{{ $user->phone }}</td>
-                    <td style="font-size: small;" data-search="{{ $user->gender }}" data-sort="{{ $user->gender }}">
-                      {{ trim($user->gender) ? __('admin.' . $user->gender) : '-' }}
+                    <td><small>{{ $user->email }}</small></td>
+                    <td><small>{{ $user->phone }}</small></td>
+                    <td data-search="{{ $user->gender }}" data-sort="{{ $user->gender }}">
+                      <small>{{ trim($user->gender) ? __('admin.' . $user->gender) : '-' }}</small>
                     </td>
-                    <td style="font-size: small;" data-search="{{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}">
-                      {{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}
+                    <td data-search="{{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}">
+                      <small>{{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}</small>
                     </td>
-                    <td style="font-size: small;" data-search="{{ $user->company ? 'Yes' : 'No' }}">
-                      {{ $user->company ? __('admin.Yes') : __('admin.No') }}
+                    <td data-search="{{ $user->company ? 'Yes' : 'No' }}">
+                      <small>{{ $user->company ? __('admin.Yes') : __('admin.No') }}</small>
                     </td>
-                    <td style="font-size: small;">{{ $user->created_at }}</td>
+                    <td><small class="text-nowrap">{{ $user->created_at }}</small></td>
                     <td style="padding: 0px;font-size: small;">
                       @if( $_user->ableTo('users.destroy', $permissions) )
                       <button id='deleteAction' data-id='{{ $user->id }}'
@@ -142,7 +142,6 @@
     var usersTable = $('#users-list-datatable').DataTable({
       responsive: true,
       pageLength: 10,
-      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
       language: {
         @if($l == 'ar')
         "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"

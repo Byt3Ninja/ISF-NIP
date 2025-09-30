@@ -65,8 +65,8 @@
         <h4 class="card-title">{{ __('admin.Training sessions') }}</h4>
         <div class="d-flex align-items-center gap-3">
           <div class="btn-group">
-            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="ti ti-download ti-sm me-1"></i>{{ __('settings.Export') }}
+            <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
             </button>
             <ul class="dropdown-menu">
               @foreach(['csv', 'excel'] as $key => $option)
