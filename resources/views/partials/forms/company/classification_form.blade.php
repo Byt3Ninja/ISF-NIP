@@ -38,7 +38,7 @@
               <option>Creative Arts</option>
             </select>
             <small class="text-muted">
-              {{ $l == 'en' ? 'You can assign multiple sectors or technologies to one industry.' : 'يمكنك تعيين قطاعات أو تقنيات متعددة لصناعة واحدة.' }}
+              {{ $l == 'en' ? 'Select the industry that best describes your business. Each industry has its specific sectors.' : 'حدد الصناعة التي تصف عملك بشكل أفضل. كل صناعة لها قطاعاتها الخاصة.' }}
             </small>
             <div class="error" id="industryErr" style="display:none;">
               {{ $l == 'en' ? 'Please select an industry' : 'يرجى اختيار صناعة' }}
@@ -111,7 +111,17 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-  // Dataset with unique technologies added for each industry
+  // Common technologies across all industries
+  const COMMON_TECHNOLOGIES = [
+    "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
+    "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
+    "Mobile Applications","Web Applications","AR/VR","3D Printing",
+    "Natural Language Processing","Computer Vision","Quantum Computing",
+    "Biometrics","Drone Technology","5G","Edge Computing","Digital Twin",
+    "Geospatial Technology","Cybersecurity","API Integration","Other"
+  ];
+
+  // Dataset with sectors for each industry
   const DATA = [
     {
       industry: "Agritech",
@@ -120,12 +130,6 @@ $(document).ready(function() {
         "Agricultural Supply Chain Platforms","Agri-Biotech and Genetics","Agri-Finance and Insurance",
         "Smart Irrigation Systems","Agri Drones and Remote Sensing","Livestock Management",
         "Food Traceability and Safety","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "Geospatial Mapping","Satellite Imaging","Hydroponics Systems","Other"
       ]
     },
     {
@@ -135,11 +139,6 @@ $(document).ready(function() {
         "Lending and Microfinance","Wealth Management / Robo-Advisory","InsurTech","RegTech / Compliance",
         "Fraud Detection and Risk Scoring","Digital Wallets","Buy Now Pay Later (BNPL)","Crypto Exchanges",
         "Crowdfunding Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Blockchain","Cloud Computing",
-        "Big Data & Analytics","Mobile Applications","Web Applications","Automation","Internet of Things (IoT)",
-        "Biometric Authentication","Open Banking APIs","Other"
       ]
     },
     {
@@ -149,12 +148,6 @@ $(document).ready(function() {
         "Diagnostics and Imaging","Health Data Analytics","Wellness and Fitness Platforms",
         "Genomics and Precision Medicine","Drug Discovery Platforms","Remote Patient Monitoring",
         "Virtual Hospitals","Healthcare Supply Chain","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "3D Bioprinting","CRISPR Gene Editing","Medical Imaging AI","Other"
       ]
     },
     {
@@ -164,12 +157,6 @@ $(document).ready(function() {
         "Corporate Training and LMS","Testing and Assessment Tools","Language Learning",
         "Virtual Classrooms","Skill Development Platforms","AR/VR Learning Environments",
         "Gamified Learning Apps","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Automation","Mobile Applications","Web Applications",
-        "Internet of Things (IoT)","AR/VR",
-        "Gamification Engines","Adaptive Learning Systems","Other"
       ]
     },
     {
@@ -179,12 +166,6 @@ $(document).ready(function() {
         "Retail Analytics and Personalization","Logistics and Last-Mile Delivery",
         "Subscription Commerce","Flash Sales Platforms","B2B E-commerce",
         "Inventory Management Systems","Omni-Channel Retail","Digital Payments Integration","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Mobile Applications","Web Applications","Automation",
-        "Internet of Things (IoT)","Blockchain",
-        "Recommendation Engines","Augmented Reality (AR) Shopping","Other"
       ]
     },
     {
@@ -194,12 +175,6 @@ $(document).ready(function() {
         "Supply Chain Platforms","Drone Delivery","Micro-Mobility (e-scooters, bikes)",
         "Autonomous Vehicles","Freight and Cargo Management","Smart Parking Systems",
         "Mobility-as-a-Service (MaaS)","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics",
-        "Mobile Applications","Web Applications","Blockchain",
-        "Vehicle Telematics","Autonomous Driving Systems","Other"
       ]
     },
     {
@@ -208,12 +183,6 @@ $(document).ready(function() {
         "Waste Management Platforms","Renewable Energy Solutions","Energy Storage Systems",
         "Carbon Capture and Trading","Water Treatment Technologies","Smart Grid Management",
         "Energy Efficiency Monitoring","Sustainable Packaging","Circular Economy Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "Solar PV Systems","Wind Turbine Tech","Battery Management Systems","Other"
       ]
     },
     {
@@ -223,11 +192,6 @@ $(document).ready(function() {
         "HR and Payroll Systems","Data Analytics and BI Tools","DevOps and CI/CD Platforms",
         "Marketing Automation","Customer Support Platforms","Project Management Tools",
         "Workflow Automation","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Automation","Web Applications","Mobile Applications","Blockchain",
-        "Low-Code/No-Code Platforms","APIs & Microservices","Other"
       ]
     },
     {
@@ -236,11 +200,6 @@ $(document).ready(function() {
         "Online Booking Platforms","Travel Management Systems","Hospitality Solutions",
         "Experience Marketplaces","Mobility Services for Travel","Virtual Travel Experiences",
         "Travel Insurance Platforms","Dynamic Pricing Engines","Loyalty and Rewards Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Mobile Applications","Web Applications","Automation","Blockchain",
-        "Virtual Reality (VR) Tours","Geolocation Services","Other"
       ]
     },
     {
@@ -249,11 +208,6 @@ $(document).ready(function() {
         "Streaming Platforms","Gaming","Digital Publishing","Advertising Technology (AdTech)",
         "Music Tech","Podcast Platforms","AR/VR Entertainment","Content Creation Tools",
         "Esports Platforms","Social Media Networks","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Mobile Applications","Web Applications","Automation","Blockchain",
-        "AR/VR","Game Engines","Motion Capture Tech","Other"
       ]
     },
     {
@@ -262,12 +216,6 @@ $(document).ready(function() {
         "Food Delivery Platforms","Alternative Proteins","Smart Kitchen Devices",
         "Food Safety and Traceability","Meal Kit Services","Restaurant Management Systems",
         "Vertical Farming","Grocery Delivery","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Mobile Applications",
-        "Web Applications","Blockchain",
-        "Food Robotics","Lab-Grown Meat Tech","Other"
       ]
     },
     {
@@ -276,11 +224,6 @@ $(document).ready(function() {
         "Machine Learning Platforms","Natural Language Processing","Computer Vision",
         "Robotics","Quantum Computing","Edge AI Solutions","Neural Interface Technology",
         "Autonomous Systems","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Automation","Robotics","Blockchain","Web Applications","Mobile Applications",
-        "Quantum Algorithms","Neuromorphic Computing","Other"
       ]
     },
     {
@@ -288,11 +231,6 @@ $(document).ready(function() {
       sectors: [
         "Contract Management","e-Discovery","Compliance Platforms","Online Dispute Resolution",
         "Case Management Systems","IP Management Tools","Legal Research Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Automation","Blockchain","Web Applications","Mobile Applications",
-        "Natural Language Processing (NLP)","Document Automation","Other"
       ]
     },
     {
@@ -301,11 +239,6 @@ $(document).ready(function() {
         "GovTech Services","Community Platforms","Non-Profit Management Tools",
         "Civic Engagement Apps","Digital Identity Solutions","Open Data Platforms",
         "Public Service Portals","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Automation","Blockchain","Web Applications","Mobile Applications",
-        "Digital ID Verification","Open Data APIs","Other"
       ]
     },
     {
@@ -314,12 +247,6 @@ $(document).ready(function() {
         "Smart Factory (Industry 4.0)","3D Printing and Additive Manufacturing","Supply Chain Automation",
         "Industrial IoT","Predictive Maintenance","Robotics Integration","Quality Control Systems",
         "Digital Twin Platforms","Advanced Materials","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "Additive Manufacturing","CNC Automation","Other"
       ]
     },
     {
@@ -327,11 +254,6 @@ $(document).ready(function() {
       sectors: [
         "Digital Art Platforms","Music Production Tools","Design Marketplaces","Content Creation Platforms",
         "Virtual Galleries","NFT Art Marketplaces","AR/VR Creative Experiences","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Automation","Blockchain","Web Applications","Mobile Applications",
-        "AR/VR","Generative AI Tools","3D Modeling Software","Other"
       ]
     }
   ];
@@ -356,10 +278,10 @@ $(document).ready(function() {
   function updateLabels(industry) {
     @if ($l == 'ar')
       $('#sectorsLabel').text(`اختر القطاعات لـ ${industry}`);
-      $('#technologiesLabel').text(`اختر التقنيات المستخدمة لـ ${industry}`);
+      $('#technologiesLabel').text('اختر التقنيات المستخدمة');
     @else
       $('#sectorsLabel').text(`Choose sectors for ${industry}`);
-      $('#technologiesLabel').text(`Choose technologies used for ${industry}`);
+      $('#technologiesLabel').text('Choose technologies used');
     @endif
   }
 
@@ -403,13 +325,7 @@ $(document).ready(function() {
   function renderTechnologies(industryName) {
     $techListEl.empty();
     
-    const entry = DATA.find(d => d.industry === industryName);
-    if (!entry) {
-      console.warn('No data found for industry:', industryName);
-      return;
-    }
-    
-    entry.technologies.forEach(tech => {
+    COMMON_TECHNOLOGIES.forEach(tech => {
       const id = generateId(tech, 'tech-');
       const $wrap = $('<div>', {
         class: 'col-md-4 col-sm-6 mb-2',
