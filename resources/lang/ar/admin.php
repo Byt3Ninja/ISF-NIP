@@ -490,7 +490,7 @@ return [
 	'judge Sessions' => 'جلسات التحكيم و المراجعة',
 	'Final done screening' => 'عدد جلسات التقيم المنتهية',
 	'Final pending screening' => 'عدد جلسات التقيم  المنتظرة',
-	'screening pending sessions' => 'عدد جلسات المراجعة و الفحص المنتظرة',
+	'screening pending sessions' => ' جلسات المراجعة و الفحص المنتظرة',
 	'screening done sessions' => 'عدد جلسات المراجعة و الفحص المنتهية',
 	'SelectCompany' => 'اختار الشركة',
 	'SelectOrSearchCompany' => 'يمكن البحث باسم الشركة',
