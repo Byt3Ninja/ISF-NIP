@@ -165,5 +165,10 @@ return [
 	'Confirm' => 'تأكيد',
 	'Delete' => 'حذف',
 	'Up' => 'للأعلى',
-	'Down' => 'للأسفل'
+	'Down' => 'للأسفل',
+
+	'Notification_Templates' => 'قوالب الإشعارات',
+	'Create_Template' => 'إنشاء قالب',
+	'Manage_Templates' => 'إدارة القوالب',
+	'Manage_Triggers' => 'إدارة المحفزات'
 ];

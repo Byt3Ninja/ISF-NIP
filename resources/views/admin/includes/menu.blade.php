@@ -953,26 +953,26 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
     <li class="{{ Request::is('dashboard/admin/notification-templates*') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-mail"></i>
-        <div>{{ __('notification Templates') }}</div>
+        <div>{{ __('settings.Notification_Templates') }}</div>
       </a>
       <ul class="menu-sub">
         <li class="{{ Request::is('dashboard/admin/notification-templates/create') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-templates.create') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('admin.Create Template') }}</span>
+            <span class="menu-item">{{ __('settings.Create_Template') }}</span>
           </a>
         </li>
         <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit', 'dashboard/admin/notification-templates/*') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-templates.index') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('admin.Manage Templates') }}</span>
+            <span class="menu-item">{{ __('settings.Manage_Templates') }}</span>
           </a>
         </li>
 
         <li class="{{ Request::is('dashboard/admin/notification-triggers', 'dashboard/admin/notification-triggers/*/edit', 'dashboard/admin/notification-triggers/*') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-triggers.index') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('admin.Manage Triggers') }}</span>
+            <span class="menu-item">{{ __('settings.Manage_Triggers') }}</span>
           </a>
         </li>
 

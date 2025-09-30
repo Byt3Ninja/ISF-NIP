@@ -169,4 +169,9 @@ return [
 	'Delete' => 'Delete',
 	'Up' => 'Up',
 	'Down' => 'Down',
+	
+	'Notification_Templates' => 'Notification Templates',
+	'Create_Template' => 'Create Template',
+	'Manage_Templates' => 'Manage Templates',
+	'Manage_Triggers' => 'Manage Triggers'
 ];
