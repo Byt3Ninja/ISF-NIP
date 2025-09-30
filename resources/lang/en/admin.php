@@ -508,7 +508,7 @@ return [
 	'judge Sessions' => 'Judge and Review Sessions',
 	'Final done screening' => 'Evaluation Done',
 	'Final pending screening' => 'Evaluation Pending',
-	'screening pending sessions' => 'Filtration Pending Number',
+	'screening pending sessions' => 'Screening Pending',
 	'screening done sessions' => 'Filtration Done Number',
 	'SelectCompany' => 'Select The Startup',
 	'SelectOrSearchCompany' => 'You can search by startup name',
