@@ -1040,22 +1040,22 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </li>
           @endif
           <li class="{{ Request::is('*queue-jobs') ? 'active' : '' }} menu-item">
-              <a href="{{ route('queue.jobs') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.QueueJobs') }}</div>
-              </a>
-            </li>
+            <a href="{{ route('queue.jobs') }}" class="menu-link">
+              <i class="menu-livicon" data-icon="globe"></i>
+              <div>{{ __('admin.QueueJobs') }}</div>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/industry-settings">
+              <i class="menu-livicon" data-icon="globe"></i>
+              <div>{{ __('admin.Industry_Settings') }}</div>
+            </a>
+          </li>
         </ul>
       </li>
 
       @endif
       
-    <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
-      <a class="menu-link" href="/dashboard/industry-settings">
-        <i class="menu-icon tf-icons ti ti-augmented-reality"></i>
-        <div>{{ __('admin.Industry_Settings') }}</div>
-      </a>
-    </li>
     
     @if ($updateSittings->HomePage == true)
       @if ($_user->hasRole('Admin'))
