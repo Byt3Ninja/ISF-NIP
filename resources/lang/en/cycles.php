@@ -542,4 +542,13 @@ return [
     'View_Location' => 'View Location',
     'Sessions_Duration' => 'Sessions Duration',
     'Meeting_Duration' => 'Meeting Duration',
+    'Mentors_Enrolled_In_Programs' => 'Mentors Enrolled In Programs',
+    'Mentorship_Requests' => 'Mentorship Requests',
+    'Mentorship_Sessions_Duration' => 'Mentorship Sessions Duration',
+    'Mentorship_Approved_Requests' => 'Mentorship Approved Requests',
+    'Mentorship_Disapproved_Requests' => 'Mentorship Disapproved Requests',
+    'Mentorship_New_Requests' => 'Mentorship New Requests',
+    'Mentorship_Sessions' => 'Mentorship Sessions',
+    'Mentorship_Completed_Sessions' => 'Mentorship Completed Sessions',
+    'Mentorship_Pending_Sessions' => 'Mentorship Pending Sessions'
   ];

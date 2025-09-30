@@ -535,5 +535,14 @@ return [
     'View_Location' => 'عرض الموقع',
     'Sessions_Duration' => 'مدة الجلسات',
     'Meeting_Duration' => 'مدة الاجتماع',
+    'Mentors_Enrolled_In_Programs' => 'الموجهين المسجلين في البرامج',
+    'Mentorship_Requests' => 'طلبات الإرشاد',
+    'Mentorship_Sessions_Duration' => 'مدة جلسات الإرشاد',
+    'Mentorship_Approved_Requests' => 'طلبات الإرشاد المعتمدة',
+    'Mentorship_Disapproved_Requests' => 'طلبات الإرشاد المرفوضة',
+    'Mentorship_New_Requests' => 'طلبات الإرشاد الجديدة',
+    'Mentorship_Sessions' => 'جلسات الإرشاد',
+    'Mentorship_Completed_Sessions' => 'جلسات الإرشاد المكتملة',
+    'Mentorship_Pending_Sessions' => 'جلسات الإرشاد المعلقة'
   ];
 

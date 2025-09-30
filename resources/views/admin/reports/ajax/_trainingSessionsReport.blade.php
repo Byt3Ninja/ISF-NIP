@@ -1,7 +1,6 @@
 
 <div class="col-12">
   @php
-  
     $cards = [
       [ 'value' => $total_sessions_count ?? 0, 'label' => __('admin.Training sessions'), 'icon' => 'school', 'color' => 'primary', 'filter' => 'reset' ],
       [ 'value' => $sessions_period ?? '0h 0m', 'label' => __('cycles.Sessions_Duration'), 'icon' => 'clock-hour-3', 'color' => 'secondary' ],
@@ -16,19 +15,20 @@
   <div class="row g-6 d-flex justify-content-center mb-8">
     @foreach($cards as $key => $card)
       <div class="col-lg-2 col-sm-6">
-        <div class="card card-border-shadow-{{ $card['color'] }} h-100 cursor-pointer filter-card" 
-             data-filter="{{ $card['filter'] ?? '' }}" 
-             style="cursor: pointer;">
-          <div class="card-body" style="display: grid; place-items: center;">
+        <div 
+          class="card card-border-shadow-{{ $card['color'] }} h-100 cursor-pointer filter-card" 
+          data-filter="{{ $card['filter'] ?? '' }}"
+        >
+          <div class="card-body py-2" style="display: grid; place-items: center;">
             <div class="d-flex align-items-center mb-2">
               <div class="avatar me-4">
                 <span class="avatar-initial rounded bg-label-{{ $card['color'] }}">
-                  <i class="ti ti-{{ $card['icon'] }} ti-lg"></i>
+                  <i class="ti ti-{{ $card['icon'] }} ti-20px"></i>
                 </span>
               </div>
               <h5 class="mb-0">{{ $card['value'] }}</h5>
             </div>
-            <small class="mb-1">{{ $card['label'] }}</small>
+            <small class="text-center">{{ $card['label'] }}</small>
           </div>
         </div>
       </div>
@@ -40,7 +40,7 @@
 <div class="card border">
   <!-- Heading & Actions -->
   <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
-    <h4 class="card-title">{{ __('admin.Training sessions') }}</h4>
+    <h5 class="card-title">{{ __('admin.Training sessions') }}</h5>
     <div class="d-flex align-items-center gap-3">
       <div class="btn-group">
         <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -254,7 +254,6 @@
 </div>
 
 <script>
-  console.log('training sessions report loaded');
   $(document).ready(function() {
     // Handle filter card clicks
     $('.filter-card').on('click', function() {
