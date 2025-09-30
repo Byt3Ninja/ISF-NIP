@@ -533,5 +533,7 @@ return [
     'Online_Session_Added_Successfully' => 'تمت إضافة الجلسة عبر الإنترنت بنجاح.',
     'Offline_Session_Added_Successfully' => 'تمت إضافة الجلسة الحضورية بنجاح.',
     'View_Location' => 'عرض الموقع',
+    'Sessions_Duration' => 'مدة الجلسات',
+    'Meeting_Duration' => 'مدة الاجتماع',
   ];
 

@@ -540,4 +540,6 @@ return [
     'Online_Session_Added_Successfully' => 'Online session added successfully.',
     'Offline_Session_Added_Successfully' => 'Offline session added successfully.',
     'View_Location' => 'View Location',
+    'Sessions_Duration' => 'Sessions Duration',
+    'Meeting_Duration' => 'Meeting Duration',
   ];

@@ -4,7 +4,7 @@
 @section('subTitle', __('admin.Edit your profile information'))
 
 @section('content')
-<div class="content-wrapper">
+<div class="content-wrapper mb-12">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row py-md-3 h-100">
       <div class="col-md-12 h-100">
@@ -40,25 +40,27 @@
           ];
         @endphp
 
-        <ul class="nav nav-pills mb-4" id="reportTabs" role="tablist">
-          @foreach($pills as $key => $data)
-          <li class="nav-item" role="presentation">
-            <button 
-              class="nav-link d-flex align-items-center gap-2 @if ($loop->first) active @endif"
-              id="{{ $key }}-tab"
-              data-bs-toggle="pill"
-              data-bs-target="#{{ $key }}"
-              type="button"
-              role="tab"
-              aria-controls="{{ $key }}"
-              aria-selected="{{ $loop->first ? 'true' : 'false' }}"
-            >
-              <i class="{{ $data['icon'] }} ti-18px"></i>
-              <span>{{ $data['label'] }}</span>
-            </button>
-          </li>
-          @endforeach
-        </ul>
+        <div class="overflow-auto">
+          <ul class="nav nav-pills mb-4 flex-nowrap" id="reportTabs" role="tablist">
+            @foreach($pills as $key => $data)
+            <li class="nav-item" role="presentation">
+              <button 
+                class="nav-link d-flex align-items-center gap-2 @if ($loop->first) active @endif"
+                id="{{ $key }}-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#{{ $key }}"
+                type="button"
+                role="tab"
+                aria-controls="{{ $key }}"
+                aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+              >
+                <i class="{{ $data['icon'] }} ti-18px"></i>
+                <span>{{ $data['label'] }}</span>
+              </button>
+            </li>
+            @endforeach
+          </ul>
+        </div>
 
         <!-- Tab Content -->
         <div class="tab-content p-0 w-100 h-100" id="reportTabsContent">
@@ -70,7 +72,7 @@
             aria-labelledby="{{ $key }}-tab"
           >
             <div class="card h-100 w-100">
-              <div class="card-body h-100 w-100">
+              <div class="card-body py-3 h-100 w-100">
                 @if ($key === 'cycles')
                   <h5>{{ __('admin.SelectCycle') }}</h5>
                   <p>{{ __('admin.SelectOrSearchCycle') }}</p>
@@ -153,6 +155,11 @@
         if (data['value'] === 1) {
           $('#report-' + type + ' .loading-message').remove();
           $('#report-' + type).html(data['view']);
+          
+          // Initialize components if this is the training report
+          if (type === 'training' && typeof initializeComponents === 'function') {
+            initializeComponents();
+          }
         }
       }
     });

@@ -195,13 +195,27 @@ class ReportController extends Controller
     }
 
     protected function trainingReport($organization_id){
-        $sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id){
+        $cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
+        $data['cycles'] = $cycles->when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        });
+
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
+            });
+        })->where('stype', 4)->get();
+        $data['steps'] = $steps;
+        
+        $sessions = TrainingSession::with('reports')->whereHas('step',function ($q)use ($organization_id){
             $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
                 $query->whereHas('cycle',function ($query) use ($organization_id){
                     $query->where('organization_id',$organization_id);
                 });
             });
-        });
+        })->orderBy('datetime', 'ASC');
+        $data['sessions'] = $sessions->get();
+
         $data['total_sessions_count'] = $sessions->count();
         $data['sessions_period'] = $sessions->sum('duration')/60;
         $data['zoom_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
@@ -211,6 +225,7 @@ class ReportController extends Controller
                 });
             });
         })->where('type','sessions')->count();
+
         $data['offline_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
             $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
                 $query->whereHas('cycle',function ($query) use ($organization_id){
@@ -218,14 +233,23 @@ class ReportController extends Controller
                 });
             });
         })->where('type','offline')->count();
+
         $data['online_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
             $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
                 $query->whereHas('cycle',function ($query) use ($organization_id){
                     $query->where('organization_id',$organization_id);
                 });
             });
-        })->where('type','online')->count();
+        })->where('type','sessions')->count();
 
+
+         $data['online_training_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
+            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
+                $query->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            });
+        })->where('type','online')->count();
         return $data;
     }
 
