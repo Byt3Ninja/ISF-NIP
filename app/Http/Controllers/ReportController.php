@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Step;
 use App\User;
 use App\Cycle;
 use App\Company;
@@ -13,6 +14,7 @@ use App\SurveyResponses;
 use App\TrainingSession;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
@@ -234,13 +236,21 @@ class ReportController extends Controller
 			->where('roles.default_for', 'judger')
 			->select('users.*')
 			->count();
-        $screenings =Company::whereHas('stepdata',function ($q)use ($organization_id){
-            $q->when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
-                });
-            })->where('stype', 2);
-        })->get();
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+             return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
+            });
+            })->where('stype', 2)->orderBy('from')->get();
+
+        $metadata = ScreeningEvaluationResults::metadataReport($steps->pluck('id')->toArray());
+
+        $allCompanies = collect();
+        foreach ($metadata as $stepId => $dataSet) {
+            $allCompanies = $allCompanies->concat($dataSet['companies']);
+        }
+         $allCompanies = $allCompanies->unique('id')->values();
+
+        $data['screening_sessions_count'] = $allCompanies->count();
         $final_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id){
             $q->when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->whereHas('cycle',function ($query) use ($organization_id){
@@ -282,7 +292,6 @@ class ReportController extends Controller
             });
         })->get();
 
-        $data['screening_sessions_count'] = count($screenings);
         $data['screening_pending_sessions_count'] = count($screening_pending_sessions);
         $data['screening_done_sessions_count'] = count($screening_done_sessions);
         $data['final_screening_count']=count($final_screenings);
