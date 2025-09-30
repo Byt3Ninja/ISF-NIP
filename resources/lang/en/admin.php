@@ -509,7 +509,7 @@ return [
 	'Final done screening' => 'Evaluation Done',
 	'Final pending screening' => 'Evaluation Pending',
 	'screening pending sessions' => 'Screening Pending',
-	'screening done sessions' => 'Filtration Done Number',
+	'screening done sessions' => 'Screening Completed',
 	'SelectCompany' => 'Select The Startup',
 	'SelectOrSearchCompany' => 'You can search by startup name',
 	'SelectCycle' => 'Select The Program',
