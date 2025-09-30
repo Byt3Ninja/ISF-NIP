@@ -135,7 +135,6 @@ return [
 	'Technologies' => 'التقنيات',
 	'Mapping' => 'الخريطة',
 	'Json' => 'JSON',
-	
 	'Add_Industry' => 'إضافة صناعة',
 	'Import_JSON' => 'استيراد JSON',
 	'Export' => 'تصدير',
@@ -144,31 +143,32 @@ return [
 	'Export_Excel' => 'تصدير Excel',
 	'Name' => 'الاسم',
 	'Actions' => 'الإجراءات',
-	
 	'Industry' => 'الصناعة',
 	'Add_Sector' => 'إضافة قطاع',
 	'Add_Other' => 'إضافة أخرى',
 	'Sector' => 'القطاع',
-	
 	'Add_Technology' => 'إضافة تقنية',
 	'Technology' => 'التقنية',
-	
 	'Mapping_Preview' => 'معاينة الخريطة',
 	'Mapping_Info_Message' => 'اختر صناعة لعرض قطاعاتها. التقنيات عامة.',
-	
 	'JSON_Output' => 'مخرجات JSON',
 	'Save_All' => 'حفظ الكل',
 	'Unsaved_Changes' => 'تغييرات غير محفوظة',
-	'Rename' => 'إعادة تسمية',
 	'New_Name' => 'اسم جديد',
 	'Cancel' => 'إلغاء',
-	'Confirm' => 'تأكيد',
 	'Delete' => 'حذف',
+	'Edit_Industry' => 'تعديل الصناعة',
+	'Edit_Sector' => 'تعديل القطاع',
+	'Edit_Technology' => 'تعديل التقنية',
+	'Save' => 'حفظ',
 	'Up' => 'للأعلى',
 	'Down' => 'للأسفل',
-
 	'Notification_Templates' => 'قوالب الإشعارات',
 	'Create_Template' => 'إنشاء قالب',
 	'Manage_Templates' => 'إدارة القوالب',
-	'Manage_Triggers' => 'إدارة المحفزات'
+	'Manage_Triggers' => 'إدارة المحفزات',
+	'Name_Required' => 'يرجى إدخال اسم',
+	'Name_Max_50' => 'يجب ألا يزيد الاسم عن 50 حرفًا.',
+	'Industry_Required' => 'يرجى اختيار صناعة.',
+	'Enter_Name' => 'أدخل الاسم',
 ];

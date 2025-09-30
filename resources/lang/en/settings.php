@@ -131,14 +131,12 @@ return [
 	'GOOGLE_CALENDAR_CLIENT_ID' => 'GOOGLE CALENDAR CLIENT ID',
 	'GOOGLE_CALENDAR_CLIENT_SECRET' => 'GOOGLE CALENDAR CLIENT SECRET',
 	'GOOGLE_CALENDAR_REDIRECT' => 'GOOGLE CALENDAR REDIRECT',
-
 	'Encryption' => 'Encryption',
 	'Industries' => 'Industries',
 	'Sectors' => 'Sectors',
 	'Technologies' => 'Technologies',
 	'Mapping' => 'Mapping',
 	'Json' => 'JSON',
-	
 	'Add_Industry' => 'Add industry',
 	'Import_JSON' => 'Import JSON',
 	'Export' => 'Export',
@@ -147,31 +145,33 @@ return [
 	'Export_Excel' => 'Export Excel',
 	'Name' => 'Name',
 	'Actions' => 'Actions',
-	
 	'Industry' => 'Industry',
 	'Add_Sector' => 'Add sector',
 	'Add_Other' => 'Add Other',
 	'Sector' => 'Sector',
-	
 	'Add_Technology' => 'Add technology',
 	'Technology' => 'Technology',
-	
 	'Mapping_Preview' => 'Mapping preview',
 	'Mapping_Info_Message' => 'Select an industry to view its sectors. Technologies are global.',
-	
 	'JSON_Output' => 'JSON Output',
 	'Save_All' => 'Save all',
 	'Unsaved_Changes' => 'Unsaved changes',
-	'Rename' => 'Rename',
 	'New_Name' => 'New Name',
 	'Cancel' => 'Cancel',
 	'Confirm' => 'Confirm',
 	'Delete' => 'Delete',
+	'Save' => 'Save',
+	'Edit_Industry' => 'Edit Industry',
+	'Edit_Sector' => 'Edit Sector',
+	'Edit_Technology' => 'Edit Technology',
 	'Up' => 'Up',
 	'Down' => 'Down',
-	
 	'Notification_Templates' => 'Notification Templates',
 	'Create_Template' => 'Create Template',
 	'Manage_Templates' => 'Manage Templates',
-	'Manage_Triggers' => 'Manage Triggers'
+	'Manage_Triggers' => 'Manage Triggers',
+	'Name_Required' => 'Please enter a name',
+	'Name_Max_50' => 'Name may not be greater than 50 characters.',
+	'Industry_Required' => 'Please select an industry.',
+	'Enter_Name' => 'Enter Name',
 ];
