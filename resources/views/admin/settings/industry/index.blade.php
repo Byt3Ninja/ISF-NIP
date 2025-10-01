@@ -229,7 +229,6 @@ if (AJAX_CONFIG.csrfToken) {
 
 // AJAX Request Function
 function makeAjaxRequest(action, params, callback) {
-  // Check for network connectivity first
   if (!navigator.onLine) {
     releaseFailureAlert({ message: 'No internet connection. Please check your network and try again.' });
     callback(false, { error: 'No internet connection' });
@@ -269,40 +268,40 @@ function makeAjaxRequest(action, params, callback) {
     requestOptions.body = JSON.stringify(config.data);
   }
 
-  let shouldShowLoading = true;
-  
+  // ✅ Show spinner before request
+  showLoadingIndicator(true);
+
   fetch(`${AJAX_CONFIG.baseUrl}${config.endpoint}`, requestOptions)
     .then(response => {
-      if (!response.ok) {
-        shouldShowLoading = false;
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      if (shouldShowLoading) showLoadingIndicator(true);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       return response.json();
     })
     .then(data => {
-      if (shouldShowLoading) showLoadingIndicator(false);
+      showLoadingIndicator(false); // ✅ Hide spinner
       if (data.success !== false) {
         callback(true, { ...params, response: data });
+
+        // ✅ Auto-hide success alert
+        releaseSuccessAlert({ message: data.message || 'Operation successful' });
+        setTimeout(() => $(".alert-success").fadeOut(), 2000);
+
       } else {
         releaseFailureAlert({ message: data.message || 'Operation failed' });
+        setTimeout(() => $(".alert-danger").fadeOut(), 2500);
         callback(false, { ...params, error: data.message || 'Operation failed' });
       }
     })
     .catch(error => {
-      if (shouldShowLoading) showLoadingIndicator(false);
+      showLoadingIndicator(false); // ✅ Hide spinner
       console.error('AJAX request failed:', error);
-      
+
       let errorMessage = 'Network error occurred';
-      if (error.name === 'AbortError') {
-        errorMessage = 'Request timeout';
-      } else if (error.message.includes('HTTP error')) {
-        errorMessage = `Server error: ${error.message}`;
-      } else if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Network connection failed';
-      }
-      
+      if (error.name === 'AbortError') errorMessage = 'Request timeout';
+      else if (error.message.includes('HTTP error')) errorMessage = `Server error: ${error.message}`;
+      else if (error.message.includes('Failed to fetch')) errorMessage = 'Network connection failed';
+
       releaseFailureAlert({ message: errorMessage });
+      setTimeout(() => $(".alert-danger").fadeOut(), 2500);
       callback(false, { ...params, error: errorMessage });
     });
 }
@@ -389,7 +388,7 @@ function renderIndustries() {
   industriesTable = initializeDataTable(
     'tblIndustries',
     industriesTable,
-    ["#", "Name", "Actions"],
+    ["#", "{{ __('settings.Name') }}", "{{ __('settings.Actions') }}"],
     (table) => {
       DATA.forEach((d) => table.row.add([null, d.industry, generateTableActions('industry', d.id)]));
     },
@@ -413,9 +412,16 @@ function renderSectors() {
   sectorsTable = initializeDataTable(
     'tblSectors',
     sectorsTable,
-    ["#", "Sector", "Actions"],
+    ["#", "{{ __('settings.Sector') }}", "{{ __('settings.Industry') }}", "{{ __('settings.Actions') }}"],
     (table) => {
-      currentSectors.forEach((s) => table.row.add([null, s.name, generateTableActions('sector', s.id, selectedIndustryId)]));
+      currentSectors.forEach((s) => {
+        table.row.add([
+          null,
+          s.name,
+          industry?.industry || "-",
+          generateTableActions('sector', s.id, selectedIndustryId)
+        ]);
+      });
     },
     '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters-sector"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
     function () { $('.filters-sector').append($('#tblSectors-filters')); }
@@ -426,7 +432,7 @@ function renderTech() {
   techTable = initializeDataTable(
     'tblTech',
     techTable,
-    ["#", "Technology", "Actions"],
+    ["#", "{{ __('settings.Technology') }}", "{{ __('settings.Actions') }}"],
     (table) => {
       TECHNOLOGIES.forEach((t) => table.row.add([null, t.name, generateTableActions('tech', t.id)]));
     },

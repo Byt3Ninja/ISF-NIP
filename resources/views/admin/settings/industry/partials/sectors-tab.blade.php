@@ -39,6 +39,7 @@
             <tr>
               <th style="width:40px">#</th>
               <th>{{ __('settings.Sector') }}</th>
+              <th>{{ __('settings.Industry') }}</th>
               <th class="text-end">{{ __('settings.Actions') }}</th>
             </tr>
           </thead>
