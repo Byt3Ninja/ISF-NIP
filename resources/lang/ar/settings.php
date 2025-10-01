@@ -157,10 +157,14 @@ return [
 	'New_Name' => 'اسم جديد',
 	'Cancel' => 'إلغاء',
 	'Delete' => 'حذف',
+	'Delete_Industry' => 'حذف الصناعة',
+	'Delete_Sector' => 'حذف القطاع',
+	'Delete_Technology' => 'حذف التقنية',
 	'Edit_Industry' => 'تعديل الصناعة',
 	'Edit_Sector' => 'تعديل القطاع',
 	'Edit_Technology' => 'تعديل التقنية',
 	'Save' => 'حفظ',
+	'Edit' => 'تعديل',
 	'Up' => 'للأعلى',
 	'Down' => 'للأسفل',
 	'Notification_Templates' => 'قوالب الإشعارات',
@@ -171,4 +175,8 @@ return [
 	'Name_Max_50' => 'يجب ألا يزيد الاسم عن 50 حرفًا.',
 	'Industry_Required' => 'يرجى اختيار صناعة.',
 	'Enter_Name' => 'أدخل الاسم',
+	'Loading' => 'جار التحميل',
+	'Delete_Industry_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه الصناعة؟',
+	'Delete_Sector_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذا القطاع؟',
+	'Delete_Technology_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه التقنية؟'
 ];

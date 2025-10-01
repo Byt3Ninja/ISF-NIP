@@ -71,6 +71,14 @@
                           <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
                         </select>
                       </div>
+                      <!-- Done or Not Done Filter -->
+                      <div class="col-12 col-md-6 col-lg-3">
+                        <select class="form-select select2" id="doneFilter">
+                          <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All Sessions') }}</option>
+                          <option value="done" {{ request()->done == 'done' ? 'selected' : '' }}>{{ __('cycles.Done Sessions') }}</option>
+                          <option value="not_done" {{ request()->done == 'not_done' ? 'selected' : '' }}>{{ __('cycles.Not Done Sessions') }}</option>
+                        </select>
+                      </div>
                       <div class="col-12 col-md-6 col-lg-4">
                         <select class="form-select select2" id="cycle_id">
                           @php

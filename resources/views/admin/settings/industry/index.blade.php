@@ -107,23 +107,6 @@
 
 @section('pagescripts')
 <script>
-// Define translation strings as a JavaScript object to avoid syntax issues
-const translations = {
-  up: @json(__('settings.Up')),
-  down: @json(__('settings.Down')),
-  edit: @json(__('settings.Edit')),
-  delete: @json(__('settings.Delete')),
-  add_industry: @json(__('settings.Add_Industry')),
-  edit_industry: @json(__('settings.Edit_Industry')),
-  save_changes: @json(__('settings.Save')),
-  add_sector: @json(__('settings.Add_Sector')),
-  edit_sector: @json(__('settings.Edit_Sector')),
-  add_technology: @json(__('settings.Add_Technology')),
-  edit_technology: @json(__('settings.Edit_Technology')),
-  admin_delete: @json(__('admin.delete')),
-  admin_cancel: @json(__('admin.cancel'))
-};
-
 // Seed dataset with IDs
 let DATA = [
   { 
@@ -161,8 +144,7 @@ let DATA = [
       { id: 12, name: "Crowdfunding Platforms" },
       { id: 13, name: "Other" }
     ] 
-  },
-  // ... repeat for other industries
+  }
 ];
 
 // Technologies with IDs
@@ -185,16 +167,53 @@ let industriesTable = null;
 let sectorsTable = null;
 let techTable = null;
 
+// ID generators
+let nextIndustryId = Math.max(...DATA.map(d => d.id), 0) + 1;
+let nextTechId = Math.max(...TECHNOLOGIES.map(t => t.id), 0) + 1;
+
+function getNextSectorId(industryId) {
+  const industry = DATA.find(d => d.id === industryId);
+  if (!industry || !industry.sectors.length) return 1;
+  return Math.max(...industry.sectors.map(s => s.id), 0) + 1;
+}
+
+// Helper functions to find by ID
+function findIndustryById(id) {
+  return DATA.find(d => d.id === parseInt(id));
+}
+
+function findIndustryIndexById(id) {
+  return DATA.findIndex(d => d.id === parseInt(id));
+}
+
+function findSectorById(industryId, sectorId) {
+  const industry = findIndustryById(industryId);
+  return industry ? industry.sectors.find(s => s.id === parseInt(sectorId)) : null;
+}
+
+function findSectorIndexById(industryId, sectorId) {
+  const industry = findIndustryById(industryId);
+  return industry ? industry.sectors.findIndex(s => s.id === parseInt(sectorId)) : -1;
+}
+
+function findTechById(id) {
+  return TECHNOLOGIES.find(t => t.id === parseInt(id));
+}
+
+function findTechIndexById(id) {
+  return TECHNOLOGIES.findIndex(t => t.id === parseInt(id));
+}
+
 // Modal context
 let currentModalAction = ''; // 'add' or 'edit'
 let currentModalType = '';   // 'industry', 'sector', or 'tech'
-let currentModalIndex = -1;  // Index for industry/sector
+let currentModalId = null;   // ID instead of index
 let currentModalName = '';   // Old name for edit, or new name for add
-let currentModalIndustryIndex = -1; // Industry index for sector edit
+let currentModalIndustryId = null; // Industry ID for sector edit
 
 // AJAX Configuration
 const AJAX_CONFIG = {
-  baseUrl: '/admin/industries',
+  baseUrl: '/industries',
   timeout: 10000,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -224,8 +243,8 @@ function makeAjaxRequest(action, params, callback) {
     'sec-down': { method: 'POST', endpoint: '/sectors/reorder', data: { ...params, direction: 'down' } },
     'edit': { method: 'PUT', endpoint: `/${params.type}/${params.id}`, data: params },
     'industry-delete': { method: 'DELETE', endpoint: `/${params.id}`, data: {} },
-    'sector-delete': { method: 'DELETE', endpoint: `/sectors/${params.id}`, data: { industryIndex: params.industryIndex } },
-    'tech-delete': { method: 'DELETE', endpoint: `/technologies/${encodeURIComponent(params.name)}`, data: {} },
+    'sector-delete': { method: 'DELETE', endpoint: `/sectors/${params.id}`, data: { industryId: params.industryId } },
+    'tech-delete': { method: 'DELETE', endpoint: `/technologies/${params.id}`, data: {} },
     'add-industry': { method: 'POST', endpoint: '', data: params },
     'add-sector': { method: 'POST', endpoint: '/sectors', data: params },
     'add-technology': { method: 'POST', endpoint: '/technologies', data: params },
@@ -250,7 +269,6 @@ function makeAjaxRequest(action, params, callback) {
     requestOptions.body = JSON.stringify(config.data);
   }
 
-  // Only show loading for successful requests
   let shouldShowLoading = true;
   
   fetch(`${AJAX_CONFIG.baseUrl}${config.endpoint}`, requestOptions)
@@ -328,45 +346,14 @@ const elements = {
 };
 
 // DataTable Language Configuration
-const dataTableLanguageConfig = {
-  @if ($l == 'ar')
-    search: @json(__('admin.Search')),
-    lengthMenu: @json(__('admin.Show')) + " _MENU_ " + @json(__('admin.Entries')),
-    info: @json(__('admin.showing')) + " _START_ " + @json(__('admin.To')) + " _END_ " + @json(__('admin.Of')) + " _TOTAL_ " + @json(__('admin.Entries')),
-    infoEmpty: @json(__('admin.no_entries_available')),
-    infoFiltered: "(" + @json(__('admin.filtered from')) + " _MAX_ " + @json(__('admin.total entries')) + ")",
-    paginate: {
-      first: @json(__('admin.First')),
-      last: @json(__('admin.Last')),
-      next: @json(__('admin.Next')),
-      previous: @json(__('admin.Previous'))
-    },
-    emptyTable: @json(__('admin.No_data_available_in_table')),
-    zeroRecords: @json(__('admin.No_matching_records_found'))
-  @endif
-};
+const dataTableLanguageConfig = {};
 
-// Generate Action Buttons
-const generateTableActions = (type, indexOrName, extraData = '') => {
-  const baseActions = {
-    industry: `
-      <button class="btn btn-sm btn-label-info" data-act="up" data-i="${indexOrName}">${translations.up} <i class="ti ti-sm ti-arrow-up ms-2"></i></button>
-      <button class="btn btn-sm btn-label-warning" data-act="down" data-i="${indexOrName}">${translations.down} <i class="ti ti-sm ti-arrow-down ms-2"></i></button>
-    `,
-    sector: `
-      <button class="btn btn-sm btn-label-info" data-act="sec-up" data-j="${indexOrName}">${translations.up} <i class="ti ti-sm ti-arrow-up ms-2"></i></button>
-      <button class="btn btn-sm btn-label-warning" data-act="sec-down" data-j="${indexOrName}">${translations.down} <i class="ti ti-sm ti-arrow-down ms-2"></i></button>
-    `,
-    tech: ``
-  };
-  const editData = type === 'tech' ? `data-name="${indexOrName}"` : `data-i="${indexOrName}"`;
-  const deleteData = type === 'tech' ? `data-name="${indexOrName}"` : `data-i="${indexOrName}"`;
-
+// Generate Action Buttons - Now using IDs
+const generateTableActions = (type, id, extraData = '') => {
   return `
     <div class="d-flex align-items-center justify-content-end gap-2">
-      ${baseActions[type] || ''}
-      <button class="btn btn-sm btn-label-secondary text-nowrap" data-act="${type}-edit" ${editData}>${translations.edit} <i class="ti ti-sm ti-pencil ms-2"></i></button>
-      <button class="btn btn-sm btn-label-danger" data-act="${type}-del" ${deleteData}>${translations.delete} <i class="ti ti-sm ti-trash ms-2"></i></button>
+      <button class="btn btn-sm btn-label-secondary text-nowrap" data-act="${type}-edit" data-id="${id}" ${type === 'sector' ? `data-industry-id="${extraData}"` : ''}>{{ __('settings.Edit') }}<i class="ti ti-sm ti-pencil ms-2"></i></button>
+      <button class="btn btn-sm btn-label-danger" data-act="${type}-del" data-id="${id}" ${type === 'sector' ? `data-industry-id="${extraData}"` : ''}>{{ __('settings.Delete') }} <i class="ti ti-sm ti-trash ms-2"></i></button>
     </div>
   `;
 };
@@ -402,14 +389,14 @@ function renderIndustries() {
   industriesTable = initializeDataTable(
     'tblIndustries',
     industriesTable,
-    ["#", @json(__('settings.Name')), @json(__('settings.Actions'))],
+    ["#", "Name", "Actions"],
     (table) => {
-      DATA.forEach((d, i) => table.row.add([null, d.industry, generateTableActions('industry', i)]));
+      DATA.forEach((d) => table.row.add([null, d.industry, generateTableActions('industry', d.id)]));
     },
     '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>'
   );
 
-  elements.selIndustrySector.innerHTML = DATA.map(d => `<option value="${d.industry}">${d.industry}</option>`).join('');
+  elements.selIndustrySector.innerHTML = DATA.map(d => `<option value="${d.id}">${d.industry}</option>`).join('');
   if (elements.selIndustrySector.options.length) elements.selIndustrySector.selectedIndex = 0;
 
   renderSectors();
@@ -419,15 +406,16 @@ function renderIndustries() {
 }
 
 function renderSectors() {
-  const idx = elements.selIndustrySector.selectedIndex;
-  const currentSectors = idx >= 0 ? DATA[idx].sectors : [];
+  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
+  const industry = findIndustryById(selectedIndustryId);
+  const currentSectors = industry ? industry.sectors : [];
 
   sectorsTable = initializeDataTable(
     'tblSectors',
     sectorsTable,
-    ["#", @json(__('settings.Sector')), @json(__('settings.Actions'))],
+    ["#", "Sector", "Actions"],
     (table) => {
-      currentSectors.forEach((s, j) => table.row.add([null, s, generateTableActions('sector', j)]));
+      currentSectors.forEach((s) => table.row.add([null, s.name, generateTableActions('sector', s.id, selectedIndustryId)]));
     },
     '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters-sector"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
     function () { $('.filters-sector').append($('#tblSectors-filters')); }
@@ -438,9 +426,9 @@ function renderTech() {
   techTable = initializeDataTable(
     'tblTech',
     techTable,
-    ["#", @json(__('settings.Technology')), @json(__('settings.Actions'))],
+    ["#", "Technology", "Actions"],
     (table) => {
-      TECHNOLOGIES.forEach((t) => table.row.add([null, t, generateTableActions('tech', t)]));
+      TECHNOLOGIES.forEach((t) => table.row.add([null, t.name, generateTableActions('tech', t.id)]));
     },
     '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>'
   );
@@ -448,12 +436,15 @@ function renderTech() {
 
 function renderPreview() {
   elements.mapPreview.innerHTML = '';
-  const idx = elements.selIndustrySector.selectedIndex;
-  if (idx < 0) return;
-  DATA[idx].sectors.forEach(s => {
+  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
+  const industry = findIndustryById(selectedIndustryId);
+  
+  if (!industry) return;
+  
+  industry.sectors.forEach(s => {
     const span = document.createElement('span');
     span.className = 'badge bg-secondary me-2 mb-2';
-    span.textContent = s;
+    span.textContent = s.name;
     elements.mapPreview.appendChild(span);
   });
 }
@@ -464,26 +455,26 @@ function dump() {
   elements.statusBtn.className = 'btn btn-sm btn-label-warning';
 }
 
-// Modal Logic
-function openEditModal(action, type, index, name, industryIndex = -1) {
+// Modal Logic - Updated to use IDs
+function openEditModal(action, type, id, name, industryId = null) {
   currentModalAction = action;
   currentModalType = type;
-  currentModalIndex = index;
+  currentModalId = id;
   currentModalName = name;
-  currentModalIndustryIndex = industryIndex;
+  currentModalIndustryId = industryId;
 
   if (type === 'industry') {
-    elements.editModalLabel.text(action === 'add' ? translations.add_industry : translations.edit_industry);
-    elements.confirmActionBtn.text(action === 'add' ? translations.add_industry : translations.save_changes);
+    elements.editModalLabel.text(action === 'add' ? '{{ __('settings.Add_Industry') }}' : '{{ __('settings.Edit_Industry') }}');
+    elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add_Industry') }}' : '{{ __('settings.Save') }}');
     elements.industrySelectContainer.hide();
   } else if (type === 'sector') {
-    elements.editModalLabel.text(action === 'add' ? translations.add_sector : translations.edit_sector);
-    elements.confirmActionBtn.text(action === 'add' ? translations.add_sector : translations.save_changes);
+    elements.editModalLabel.text(action === 'add' ? '{{ __('settings.Add_Sector') }}' : '{{ __('settings.Edit_Sector') }}');
+    elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add_Sector') }}' : '{{ __('settings.Save') }}');
     elements.industrySelectContainer.show();
-    elements.editIndustrySelect.html(DATA.map((d, i) => `<option value="${i}" ${i === industryIndex ? 'selected' : ''}>${d.industry}</option>`).join(''));
+    elements.editIndustrySelect.html(DATA.map((d) => `<option value="${d.id}" ${d.id === industryId ? 'selected' : ''}>${d.industry}</option>`).join(''));
   } else {
-    elements.editModalLabel.text(action === 'add' ? translations.add_technology : translations.edit_technology);
-    elements.confirmActionBtn.text(action === 'add' ? translations.add_technology : translations.save_changes);
+    elements.editModalLabel.text(action === 'add' ? '{{ __('settings.Add_Technology') }}' : '{{ __('settings.Edit_Technology') }}');
+    elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add_Technology') }}' : '{{ __('settings.Save') }}');
     elements.industrySelectContainer.hide();
   }
 
@@ -497,7 +488,6 @@ elements.editInput.on('input', function() {
   const maxLengthFeedback = $(this).siblings('.invalid-feedback[data-error="maxlength"]');
   const requiredFeedback = $(this).siblings('.invalid-feedback[data-error="required"]');
   
-  // Clear all validation states first
   $(this).removeClass('is-invalid');
   maxLengthFeedback.hide();
   requiredFeedback.hide();
@@ -518,7 +508,6 @@ elements.editIndustrySelect.on('change', function() {
   }
 });
 
-// Reset validation state when modal opens
 elements.editModal.on('show.bs.modal', function() {
   elements.editInput.removeClass('is-invalid').siblings('.invalid-feedback').hide();
   elements.editIndustrySelect.removeClass('is-invalid');
@@ -526,16 +515,13 @@ elements.editModal.on('show.bs.modal', function() {
 
 elements.confirmActionBtn.on('click', function () {
   const newName = elements.editInput.val().trim();
-  const selectedIndustryIndex = currentModalType === 'sector' ? parseInt(elements.editIndustrySelect.val()) : -1;
+  const selectedIndustryId = currentModalType === 'sector' ? parseInt(elements.editIndustrySelect.val()) : null;
   
-  // Reset validation state
   elements.editInput.removeClass('is-invalid').siblings('.invalid-feedback').hide();
   elements.editIndustrySelect.removeClass('is-invalid');
   
-  // Validate input length and required fields
   let isValid = true;
   
-  // Name validation
   if (!newName) {
     elements.editInput.addClass('is-invalid');
     elements.editInput.siblings('.invalid-feedback[data-error="required"]').show();
@@ -546,8 +532,7 @@ elements.confirmActionBtn.on('click', function () {
     isValid = false;
   }
   
-  // Industry validation for sector type
-  if (currentModalType === 'sector' && selectedIndustryIndex === -1) {
+  if (currentModalType === 'sector' && !selectedIndustryId) {
     elements.editIndustrySelect.addClass('is-invalid');
     isValid = false;
   }
@@ -557,14 +542,14 @@ elements.confirmActionBtn.on('click', function () {
   elements.editModal.modal('hide');
 
   if (currentModalAction === 'add') {
-    handleAddAction(currentModalType, newName, selectedIndustryIndex);
+    handleAddAction(currentModalType, newName, selectedIndustryId);
   } else if (currentModalAction === 'edit') {
-    if (newName === currentModalName && (currentModalType !== 'sector' || selectedIndustryIndex === currentModalIndustryIndex)) return;
-    handleEditAction(currentModalType, currentModalIndex, currentModalName, newName, selectedIndustryIndex);
+    if (newName === currentModalName && (currentModalType !== 'sector' || selectedIndustryId === currentModalIndustryId)) return;
+    handleEditAction(currentModalType, currentModalId, currentModalName, newName, selectedIndustryId);
   }
 });
 
-function handleAddAction(type, newName, industryIndex) {
+function handleAddAction(type, newName, industryId) {
   const actionMap = {
     'industry': 'add-industry',
     'sector': 'add-sector', 
@@ -573,7 +558,7 @@ function handleAddAction(type, newName, industryIndex) {
 
   const params = {
     industry: { name: newName },
-    sector: { name: newName, industryIndex: industryIndex >= 0 ? industryIndex : elements.selIndustrySector.selectedIndex },
+    sector: { name: newName, industryId: industryId || parseInt(elements.selIndustrySector.value) },
     tech: { name: newName }
   };
 
@@ -581,20 +566,24 @@ function handleAddAction(type, newName, industryIndex) {
     if (success) {
       switch (type) {
         case 'industry':
-          DATA.push({ industry: newName, sectors: ['Other'] });
+          const newIndustryId = result.response?.id || nextIndustryId++;
+          DATA.push({ id: newIndustryId, industry: newName, sectors: [{ id: 1, name: 'Other' }] });
           renderIndustries();
           break;
         case 'sector':
-          const idxSector = industryIndex >= 0 ? industryIndex : elements.selIndustrySector.selectedIndex;
-          if (idxSector >= 0) {
-            DATA[idxSector].sectors.push(newName);
+          const targetIndustryId = industryId || parseInt(elements.selIndustrySector.value);
+          const targetIndustry = findIndustryById(targetIndustryId);
+          if (targetIndustry) {
+            const newSectorId = result.response?.id || getNextSectorId(targetIndustryId);
+            targetIndustry.sectors.push({ id: newSectorId, name: newName });
             renderSectors();
             renderPreview();
           }
           break;
         case 'tech':
-          if (!TECHNOLOGIES.includes(newName)) {
-            TECHNOLOGIES.push(newName);
+          const newTechId = result.response?.id || nextTechId++;
+          if (!TECHNOLOGIES.find(t => t.name === newName)) {
+            TECHNOLOGIES.push({ id: newTechId, name: newName });
             renderTech();
           }
           break;
@@ -607,29 +596,51 @@ function handleAddAction(type, newName, industryIndex) {
   });
 }
 
-function handleEditAction(type, index, oldName, newName, industryIndex) {
-  const params = type === 'sector' ? { type, index, oldName, newName, industryIndex, oldIndustryIndex: currentModalIndustryIndex } : { type, index, oldName, newName };
+function handleEditAction(type, id, oldName, newName, industryId) {
+  const params = { type, id, oldName, newName };
+  if (type === 'sector') {
+    params.industryId = industryId;
+    params.oldIndustryId = currentModalIndustryId;
+  }
 
   makeAjaxRequest('edit', params, (success, result) => {
     if (success) {
       switch (type) {
         case 'industry':
-          DATA[index].industry = newName;
-          renderIndustries();
+          const industry = findIndustryById(id);
+          if (industry) {
+            industry.industry = newName;
+            renderIndustries();
+          }
           break;
         case 'sector':
-          if (currentModalIndustryIndex !== industryIndex) {
-            DATA[currentModalIndustryIndex].sectors.splice(index, 1);
-            DATA[industryIndex].sectors.push(newName);
+          if (currentModalIndustryId !== industryId) {
+            // Moving sector to different industry
+            const oldIndustry = findIndustryById(currentModalIndustryId);
+            const newIndustry = findIndustryById(industryId);
+            const sectorIndex = findSectorIndexById(currentModalIndustryId, id);
+            
+            if (oldIndustry && newIndustry && sectorIndex !== -1) {
+              const sector = oldIndustry.sectors.splice(sectorIndex, 1)[0];
+              sector.name = newName;
+              newIndustry.sectors.push(sector);
+            }
           } else {
-            DATA[industryIndex].sectors[index] = newName;
+            // Just updating name
+            const sector = findSectorById(industryId, id);
+            if (sector) {
+              sector.name = newName;
+            }
           }
           renderSectors();
           renderPreview();
           break;
         case 'tech':
-          TECHNOLOGIES = TECHNOLOGIES.map(t => t === oldName ? newName : t);
-          renderTech();
+          const tech = findTechById(id);
+          if (tech) {
+            tech.name = newName;
+            renderTech();
+          }
           break;
       }
       dump();
@@ -640,83 +651,53 @@ function handleEditAction(type, index, oldName, newName, industryIndex) {
   });
 }
 
-// CRUD Actions
-function moveItem(arr, index, direction) {
-  if (direction === 'up' && index > 0) {
-    [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
-    return true;
-  }
-  if (direction === 'down' && index < arr.length - 1) {
-    [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
-    return true;
-  }
-  return false;
-}
-
 $(document).on('click', '#tblIndustries, #tblSectors, #tblTech', function (e) {
   const target = $(e.target).closest('button[data-act]');
   if (target.length === 0) return;
 
   const act = target.data('act');
-  const i = target.data('i');
-  const j = target.data('j');
-  const name = target.data('name');
+  const id = parseInt(target.data('id'));
+  const industryId = target.data('industry-id') ? parseInt(target.data('industry-id')) : null;
 
-  const currentIndustryIndex = elements.selIndustrySector.selectedIndex;
+  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
 
   switch (act) {
-    case 'up':
-    case 'down':
-      makeAjaxRequest(act, { index: i, type: 'industry' }, (success, result) => {
-        if (success && moveItem(DATA, i, act)) {
-          renderIndustries();
-          dump();
-          releaseSuccessAlert({ message: `Moved ${act} successfully` });
-        } else if (!success) {
-          releaseFailureAlert({ message: result.error || `Failed to move ${act}` });
-        }
-      });
-      break;
-    case 'sec-up':
-    case 'sec-down':
-      makeAjaxRequest(act, { index: j, industryIndex: currentIndustryIndex }, (success, result) => {
-        if (success && moveItem(DATA[currentIndustryIndex].sectors, j, act.split('-')[1])) {
-          renderSectors();
-          renderPreview();
-          dump();
-          releaseSuccessAlert({ message: `Sector moved ${act.split('-')[1]} successfully` });
-        } else if (!success) {
-          releaseFailureAlert({ message: result.error || `Failed to move sector ${act.split('-')[1]}` });
-        }
-      });
-      break;
     case 'industry-edit':
-      openEditModal('edit', 'industry', i, DATA[i].industry);
+      const indToEdit = findIndustryById(id);
+      if (indToEdit) {
+        openEditModal('edit', 'industry', id, indToEdit.industry);
+      }
       break;
     case 'sector-edit':
-      openEditModal('edit', 'sector', j, DATA[currentIndustryIndex].sectors[j], currentIndustryIndex);
+      const secToEdit = findSectorById(industryId || selectedIndustryId, id);
+      if (secToEdit) {
+        openEditModal('edit', 'sector', id, secToEdit.name, industryId || selectedIndustryId);
+      }
       break;
     case 'tech-edit':
-      openEditModal('edit', 'tech', -1, name);
+      const techToEdit = findTechById(id);
+      if (techToEdit) {
+        openEditModal('edit', 'tech', id, techToEdit.name);
+      }
       break;
     case 'industry-del':
     case 'sector-del':
     case 'tech-del':
-      handleDeleteConfirmation(act.replace('-del', ''), i || j || name, currentIndustryIndex);
+      handleDeleteConfirmation(act.replace('-del', ''), id, industryId || selectedIndustryId);
       break;
   }
 });
 
-function handleDeleteConfirmation(type, indexOrName, industryIndex = -1) {
+function handleDeleteConfirmation(type, id, industryId = null) {
   const titleMap = {
-    industry: 'Delete Industry',
-    sector: 'Delete Sector',
-    tech: 'Delete Technology'
+    industry: '{{ __('settings.Delete_Industry') }}',
+    sector: '{{ __('settings.Delete_Sector') }}',
+    tech: '{{ __('settings.Delete_Technology') }}'
   };
   const textMap = {
-    industry: 'Are you sure you want to delete this industry?',
-    sector: 'Are you sure you want to delete this sector?',
-    tech: 'Are you sure you want to delete this technology?'
+    industry: '{{ __('settings.Delete_Industry_Confirmation') }}',
+    sector: '{{ __('settings.Delete_Sector_Confirmation') }}',
+    tech: '{{ __('settings.Delete_Technology_Confirmation') }}'
   };
 
   Swal.fire({
@@ -726,29 +707,39 @@ function handleDeleteConfirmation(type, indexOrName, industryIndex = -1) {
     showCancelButton: true,
     buttonStyling: false,
     showConfirmButton: true,
-    confirmButtonText: translations.admin_delete,
-    cancelButtonText: translations.admin_cancel,
+    confirmButtonText: '{{ __('settings.Delete') }}',
+    cancelButtonText: '{{ __('settings.Cancel') }}',
     customClass: {
       confirmButton: 'btn btn-danger me-3',
       cancelButton: 'btn btn-label-secondary'
     },
   }).then((result) => {
     if (result.isConfirmed) {
-      makeAjaxRequest(`${type}-delete`, { index: indexOrName, name: indexOrName, industryIndex }, (success, result) => {
+      makeAjaxRequest(`${type}-delete`, { id: id, industryId: industryId }, (success, result) => {
         if (success) {
           switch (type) {
             case 'industry':
-              DATA.splice(indexOrName, 1);
-              renderIndustries();
+              const indIndex = findIndustryIndexById(id);
+              if (indIndex !== -1) {
+                DATA.splice(indIndex, 1);
+                renderIndustries();
+              }
               break;
             case 'sector':
-              DATA[industryIndex].sectors.splice(indexOrName, 1);
-              renderSectors();
-              renderPreview();
+              const industry = findIndustryById(industryId);
+              const secIndex = findSectorIndexById(industryId, id);
+              if (industry && secIndex !== -1) {
+                industry.sectors.splice(secIndex, 1);
+                renderSectors();
+                renderPreview();
+              }
               break;
             case 'tech':
-              TECHNOLOGIES = TECHNOLOGIES.filter(x => x !== indexOrName);
-              renderTech();
+              const techIndex = findTechIndexById(id);
+              if (techIndex !== -1) {
+                TECHNOLOGIES.splice(techIndex, 1);
+                renderTech();
+              }
               break;
           }
           dump();
@@ -761,17 +752,23 @@ function handleDeleteConfirmation(type, indexOrName, industryIndex = -1) {
   });
 }
 
-// Add Buttons
-document.getElementById('addIndustry').addEventListener('click', () => openEditModal('add', 'industry', -1, ''));
-document.getElementById('addSector').addEventListener('click', () => openEditModal('add', 'sector', -1, '', elements.selIndustrySector.selectedIndex));
-document.getElementById('addTech').addEventListener('click', () => openEditModal('add', 'tech', -1, ''));
+// Add Buttons - Updated to use IDs
+document.getElementById('addIndustry').addEventListener('click', () => openEditModal('add', 'industry', null, ''));
+document.getElementById('addSector').addEventListener('click', () => {
+  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
+  openEditModal('add', 'sector', null, '', selectedIndustryId);
+});
+document.getElementById('addTech').addEventListener('click', () => openEditModal('add', 'tech', null, ''));
 
 document.getElementById('addOtherSector').addEventListener('click', () => {
-  const idx = elements.selIndustrySector.selectedIndex;
-  if (idx >= 0 && !DATA[idx].sectors.includes('Other')) {
-    makeAjaxRequest('add-sector', { name: 'Other', industryIndex: idx }, (success, result) => {
+  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
+  const industry = findIndustryById(selectedIndustryId);
+  
+  if (industry && !industry.sectors.find(s => s.name === 'Other')) {
+    makeAjaxRequest('add-sector', { name: 'Other', industryId: selectedIndustryId }, (success, result) => {
       if (success) {
-        DATA[idx].sectors.push('Other');
+        const newSectorId = result.response?.id || getNextSectorId(selectedIndustryId);
+        industry.sectors.push({ id: newSectorId, name: 'Other' });
         renderSectors();
         renderPreview();
         dump();
@@ -784,10 +781,11 @@ document.getElementById('addOtherSector').addEventListener('click', () => {
 });
 
 document.getElementById('addOtherTech').addEventListener('click', () => {
-  if (!TECHNOLOGIES.includes('Other')) {
+  if (!TECHNOLOGIES.find(t => t.name === 'Other')) {
     makeAjaxRequest('add-technology', { name: 'Other' }, (success, result) => {
       if (success) {
-        TECHNOLOGIES.push('Other');
+        const newTechId = result.response?.id || nextTechId++;
+        TECHNOLOGIES.push({ id: newTechId, name: 'Other' });
         renderTech();
         dump();
         releaseSuccessAlert({ message: 'Other technology added successfully' });
@@ -826,15 +824,27 @@ document.getElementById('importJson').addEventListener('click', () => {
     reader.onload = () => {
       try {
         const importedData = JSON.parse(reader.result);
-        if (!Array.isArray(importedData.industries) || !importedData.industries.every(item => 
-          item.industry && Array.isArray(item.sectors)
-        ) || !Array.isArray(importedData.technologies)) {
+        
+        // Validate structure
+        if (!Array.isArray(importedData.industries) || 
+            !importedData.industries.every(item => 
+              item.id && item.industry && Array.isArray(item.sectors) &&
+              item.sectors.every(s => s.id && s.name)
+            ) || 
+            !Array.isArray(importedData.technologies) ||
+            !importedData.technologies.every(t => t.id && t.name)) {
           throw new Error('Invalid data structure');
         }
+        
         makeAjaxRequest('save-all', { industries: importedData.industries, technologies: importedData.technologies }, (success, result) => {
           if (success) {
             DATA = importedData.industries;
             TECHNOLOGIES = importedData.technologies;
+            
+            // Update ID generators
+            nextIndustryId = Math.max(...DATA.map(d => d.id), 0) + 1;
+            nextTechId = Math.max(...TECHNOLOGIES.map(t => t.id), 0) + 1;
+            
             renderIndustries();
             renderTech();
             dump();
@@ -872,16 +882,42 @@ document.getElementById('saveAll').addEventListener('click', () => {
 
 // Global Export Functions
 window.exportIndustries = function (format) {
-  if (!industriesTable) { releaseFailureAlert({ message: 'No data available to export' }); return; }
-  try { industriesTable.button(`.buttons-${format}`).trigger(); } catch (error) { console.error('Export error:', error); releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); }
+  if (!industriesTable) { 
+    releaseFailureAlert({ message: 'No data available to export' }); 
+    return; 
+  }
+  try { 
+    industriesTable.button(`.buttons-${format}`).trigger(); 
+  } catch (error) { 
+    console.error('Export error:', error); 
+    releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); 
+  }
 }
+
 window.exportSectors = function (format) {
-  if (!sectorsTable) { releaseFailureAlert({ message: 'No data available to export' }); return; }
-  try { sectorsTable.button(`.buttons-${format}`).trigger(); } catch (error) { console.error('Export error:', error); releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); }
+  if (!sectorsTable) { 
+    releaseFailureAlert({ message: 'No data available to export' }); 
+    return; 
+  }
+  try { 
+    sectorsTable.button(`.buttons-${format}`).trigger(); 
+  } catch (error) { 
+    console.error('Export error:', error); 
+    releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); 
+  }
 }
+
 window.exportTechnologies = function (format) {
-  if (!techTable) { releaseFailureAlert({ message: 'No data available to export' }); return; }
-  try { techTable.button(`.buttons-${format}`).trigger(); } catch (error) { console.error('Export error:', error); releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); }
+  if (!techTable) { 
+    releaseFailureAlert({ message: 'No data available to export' }); 
+    return; 
+  }
+  try { 
+    techTable.button(`.buttons-${format}`).trigger(); 
+  } catch (error) { 
+    console.error('Export error:', error); 
+    releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); 
+  }
 }
 
 // Network Status Monitoring
@@ -912,23 +948,5 @@ function retryFailedRequest(action, params, maxRetries = 3, currentRetry = 0) {
 // Initialize
 renderIndustries();
 dump();
-
-console.log('Industry Management System initialized');
-console.log('AJAX Configuration:', AJAX_CONFIG);
-console.log('Available endpoints:', Object.keys({
-  'GET /industries': 'Get all industries',
-  'POST /industries': 'Create new industry', 
-  'PUT /industries/{id}': 'Update industry',
-  'DELETE /industries/{id}': 'Delete industry',
-  'POST /industries/reorder': 'Reorder industries',
-  'POST /industries/sectors': 'Create new sector',
-  'PUT /industries/sectors/{id}': 'Update sector',
-  'DELETE /industries/sectors/{id}': 'Delete sector',
-  'POST /industries/sectors/reorder': 'Reorder sectors',
-  'POST /industries/technologies': 'Create new technology',
-  'PUT /industries/technologies/{name}': 'Update technology',
-  'DELETE /industries/technologies/{name}': 'Delete technology',
-  'POST /industries/save-all': 'Save all changes'
-}));
 </script>
 @stop

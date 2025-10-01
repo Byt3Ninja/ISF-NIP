@@ -161,6 +161,10 @@ return [
 	'Confirm' => 'Confirm',
 	'Delete' => 'Delete',
 	'Save' => 'Save',
+	'Edit' => 'Edit',
+	'Delete_Industry' => 'Delete Industry',
+	'Delete_Sector' => 'Delete Sector',
+	'Delete_Technology' => 'Delete Technology',
 	'Edit_Industry' => 'Edit Industry',
 	'Edit_Sector' => 'Edit Sector',
 	'Edit_Technology' => 'Edit Technology',
@@ -174,4 +178,8 @@ return [
 	'Name_Max_50' => 'Name may not be greater than 50 characters.',
 	'Industry_Required' => 'Please select an industry.',
 	'Enter_Name' => 'Enter Name',
+	'Loading' => 'Loading',
+	'Delete_Industry_Confirmation' => 'Are you sure you want to delete this industry?',
+	'Delete_Sector_Confirmation' => 'Are you sure you want to delete this sector?',
+	'Delete_Technology_Confirmation' => 'Are you sure you want to delete this technology?'
 ];
