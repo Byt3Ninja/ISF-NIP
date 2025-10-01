@@ -269,7 +269,7 @@ function makeAjaxRequest(action, params, callback) {
   }
 
   // ✅ Show spinner before request
-  showLoadingIndicator(true);
+  // showLoadingIndicator(true);
 
   fetch(`${AJAX_CONFIG.baseUrl}${config.endpoint}`, requestOptions)
     .then(response => {
@@ -277,7 +277,7 @@ function makeAjaxRequest(action, params, callback) {
       return response.json();
     })
     .then(data => {
-      showLoadingIndicator(false); // ✅ Hide spinner
+      // showLoadingIndicator(false); // ✅ Hide spinner
       if (data.success !== false) {
         callback(true, { ...params, response: data });
 
@@ -292,7 +292,7 @@ function makeAjaxRequest(action, params, callback) {
       }
     })
     .catch(error => {
-      showLoadingIndicator(false); // ✅ Hide spinner
+      // showLoadingIndicator(false); // ✅ Hide spinner
       console.error('AJAX request failed:', error);
 
       let errorMessage = 'Network error occurred';
@@ -307,28 +307,28 @@ function makeAjaxRequest(action, params, callback) {
 }
 
 // Loading Indicator
-function showLoadingIndicator(show) {
-  let indicator = document.getElementById('loadingIndicator');
-  if (show) {
-    if (!indicator) {
-      indicator = document.createElement('div');
-      indicator.id = 'loadingIndicator';
-      indicator.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25';
-      indicator.style.zIndex = '9999';
-      indicator.innerHTML = `
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      `;
-      document.body.appendChild(indicator);
-    }
-    indicator.style.display = 'flex';
-  } else {
-    if (indicator) {
-      indicator.style.display = 'none';
-    }
-  }
-}
+// function showLoadingIndicator(show) {
+//   let indicator = document.getElementById('loadingIndicator');
+//   if (show) {
+//     if (!indicator) {
+//       indicator = document.createElement('div');
+//       indicator.id = 'loadingIndicator';
+//       indicator.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25';
+//       indicator.style.zIndex = '9999';
+//       indicator.innerHTML = `
+//         <div class="spinner-border text-primary" role="status">
+//           <span class="visually-hidden">Loading...</span>
+//         </div>
+//       `;
+//       document.body.appendChild(indicator);
+//     }
+//     indicator.style.display = 'flex';
+//   } else {
+//     if (indicator) {
+//       indicator.style.display = 'none';
+//     }
+//   }
+// }
 
 // DOM Elements
 const elements = {
