@@ -507,7 +507,7 @@ return [
 	'Mentorship done requests Duration' => 'Mentorship Done Requests Duration',
 	'judge Sessions' => 'Judge and Review Sessions',
 	'Final done screening' => 'Evaluation Done',
-	'Final pending screening' => 'Evaluation Pending',
+	'Final pending screening' => 'Pending Final Screening',
 	'screening pending sessions' => 'Screening Pending',
 	'screening done sessions' => 'Screening Completed',
 	'SelectCompany' => 'Select The Startup',
