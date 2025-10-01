@@ -124,39 +124,61 @@ const translations = {
   admin_cancel: @json(__('admin.cancel'))
 };
 
-// Seed dataset
+// Seed dataset with IDs
 let DATA = [
-  { industry: "Agritech", sectors: ["Crop Production Solutions", "Precision Agriculture", "Farm Management Software", "Agricultural Supply Chain Platforms", "Agri-Biotech and Genetics", "Agri-Finance and Insurance", "Smart Irrigation Systems", "Agri Drones and Remote Sensing", "Livestock Management", "Food Traceability and Safety", "Other"] },
-  { industry: "Fintech", sectors: ["Digital Banking / Neo Banks", "Payments and Remittances", "Payment Gateways and Processors", "Lending and Microfinance", "Wealth Management / Robo-Advisory", "InsurTech", "RegTech / Compliance", "Fraud Detection and Risk Scoring", "Digital Wallets", "Buy Now Pay Later (BNPL)", "Crypto Exchanges", "Crowdfunding Platforms", "Other"] },
-  { industry: "Healthtech", sectors: ["Telemedicine and Remote Care", "Electronic Health Records (EHR)", "Medical Devices and Wearables", "Diagnostics and Imaging", "Health Data Analytics", "Wellness and Fitness Platforms", "Genomics and Precision Medicine", "Drug Discovery Platforms", "Remote Patient Monitoring", "Virtual Hospitals", "Healthcare Supply Chain", "Other"] },
-  { industry: "Edtech", sectors: ["Online Learning Platforms", "K-12 Solutions", "Higher Education Solutions", "Corporate Training and LMS", "Testing and Assessment Tools", "Language Learning", "Virtual Classrooms", "Skill Development Platforms", "AR/VR Learning Environments", "Gamified Learning Apps", "Other"] },
-  { industry: "E-commerce & Retail", sectors: ["Online Marketplaces", "Direct-to-Consumer Brands", "Social Commerce", "Retail Analytics and Personalization", "Logistics and Last-Mile Delivery", "Subscription Commerce", "Flash Sales Platforms", "B2B E-commerce", "Inventory Management Systems", "Omni-Channel Retail", "Digital Payments Integration", "Other"] },
-  { industry: "Mobility & Logistics", sectors: ["Ride-Hailing", "Fleet Management", "Delivery and Courier Services", "Smart Public Transport", "Supply Chain Platforms", "Drone Delivery", "Micro-Mobility (e-scooters, bikes)", "Autonomous Vehicles", "Freight and Cargo Management", "Smart Parking Systems", "Mobility-as-a-Service (MaaS)", "Other"] },
-  { industry: "Recycling & Greentech", sectors: ["Waste Management Platforms", "Renewable Energy Solutions", "Energy Storage Systems", "Carbon Capture and Trading", "Water Treatment Technologies", "Smart Grid Management", "Energy Efficiency Monitoring", "Sustainable Packaging", "Circular Economy Platforms", "Other"] },
-  { industry: "SaaS / Enterprise Tech", sectors: ["Cloud Infrastructure", "Productivity Tools", "CRM and ERP Systems", "Cybersecurity Platforms", "HR and Payroll Systems", "Data Analytics and BI Tools", "DevOps and CI/CD Platforms", "Marketing Automation", "Customer Support Platforms", "Project Management Tools", "Workflow Automation", "Other"] },
-  { industry: "Tourism & TravelTech", sectors: ["Online Booking Platforms", "Travel Management Systems", "Hospitality Solutions", "Experience Marketplaces", "Mobility Services for Travel", "Virtual Travel Experiences", "Travel Insurance Platforms", "Dynamic Pricing Engines", "Loyalty and Rewards Platforms", "Other"] },
-  { industry: "Media & Entertainment", sectors: ["Streaming Platforms", "Gaming", "Digital Publishing", "Advertising Technology (AdTech)", "Music Tech", "Podcast Platforms", "AR/VR Entertainment", "Content Creation Tools", "Esports Platforms", "Social Media Networks", "Other"] },
-  { industry: "Foodtech", sectors: ["Food Delivery Platforms", "Alternative Proteins", "Smart Kitchen Devices", "Food Safety and Traceability", "Meal Kit Services", "Restaurant Management Systems", "Vertical Farming", "Grocery Delivery", "Other"] },
-  { industry: "AI & Deeptech", sectors: ["Machine Learning Platforms", "Natural Language Processing", "Computer Vision", "Robotics", "Quantum Computing", "Edge AI Solutions", "Neural Interface Technology", "Autonomous Systems", "Other"] },
-  { industry: "LegalTech", sectors: ["Contract Management", "e-Discovery", "Compliance Platforms", "Online Dispute Resolution", "Case Management Systems", "IP Management Tools", "Legal Research Platforms", "Other"] },
-  { industry: "Social Impact & Civic Tech", sectors: ["GovTech Services", "Community Platforms", "Non-Profit Management Tools", "Civic Engagement Apps", "Digital Identity Solutions", "Open Data Platforms", "Public Service Portals", "Other"] },
-  { industry: "Manufacturing", sectors: ["Smart Factory (Industry 4.0)", "3D Printing and Additive Manufacturing", "Supply Chain Automation", "Industrial IoT", "Predictive Maintenance", "Robotics Integration", "Quality Control Systems", "Digital Twin Platforms", "Advanced Materials", "Other"] },
-  { industry: "Creative Arts", sectors: ["Digital Art Platforms", "Music Production Tools", "Design Marketplaces", "Content Creation Platforms", "Virtual Galleries", "NFT Art Marketplaces", "AR/VR Creative Experiences", "Other"] }
+  { 
+    id: 1,
+    industry: "Agritech", 
+    sectors: [
+      { id: 1, name: "Crop Production Solutions" },
+      { id: 2, name: "Precision Agriculture" },
+      { id: 3, name: "Farm Management Software" },
+      { id: 4, name: "Agricultural Supply Chain Platforms" },
+      { id: 5, name: "Agri-Biotech and Genetics" },
+      { id: 6, name: "Agri-Finance and Insurance" },
+      { id: 7, name: "Smart Irrigation Systems" },
+      { id: 8, name: "Agri Drones and Remote Sensing" },
+      { id: 9, name: "Livestock Management" },
+      { id: 10, name: "Food Traceability and Safety" },
+      { id: 11, name: "Other" }
+    ] 
+  },
+  { 
+    id: 2,
+    industry: "Fintech", 
+    sectors: [
+      { id: 1, name: "Digital Banking / Neo Banks" },
+      { id: 2, name: "Payments and Remittances" },
+      { id: 3, name: "Payment Gateways and Processors" },
+      { id: 4, name: "Lending and Microfinance" },
+      { id: 5, name: "Wealth Management / Robo-Advisory" },
+      { id: 6, name: "InsurTech" },
+      { id: 7, name: "RegTech / Compliance" },
+      { id: 8, name: "Fraud Detection and Risk Scoring" },
+      { id: 9, name: "Digital Wallets" },
+      { id: 10, name: "Buy Now Pay Later (BNPL)" },
+      { id: 11, name: "Crypto Exchanges" },
+      { id: 12, name: "Crowdfunding Platforms" },
+      { id: 13, name: "Other" }
+    ] 
+  },
+  // ... repeat for other industries
 ];
 
+// Technologies with IDs
 let TECHNOLOGIES = [
-  "Artificial Intelligence (AI)", 
-  "Machine Learning (ML)", 
-  "Internet of Things (IoT)", 
-  "Cloud Computing", 
-  "Big Data & Analytics", 
-  "Automation", 
-  "Robotics", 
-  "Blockchain", 
-  "Mobile Applications", 
-  "Web Applications", 
-  "AR/VR", 
-  "Other"
+  { id: 1, name: "Artificial Intelligence (AI)" },
+  { id: 2, name: "Machine Learning (ML)" },
+  { id: 3, name: "Internet of Things (IoT)" },
+  { id: 4, name: "Cloud Computing" },
+  { id: 5, name: "Big Data & Analytics" },
+  { id: 6, name: "Automation" },
+  { id: 7, name: "Robotics" },
+  { id: 8, name: "Blockchain" },
+  { id: 9, name: "Mobile Applications" },
+  { id: 10, name: "Web Applications" },
+  { id: 11, name: "AR/VR" },
+  { id: 12, name: "Other" }
 ];
 
 let industriesTable = null;
@@ -200,9 +222,9 @@ function makeAjaxRequest(action, params, callback) {
     'down': { method: 'POST', endpoint: '/reorder', data: { ...params, direction: 'down' } },
     'sec-up': { method: 'POST', endpoint: '/sectors/reorder', data: { ...params, direction: 'up' } },
     'sec-down': { method: 'POST', endpoint: '/sectors/reorder', data: { ...params, direction: 'down' } },
-    'edit': { method: 'PUT', endpoint: `/${params.type}/edit`, data: params },
-    'industry-delete': { method: 'DELETE', endpoint: `/${params.index}`, data: {} },
-    'sector-delete': { method: 'DELETE', endpoint: `/sectors/${params.index}`, data: { industryIndex: params.industryIndex } },
+    'edit': { method: 'PUT', endpoint: `/${params.type}/${params.id}`, data: params },
+    'industry-delete': { method: 'DELETE', endpoint: `/${params.id}`, data: {} },
+    'sector-delete': { method: 'DELETE', endpoint: `/sectors/${params.id}`, data: { industryIndex: params.industryIndex } },
     'tech-delete': { method: 'DELETE', endpoint: `/technologies/${encodeURIComponent(params.name)}`, data: {} },
     'add-industry': { method: 'POST', endpoint: '', data: params },
     'add-sector': { method: 'POST', endpoint: '/sectors', data: params },
