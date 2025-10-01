@@ -2,7 +2,7 @@
 
 return [
     'First screening'=>'Screening',
-    'Final screening'=>'Evaluation',
+    'Final screening'=>'Final Screening',
     'Services' => 'Services',
     'newmessages' => 'New Messages',
     'cantAccessAllCompanies' => 'You can not access all companies',
