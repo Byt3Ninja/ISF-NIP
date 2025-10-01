@@ -306,7 +306,7 @@ return [
 	'Training' => 'Training',
 	'Training courses' => 'Training courses',
 	'Training sessions' => 'Training sessions',
-	'Training sessions duration (hours)' => 'Training sessions duration (hours)',
+	'Training sessions duration (hours)' => 'Training Sessions Durations (Hours)',
 	'Final Screening' => 'Final Screening',
 	'Add Service' => 'Add Service',
 	'All Services' => 'All Services',

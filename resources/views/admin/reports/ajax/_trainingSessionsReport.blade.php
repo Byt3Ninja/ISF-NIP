@@ -3,18 +3,23 @@
   @php
     $cards = [
       [ 'value' => $total_sessions_count ?? 0, 'label' => __('admin.Training sessions'), 'icon' => 'school', 'color' => 'primary', 'filter' => 'reset' ],
-      [ 'value' => $sessions_period ?? '0h 0m', 'label' => __('cycles.Sessions_Duration'), 'icon' => 'clock-hour-3', 'color' => 'secondary' ],
-      [ 'value' => $zoom_sessions_count ?? 0, 'label' => __('cycles.Meeting_Duration'), 'icon' => 'video-plus', 'color' => 'warning' ],
-      [ 'value' => $offline_sessions_count ?? 0, 'label' => __('cycles.Offline_Session'), 'icon' => 'building-community', 'color' => 'danger', 'filter' => 'Offline_Session' ],
-      [ 'value' => $online_sessions_count ?? 0, 'label' => __('cycles.Online_Session'), 'icon' => 'screen-share', 'color' => 'info', 'filter' => 'Online_Session' ],
-      [ 'value' => $online_training_count ?? 0, 'label' => __('cycles.Online_Training'), 'icon' => 'certificate', 'color' => 'success', 'filter' => 'Online_Training' ]
+      [ 'value' => $sessions_period ?? '0h 0m', 'label' => __('admin.Training sessions duration (hours)'), 'icon' => 'clock-hour-3', 'color' => 'secondary' ],
+      [ 'value' => $offline_sessions_count ?? 0, 'label' => __('admin.Offline Training Sessions Count'), 'icon' => 'building-community', 'color' => 'danger', 'filter' => 'Offline_Session','type' => 'offline' ],
+      [ 'value' => $online_sessions_count ?? 0, 'label' => __('admin.Zoom Training Sessions Count'), 'icon' => 'screen-share', 'color' => 'info', 'filter' => 'Online_Session', 'type' => 'sessions' ],
+      [ 'value' => $online_training_count ?? 0, 'label' => __('admin.Online Training Sessions Count'), 'icon' => 'certificate', 'color' => 'success', 'filter' => 'Online_Training', 'type' => 'online' ]
     ];
   @endphp
 
   <!-- KPI Cards -->
   <div class="row g-6 d-flex justify-content-center mb-8">
     @foreach($cards as $key => $card)
+        @php
+        $url = isset($card['type'])
+        ? route('trainings.sessions_report', ['type' => $card['type']])
+        : route('trainings.sessions_report');
+      @endphp
       <div class="col-lg-2 col-sm-6">
+        <a href="{{ $url }}" class="text-decoration-none">
         <div 
           class="card card-border-shadow-{{ $card['color'] }} h-100 cursor-pointer filter-card" 
           data-filter="{{ $card['filter'] ?? '' }}"
@@ -31,6 +36,7 @@
             <small class="text-center">{{ $card['label'] }}</small>
           </div>
         </div>
+        </a>
       </div>
     @endforeach
   </div>
