@@ -695,13 +695,6 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item">{{ __('admin.Training sessions') }}</span>
             </a>
           </li>
-
-          <li class="{{ Request::is('dashboard/training/sessionsReport*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/training/sessionsReport">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item">{{ __('admin.Training_sessions_report') }}</span>
-            </a>
-          </li>
           
           <li
             class="{{ Request::is('dashboard/training/all*', 'dashboard/training/addcontent*', 'dashboard/training/editcontent*', 'dashboard/training/viewcontent*') ? 'active' : '' }} menu-item">
