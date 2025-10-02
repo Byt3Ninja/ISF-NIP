@@ -19,7 +19,6 @@
         : route('trainings.sessions_report');
       @endphp
       <div class="col-lg-2 col-sm-6">
-        <a href="{{ $url }}" class="text-decoration-none">
         <div 
           class="card card-border-shadow-{{ $card['color'] }} h-100 cursor-pointer filter-card" 
           data-filter="{{ $card['filter'] ?? '' }}"
@@ -36,7 +35,6 @@
             <small class="text-center">{{ $card['label'] }}</small>
           </div>
         </div>
-        </a>
       </div>
     @endforeach
   </div>
