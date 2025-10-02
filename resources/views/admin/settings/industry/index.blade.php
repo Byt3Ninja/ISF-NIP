@@ -236,10 +236,6 @@ function makeAjaxRequest(action, params, callback) {
   }
 
   const actionConfig = {
-    'up': { method: 'POST', endpoint: '/reorder', data: { ...params, direction: 'up' } },
-    'down': { method: 'POST', endpoint: '/reorder', data: { ...params, direction: 'down' } },
-    'sec-up': { method: 'POST', endpoint: '/sectors/reorder', data: { ...params, direction: 'up' } },
-    'sec-down': { method: 'POST', endpoint: '/sectors/reorder', data: { ...params, direction: 'down' } },
     'edit': { method: 'PUT', endpoint: `/${params.type}/${params.id}`, data: params },
     'industry-delete': { method: 'DELETE', endpoint: `/${params.id}`, data: {} },
     'sector-delete': { method: 'DELETE', endpoint: `/sectors/${params.id}`, data: { industryId: params.industryId } },
@@ -395,7 +391,10 @@ function renderIndustries() {
     '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>'
   );
 
-  elements.selIndustrySector.innerHTML = DATA.map(d => `<option value="${d.id}">${d.industry}</option>`).join('');
+  elements.selIndustrySector.innerHTML = 
+  `<option value="">{{ __('settings.Select_Industry') }}</option>` + 
+  DATA.map(d => `<option value="${d.id}">${d.industry}</option>`).join('');
+
   if (elements.selIndustrySector.options.length) elements.selIndustrySector.selectedIndex = 0;
 
   renderSectors();
@@ -405,9 +404,32 @@ function renderIndustries() {
 }
 
 function renderSectors() {
-  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
-  const industry = findIndustryById(selectedIndustryId);
-  const currentSectors = industry ? industry.sectors : [];
+  const selectedIndustryId = elements.selIndustrySector.value;
+  let currentSectors = [];
+  let industry = null;
+
+  if (selectedIndustryId === "") {
+    // Show ALL sectors across all industries
+    DATA.forEach(ind => {
+      ind.sectors.forEach(s => {
+        currentSectors.push({
+          ...s,
+          industryName: ind.industry,
+          industryId: ind.id
+        });
+      });
+    });
+  } else {
+    // Show sectors for selected industry only
+    industry = findIndustryById(parseInt(selectedIndustryId));
+    if (industry) {
+      currentSectors = industry.sectors.map(s => ({
+        ...s,
+        industryName: industry.industry,
+        industryId: industry.id
+      }));
+    }
+  }
 
   sectorsTable = initializeDataTable(
     'tblSectors',
@@ -418,8 +440,8 @@ function renderSectors() {
         table.row.add([
           null,
           s.name,
-          industry?.industry || "-",
-          generateTableActions('sector', s.id, selectedIndustryId)
+          s.industryName || "-",
+          generateTableActions('sector', s.id, s.industryId)
         ]);
       });
     },
@@ -442,12 +464,24 @@ function renderTech() {
 
 function renderPreview() {
   elements.mapPreview.innerHTML = '';
-  const selectedIndustryId = parseInt(elements.selIndustrySector.value);
-  const industry = findIndustryById(selectedIndustryId);
-  
-  if (!industry) return;
-  
-  industry.sectors.forEach(s => {
+  const selectedIndustryId = elements.selIndustrySector.value;
+  let sectorsToShow = [];
+
+  if (selectedIndustryId === "") {
+    // Show all sectors from all industries
+    DATA.forEach(ind => {
+      ind.sectors.forEach(s => {
+        sectorsToShow.push(s);
+      });
+    });
+  } else {
+    const industry = findIndustryById(parseInt(selectedIndustryId));
+    if (industry) {
+      sectorsToShow = industry.sectors;
+    }
+  }
+
+  sectorsToShow.forEach(s => {
     const span = document.createElement('span');
     span.className = 'badge bg-secondary me-2 mb-2';
     span.textContent = s.name;

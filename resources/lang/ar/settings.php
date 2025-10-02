@@ -178,5 +178,6 @@ return [
 	'Loading' => 'جار التحميل',
 	'Delete_Industry_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه الصناعة؟',
 	'Delete_Sector_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذا القطاع؟',
-	'Delete_Technology_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه التقنية؟'
+	'Delete_Technology_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه التقنية؟',
+	'Select_Industry' => 'اختر الصناعة'
 ];

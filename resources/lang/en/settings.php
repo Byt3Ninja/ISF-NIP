@@ -181,5 +181,6 @@ return [
 	'Loading' => 'Loading',
 	'Delete_Industry_Confirmation' => 'Are you sure you want to delete this industry?',
 	'Delete_Sector_Confirmation' => 'Are you sure you want to delete this sector?',
-	'Delete_Technology_Confirmation' => 'Are you sure you want to delete this technology?'
+	'Delete_Technology_Confirmation' => 'Are you sure you want to delete this technology?',
+	'Select_Industry' => 'Select Industry'
 ];
