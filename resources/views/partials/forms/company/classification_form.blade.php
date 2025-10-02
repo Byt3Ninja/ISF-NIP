@@ -208,7 +208,6 @@ $(function() {
   // Event bindings
   $industryEl.on('change', function() {
     renderSectors($(this).val());
-    renderTechnologies();
     $industryErr.hide();
   });
 
@@ -261,6 +260,7 @@ $(function() {
 
   // Init
   renderIndustryOptions();
+  renderTechnologies();
 });
 </script>
 @endpush
