@@ -550,5 +550,16 @@ return [
     'Mentorship_New_Requests' => 'Mentorship New Requests',
     'Mentorship_Sessions' => 'Mentorship Sessions',
     'Mentorship_Completed_Sessions' => 'Mentorship Completed Sessions',
-    'Mentorship_Pending_Sessions' => 'Mentorship Pending Sessions'
+    'Mentorship_Pending_Sessions' => 'Mentorship Pending Sessions',
+    'Select_Completion_Status' => 'Select completion status',
+    'Select_Request_Status' => 'Select request status',
+    'Completed' => 'Completed',
+    'Not_Completed' => 'Not completed',
+    'All_Sessions' => 'All sessions',
+    'Filter_Sessions' => 'Filter Sessions',
+    'Start_Date' => 'Start Date',
+    'End_Date' => 'End Date',
+    'Request_Status' => 'Request Status',
+    'Completion_Status' => 'Completion Status',
+    'Select_Program' => 'Select Program',
   ];

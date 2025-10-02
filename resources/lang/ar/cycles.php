@@ -543,6 +543,17 @@ return [
     'Mentorship_New_Requests' => 'طلبات الإرشاد الجديدة',
     'Mentorship_Sessions' => 'جلسات الإرشاد',
     'Mentorship_Completed_Sessions' => 'جلسات الإرشاد المكتملة',
-    'Mentorship_Pending_Sessions' => 'جلسات الإرشاد المعلقة'
+    'Mentorship_Pending_Sessions' => 'جلسات الإرشاد المعلقة',
+    'Select_Completion_Status' => 'اختر حالة الإنجاز',
+    'Select_Request_Status' => 'اختر حالة الطلب',
+    'Completed' => 'مكتمل',
+    'Not_Completed' => 'غير مكتمل',
+    'All_Sessions' => 'جميع الجلسات',
+    'Filter_Sessions' => 'تصفية الجلسات',
+    'Start_Date' => 'تاريخ البدء',
+    'End_Date' => 'تاريخ الانتهاء',
+    'Request_Status' => 'حالة الطلب',
+    'Completion_Status' => 'حالة الإنجاز',
+    'Select_Program' => 'اختر البرنامج',
   ];
 
