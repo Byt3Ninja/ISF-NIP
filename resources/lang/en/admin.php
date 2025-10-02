@@ -2377,4 +2377,5 @@ return [
 	'Invalid_file_type' => 'Invalid file type',
 	'File_size_must_be_less_than_10MB' => 'File size must be less than 10MB',
 	'resultsReport' => 'Results Report',
+	'Not_Found' => 'Not Found',
 ];

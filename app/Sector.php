@@ -23,7 +23,13 @@ class Sector extends Model
     }
 
     public function companies()
-{
-    return $this->hasMany(Company::class, 'sector', 'id');
-}
+    {
+        return $this->hasMany(Company::class, 'sector', 'id');
+    }
+
+    public function industries()
+    {
+        return $this->belongsToMany(StaticCategory::class, 'industry_sector', 'sector_id', 'industry_id');
+    }
+
 }
