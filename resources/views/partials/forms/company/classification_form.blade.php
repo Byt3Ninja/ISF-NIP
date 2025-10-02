@@ -2,7 +2,7 @@
   <div class="card-header">
     <h5 class="card-title">
       {{ $heading }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
-    </h5>    
+    </h5>
   </div>
   <div class="card-body">
     <form 
@@ -28,7 +28,7 @@
           </div>
         </div>
       </fieldset>
-    
+
       <div class="col-12">
         <div class="form-group mb-6">
           <label id="sectorsLabel" class="form-label fs-6 fw-semibold d-block">
@@ -38,7 +38,6 @@
             {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom sector.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة قطاع مخصص.' }}
           </small>
           <div class="row mt-4" id="sectorList"></div>
-          
           <input 
             id="sectorOther" 
             class="form-control" 
@@ -47,13 +46,13 @@
             placeholder="{{ $l == 'en' ? 'Type other sector' : 'اكتب قطاعًا آخر' }}" 
             style="display:none" 
           />
-          <input type="hidden" id="sector_ids" name="sector_ids[]" />
+          <input type="hidden" id="sector_ids" name="sector_ids">
           <div class="error" id="sectorErr" style="display:none;">
             {{ $l == 'en' ? 'Select at least one sector' : 'حدد قطاعًا واحدًا على الأقل' }}
           </div>
         </div>
       </div>
-    
+
       <div class="col-12">
         <div class="form-group mb-6">
           <label id="technologiesLabel" class="form-label fs-6 fw-semibold d-block">
@@ -63,7 +62,6 @@
             {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom technology.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة تقنية مخصصة.' }}
           </small>
           <div class="row mt-4" id="techList"></div>
-
           <input 
             id="techOther" 
             class="form-control" 
@@ -72,13 +70,13 @@
             placeholder="{{ $l == 'en' ? 'Type other technology' : 'اكتب تقنية أخرى' }}" 
             style="display:none" 
           />
-          <input type="hidden" id="tech_ids" name="tech_ids[]" />
+          <input type="hidden" id="tech_ids" name="tech_ids">
           <div class="error" id="techErr" style="display:none;">
             {{ $l == 'en' ? 'Select at least one technology' : 'حدد تقنية واحدة على الأقل' }}
           </div>
         </div>
       </div>
-    
+
       <div class="col-12 mt-12">
         <div class="d-flex gap-2 justify-content-end">
           <button type="submit" class="btn btn-primary">
@@ -93,25 +91,23 @@
 @push('scripts')
 <script>
 $(function() {
-  // Technologies
+  // Technologies (common, no "Other" in dataset)
   const COMMON_TECHNOLOGIES = [
     {id: 1, name:"Artificial Intelligence (AI)"},
     {id: 2, name:"Machine Learning (ML)"},
     {id: 3, name:"Internet of Things (IoT)"},
     {id: 4, name:"Cloud Computing"},
-    {id: 5, name:"Big Data & Analytics"},
-    {id: 6, name:"Other"}
+    {id: 5, name:"Big Data & Analytics"}
   ];
 
-  // Industries dataset with sectors
+  // Industries with sectors (no "Other" in dataset)
   const DATA = [
     {
       id: 1,
       name: "Agritech",
       sectors: [
         {id: 101, name:"Crop Production Solutions"},
-        {id: 102, name:"Precision Agriculture"},
-        {id: 199, name:"Other"}
+        {id: 102, name:"Precision Agriculture"}
       ]
     },
     {
@@ -119,8 +115,7 @@ $(function() {
       name: "Fintech",
       sectors: [
         {id: 201, name:"Digital Banking"},
-        {id: 202, name:"Payments and Remittances"},
-        {id: 299, name:"Other"}
+        {id: 202, name:"Payments and Remittances"}
       ]
     },
     {
@@ -128,11 +123,10 @@ $(function() {
       name: "Healthtech",
       sectors: [
         {id: 301, name:"Telemedicine and Remote Care"},
-        {id: 302, name:"Electronic Health Records (EHR)"},
-        {id: 399, name:"Other"}
+        {id: 302, name:"Electronic Health Records (EHR)"}
       ]
     }
-    // ...continue for all industries
+    // ...add all industries
   ];
 
   const $industryEl = $('#industry');
@@ -147,7 +141,7 @@ $(function() {
   const $sectorErr = $('#sectorErr');
   const $techErr = $('#techErr');
 
-  // Populate industry options
+  // Populate industries
   function renderIndustryOptions() {
     $industryEl.empty();
     $industryEl.append('<option value="" disabled selected>Select Industry</option>');
@@ -156,14 +150,13 @@ $(function() {
     });
   }
 
-  // Render sectors for industry
+  // Render sectors with static Other
   function renderSectors(industryId) {
     $sectorListEl.empty();
     const entry = DATA.find(d => d.id == industryId);
     if (!entry) return;
-
     entry.sectors.forEach(sec => {
-      const $wrap = $(`
+      $sectorListEl.append(`
         <div class="col-md-4 col-sm-6 mb-2">
           <div class="form-check">
             <input class="form-check-input sector-checkbox" type="checkbox" value="${sec.id}" id="sec-${sec.id}" />
@@ -171,15 +164,22 @@ $(function() {
           </div>
         </div>
       `);
-      $sectorListEl.append($wrap);
     });
+    $sectorListEl.append(`
+      <div class="col-md-4 col-sm-6 mb-2">
+        <div class="form-check">
+          <input class="form-check-input sector-checkbox" type="checkbox" value="other-sector" id="sec-other" />
+          <label class="form-check-label" for="sec-other">Other</label>
+        </div>
+      </div>
+    `);
   }
 
-  // Render technologies
+  // Render technologies with static Other
   function renderTechnologies() {
     $techListEl.empty();
     COMMON_TECHNOLOGIES.forEach(tech => {
-      const $wrap = $(`
+      $techListEl.append(`
         <div class="col-md-4 col-sm-6 mb-2">
           <div class="form-check">
             <input class="form-check-input technology-checkbox" type="checkbox" value="${tech.id}" id="tech-${tech.id}" />
@@ -187,25 +187,38 @@ $(function() {
           </div>
         </div>
       `);
-      $techListEl.append($wrap);
     });
+    $techListEl.append(`
+      <div class="col-md-4 col-sm-6 mb-2">
+        <div class="form-check">
+          <input class="form-check-input technology-checkbox" type="checkbox" value="other-tech" id="tech-other" />
+          <label class="form-check-label" for="tech-other">Other</label>
+        </div>
+      </div>
+    `);
   }
 
-  // Show/hide Other inputs
+  // Toggle visibility of Other inputs
   function toggleOtherInputs() {
-    $sectorOtherEl.toggle($('.sector-checkbox[value="199"]:checked').length > 0);
-    $techOtherEl.toggle($('.technology-checkbox[value="6"]:checked').length > 0);
+    $sectorOtherEl.toggle($('.sector-checkbox[value="other-sector"]:checked').length > 0);
+    $techOtherEl.toggle($('.technology-checkbox[value="other-tech"]:checked').length > 0);
   }
 
-  // Update hidden inputs with selected IDs
+  // Sync hidden inputs (exclude "Other")
   function updateHiddenInputs() {
-    const sectorIds = $('.sector-checkbox:checked').map((_, el) => $(el).val()).get();
-    const techIds = $('.technology-checkbox:checked').map((_, el) => $(el).val()).get();
+    const sectorIds = $('.sector-checkbox:checked')
+      .map((_, el) => $(el).val())
+      .get()
+      .filter(v => v !== 'other-sector');
+    const techIds = $('.technology-checkbox:checked')
+      .map((_, el) => $(el).val())
+      .get()
+      .filter(v => v !== 'other-tech');
     $sectorHidden.val(JSON.stringify(sectorIds));
     $techHidden.val(JSON.stringify(techIds));
   }
 
-  // Event bindings
+  // Events
   $industryEl.on('change', function() {
     renderSectors($(this).val());
     $industryErr.hide();
@@ -240,12 +253,11 @@ $(function() {
       isValid = false;
     }
 
-    // Require "Other" text if selected
-    if ($('.sector-checkbox[value="199"]:checked').length && !$sectorOtherEl.val().trim()) {
+    if ($('.sector-checkbox[value="other-sector"]:checked').length && !$sectorOtherEl.val().trim()) {
       $sectorErr.text('{{ $l == "en" ? "Please specify the other sector" : "يرجى تحديد القطاع الآخر" }}').show();
       isValid = false;
     }
-    if ($('.technology-checkbox[value="6"]:checked').length && !$techOtherEl.val().trim()) {
+    if ($('.technology-checkbox[value="other-tech"]:checked').length && !$techOtherEl.val().trim()) {
       $techErr.text('{{ $l == "en" ? "Please specify the other technology" : "يرجى تحديد التقنية الأخرى" }}').show();
       isValid = false;
     }
@@ -254,7 +266,6 @@ $(function() {
       e.preventDefault();
       return;
     }
-
     updateHiddenInputs();
   });
 
