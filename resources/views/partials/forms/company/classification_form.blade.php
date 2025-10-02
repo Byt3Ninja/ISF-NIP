@@ -12,6 +12,8 @@
       action="{{ $_user->hasAnyRole('Admin|organizationManager') ? route('company.profile_update_mine', $client->company->id) : route('company.profile_update_mine') }}"
       novalidate
     >
+      {!! csrf_field() !!}
+      <input name="CompanyN" type="hidden" value="14">
       <fieldset class="row">
         <div class="col-12">
           <div class="form-group mb-6">
@@ -88,46 +90,15 @@
   </div>
 </div>
 
+
 @push('scripts')
 <script>
 $(function() {
-  // Technologies (common, no "Other" in dataset)
-  const COMMON_TECHNOLOGIES = [
-    {id: 1, name:"Artificial Intelligence (AI)"},
-    {id: 2, name:"Machine Learning (ML)"},
-    {id: 3, name:"Internet of Things (IoT)"},
-    {id: 4, name:"Cloud Computing"},
-    {id: 5, name:"Big Data & Analytics"}
-  ];
-
-  // Industries with sectors (no "Other" in dataset)
-  const DATA = [
-    {
-      id: 1,
-      name: "Agritech",
-      sectors: [
-        {id: 101, name:"Crop Production Solutions"},
-        {id: 102, name:"Precision Agriculture"}
-      ]
-    },
-    {
-      id: 2,
-      name: "Fintech",
-      sectors: [
-        {id: 201, name:"Digital Banking"},
-        {id: 202, name:"Payments and Remittances"}
-      ]
-    },
-    {
-      id: 3,
-      name: "Healthtech",
-      sectors: [
-        {id: 301, name:"Telemedicine and Remote Care"},
-        {id: 302, name:"Electronic Health Records (EHR)"}
-      ]
-    }
-    // ...add all industries
-  ];
+  // Technologies
+  const COMMON_TECHNOLOGIES = @json($technologies);
+ 
+  // Industries dataset with sectors
+  const DATA = @json($data);
 
   const $industryEl = $('#industry');
   const $sectorListEl = $('#sectorList');

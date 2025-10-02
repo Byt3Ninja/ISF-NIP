@@ -108,60 +108,10 @@
 @section('pagescripts')
 <script>
 // Seed dataset with IDs
-let DATA = [
-  { 
-    id: 1,
-    industry: "Agritech", 
-    sectors: [
-      { id: 1, name: "Crop Production Solutions" },
-      { id: 2, name: "Precision Agriculture" },
-      { id: 3, name: "Farm Management Software" },
-      { id: 4, name: "Agricultural Supply Chain Platforms" },
-      { id: 5, name: "Agri-Biotech and Genetics" },
-      { id: 6, name: "Agri-Finance and Insurance" },
-      { id: 7, name: "Smart Irrigation Systems" },
-      { id: 8, name: "Agri Drones and Remote Sensing" },
-      { id: 9, name: "Livestock Management" },
-      { id: 10, name: "Food Traceability and Safety" },
-      { id: 11, name: "Other" }
-    ] 
-  },
-  { 
-    id: 2,
-    industry: "Fintech", 
-    sectors: [
-      { id: 1, name: "Digital Banking / Neo Banks" },
-      { id: 2, name: "Payments and Remittances" },
-      { id: 3, name: "Payment Gateways and Processors" },
-      { id: 4, name: "Lending and Microfinance" },
-      { id: 5, name: "Wealth Management / Robo-Advisory" },
-      { id: 6, name: "InsurTech" },
-      { id: 7, name: "RegTech / Compliance" },
-      { id: 8, name: "Fraud Detection and Risk Scoring" },
-      { id: 9, name: "Digital Wallets" },
-      { id: 10, name: "Buy Now Pay Later (BNPL)" },
-      { id: 11, name: "Crypto Exchanges" },
-      { id: 12, name: "Crowdfunding Platforms" },
-      { id: 13, name: "Other" }
-    ] 
-  }
-];
-
+let DATA = @json($data);
+// console.log(DATA);
 // Technologies with IDs
-let TECHNOLOGIES = [
-  { id: 1, name: "Artificial Intelligence (AI)" },
-  { id: 2, name: "Machine Learning (ML)" },
-  { id: 3, name: "Internet of Things (IoT)" },
-  { id: 4, name: "Cloud Computing" },
-  { id: 5, name: "Big Data & Analytics" },
-  { id: 6, name: "Automation" },
-  { id: 7, name: "Robotics" },
-  { id: 8, name: "Blockchain" },
-  { id: 9, name: "Mobile Applications" },
-  { id: 10, name: "Web Applications" },
-  { id: 11, name: "AR/VR" },
-  { id: 12, name: "Other" }
-];
+let TECHNOLOGIES = @json($technologies);
 
 let industriesTable = null;
 let sectorsTable = null;
@@ -213,8 +163,8 @@ let currentModalIndustryId = null; // Industry ID for sector edit
 
 // AJAX Configuration
 const AJAX_CONFIG = {
-  baseUrl: '/industries',
-  timeout: 10000,
+  baseUrl: '/dashboard/industries', // Base URL for your industry management API
+  timeout: 10000, // 10 seconds timeout
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': 'application/json',
