@@ -200,6 +200,15 @@
                 ]
             },
             {
+                "name": "settings.industry_view",
+                "description": "View Industry Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "settings.create_technologies",
                 "description": " Create Technologies",
                 "guard_name": "web",

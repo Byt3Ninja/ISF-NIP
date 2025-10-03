@@ -100,6 +100,7 @@ $(function() {
   // Industries dataset with sectors
   const DATA = @json($data);
 
+  // Elements
   const $industryEl = $('#industry');
   const $sectorListEl = $('#sectorList');
   const $techListEl = $('#techList');
@@ -111,17 +112,37 @@ $(function() {
   const $industryErr = $('#industryErr');
   const $sectorErr = $('#sectorErr');
   const $techErr = $('#techErr');
+  const $submitBtn = $form.find('button[type="submit"]');
 
-  // Populate industries
+  let initialState = null;
+
+  function getState() {
+    return {
+      industry: $industryEl.val(),
+      sectors: $('.sector-checkbox:checked').map((_, el) => $(el).val()).get(),
+      technologies: $('.technology-checkbox:checked').map((_, el) => $(el).val()).get(),
+      otherSector: $sectorOtherEl.val().trim(),
+      otherTech: $techOtherEl.val().trim()
+    };
+  }
+
+  function saveInitialState() {
+    initialState = JSON.stringify(getState());
+  }
+
+  function checkForChanges() {
+    const current = JSON.stringify(getState());
+    $submitBtn.prop('disabled', current === initialState);
+  }
+
   function renderIndustryOptions() {
     $industryEl.empty();
-    $industryEl.append('<option value="" disabled selected>Select Industry</option>');
+    $industryEl.append('<option value="" disabled>Select Industry</option>');
     DATA.forEach(ind => {
-      $industryEl.append(`<option value="${ind.id}">${ind.name}</option>`);
+      $industryEl.append(`<option value="${ind.id}" ${ind.selected ? 'selected' : ''}>${ind.name}</option>`);
     });
   }
 
-  // Render sectors with static Other
   function renderSectors(industryId) {
     $sectorListEl.empty();
     const entry = DATA.find(d => d.id == industryId);
@@ -130,7 +151,7 @@ $(function() {
       $sectorListEl.append(`
         <div class="col-md-4 col-sm-6 mb-2">
           <div class="form-check">
-            <input class="form-check-input sector-checkbox" type="checkbox" value="${sec.id}" id="sec-${sec.id}" />
+            <input class="form-check-input sector-checkbox" type="checkbox" value="${sec.id}" id="sec-${sec.id}" ${sec.selected ? 'checked' : ''} />
             <label class="form-check-label" for="sec-${sec.id}">${sec.name}</label>
           </div>
         </div>
@@ -146,14 +167,13 @@ $(function() {
     `);
   }
 
-  // Render technologies with static Other
   function renderTechnologies() {
     $techListEl.empty();
     COMMON_TECHNOLOGIES.forEach(tech => {
       $techListEl.append(`
         <div class="col-md-4 col-sm-6 mb-2">
           <div class="form-check">
-            <input class="form-check-input technology-checkbox" type="checkbox" value="${tech.id}" id="tech-${tech.id}" />
+            <input class="form-check-input technology-checkbox" type="checkbox" value="${tech.id}" id="tech-${tech.id}" ${tech.selected ? 'checked' : ''} />
             <label class="form-check-label" for="tech-${tech.id}">${tech.name}</label>
           </div>
         </div>
@@ -169,22 +189,14 @@ $(function() {
     `);
   }
 
-  // Toggle visibility of Other inputs
   function toggleOtherInputs() {
     $sectorOtherEl.toggle($('.sector-checkbox[value="other-sector"]:checked').length > 0);
     $techOtherEl.toggle($('.technology-checkbox[value="other-tech"]:checked').length > 0);
   }
 
-  // Sync hidden inputs (exclude "Other")
   function updateHiddenInputs() {
-    const sectorIds = $('.sector-checkbox:checked')
-      .map((_, el) => $(el).val())
-      .get()
-      .filter(v => v !== 'other-sector');
-    const techIds = $('.technology-checkbox:checked')
-      .map((_, el) => $(el).val())
-      .get()
-      .filter(v => v !== 'other-tech');
+    const sectorIds = $('.sector-checkbox:checked').map((_, el) => $(el).val()).get().filter(v => v !== 'other-sector');
+    const techIds = $('.technology-checkbox:checked').map((_, el) => $(el).val()).get().filter(v => v !== 'other-tech');
     $sectorHidden.val(JSON.stringify(sectorIds));
     $techHidden.val(JSON.stringify(techIds));
   }
@@ -192,16 +204,27 @@ $(function() {
   // Events
   $industryEl.on('change', function() {
     renderSectors($(this).val());
+    toggleOtherInputs();
+    updateHiddenInputs();
+    checkForChanges();
     $industryErr.hide();
   });
 
   $(document).on('change', '.sector-checkbox, .technology-checkbox', function() {
     toggleOtherInputs();
     updateHiddenInputs();
+    checkForChanges();
   });
 
-  $sectorOtherEl.on('input', () => $sectorErr.hide());
-  $techOtherEl.on('input', () => $techErr.hide());
+  // clear errors on typing in "Other" fields
+  $sectorOtherEl.on('input', function() {
+    $sectorErr.hide();
+    checkForChanges();
+  });
+  $techOtherEl.on('input', function() {
+    $techErr.hide();
+    checkForChanges();
+  });
 
   $form.on('submit', function(e) {
     let isValid = true;
@@ -213,17 +236,14 @@ $(function() {
       $industryErr.show();
       isValid = false;
     }
-
     if (!$('.sector-checkbox:checked').length) {
       $sectorErr.show();
       isValid = false;
     }
-
     if (!$('.technology-checkbox:checked').length) {
       $techErr.show();
       isValid = false;
     }
-
     if ($('.sector-checkbox[value="other-sector"]:checked').length && !$sectorOtherEl.val().trim()) {
       $sectorErr.text('{{ $l == "en" ? "Please specify the other sector" : "يرجى تحديد القطاع الآخر" }}').show();
       isValid = false;
@@ -242,7 +262,12 @@ $(function() {
 
   // Init
   renderIndustryOptions();
+  renderSectors($industryEl.val());
   renderTechnologies();
+  toggleOtherInputs();
+  updateHiddenInputs();
+  saveInitialState();
+  checkForChanges(); // disable at start
 });
 </script>
 @endpush
