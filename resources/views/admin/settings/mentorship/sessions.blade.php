@@ -113,14 +113,6 @@
                             <div class="col-12">
                               <label for="cycle_id" class="form-label">{{ __('cycles.Cycle') }}</label>
                               <select class="form-select select2" name="cycle_id">
-                                @php
-                                  $user = auth()->user();
-                                  if($user->hasAnyRole(['organizationManager'])) {
-                                      $cycles = \App\Cycle::where('organization_id', $user->organization_id)->get();
-                                  } else {
-                                      $cycles = \App\Cycle::all();
-                                  }
-                                @endphp
                                 <option value="" disabled>{{ __('cycles.Select_Program') }}</option>
                                 <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
                                 @foreach ($cycles as $cycle)
@@ -149,6 +141,7 @@
                         <th>{{ __('cycles.Company') }}</th>
                         <th>{{ __('cycles.User/Title') }}</th>
                         <th>{{ __('cycles.Mentor') }}</th>
+                        <th>{{ __('cycles.Cycle') }}</th>
                         <th>{{ __('cycles.Rate/Comment') }}</th>
                         <th>{{ __('cycles.Date/Time') }}</th>
                         <th>{{ __('cycles.Approved') }}</th>
@@ -195,6 +188,9 @@
                                 @endif
                               {{ $session->mentor->name ?? '' }}
                             </div>
+                          </td>
+                          <td>
+                            {{ optional($cycles->firstWhere('id', $session->cycle_id))->title }}
                           </td>
                           <td>
                             <small>{!! $session->rate_comment ? str_repeat('<i class="ti tis-star text-warning"></i>', $session->rating) . '<br>' . $session->rate_comment : $session->comment !!}</small>
@@ -485,7 +481,7 @@
       "columnDefs": [
         {
           "orderable": false,
-          "targets": [0, 1, 2, 3, 4, 5, 6, 7]
+          "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8]
         }
       ],
       @if ($l == 'ar')

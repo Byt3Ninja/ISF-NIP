@@ -653,7 +653,13 @@ class MentorsController extends Controller
 			return $session;
 		});
 
-		return view('admin.settings.mentorship.sessions', compact('sessions'));
+		if(!is_null($organization_id)) {
+			$cycles = \App\Cycle::where('organization_id', $organization_id)->get();
+		} else {
+				$cycles = \App\Cycle::all();
+		}
+
+		return view('admin.settings.mentorship.sessions', compact('sessions', 'cycles'));
 	}
 
 	public function getSession(Request $request)
