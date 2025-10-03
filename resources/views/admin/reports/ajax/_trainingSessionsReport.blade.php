@@ -401,5 +401,30 @@
         releaseFailureAlert({ message: 'Failed to export data. Please try again.' });
       }
     }
+
+    window.createQrCode = function (training) {
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/training/QrCode-offline",
+        data: {
+          "id": training,
+        },
+        success: function(response) {
+          if (response) {
+            alert(response.massege);
+            location.reload();
+          }
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
   });
 </script>
