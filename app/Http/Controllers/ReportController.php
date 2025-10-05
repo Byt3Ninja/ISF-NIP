@@ -19,6 +19,7 @@ use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exports\FinalScreeningReportExport;
+use App\Exports\ScreeningReportExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
@@ -56,6 +57,10 @@ class ReportController extends Controller
             case 'finalScreening':
                 $data = $this->finalScreeningReport($organization_id);
                 $view = '_finalScreeningReport';
+                break;
+            case 'screening':
+                $data = $this->screeningReport($organization_id);
+                $view = '_screeningReport';
                 break;
             case 'cycles':
                 $data = $this->cyclesReport($organization_id,$request->id);
@@ -450,6 +455,107 @@ class ReportController extends Controller
         return $data;
     }
 
+    protected function screeningReport($organization_id){
+        $l = app()->getLocale();
+
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
+            });
+        })->where('stype', 2)->orderBy('from')->get();
+        
+        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->get();
+        
+        $metadata = ScreeningEvaluationResults::metadataReport($steps->pluck('id')->toArray());
+
+        $allCompanies = collect();
+        $_allSteps = collect();
+        $allJudges = collect();
+        $allResults = collect();
+        $_allCompanies = collect();
+        
+        foreach ($metadata as $stepId => $data) {
+            $allCompanies = $allCompanies->concat($data['companies']);
+            $_allSteps = $_allSteps->concat($data['_steps']);
+            $allJudges = $allJudges->concat($data['judges']);
+            $allResults = $allResults->concat($data['results']);
+            $_allCompanies = $_allCompanies->concat($data['_companies']);
+        }
+        
+        $allCompanies = $allCompanies->unique('id')->values();
+        $allJudges = $allJudges->unique('id')->values();
+        $_allCompanies = $_allCompanies->unique('id')->values();
+
+        // Calculate KPI data for screening
+        $screening_count = $allCompanies->count();
+        $pending_screenings = $allCompanies->filter(function($company) use ($allResults) {
+            return $allResults->where('company_id', $company->id)->isEmpty();
+        })->count();
+        
+        $draft_screenings = $allResults->where('status', 0)->unique('company_id')->count();
+        $published_screenings = $allResults->where('status', 1)->unique('company_id')->count();
+        
+        $judgers_count = $allJudges->count();
+
+        // KPI Cards Data
+        $kpiData = [
+            [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
+            [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
+            [ 'value' => $pending_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
+            [ 'value' => $draft_screenings, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
+        ];
+
+        // Process companies with their evaluation data
+        $startups = $allCompanies->map(function ($company) use ($allJudges, $allResults) {
+            // Get evaluations for this company
+            $companyResults = $allResults->where('company_id', $company->id);
+            
+            // Calculate scores and status
+            $publishedResults = $companyResults->where('status', 1);
+            $averageScore = $publishedResults->count() > 0 ? $publishedResults->avg('score') : 0;
+            
+            // Attach calculated data to company
+            $company->average_score = round($averageScore, 1);
+            $company->evaluation_results = $companyResults;
+            
+            return $company;
+        });
+
+        // Process judges with their evaluation data
+        $judges = $allJudges->map(function ($judge) use ($allResults, $allCompanies) {
+            $judgeResults = $allResults->where('user_id', $judge->id);
+            
+            $companies = $judgeResults->map(function ($result) use ($allCompanies) {
+                $company = $allCompanies->where('id', $result->company_id)->first();
+                if ($company) {
+                    return (object) [
+                        'id' => $result->company_id,
+                        'status' => $result->status == 1 ? 'Published' : 'Draft',
+                        'score' => $result->score
+                    ];
+                }
+                return null;
+            })->filter();
+            
+            $judge->companies_ids = $companies->pluck('id')->toArray();
+            $judge->startups = collect($judge->companies_ids);
+            $judge->companies = $companies->toArray();
+            
+            return $judge;
+        });
+
+        $data['cycles'] = $cycles;
+        $data['steps'] = $steps;
+        $data['kpiData'] = $kpiData;
+        $data['startups'] = $startups;
+        $data['judges'] = $judges;
+
+        return $data;
+    }
+
     protected function cyclesReport($organization_id,$cycle_id){
         $cycle = Cycle::find($cycle_id);
         $data['mentors_count'] = User::whereHas('mentorSessions',function ($q)use ($organization_id,$cycle_id){
@@ -678,6 +784,215 @@ class ReportController extends Controller
     }
     
     private function prepareExportData($startups, $judges)
+    {
+        return $startups->map(function ($startup) use ($judges) {
+            // Get judges for this startup
+            $startupJudges = $judges->filter(function($judge) use ($startup) {
+                return collect($judge->companies)->where('id', $startup->id)->isNotEmpty();
+            });
+            
+            // Calculate average score and collect judge data
+            $totalScore = 0;
+            $publishedEvaluations = 0;
+            $judgeScores = [];
+            $judgeNames = [];
+            $evaluationStatuses = [];
+            
+            foreach ($judges as $judge) {
+                $scoped_company = collect($judge->companies)->where('id', $startup->id)->first();
+                if ($scoped_company) {
+                    $judgeNames[] = $judge->name;
+                    $status = strtolower($scoped_company->status ?? 'not-evaluated');
+                    $evaluationStatuses[] = ucfirst($status);
+                    
+                    if (isset($scoped_company->score)) {
+                        $judgeScores[$judge->id] = $scoped_company->score;
+                        if ($status === 'published') {
+                            $totalScore += (float) $scoped_company->score;
+                            $publishedEvaluations++;
+                        }
+                    } else {
+                        $judgeScores[$judge->id] = 'N/A';
+                    }
+                } else {
+                    $judgeScores[$judge->id] = 'N/A';
+                }
+            }
+            
+            $averageScore = $publishedEvaluations > 0 ? round($totalScore / $publishedEvaluations, 1) : 0;
+            
+            // Determine overall evaluation status
+            $overallStatus = 'Not Evaluated';
+            if (in_array('Published', $evaluationStatuses)) {
+                $overallStatus = 'Published';
+            } elseif (in_array('Draft', $evaluationStatuses)) {
+                $overallStatus = 'Draft';
+            }
+            
+            // Add calculated fields to startup object
+            $startup->average_score = $averageScore;
+            $startup->judges_names = implode(', ', array_unique($judgeNames));
+            $startup->evaluation_status = $overallStatus;
+            $startup->judge_scores = $judgeScores;
+            
+            return $startup;
+        });
+    }
+
+    public function exportScreening(Request $request)
+    {
+        $organization_id = auth()->user()->organization_id;
+        $format = $request->input('format', 'excel');
+        $filters = $request->input('filters', []);
+        
+        // Get the same data as the report view but process it for export
+        $reportData = $this->screeningReport($organization_id);
+        $startups = $reportData['startups'];
+        $judges = $reportData['judges'];
+        
+        // Apply filters to the data
+        $filteredStartups = $this->applyScreeningExportFilters($startups, $judges, $filters);
+        
+        // Process data for export
+        $exportData = $this->prepareScreeningExportData($filteredStartups, $judges);
+        
+        // Generate filename with timestamp
+        $timestamp = Carbon::now()->format('Y-m-d_H-i-s');
+        $filename = "screening_report_{$timestamp}";
+        
+        if ($format === 'csv') {
+            return Excel::download(new ScreeningReportExport($exportData, $judges), $filename . '.csv', \Maatwebsite\Excel\Excel::CSV);
+        } else {
+            return Excel::download(new ScreeningReportExport($exportData, $judges), $filename . '.xlsx');
+        }
+    }
+    
+    private function applyScreeningExportFilters($startups, $judges, $filters)
+    {
+        $filtered = $startups->filter(function ($startup) use ($filters) {
+            // Apply search filter
+            if (!empty($filters['search'])) {
+                $searchTerm = strtolower($filters['search']);
+                $companyName = strtolower($startup->name ?? '');
+                $userName = strtolower($startup->user->name ?? '');
+                
+                // Get category string
+                $categories = is_string($startup->business_categories) ? 
+                    json_decode($startup->business_categories, true) : $startup->business_categories;
+                $categoryString = is_array($categories) ? 
+                    implode(' ', array_filter($categories)) : ($startup->business_categories ?? '');
+                $categoryString = strtolower(str_replace(['/', ','], ' ', $categoryString ?? ''));
+                
+                if (!str_contains($companyName, $searchTerm) && 
+                    !str_contains($userName, $searchTerm) && 
+                    !str_contains($categoryString, $searchTerm)) {
+                    return false;
+                }
+            }
+            
+            // Apply cycle filter
+            if (!empty($filters['cycle'])) {
+                $cycleId = $startup->stepdata->cycle->id ?? ($startup->cycledata->id ?? '');
+                if (strval($cycleId) !== strval($filters['cycle'])) {
+                    return false;
+                }
+            }
+            
+            // Apply step filter
+            if (!empty($filters['step'])) {
+                $stepId = $startup->stepdata->id ?? $startup->step ?? '';
+                if (strval($stepId) !== strval($filters['step'])) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+        
+        // Apply judge and score filters (more complex filtering)
+        return $filtered->filter(function ($startup) use ($judges, $filters) {
+            // Get judge evaluations for this startup
+            $startupJudges = $judges->filter(function($judge) use ($startup) {
+                return collect($judge->companies)->where('id', $startup->id)->isNotEmpty();
+            });
+            
+            // Apply judge filter
+            if (!empty($filters['judge'])) {
+                $hasJudge = $startupJudges->contains('id', $filters['judge']);
+                if (!$hasJudge) {
+                    return false;
+                }
+            }
+            
+            // Calculate scores for filtering
+            $totalScore = 0;
+            $publishedEvaluations = 0;
+            $evaluationStatuses = [];
+            
+            foreach ($startupJudges as $judge) {
+                $scoped_company = collect($judge->companies)->where('id', $startup->id)->first();
+                if ($scoped_company) {
+                    $status = strtolower($scoped_company->status ?? 'not-evaluated');
+                    $evaluationStatuses[] = $status;
+                    
+                    if ($status === 'published' && isset($scoped_company->score)) {
+                        $totalScore += (float) $scoped_company->score;
+                        $publishedEvaluations++;
+                    }
+                }
+            }
+            
+            $averageScore = $publishedEvaluations > 0 ? $totalScore / $publishedEvaluations : 0;
+            
+            // Apply score filter
+            if (!empty($filters['score'])) {
+                switch ($filters['score']) {
+                    case 'excellent':
+                        if ($averageScore < 75 || $averageScore > 100) return false;
+                        break;
+                    case 'good':
+                        if ($averageScore < 50 || $averageScore >= 75) return false;
+                        break;
+                    case 'average':
+                        if ($averageScore < 25 || $averageScore >= 50) return false;
+                        break;
+                    case 'poor':
+                        if ($averageScore >= 25) return false;
+                        break;
+                }
+            }
+            
+            // Apply status filter
+            if (!empty($filters['status'])) {
+                $primaryStatus = 'not-evaluated';
+                $hasPublished = in_array('published', $evaluationStatuses);
+                $hasDraft = in_array('draft', $evaluationStatuses);
+                $hasNotEvaluated = in_array('not-evaluated', $evaluationStatuses) || empty($evaluationStatuses);
+                
+                if ($hasPublished && !$hasDraft && !$hasNotEvaluated) {
+                    $primaryStatus = 'published';
+                } elseif ($hasDraft) {
+                    $primaryStatus = 'draft';
+                }
+                
+                switch ($filters['status']) {
+                    case 'published':
+                        if ($primaryStatus !== 'published' && !$hasPublished) return false;
+                        break;
+                    case 'draft':
+                        if ($primaryStatus !== 'draft' && !$hasDraft) return false;
+                        break;
+                    case 'not-evaluated':
+                        if ($primaryStatus !== 'not-evaluated' && !$hasNotEvaluated) return false;
+                        break;
+                }
+            }
+            
+            return true;
+        });
+    }
+    
+    private function prepareScreeningExportData($startups, $judges)
     {
         return $startups->map(function ($startup) use ($judges) {
             // Get judges for this startup
