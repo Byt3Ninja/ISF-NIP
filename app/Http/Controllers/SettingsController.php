@@ -17,6 +17,7 @@ use App\Settings;
 use Carbon\Carbon;
 use App\Invitation;
 use App\Technology;
+use App\ReminderLog;
 use App\Organization;
 use App\StaticCategory;
 use App\MentorshipRequest;
@@ -821,11 +822,12 @@ class SettingsController extends Controller
     }
 
 	public function ReminderLogs(Request $request) {
+		$delete = ReminderLog::truncate();
 							if(auth()->user()->hasRole('organizationManager')) {
-                                $cycles = \App\Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
-                                $ReminderLogs = \App\ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+                                $cycles = Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
+                                $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
                             }elseif(auth()->user()->hasRole('Admin')) {
-                                $ReminderLogs = \App\ReminderLog::all();
+                                $ReminderLogs = ReminderLog::all();
                             }else{
                                 $ReminderLogs = [];
                             }
