@@ -2433,4 +2433,5 @@ return [
 	'File_size_must_be_less_than_10MB' => 'حجم الملف يجب ان يكون اقل من 10MB',
 	'resultsReport' => 'تقرير النتائج',
 	'Not_Found' => 'غير موجود',
+	'Screening_Results' => 'نتائج الفحص',
 ];
