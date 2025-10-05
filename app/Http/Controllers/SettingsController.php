@@ -822,6 +822,7 @@ class SettingsController extends Controller
     }
 
 	public function ReminderLogs(Request $request) {
+		$delete = ReminderLog::truncate();
 							if(auth()->user()->hasRole('organizationManager')) {
                                 $cycles = Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
                                 $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
