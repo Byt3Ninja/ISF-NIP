@@ -506,7 +506,7 @@ return [
 	'startup not complete the form' => 'Startup Not Complete the Form',
 	'Mentorship done requests Duration' => 'Mentorship Done Requests Duration',
 	'judge Sessions' => 'Judge and Review Sessions',
-	'Final done screening' => 'Completed Final screening',
+	'Final done screening' => 'Completed Final Screening',
 	'Final pending screening' => 'Pending Final Screening',
 	'screening pending sessions' => 'Pending Screening ',
 	'screening done sessions' => 'Completed Screening ',

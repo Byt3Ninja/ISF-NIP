@@ -66,6 +66,7 @@
                   <div class="modal-dialog modal-dialog-centered modal-md">
                     <div class="modal-content">
                       <form method="GET" action="{{ url()->current() }}">
+                        <input type="hidden" name="show" value="all">
                         <div class="modal-header">
                           <h5 class="modal-title" id="filterModalLabel">{{ __('cycles.Filter_Sessions') }}</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Cancel') }}"></button>
@@ -87,23 +88,13 @@
                                 value="{{ request('end_date') }}" placeholder="End Date">
                             </div>
 
-                            <!-- Show Filter -->
-                            <div class="col-12">
-                              <label for="showValueSelect" class="form-label">{{ __('cycles.Request_Status') }}</label>
-                              <select class="form-select select2" name="show" data-placeholder="{{ __('cycles.Select_Request_Status') }}" id="showValueSelect">
-                                <option value="">{{ __('cycles.Select_Request_Status') }}</option>
-                                <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>{{ __('cycles.All requests') }}</option>
-                                <option value="new" {{ !request()->show ? 'selected' : '' }}>{{ __('cycles.New requests only') }}</option>
-                                <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>{{ __('cycles.approved requests') }}</option>
-                                <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
-                              </select>
-                            </div>
+                            
 
                             <!-- Done Filter -->
                             <div class="col-12">
                               <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
                               <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
-                                <option value="" {{ request()->done == '' ? 'selected' : '' }}>{{ __('cycles.Select_Completion_Status') }}</option>
+                                <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
                                 <option value="yes" {{ request()->done == 'yes' ? 'selected' : '' }}>{{ __('cycles.Completed') }}</option>
                                 <option value="no" {{ request()->done == 'no' ? 'selected' : '' }}>{{ __('cycles.Not_Completed') }}</option>
                               </select>
@@ -150,7 +141,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach ($sessions as $session)
+                      @forelse  ($sessions as $session)
                         <tr>
                           <td>
                             <div class="d-flex align-items-center w-px-150">
@@ -264,7 +255,13 @@
                             </div>
                           </td>
                         </tr>
-                      @endforeach
+                          @empty
+                            <tr>
+                              <td colspan="9" class="text-center">
+                                {{ $l === 'ar' ? 'لا توجد جلسات ارشاد متاحة' : 'No Mentorship Sessions Found' }}
+                              </td>
+                            </tr>
+                      @endforelse
                     </tbody>
                   </table>
                   @foreach ($sessions as $session)
