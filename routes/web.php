@@ -755,6 +755,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
         Route::get('/', 'ReportController@index')->name('reports.list');
         // ======> Ajax Route
         Route::get('view/{type?}', 'ReportController@View')->name('reports.view.ajax');
+        // ======> Export Routes
+        Route::post('export/final-screening', 'ReportController@exportFinalScreening')->name('reports.export.finalScreening');
     });
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
