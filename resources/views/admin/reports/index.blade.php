@@ -32,7 +32,8 @@
           $pills = [
             'mentorship'     => ['label' => __('admin.Mentorship'),      'icon' => 'ti ti-school'],
             'training'       => ['label' => __('admin.Training sessions'),'icon' => 'ti ti-chalkboard'],
-            'judge'          => ['label' => __('admin.Screening result'),  'icon' => 'ti ti-scale'],
+            'screening'          => ['label' => __('admin.Screening'),  'icon' => 'ti ti-scale'],
+            'finalScreening'          => ['label' => __('admin.Final Screening'),  'icon' => 'ti ti-gavel'],
             'cycles'         => ['label' => __('admin.Cycles'),          'icon' => 'ti ti-refresh'],
             'companies'      => ['label' => __('admin.Companies'),       'icon' => 'ti ti-building'],
             'mentorSurveys'  => ['label' => __('admin.Surveys_Mentor'),  'icon' => 'ti ti-clipboard-check'],
@@ -45,7 +46,7 @@
             @foreach($pills as $key => $data)
             <li class="nav-item" role="presentation">
               <button 
-                class="nav-link d-flex align-items-center gap-2 @if ($loop->first) active @endif"
+                class="nav-link px-4 py-2 d-flex align-items-center gap-2 @if ($loop->first) active @endif"
                 id="{{ $key }}-tab"
                 data-bs-toggle="pill"
                 data-bs-target="#{{ $key }}"
@@ -55,7 +56,7 @@
                 aria-selected="{{ $loop->first ? 'true' : 'false' }}"
               >
                 <i class="{{ $data['icon'] }} ti-18px"></i>
-                <span>{{ $data['label'] }}</span>
+                <span style="font-size: 14px;">{{ $data['label'] }}</span>
               </button>
             </li>
             @endforeach
@@ -114,14 +115,19 @@
     // Load report when tab is shown
     $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
       var type = $(e.target).data('bs-target').replace('#',''); // e.g. "mentorship"
-      if (type !== 'cycles' && type !== 'companies') {
+      if (type === 'judge') {
+        // For judge report, pass cycle and step filters
+        getAjaxReport(type, 0, $('#cycle-filter').val(), $('#step-filter').val());
+      } else if (type !== 'cycles' && type !== 'companies') {
         getAjaxReport(type, 0);
       }
     });
 
     // Load immediately first active tab
     let firstTab = $('#reportTabs .nav-link.active').data('bs-target').replace('#','');
-    if (firstTab !== 'cycles' && firstTab !== 'companies') {
+    if (firstTab === 'judge') {
+      getAjaxReport(firstTab, 0, $('#cycle-filter').val(), $('#step-filter').val());
+    } else if (firstTab !== 'cycles' && firstTab !== 'companies') {
       getAjaxReport(firstTab, 0);
     }
 
@@ -136,12 +142,28 @@
       if (id) getAjaxReport('companies', id);
     });
 
+    // Load when cycle/step filters change in judge report
+    $(document).on('change', '#cycle-filter, #step-filter', function() {
+      const type = 'judge';
+      const cycleId = $('#cycle-filter').val();
+      const stepId = $('#step-filter').val();
+      getAjaxReport(type, 0, cycleId, stepId);
+    });
+
   });
 
-  function getAjaxReport(type, id = 0) {
+  function getAjaxReport(type, id = 0, cycle_id = null, step_id = null) {
+    let dataToSend = { id: id };
+    if (cycle_id !== null) {
+      dataToSend.cycle_id = cycle_id;
+    }
+    if (step_id !== null) {
+      dataToSend.step_id = step_id;
+    }
+
     $.ajax({
       url: "{{ route('reports.view.ajax') }}/" + type,
-      data: { id: id },
+      data: dataToSend,
       beforeSend: function() {
         $('#report-' + type).html(`
           <div class="d-flex justify-content-center align-items-center py-4 loading-message">

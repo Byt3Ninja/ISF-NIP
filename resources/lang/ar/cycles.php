@@ -555,5 +555,11 @@ return [
     'Request_Status' => 'حالة الطلب',
     'Completion_Status' => 'حالة الإنجاز',
     'Select_Program' => 'اختر البرنامج',
+    'Step' => 'المرحلة',
+    'AllـSteps' => 'كل المراحل',
+    'All_Cycles' => 'كل البرامج',
+    'No_Startups_Final_Screening' => 'لا توجد شركات في مرحلة الفحص النهائي.',
+    'No_Startups_Match_Filters' => 'لا توجد شركات تطابق الفلاتر الحالية.',
+    'Exporting...' => 'جاري التصدير...',
   ];
 
