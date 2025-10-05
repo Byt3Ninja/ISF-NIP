@@ -54,4 +54,35 @@ class TechnologyController extends Controller
         $technology->delete();
         return redirect()->route('technologies.index')->with('success', 'Technology deleted successfully.');
     }
+
+    public function create_technologies(Request $request)
+		{
+			$request->validate([
+				'name' => 'required',
+			]);
+			$technology = new Technology();
+			$technology->name = $request->name;
+			$technology->save();
+
+			
+			return response()->json(['message' => 'AddedSuccessfully']);
+		} 
+		public function update_technologies(Request $request, $id)
+		{
+			
+			$name = $request->input('newName');
+
+			$updateSittings = Technology::where('id', $id)->first();
+			$updateSittings->name = $name;
+			$updateSittings->save();
+
+			return response()->json(['message' => 'UpdatedSuccessfully']);
+		}
+		public function delete_technologies(Request $request, $id)
+		{
+			$updateSittings = Technology::where('id', $id)->first();
+			$updateSittings->delete();
+
+			return response()->json(['message' => 'DeletedSuccessfully']);
+		}
 }
