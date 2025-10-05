@@ -7,19 +7,20 @@ use App\User;
 use App\Cycle;
 use App\Event;
 use App\State;
+use File, URL;
+use App\Sector;
 use App\Country;
 use App\Calendar;
 use App\Currency;
 use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
-use File, URL;
 use App\Invitation;
+use App\Technology;
 use App\Organization;
+use App\StaticCategory;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
-use App\Notifications\UserInvitationNotification;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -27,6 +28,8 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\UserInvitationNotification;
 
 class SettingsController extends Controller
 {
@@ -957,10 +960,7 @@ class SettingsController extends Controller
 
     }
 
-		public function industrySettings(Request $request)
-		{
-			return view('admin.settings.industry_settings');
-		} 
+		
 
 	public function inviteUser(Request $request)
 	{
@@ -1100,4 +1100,158 @@ class SettingsController extends Controller
 
 		return back()->with('message', 'InvitationCanceled');
 	}
+
+	public function industrySettings(Request $request)
+		{
+			$l = app()->getLocale();
+			$technologies = DB::table('technologies')->get()->map(function ($tech) {
+								return [
+									'id'   => $tech->id,
+									'name' => $tech->name, // أو $tech->{"name_$l"} إذا كانت الأسماء متعددة اللغات
+								];
+							})->values()->toArray();
+
+			$allSectors = DB::table('sectors')->get();
+
+			$industries = StaticCategory::with('sectors')->get();
+			$data = $industries->map(function ($industry) use ($l, $allSectors) {
+
+				if ($industry->sectors->isNotEmpty()) {
+					$sectorsList = $industry->sectors->map(function ($sector) use ($l) {
+						return [
+							'id'   => $sector->id,
+							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+						];
+					})->values()->toArray();
+				} else {
+					$sectorsList = $allSectors->map(function ($sector) use ($l) {
+						return [
+							'id'   => $sector->id,
+							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+						];
+					})->values()->toArray();
+				}
+				return [
+					'id'       => $industry->id,
+					'industry' => $industry->name,
+					'sectors'  => $sectorsList,
+				];
+				
+			});
+		
+			return view('admin.settings.industry.index', compact('data', 'technologies'));
+		} 
+
+		public function create_industries(Request $request)
+		{
+			$request->validate([
+				'name' => 'required',
+			]);
+			$industry = new StaticCategory();
+			$industry->name = $request->name;
+			$industry->save();
+			
+			return response()->json(['status'=> 'success','message' => 'AddedSuccessfully']);
+		}
+
+		public function update_industries(Request $request, $id)
+		{
+			$id = $request->input('id');
+			$name = $request->input('newName');
+
+			$updateindustry = StaticCategory::where('id', $id)->first();
+			$updateindustry->name = $name;
+			$updateindustry->save();
+
+			return response()->json(['message' => 'UpdatedSuccessfully']);
+		}
+		public function delete_industries(Request $request, $id)
+		{
+			$deleteindustry = StaticCategory::where('id', $id)->first();
+			$deleteindustry->delete();
+			return response()->json(['message' => 'DeletedSuccessfully']);
+		}
+		
+
+		public function create_technologies(Request $request)
+		{
+			$request->validate([
+				'name' => 'required',
+			]);
+			$technology = new Technology();
+			$technology->name = $request->name;
+			$technology->save();
+
+			
+			return response()->json(['message' => 'AddedSuccessfully']);
+		} 
+		public function update_technologies(Request $request, $id)
+		{
+			
+			$name = $request->input('newName');
+
+			$updateSittings = Technology::where('id', $id)->first();
+			$updateSittings->name = $name;
+			$updateSittings->save();
+
+			return response()->json(['message' => 'UpdatedSuccessfully']);
+		}
+		public function delete_technologies(Request $request, $id)
+		{
+			$updateSittings = Technology::where('id', $id)->first();
+			$updateSittings->delete();
+
+			return response()->json(['message' => 'DeletedSuccessfully']);
+		}
+		public function create_sectors(Request $request)
+		{
+			$request->validate([
+				'name' => 'required',
+				'industryId' => 'required|exists:static_categories,id',
+			]);
+			$sector = new Sector();
+			$sector->name_en = $request->name;
+			$sector->name_ar = $request->name;
+			$sector->save();
+
+			$industry = StaticCategory::where('id', $request->industryId)->first();
+			$industry->sectors()->attach($sector->id);
+			$industry->save();
+			
+			return response()->json(['message' => 'AddedSuccessfully']);
+		}
+
+		public function update_sectors(Request $request, $id)
+		{
+			
+			$request->validate([
+				'newName' => 'required',
+				'industryId' => 'required|exists:static_categories,id',
+			]);
+
+			$name = $request->input('newName');
+			$industry_id = $request->input('industryId');
+
+			$updateSettings = Sector::where('id', $id)->first();
+			$updateSettings->name_en = $name;
+			$updateSettings->name_ar = $name;
+			$updateSettings->save();
+
+			// $industry = StaticCategory::where('id', $industry_id)->first();
+			// $industry->sectors()->updateExistingPivot($id, ['name_en' => $name, 'name_ar' => $name]);
+			// $industry->save();
+
+			return response()->json(['message' => 'UpdatedSuccessfully']);
+		}
+		
+		public function delete_sectors(Request $request, $id)
+		{
+			$sector = Sector::find($id);
+			if(empty($sector)){
+				return response()->json(['message' => 'Not_Found']);
+			}
+			$sector->delete();
+			return response()->json(['message' => 'DeletedSuccessfully']);
+		}
+		
 }

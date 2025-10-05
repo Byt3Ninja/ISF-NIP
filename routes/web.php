@@ -221,7 +221,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
     Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
-    Route::get('industry-settings', 'SettingsController@industrySettings');
+    Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
     Route::any('setaboutus', 'SettingsController@get_aboutus');
     Route::post('updateaboutus', 'SettingsController@update_aboutus');
@@ -357,6 +357,20 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('company.profile_milestones_edit');
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('company.profile_milestones_delete');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
+
+    //Industry
+    Route::post('/industries/technologies', 'SettingsController@create_technologies')->name('settings.create_technologies');
+    Route::put('/industries/tech/{id}', 'SettingsController@update_technologies')->name('settings.update_technologies');
+    Route::delete('/industries/technologies/{id}', 'SettingsController@delete_technologies')->name('settings.delete_technologies');
+    
+    Route::post('/industries', 'SettingsController@create_industries')->name('settings.create_industries');
+    Route::put('/industries/industry/{id}', 'SettingsController@update_industries')->name('settings.update_industries');
+    Route::delete('/industries/{id}', 'SettingsController@delete_industries')->name('settings.delete_industries');
+
+    Route::post('/industries/sectors', 'SettingsController@create_sectors')->name('settings.create_sectors');
+    Route::put('/industries/sector/{id}', 'SettingsController@update_sectors')->name('settings.update_sectors');
+    Route::delete('/industries/sectors/{id}', 'SettingsController@delete_sectors')->name('settings.delete_sectors');
+
 
 
 

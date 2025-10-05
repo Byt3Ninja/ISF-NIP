@@ -2,7 +2,7 @@
   <div class="card-header">
     <h5 class="card-title">
       {{ $heading }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
-    </h5>    
+    </h5>
   </div>
   <div class="card-body">
     <form 
@@ -12,33 +12,17 @@
       action="{{ $_user->hasAnyRole('Admin|organizationManager') ? route('company.profile_update_mine', $client->company->id) : route('company.profile_update_mine') }}"
       novalidate
     >
+      {!! csrf_field() !!}
+      <input name="CompanyN" type="hidden" value="14">
       <fieldset class="row">
         <div class="col-12">
           <div class="form-group mb-6">
             <label for="industry" class="form-label fs-6 fw-semibold">
               {{ $l == 'en' ? 'Industry' : 'الصناعة' }}
             </label>
-            <select id="industry" class="form-select select2" name="industry" required>
-              {{-- <option value="" selected disabled>Select industry</option> --}}
-              <option selected>Agritech</option>
-              <option>Fintech</option>
-              <option>Healthtech</option>
-              <option>Edtech</option>
-              <option>E-commerce & Retail</option>
-              <option>Mobility & Logistics</option>
-              <option>Recycling & Greentech</option>
-              <option>SaaS / Enterprise Tech</option>
-              <option>Tourism & TravelTech</option>
-              <option>Media & Entertainment</option>
-              <option>Foodtech</option>
-              <option>AI & Deeptech</option>
-              <option>LegalTech</option>
-              <option>Social Impact & Civic Tech</option>
-              <option>Manufacturing</option>
-              <option>Creative Arts</option>
-            </select>
+            <select id="industry" class="form-select select2" name="industry_id" required></select>
             <small class="text-muted">
-              {{ $l == 'en' ? 'You can assign multiple sectors or technologies to one industry.' : 'يمكنك تعيين قطاعات أو تقنيات متعددة لصناعة واحدة.' }}
+              {{ $l == 'en' ? 'Select the industry that best describes your business. Each industry has its specific sectors.' : 'حدد الصناعة التي تصف عملك بشكل أفضل. كل صناعة لها قطاعاتها الخاصة.' }}
             </small>
             <div class="error" id="industryErr" style="display:none;">
               {{ $l == 'en' ? 'Please select an industry' : 'يرجى اختيار صناعة' }}
@@ -46,57 +30,55 @@
           </div>
         </div>
       </fieldset>
-    
+
       <div class="col-12">
         <div class="form-group mb-6">
-          <label for="sectors" id="sectorsLabel" class="form-label fs-6 fw-semibold d-block">
+          <label id="sectorsLabel" class="form-label fs-6 fw-semibold d-block">
             {{ $l == 'en' ? 'Sectors' : 'القطاعات' }}
           </label>
           <small class="text-muted">
             {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom sector.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة قطاع مخصص.' }}
           </small>
-          <div class="row mt-4" id="sectorList" aria-label="Sector list">
-            <!-- sectors populated by JS based on dataset and selected industry -->
-          </div>
+          <div class="row mt-4" id="sectorList"></div>
           <input 
             id="sectorOther" 
             class="form-control" 
-            name="sectorOther" 
+            name="other_sector" 
             type="text" 
             placeholder="{{ $l == 'en' ? 'Type other sector' : 'اكتب قطاعًا آخر' }}" 
             style="display:none" 
           />
+          <input type="hidden" id="sector_ids" name="sector_ids">
           <div class="error" id="sectorErr" style="display:none;">
             {{ $l == 'en' ? 'Select at least one sector' : 'حدد قطاعًا واحدًا على الأقل' }}
           </div>
         </div>
       </div>
-    
+
       <div class="col-12">
         <div class="form-group mb-6">
-          <label for="technologies" id="technologiesLabel" class="form-label fs-6 fw-semibold d-block">
+          <label id="technologiesLabel" class="form-label fs-6 fw-semibold d-block">
             {{ $l == 'en' ? 'Technologies used' : 'التقنيات المستخدمة' }}
           </label>
           <small class="text-muted mb-4">
             {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom technology.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة تقنية مخصصة.' }}
           </small>
-          <div class="row mt-4" id="techList" aria-label="Technology list">
-            <!-- technologies populated by JS based on dataset -->
-          </div>
+          <div class="row mt-4" id="techList"></div>
           <input 
             id="techOther" 
             class="form-control" 
-            name="techOther" 
+            name="other_tech" 
             type="text" 
             placeholder="{{ $l == 'en' ? 'Type other technology' : 'اكتب تقنية أخرى' }}" 
             style="display:none" 
           />
+          <input type="hidden" id="tech_ids" name="tech_ids">
           <div class="error" id="techErr" style="display:none;">
             {{ $l == 'en' ? 'Select at least one technology' : 'حدد تقنية واحدة على الأقل' }}
           </div>
         </div>
       </div>
-    
+
       <div class="col-12 mt-12">
         <div class="d-flex gap-2 justify-content-end">
           <button type="submit" class="btn btn-primary">
@@ -108,471 +90,184 @@
   </div>
 </div>
 
+
 @push('scripts')
 <script>
-$(document).ready(function() {
-  // Dataset with unique technologies added for each industry
-  const DATA = [
-    {
-      industry: "Agritech",
-      sectors: [
-        "Crop Production Solutions","Precision Agriculture","Farm Management Software",
-        "Agricultural Supply Chain Platforms","Agri-Biotech and Genetics","Agri-Finance and Insurance",
-        "Smart Irrigation Systems","Agri Drones and Remote Sensing","Livestock Management",
-        "Food Traceability and Safety","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "Geospatial Mapping","Satellite Imaging","Hydroponics Systems","Other"
-      ]
-    },
-    {
-      industry: "Fintech",
-      sectors: [
-        "Digital Banking / Neo Banks","Payments and Remittances","Payment Gateways and Processors",
-        "Lending and Microfinance","Wealth Management / Robo-Advisory","InsurTech","RegTech / Compliance",
-        "Fraud Detection and Risk Scoring","Digital Wallets","Buy Now Pay Later (BNPL)","Crypto Exchanges",
-        "Crowdfunding Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Blockchain","Cloud Computing",
-        "Big Data & Analytics","Mobile Applications","Web Applications","Automation","Internet of Things (IoT)",
-        "Biometric Authentication","Open Banking APIs","Other"
-      ]
-    },
-    {
-      industry: "Healthtech",
-      sectors: [
-        "Telemedicine and Remote Care","Electronic Health Records (EHR)","Medical Devices and Wearables",
-        "Diagnostics and Imaging","Health Data Analytics","Wellness and Fitness Platforms",
-        "Genomics and Precision Medicine","Drug Discovery Platforms","Remote Patient Monitoring",
-        "Virtual Hospitals","Healthcare Supply Chain","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "3D Bioprinting","CRISPR Gene Editing","Medical Imaging AI","Other"
-      ]
-    },
-    {
-      industry: "Edtech",
-      sectors: [
-        "Online Learning Platforms","K-12 Solutions","Higher Education Solutions",
-        "Corporate Training and LMS","Testing and Assessment Tools","Language Learning",
-        "Virtual Classrooms","Skill Development Platforms","AR/VR Learning Environments",
-        "Gamified Learning Apps","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Automation","Mobile Applications","Web Applications",
-        "Internet of Things (IoT)","AR/VR",
-        "Gamification Engines","Adaptive Learning Systems","Other"
-      ]
-    },
-    {
-      industry: "E-commerce & Retail",
-      sectors: [
-        "Online Marketplaces","Direct-to-Consumer Brands","Social Commerce",
-        "Retail Analytics and Personalization","Logistics and Last-Mile Delivery",
-        "Subscription Commerce","Flash Sales Platforms","B2B E-commerce",
-        "Inventory Management Systems","Omni-Channel Retail","Digital Payments Integration","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Mobile Applications","Web Applications","Automation",
-        "Internet of Things (IoT)","Blockchain",
-        "Recommendation Engines","Augmented Reality (AR) Shopping","Other"
-      ]
-    },
-    {
-      industry: "Mobility & Logistics",
-      sectors: [
-        "Ride-Hailing","Fleet Management","Delivery and Courier Services","Smart Public Transport",
-        "Supply Chain Platforms","Drone Delivery","Micro-Mobility (e-scooters, bikes)",
-        "Autonomous Vehicles","Freight and Cargo Management","Smart Parking Systems",
-        "Mobility-as-a-Service (MaaS)","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics",
-        "Mobile Applications","Web Applications","Blockchain",
-        "Vehicle Telematics","Autonomous Driving Systems","Other"
-      ]
-    },
-    {
-      industry: "Recycling & Greentech",
-      sectors: [
-        "Waste Management Platforms","Renewable Energy Solutions","Energy Storage Systems",
-        "Carbon Capture and Trading","Water Treatment Technologies","Smart Grid Management",
-        "Energy Efficiency Monitoring","Sustainable Packaging","Circular Economy Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "Solar PV Systems","Wind Turbine Tech","Battery Management Systems","Other"
-      ]
-    },
-    {
-      industry: "SaaS / Enterprise Tech",
-      sectors: [
-        "Cloud Infrastructure","Productivity Tools","CRM and ERP Systems","Cybersecurity Platforms",
-        "HR and Payroll Systems","Data Analytics and BI Tools","DevOps and CI/CD Platforms",
-        "Marketing Automation","Customer Support Platforms","Project Management Tools",
-        "Workflow Automation","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Automation","Web Applications","Mobile Applications","Blockchain",
-        "Low-Code/No-Code Platforms","APIs & Microservices","Other"
-      ]
-    },
-    {
-      industry: "Tourism & TravelTech",
-      sectors: [
-        "Online Booking Platforms","Travel Management Systems","Hospitality Solutions",
-        "Experience Marketplaces","Mobility Services for Travel","Virtual Travel Experiences",
-        "Travel Insurance Platforms","Dynamic Pricing Engines","Loyalty and Rewards Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Mobile Applications","Web Applications","Automation","Blockchain",
-        "Virtual Reality (VR) Tours","Geolocation Services","Other"
-      ]
-    },
-    {
-      industry: "Media & Entertainment",
-      sectors: [
-        "Streaming Platforms","Gaming","Digital Publishing","Advertising Technology (AdTech)",
-        "Music Tech","Podcast Platforms","AR/VR Entertainment","Content Creation Tools",
-        "Esports Platforms","Social Media Networks","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Mobile Applications","Web Applications","Automation","Blockchain",
-        "AR/VR","Game Engines","Motion Capture Tech","Other"
-      ]
-    },
-    {
-      industry: "Foodtech",
-      sectors: [
-        "Food Delivery Platforms","Alternative Proteins","Smart Kitchen Devices",
-        "Food Safety and Traceability","Meal Kit Services","Restaurant Management Systems",
-        "Vertical Farming","Grocery Delivery","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Mobile Applications",
-        "Web Applications","Blockchain",
-        "Food Robotics","Lab-Grown Meat Tech","Other"
-      ]
-    },
-    {
-      industry: "AI & Deeptech",
-      sectors: [
-        "Machine Learning Platforms","Natural Language Processing","Computer Vision",
-        "Robotics","Quantum Computing","Edge AI Solutions","Neural Interface Technology",
-        "Autonomous Systems","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Automation","Robotics","Blockchain","Web Applications","Mobile Applications",
-        "Quantum Algorithms","Neuromorphic Computing","Other"
-      ]
-    },
-    {
-      industry: "LegalTech",
-      sectors: [
-        "Contract Management","e-Discovery","Compliance Platforms","Online Dispute Resolution",
-        "Case Management Systems","IP Management Tools","Legal Research Platforms","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Automation","Blockchain","Web Applications","Mobile Applications",
-        "Natural Language Processing (NLP)","Document Automation","Other"
-      ]
-    },
-    {
-      industry: "Social Impact & Civic Tech",
-      sectors: [
-        "GovTech Services","Community Platforms","Non-Profit Management Tools",
-        "Civic Engagement Apps","Digital Identity Solutions","Open Data Platforms",
-        "Public Service Portals","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing","Big Data & Analytics",
-        "Automation","Blockchain","Web Applications","Mobile Applications",
-        "Digital ID Verification","Open Data APIs","Other"
-      ]
-    },
-    {
-      industry: "Manufacturing",
-      sectors: [
-        "Smart Factory (Industry 4.0)","3D Printing and Additive Manufacturing","Supply Chain Automation",
-        "Industrial IoT","Predictive Maintenance","Robotics Integration","Quality Control Systems",
-        "Digital Twin Platforms","Advanced Materials","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Internet of Things (IoT)",
-        "Cloud Computing","Big Data & Analytics","Automation","Robotics","Blockchain",
-        "Mobile Applications","Web Applications",
-        "Additive Manufacturing","CNC Automation","Other"
-      ]
-    },
-    {
-      industry: "Creative Arts",
-      sectors: [
-        "Digital Art Platforms","Music Production Tools","Design Marketplaces","Content Creation Platforms",
-        "Virtual Galleries","NFT Art Marketplaces","AR/VR Creative Experiences","Other"
-      ],
-      technologies: [
-        "Artificial Intelligence (AI)","Machine Learning (ML)","Cloud Computing",
-        "Big Data & Analytics","Automation","Blockchain","Web Applications","Mobile Applications",
-        "AR/VR","Generative AI Tools","3D Modeling Software","Other"
-      ]
-    }
-  ];
+$(function() {
+  // Technologies
+  const COMMON_TECHNOLOGIES = @json($technologies);
+ 
+  // Industries dataset with sectors
+  const DATA = @json($data);
 
-  // Cache jQuery selectors for better performance
+  // Elements
   const $industryEl = $('#industry');
   const $sectorListEl = $('#sectorList');
   const $techListEl = $('#techList');
   const $sectorOtherEl = $('#sectorOther');
   const $techOtherEl = $('#techOther');
+  const $sectorHidden = $('#sector_ids');
+  const $techHidden = $('#tech_ids');
+  const $form = $('#classificationForm');
   const $industryErr = $('#industryErr');
   const $sectorErr = $('#sectorErr');
   const $techErr = $('#techErr');
-  const $form = $('#classificationForm');
+  const $submitBtn = $form.find('button[type="submit"]');
 
-  // Generate a safe ID from text
-  function generateId(text, prefix = '') {
-    return prefix + text.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+  let initialState = null;
+
+  function getState() {
+    return {
+      industry: $industryEl.val(),
+      sectors: $('.sector-checkbox:checked').map((_, el) => $(el).val()).get(),
+      technologies: $('.technology-checkbox:checked').map((_, el) => $(el).val()).get(),
+      otherSector: $sectorOtherEl.val().trim(),
+      otherTech: $techOtherEl.val().trim()
+    };
   }
 
-  // Update labels based on selected industry
-  function updateLabels(industry) {
-    @if ($l == 'ar')
-      $('#sectorsLabel').text(`اختر القطاعات لـ ${industry}`);
-      $('#technologiesLabel').text(`اختر التقنيات المستخدمة لـ ${industry}`);
-    @else
-      $('#sectorsLabel').text(`Choose sectors for ${industry}`);
-      $('#technologiesLabel').text(`Choose technologies used for ${industry}`);
-    @endif
+  function saveInitialState() {
+    initialState = JSON.stringify(getState());
   }
 
-  // Render sectors based on selected industry
-  function renderSectors(industryName) {
+  function checkForChanges() {
+    const current = JSON.stringify(getState());
+    $submitBtn.prop('disabled', current === initialState);
+  }
+
+  function renderIndustryOptions() {
+    $industryEl.empty();
+    $industryEl.append('<option value="" disabled>Select Industry</option>');
+    DATA.forEach(ind => {
+      $industryEl.append(`<option value="${ind.id}" ${ind.selected ? 'selected' : ''}>${ind.name}</option>`);
+    });
+  }
+
+  function renderSectors(industryId) {
     $sectorListEl.empty();
-    
-    const entry = DATA.find(d => d.industry === industryName);
-    // console.log('Selected Industry:', industryName);
-    // console.log('Industry Data:', entry);
-    
-    if (!entry) {
-      console.warn('No data found for industry:', industryName);
-      return;
-    }
-
-    entry.sectors.forEach(sector => {
-      const id = generateId(sector, 'sec-');
-      const $wrap = $('<div>', {
-        class: 'col-md-4 col-sm-6 mb-2',
-        html: `
+    const entry = DATA.find(d => d.id == industryId);
+    if (!entry) return;
+    entry.sectors.forEach(sec => {
+      $sectorListEl.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
           <div class="form-check">
-            <input 
-              class="form-check-input sector-checkbox" 
-              type="checkbox" 
-              name="sectors" 
-              value="${sector}" 
-              id="${id}"
-            />
-            <label class="form-check-label text-nowrap" for="${id}">
-              ${sector}
-            </label>
+            <input class="form-check-input sector-checkbox" type="checkbox" value="${sec.id}" id="sec-${sec.id}" ${sec.selected ? 'checked' : ''} />
+            <label class="form-check-label" for="sec-${sec.id}">${sec.name}</label>
           </div>
-        `
-      });
-      $sectorListEl.append($wrap);
+        </div>
+      `);
     });
+    $sectorListEl.append(`
+      <div class="col-md-4 col-sm-6 mb-2">
+        <div class="form-check">
+          <input class="form-check-input sector-checkbox" type="checkbox" value="other-sector" id="sec-other" />
+          <label class="form-check-label" for="sec-other">Other</label>
+        </div>
+      </div>
+    `);
   }
 
-  // Render technologies based on selected industry
-  function renderTechnologies(industryName) {
+  function renderTechnologies() {
     $techListEl.empty();
-    
-    const entry = DATA.find(d => d.industry === industryName);
-    if (!entry) {
-      console.warn('No data found for industry:', industryName);
-      return;
-    }
-    
-    entry.technologies.forEach(tech => {
-      const id = generateId(tech, 'tech-');
-      const $wrap = $('<div>', {
-        class: 'col-md-4 col-sm-6 mb-2',
-        html: `
+    COMMON_TECHNOLOGIES.forEach(tech => {
+      $techListEl.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
           <div class="form-check">
-            <input 
-              class="form-check-input technology-checkbox" 
-              type="checkbox" 
-              name="technologies" 
-              value="${tech}" 
-              id="${id}"
-            />
-            <label class="form-check-label text-nowrap" for="${id}">
-              ${tech}
-            </label>
+            <input class="form-check-input technology-checkbox" type="checkbox" value="${tech.id}" id="tech-${tech.id}" ${tech.selected ? 'checked' : ''} />
+            <label class="form-check-label" for="tech-${tech.id}">${tech.name}</label>
           </div>
-        `
-      });
-      $techListEl.append($wrap);
+        </div>
+      `);
     });
+    $techListEl.append(`
+      <div class="col-md-4 col-sm-6 mb-2">
+        <div class="form-check">
+          <input class="form-check-input technology-checkbox" type="checkbox" value="other-tech" id="tech-other" />
+          <label class="form-check-label" for="tech-other">Other</label>
+        </div>
+      </div>
+    `);
   }
 
-
-
-  // Toggle visibility of "Other" input fields
   function toggleOtherInputs() {
-    const sectorOtherChecked = $('input[name="sectors"][value="Other"]').is(':checked');
-    const techOtherChecked = $('input[name="technologies"][value="Other"]').is(':checked');
-    
-    $sectorOtherEl.toggle(sectorOtherChecked);
-    $techOtherEl.toggle(techOtherChecked);
+    $sectorOtherEl.toggle($('.sector-checkbox[value="other-sector"]:checked').length > 0);
+    $techOtherEl.toggle($('.technology-checkbox[value="other-tech"]:checked').length > 0);
   }
 
-  // Hide error messages
-  function hideErrors() {
+  function updateHiddenInputs() {
+    const sectorIds = $('.sector-checkbox:checked').map((_, el) => $(el).val()).get().filter(v => v !== 'other-sector');
+    const techIds = $('.technology-checkbox:checked').map((_, el) => $(el).val()).get().filter(v => v !== 'other-tech');
+    $sectorHidden.val(JSON.stringify(sectorIds));
+    $techHidden.val(JSON.stringify(techIds));
+  }
+
+  // Events
+  $industryEl.on('change', function() {
+    renderSectors($(this).val());
+    toggleOtherInputs();
+    updateHiddenInputs();
+    checkForChanges();
+    $industryErr.hide();
+  });
+
+  $(document).on('change', '.sector-checkbox, .technology-checkbox', function() {
+    toggleOtherInputs();
+    updateHiddenInputs();
+    checkForChanges();
+  });
+
+  // clear errors on typing in "Other" fields
+  $sectorOtherEl.on('input', function() {
+    $sectorErr.hide();
+    checkForChanges();
+  });
+  $techOtherEl.on('input', function() {
+    $techErr.hide();
+    checkForChanges();
+  });
+
+  $form.on('submit', function(e) {
+    let isValid = true;
     $industryErr.hide();
     $sectorErr.hide();
     $techErr.hide();
-  }
-  
-  // Industry selection change
-  $industryEl.on('change', function() {
-    const selectedIndustry = $(this).val();
-    // console.log('Industry changed to:', selectedIndustry);
-    
-    renderSectors(selectedIndustry);
-    renderTechnologies(selectedIndustry);
-    updateLabels(selectedIndustry);
-    $industryErr.hide(); // Hide industry error when industry is selected
-    toggleOtherInputs();
-  });
 
-  // Handle checkbox changes using event delegation
-  $(document).on('change', 'input[name="technologies"]', function() {
-    toggleOtherInputs();
-    $techErr.hide(); // Hide tech error when technology is selected
-  });
-
-  $(document).on('change', 'input[name="sectors"]', function() {
-    toggleOtherInputs();
-    $sectorErr.hide(); // Hide sector error when sector is selected
-  });
-
-  // Handle other input field changes
-  $sectorOtherEl.on('input', function() {
-    // Hide sector error when user types in "Other" field
-    if ($(this).val().trim()) {
-      $sectorErr.hide();
-    }
-  });
-
-  $techOtherEl.on('input', function() {
-    // Hide tech error when user types in "Other" field
-    if ($(this).val().trim()) {
-      $techErr.hide();
-    }
-  });
-
-  // Form submission
-  $form.on('submit', function(e) {
-    e.preventDefault();
-    
-    let isValid = true;
-    hideErrors();
-
-    // Validate industry selection
     if (!$industryEl.val()) {
       $industryErr.show();
       isValid = false;
     }
-
-    // Validate sector selection
-    if (!$('input[name="sectors"]:checked').length) {
+    if (!$('.sector-checkbox:checked').length) {
       $sectorErr.show();
       isValid = false;
     }
-
-    // Validate technology selection
-    if (!$('input[name="technologies"]:checked').length) {
+    if (!$('.technology-checkbox:checked').length) {
       $techErr.show();
       isValid = false;
     }
-
-    // Validate "Other" fields if "Other" is selected
-    const sectorOtherChecked = $('input[name="sectors"][value="Other"]').is(':checked');
-    const techOtherChecked = $('input[name="technologies"][value="Other"]').is(':checked');
-
-    if (sectorOtherChecked && !$sectorOtherEl.val().trim()) {
+    if ($('.sector-checkbox[value="other-sector"]:checked').length && !$sectorOtherEl.val().trim()) {
       $sectorErr.text('{{ $l == "en" ? "Please specify the other sector" : "يرجى تحديد القطاع الآخر" }}').show();
       isValid = false;
     }
-
-    if (techOtherChecked && !$techOtherEl.val().trim()) {
+    if ($('.technology-checkbox[value="other-tech"]:checked').length && !$techOtherEl.val().trim()) {
       $techErr.text('{{ $l == "en" ? "Please specify the other technology" : "يرجى تحديد التقنية الأخرى" }}').show();
       isValid = false;
     }
 
     if (!isValid) {
+      e.preventDefault();
       return;
     }
-
-    e.currentTarget.submit();
-
-    // // Collect form data
-    // const sectors = $('input[name="sectors"]:checked').map(function() {
-    //   return $(this).val();
-    // }).get();
-
-    // const technologies = $('input[name="technologies"]:checked').map(function() {
-    //   return $(this).val();
-    // }).get();
-
-    // // Add custom "Other" values if provided
-    // const customSector = $sectorOtherEl.val().trim();
-    // const customTech = $techOtherEl.val().trim();
-
-    // const payload = {
-    //   refId: $('#refId').val().trim() || null,
-    //   industry: $industryEl.val(),
-    //   sectors: customSector ? [...sectors, customSector] : sectors,
-    //   technologies: customTech ? [...technologies, customTech] : technologies
-    // };
-
-    // console.log('Form submission payload:', payload);
-    
-    // // Here you would typically send the data to your backend
-    // // Example: $.post('/api/classifications', payload).done(function(response) { ... });
-    
+    updateHiddenInputs();
   });
 
-  // Initialize the form
-  function init() {
-    // If there's a default industry selected, render its sectors and technologies
-    const defaultIndustry = $industryEl.val();
-    if (defaultIndustry) {
-      renderSectors(defaultIndustry);
-      renderTechnologies(defaultIndustry);
-      updateLabels(defaultIndustry);
-    }
-  }
-
-  // Initialize when DOM is ready
-  init();
+  // Init
+  renderIndustryOptions();
+  renderSectors($industryEl.val());
+  renderTechnologies();
+  toggleOtherInputs();
+  updateHiddenInputs();
+  saveInitialState();
+  checkForChanges(); // disable at start
 });
 </script>
 @endpush

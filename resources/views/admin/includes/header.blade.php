@@ -327,7 +327,7 @@
         'isVisible' => '$_user->ableToAny(["TimeSheet.index", "time_sheets.reports.finance.view", "time_sheets.view.mine"], $permissions)',
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'TimeSheet' : 'الجدول الزمني',
+                'label' => $l == 'en' ? 'Time sheet' : 'الجدول الزمني',
                 'icon' => 'ti ti-clock-record',
                 'route' => 'TimeSheet.index',
                 'permission' => 'TimeSheet.index',
@@ -367,24 +367,24 @@
             ]
         ]
     ],
-
     // Screening
     [
-        'label' => $l == 'en' ? 'Screening Management' : 'إدارة الفرز',
+        'label' => $l == 'en' ? 'Screening Management' : 'إدارة الفحص',
         'icon' => 'ti ti-hourglass me-3 ti-md',
         'route' => null,
         'permission' => ['screening.index', 'screening.results_view'],
         'isVisible' => '$_user->ableToAny(["screening.index", "screening.results_view"], $permissions)',
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Manage' : 'إدارة',
+                'label' => $l == 'en' ? 'Screening Management' : 'إدارة الفحص',
                 'icon' => 'ti ti-settings-cog',
                 'route' => '/dashboard/screening',
                 'permission' => 'screening.index',
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Results' : 'النتائج',
+
+                'label' => $l == 'en' ? 'Screening Results' : 'نتائج الفحص',
                 'icon' => 'ti ti-chart-dots',
                 'route' => '/dashboard/screening/results',
                 'permission' => 'screening.results_view',
@@ -409,14 +409,14 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Manage' : 'إدارة',
+                'label' => $l == 'en' ? 'Manage mentorships' : 'إدارة جلسات الإرشاد',
                 'icon' => 'ti ti-settings',
                 'route' => '/dashboard/mentorship/view',
                 'permission' => 'mentorships.requests_view',
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Sessions' : 'الجلسات',
+                'label' => $l == 'en' ? 'Mentorship Sessions' : 'جلسات الإرشاد',
                 'icon' => 'ti ti-calendar-time',
                 'route' => null,
                 'permission' => 'mentorships.sessions_list',
@@ -437,14 +437,14 @@
                         'isVisible' => true
                     ],
                     [
-                        'label' => $l == 'en' ? 'Approved requests' : 'الطلبات الموافق عليها',
+                        'label' => $l == 'en' ? 'Approved mentorship requests' : 'الطلبات الموافق عليها',
                         'icon' => 'ti ti-check',
                         'route' => '/dashboard/mentorship/sessions?show=approved',
                         'permission' => 'mentorships.sessions_list',
                         'isVisible' => true
                     ],
                     [
-                        'label' => $l == 'en' ? 'Disapproved requests' : 'الطلبات المرفوضة',
+                        'label' => $l == 'en' ? 'Disapproved mentorship requests' : 'الطلبات المرفوضة',
                         'icon' => 'ti ti-x',
                         'route' => '/dashboard/mentorship/sessions?show=disapproved',
                         'permission' => 'mentorships.sessions_list',
@@ -510,7 +510,7 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Results' : 'النتائج',
+                'label' => $l == 'en' ? 'Training results' : 'نتائج التدريب',
                 'icon' => 'ti ti-chart-bar',
                 'route' => '/dashboard/training/results',
                 'permission' => 'trainings.results_view',
@@ -567,14 +567,14 @@
         'isVisible' => '$_user->ableToAny(["screening.index", "screening.results_view"], $permissions)',
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Manage' : 'إدارة',
+                'label' => $l == 'en' ? 'Manage Final Screening' : 'إدارة الفحص النهائي',
                 'icon' => 'ti ti-adjustments',
                 'route' => '/dashboard/final',
                 'permission' => 'screening.index',
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Results' : 'النتائج',
+                'label' => $l == 'en' ? 'Final screening results' : 'نتائج الفحص النهائي',
                 'icon' => 'ti ti-award',
                 'route' => '/dashboard/final/results',
                 'permission' => 'screening.results_view',
@@ -631,7 +631,7 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'List All' : 'عرض الكل',
+                'label' => $l == 'en' ? 'Users' : 'المستخدمون',
                 'icon' => 'ti ti-users-group',
                 'route' => 'users.index',
                 'permission' => 'users.index',
@@ -829,7 +829,7 @@
             ],
             [
                 'label' => $l == 'en' ? 'Labels' : 'التسميات',
-                'icon' => 'ti ti-label',
+                'icon' => 'ti ti-tag',
                 'route' => 'Labels.index',
                 'permission' => 'Labels.index',
                 'isVisible' => "!app()->environment('production', 'beta')"

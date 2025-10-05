@@ -198,6 +198,96 @@
                 "default_for": [
                     "admin"
                 ]
+            },
+            {
+                "name": "settings.industry_view",
+                "description": "View Industry Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.create_technologies",
+                "description": " Create Technologies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.update_technologies",
+                "description": " Update Technologies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.delete_technologies",
+                "description": " Delete Technologies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.create_industries",
+                "description": " Create Industries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.update_industries",
+                "description": " Update Industries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.delete_industries",
+                "description": " Delete Industries ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.create_sectors",
+                "description": " Create Sectors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.update_sectors",
+                "description": " Update Sectors ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.delete_sectors",
+                "description": " Delete Sectors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
             }
         ]
     },

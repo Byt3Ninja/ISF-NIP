@@ -15,9 +15,12 @@ use App\Country;
 use App\Currency;
 use App\Settings;
 use App\Milestone;
+use App\Technology;
 use App\Team_member;
 use App\FundingRound;
 use App\Organization;
+use App\StaticCategory;
+use App\CompanyRelation;
 use App\SustainableIcon;
 use App\Events\WebMessage;
 use App\ScreeningEvaluation;
@@ -289,7 +292,46 @@ class ClientCompanyController extends Controller
                 });
             }
 
+            $l = app()->getLocale();
+            $companyRelations = CompanyRelation::where('company_id', $client->company->id)->get();
 
+            $selectedIndustryId   = $companyRelations->pluck('industry_id')->filter()->first(); // غالباً Industry واحد
+            $selectedSectorIds    = $companyRelations->pluck('sector_id')->filter()->toArray();
+            $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
+            $technologies = DB::table('technologies')->get()->map(function ($tech) use ($l, $selectedTechnologyIds) {
+                return [
+                    'id'       => $tech->id,
+                    'name'     => $tech->{"name_$l"} ?? $tech->name,
+                    'selected' => in_array($tech->id, $selectedTechnologyIds),
+                ];
+            })->values()->toArray();
+            $allSectors = DB::table('sectors')->get();
+            $industries = StaticCategory::with('sectors')->get();
+            $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
+                if ($industry->sectors->isNotEmpty()) {
+                    $sectorsList = $industry->sectors->map(function ($sector) use ($l, $selectedSectorIds) {
+                        return [
+                            'id'       => $sector->id,
+                            'name'     => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+                            'selected' => in_array($sector->id, $selectedSectorIds),
+                        ];
+                    })->values()->toArray();
+                } else {
+                    $sectorsList = $allSectors->map(function ($sector) use ($l, $selectedSectorIds) {
+                        return [
+                            'id'       => $sector->id,
+                            'name'     => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+                            'selected' => in_array($sector->id, $selectedSectorIds),
+                        ];
+                    })->values()->toArray();
+                }
+                return [
+                    'id'       => $industry->id,
+                    'name'     => $industry->name,
+                    'selected' => $industry->id == $selectedIndustryId,
+                    'sectors'  => $sectorsList,
+                ];
+            });
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -306,7 +348,10 @@ class ClientCompanyController extends Controller
                 'sectors',
                 'funding_rounds',
                 'Setting',
-                'Stages'
+                'Stages',
+                'technologies',
+                'industries',
+                'data'
             ));
         } catch (Exception $e) {
             //log what happend
@@ -849,7 +894,58 @@ class ClientCompanyController extends Controller
                 $result->business_plan = $uploadedFile;
             }
             $result->save();
-
+            if( $data['CompanyN'] == 14 )
+            {
+               
+                $request->validate([
+                    'industry_id' => 'required',
+                    'sector_ids' => 'required',
+                    'tech_ids' => 'required', // max limit to be defined later from admin panel settings
+                ], [
+                    'sector_ids.required' => __('admin.sectors is required'),
+                    'tech_ids.required' => __('admin.technologies is required'),
+                ]);
+                $sectorIds = json_decode($data['sector_ids'][0], true);
+                $techIds   = json_decode($data['tech_ids'][0], true);
+                if($data['other_sector'] != null){
+                    $addSector = new Sector();
+                    $addSector->name_en = $data['other_sector'];
+                    $addSector->name_ar = $data['other_sector'];
+                    $addSector->save();
+                    $sectorIds[] = $addSector->id;
+                    $addSectorWithIndustry = StaticCategory::where('id', $data['industry_id'])->first();
+                    $addSectorWithIndustry->sectors()->attach($addSector->id);
+                    $addSectorWithIndustry->save();
+                }
+                if($data['other_tech'] != null){
+                    $addTech = new Technology();
+                    $addTech->name = $data['other_tech'];
+                    $addTech->save();
+                    $techIds[] = $addTech->id;
+                }
+               $deleteCompanyRelations = CompanyRelation::where('company_id', $result->id)->where('user_id', $user->id)->delete();
+                if (!empty($sectorIds)) {
+                    foreach ($sectorIds as $sectorId) {
+                        $relation = new CompanyRelation();
+                        $relation->company_id   = $result->id;
+                        $relation->user_id      = $user->id;
+                        $relation->industry_id  = $data['industry_id'];
+                        $relation->sector_id    = $sectorId;
+                        $relation->save();
+                    }
+                }
+                // Technologies
+                if (!empty($techIds)) {
+                    foreach ($techIds as $techId) {
+                        $relation = new CompanyRelation();
+                        $relation->company_id   = $result->id;
+                        $relation->user_id      = $user->id;
+                        $relation->industry_id  = $data['industry_id'];
+                        $relation->technology_id = $techId;
+                        $relation->save();
+                    }
+                }   
+            }
             if( is_null( $id ) )
             {
                 User::where('id', $user->id)->update(['company_id' => $result->id]);
