@@ -276,6 +276,7 @@ class CyclesController extends Controller
 
         if ($type == 1 || $isEdit == true) {
             /// Edit Cycle
+           
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250|unique:cycles,title,' . $id,
@@ -694,7 +695,7 @@ class CyclesController extends Controller
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
+                'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
