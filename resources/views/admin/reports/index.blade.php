@@ -110,56 +110,32 @@
 
 @section('scripts')
 <script>
-  $(document).ready(function() {
-
-    // Load report when tab is shown
-    $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
-      var type = $(e.target).data('bs-target').replace('#',''); // e.g. "mentorship"
-      if (type === 'judge') {
-        // For judge report, pass cycle and step filters
-        getAjaxReport(type, 0, $('#cycle-filter').val(), $('#step-filter').val());
-      } else if (type !== 'cycles' && type !== 'companies') {
-        getAjaxReport(type, 0);
-      }
-    });
-
-    // Load immediately first active tab
-    let firstTab = $('#reportTabs .nav-link.active').data('bs-target').replace('#','');
-    if (firstTab === 'judge') {
-      getAjaxReport(firstTab, 0, $('#cycle-filter').val(), $('#step-filter').val());
-    } else if (firstTab !== 'cycles' && firstTab !== 'companies') {
-      getAjaxReport(firstTab, 0);
+  // Define cleanup function first (function hoisting)
+  function cleanupTabContent(type) {
+    // Remove any global event handlers that might have been bound by the tab content
+    const reportContainer = $('#report-' + type);
+    
+    // Unbind any document-level events that might be specific to this tab
+    if (type === 'screening') {
+      $(document).off('click', '.show-company-evaluation');
+      $(document).off('click', '#export-csv, #export-excel');
+    } else if (type === 'finalScreening') {
+      $(document).off('click', '.show-company-evaluation');
+      $(document).off('click', '#export-csv, #export-excel');
     }
+    
+    // Clear the container
+    reportContainer.empty();
+    
+    // Trigger cleanup event for any custom cleanup needed
+    $(document).trigger('tabContentCleanup', [type]);
+  }
 
-    // Load when cycle/company select changes
-    $('#cyclesSelectOptions').change(function() {
-      let id = $(this).val();
-      if (id) getAjaxReport('cycles', id);
-    });
-
-    $('#companiesSelectOptions').change(function() {
-      let id = $(this).val();
-      if (id) getAjaxReport('companies', id);
-    });
-
-    // Load when cycle/step filters change in judge report
-    $(document).on('change', '#cycle-filter, #step-filter', function() {
-      const type = 'judge';
-      const cycleId = $('#cycle-filter').val();
-      const stepId = $('#step-filter').val();
-      getAjaxReport(type, 0, cycleId, stepId);
-    });
-
-  });
-
-  function getAjaxReport(type, id = 0, cycle_id = null, step_id = null) {
+  function getAjaxReport(type, id = 0) {
     let dataToSend = { id: id };
-    if (cycle_id !== null) {
-      dataToSend.cycle_id = cycle_id;
-    }
-    if (step_id !== null) {
-      dataToSend.step_id = step_id;
-    }
+
+    // Clean up existing content first
+    cleanupTabContent(type);
 
     $.ajax({
       url: "{{ route('reports.view.ajax') }}/" + type,
@@ -182,9 +158,55 @@
           if (type === 'training' && typeof initializeComponents === 'function') {
             initializeComponents();
           }
+          
+          // Trigger content loaded event for any additional initialization
+          $(document).trigger('tabContentLoaded', [type]);
         }
       }
     });
   }
+
+  $(document).ready(function() {
+
+    // Clear content of inactive tabs when switching
+    $('button[data-bs-toggle="pill"]').on('hide.bs.tab', function (e) {
+      var previousType = $(e.target).data('bs-target').replace('#','');
+      // Clean up the content of the tab being hidden to prevent conflicts
+      cleanupTabContent(previousType);
+    });
+
+    // Load report when tab is shown
+    $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+      var type = $(e.target).data('bs-target').replace('#',''); // e.g. "mentorship"
+      
+      // Clear all other tab contents first to ensure only active tab has content
+      $('.report-content').each(function() {
+        if ($(this).attr('id') !== 'report-' + type) {
+          $(this).empty();
+        }
+      });
+      
+      if (type !== 'cycles' && type !== 'companies') {
+        getAjaxReport(type, 0);
+      }
+    });
+
+    // Load immediately first active tab
+    let firstTab = $('#reportTabs .nav-link.active').data('bs-target').replace('#','');
+    if (firstTab !== 'cycles' && firstTab !== 'companies') {
+      getAjaxReport(firstTab, 0);
+    }
+
+    // Load when cycle/company select changes
+    $('#cyclesSelectOptions').change(function() {
+      let id = $(this).val();
+      if (id) getAjaxReport('cycles', id);
+    });
+
+    $('#companiesSelectOptions').change(function() {
+      let id = $(this).val();
+      if (id) getAjaxReport('companies', id);
+    });
+  });
 </script>
 @stop

@@ -566,6 +566,10 @@ return [
     'AllـSteps' => 'All Steps',
     'All_Cycles' => 'All Programs',
     'No_Startups_Final_Screening' => 'No startups in the final screening stage.',
+    'No_Startups_Screening' => 'No startups in the screening stage.',
+    'No_Startups_Screening' => 'No startups in the screening stage.',
     'No_Startups_Match_Filters' => 'No startups match the current filter criteria.',
-    'Exporting...' => 'Exporting...',
-  ];
+        'Exporting...' => 'Exporting...',
+    'Filter by' => 'Filter by',
+    'Go to judges page' => 'Go to judges page',
+];

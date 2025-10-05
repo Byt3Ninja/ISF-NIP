@@ -559,7 +559,11 @@ return [
     'AllـSteps' => 'كل المراحل',
     'All_Cycles' => 'كل البرامج',
     'No_Startups_Final_Screening' => 'لا توجد شركات في مرحلة الفحص النهائي.',
+    'No_Startups_Screening' => 'لا توجد شركات في مرحلة الفحص.',
+    'No_Startups_Screening' => 'لا توجد شركات في مرحلة الفحص.',
     'No_Startups_Match_Filters' => 'لا توجد شركات تطابق الفلاتر الحالية.',
     'Exporting...' => 'جاري التصدير...',
+    'Filter by' => 'تصفية حسب',
+    'Go to judges page' => 'الذهاب إلى صفحة الحكام',
   ];
 

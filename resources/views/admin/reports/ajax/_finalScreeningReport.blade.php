@@ -1,10 +1,19 @@
 <div class="col-12">
-  <div class="row g-6 d-flex justify-content-center mb-8">
+  <div class="d-flex flex-wrap justify-content-center gap-6 mb-8">
     @foreach ($kpiData as $key => $item)
-      <div class="col-lg-2 col-sm-6">
-        <a 
-          href="{{ $key == 0 ? route('users.judger') : 'javascript:void(0)' }}" 
-          class="card card-border-shadow-{{ $item['color'] }} h-100 text-dark"
+      <div>
+        <button 
+          type="button"
+          class="card card-border-shadow-{{ $item['color'] }} h-100 text-dark final-screening-kpi-filter-card btn p-0 border-0"
+          @if($key == 0)
+            data-filter-type="judges"
+            onclick="window.location.href='{{ route('users.judger') }}'"
+            title="{{ __('cycles.Go to judges page') }}"
+          @else
+            title="{{ __('cycles.Filter by') . ' ' . __('admin.' . $item['label']) }}"
+            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-evaluated' : ($key == 3 ? 'draft' : 'published')) }}"
+            onclick="filterByFinalScreeningKPI(this)"
+          @endif
         >
           <div class="card-body py-2" style="display: grid; place-items: center;">
             <div class="d-flex align-items-center mb-2">
@@ -17,7 +26,7 @@
             </div>
             <small class="text-center">{{ __('admin.' . $item['label']) }}</small>
           </div>
-        </a>
+        </button>
       </div>
     @endforeach
   </div>
@@ -29,7 +38,7 @@
     <div class="card border">
       <div class="card-header">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-					<h5 class="card-title mb-1 fw-bold text-dark d-flex align-items-center">
+					<h5 class="card-title">
 						{{ __('cycles.Final Screening results') }}
 					</h5>
           <div class="d-flex flex-wrap gap-2 align-items-center">
@@ -58,7 +67,7 @@
 							<ul class="dropdown-menu">
 								@foreach(['csv', 'excel'] as $key => $option)
 									<li>
-										<a class="dropdown-item text-uppercase" id="export-{{$option}}" href="javascript:void(0)" onclick="exportTraining('{{$option}}')">
+										<a class="dropdown-item text-uppercase cursor-pointer" id="export-{{$option}}">
 											{{$option}}
 										</a>
 									</li>
@@ -72,7 +81,7 @@
 				<div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
 					<!-- Cycle Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="cycle-filter" class="form-select">
+						<select id="final-screening-cycle-filter" class="form-select">
 							<option value="">{{ __('cycles.All_Cycles') }}</option>
 							@foreach ($cycles as $cycle)
 								<option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
@@ -82,7 +91,7 @@
 
 					<!-- Step Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="step-filter" class="form-select">
+						<select id="final-screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
 								<option value="{{ $step->id }}">{{ $step->title }}</option>
@@ -92,7 +101,7 @@
 
 					<!-- Judge Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="judge-filter" class="form-select">
+						<select id="final-screening-judge-filter" class="form-select">
 							<option value="">{{ __('cycles.All Judges') }}</option>
 							@foreach ($judges->unique('id') as $judge)
 								<option value="{{ $judge->id }}">{{ Str::limit($judge->name, 25) }}</option>
@@ -102,7 +111,7 @@
 
 					<!-- Score Range Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="score-filter" class="form-select">
+						<select id="final-screening-score-filter" class="form-select">
 							<option value="">{{ __('cycles.All Scores') }}</option>
 							<option value="excellent">{{ __('cycles.Excellent') }} (75-100%)</option>
 							<option value="good">{{ __('cycles.Good') }} (50-74%)</option>
@@ -113,7 +122,7 @@
 
 					<!-- Status Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="status-filter" class="form-select">
+						<select id="final-screening-status-filter" class="form-select">
 							<option value="">{{ __('cycles.All Status') }}</option>
 							<option value="published">{{ __('cycles.Published') }}</option>
 							<option value="draft">{{ __('cycles.Draft') }}</option>
@@ -140,7 +149,7 @@
 					</div>
 				@else
         <!-- Company Cards Grid -->
-        <div id="companies-grid" class="row g-4">
+        <div id="final-screening-companies-grid" class="row g-4">
           @foreach ($startups as $company)
             @php
               // Get the evaluation status from judges
@@ -258,7 +267,7 @@
                         <small class="text-muted line-clamp-1">
                           @php
                             $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
-                            $categoryList = is_array($categories) ? implode(', ', array_filter($categories)) : ($company->business_categories ?? __('cycles.No category'));
+                            $categoryList = is_array($categories) ? implode(', ', array_filter($categories)) : ($company->business_categories ?? '');
                             $categoryList = str_replace('/', ', ', $categoryList);
                           @endphp
                           {{ $categoryList }}
@@ -412,7 +421,7 @@
         </div>
         
 				<!-- No Results State (Hidden by default, shown via JavaScript when filters don't match) -->
-        <div id="no-results-state" class="d-none">
+        <div id="final-screening-no-results-state" class="d-none">
           <div class="text-center py-5">
             <p class="text-muted">{{ __('cycles.No_Startups_Match_Filters') }}</p>
           </div>
@@ -448,87 +457,128 @@
 </div>
 
 <script>
-	// Global variables for filtering
-	let allCompanyCards = [];
-	let currentFilters = {
-		search: '',
-		cycle: '',
-		step: '',
-		judge: '',
-		score: '',
-		status: ''
-	};
+	// Global variables for filtering (Final Screening - namespaced to avoid conflicts)
+	// Only declare if not already declared to avoid redeclaration errors
+	if (typeof finalScreeningCompanyCards === 'undefined') {
+		var finalScreeningCompanyCards = [];
+	}
+	if (typeof finalScreeningCurrentFilters === 'undefined') {
+		var finalScreeningCurrentFilters = {
+			search: '',
+			cycle: '',
+			step: '',
+			judge: '',
+			score: '',
+			status: ''
+		};
+	}
 
 	$(document).ready(function() {
-		// Initialize company cards array
-		allCompanyCards = $('.company-card').toArray();
+		// Only initialize if not already initialized
+		if (finalScreeningCompanyCards.length === 0) {
+			// Initialize company cards array
+			finalScreeningCompanyCards = $('.company-card').toArray();
+			
+			// Initialize search and filter functionality
+			if (typeof initializeFinalScreeningSearchAndFilters === 'function') {
+				initializeFinalScreeningSearchAndFilters();
+			}
+			
+			// Hide no-results state initially (will be shown by updateDisplay if needed)
+			$('#final-screening-no-results-state').addClass('d-none');
+			
+			// Set initial filter indicators
+			if (typeof updateFinalScreeningFilterIndicators === 'function') {
+				updateFinalScreeningFilterIndicators();
+			}
+			
+			// Enable debug mode by setting: window.debugFilters = true in browser console
+			if (window.debugFilters) {
+				console.log('Final Screening filtration system initialized with', finalScreeningCompanyCards.length, 'companies');
+			}
+		}
 		
-		// Initialize search and filter functionality
-		initializeSearchAndFilters();
-		
-		// Hide no-results state initially (will be shown by updateDisplay if needed)
-		$('#no-results-state').addClass('d-none');
-		
-		// Set initial filter indicators
-		updateFilterIndicators();
-		
-		// Enable debug mode by setting: window.debugFilters = true in browser console
-		if (window.debugFilters) {
-			console.log('Filtration system initialized with', allCompanyCards.length, 'companies');
+		// Debug function for troubleshooting filters (only if not already defined)
+		if (typeof window.debugFinalScreeningFilters === 'undefined') {
+			window.debugFinalScreeningFilters = function() {
+				console.log('=== Final Screening Filters Debug ===');
+				console.log('Current Filters:', finalScreeningCurrentFilters);
+				console.log('Total Cards:', finalScreeningCompanyCards.length);
+				console.log('Visible Cards:', $('.company-card:visible').length);
+				console.log('Hidden Cards:', $('.company-card:hidden').length);
+				
+				// Test each filter
+				finalScreeningCompanyCards.forEach((card, index) => {
+					const $card = $(card);
+					const visible = $card.is(':visible');
+					console.log(`Card ${index}: ${visible ? 'VISIBLE' : 'HIDDEN'}`, {
+						startup: $card.find('.company-name').text().trim(),
+						cycle: $card.data('cycle'),
+						step: $card.data('step'),
+						judge: $card.data('judge'),
+						score: $card.data('score'),
+						status: $card.data('status')
+					});
+				});
+			};
 		}
 	});
 
-	function initializeSearchAndFilters() {
-		// Search input handler with debounce
-		let searchTimeout;
-		$('#company-search').on('input', function() {
-			clearTimeout(searchTimeout);
-			const searchValue = $(this).val().trim();
-			
-			// Show/hide clear search button
-			if (searchValue) {
-				$('#clear-search').removeClass('d-none');
-			} else {
-				$('#clear-search').addClass('d-none');
-			}
-			
-			searchTimeout = setTimeout(() => {
-				currentFilters.search = searchValue.toLowerCase();
-				applyFilters();
-			}, 300);
-		});
+	// Define function only if it doesn't exist
+	if (typeof initializeFinalScreeningSearchAndFilters === 'undefined') {
+		window.initializeFinalScreeningSearchAndFilters = function() {
+			// Search input handler with debounce
+			let searchTimeout;
+			$('#company-search').on('input', function() {
+				clearTimeout(searchTimeout);
+				const searchValue = $(this).val().trim();
+				
+				// Show/hide clear search button
+				if (searchValue) {
+					$('#clear-search').removeClass('d-none');
+				} else {
+					$('#clear-search').addClass('d-none');
+				}
+				
+				searchTimeout = setTimeout(() => {
+					finalScreeningCurrentFilters.search = searchValue.toLowerCase();
+					applyFinalScreeningFilters();
+				}, 300);
+			});
 
-		// Filter change handlers
-		$('#cycle-filter, #step-filter, #judge-filter, #score-filter, #status-filter').on('change', function() {
-			const filterId = $(this).attr('id');
-			const filterType = filterId.replace('-filter', '');
-			currentFilters[filterType] = $(this).val() || '';
-			applyFilters();
-		});
+			// Filter change handlers
+			$('#final-screening-cycle-filter, #final-screening-step-filter, #final-screening-judge-filter, #final-screening-score-filter, #final-screening-status-filter').on('change', function() {
+				const filterId = $(this).attr('id');
+				const filterType = filterId.replace('final-screening-', '').replace('-filter', '');
+				finalScreeningCurrentFilters[filterType] = $(this).val() || '';
+				applyFinalScreeningFilters();
+			});
 
-		// Clear filters button
-		$('#clear-filters, #clear-search').on('click', function() {
-			clearAllFilters();
-		});
+			// Clear filters button
+			$('#clear-filters, #clear-search').on('click', function() {
+				clearAllFinalScreeningFilters();
+			});
+		};
 	}
 
-	function applyFilters() {
-		let filteredCards = [...allCompanyCards];
+	if (typeof applyFinalScreeningFilters === 'undefined') {
+		window.applyFinalScreeningFilters = function() {
+		let filteredCards = [...finalScreeningCompanyCards];
 		
 		// Debug logging (can be removed in production)
 		if (window.debugFilters) {
-			console.log('Applying filters:', currentFilters);
-			console.log('Total company cards:', allCompanyCards.length);
+			console.log('Applying final screening filters:', finalScreeningCurrentFilters);
+			console.log('Total company cards:', finalScreeningCompanyCards.length);
 		}
 
 		// Apply search filter
-		if (currentFilters.search) {
+		if (finalScreeningCurrentFilters.search) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
 				const companyName = String($card.data('company-name') || '').toLowerCase();
 				const userName = String($card.data('user-name') || '').toLowerCase();
 				const category = String($card.data('category') || '').toLowerCase();
-				const searchTerm = currentFilters.search.toLowerCase();
+				const searchTerm = finalScreeningCurrentFilters.search.toLowerCase();
 				
 				return companyName.includes(searchTerm) || 
 								userName.includes(searchTerm) || 
@@ -538,49 +588,49 @@
 		}
 
 		// Apply cycle filter
-		if (currentFilters.cycle) {
+		if (finalScreeningCurrentFilters.cycle) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
 				const cycleId = String($card.data('cycle-id') || '');
-				return cycleId === currentFilters.cycle && cycleId !== '';
+				return cycleId === finalScreeningCurrentFilters.cycle && cycleId !== '';
 			});
 			if (window.debugFilters) console.log('After cycle filter:', filteredCards.length);
 		}
 
 		// Apply step filter
-		if (currentFilters.step) {
+		if (finalScreeningCurrentFilters.step) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
 				const stepId = String($card.data('step-id') || '');
-				return stepId === currentFilters.step && stepId !== '';
+				return stepId === finalScreeningCurrentFilters.step && stepId !== '';
 			});
 			if (window.debugFilters) console.log('After step filter:', filteredCards.length);
 		}
 
 		// Apply judge filter
-		if (currentFilters.judge) {
+		if (finalScreeningCurrentFilters.judge) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
 				const judgeIdsString = String($card.data('judge-ids') || '');
 				if (!judgeIdsString) return false;
 				const judgeIds = judgeIdsString.split(',').filter(id => id !== '');
-				return judgeIds.includes(currentFilters.judge);
+				return judgeIds.includes(finalScreeningCurrentFilters.judge);
 			});
 			if (window.debugFilters) console.log('After judge filter:', filteredCards.length);
 		}
 
 		// Apply score filter
-		if (currentFilters.score) {
+		if (finalScreeningCurrentFilters.score) {
 			filteredCards = filteredCards.filter(card => {
 				const scoreValue = $(card).data('score');
 				const score = parseFloat(scoreValue) || 0;
 				
 				// For companies with no scores, only show in 'poor' or when no score filter is applied
 				if (score === 0) {
-					return currentFilters.score === 'poor';
+					return finalScreeningCurrentFilters.score === 'poor';
 				}
 				
-				switch (currentFilters.score) {
+				switch (finalScreeningCurrentFilters.score) {
 					case 'excellent': return score >= 75 && score <= 100;
 					case 'good': return score >= 50 && score < 75;
 					case 'average': return score >= 25 && score < 50;
@@ -592,14 +642,14 @@
 		}
 
 		// Apply status filter
-		if (currentFilters.status) {
+		if (finalScreeningCurrentFilters.status) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
 				const primaryStatus = String($card.data('status') || 'not-evaluated');
 				const evaluationStatusesString = String($card.data('evaluation-statuses') || '');
 				const evaluationStatuses = evaluationStatusesString ? evaluationStatusesString.split(',').filter(status => status.trim()) : [];
 				
-				switch (currentFilters.status) {
+				switch (finalScreeningCurrentFilters.status) {
 					case 'published':
 						// Show companies where ALL evaluations are published (primaryStatus === 'published')
 						// OR companies with at least some published evaluations (for mixed cases)
@@ -617,13 +667,13 @@
 			if (window.debugFilters) console.log('After status filter:', filteredCards.length);
 		}
 
-		if (window.debugFilters) console.log('Final filtered results:', filteredCards.length);
+		if (window.debugFilters) console.log('Final screening filtered results:', filteredCards.length);
 		
 		// Update display
-		updateDisplay(filteredCards);
+		updateFinalScreeningDisplay(filteredCards);
 		
 		// Show/hide clear filters button and update filter indicators
-		const hasActiveFilters = currentFilters.search || currentFilters.cycle || currentFilters.step || currentFilters.judge || currentFilters.score || currentFilters.status;
+		const hasActiveFilters = finalScreeningCurrentFilters.search || finalScreeningCurrentFilters.cycle || finalScreeningCurrentFilters.step || finalScreeningCurrentFilters.judge || finalScreeningCurrentFilters.score || finalScreeningCurrentFilters.status;
 		if (hasActiveFilters) {
 			$('#clear-filters').removeClass('d-none');
 		} else {
@@ -631,14 +681,14 @@
 		}
 		
 		// Update filter indicators
-		updateFilterIndicators();
+		updateFinalScreeningFilterIndicators();
+		};
 	}
 
-	function updateDisplay(filteredCards) {
-		const $grid = $('#companies-grid');
-		const $noResults = $('#no-results-state');
-		
-		// Hide all cards first
+	if (typeof updateFinalScreeningDisplay === 'undefined') {
+		window.updateFinalScreeningDisplay = function(filteredCards) {
+			const $grid = $('#final-screening-companies-grid');
+			const $noResults = $('#final-screening-no-results-state');		// Hide all cards first
 		$('.company-card').hide();
 		
 		if (filteredCards.length > 0) {
@@ -651,8 +701,8 @@
 			$noResults.addClass('d-none');
 		} else {
 			// Check if we have any companies at all and if any filters are active
-			const totalCompanies = allCompanyCards.length;
-			const hasActiveFilters = currentFilters.search || currentFilters.cycle || currentFilters.step || currentFilters.judge || currentFilters.score || currentFilters.status;
+			const totalCompanies = finalScreeningCompanyCards.length;
+			const hasActiveFilters = finalScreeningCurrentFilters.search || finalScreeningCurrentFilters.cycle || finalScreeningCurrentFilters.step || finalScreeningCurrentFilters.judge || finalScreeningCurrentFilters.score || finalScreeningCurrentFilters.status;
 			
 			if (totalCompanies > 0 && hasActiveFilters) {
 				// Companies exist but filters don't match - show filter no-result
@@ -662,58 +712,63 @@
 				$noResults.addClass('d-none');
 			}
 		}
-
-
-	}
-
-
-
-	function updateFilterIndicators() {
-		// Add visual indicators for active filters
-		$('#cycle-filter, #step-filter, #judge-filter, #score-filter, #status-filter').each(function() {
-			const $select = $(this);
-			const hasValue = $select.val() && $select.val() !== '';
-			
-			if (hasValue) {
-				$select.addClass('border-primary');
-			} else {
-				$select.removeClass('border-primary');
-			}
-		});
-		
-		// Handle search input
-		const $search = $('#company-search');
-		if (currentFilters.search) {
-			$search.addClass('border-primary');
-		} else {
-			$search.removeClass('border-primary');
-		}
-	}
-
-	function clearAllFilters() {
-		// Reset form inputs
-		$('#company-search').val('');
-		$('#cycle-filter, #step-filter, #judge-filter, #score-filter, #status-filter').val('');
-		
-		// Hide clear search button
-		$('#clear-search').addClass('d-none');
-		
-		// Reset current filters
-		currentFilters = {
-			search: '',
-			cycle: '',
-			step: '',
-			judge: '',
-			score: '',
-			status: ''
 		};
-		
-		// Apply filters (will show all cards and hide no-results state)
-		applyFilters();
 	}
 
-	// Show Company Evaluation Modal
-	$(document).on('click', '.show-company-evaluation', function(e) {
+
+
+	if (typeof updateFinalScreeningFilterIndicators === 'undefined') {
+		window.updateFinalScreeningFilterIndicators = function() {
+			// Add visual indicators for active filters
+			$('#final-screening-cycle-filter, #final-screening-step-filter, #final-screening-judge-filter, #final-screening-score-filter, #final-screening-status-filter').each(function() {
+				const $select = $(this);
+				const hasValue = $select.val() && $select.val() !== '';
+				
+				if (hasValue) {
+					$select.addClass('border-primary');
+				} else {
+					$select.removeClass('border-primary');
+				}
+			});
+			
+			// Handle search input
+			const $search = $('#company-search');
+			if (finalScreeningCurrentFilters.search) {
+				$search.addClass('border-primary');
+			} else {
+				$search.removeClass('border-primary');
+			}
+		};
+	}
+
+	if (typeof clearAllFinalScreeningFilters === 'undefined') {
+		window.clearAllFinalScreeningFilters = function() {
+			// Reset form inputs
+			$('#company-search').val('');
+			$('#final-screening-cycle-filter, #final-screening-step-filter, #final-screening-judge-filter, #final-screening-score-filter, #final-screening-status-filter').val('');
+			
+			// Hide clear search button
+			$('#clear-search').addClass('d-none');
+			
+			// Reset current filters
+			finalScreeningCurrentFilters = {
+				search: '',
+				cycle: '',
+				step: '',
+				judge: '',
+				score: '',
+				status: ''
+			};
+			
+			// Apply filters (will show all cards and hide no-results state)
+			applyFinalScreeningFilters();
+		};
+	}
+
+	// Show Company Evaluation Modal (only bind if not already bound)
+	if (!$(document).data('final-screening-evaluation-handler-bound')) {
+		$(document).data('final-screening-evaluation-handler-bound', true);
+		$(document).on('click', '.show-company-evaluation', function(e) {
 		e.preventDefault();
 		const company = parseInt($(this).data('company'));
 		const step = parseInt($(this).data('step'));
@@ -751,9 +806,11 @@
 				`);
 			}
 		});
-	});
+		});
+	}
 
-	function buildEvaluationModal(data) {
+	if (typeof buildEvaluationModal === 'undefined') {
+		window.buildEvaluationModal = function(data) {
 		const totalScore = (data.total * 100).toFixed(1);
 		
 		let modalContent = `
@@ -1002,64 +1059,117 @@
 			</div>`;
 
 		$('#evaluationModalBody').html(modalContent);
+		};
 	}
 
-	// Export functionality
-	$('#export-csv, #export-excel').on('click', function() {
-		const format = $(this).attr('id') === 'export-csv' ? 'csv' : 'excel';
-		const button = $(this);
-		const originalText = button.html();
+	// KPI Card filtering functionality for Final Screening
+	if (typeof window.filterByFinalScreeningKPI === 'undefined') {
+		window.filterByFinalScreeningKPI = function(cardElement) {
+		const filterType = $(cardElement).data('filter-type');
 		
-		// Show loading state
-		button.prop('disabled', true).html('<i class="ti ti-loader ti-spin me-1"></i>{{ __("cycles.Exporting...") }}');
+		// Clear all current filters first
+		clearAllFinalScreeningFilters();
 		
-		// Prepare export data with current filters
-		const exportData = {
-			format: format,
-			filters: {
-				search: currentFilters.search || '',
-				cycle: currentFilters.cycle || '',
-				step: currentFilters.step || '',
-				judge: currentFilters.judge || '',
-				score: currentFilters.score || '',
-				status: currentFilters.status || ''
-			},
-			_token: $('meta[name="csrf-token"]').attr('content')
+		// Apply the specific filter based on KPI card clicked
+		switch(filterType) {
+			case 'total':
+				// Show all - filters are already cleared
+				break;
+			case 'not-evaluated':
+				finalScreeningCurrentFilters.status = 'not-evaluated';
+				$('#final-screening-status-filter').val('not-evaluated');
+				break;
+			case 'draft':
+				finalScreeningCurrentFilters.status = 'draft';
+				$('#final-screening-status-filter').val('draft');
+				break;
+			case 'published':
+				finalScreeningCurrentFilters.status = 'published';
+				$('#final-screening-status-filter').val('published');
+				break;
+		}
+		
+		// Apply the filter and update display
+		applyFinalScreeningFilters();
+		
+		// Add visual feedback to the clicked card (only final screening cards)
+		$('.final-screening-kpi-filter-card').removeClass('border-primary');
+		$(cardElement).addClass('border-primary');
+		
+		// Remove the border after a few seconds
+		setTimeout(() => {
+			$(cardElement).removeClass('border-primary');
+		}, 3000);
+		
+		// Scroll to results section smoothly
+		$('#final-screening-companies-grid').get(0).scrollIntoView({ behavior: 'smooth', block: 'start' });
 		};
-		
-		// Create a form and submit it to trigger download
-		const form = $('<form>', {
-			method: 'POST',
-			action: '{{ route("reports.export.finalScreening") }}',
-			style: 'display: none;'
-		});
-		
-		// Add all data as hidden inputs
-		Object.keys(exportData).forEach(key => {
-			if (key === 'filters') {
-				Object.keys(exportData.filters).forEach(filterKey => {
+	}
+
+	// Backward compatibility - if no specific function is called on KPI cards, use the final screening version
+	if (typeof window.filterByKPI === 'undefined') {
+		window.filterByKPI = window.filterByFinalScreeningKPI;
+	}
+
+	// Export functionality (only bind if not already bound)
+	if (!$(document).data('final-screening-export-handler-bound')) {
+		$(document).data('final-screening-export-handler-bound', true);
+		$('#export-csv, #export-excel').on('click', function() {
+			const format = $(this).attr('id') === 'export-csv' ? 'csv' : 'excel';
+			const button = $(this);
+			const originalText = button.html();
+			
+			// Show loading state
+			button.prop('disabled', true).html('<i class="ti ti-loader ti-spin me-1"></i>{{ __("cycles.Exporting...") }}');
+			
+			// Prepare export data with current filters
+			const exportData = {
+				format: format,
+				filters: {
+					search: finalScreeningCurrentFilters.search || '',
+					cycle: finalScreeningCurrentFilters.cycle || '',
+					step: finalScreeningCurrentFilters.step || '',
+					judge: finalScreeningCurrentFilters.judge || '',
+					score: finalScreeningCurrentFilters.score || '',
+					status: finalScreeningCurrentFilters.status || ''
+				},
+				_token: $('meta[name="csrf-token"]').attr('content')
+			};
+			
+			// Create a form and submit it to trigger download
+			const form = $('<form>', {
+				method: 'POST',
+				action: '{{ route("reports.export.finalScreening") }}',
+				style: 'display: none;'
+			});
+			
+			// Add all data as hidden inputs
+			Object.keys(exportData).forEach(key => {
+				if (key === 'filters') {
+					Object.keys(exportData.filters).forEach(filterKey => {
+						form.append($('<input>', {
+							type: 'hidden',
+							name: `filters[${filterKey}]`,
+							value: exportData.filters[filterKey]
+						}));
+					});
+				} else {
 					form.append($('<input>', {
 						type: 'hidden',
-						name: `filters[${filterKey}]`,
-						value: exportData.filters[filterKey]
+						name: key,
+						value: exportData[key]
 					}));
-				});
-			} else {
-				form.append($('<input>', {
-					type: 'hidden',
-					name: key,
-					value: exportData[key]
-				}));
-			}
+				}
+			});
+			
+			$('body').append(form);
+			form.submit();
+			form.remove();
+			
+			// Reset button state after a short delay
+			setTimeout(() => {
+				button.prop('disabled', false).html(originalText);
+			}, 2000);
 		});
-		
-		$('body').append(form);
-		form.submit();
-		form.remove();
-		
-		// Reset button state after a short delay
-		setTimeout(() => {
-			button.prop('disabled', false).html(originalText);
-		}, 2000);
-	});
+	}
 </script>
