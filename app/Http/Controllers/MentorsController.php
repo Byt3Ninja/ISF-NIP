@@ -592,61 +592,65 @@ class MentorsController extends Controller
 	{
 		$organization_id = auth()->user()->organization_id;
 		if ($request->show == 'all') {
-			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
-				$startDate = date('Y-m-d', strtotime($request->start_date));
-				$endDate = date('Y-m-d', strtotime($request->end_date));
+			$startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
 
 				// البحث باستخدام التاريخ من وإلى
-				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
-			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				return $q->whereBetween('zoom_date', [$startDate, $endDate]);
+			})->when($request->filled('cycle_id') && $request->cycle_id !== 'all', function ($q) use ($request) {
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
-			})->orderBy('id', 'DESC')->get();
+			});
 		} elseif ($request->show == 'approved') {
-			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
 			})->whereNotNull('start_url')->when($request->start_date && $request->end_date, function ($q) use ($request) {
-				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
-				$startDate = date('Y-m-d', strtotime($request->start_date));
-				$endDate = date('Y-m-d', strtotime($request->end_date));
-
-				// البحث باستخدام التاريخ من وإلى
-				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
-			})->where('approved', 'Yes')->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				$startDate = Carbon::parse($request->start_date)->startOfDay();
+				$endDate = Carbon::parse($request->end_date)->endOfDay();
+				$q->whereBetween('zoom_date', [$startDate, $endDate]);
+			})->where('approved', 'Yes')->when($request->filled('cycle_id') && $request->cycle_id !== 'all', function ($q) use ($request) {
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
-			})->orderBy('id', 'DESC')->get();
+			});
 		} elseif ($request->show == 'disapproved') {
-			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
 			})->where('approved', 'No')->when($request->start_date && $request->end_date, function ($q) use ($request) {
-				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
-				$startDate = date('Y-m-d', strtotime($request->start_date));
-				$endDate = date('Y-m-d', strtotime($request->end_date));
-
-				// البحث باستخدام التاريخ من وإلى
-				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
-			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				$startDate = Carbon::parse($request->start_date)->startOfDay();
+				$endDate = Carbon::parse($request->end_date)->endOfDay();
+				$q->whereBetween('zoom_date', [$startDate, $endDate]);
+			})->when($request->filled('cycle_id') && $request->cycle_id !== 'all', function ($q) use ($request) {
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
-			})->orderBy('id', 'DESC')->get();
+			});
 		} else {
-			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+			 $query = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
 			})->whereNull('approved')->when($request->start_date && $request->end_date, function ($q) use ($request) {
-				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
-				$startDate = date('Y-m-d', strtotime($request->start_date));
-				$endDate = date('Y-m-d', strtotime($request->end_date));
-				// البحث باستخدام التاريخ من وإلى
+				$startDate = Carbon::parse($request->start_date)->startOfDay();
+				$endDate = Carbon::parse($request->end_date)->endOfDay();
+				$q->whereBetween('zoom_date', [$startDate, $endDate]);
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
-			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+			})->when($request->filled('cycle_id') && $request->cycle_id !== 'all', function ($q) use ($request) {
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
-			})->orderBy('id', 'DESC')->get();
+			});
 		}
+
+    	if ($request->filled('done') && $request->done !== 'all') {
+         $query->where('approved', 'Yes');
+   		 if ($request->done === 'yes') {
+        	$query->where('done', 1);
+    	} elseif ($request->done === 'no') {
+        	$query->whereNull('done');
+   		 }
+    	}
+
+		$sessions = $query->orderBy('id', 'DESC')->get();
 
 		$sessions = $sessions->map(function ($session) {
 			$session->date = Carbon::parse($session->zoom_date);

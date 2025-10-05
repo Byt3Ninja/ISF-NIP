@@ -228,7 +228,7 @@ return [
     'Review comment' => 'Review comment',
     'Rate' => 'Rate',
     'Your request' => 'Your request',
-    'Done' => 'Done',
+    'Done' => 'Completed',
     'Course Title' => 'Course Title',
     'all online training steps' => 'All online training steps',
     'Training Steps'  => 'Training Steps',

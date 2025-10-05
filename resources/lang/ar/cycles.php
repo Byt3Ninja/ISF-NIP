@@ -225,7 +225,7 @@ return [
     'Review comment' => 'تعليقات المستخدمين',
     'Rate' => 'التقييم',
     'Your request' => 'طلبك',
-    'Done' => 'تمت',
+    'Done' => 'اكتملت',
     'Course Title' => 'عنوان الكورس',
     'all online training steps' => 'كافة التدريبات بالبرامج',
     'Training Steps'  => 'مراحل التدريب',
