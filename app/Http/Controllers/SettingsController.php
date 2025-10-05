@@ -17,6 +17,7 @@ use App\Settings;
 use Carbon\Carbon;
 use App\Invitation;
 use App\Technology;
+use App\ReminderLog;
 use App\Organization;
 use App\StaticCategory;
 use App\MentorshipRequest;
@@ -821,11 +822,12 @@ class SettingsController extends Controller
     }
 
 	public function ReminderLogs(Request $request) {
+		$delete = ReminderLog::truncate();
 							if(auth()->user()->hasRole('organizationManager')) {
-                                $cycles = \App\Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
-                                $ReminderLogs = \App\ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+                                $cycles = Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
+                                $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
                             }elseif(auth()->user()->hasRole('Admin')) {
-                                $ReminderLogs = \App\ReminderLog::all();
+                                $ReminderLogs = ReminderLog::all();
                             }else{
                                 $ReminderLogs = [];
                             }
@@ -1140,118 +1142,6 @@ class SettingsController extends Controller
 			});
 		
 			return view('admin.settings.industry.index', compact('data', 'technologies'));
-		} 
-
-		public function create_industries(Request $request)
-		{
-			$request->validate([
-				'name' => 'required',
-			]);
-			$industry = new StaticCategory();
-			$industry->name = $request->name;
-			$industry->save();
-			
-			return response()->json(['status'=> 'success','message' => 'AddedSuccessfully']);
-		}
-
-		public function update_industries(Request $request, $id)
-		{
-			$id = $request->input('id');
-			$name = $request->input('newName');
-
-			$updateindustry = StaticCategory::where('id', $id)->first();
-			$updateindustry->name = $name;
-			$updateindustry->save();
-
-			return response()->json(['message' => 'UpdatedSuccessfully']);
-		}
-		public function delete_industries(Request $request, $id)
-		{
-			$deleteindustry = StaticCategory::where('id', $id)->first();
-			$deleteindustry->delete();
-			return response()->json(['message' => 'DeletedSuccessfully']);
-		}
-		
-
-		public function create_technologies(Request $request)
-		{
-			$request->validate([
-				'name' => 'required',
-			]);
-			$technology = new Technology();
-			$technology->name = $request->name;
-			$technology->save();
-
-			
-			return response()->json(['message' => 'AddedSuccessfully']);
-		} 
-		public function update_technologies(Request $request, $id)
-		{
-			
-			$name = $request->input('newName');
-
-			$updateSittings = Technology::where('id', $id)->first();
-			$updateSittings->name = $name;
-			$updateSittings->save();
-
-			return response()->json(['message' => 'UpdatedSuccessfully']);
-		}
-		public function delete_technologies(Request $request, $id)
-		{
-			$updateSittings = Technology::where('id', $id)->first();
-			$updateSittings->delete();
-
-			return response()->json(['message' => 'DeletedSuccessfully']);
-		}
-		public function create_sectors(Request $request)
-		{
-			$request->validate([
-				'name' => 'required',
-				'industryId' => 'required|exists:static_categories,id',
-			]);
-			$sector = new Sector();
-			$sector->name_en = $request->name;
-			$sector->name_ar = $request->name;
-			$sector->save();
-
-			$industry = StaticCategory::where('id', $request->industryId)->first();
-			$industry->sectors()->attach($sector->id);
-			$industry->save();
-			
-			return response()->json(['message' => 'AddedSuccessfully']);
-		}
-
-		public function update_sectors(Request $request, $id)
-		{
-			
-			$request->validate([
-				'newName' => 'required',
-				'industryId' => 'required|exists:static_categories,id',
-			]);
-
-			$name = $request->input('newName');
-			$industry_id = $request->input('industryId');
-
-			$updateSettings = Sector::where('id', $id)->first();
-			$updateSettings->name_en = $name;
-			$updateSettings->name_ar = $name;
-			$updateSettings->save();
-
-			// $industry = StaticCategory::where('id', $industry_id)->first();
-			// $industry->sectors()->updateExistingPivot($id, ['name_en' => $name, 'name_ar' => $name]);
-			// $industry->save();
-
-			return response()->json(['message' => 'UpdatedSuccessfully']);
-		}
-		
-		public function delete_sectors(Request $request, $id)
-		{
-			$sector = Sector::find($id);
-			if(empty($sector)){
-				return response()->json(['message' => 'Not_Found']);
-			}
-			$sector->delete();
-			return response()->json(['message' => 'DeletedSuccessfully']);
 		}
 		
 }
