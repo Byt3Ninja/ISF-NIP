@@ -484,7 +484,7 @@
                       
                       <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
                            data-company-name="{{ strtolower($company->name) }}"
-                           data-user-name="{{ strtolower($company->user->name) }}"
+                           data-user-name="{{ strtolower($company->user?->{'first_name_'.$l}) . ' - ' . strtolower($company->user?->{'last_name_'.$l}) }}"
                            data-category="{{ strtolower($categoryString) }}"
                            data-score="{{ $filterScore }}"
                            data-status="{{ $primaryStatus }}"
