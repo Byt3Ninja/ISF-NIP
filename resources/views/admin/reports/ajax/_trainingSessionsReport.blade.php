@@ -128,6 +128,7 @@
             <th>{{ __('cycles.Program') }}</th>
             <th>{{ __('cycles.Training_Step') }}</th>
             <th>{{ __('cycles.Date_Time') }}</th>
+            <th>{{ __('cycles.Duration') }}</th>
             <th>{{ __('cycles.details') }}</th>
             <th>{{ __('cycles.Actions') }}</th>
           </tr>
@@ -178,6 +179,13 @@
                   @endif
                 </small>
               </td>
+              @php
+                    $hours = floor($session->duration / 60);
+                    $minutes = $session->duration % 60;
+               @endphp
+                <td>
+                    {{ sprintf('%02d:%02d', $hours, $minutes) }}
+                </td>
 
               {{-- Details (Trainer + Address if offline) --}}
               <td>

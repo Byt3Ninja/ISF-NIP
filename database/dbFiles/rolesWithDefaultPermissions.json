@@ -5754,6 +5754,16 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "reports.export.screening",
+                "description": "Export Screening Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
