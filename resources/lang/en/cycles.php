@@ -579,4 +579,6 @@ return [
     'Has_LinkedIn_Profile' => 'Has LinkedIn Profile',
     'Enrolled_Program' => 'Enrolled in Program',
     'Apply_Filters' => 'Apply Filters',
+    'Total' => 'Total',
+    'Startup_Surveys' => 'Startup Surveys',
 ];

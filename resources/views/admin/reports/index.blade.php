@@ -37,7 +37,7 @@
             'cycles'         => ['label' => __('admin.Cycles'),          'icon' => 'ti ti-refresh'],
             'companies'      => ['label' => __('admin.Companies'),       'icon' => 'ti ti-building'],
             'mentorSurveys'  => ['label' => __('admin.Surveys_Mentor'),  'icon' => 'ti ti-clipboard-check'],
-            'startupSurveys' => ['label' => __('admin.Surveys_Startup'), 'icon' => 'ti ti-clipboard-list'],
+            'startupSurveys' => ['label' => __('cycles.Startup_Surveys'), 'icon' => 'ti ti-clipboard-list'],
           ];
         @endphp
 
