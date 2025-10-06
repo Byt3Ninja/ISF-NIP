@@ -676,12 +676,13 @@
     
     // Initalize date table
     let trainingTable = $('#tblTraining').DataTable({
+      responsive: true,
       pageLength: 10,
       columnDefs: [{
         orderable: false,
         targets: [6]
       }],
-      order: [[0, 'asc']],
+      order: [[4, 'desc']],
       language: {
         @if ($l == 'ar')
           sEmptyTable: "ليست هناك بيانات متاحة في الجدول",
