@@ -3,74 +3,6 @@
 @section('title', __('dashboard.Mentors'))
 @section('subTitle', __('dashboard.Mentors'))
 
-@section('style')
-<style>
-  .line-clamp-4 {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* Mentor card improvements */
-  .mentor-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    border: 1px solid #e7e7ff;
-  }
-  
-  .mentor-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(105, 108, 255, 0.15);
-  }
-  
-  .stats-card {
-    transition: background-color 0.2s ease-in-out;
-  }
-  
-  .stats-card:hover {
-    opacity: 0.9;
-  }
-  
-  /* Modal filter styling */
-  #filterModal .form-select,
-  #filterModal .form-control {
-    min-height: 38px;
-  }
-  
-  /* Select2 styling for expertise filter in modal */
-  #filterModal .select2-container .select2-selection--multiple {
-    min-height: 38px !important;
-    border-color: #d9dee3 !important;
-  }
-  
-  #filterModal .select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #696cff;
-    border-color: #696cff;
-    color: white;
-  }
-  
-  /* Search form styling */
-  .search-form {
-    min-width: 300px;
-  }
-  
-  @media (max-width: 768px) {
-    .search-form {
-      min-width: 250px;
-    }
-  }
-</style>
-@stop
-
 @section('content')
 @if (!Auth::user()->first_name_ar)
 <div class="d-none">
@@ -168,7 +100,7 @@
                 style="height: 293px; width: 100%; object-fit: cover;"
               >
             </div>
-            <div class="card card-body mentor-card mx-2 p-4"
+            <div class="card card-body mx-2 p-4"
               style="height: 380px; z-index: 1; margin-top: -25px; border-radius: 15px;">
               <div
                 class="bg-white shadow-sm border border-label-secondary rounded px-2 py-1 d-flex justify-content-between align-items-center mb-2"
@@ -326,7 +258,7 @@
         <div class="modal-body">
           <!-- Program Filter -->
           <div class="form-group mb-4">
-            <label for="programFilter" class="form-label">{{ __('cycles.Select_Program') }}</label>
+            <label for="programFilter" class="form-label">{{ __('cycles.Cycle') }}</label>
             <select name="programFilter" id="programFilter" class="form-select select2">
               <option value="">{{ __('admin.All_Programs') }}</option>
               @if(isset($cycles) && count($cycles) > 0)
@@ -354,7 +286,7 @@
 
           <!-- Expertise Filter -->
           <div class="form-group mb-4">
-            <label for="expertises" class="form-label">{{ __('admin.Select Expertise') }}</label>
+            <label for="expertises" class="form-label">{{ __('admin.Expertises') }}</label>
             <select name="expertises[]" id="expertises" class="form-select select2" multiple="multiple">
               @php
               $expertises = App\Expertise::where('parent_id', null)->get();

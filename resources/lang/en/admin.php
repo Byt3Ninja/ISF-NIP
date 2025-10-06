@@ -2379,4 +2379,6 @@ return [
 	'resultsReport' => 'Results Report',
 	'Not_Found' => 'Not Found',
 	'Screening_Results' => 'Screening Results',
+	'Sectors' => 'Sectors',
+	'All_Stages' => 'All Stages',
 ];

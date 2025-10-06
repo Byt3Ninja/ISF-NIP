@@ -2434,4 +2434,6 @@ return [
 	'resultsReport' => 'تقرير النتائج',
 	'Not_Found' => 'غير موجود',
 	'Screening_Results' => 'نتائج الفحص',
+	'Sectors' => 'القطاعات',
+	'All_Stages' => 'جميع المراحل',
 ];

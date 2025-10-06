@@ -1543,10 +1543,44 @@ class ClientCompanyController extends Controller
 }
 
     public function companies(Request $request)
-	{
-	    $filters = $request->only(['search', 'sector', 'stage', 'organization']);
+    {
+        // Map the form parameters to the expected filter parameters
+        $filters = [];
+        
+        // Handle search
+        if ($request->filled('search')) {
+            $filters['search'] = $request->get('search');
+        }
+        
+        // Handle organization filter (Admin only)
+        if ($request->filled('orgnization')) {
+            $filters['organization'] = $request->get('orgnization');
+        }
+        
+        // Handle program/cycle filter
+        if ($request->filled('programFilter')) {
+            $filters['programId'] = $request->get('programFilter');
+        }
+        
+        // Handle stage filter
+        if ($request->filled('stage')) {
+            $filters['stage'] = $request->get('stage');
+        }
+        
+        // Handle sectors filter (multiple sectors)
+        if ($request->filled('sectors')) {
+            $sectors = $request->get('sectors');
+            if (is_array($sectors) && !empty($sectors)) {
+                // For multiple sectors, we'll need to modify the repository to handle this
+                $filters['sectors'] = $sectors;
+            }
+        }
+        
         $companies = $this->companyService->getCompanies($filters, isApi: false);
+        
+        // Pass the language variable
+        $l = app()->getLocale();
 
-	    return view('admin/users/companies', compact('companies'));
-	}
+        return view('admin/users/companies', compact('companies', 'l'));
+    }
 }
