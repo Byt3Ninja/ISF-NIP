@@ -16,7 +16,7 @@ class CompanyRepository
         $locale = app()->getLocale();
         $nameField = $locale == 'ar' ? 'name_ar' : 'name_en';
 
-        $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization']);
+        $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization', 'sectoR', 'stagE']);
         $user = auth()->user();
 
         if ($user && $user->hasRole('organizationManager')) {
@@ -55,6 +55,11 @@ class CompanyRepository
                     $q->where("name_{$locale}", 'like', "%{$filters['sector']}%");
                 });
             }
+        }
+
+        // Handle multiple sectors filter
+        if (!empty($filters['sectors']) && is_array($filters['sectors'])) {
+            $query->whereIn('sector', $filters['sectors']);
         }
 
         if (!empty($filters['stage'])) {

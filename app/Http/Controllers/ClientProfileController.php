@@ -388,8 +388,10 @@ class ClientProfileController extends Controller
         $setting = Settings::where('id', 1)->first();
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
-        $ExpertiesSearch = $request->input('expertises');
+        $expertisesSearch = $request->input('expertises', []);
         $linkedin = $request->input('linkedin');
+        $programFilter = $request->input('programFilter');
+        $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
             if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
                 $l = app()->getLocale();
@@ -405,19 +407,42 @@ class ClientProfileController extends Controller
                         })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
-                if (!empty($ExpertiesSearch)) {
-                    $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
-                    if ($expertiesMentor) {
-                        $expid = $expertiesMentor->id;
-                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
-                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                if (!empty($expertisesSearch) && is_array($expertisesSearch)) {
+                    $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expertisesSearch) {
+                        $query->whereIn('expertise_id', $expertisesSearch);
+                    });
+                }
+                // LinkedIn filter - All/Yes/No options
+                if ($linkedin !== null && $linkedin !== '') {
+                    if ($linkedin == '1') {
+                        // Yes - has LinkedIn profile
+                        $mentors = $mentors->whereHas('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
+                        });
+                    } elseif ($linkedin == '0') {
+                        // No - doesn't have LinkedIn profile
+                        $mentors = $mentors->whereDoesntHave('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
                         });
                     }
+                    // If linkedin is empty string (''), show all (no filter applied)
                 }
-                if (!empty($linkedin)) {
-                    $mentors = $mentors->whereHas('bio', function ($query) use ($linkedin) {
-                        $query->whereNotNull('linkedin');
+                // Program filter - filter by specific program/cycle
+                if (!empty($programFilter)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                        $query->where('cycle_id', $programFilter);
                     });
+                }
+                // Enrolled in program filter - All/Yes/No options
+                if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
+                    if ($enrolledInProgramFilter == '1') {
+                        // Yes - enrolled in at least one program
+                        $mentors = $mentors->has('mentorCycles');
+                    } elseif ($enrolledInProgramFilter == '0') {
+                        // No - not enrolled in any program
+                        $mentors = $mentors->doesntHave('mentorCycles');
+                    }
+                    // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
                 if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
                     $cycleId = Auth::user()->company->cycle;
@@ -428,9 +453,17 @@ class ClientProfileController extends Controller
                 }
 
                 $mentors = $mentors->get();
+
+                $cycles = [];
+
+                if (Auth::user()->organization_id) {
+                    $cycles = Cycle::where('organization_id', Auth::user()->organization_id)->get();
+                } else {
+                    $cycles = Cycle::all();
+                }
              
                 // $mentors = User::role('mentor')->get();
-                return view('admin/clients/Mentors', compact('mentors'));
+                return view('admin/clients/Mentors', compact('mentors', 'cycles'));
             }
         } else {
 
@@ -448,18 +481,54 @@ class ClientProfileController extends Controller
                         })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
-                if (!empty($ExpertiesSearch)) {
-                    $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
-                    if ($expertiesMentor) {
-                        $expid = $expertiesMentor->id;
-                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
-                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                if (!empty($expertisesSearch) && is_array($expertisesSearch)) {
+                    $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expertisesSearch) {
+                        $query->whereIn('expertise_id', $expertisesSearch);
+                    });
+                }
+                // LinkedIn filter - All/Yes/No options
+                if ($linkedin !== null && $linkedin !== '') {
+                    if ($linkedin == '1') {
+                        // Yes - has LinkedIn profile
+                        $mentors = $mentors->whereHas('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
+                        });
+                    } elseif ($linkedin == '0') {
+                        // No - doesn't have LinkedIn profile
+                        $mentors = $mentors->whereDoesntHave('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
                         });
                     }
+                    // If linkedin is empty string (''), show all (no filter applied)
+                }
+                // Program filter - filter by specific program/cycle
+                if (!empty($programFilter)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                        $query->where('cycle_id', $programFilter);
+                    });
+                }
+                // Enrolled in program filter - All/Yes/No options
+                if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
+                    if ($enrolledInProgramFilter == '1') {
+                        // Yes - enrolled in at least one program
+                        $mentors = $mentors->has('mentorCycles');
+                    } elseif ($enrolledInProgramFilter == '0') {
+                        // No - not enrolled in any program
+                        $mentors = $mentors->doesntHave('mentorCycles');
+                    }
+                    // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
                 $mentors = $mentors->get();
+                
+                $cycles = [];
+                if (Auth::user()->organization_id) {
+                    $cycles = Cycle::where('organization_id', Auth::user()->organization_id)->get();
+                } else {
+                    $cycles = Cycle::all();
+                }
+                
                 // $mentors = User::role('mentor')->get();
-                return view('admin/clients/Mentors', compact('mentors'));
+                return view('admin/clients/Mentors', compact('mentors', 'cycles'));
             } else {
                 return redirect()->route('core.dashboard_view');
             }

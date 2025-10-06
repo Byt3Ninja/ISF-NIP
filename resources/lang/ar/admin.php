@@ -131,7 +131,7 @@ return [
 	'My Feed' => 'الخلاصة',
 	'Like' => 'أعجبني',
 	'Likes' => 'الاعجاب',
-	'View Profile' => 'مشاهده',
+	'View Profile' => 'عرض الملف الشخصي',
 	'partners settings' => 'إعدادات الرعاة',
 	'press settings' => 'روابط الأخبار',
 	'Portal Settings' => 'إعدادات النظام',
@@ -2434,4 +2434,6 @@ return [
 	'resultsReport' => 'تقرير النتائج',
 	'Not_Found' => 'غير موجود',
 	'Screening_Results' => 'نتائج الفحص',
+	'Sectors' => 'القطاعات',
+	'All_Stages' => 'جميع المراحل',
 ];
