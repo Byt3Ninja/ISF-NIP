@@ -133,7 +133,7 @@
                                     (request()->has('expertises') && !empty(request('expertises')));
                 @endphp
                 @if($hasActiveFilters)
-                  <a href="{{ route('mentors.list') }}" class="btn btn-outline-warning" title="{{ __('admin.Reset_Filters') }}">
+                  <a href="{{ route('mentors.list') }}" class="btn btn-outline-secondary" title="{{ __('admin.Reset_Filters') }}">
                     <i class="ti ti-refresh me-2"></i>
                     {{ __('admin.Reset') }}
                   </a>
@@ -440,7 +440,7 @@
           </button>
           <button type="submit" class="btn btn-primary">
             <i class="ti ti-filter me-2"></i>
-            {{ __('admin.Apply_Filters') }}
+            {{ __('cycles.Apply_Filters') }}
           </button>
         </div>
       </form>
