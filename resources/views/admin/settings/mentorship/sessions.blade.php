@@ -95,8 +95,8 @@
                               <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
                               <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
                                 <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
-                                <option value="yes" {{ request()->done == 'yes' ? 'selected' : '' }}>{{ __('cycles.Completed') }}</option>
-                                <option value="no" {{ request()->done == 'no' ? 'selected' : '' }}>{{ __('cycles.Not_Completed') }}</option>
+                                <option value="yes" {{ request()->done == 'yes' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
+                                <option value="no" {{ request()->done == 'no' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
                               </select>
                             </div>
 
@@ -124,7 +124,6 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="table-responsive">
                   <table class="table" id="userstable">
                     <thead class="table-light">
@@ -141,7 +140,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @forelse  ($sessions as $session)
+                      @foreach  ($sessions as $session)
                         <tr>
                           <td>
                             <div class="d-flex align-items-center w-px-150">
@@ -255,13 +254,7 @@
                             </div>
                           </td>
                         </tr>
-                          @empty
-                            <tr>
-                              <td colspan="9" class="text-center">
-                                {{ $l === 'ar' ? 'لا توجد جلسات ارشاد متاحة' : 'No Mentorship Sessions Found' }}
-                              </td>
-                            </tr>
-                      @endforelse
+                      @endforeach
                     </tbody>
                   </table>
                   @foreach ($sessions as $session)
@@ -467,7 +460,6 @@
       alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
     });
     $(document).ready(function() {
-    $('#userstable').DataTable().destroy();
     $('#userstable').DataTable({
       "responsive": true,
       "searching": true,
@@ -481,8 +473,9 @@
           "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8]
         }
       ],
-      @if ($l == 'ar')
         "language": {
+          emptyTable: "{{ $l === 'ar' ? 'لا توجد جلسات ارشاد متاحة' : 'No Mentorship Sessions Found' }}",
+         @if ($l === 'ar')
           "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
           "sLoadingRecords": "جارٍ التحميل...",
           "sProcessing": "جارٍ التحميل...",
@@ -504,8 +497,8 @@
             "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
             "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
           }
-        }
       @endif
+       }
       });
     });
   </script>
