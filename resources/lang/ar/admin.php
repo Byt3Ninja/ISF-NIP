@@ -131,7 +131,7 @@ return [
 	'My Feed' => 'الخلاصة',
 	'Like' => 'أعجبني',
 	'Likes' => 'الاعجاب',
-	'View Profile' => 'مشاهده',
+	'View Profile' => 'عرض الملف الشخصي',
 	'partners settings' => 'إعدادات الرعاة',
 	'press settings' => 'روابط الأخبار',
 	'Portal Settings' => 'إعدادات النظام',

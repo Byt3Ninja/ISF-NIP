@@ -565,5 +565,12 @@ return [
     'Exporting...' => 'جاري التصدير...',
     'Filter by' => 'تصفية حسب',
     'Go to judges page' => 'الذهاب إلى صفحة الحكام',
+    'No_Mentors_Found' => 'لم يتم العثور على مرشدين',
+    'Request_Mentorship' => 'طلب ارشاد',
+    'Show_Filters' => 'إظهار الفلاتر',
+    'Any_Rating' => 'أي تقييم',
+    'Has_LinkedIn_Profile' => 'لديه ملف لينكدإن',
+    'Enrolled_Program' => 'لم يشترك في برنامج',
+    'Apply_Filters' => 'تطبيق الفلاتر',
   ];
 
