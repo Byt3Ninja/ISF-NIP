@@ -12,8 +12,8 @@ if($user)
 
 
 <!-- Notification -->
-<li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-  <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
+<li class="nav-item dropdown-notifications navbar-dropdown dropdown me-1 me-md-2">
+  <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow p-1 p-md-2" href="javascript:void(0);"
     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
@@ -24,15 +24,15 @@ if($user)
   </a>
 
   <!-- Notification Dropdown -->
-  <ul class="dropdown-menu dropdown-menu-end p-0">
+  <ul class="dropdown-menu dropdown-menu-end p-0" style="min-width: 280px; max-width: 400px;">
     @if ($all > 0)
       <li class="dropdown-menu-header border-bottom">
-        <div class="dropdown-header d-flex align-items-center py-3">
+        <div class="dropdown-header d-flex align-items-center py-3 px-3">
           <h6 class="mb-0 me-auto" style="text-transform:capitalize;">{{ __('notification') }}</h6>
           <div class="d-flex align-items-center h6 mb-0">
             <span class="badge bg-label-primary me-2" id="new-count">{{ $all }} {{ $l == 'en' ? 'New': 'جديد' }}</span>
 
-           <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all"
+           <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all p-1"
               data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.mark_all_as_read') }}"
               onclick="markAllAsRead()">
             <i class="ti ti-mail-opened text-heading"></i>
@@ -43,17 +43,17 @@ if($user)
     @endif
 
     <!-- Notification List -->
-    <li class="dropdown-notifications-list scrollable-container">
+    <li class="dropdown-notifications-list scrollable-container" style="max-height: 300px; overflow-y: auto;">
       <ul id="notification-list" class="list-group list-group-flush">
         @if ($notifications->isEmpty())
-          <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
+          <li class="list-group-item list-group-item-action dropdown-notifications-item text-center py-3">
             <span class="text-muted">{{ __('admin.NoNotifications') }}</span>
           </li>
         @else
           @foreach ($notifications as $notification)
-            <li class="list-group-item list-group-item-action dropdown-notifications-item" onclick="markAsRead('{{ $notification->id }}')">
-                <h6 class="media-heading">{{ $notification->data['message'] ?? '-' }}</h6>
-                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+            <li class="list-group-item list-group-item-action dropdown-notifications-item py-3 px-3" onclick="markAsRead('{{ $notification->id }}')" style="cursor: pointer;">
+                <h6 class="media-heading mb-1" style="font-size: 0.875rem; line-height: 1.3;">{{ $notification->data['message'] ?? '-' }}</h6>
+                <small class="text-muted" style="font-size: 0.75rem;">{{ $notification->created_at->diffForHumans() }}</small>
             </li>
           @endforeach
         @endif

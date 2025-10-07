@@ -1152,10 +1152,10 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
 
   <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
     <!-- Search -->
-    <div class="navbar-nav align-items-center w-px-300">
+    <div class="navbar-nav align-items-center w-100 w-md-px-300">
       <div class="nav-item navbar-search-wrapper mb-0 w-100">
-        <button data-bs-toggle="modal" data-bs-target="#searchModal" class="w-100 nav-item nav-link search-toggler d-flex align-items-center w-100 px-0">
-          <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>
+        <button data-bs-toggle="modal" data-bs-target="#searchModal" class="w-100 nav-item nav-link search-toggler d-flex align-items-center justify-content-center justify-content-md-start px-2 px-md-0">
+          <i class="ti ti-search ti-md me-0 me-md-2 me-lg-4 ti-lg"></i>
           <span class="d-none d-md-inline-block text-muted fw-normal">{{ __('admin.Search') }}</span>
         </button>
       </div>
@@ -1164,8 +1164,8 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
 
     <ul class="navbar-nav flex-row align-items-center ms-auto">
       <!-- Language -->
-      <li class="nav-item dropdown-language dropdown">
-        <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+      <li class="nav-item dropdown-language dropdown me-1 me-md-2">
+        <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow p-1 p-md-2"
           href="javascript:void(0);" data-bs-toggle="dropdown">
           <i class="ti ti-language rounded-circle ti-md"></i>
         </a>
@@ -1190,8 +1190,8 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
       <!--/ Language -->
 
       <!-- Style Switcher -->
-      <li class="nav-item dropdown-style-switcher dropdown">
-        <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
+      <li class="nav-item dropdown-style-switcher dropdown me-1 me-md-2">
+        <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow p-1 p-md-2"
           href="javascript:void(0);" data-bs-toggle="dropdown">
           <i class="ti ti-md"></i>
         </a>
@@ -1220,9 +1220,9 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
       <!--/ Notifications -->
 
       <!-- User -->
-      <li class="nav-item navbar-dropdown dropdown-user dropdown">
-        <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
-          <div class="avatar avatar-online">
+      <li class="nav-item navbar-dropdown dropdown-user dropdown ms-1">
+        <a class="nav-link dropdown-toggle hide-arrow p-1" href="javascript:void(0);" data-bs-toggle="dropdown">
+          <div class="avatar avatar-online avatar-sm">
             @if (auth()->user()->image_url)
               <img 
                 class="rounded-circle" 
@@ -1317,22 +1317,22 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
 
 <!-- Search Modal -->
 <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered mx-2 mx-md-auto">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header border-0 pb-0">
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body" >
-        <input type="text" id="menuSearch" class="form-control" placeholder="{{ __('admin.Search') }}...">
-        <div class="w-100" style="max-height: 500px; overflow-y: auto;">
-          <div id="menuGrid" class="nav nav-pills row g-3 mt-5">
+      <div class="modal-body pt-0">
+        <input type="text" id="menuSearch" class="form-control form-control-lg" placeholder="{{ __('admin.Search') }}...">
+        <div class="w-100" style="max-height: 400px; overflow-y: auto;">
+          <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
             @foreach($flattenedMenuItems as $item)
-              <div class="col-6 nav-item" data-label="{{ strtolower($item['label']) }}">
-                <a href="{{ isset($item['route']) ? (is_callable($item['route']) ? $item['route']() : (is_string($item['route']) && strpos($item['route'], '/') !== 0 ? ($item['route'] === 'company.profile_view' ? ($companyid ? route($item['route'], ['id' => $companyid]) : '#') : ($item['route'] === 'pages.update_mine' ? (Auth::user()->PageId ? route($item['route'], ['id' => Auth::user()->PageId]) : '#') : route($item['route']))) : $item['route'])) : '#' }}" class="nav-link d-flex justify-content-start align-items-center">
+              <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
+                <a href="{{ isset($item['route']) ? (is_callable($item['route']) ? $item['route']() : (is_string($item['route']) && strpos($item['route'], '/') !== 0 ? ($item['route'] === 'company.profile_view' ? ($companyid ? route($item['route'], ['id' => $companyid]) : '#') : ($item['route'] === 'pages.update_mine' ? (Auth::user()->PageId ? route($item['route'], ['id' => Auth::user()->PageId]) : '#') : route($item['route']))) : $item['route'])) : '#' }}" class="nav-link d-flex justify-content-start align-items-center text-start p-2 p-md-3">
                   @if (isset($item['icon']))
-                    <i class="ti {{ $item['icon'] }} ti-lg me-2"></i>
+                    <i class="ti {{ $item['icon'] }} ti-md me-2 flex-shrink-0"></i>
                   @endif
-                  {{ $item['label'] }}
+                  <span class="text-truncate">{{ $item['label'] }}</span>
                 </a>
               </div>
             @endforeach
@@ -1342,3 +1342,188 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
     </div>
   </div>
 </div>
+
+<!-- Mobile Header Fixes -->
+<style>
+  /* Mobile responsive fixes for header */
+  @media (max-width: 768px) {
+    .layout-navbar {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    
+    .navbar-nav-right {
+      gap: 0.25rem;
+    }
+    
+    .navbar-nav-right .nav-item {
+      margin: 0 !important;
+    }
+    
+    .navbar-nav-right .nav-link {
+      padding: 0.375rem !important;
+      min-width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Search button mobile fixes */
+    .navbar-search-wrapper .search-toggler {
+      min-height: 40px;
+      border-radius: 0.375rem;
+      background-color: rgba(var(--bs-gray-100-rgb), 0.5);
+    }
+    
+    /* Avatar size on mobile */
+    .avatar-sm {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    
+    /* Dropdown menus positioning */
+    .dropdown-menu {
+      transform: translateX(-50%) !important;
+      left: 50% !important;
+      right: auto !important;
+    }
+    
+    /* Search modal mobile fixes */
+    .modal-dialog {
+      margin: 1rem;
+      max-width: calc(100% - 2rem);
+    }
+    
+    #menuGrid .nav-link {
+      font-size: 0.875rem;
+      padding: 0.75rem !important;
+    }
+    
+    #menuGrid .nav-link i {
+      font-size: 1.125rem !important;
+    }
+  }
+  
+  /* Very small screens (below 576px) */
+  @media (max-width: 575px) {
+    .layout-navbar {
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+    
+    .navbar-nav-right {
+      gap: 0.125rem;
+    }
+    
+    .navbar-nav-right .nav-link {
+      padding: 0.25rem !important;
+      min-width: 36px;
+      height: 36px;
+    }
+    
+    /* Hide search text on very small screens */
+    .navbar-search-wrapper .search-toggler span {
+      display: none !important;
+    }
+    
+    .navbar-search-wrapper {
+      max-width: 50px;
+      flex: none !important;
+    }
+    
+    .modal-dialog {
+      margin: 0.5rem;
+      max-width: calc(100% - 1rem);
+    }
+    
+    #menuGrid {
+      gap: 0.5rem !important;
+    }
+    
+    #menuGrid .col-12 {
+      padding: 0.25rem;
+    }
+  }
+  
+  /* Fix for notification badge positioning */
+  .position-relative .badge-notifications {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    z-index: 10;
+  }
+  
+  /* Ensure proper spacing between header elements */
+  .navbar-nav.flex-row > .nav-item:not(:last-child) {
+    margin-right: 0.25rem;
+  }
+  
+  @media (min-width: 768px) {
+    .navbar-nav.flex-row > .nav-item:not(:last-child) {
+      margin-right: 0.5rem;
+    }
+  }
+</style>
+
+<!-- Mobile Header JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Search functionality
+  const searchInput = document.getElementById('menuSearch');
+  const menuItems = document.querySelectorAll('#menuGrid .nav-item');
+  
+  if (searchInput && menuItems.length > 0) {
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase().trim();
+      
+      menuItems.forEach(function(item) {
+        const label = item.getAttribute('data-label') || '';
+        const linkText = item.querySelector('.nav-link')?.textContent?.toLowerCase() || '';
+        
+        if (searchTerm === '' || label.includes(searchTerm) || linkText.includes(searchTerm)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+    
+    // Clear search when modal is closed
+    const searchModal = document.getElementById('searchModal');
+    if (searchModal) {
+      searchModal.addEventListener('hidden.bs.modal', function() {
+        searchInput.value = '';
+        menuItems.forEach(function(item) {
+          item.style.display = '';
+        });
+      });
+      
+      // Focus search input when modal opens
+      searchModal.addEventListener('shown.bs.modal', function() {
+        searchInput.focus();
+      });
+    }
+  }
+  
+  // Fix dropdown positioning on mobile
+  const dropdowns = document.querySelectorAll('.dropdown-toggle');
+  dropdowns.forEach(function(dropdown) {
+    dropdown.addEventListener('click', function() {
+      setTimeout(function() {
+        const dropdownMenu = dropdown.nextElementSibling;
+        if (dropdownMenu && window.innerWidth <= 768) {
+          const rect = dropdown.getBoundingClientRect();
+          const menuWidth = dropdownMenu.offsetWidth;
+          const screenWidth = window.innerWidth;
+          
+          // Adjust position if dropdown goes off screen
+          if (rect.left + menuWidth > screenWidth) {
+            dropdownMenu.style.transform = 'translateX(-' + (menuWidth - rect.width) + 'px)';
+          }
+        }
+      }, 10);
+    });
+  });
+});
+</script>
