@@ -70,7 +70,7 @@
             @endforeach
           </select>
         </div>
-        <div class="col-md-12 col-12 mb-6">
+        {{-- <div class="col-md-12 col-12 mb-6">
           <label class="form-label fs-6 fw-semibold mb-2" for="sector">{{ __('admin.Sector') }} *</label>
           <select class="form-select select2" id="selectsector" name="sector" required onchange="ssector(this.options[this.selectedIndex].value)">
             @foreach ($sectors as $sector_group)
@@ -83,7 +83,7 @@
               </optgroup>
             @endforeach
           </select>
-        </div>
+        </div> --}}
         <div class="mb-3">
           <label class="form-label fs-6 fw-semibold mb-2" for="categories">{{ __('admin.Categories') }} *</label>
           <div class="row">

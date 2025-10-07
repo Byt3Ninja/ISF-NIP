@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header">
     <h5 class="card-title">
-      {{ $heading }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
+      {{ $l == 'en' ? 'Industry' : 'الصناعة' }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
     </h5>
   </div>
   <div class="card-body">
@@ -46,7 +46,9 @@
             name="other_sector" 
             type="text" 
             placeholder="{{ $l == 'en' ? 'Type other sector' : 'اكتب قطاعًا آخر' }}" 
-            style="display:none" 
+            style="display:none"
+            pattern="[A-Za-z\s]+"
+            title="{{ $l == 'en' ? 'Letters only' : 'حروف فقط' }}"
           />
           <input type="hidden" id="sector_ids" name="sector_ids">
           <div class="error" id="sectorErr" style="display:none;">
@@ -70,7 +72,9 @@
             name="other_tech" 
             type="text" 
             placeholder="{{ $l == 'en' ? 'Type other technology' : 'اكتب تقنية أخرى' }}" 
-            style="display:none" 
+            style="display:none"
+            pattern="[A-Za-z\s]+"
+            title="{{ $l == 'en' ? 'Letters only' : 'حروف فقط' }}"
           />
           <input type="hidden" id="tech_ids" name="tech_ids">
           <div class="error" id="techErr" style="display:none;">
@@ -82,7 +86,7 @@
       <div class="col-12 mt-12">
         <div class="d-flex gap-2 justify-content-end">
           <button type="submit" class="btn btn-primary">
-            {{ $l == 'en' ? 'Save Classification' : 'حفظ التصنيف' }}
+            {{ $l == 'en' ? 'Save' : 'حفظ' }}
           </button>
         </div>
       </div>
@@ -216,15 +220,41 @@ $(function() {
     checkForChanges();
   });
 
-  // clear errors on typing in "Other" fields
+  // clear errors on typing in "Other" fields with validation
   $sectorOtherEl.on('input', function() {
+    let value = $(this).val();
+    // Remove leading whitespace and filter non-letters (except spaces)
+    value = value.replace(/^\s+/, '').replace(/[^A-Za-z\s]/g, '');
+    $(this).val(value);
     $sectorErr.hide();
     checkForChanges();
   });
+  
   $techOtherEl.on('input', function() {
+    let value = $(this).val();
+    // Remove leading whitespace and filter non-letters (except spaces)
+    value = value.replace(/^\s+/, '').replace(/[^A-Za-z\s]/g, '');
+    $(this).val(value);
     $techErr.hide();
     checkForChanges();
   });
+
+  // Prevent invalid characters on keypress
+  function validateLettersOnly(e) {
+    const char = String.fromCharCode(e.which);
+    const isLetter = /[A-Za-z]/.test(char);
+    const isSpace = char === ' ';
+    const isEmpty = $(e.target).val().length === 0;
+    
+    // Allow letters, allow space only if field is not empty (no leading space)
+    if (!isLetter && !(isSpace && !isEmpty)) {
+      e.preventDefault();
+      return false;
+    }
+  }
+  
+  $sectorOtherEl.on('keypress', validateLettersOnly);
+  $techOtherEl.on('keypress', validateLettersOnly);
 
   $form.on('submit', function(e) {
     let isValid = true;
@@ -244,13 +274,19 @@ $(function() {
       $techErr.show();
       isValid = false;
     }
-    if ($('.sector-checkbox[value="other-sector"]:checked').length && !$sectorOtherEl.val().trim()) {
-      $sectorErr.text('{{ $l == "en" ? "Please specify the other sector" : "يرجى تحديد القطاع الآخر" }}').show();
-      isValid = false;
+    if ($('.sector-checkbox[value="other-sector"]:checked').length) {
+      const sectorValue = $sectorOtherEl.val().trim();
+      if (!sectorValue || !/^[A-Za-z\s]+$/.test(sectorValue)) {
+        $sectorErr.text('{{ $l == "en" ? "Please specify a valid sector name (letters only)" : "يرجى تحديد اسم قطاع صالح (حروف فقط)" }}').show();
+        isValid = false;
+      }
     }
-    if ($('.technology-checkbox[value="other-tech"]:checked').length && !$techOtherEl.val().trim()) {
-      $techErr.text('{{ $l == "en" ? "Please specify the other technology" : "يرجى تحديد التقنية الأخرى" }}').show();
-      isValid = false;
+    if ($('.technology-checkbox[value="other-tech"]:checked').length) {
+      const techValue = $techOtherEl.val().trim();
+      if (!techValue || !/^[A-Za-z\s]+$/.test(techValue)) {
+        $techErr.text('{{ $l == "en" ? "Please specify a valid technology name (letters only)" : "يرجى تحديد اسم تقنية صالح (حروف فقط)" }}').show();
+        isValid = false;
+      }
     }
 
     if (!isValid) {
