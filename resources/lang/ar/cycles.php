@@ -572,5 +572,7 @@ return [
     'Has_LinkedIn_Profile' => 'لديه ملف لينكدإن',
     'Enrolled_Program' => 'لم يشترك في برنامج',
     'Apply_Filters' => 'تطبيق الفلاتر',
+    'Total' => 'الإجمالي', 
+    'Startup_Surveys' => 'استطلاعات الشركات الناشئة',
   ];
 
