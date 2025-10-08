@@ -593,12 +593,21 @@ class ReportController extends Controller
                     });
             })->where('stype', 5);
         })->count();
+         $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
+            });
+        })->where('stype', 4)->get();
+        $cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
         $data['training_sessions_count'] = $training_sessions->count();
+        $data['training_sessions'] = $training_sessions->get();
         $data['training_sessions_period'] = $training_sessions->sum('duration')/60;
         $data['mentorRequests_count']  = $mentorRequests->count();
         $data['mentorships_period']= $mentorRequests->sum('period')/60;
         $data['mentorship_attendance_rate']= $mentorRequests->count()?($mentorRequests->sum('done')/$mentorRequests->count())*100:0;
         $data['cycle']=$cycle;
+        $data['cycles']=$cycles;
+        $data['steps']=$steps;
         $data['startups']=$startups->count();
         $data['screening_sessions_count']=$screenings;
         $data['final_screening_count']=$final_screenings;

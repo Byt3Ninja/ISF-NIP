@@ -78,6 +78,7 @@
                   <h5>{{ __('admin.SelectCycle') }}</h5>
                   <p>{{ __('admin.SelectOrSearchCycle') }}</p>
                   <select class="form-control select2" id="cyclesSelectOptions">
+                    <option value="#">{{ __('admin.SelectCycle') }}</option>
                     @foreach ($cycles as $cycle)
                       <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
                     @endforeach
