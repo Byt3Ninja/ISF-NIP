@@ -566,7 +566,7 @@ return [
     'AllـSteps' => 'All Steps',
     'All_Cycles' => 'All Programs',
     'No_Startups_Final_Screening' => 'No startups in the final screening stage.',
-    'No_Startups_Screening' => 'No startups in the screening stage.',
+    'No_Startups_Screening' => 'No Startups in the Screening Stage.',
     'No_Startups_Screening' => 'No startups in the screening stage.',
     'No_Startups_Match_Filters' => 'No startups match the current filter criteria.',
     'Exporting...' => 'Exporting...',
