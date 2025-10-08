@@ -226,10 +226,14 @@
           @else
           <!-- No Mentors Result -->
           <div class="col-12" id="noMentorsResult">
-            @if(request()->get('enrolledInProgramFilter') == '1')
-              @include('includes.no-result', ['message' => __('cycles.No_Mentors_Enrolled')])
+            @if(request()->has('programFilter') && request('programFilter') != '')
+              @include('includes.no-result', ['message' => __('cycles.No_Mentors_For_Selected_Program')])
             @else
-              @include('includes.no-result', ['message' => __('cycles.No_Mentors_Found')])
+              @if(request()->get('enrolledInProgramFilter') == '1')
+                @include('includes.no-result', ['message' => __('cycles.No_Mentors_Enrolled')])
+              @else
+                @include('includes.no-result', ['message' => __('cycles.No_Mentors_Found')])
+              @endif
             @endif
           </div>
           @endif
@@ -472,6 +476,28 @@
         return option.text;
       }
     });
+
+    // If programFilter is present in URL, pre-select it in the program select control
+    (function preselectProgramFilter(){
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const programId = urlParams.get('programFilter');
+        if (programId && programId !== '') {
+          const $pf = $('#programFilter');
+          // Ensure option exists (it should from server-side rendering)
+          if ($pf.find('option[value="' + programId + '"]').length) {
+            $pf.val(programId).trigger('change');
+          } else {
+            // Option might not be loaded yet; append a temporary option then select
+            const programText = '{{ __('cycles.Select_Program') }} ' + programId;
+            $pf.append($('<option>', { value: programId, text: programText }));
+            $pf.val(programId).trigger('change');
+          }
+        }
+      } catch (e) {
+        console.error('preselectProgramFilter error', e);
+      }
+    })();
     
     // Initialize rating filter (single select with "All" option)
     $('#rateSearch').select2({
