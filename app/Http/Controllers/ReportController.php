@@ -547,6 +547,8 @@ class ReportController extends Controller
             return $judge;
         });
 
+        $judgers = User::role('Judger')->count();
+        $data['judgers'] = $judgers;
         $data['cycles'] = $cycles;
         $data['steps'] = $steps;
         $data['kpiData'] = $kpiData;
