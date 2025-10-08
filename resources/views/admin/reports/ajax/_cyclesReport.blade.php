@@ -255,6 +255,7 @@
     </div>
 
     <!-- Table Data -->
+    <div id="trainingTableSection">
     <div class="table-responsive">
       <table class="table table-hover" id="tblTraining">
         <thead class="table-light">
@@ -394,6 +395,7 @@
           @endforeach
         </tbody>
       </table>
+    </div>
     </div>
   </div>
 </div>
