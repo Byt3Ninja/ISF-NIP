@@ -74,16 +74,7 @@
           >
             <div class="card h-100 w-100">
               <div class="card-body py-3 h-100 w-100">
-                @if ($key === 'cycles')
-                  <h5>{{ __('admin.SelectCycle') }}</h5>
-                  <p>{{ __('admin.SelectOrSearchCycle') }}</p>
-                  <select class="form-control select2" id="cyclesSelectOptions">
-                    <option value="#">{{ __('admin.SelectCycle') }}</option>
-                    @foreach ($cycles as $cycle)
-                      <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
-                    @endforeach
-                  </select>
-                @elseif ($key === 'companies')
+                @if ($key === 'companies')
                   <h5>{{ __('admin.SelectCompany') }}</h5>
                   <p>{{ __('admin.SelectOrSearchCompany') }}</p>
                   <select class="form-control select2" id="companiesSelectOptions">
@@ -187,7 +178,7 @@
         }
       });
       
-      if (type !== 'cycles' && type !== 'companies') {
+      if (type !== 'companies') {
         getAjaxReport(type, 0);
       }
     });
@@ -197,12 +188,6 @@
     if (firstTab !== 'cycles' && firstTab !== 'companies') {
       getAjaxReport(firstTab, 0);
     }
-
-    // Load when cycle/company select changes
-    $('#cyclesSelectOptions').change(function() {
-      let id = $(this).val();
-      if (id) getAjaxReport('cycles', id);
-    });
 
     $('#companiesSelectOptions').change(function() {
       let id = $(this).val();

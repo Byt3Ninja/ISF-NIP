@@ -2385,4 +2385,13 @@ return [
 	'Screening_Results' => 'Screening Results',
 	'Sectors' => 'Sectors',
 	'All_Stages' => 'All Stages',
+	'Subscribed_Startups' => 'Subscribed Startups',
+	'Enrolled_Mentors' => 'Enrolled Mentors',
+	'Mentorship_Requests' => 'Mentorship Requests',
+	'Mentorship_Requests_Duration' => 'Mentorship Requests Duration',
+	'Startups_Attendance_Rate' => 'Startups Attendance Rate',
+	'Training_Sessions' => 'Training Sessions',
+	'Training_Sessions_Duration' => 'Training Sessions Duration',
+	'First_Screening' => 'First Screening',
+	'Final_Screening' => 'Final Screening',
 ];

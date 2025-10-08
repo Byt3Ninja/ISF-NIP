@@ -55,9 +55,9 @@
 <div class="row">
   <div class="col-12">
     <div class="card border">
-      <div class="card-header">
+      <div class="card-header overflow-hidden">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-          <h5 class="card-title"> {{ __('cycles.Startup_Surveys') }}</h5>
+          <h5 class="card-title mb-3 mb-md-0"> {{ __('cycles.Startup_Surveys') }}</h5>
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <!-- Search Input -->
             <div class="search-wrapper position-relative">
@@ -273,7 +273,7 @@
     
     startupSurveyDataTable = $('#startup-survey-table').DataTable({
       paging: true,
-      pageLength: 25,
+      pageLength: 10,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
       searching: false, // We'll use custom search
       ordering: true,

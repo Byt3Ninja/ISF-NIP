@@ -44,7 +44,7 @@
 <div class="card border">
   <!-- Heading & Actions -->
   <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
-    <h5 class="card-title">{{ __('admin.Training sessions') }}</h5>
+    <h5 class="card-title mb-3 mb-md-0">{{ __('admin.Training sessions') }}</h5>
     <div class="d-flex align-items-center gap-3">
       <div class="btn-group">
         <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">

@@ -2440,4 +2440,13 @@ return [
 	'Screening_Results' => 'نتائج الفحص',
 	'Sectors' => 'القطاعات',
 	'All_Stages' => 'جميع المراحل',
+	'Subscribed_Startups' => 'الشركات الناشئة المشتركة',
+	'Enrolled_Mentors' => 'المرشدين المسجلين',
+	'Mentorship_Requests' => 'طلبات الإرشاد',
+	'Mentorship_Requests_Duration' => 'مدة طلبات الإرشاد',
+	'Startups_Attendance_Rate' => 'معدل حضور الشركات الناشئة',
+	'Training_Sessions' => 'جلسات التدريب',
+	'Training_Sessions_Duration' => 'مدة جلسات التدريب',
+	'First_Screening' => 'الفحص الأول',
+	'Final_Screening' => 'الفحص النهائي',
 ];
