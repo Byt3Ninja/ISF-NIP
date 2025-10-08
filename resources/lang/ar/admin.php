@@ -1794,7 +1794,7 @@ return [
 	'Step Title' => 'اسم المرحلة',
 	'Training sessions' => 'جلسات التدريب',
 	'Services Requests' => 'طلبات الخدمات',
-	'Training sessions Duration' => 'مدة جلسات التدريب (ساعات)',
+	'Training sessions Duration' => 'مدة جلسات التدريب ',
 	'Services' => 'الخدمات',
 	'My Requests' => 'طلباتي',
 	'Started' => 'بدأت',
