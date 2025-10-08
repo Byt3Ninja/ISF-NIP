@@ -1969,6 +1969,7 @@ return [
 	'ServiceUpdated' => 'تم تحديث الخدمة بنجاح',
 	'Export' => 'تصدير',
 	'No_Startups_To_Export' => 'لا توجد شركات للقيام بالتصدير وفق الفلاتر الحالية.',
+	'No_Subscribed_Startups' => 'لا توجد شركات ناشئة مشتركة في هذا البرنامج',
 	'no_entries_available' => 'لا توجد إدخالات متاحة',
 	'All_Types' => 'جميع الأنواع',
 	'session_report_not_available' => 'لا توجد تقرير عن الجلسات',

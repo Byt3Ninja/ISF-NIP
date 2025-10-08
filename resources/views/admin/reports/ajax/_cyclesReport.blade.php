@@ -31,7 +31,7 @@
 
 <div class="col-12 mt-6">
   <div class="row g-6">
-    <a href="dashboard/cycles/{{ $cycle->id }}/registered" class="col-lg-4 col-sm-6">
+  <a href="{{ route('users.view_companies', ['programFilter' => $cycle->id]) }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-primary h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
