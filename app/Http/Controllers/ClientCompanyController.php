@@ -393,7 +393,7 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-        try {
+         try {
             $user = Auth::user();
             if( !is_null( $id ) )
             {
@@ -925,21 +925,41 @@ class ClientCompanyController extends Controller
                 $request->validate([
                     'industry_id' => 'required',
                     'sector_ids' => 'required|json',
-                    'tech_ids' => 'required|json', // max limit to be defined later from admin panel settings
+                    // Accept either pre-existing tech ids (tech_ids) or freeform tags (tech_tags)
+                    'tech_ids' => 'nullable|json', // max limit to be defined later from admin panel settings
+                    'tech_tags' => 'nullable|string', // comma separated or json string of tags
                     'other_sector' => 'nullable|regex:/^[A-Za-z\s]+$/|max:255',
-                    'other_tech' => 'nullable|regex:/^[A-Za-z\s]+$/|max:255',
+                    'other_tech' => 'nullable|regex:/^[A-Za-z\s]+$/|max:50',
                 ], [
                     'industry_id.required' => __('admin.industry is required'),
                     'sector_ids.required' => __('admin.sectors is required'),
                     'sector_ids.json' => __('admin.sectors data is invalid'),
-                    'tech_ids.required' => __('admin.technologies is required'),
                     'tech_ids.json' => __('admin.technologies data is invalid'),
                     'other_sector.regex' => __('admin.other sector must contain letters only'),
-                    'other_tech.regex' => __('admin.other technology must contain letters only'),
+                    'other_tech.regex' => __('admin.other technology must contain letters only'),                    
                 ]);
-                
+
+                // Normalize incoming sector and technology inputs
+                if($request->tech_ids == 'null' && empty($request->tech_tags) && $request->other_tech == null ){
+                    return redirect()->back()->with(['msg' => __('Please select at least one sector or technology, or provide an "Other" value.'), 'class' => 'danger'])->withInput();
+                }
+
                 $sectorIds = json_decode($data['sector_ids'], true) ?: [];
                 $techIds   = json_decode($data['tech_ids'], true) ?: [];
+
+                // If tech_tags provided (from tag input), parse into array of trimmed strings
+                $techTags = [];
+                if (!empty($data['tech_tags'])) {
+                    // tech_tags may be a JSON string or comma-separated
+                    $maybeJson = $data['tech_tags'];
+                    $decoded = json_decode($maybeJson, true);
+                    if (is_array($decoded)) {
+                        $techTags = array_map('trim', $decoded);
+                    } else {
+                        // split by comma
+                        $techTags = array_filter(array_map('trim', explode(',', $maybeJson)));
+                    }
+                }
                 
                 // Validate that we have valid arrays after decoding
                 if (!is_array($sectorIds)) {
@@ -977,6 +997,28 @@ class ClientCompanyController extends Controller
                         Log::warning('Invalid technology name provided: ' . $techName);
                     }
                 }
+
+                // Process freeform tech tags (create Technology rows if needed)
+                if (!empty($techTags)) {
+                    foreach ($techTags as $tag) {
+                        // enforce max length
+                        if (mb_strlen($tag) > 50) {
+                            return redirect()->back()->with(['msg' => __('admin.Technology_name_too_long'), 'class' => 'danger'])->withInput();
+                        }
+                        // try find existing technology by name (case-insensitive)
+                        $existing = Technology::whereRaw('LOWER(name) = ?', [mb_strtolower($tag)])->first();
+                        if ($existing) {
+                            $techIds[] = $existing->id;
+                        } else {
+                            $newTech = new Technology();
+                            $newTech->name = $tag;
+                            $newTech->save();
+                            $techIds[] = $newTech->id;
+                        }
+                    }
+                }
+
+               // remove previous relations for this company/user
                $deleteCompanyRelations = CompanyRelation::where('company_id', $result->id)->where('user_id', $user->id)->delete();
                 if (!empty($sectorIds)) {
                     foreach ($sectorIds as $sectorId) {
@@ -990,6 +1032,8 @@ class ClientCompanyController extends Controller
                 }
                 // Technologies
                 if (!empty($techIds)) {
+                    // make unique
+                    $techIds = array_values(array_unique($techIds));
                     foreach ($techIds as $techId) {
                         $relation = new CompanyRelation();
                         $relation->company_id   = $result->id;

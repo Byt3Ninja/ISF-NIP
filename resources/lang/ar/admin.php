@@ -398,6 +398,7 @@ return [
 	'New only' => 'شركة جديدة',
 	'Join Cycle' => 'منضم لبرنامج',
 	'You need to add your company details first' => 'برجاء إضافة بيانات شركتك أولاً.',
+	'Technology_name_too_long' => 'يجب ألا يتجاوز اسم التقنية 50 حرفًا',
 	'Google Map full URL' => 'رابط خريطة جوجل الكامل',
 	'Select image file' => 'أختر صورة',
 	'problem' => 'المشكلة',
