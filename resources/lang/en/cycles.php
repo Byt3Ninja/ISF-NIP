@@ -574,6 +574,7 @@ return [
     'Go to judges page' => 'Go to judges page',
     'No_Mentors_Found' => 'No Mentors Found',
   'No_Mentors_Enrolled' => 'No mentors enrolled in a program.',
+  'No_Mentors_For_Selected_Program' => 'No mentors available for the selected program.',
     'Request_Mentorship' => 'Request Mentorship',
     'Show_Filters' => 'Show Filters',
     'Any_Rating' => 'Any Rating',

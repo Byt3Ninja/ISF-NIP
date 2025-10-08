@@ -100,7 +100,11 @@
         <div class="row" id="companiesContainer">
           @if (count($companies) == 0)
           <div class="col-12" id="noCompaniesResult">
-            @include('includes.no-result', ['message' => __('admin.No Companies Found')])
+            @if(request()->has('programFilter') && request('programFilter') != '')
+              @include('includes.no-result', ['message' => __('admin.No_Subscribed_Startups')])
+            @else
+              @include('includes.no-result', ['message' => __('admin.No Companies Found')])
+            @endif
           </div>
           @else
           @foreach ($companies as $company)
