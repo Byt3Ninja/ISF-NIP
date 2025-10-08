@@ -567,6 +567,7 @@ return [
     'Go to judges page' => 'الذهاب إلى صفحة الحكام',
     'No_Mentors_Found' => 'لم يتم العثور على مرشدين',
   'No_Mentors_Enrolled' => 'لا يوجد مرشدين مسجلين في برنامج',
+  'No_Mentors_For_Selected_Program' => 'لا يوجد مرشدين متاحين للبرنامج المختار',
     'Request_Mentorship' => 'طلب ارشاد',
     'Show_Filters' => 'إظهار الفلاتر',
     'Any_Rating' => 'أي تقييم',
