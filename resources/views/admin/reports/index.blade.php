@@ -34,7 +34,7 @@
             'training'       => ['label' => __('admin.Training sessions'),'icon' => 'ti ti-chalkboard'],
             'screening'          => ['label' => __('admin.Screening'),  'icon' => 'ti ti-scale'],
             'finalScreening'          => ['label' => __('admin.Final Screening'),  'icon' => 'ti ti-gavel'],
-            'cycles'         => ['label' => __('admin.Cycles'),          'icon' => 'ti ti-refresh'],
+            'cycles'         => ['label' => __('admin.Cycles'),          'icon' => 'ti ti-components'],
             'companies'      => ['label' => __('admin.Companies'),       'icon' => 'ti ti-building'],
             'mentorSurveys'  => ['label' => __('admin.Surveys_Mentor'),  'icon' => 'ti ti-clipboard-check'],
             'startupSurveys' => ['label' => __('cycles.Startup_Surveys'), 'icon' => 'ti ti-clipboard-list'],

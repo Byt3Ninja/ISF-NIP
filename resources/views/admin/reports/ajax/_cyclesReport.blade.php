@@ -59,6 +59,7 @@
               <th><small>{{ __('admin.Training_Sessions_Duration') }} (h)</small></th>
               <th><small>{{ __('admin.First_Screening') }}</small></th>
               <th><small>{{ __('admin.Final_Screening') }}</small></th>
+              <th><small>{{ __('admin.Actions') }}</small></th>
             </tr>
           </thead>
           <tbody>
@@ -79,6 +80,11 @@
                   <td><small>{{ number_format($kpi['training_sessions_period'], 1) }}</small></td>
                   <td><small>{{ $kpi['screening_sessions_count'] }}</small></td>
                   <td><small>{{ $kpi['final_screening_count'] }}</small></td>
+                  <td>
+                    <a href="/dashboard/programlist/report/{{ $_cycle->id }}" class="btn btn-sm btn-primary">
+                      <i class="ti ti-eye me-1"></i>{{ __('admin.View_Report') }}
+                    </a>
+                  </td>
                 </tr>
               @endif
             @endforeach

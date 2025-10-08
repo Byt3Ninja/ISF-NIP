@@ -698,8 +698,8 @@ class ReportController extends Controller
             [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
             [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
             [ 'value' => $data['training_sessions_period'] ?? 0, 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary' ],
-            [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'First_Screening', 'icon' => 'rocket', 'color' => 'success' ],
-            [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'telescope', 'color' => 'primary' ],
+            [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'First_Screening', 'icon' => 'scale', 'color' => 'success' ],
+            [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
         ];
 
         return $data;
