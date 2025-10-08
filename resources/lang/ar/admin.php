@@ -598,6 +598,7 @@ return [
 	'quizPassPercentage' => 'نسبة النجاح',
 	'Draft' => 'مسودة',
 	'Published' => 'تم النشر',
+	'Total' => 'المجموع',
 	'From' => 'من',
 	'startsFrom' => 'يبدأ من',
 	'To' => 'حتى',
