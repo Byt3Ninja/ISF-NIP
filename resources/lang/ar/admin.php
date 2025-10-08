@@ -302,7 +302,7 @@ return [
 	'Training' => 'التدريبات',
 	'Training courses' => 'المحتوى التدريبي',
 	'Training sessions' => 'الجلسات التدريبية',
-	'Training sessions duration (hours)' => 'مدة جلسات التدريب (بالساعات)',
+	'Training sessions duration (hours)' => 'مدة جلسات التدريب',
 	'Final Screening' => 'التقييم النهائي',
 	'Add Service' => 'إضافة خدمة',
 	'All Services' => 'كافة الخدمات',
