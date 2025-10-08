@@ -78,6 +78,16 @@
                   <i class="ti ti-filter me-2"></i>
                   <span class="mx-1">{{ __('cycles.Show_Filters') }}</span>
                 </button>
+                <!-- Export Dropdown -->
+                <div class="btn-group">
+                  <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-download me-2"></i>{{ __('admin.Export') }}
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item export-action" data-format="csv" href="#">CSV</a></li>
+                    <li><a class="dropdown-item export-action" data-format="xlsx" href="#">Excel</a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -367,6 +377,33 @@
         </div>
       </section>
       <!-- / Company List -->
+        @section('scripts')
+        <script>
+        document.addEventListener('DOMContentLoaded', function(){
+          document.querySelectorAll('.export-action').forEach(function(el){
+            el.addEventListener('click', function(e){
+              e.preventDefault();
+              const format = e.target.dataset.format || 'xlsx';
+              // Build query params from current URL and filter modal inputs
+              const params = new URLSearchParams(window.location.search);
+              // If modal inputs present, include their values
+              const org = document.querySelector('#organizationFilter');
+              if (org && org.value) params.set('orgnization', org.value);
+              const program = document.querySelector('select[name="programFilter"]');
+              if (program && program.value) params.set('programFilter', program.value);
+              const stage = document.querySelector('select[name="stage"]');
+              if (stage && stage.value) params.set('stage', stage.value);
+              // include search input if used
+              const search = document.querySelector('#searchInput');
+              if (search && search.value) params.set('search', search.value);
+              params.set('format', format);
+              const url = '{{ route('users.companies_export') }}' + '?' + params.toString();
+              window.location.href = url;
+            });
+          });
+        });
+        </script>
+        @endsection
     </div>
   </div>
 </div>

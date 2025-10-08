@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header">
     <h5 class="card-title">
-      {{ $heading }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
+      {{ $l == 'en' ? 'Industry' : 'الصناعة' }} ({{ $l == 'en' ? 'Sectors & Technologies' : 'القطاعات والتقنيات' }})
     </h5>
   </div>
   <div class="card-body">
@@ -46,7 +46,9 @@
             name="other_sector" 
             type="text" 
             placeholder="{{ $l == 'en' ? 'Type other sector' : 'اكتب قطاعًا آخر' }}" 
-            style="display:none" 
+            style="display:none"
+            pattern="[A-Za-z\s]+"
+            title="{{ $l == 'en' ? 'Letters only' : 'حروف فقط' }}"
           />
           <input type="hidden" id="sector_ids" name="sector_ids">
           <div class="error" id="sectorErr" style="display:none;">
@@ -61,20 +63,15 @@
             {{ $l == 'en' ? 'Technologies used' : 'التقنيات المستخدمة' }}
           </label>
           <small class="text-muted mb-4">
-            {{ $l == 'en' ? 'Tag all that apply. Select Other to add a custom technology.' : 'وضع علامة على كل ما ينطبق. حدد "أخرى" لإضافة تقنية مخصصة.' }}
+            {{ $l == 'en' ? 'Add technologies your startup uses (press Enter to add each). Max 50 characters per technology.' : 'أضف التقنيات التي يستخدمها مشروعك (اضغط Enter لإضافة كلٍ منها). الحد الأقصى 50 حرفًا لكل تقنية.' }}
           </small>
-          <div class="row mt-4" id="techList"></div>
-          <input 
-            id="techOther" 
-            class="form-control" 
-            name="other_tech" 
-            type="text" 
-            placeholder="{{ $l == 'en' ? 'Type other technology' : 'اكتب تقنية أخرى' }}" 
-            style="display:none" 
-          />
-          <input type="hidden" id="tech_ids" name="tech_ids">
-          <div class="error" id="techErr" style="display:none;">
-            {{ $l == 'en' ? 'Select at least one technology' : 'حدد تقنية واحدة على الأقل' }}
+          <div class="mt-3">
+            <div id="techTagsContainer" class="d-flex flex-wrap gap-2"></div>
+            <input id="techTagInput" class="form-control mt-2" type="text" placeholder="{{ $l == 'en' ? 'Type a technology and press Enter' : 'اكتب تقنية ثم اضغط Enter' }}" maxlength="50" />
+            <input type="hidden" id="tech_tags" name="tech_tags" />
+            <div class="error" id="techErr" style="display:none; margin-top:6px; color: #dc3545;">
+              {{ $l == 'en' ? 'Please enter at least one technology.' : 'يرجى إدخال تقنية واحدة على الأقل' }}
+            </div>
           </div>
         </div>
       </div>
@@ -82,7 +79,7 @@
       <div class="col-12 mt-12">
         <div class="d-flex gap-2 justify-content-end">
           <button type="submit" class="btn btn-primary">
-            {{ $l == 'en' ? 'Save Classification' : 'حفظ التصنيف' }}
+            {{ $l == 'en' ? 'Save' : 'حفظ' }}
           </button>
         </div>
       </div>
@@ -94,6 +91,80 @@
 @push('scripts')
 <script>
 $(function() {
+  // Tech tags UI
+  const $techTagsContainer = $('#techTagsContainer');
+  const $techTagInput = $('#techTagInput');
+  const $techTagsHidden = $('#tech_tags');
+  const MAX_TECH_LENGTH = 50;
+
+  // initialize from existing technologies passed from controller (names)
+  const initialTechs = @json($technologies->pluck('name')->filter()->values());
+  const existingTechNames = [];
+  if (Array.isArray(initialTechs)) {
+    initialTechs.forEach(t => addTechTag(t));
+  }
+
+  function renderTags() {
+    $techTagsContainer.empty();
+    existingTechNames.forEach((name, idx) => {
+      const $chip = $(`
+        <div class="badge bg-primary text-white d-inline-flex align-items-center" data-idx="${idx}" style="padding: .45rem .6rem;">
+          <span class="me-2 line-clamp-1">${escapeHtml(name)}</span>
+          <button type="button" class="btn-close btn-close-white btn-sm remove-tech" aria-label="Remove" data-idx="${idx}"></button>
+        </div>
+      `);
+      $techTagsContainer.append($chip);
+    });
+    $techTagsHidden.val(JSON.stringify(existingTechNames));
+    // update tech checkboxes hidden inputs used elsewhere
+  }
+
+  function addTechTag(value) {
+    if (!value) return;
+    value = String(value).trim();
+    if (!value) return;
+    if (value.length > MAX_TECH_LENGTH) {
+      alert("{{ $l == 'en' ? 'Technology name must be 50 characters or less.' : 'يجب ألا يتجاوز اسم التقنية 50 حرفًا.' }}");
+      return;
+    }
+    // prevent duplicates (case-insensitive)
+    const exists = existingTechNames.some(t => t.toLowerCase() === value.toLowerCase());
+    if (exists) return;
+    existingTechNames.push(value);
+    renderTags();
+  }
+
+  function removeTechTag(idx) {
+    existingTechNames.splice(idx, 1);
+    renderTags();
+  }
+
+  function escapeHtml(unsafe) {
+    return unsafe.replace(/[&<"'`=\/]/g, function (s) {
+      return ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+        '/': '&#x2F;'
+      })[s];
+    });
+  }
+
+  $techTagInput.on('keypress', function(e) {
+    if (e.which === 13) { // Enter
+      e.preventDefault();
+      addTechTag($(this).val());
+      $(this).val('');
+    }
+  });
+
+  $(document).on('click', '.remove-tech', function() {
+    const idx = parseInt($(this).data('idx'));
+    removeTechTag(idx);
+  });
+
   // Technologies
   const COMMON_TECHNOLOGIES = @json($technologies);
  
@@ -216,15 +287,41 @@ $(function() {
     checkForChanges();
   });
 
-  // clear errors on typing in "Other" fields
+  // clear errors on typing in "Other" fields with validation
   $sectorOtherEl.on('input', function() {
+    let value = $(this).val();
+    // Remove leading whitespace and filter non-letters (except spaces)
+    value = value.replace(/^\s+/, '').replace(/[^A-Za-z\s]/g, '');
+    $(this).val(value);
     $sectorErr.hide();
     checkForChanges();
   });
+  
   $techOtherEl.on('input', function() {
+    let value = $(this).val();
+    // Remove leading whitespace and filter non-letters (except spaces)
+    value = value.replace(/^\s+/, '').replace(/[^A-Za-z\s]/g, '');
+    $(this).val(value);
     $techErr.hide();
     checkForChanges();
   });
+
+  // Prevent invalid characters on keypress
+  function validateLettersOnly(e) {
+    const char = String.fromCharCode(e.which);
+    const isLetter = /[A-Za-z]/.test(char);
+    const isSpace = char === ' ';
+    const isEmpty = $(e.target).val().length === 0;
+    
+    // Allow letters, allow space only if field is not empty (no leading space)
+    if (!isLetter && !(isSpace && !isEmpty)) {
+      e.preventDefault();
+      return false;
+    }
+  }
+  
+  $sectorOtherEl.on('keypress', validateLettersOnly);
+  $techOtherEl.on('keypress', validateLettersOnly);
 
   $form.on('submit', function(e) {
     let isValid = true;
@@ -244,13 +341,19 @@ $(function() {
       $techErr.show();
       isValid = false;
     }
-    if ($('.sector-checkbox[value="other-sector"]:checked').length && !$sectorOtherEl.val().trim()) {
-      $sectorErr.text('{{ $l == "en" ? "Please specify the other sector" : "يرجى تحديد القطاع الآخر" }}').show();
-      isValid = false;
+    if ($('.sector-checkbox[value="other-sector"]:checked').length) {
+      const sectorValue = $sectorOtherEl.val().trim();
+      if (!sectorValue || !/^[A-Za-z\s]+$/.test(sectorValue)) {
+        $sectorErr.text('{{ $l == "en" ? "Please specify a valid sector name (letters only)" : "يرجى تحديد اسم قطاع صالح (حروف فقط)" }}').show();
+        isValid = false;
+      }
     }
-    if ($('.technology-checkbox[value="other-tech"]:checked').length && !$techOtherEl.val().trim()) {
-      $techErr.text('{{ $l == "en" ? "Please specify the other technology" : "يرجى تحديد التقنية الأخرى" }}').show();
-      isValid = false;
+    if ($('.technology-checkbox[value="other-tech"]:checked').length) {
+      const techValue = $techOtherEl.val().trim();
+      if (!techValue || !/^[A-Za-z\s]+$/.test(techValue)) {
+        $techErr.text('{{ $l == "en" ? "Please specify a valid technology name (letters only)" : "يرجى تحديد اسم تقنية صالح (حروف فقط)" }}').show();
+        isValid = false;
+      }
     }
 
     if (!isValid) {

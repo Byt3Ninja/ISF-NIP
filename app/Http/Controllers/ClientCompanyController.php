@@ -81,6 +81,32 @@ class ClientCompanyController extends Controller
             $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')
                 ->where('Company_id', $id)->get();
             $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
+            
+            // Startup Technologies
+            $technologies = CompanyRelation::where('company_id', $id)
+                ->whereNotNull('technology_id')
+                ->with('technology')
+                ->get()
+                ->pluck('technology')
+                ->filter();
+            
+            // Startup Sectors
+            $sectors = CompanyRelation::where('company_id', $id)
+                ->whereNotNull('sector_id')
+                ->with('sector')
+                ->get()
+                ->pluck('sector')
+                ->filter();
+            
+            // Startup Industry
+            $industry = CompanyRelation::where('company_id', $id)
+                ->whereNotNull('industry_id')
+                ->with('industry')
+                ->get()
+                ->pluck('industry')
+                ->filter()
+                ->first(); // Usually one industry per company
+                
             // مسار الملف
             $pathToFile = storage_path($company->pitch_deck);
             // تحقق من وجود الملف
@@ -124,7 +150,7 @@ class ClientCompanyController extends Controller
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -301,7 +327,7 @@ class ClientCompanyController extends Controller
             $technologies = DB::table('technologies')->get()->map(function ($tech) use ($l, $selectedTechnologyIds) {
                 return [
                     'id'       => $tech->id,
-                    'name'     => $tech->{"name_$l"} ?? $tech->name,
+                    'name'     => $tech->name,
                     'selected' => in_array($tech->id, $selectedTechnologyIds),
                 ];
             })->values()->toArray();
@@ -367,7 +393,7 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-        try {
+         try {
             $user = Auth::user();
             if( !is_null( $id ) )
             {
@@ -895,34 +921,104 @@ class ClientCompanyController extends Controller
             }
             $result->save();
             if( $data['CompanyN'] == 14 )
-            {
-               
+            {               
                 $request->validate([
                     'industry_id' => 'required',
-                    'sector_ids' => 'required',
-                    'tech_ids' => 'required', // max limit to be defined later from admin panel settings
+                    'sector_ids' => 'required|json',
+                    // Accept either pre-existing tech ids (tech_ids) or freeform tags (tech_tags)
+                    'tech_ids' => 'nullable|json', // max limit to be defined later from admin panel settings
+                    'tech_tags' => 'nullable|string', // comma separated or json string of tags
+                    'other_sector' => 'nullable|regex:/^[A-Za-z\s]+$/|max:255',
+                    'other_tech' => 'nullable|regex:/^[A-Za-z\s]+$/|max:50',
                 ], [
+                    'industry_id.required' => __('admin.industry is required'),
                     'sector_ids.required' => __('admin.sectors is required'),
-                    'tech_ids.required' => __('admin.technologies is required'),
+                    'sector_ids.json' => __('admin.sectors data is invalid'),
+                    'tech_ids.json' => __('admin.technologies data is invalid'),
+                    'other_sector.regex' => __('admin.other sector must contain letters only'),
+                    'other_tech.regex' => __('admin.other technology must contain letters only'),                    
                 ]);
-                $sectorIds = json_decode($data['sector_ids'][0], true);
-                $techIds   = json_decode($data['tech_ids'][0], true);
-                if($data['other_sector'] != null){
-                    $addSector = new Sector();
-                    $addSector->name_en = $data['other_sector'];
-                    $addSector->name_ar = $data['other_sector'];
-                    $addSector->save();
-                    $sectorIds[] = $addSector->id;
-                    $addSectorWithIndustry = StaticCategory::where('id', $data['industry_id'])->first();
-                    $addSectorWithIndustry->sectors()->attach($addSector->id);
-                    $addSectorWithIndustry->save();
+
+                // Normalize incoming sector and technology inputs
+                if($request->tech_ids == 'null' && empty($request->tech_tags) && $request->other_tech == null ){
+                    return redirect()->back()->with(['msg' => __('Please select at least one sector or technology, or provide an "Other" value.'), 'class' => 'danger'])->withInput();
                 }
-                if($data['other_tech'] != null){
-                    $addTech = new Technology();
-                    $addTech->name = $data['other_tech'];
-                    $addTech->save();
-                    $techIds[] = $addTech->id;
+
+                $sectorIds = json_decode($data['sector_ids'], true) ?: [];
+                $techIds   = json_decode($data['tech_ids'], true) ?: [];
+
+                // If tech_tags provided (from tag input), parse into array of trimmed strings
+                $techTags = [];
+                if (!empty($data['tech_tags'])) {
+                    // tech_tags may be a JSON string or comma-separated
+                    $maybeJson = $data['tech_tags'];
+                    $decoded = json_decode($maybeJson, true);
+                    if (is_array($decoded)) {
+                        $techTags = array_map('trim', $decoded);
+                    } else {
+                        // split by comma
+                        $techTags = array_filter(array_map('trim', explode(',', $maybeJson)));
+                    }
                 }
+                
+                // Validate that we have valid arrays after decoding
+                if (!is_array($sectorIds)) {
+                    $sectorIds = [];
+                }
+                if (!is_array($techIds)) {
+                    $techIds = [];
+                }
+                
+                if(isset($data['other_sector']) && !empty(trim($data['other_sector']))){
+                    $sectorName = trim($data['other_sector']);
+                    // Validate that it contains only letters and spaces
+                    if (preg_match('/^[A-Za-z\s]+$/', $sectorName)) {
+                        $addSector = new Sector();
+                        $addSector->name_en = $sectorName;
+                        $addSector->name_ar = $sectorName;
+                        $addSector->save();
+                        $sectorIds[] = $addSector->id;
+                        $addSectorWithIndustry = StaticCategory::where('id', $data['industry_id'])->first();
+                        $addSectorWithIndustry->sectors()->attach($addSector->id);
+                        $addSectorWithIndustry->save();
+                    } else {
+                        Log::warning('Invalid sector name provided: ' . $sectorName);
+                    }
+                }
+                if(isset($data['other_tech']) && !empty(trim($data['other_tech']))){
+                    $techName = trim($data['other_tech']);
+                    // Validate that it contains only letters and spaces
+                    if (preg_match('/^[A-Za-z\s]+$/', $techName)) {
+                        $addTech = new Technology();
+                        $addTech->name = $techName;
+                        $addTech->save();
+                        $techIds[] = $addTech->id;
+                    } else {
+                        Log::warning('Invalid technology name provided: ' . $techName);
+                    }
+                }
+
+                // Process freeform tech tags (create Technology rows if needed)
+                if (!empty($techTags)) {
+                    foreach ($techTags as $tag) {
+                        // enforce max length
+                        if (mb_strlen($tag) > 50) {
+                            return redirect()->back()->with(['msg' => __('admin.Technology_name_too_long'), 'class' => 'danger'])->withInput();
+                        }
+                        // try find existing technology by name (case-insensitive)
+                        $existing = Technology::whereRaw('LOWER(name) = ?', [mb_strtolower($tag)])->first();
+                        if ($existing) {
+                            $techIds[] = $existing->id;
+                        } else {
+                            $newTech = new Technology();
+                            $newTech->name = $tag;
+                            $newTech->save();
+                            $techIds[] = $newTech->id;
+                        }
+                    }
+                }
+
+               // remove previous relations for this company/user
                $deleteCompanyRelations = CompanyRelation::where('company_id', $result->id)->where('user_id', $user->id)->delete();
                 if (!empty($sectorIds)) {
                     foreach ($sectorIds as $sectorId) {
@@ -936,6 +1032,8 @@ class ClientCompanyController extends Controller
                 }
                 // Technologies
                 if (!empty($techIds)) {
+                    // make unique
+                    $techIds = array_values(array_unique($techIds));
                     foreach ($techIds as $techId) {
                         $relation = new CompanyRelation();
                         $relation->company_id   = $result->id;
@@ -955,7 +1053,9 @@ class ClientCompanyController extends Controller
             if( $result ) {
                 if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
 
-                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
+                // Use the result's ID if $id is null (new company creation)
+                $redirectId = $id ?: $result->id;
+                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
             } else { return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم

@@ -289,6 +289,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+    // lowercase alias for backward-compatibility / ease of testing
+    Route::get('/show/mentors', 'ClientProfileController@showMintors')->name('mentors.list.lowercase');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
     Route::group(['prefix' => '2fa'], function () {
@@ -381,6 +383,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
+    // Export startups (CSV / Excel) - preserves current filters passed as query params
+    Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
     //Cities
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');

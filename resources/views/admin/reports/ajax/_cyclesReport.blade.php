@@ -47,7 +47,7 @@
       </div>
     </a>
 
-    <a href="/dashboard/users#search=Mentor" class="col-lg-4 col-sm-6">
+  <a href="{{ route('mentors.list', ['enrolledInProgramFilter' => 1, 'programFilter' => $cycle->id]) }}" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-warning h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -58,7 +58,7 @@
             </div>
             <h4 class="mb-0">{{ $mentors_count }}</h4>
           </div>
-          <p class="mb-1">{{ __('admin.Mentors') }}</p>
+          <p class="mb-1">{{ __('cycles.Mentors_Enrolled_In_Programs') }}</p>
         </div>
       </div>
     </a>

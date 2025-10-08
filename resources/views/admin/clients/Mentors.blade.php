@@ -226,7 +226,11 @@
           @else
           <!-- No Mentors Result -->
           <div class="col-12" id="noMentorsResult">
-            @include('includes.no-result', ['message' => __('cycles.No_Mentors_Found')])
+            @if(request()->get('enrolledInProgramFilter') == '1')
+              @include('includes.no-result', ['message' => __('cycles.No_Mentors_Enrolled')])
+            @else
+              @include('includes.no-result', ['message' => __('cycles.No_Mentors_Found')])
+            @endif
           </div>
           @endif
           <!-- / Mentors List -->

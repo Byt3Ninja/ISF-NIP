@@ -573,6 +573,7 @@ return [
     'Filter by' => 'Filter by',
     'Go to judges page' => 'Go to judges page',
     'No_Mentors_Found' => 'No Mentors Found',
+  'No_Mentors_Enrolled' => 'No mentors enrolled in a program.',
     'Request_Mentorship' => 'Request Mentorship',
     'Show_Filters' => 'Show Filters',
     'Any_Rating' => 'Any Rating',
