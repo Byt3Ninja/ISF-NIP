@@ -4042,6 +4042,18 @@
                 ]
             },
             {
+                "name": "mentors.list.lowercase",
+                "description": "List Mentors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+            {
                 "name": "mentors.add",
                 "description": "Add New Mentor",
                 "guard_name": "web",

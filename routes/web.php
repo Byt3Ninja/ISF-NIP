@@ -289,6 +289,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+    // lowercase alias for backward-compatibility / ease of testing
+    Route::get('/show/mentors', 'ClientProfileController@showMintors')->name('mentors.list.lowercase');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
     Route::group(['prefix' => '2fa'], function () {
