@@ -22,7 +22,7 @@
                   <i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
                 </span>
               </div>
-              <h5 class="mb-0">{{ $item['value'] }}</h5>
+              <h5 class="mb-0">{{ $key == 0 ? $judgers : $item['value'] }}</h5>
             </div>
             <small class="text-center">{{ __('admin.' . $item['label']) }}</small>
           </div>
