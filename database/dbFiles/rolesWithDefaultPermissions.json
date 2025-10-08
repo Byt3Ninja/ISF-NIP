@@ -1983,6 +1983,18 @@
                     "admin"
                 ]
             },
+
+                        {
+                "name": "users.companies_export",
+                "description": "List Users",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+
+            
             {
                 "name": "users.create",
                 "description": "Create User Form",

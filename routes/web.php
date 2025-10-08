@@ -383,6 +383,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
+    // Export startups (CSV / Excel) - preserves current filters passed as query params
+    Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
     //Cities
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');

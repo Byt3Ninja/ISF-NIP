@@ -1968,6 +1968,7 @@ return [
 	'ServiceAdded' => 'تم اضافة الخدمة بنجاح',
 	'ServiceUpdated' => 'تم تحديث الخدمة بنجاح',
 	'Export' => 'تصدير',
+	'No_Startups_To_Export' => 'لا توجد شركات للقيام بالتصدير وفق الفلاتر الحالية.',
 	'no_entries_available' => 'لا توجد إدخالات متاحة',
 	'All_Types' => 'جميع الأنواع',
 	'session_report_not_available' => 'لا توجد تقرير عن الجلسات',
