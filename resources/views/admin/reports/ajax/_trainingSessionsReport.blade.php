@@ -3,7 +3,7 @@
   @php
     $cards = [
       [ 'value' => $total_sessions_count ?? 0, 'label' => __('admin.Training sessions'), 'icon' => 'school', 'color' => 'primary', 'filter' => 'reset' ],
-      [ 'value' => $sessions_period ?? '0h 0m', 'label' => __('admin.Training sessions duration (hours)'), 'icon' => 'clock-hour-3', 'color' => 'secondary' ],
+        [ 'value' => number_format($sessions_period ?? 0, 2) . ' H', 'label' => __('admin.Training_Sessions_Duration'), 'icon' => 'clock-hour-3', 'color' => 'secondary' ],
       [ 'value' => $offline_sessions_count ?? 0, 'label' => __('admin.Offline Training Sessions Count'), 'icon' => 'building-community', 'color' => 'danger', 'filter' => 'Offline_Session','type' => 'offline' ],
       [ 'value' => $online_sessions_count ?? 0, 'label' => __('admin.Zoom Training Sessions Count'), 'icon' => 'screen-share', 'color' => 'info', 'filter' => 'Online_Session', 'type' => 'sessions' ],
       [ 'value' => $online_training_count ?? 0, 'label' => __('admin.Online Training Sessions Count'), 'icon' => 'certificate', 'color' => 'success', 'filter' => 'Online_Training', 'type' => 'online' ]

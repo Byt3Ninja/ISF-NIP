@@ -236,13 +236,6 @@
               </tbody>
             </table>
           </div>
-          
-          <!-- No Results State (Hidden by default, shown via JavaScript when filters don't match) -->
-          <div id="startup-survey-no-results-state" class="d-none">
-            <div class="text-center py-5">
-              <p class="text-muted">{{ __('cycles.No_surveys_match_filters') }}</p>
-            </div>
-          </div>
         @endif
       </div>
     </div>
@@ -370,9 +363,6 @@
     
     // Initialize export functionality
     initializeStartupSurveyExport();
-    
-    // Hide no-results state initially
-    $('#startup-survey-no-results-state').addClass('d-none');
     
     // Set initial filter indicators
     updateStartupSurveyFilterIndicators();
@@ -508,23 +498,9 @@
       
       // Redraw the table
       startupSurveyDataTable.draw();
-      
-      // Hide no results state
-      $('#startup-survey-no-results-state').addClass('d-none');
     } else {
-      // Check if we have any surveys at all and if any filters are active
-      const totalSurveys = startupSurveyRows.length;
-      const hasActiveFilters = startupSurveyCurrentFilters.search || startupSurveyCurrentFilters.status || startupSurveyCurrentFilters.program || startupSurveyCurrentFilters.organization;
-      
-      if (totalSurveys > 0 && hasActiveFilters) {
-        // Surveys exist but filters don't match - show filter no-result
-        $('#startup-survey-no-results-state').removeClass('d-none');
-        startupSurveyDataTable.draw();
-      } else {
-        // No surveys exist or no filters active - hide filter no-result (server-side message will show)
-        $('#startup-survey-no-results-state').addClass('d-none');
-        startupSurveyDataTable.draw();
-      }
+      // Redraw the table to show DataTable's built-in no results message
+      startupSurveyDataTable.draw();
     }
   }
 
@@ -566,7 +542,7 @@
       organization: ''
     };
     
-    // Apply filters (will show all rows and hide no-results state)
+    // Apply filters (will show all rows)
     applyStartupSurveyFilters();
   }
 
