@@ -98,10 +98,16 @@ $(function() {
   const MAX_TECH_LENGTH = 50;
 
   // initialize from existing technologies passed from controller (names)
-  const initialTechs = @json($technologies->pluck('name')->filter()->values());
+  const initialTechs = @json($technologies);
   const existingTechNames = [];
   if (Array.isArray(initialTechs)) {
-    initialTechs.forEach(t => addTechTag(t));
+    initialTechs.forEach(tech => {
+      // Handle both object format {name: 'techName'} and string format
+      const techName = typeof tech === 'object' && tech.name ? tech.name : tech;
+      if (techName) {
+        addTechTag(techName);
+      }
+    });
   }
 
   function renderTags() {
@@ -193,7 +199,7 @@ $(function() {
       sectors: $('.sector-checkbox:checked').map((_, el) => $(el).val()).get(),
       technologies: $('.technology-checkbox:checked').map((_, el) => $(el).val()).get(),
       otherSector: $sectorOtherEl.val().trim(),
-      otherTech: $techOtherEl.val().trim()
+      // otherTech: $techOtherEl.val().trim()
     };
   }
 

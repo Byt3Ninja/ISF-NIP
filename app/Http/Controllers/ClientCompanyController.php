@@ -76,10 +76,12 @@ class ClientCompanyController extends Controller
                 ->where('Company_id', $id)->get();
 
 
-            $Achieved_Milestones = Milestone::where('plan', 'Achieved_Milestones')
-                ->where('Company_id', $id)->get();
-            $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')
-                ->where('Company_id', $id)->get();
+            // Load all milestones for this company (new unified structure)
+            $milestones = Milestone::where('Company_id', $id)->orderBy('created_at')->get();
+            
+            // For backward compatibility, create empty collections for old template variables
+            $Achieved_Milestones = collect();
+            $Planned_Milestones = collect();
             $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
             
             // Startup Technologies
@@ -150,7 +152,7 @@ class ClientCompanyController extends Controller
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
+            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -196,16 +198,19 @@ class ClientCompanyController extends Controller
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', auth()->user()->company->id)->get();
 
-                    $Achieveds = Milestone::where('plan', 'Achieved_Milestones')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Planneds = Milestone::where('plan', 'Planned_Milestones')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Archiveds = Milestone::where('plan', 'Archived_Milestones')
-                        ->where('Company_id', auth()->user()->company->id)->get();
+                    // Load all milestones for this company (new unified structure)
+                    $milestones = Milestone::where('Company_id', auth()->user()->company->id)
+                        ->orderBy('created_at')->get();
+                    
+                    // For backward compatibility, create empty collections
+                    $Achieveds = collect();
+                    $Planneds = collect();
+                    $Archiveds = collect();
                 } else {
                     $fonders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
+                    $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
                     $Archiveds = 'NA';
@@ -281,16 +286,19 @@ class ClientCompanyController extends Controller
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', $client->company->id)->get();
 
-                    $Achieveds = Milestone::where('plan', 'Achieved_Milestones')
-                        ->where('Company_id', $client->company->id)->get();
-                    $Planneds = Milestone::where('plan', 'Planned_Milestones')
-                        ->where('Company_id', $client->company->id)->get();
-                    $Archiveds = Milestone::where('plan', 'Archived_Milestones')
-                        ->where('Company_id', $client->company->id)->get();
+                    // Load all milestones for this company (new unified structure)
+                    $milestones = Milestone::where('Company_id', $client->company->id)
+                        ->orderBy('created_at')->get();
+                    
+                    // For backward compatibility, create empty collections
+                    $Achieveds = collect();
+                    $Planneds = collect();
+                    $Archiveds = collect();
                 } else {
                     $fonders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
+                    $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
                     $Archiveds = 'NA';
@@ -365,6 +373,7 @@ class ClientCompanyController extends Controller
                 'Shareholders',
                 'Investors',
                 'Currencies',
+                'milestones',
                 'Achieveds',
                 'Planneds',
                 'Archiveds',
@@ -1419,199 +1428,388 @@ class ClientCompanyController extends Controller
 
     public function AddMileStone(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        try {
+            // Get company from authenticated user or provided ID
+            if ($id) {
+                $user = User::where('company_id', $id)->first();
+                $companyId = $user ? $user->company_id : $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
+            }
 
+            if (!$companyId) {
+                return response()->json([
+                    'errors' => ['company' => [__('admin.Company not found')]],
+                ], 422);
+            }
 
-        if ($request->Plan == "Achieved_Milestones") {
-            // تحقق من صحة البيانات
+            // Validate the request
             $validator = Validator::make($request->all(), [
-                'Plan' => 'required|string|max:255',
-                'achieved_milestone_name' => 'required|max:255',
-                'achieved_milestone_description' => 'required|max:255',
+                'name' => 'required|string|max:300',
+                'description' => 'required|string|max:1000',
+                'completion_percentage' => 'required|integer|min:0|max:100',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
             ], [
-                'Plan.required' => __('admin.Choose achieved milestones'),
-                'achieved_milestone_name.required' => __('admin.Name is Required MileStone'),
-                'achieved_milestone_description.required' => __('admin.milestone achieved description'),
+                'name.required' => __('Please enter a milestone title.'),
+                'name.max' => __('Milestone title must not exceed 300 characters.'),
+                'description.required' => __('Please enter a milestone description.'),
+                'description.max' => __('Milestone description must not exceed 1000 characters.'),
+                'completion_percentage.required' => __('Please enter a completion percentage.'),
+                'completion_percentage.integer' => __('Completion percentage must be a number.'),
+                'completion_percentage.min' => __('Completion percentage must be between 0 and 100.'),
+                'completion_percentage.max' => __('Completion percentage must be between 0 and 100.'),
+                'documents.*.file' => __('Each document must be a valid file.'),
+                'documents.*.mimes' => __('Only PDF, JPG, PNG, DOCX, and XLSX files are allowed.'),
+                'documents.*.max' => __('File too large. Maximum size allowed is 10 MB.'),
             ]);
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
             if ($validator->fails()) {
                 return response()->json([
                     'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+                ], 422);
             }
 
-            $plan = $request->Plan;
-            $name = $request->achieved_milestone_name;
-            $desc = $request->achieved_milestone_description;
-        }
-        if ($request->Plan == "Planned_Milestones") {
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'Plan' => 'required|string|max:255',
-                'planned_milestone_name' => 'required|max:255',
-                'planned_milestone_description' => 'required|max:255',
-            ], [
-                'Plan.required' => __('admin.Choose achieved milestones'),
-                'planned_milestone_name.required' => __('admin.Name is Required MileStone'),
-                'planned_milestone_description.required' => __('admin.milestone achieved description'),
+            // Create new milestone
+            $milestone = new Milestone();
+            $milestone->name = $request->name;
+            $milestone->description = $request->description;
+            $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->Company_id = $companyId;
+            $milestone->save();
+
+            // Handle file uploads if any
+            $documents = [];
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $index => $file) {
+                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    
+                    $documents[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'url' => asset('storage/' . $filePath),
+                        'path' => $filePath,
+                    ];
+                }
+                
+                // Store documents info in milestone (you might want to create a separate table for this)
+                $milestone->documents = json_encode($documents);
+                $milestone->save();
+            }
+
+            return response()->json([
+                'state' => __('admin.MileStone_added'),
+                'success' => true,
+                'milestone' => [
+                    'id' => $milestone->id,
+                    'name' => $milestone->name,
+                    'description' => $milestone->description,
+                    'completion_percentage' => $milestone->completion_percentage,
+                    'documents' => $documents,
+                ],
             ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
-            }
-
-            $plan = $request->Plan;
-            $name = $request->planned_milestone_name;
-            $desc = $request->planned_milestone_description;
+            
+        } catch (\Exception $e) {
+            \Log::error('Error adding milestone: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => [__('An error occurred while saving the milestone.')]],
+            ], 500);
         }
-        if ($request->Plan == "Archived_Milestones") {
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'Plan' => 'required|string|max:255',
-                'Archived_milestone_name' => 'required|max:255',
-                'Archived_milestone_description' => 'required|max:255',
-            ], [
-                'Plan.required' => __('admin.Choose achieved milestones'),
-                'Archived_milestone_name.required' => __('admin.Name is Required MileStone'),
-                'Archived_milestone_description.required' => __('admin.milestone achieved description'),
-            ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
-            }
-
-            $plan = $request->Plan;
-            $name = $request->Archived_milestone_name;
-            $desc = $request->Archived_milestone_description;
-        }
-
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $mileStone = new Milestone(); // افترض أن لديك موديل اسمه TeamMember
-        $mileStone->plan = $plan;
-        $mileStone->name = $name;
-        $mileStone->description = $desc;
-        $mileStone->Company_id = $companyId;
-        $mileStone->save();
-
-        // استجابة بعد الحفظ
-        return response()->json([
-            'state' => __('admin.MileStone_added'),
-        ]);
     }
 
     public function EditMileStone(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        try {
+            // Get company from authenticated user or provided ID
+            if ($id) {
+                $user = User::where('company_id', $id)->first();
+                $companyId = $user ? $user->company_id : $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
+            }
 
-        $id = $request->id;
+            if (!$companyId) {
+                return response()->json([
+                    'errors' => ['company' => [__('admin.Company not found')]],
+                ], 422);
+            }
 
-
-        $mileStone = Milestone::where('id', $id)->first(); // افترض أن لديك موديل اسمه
-
-
-        if ($mileStone->plan == "Achieved_Milestones") {
-            // تحقق من صحة البيانات
+            // Validate the request
             $validator = Validator::make($request->all(), [
-                'Achieved_name' => 'required|max:255',
-                'Achieved_desc' => 'required|max:255',
+                'id' => 'required|integer|exists:milestones,id',
+                'name' => 'required|string|max:300',
+                'description' => 'required|string|max:1000',
+                'completion_percentage' => 'required|integer|min:0|max:100',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
+                'remove_documents' => 'nullable|string', // JSON string of indices to remove
             ], [
-                'Achieved_name.required' => __('admin.Name is Required MileStone'),
-                'Achieved_desc.required' => __('admin.milestone achieved description'),
+                'id.required' => __('Milestone ID is required.'),
+                'id.exists' => __('Milestone not found.'),
+                'name.required' => __('Please enter a milestone title.'),
+                'name.max' => __('Milestone title must not exceed 300 characters.'),
+                'description.required' => __('Please enter a milestone description.'),
+                'description.max' => __('Milestone description must not exceed 1000 characters.'),
+                'completion_percentage.required' => __('Please enter a completion percentage.'),
+                'completion_percentage.integer' => __('Completion percentage must be a number.'),
+                'completion_percentage.min' => __('Completion percentage must be between 0 and 100.'),
+                'completion_percentage.max' => __('Completion percentage must be between 0 and 100.'),
+                'documents.*.file' => __('Each document must be a valid file.'),
+                'documents.*.mimes' => __('Only PDF, JPG, PNG, DOCX, and XLSX files are allowed.'),
+                'documents.*.max' => __('File too large. Maximum size allowed is 10 MB.'),
             ]);
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
             if ($validator->fails()) {
                 return response()->json([
                     'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+                ], 422);
             }
 
+            // Find the milestone and ensure it belongs to the company
+            $milestone = Milestone::where('id', $request->id)
+                                ->where('Company_id', $companyId)
+                                ->first();
 
-            $name = $request->Achieved_name;
-            $desc = $request->Achieved_desc;
-        }
-
-        if ($mileStone->plan == "Planned_Milestones") {
-
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-
-                'Planned_name' => 'required|max:255',
-                'Planned_desc' => 'required|max:255',
-            ], [
-
-                'Planned_name.required' => __('admin.Name is Required MileStone'),
-                'Planned_desc.required' => __('admin.milestone achieved description'),
-            ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
+            if (!$milestone) {
                 return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+                    'errors' => ['milestone' => [__('Milestone not found or you do not have permission to edit it.')]],
+                ], 404);
             }
 
+            // Update milestone
+            $milestone->name = $request->name;
+            $milestone->description = $request->description;
+            $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->save();
 
-            $name = $request->Planned_name;
-            $desc = $request->Planned_desc;
-        }
-        if ($mileStone->plan == "Archived_Milestones") {
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'Archived_name' => 'required|max:255',
-                'Archived_desc' => 'required|max:255',
-            ], [
-                'Archived_name.required' => __('admin.Name is Required MileStone'),
-                'Archived_desc.required' => __('admin.milestone achieved description'),
+            // Handle file uploads if any (append to existing documents)
+            // Force model to refresh and apply casts
+            $milestone->refresh();
+            $existingDocuments = $milestone->documents;
+            
+            \Log::info('EditMileStone: Initial request info', [
+                'milestone_id' => $milestone->id,
+                'has_files' => $request->hasFile('documents'),
+                'request_files' => $request->files->keys(),
+                'all_input' => array_keys($request->all()),
+                'files_in_documents' => $request->hasFile('documents') ? count($request->file('documents')) : 0
             ]);
+            
+            \Log::info('EditMileStone: Processing existing documents', [
+                'milestone_id' => $milestone->id,
+                'documents_type' => gettype($existingDocuments),
+                'documents_value' => $existingDocuments,
+                'has_files' => $request->hasFile('documents')
+            ]);
+            
+            // Ensure existing documents is an array (handle JSON string or null)
+            if (is_string($existingDocuments)) {
+                try {
+                    $decoded = json_decode($existingDocuments, true);
+                    $existingDocuments = is_array($decoded) ? $decoded : [];
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to decode milestone documents JSON', [
+                        'milestone_id' => $milestone->id,
+                        'documents_raw' => $existingDocuments,
+                        'error' => $e->getMessage()
+                    ]);
+                    $existingDocuments = [];
+                }
+            } elseif (!is_array($existingDocuments)) {
+                $existingDocuments = [];
+            }
+            
+            // Handle document removals
+            if ($request->has('remove_documents')) {
+                $removeDocuments = json_decode($request->input('remove_documents'), true);
+                if (is_array($removeDocuments)) {
+                    \Log::info('EditMileStone: Removing documents', [
+                        'remove_indices' => $removeDocuments,
+                        'milestone_id' => $milestone->id
+                    ]);
+                    
+                    // Remove documents from file system and filter from existing documents
+                    foreach ($removeDocuments as $index) {
+                        if (isset($existingDocuments[$index])) {
+                            $document = $existingDocuments[$index];
+                            
+                            // Delete physical file if it exists
+                            if (isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
+                                \Storage::disk('public')->delete($document['path']);
+                                \Log::info('EditMileStone: Physical file deleted', [
+                                    'path' => $document['path'],
+                                    'milestone_id' => $milestone->id
+                                ]);
+                            }
+                        }
+                    }
+                    
+                    // Remove documents from array by filtering out the specified indices
+                    $existingDocuments = array_values(array_filter($existingDocuments, function($doc, $index) use ($removeDocuments) {
+                        return !in_array($index, $removeDocuments);
+                    }, ARRAY_FILTER_USE_BOTH));
+                }
+            }
+            
+            $newDocuments = [];
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+            if ($request->hasFile('documents')) {
+                \Log::info('EditMileStone: Files detected', [
+                    'files_count' => count($request->file('documents')),
+                    'milestone_id' => $milestone->id
+                ]);
+                
+                foreach ($request->file('documents') as $index => $file) {
+                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    
+                    \Log::info('EditMileStone: File uploaded', [
+                        'original_name' => $file->getClientOriginalName(),
+                        'stored_path' => $filePath,
+                        'index' => $index
+                    ]);
+                    
+                    $newDocuments[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'url' => asset('storage/' . $filePath),
+                        'path' => $filePath,
+                    ];
+                }
+                
+                // Merge existing and new documents
+                $allDocuments = array_merge($existingDocuments, $newDocuments);
+                $milestone->documents = json_encode($allDocuments);
+                $milestone->save();
+                
+                \Log::info('EditMileStone: Documents saved', [
+                    'existing_count' => count($existingDocuments),
+                    'new_count' => count($newDocuments),
+                    'total_count' => count($allDocuments),
+                    'milestone_id' => $milestone->id
+                ]);
+                
+                // Return the merged documents directly
+                $finalDocuments = $allDocuments;
+            } else {
+                // No new files uploaded, use existing documents
+                $finalDocuments = $existingDocuments;
             }
 
-            $name = $request->Archived_name;
-            $desc = $request->Archived_desc;
+            \Log::info('EditMileStone: Final response', [
+                'milestone_id' => $milestone->id,
+                'final_documents_count' => count($finalDocuments),
+                'final_documents' => $finalDocuments
+            ]);
+            
+            return response()->json([
+                'state' => __('admin.MileStone_Edited'),
+                'success' => true,
+                'milestone' => [
+                    'id' => $milestone->id,
+                    'name' => $milestone->name,
+                    'description' => $milestone->description,
+                    'completion_percentage' => $milestone->completion_percentage,
+                    'documents' => $finalDocuments,
+                ],
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error editing milestone: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => [__('An error occurred while updating the milestone.')]],
+            ], 500);
         }
-
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-
-
-        $mileStone->name = $name;
-        $mileStone->description = $desc;
-        $mileStone->save();
-
-        // استجابة بعد الحفظ
-        return response()->json([
-            'state' => __('admin.MileStone_Edited'),
-        ]);
     }
     public function DeleteMileStone(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        try {
+            // Get company from authenticated user or provided ID
+            if ($id) {
+                $user = User::where('company_id', $id)->first();
+                $companyId = $user ? $user->company_id : $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
+            }
 
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $Milestone = Milestone::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+            if (!$companyId) {
+                return response()->json([
+                    'errors' => ['company' => [__('admin.Company not found')]],
+                ], 422);
+            }
 
-        $Milestone->delete();
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|integer|exists:milestones,id',
+            ], [
+                'id.required' => __('Milestone ID is required.'),
+                'id.exists' => __('Milestone not found.'),
+            ]);
 
-        // استجابة بعد الحفظ
-        return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Find the milestone and ensure it belongs to the company
+            $milestone = Milestone::where('id', $request->id)
+                                ->where('Company_id', $companyId)
+                                ->first();
+
+            if (!$milestone) {
+                return response()->json([
+                    'errors' => ['milestone' => [__('Milestone not found or you do not have permission to delete it.')]],
+                ], 404);
+            }
+
+            // Delete associated files if they exist
+            if ($milestone->documents && is_array($milestone->documents)) {
+                $documents = $milestone->documents;
+                foreach ($documents as $document) {
+                    if (is_array($document) && isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
+                        \Storage::disk('public')->delete($document['path']);
+                    }
+                }
+            }
+
+            // Delete the milestone
+            $milestone->delete();
+
+            return response()->json([
+                'state' => __('admin.MileStone_deleted'),
+                'success' => true,
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error deleting milestone: ' . $e->getMessage(), [
+                'milestone_id' => $request->id ?? 'unknown',
+                'company_id' => $companyId ?? 'unknown',
+                'user_id' => Auth::id(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'errors' => ['general' => [__('An error occurred while deleting the milestone.')]],
+            ], 500);
+        }
     }
 
 
