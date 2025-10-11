@@ -479,6 +479,7 @@ class HackathonController extends Controller
         return view('admin.hackathon.team-workspace', compact('teamData', 'sharedFile', 'todoList'));
     }
 
+
     public function show(Request $request, $id)
     {
         $user = Auth::user();
@@ -1033,29 +1034,45 @@ class HackathonController extends Controller
             $winners = TeamFormation::winnersMapping( $teams );
         }
         
-        return view('admin.hackathon.hackathon-details', compact(
-            'pages',
-            'currentHackathon',
-            'data', 
-            'l', 
-            'id', 
-            'teamsData', 
-            'allteams', 
-            'team_invition', 
-            'companyStep', 
-            'count_team',
-            'answers', 
-            'data_evi', 
-            'judges_users',
-            'nextSessions',
-            'sessions',
-            'cType',
-            'steps',
-            'showStep',
-            'steps_ids',
-            'teamJoins',
-            'winners'
-        ));
+        $hackthonFinish = [];
+        $hackthonCycle = Cycle::find($id);
+
+        if($hackthonCycle->end < now()){
+            $hackthonFinish['id'] = $hackthonCycle->id;
+            $hackthonFinish['title'] = $hackthonCycle->title;
+            $hackthonFinish['description'] = $hackthonCycle->description;
+            $hackthonFinish['start'] = $hackthonCycle->start->format('Y-m-d');
+            $hackthonFinish['end'] = $hackthonCycle->end->format('Y-m-d');
+            $hackthonFinish['img'] = $hackthonCycle->img_url;
+            $hackthonFinish['teams'] = TeamFormation::teams($hackthonCycle->id);
+            $hackthonFinish['winners']= TeamFormation::winners($hackthonFinish['teams']);
+        }
+        
+            return view('admin.hackathon.hackathon-details', compact(
+                'pages',
+                'currentHackathon',
+                'data', 
+                'l', 
+                'id', 
+                'teamsData', 
+                'allteams', 
+                'team_invition', 
+                'companyStep', 
+                'count_team',
+                'answers', 
+                'data_evi', 
+                'judges_users',
+                'nextSessions',
+                'sessions',
+                'cType',
+                'steps',
+                'showStep',
+                'steps_ids',
+                'teamJoins',
+                'winners',
+                'hackthonFinish'
+            ));
+        
     }
 
     public function applyHackathon($id)
@@ -2721,4 +2738,5 @@ class HackathonController extends Controller
             return response()->json(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
 }

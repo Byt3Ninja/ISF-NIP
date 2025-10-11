@@ -347,6 +347,6 @@ class Company extends Model
 
    public function milestones()
    {
-      return $this->hasMany(Milestone::class);
+      return $this->hasMany(Milestone::class, 'Company_id');
    }
 }

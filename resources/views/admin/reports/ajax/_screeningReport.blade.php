@@ -36,9 +36,9 @@
 <div class="row">
   <div class="col-12">
     <div class="card border">
-      <div class="card-header">
+      <div class="card-header overflow-hidden">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-					<h5 class="card-title">
+					<h5 class="card-title mb-3 mb-md-0">
 						{{ __('cycles.Screening results') }}
 					</h5>
           <div class="d-flex flex-wrap gap-2 align-items-center">            

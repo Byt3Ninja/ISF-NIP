@@ -55,90 +55,70 @@
 <div class="row">
   <div class="col-12">
     <div class="card border">
-      <div class="card-header">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-          <h5 class="card-title"> {{ __('cycles.Startup_Surveys') }}</h5>
+      <div class="card-header border-bottom mb-6">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <h5 class="card-title mb-3 mb-md-0"> {{ __('cycles.Startup_Surveys') }}</h5>
           <div class="d-flex flex-wrap gap-2 align-items-center">
-            <!-- Search Input -->
-            <div class="search-wrapper position-relative">
-              <div class="position-relative">
-                <input
-                  type="text"
-                  id="startup-survey-search"
-                  class="form-control"
-                  placeholder="{{ __('admin.Search') }}..."
-                  style="padding-left: 2rem; padding-right: 2rem; min-width: 300px;"
-                >
-                <i class="ti ti-search ti-16px position-absolute top-50 translate-middle-y mx-2 text-muted" style="left: 0;"></i>
-                <button id="clear-startup-survey-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
-                  <i class="ti ti-x ti-14px text-muted"></i>
-                </button>
-              </div>
-            </div>
-
             <!-- Export Buttons -->
             <div class="btn-group">
               <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
               </button>
               <ul class="dropdown-menu">
-                <li>
-                  <a class="dropdown-item cursor-pointer" id="export-csv-btn">
-                    <i class="ti ti-file-text me-2"></i>CSV
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item cursor-pointer" id="export-excel-btn">
-                    <i class="ti ti-file-spreadsheet me-2"></i>Excel
-                  </a>
-                </li>
+                @foreach(['csv', 'excel'] as $key => $option)
+                  <li>
+                    <button id="export-{{ $option }}-btn" class="dropdown-item text-uppercase">
+                      {{$option}}
+                    </button>
+                  </li>
+                @endforeach
               </ul>
             </div>
           </div>
         </div>
-
+      </div>
+      
+      <div class="card-body">
         <!-- Enhanced Filter Section -->
-        <div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
+        <div id="tblStartupSurveysFilters" class="row g-2 align-items-center">
           <!-- Status Filter -->
           <div class="col-lg-3 col-md-4 col-sm-6">
-            <select id="startup-survey-status-filter" class="form-select">
+            <select id="startup-survey-status-filter" class="form-select form-select-sm">
               <option value="">{{ __('cycles.All Status') }}</option>
-              <option value="answered">{{ __('admin.answered') }}</option>
               <option value="not-answered">{{ __('admin.notAnswered') }}</option>
+              <option value="answered">{{ __('admin.answered') }}</option>
             </select>
           </div>
-
+  
           <!-- Program Filter -->
           <div class="col-lg-3 col-md-4 col-sm-6">
-            <select id="startup-survey-program-filter" class="form-select">
+            <select id="startup-survey-program-filter" class="form-select form-select-sm">
               <option value="">{{ __('admin.All_Programs') }}</option>
               @foreach ($mentorRequests->pluck('cycle')->unique('id') as $cycle)
                 <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
               @endforeach
             </select>
           </div>
-
+  
           <!-- Organization Filter -->
           <div class="col-lg-3 col-md-4 col-sm-6">
-            <select id="startup-survey-organization-filter" class="form-select">
+            <select id="startup-survey-organization-filter" class="form-select form-select-sm">
               <option value="">{{ __('admin.All_Organizations') }}</option>
               @foreach ($mentorRequests->pluck('orgnization')->unique('id') as $organization)
                 <option value="{{ $organization->id }}">{{ $organization->{'name_' . app()->getLocale()} }}</option>
               @endforeach
             </select>
           </div>
-
+  
           <!-- Clear Filters Button -->
           <div class="col-lg-3 col-md-4 col-sm-6">
-            <button id="clear-startup-survey-filters" class="btn btn-outline-secondary d-none">
+            <button id="clear-startup-survey-filters" class="btn btn-sm btn-outline-secondary d-none">
               <i class="ti ti-x me-1"></i>
               {{ __('cycles.Clear') }}
             </button>
           </div>
         </div>
-      </div>
-      
-      <div class="card-body">
+
         @if($mentorRequests->count() == 0)
           <!-- No Surveys Available -->
           <div class="col-12">
@@ -149,9 +129,8 @@
         @else
           <div class="table-responsive">
             <table class="table" id="startup-survey-table">
-              <thead class="bg-label-secondary">
+              <thead class="table-light">
                 <tr>
-                  <th class="text-center">#</th>
                   <th class="text-center">{{ __('admin.Mentor') }}</th>
                   <th class="text-center">{{ __('admin.Startup') }}</th>
                   <th class="text-center">{{ __('admin.Prorgam_name') }}</th>
@@ -184,7 +163,6 @@
                       data-organization-id="{{ $session->orgnization->id ?? '' }}"
                       data-status="{{ $surveyStatus }}"
                       data-date="{{ $session->zoom_date ?? '' }}">
-                    <td class="text-center">{{ $c++ }}</td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
                         <img 
@@ -236,13 +214,6 @@
               </tbody>
             </table>
           </div>
-          
-          <!-- No Results State (Hidden by default, shown via JavaScript when filters don't match) -->
-          <div id="startup-survey-no-results-state" class="d-none">
-            <div class="text-center py-5">
-              <p class="text-muted">{{ __('cycles.No_surveys_match_filters') }}</p>
-            </div>
-          </div>
         @endif
       </div>
     </div>
@@ -256,7 +227,6 @@
   }
   if (typeof startupSurveyCurrentFilters === 'undefined') {
     var startupSurveyCurrentFilters = {
-      search: '',
       status: '',
       program: '',
       organization: ''
@@ -273,14 +243,14 @@
     
     startupSurveyDataTable = $('#startup-survey-table').DataTable({
       paging: true,
-      pageLength: 25,
+      pageLength: 10,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-      searching: false, // We'll use custom search
+      searching: true, // Enable DataTable's built-in search
       ordering: true,
       info: true,
       autoWidth: false,
       responsive: true,
-      dom: 'Bfrtip',
+      dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>B<"row"<"col-sm-12"rt>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>', // Custom DOM layout
       buttons: [
         {
           extend: 'csv',
@@ -292,7 +262,7 @@
           },
           title: 'Startup Surveys Report',
           exportOptions: {
-            columns: [0, 1, 2, 3, 4, 5, 6], // Exclude action column
+            columns: [0, 1, 2, 3, 4, 5], // Exclude action column
             format: {
               body: function(data, row, column, node) {
                 // Clean HTML tags and get text content
@@ -320,7 +290,7 @@
           },
           title: 'Startup Surveys Report',
           exportOptions: {
-            columns: [0, 1, 2, 3, 4, 5, 6], // Exclude action column
+            columns: [0, 1, 2, 3, 4, 5], // Exclude action column
             format: {
               body: function(data, row, column, node) {
                 // Clean HTML tags and get text content
@@ -356,10 +326,10 @@
         }
       },
       columnDefs: [
-        { targets: [0, 1, 2, 3, 4, 5, 6, 7], orderable: true },
-        { targets: [1, 2, 7], orderable: false } // Disable ordering for image columns and actions
+        { targets: [0, 1, 2, 3, 4, 5, 6], orderable: true },
+        { targets: [0, 1, 6], orderable: false } // Disable ordering for image columns and actions
       ],
-      order: [[5, 'desc']] // Sort by date column by default
+      order: [[4, 'desc']] // Sort by date column by default
     });
 
     // Initialize rows array for custom filtering
@@ -371,9 +341,6 @@
     // Initialize export functionality
     initializeStartupSurveyExport();
     
-    // Hide no-results state initially
-    $('#startup-survey-no-results-state').addClass('d-none');
-    
     // Set initial filter indicators
     updateStartupSurveyFilterIndicators();
     
@@ -384,25 +351,6 @@
   });
 
   function initializeStartupSurveySearchAndFilters() {
-    // Search input handler with debounce
-    let searchTimeout;
-    $('#startup-survey-search').on('input', function() {
-      clearTimeout(searchTimeout);
-      const searchValue = $(this).val().trim();
-      
-      // Show/hide clear search button
-      if (searchValue) {
-        $('#clear-startup-survey-search').removeClass('d-none');
-      } else {
-        $('#clear-startup-survey-search').addClass('d-none');
-      }
-      
-      searchTimeout = setTimeout(() => {
-        startupSurveyCurrentFilters.search = searchValue.toLowerCase();
-        applyStartupSurveyFilters();
-      }, 300);
-    });
-
     // Filter change handlers
     $('#startup-survey-status-filter, #startup-survey-program-filter, #startup-survey-organization-filter').on('change', function() {
       const filterId = $(this).attr('id');
@@ -412,75 +360,22 @@
     });
 
     // Clear filters button
-    $('#clear-startup-survey-filters, #clear-startup-survey-search').on('click', function() {
+    $('#clear-startup-survey-filters').on('click', function() {
       clearAllStartupSurveyFilters();
     });
   }
 
   function applyStartupSurveyFilters() {
-    let filteredRows = [...startupSurveyRows];
-    
     // Debug logging
     if (window.debugStartupSurveyFilters) {
       console.log('Applying startup survey filters:', startupSurveyCurrentFilters);
-      console.log('Total survey rows:', startupSurveyRows.length);
     }
-
-    // Apply search filter
-    if (startupSurveyCurrentFilters.search) {
-      filteredRows = filteredRows.filter(row => {
-        const $row = $(row);
-        const mentor = String($row.data('mentor') || '').toLowerCase();
-        const startup = String($row.data('startup') || '').toLowerCase();
-        const program = String($row.data('program') || '').toLowerCase();
-        const organization = String($row.data('organization') || '').toLowerCase();
-        const searchTerm = startupSurveyCurrentFilters.search.toLowerCase();
-        
-        return mentor.includes(searchTerm) || 
-               startup.includes(searchTerm) || 
-               program.includes(searchTerm) ||
-               organization.includes(searchTerm);
-      });
-      if (window.debugStartupSurveyFilters) console.log('After search filter:', filteredRows.length);
-    }
-
-    // Apply status filter
-    if (startupSurveyCurrentFilters.status) {
-      filteredRows = filteredRows.filter(row => {
-        const $row = $(row);
-        const status = String($row.data('status') || '');
-        return status === startupSurveyCurrentFilters.status;
-      });
-      if (window.debugStartupSurveyFilters) console.log('After status filter:', filteredRows.length);
-    }
-
-    // Apply program filter
-    if (startupSurveyCurrentFilters.program) {
-      filteredRows = filteredRows.filter(row => {
-        const $row = $(row);
-        const programId = String($row.data('program-id') || '');
-        return programId === startupSurveyCurrentFilters.program;
-      });
-      if (window.debugStartupSurveyFilters) console.log('After program filter:', filteredRows.length);
-    }
-
-    // Apply organization filter
-    if (startupSurveyCurrentFilters.organization) {
-      filteredRows = filteredRows.filter(row => {
-        const $row = $(row);
-        const organizationId = String($row.data('organization-id') || '');
-        return organizationId === startupSurveyCurrentFilters.organization;
-      });
-      if (window.debugStartupSurveyFilters) console.log('After organization filter:', filteredRows.length);
-    }
-
-    if (window.debugStartupSurveyFilters) console.log('Startup survey filtered results:', filteredRows.length);
     
-    // Update display
-    updateStartupSurveyDisplay(filteredRows);
+    // Update display by rebuilding the table
+    updateStartupSurveyDisplay();
     
     // Show/hide clear filters button and update filter indicators
-    const hasActiveFilters = startupSurveyCurrentFilters.search || startupSurveyCurrentFilters.status || startupSurveyCurrentFilters.program || startupSurveyCurrentFilters.organization;
+    const hasActiveFilters = startupSurveyCurrentFilters.status || startupSurveyCurrentFilters.program || startupSurveyCurrentFilters.organization;
     if (hasActiveFilters) {
       $('#clear-startup-survey-filters').removeClass('d-none');
     } else {
@@ -491,40 +386,60 @@
     updateStartupSurveyFilterIndicators();
   }
 
-  function updateStartupSurveyDisplay(filteredRows) {
-    // Clear DataTable
+  function updateStartupSurveyDisplay() {
+    // Clear the DataTable and rebuild with filtered data
     startupSurveyDataTable.clear();
     
-    if (filteredRows.length > 0) {
-      // Add filtered rows to DataTable
-      filteredRows.forEach(row => {
-        const $row = $(row);
-        const rowData = [];
-        $row.find('td').each(function() {
-          rowData.push($(this).html());
-        });
-        startupSurveyDataTable.row.add(rowData);
+    // Filter the original rows based on current filters
+    const filteredRows = startupSurveyRows.filter(row => {
+      const $row = $(row);
+      
+      // Apply status filter
+      if (startupSurveyCurrentFilters.status) {
+        const status = String($row.data('status') || '');
+        if (status !== startupSurveyCurrentFilters.status) {
+          return false;
+        }
+      }
+      
+      // Apply program filter  
+      if (startupSurveyCurrentFilters.program) {
+        const programId = String($row.data('program-id') || '');
+        if (programId !== startupSurveyCurrentFilters.program) {
+          return false;
+        }
+      }
+      
+      // Apply organization filter
+      if (startupSurveyCurrentFilters.organization) {
+        const organizationId = String($row.data('organization-id') || '');
+        if (organizationId !== startupSurveyCurrentFilters.organization) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    // Add filtered rows back to the DataTable
+    filteredRows.forEach(row => {
+      const $row = $(row);
+      const rowData = [];
+      
+      // Extract data from each cell (excluding the row number)
+      $row.find('td').each(function() {
+        rowData.push($(this).html());
       });
       
-      // Redraw the table
-      startupSurveyDataTable.draw();
-      
-      // Hide no results state
-      $('#startup-survey-no-results-state').addClass('d-none');
-    } else {
-      // Check if we have any surveys at all and if any filters are active
-      const totalSurveys = startupSurveyRows.length;
-      const hasActiveFilters = startupSurveyCurrentFilters.search || startupSurveyCurrentFilters.status || startupSurveyCurrentFilters.program || startupSurveyCurrentFilters.organization;
-      
-      if (totalSurveys > 0 && hasActiveFilters) {
-        // Surveys exist but filters don't match - show filter no-result
-        $('#startup-survey-no-results-state').removeClass('d-none');
-        startupSurveyDataTable.draw();
-      } else {
-        // No surveys exist or no filters active - hide filter no-result (server-side message will show)
-        $('#startup-survey-no-results-state').addClass('d-none');
-        startupSurveyDataTable.draw();
-      }
+      startupSurveyDataTable.row.add(rowData);
+    });
+    
+    // Redraw the table
+    startupSurveyDataTable.draw();
+    
+    // Debug logging
+    if (window.debugStartupSurveyFilters) {
+      console.log(`Filtered ${filteredRows.length} rows from ${startupSurveyRows.length} total rows`);
     }
   }
 
@@ -540,34 +455,42 @@
         $select.removeClass('border-primary');
       }
     });
-    
-    // Handle search input
-    const $search = $('#startup-survey-search');
-    if (startupSurveyCurrentFilters.search) {
-      $search.addClass('border-primary');
-    } else {
-      $search.removeClass('border-primary');
-    }
   }
 
   function clearAllStartupSurveyFilters() {
     // Reset form inputs
-    $('#startup-survey-search').val('');
     $('#startup-survey-status-filter, #startup-survey-program-filter, #startup-survey-organization-filter').val('');
     
-    // Hide clear search button
-    $('#clear-startup-survey-search').addClass('d-none');
+    // Clear DataTable search
+    startupSurveyDataTable.search('').draw();
     
     // Reset current filters
     startupSurveyCurrentFilters = {
-      search: '',
       status: '',
       program: '',
       organization: ''
     };
     
-    // Apply filters (will show all rows and hide no-results state)
-    applyStartupSurveyFilters();
+    // Rebuild table with all rows
+    startupSurveyDataTable.clear();
+    startupSurveyRows.forEach(row => {
+      const $row = $(row);
+      const rowData = [];
+      
+      // Extract data from each cell
+      $row.find('td').each(function() {
+        rowData.push($(this).html());
+      });
+      
+      startupSurveyDataTable.row.add(rowData);
+    });
+    startupSurveyDataTable.draw();
+    
+    // Update filter indicators
+    updateStartupSurveyFilterIndicators();
+    
+    // Hide clear filters button
+    $('#clear-startup-survey-filters').addClass('d-none');
   }
 
   // KPI Card filtering functionality for Startup Survey
@@ -688,7 +611,7 @@
     // Get headers
     const headers = [];
     table.querySelectorAll('thead th').forEach((th, index) => {
-      if (index < 7) { // Exclude action column
+      if (index < 6) { // Exclude action column
         headers.push('"' + th.textContent.trim().replace(/"/g, '""') + '"');
       }
     });
@@ -697,7 +620,7 @@
     // Get visible rows data
     startupSurveyDataTable.rows({ search: 'applied' }).data().each(function (rowData) {
       const row = [];
-      for (let i = 0; i < 7; i++) { // Exclude action column
+      for (let i = 0; i < 6; i++) { // Exclude action column
         let cellData = '';
         if (typeof rowData[i] === 'string') {
           // Clean HTML and extract text

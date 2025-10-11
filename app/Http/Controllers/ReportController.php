@@ -559,60 +559,148 @@ class ReportController extends Controller
     }
 
     protected function cyclesReport($organization_id,$cycle_id){
+        // Keep the passed cycle (for backward-compatible views), but do not filter by it
         $cycle = Cycle::find($cycle_id);
-        $data['mentors_count'] = User::whereHas('mentorSessions',function ($q)use ($organization_id,$cycle_id){
-            $q->where('cycle_id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
-                $q->where('organization_id',$organization_id);
+
+        // OVERALL (all cycles) KPIs within the organization (no cycle filter)
+        $data['mentors_count'] = User::whereHas('mentorSessions', function ($q) use ($organization_id) {
+            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                $q->where('organization_id', $organization_id);
             });
         })->count();
-        $mentorRequests =  MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
-            $q->where('organization_id',$organization_id);
-        })->where('cycle_id',$cycle_id);
 
-        $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$cycle_id){
-            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
-                    $query->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                        $query->where('organization_id',$organization_id);
-                    });
+        $mentorRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            $q->where('organization_id', $organization_id);
+        });
+
+        $training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
+            $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->when(!is_null($organization_id), function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
             });
         });
-        $startups = Company::whereHas('cycledata',function ($q) use ($organization_id,$cycle_id){
-            $q->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
-                 $q->where('organization_id',$organization_id);
+
+        $startups = Company::whereHas('cycledata', function ($q) use ($organization_id) {
+            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                $q->where('organization_id', $organization_id);
             });
         });
-        $screenings =Company::whereHas('stepdata',function ($q)use ($organization_id,$cycle_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
-                    $query->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
-                        $q->where('organization_id',$organization_id);
-                    });
+
+        $screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    $q->where('organization_id', $organization_id);
+                });
             })->where('stype', 2);
         })->count();
-        $final_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id,$cycle_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
-                    $query->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q) use($organization_id){
-                        $q->where('organization_id',$organization_id);
-                    });
+
+        $final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    $q->where('organization_id', $organization_id);
+                });
             })->where('stype', 5);
         })->count();
-         $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
             return $q->whereHas('cycle', function ($query) use ($organization_id) {
                 $query->where('organization_id', $organization_id);
             });
         })->where('stype', 4)->get();
-        $cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
+
+        // All cycles within the organization
+        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            $q->where('organization_id', $organization_id);
+        })->get();
+
+        // Per-cycle KPI data
+        $cycles_kpis = [];
+        foreach ($cycles as $c) {
+            $per_cycle_mentor_requests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                $q->where('organization_id', $organization_id);
+            })->where('cycle_id', $c->id);
+
+            $per_cycle_training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id, $c) {
+                $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                    $query->where('cycles.id', $c->id)
+                        ->when(!is_null($organization_id), function ($query) use ($organization_id) {
+                            $query->where('organization_id', $organization_id);
+                        });
+                });
+            });
+
+            $per_cycle_startups = Company::whereHas('cycledata', function ($q) use ($organization_id, $c) {
+                $q->where('cycles.id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    $q->where('organization_id', $organization_id);
+                });
+            });
+
+            $per_cycle_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id, $c) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                    $query->where('cycles.id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                        $q->where('organization_id', $organization_id);
+                    });
+                })->where('stype', 2);
+            })->count();
+
+            $per_cycle_final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id, $c) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                    $query->where('cycles.id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                        $q->where('organization_id', $organization_id);
+                    });
+                })->where('stype', 5);
+            })->count();
+
+            $per_cycle_mentors_count = User::whereHas('mentorSessions', function ($q) use ($organization_id, $c) {
+                $q->where('cycle_id', $c->id)->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    $q->where('organization_id', $organization_id);
+                });
+            })->count();
+
+            $cycles_kpis[$c->id] = [
+                'cycle' => $c,
+                'mentors_count' => $per_cycle_mentors_count,
+                'mentorRequests_count' => $per_cycle_mentor_requests->count(),
+                'mentorships_period' => $per_cycle_mentor_requests->sum('period') / 60,
+                'mentorship_attendance_rate' => $per_cycle_mentor_requests->count() ? ($per_cycle_mentor_requests->sum('done') / $per_cycle_mentor_requests->count()) * 100 : 0,
+                'training_sessions_count' => $per_cycle_training_sessions->count(),
+                'training_sessions_period' => $per_cycle_training_sessions->sum('duration') / 60,
+                'startups' => $per_cycle_startups->count(),
+                'screening_sessions_count' => $per_cycle_screenings,
+                'final_screening_count' => $per_cycle_final_screenings,
+            ];
+        }
+
+        // Overall aggregates (no cycle filter)
         $data['training_sessions_count'] = $training_sessions->count();
         $data['training_sessions'] = $training_sessions->get();
-        $data['training_sessions_period'] = $training_sessions->sum('duration')/60;
-        $data['mentorRequests_count']  = $mentorRequests->count();
-        $data['mentorships_period']= $mentorRequests->sum('period')/60;
-        $data['mentorship_attendance_rate']= $mentorRequests->count()?($mentorRequests->sum('done')/$mentorRequests->count())*100:0;
-        $data['cycle']=$cycle;
-        $data['cycles']=$cycles;
-        $data['steps']=$steps;
-        $data['startups']=$startups->count();
-        $data['screening_sessions_count']=$screenings;
-        $data['final_screening_count']=$final_screenings;
+        $data['training_sessions_period'] = $training_sessions->sum('duration') / 60;
+        $data['mentorRequests_count'] = $mentorRequests->count();
+        $data['mentorships_period'] = $mentorRequests->sum('period') / 60;
+        $data['mentorship_attendance_rate'] = $mentorRequests->count() ? ($mentorRequests->sum('done') / $mentorRequests->count()) * 100 : 0;
+
+        // Pass through references
+        $data['cycle'] = $cycle; // kept for compatibility
+        $data['cycles'] = $cycles; // all cycles
+        $data['cycles_kpis'] = $cycles_kpis; // new: per-cycle KPI data
+        $data['steps'] = $steps;
+        $data['startups'] = $startups->count();
+        $data['screening_sessions_count'] = $screenings;
+        $data['final_screening_count'] = $final_screenings;
+
+        // Group overall KPIs for Blade looping
+        $data['kpiData'] = [
+            [ 'value' => $data['startups'] ?? 0, 'label' => 'Subscribed_Startups', 'icon' => 'building', 'color' => 'primary' ],
+            [ 'value' => $data['mentors_count'] ?? 0, 'label' => 'Enrolled_Mentors', 'icon' => 'school', 'color' => 'warning' ],
+            [ 'value' => $data['mentorRequests_count'] ?? 0, 'label' => 'Mentorship_Requests', 'icon' => 'book', 'color' => 'success' ],
+            [ 'value' => $data['mentorships_period'] ?? 0, 'label' => 'Mentorship_Requests_Duration', 'icon' => 'clock', 'color' => 'danger' ],
+            [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
+            [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
+            [ 'value' => $data['training_sessions_period'] ?? 0, 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary' ],
+            [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'First_Screening', 'icon' => 'scale', 'color' => 'success' ],
+            [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
+        ];
 
         return $data;
     }

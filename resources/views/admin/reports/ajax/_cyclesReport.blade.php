@@ -1,472 +1,114 @@
-<div class="col-md-12">
-  <!-- users view card details start -->
-  <div class="card">
-    <div class="card-header border-bottom">
-      <h4 class="card-title d-flex align-items-center mb-3">
-        <i class='ti ti-briefcase ti-28px'></i> 
-        <span class="mx-2">{{ $cycle->title }}</span>
-      </h4>
-      <span>
-        {{ __('dashboard.start from') . ': ' . $cycle->start_format . ' ' . __('dashboard.to') . ': ' . $cycle->end_format }}
-      </span>
-
-      <div class="d-flex align-items-center mt-2">
-        <div class="media-left mr-50">
-          <img 
-            src="{{ $cycle->organization->image_url }}"
-            alt="avatar"
-            class="rounded-circle"
-            height="40"
-            width="40"
-          />
+<div class="col-12 mt-6">
+  <div class="row justify-content-center mb-8">
+    @foreach($kpiData as $key => $item)
+      <div class="col-sm-6 col-md-4 col-lg-2 mb-4">
+        <div class="card card-border-shadow-{{ $item['color'] }} h-100">
+        <div class="card-body py-2" style="display: grid; place-items: center;">
+            <div class="d-flex align-items-center mb-2">
+              <div class="avatar me-4">
+                <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
+                  <i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
+                </span>
+              </div>
+              <h5 class="mb-0">{{ $item['value'] }}{{ $key == 3 || $key == 6 ? ' H' : '' }}{{ $key == 4 ? ' %' : '' }}</h5>
+            </div>
+            <small class="text-center">{{ __('admin.' . $item['label']) }}</small>
+          </div>
         </div>
-        <span class="mx-2">
-          {{ $cycle->organization->name }}
-        </span>
       </div>
-    </div>
+    @endforeach
   </div>
-  <!-- users view card details ends -->
 </div>
 
 <div class="col-12 mt-6">
-  <div class="row g-6">
-  <a href="{{ route('users.view_companies', ['programFilter' => $cycle->id]) }}" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-primary">
-                <i class="ti ti-building ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $startups }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Subscribe Startups in Cycle') }}</p>
-        </div>
-      </div>
-    </a>
-
-  <a href="{{ route('mentors.list', ['enrolledInProgramFilter' => 1, 'programFilter' => $cycle->id]) }}" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-warning h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-warning">
-                <i class="ti ti-school ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $mentors_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('cycles.Mentors_Enrolled_In_Programs') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-success h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="ti ti-book ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $mentorRequests_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Mentorship requests') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-danger h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-danger">
-                <i class="ti ti-clock ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $mentorships_period }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Mentorship requests Duration') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-secondary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-secondary">
-                <i class="ti ti-browser ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ (int) $mentorship_attendance_rate }} %</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Company Attendance Rate') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="#" class="col-lg-4 col-sm-6 scroll-to-table">
-      <div class="card card-border-shadow-warning h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-warning">
-                <i class="ti ti-user-screen ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $training_sessions_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Training sessions') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="#" class="col-lg-4 col-sm-6 scroll-to-table">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-primary">
-                <i class="ti ti-clock ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $training_sessions_period }}</h4>
-          </div>
-          <p class="mb-1">{{ __('admin.Training sessions Duration') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/screening/results" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-success h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="ti ti-rocket ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $screening_sessions_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('dashboard.First screening') }}</p>
-        </div>
-      </div>
-    </a>
-
-    <a href="/dashboard/final/results" class="col-lg-4 col-sm-6">
-      <div class="card card-border-shadow-primary h-100">
-        <div class="card-body" style="display: grid; place-items: center;">
-          <div class="d-flex align-items-center mb-2">
-            <div class="avatar me-4">
-              <span class="avatar-initial rounded bg-label-primary">
-                <i class="ti ti-telescope ti-28px"></i>
-              </span>
-            </div>
-            <h4 class="mb-0">{{ $final_screening_count }}</h4>
-          </div>
-          <p class="mb-1">{{ __('dashboard.Final screening') }}</p>
-        </div>
-      </div>
-    </a>
-  </div>
-</div>
-
-<div class="card border">
-  <!-- Heading & Actions -->
-  <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
-    <h5 class="card-title">{{ __('admin.Training sessions') }}</h5>
-    <div class="d-flex align-items-center gap-3">
-      <div class="btn-group">
-        <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
-        </button>
-        <ul class="dropdown-menu">
-          @foreach(['csv', 'excel'] as $key => $option)
-            <li>
-              <a class="dropdown-item text-uppercase" href="javascript:void(0)" onclick="exportTraining('{{$option}}')">
-                {{$option}}
-              </a>
-            </li>
-          @endforeach
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="card-body">
-    <!-- Table Filter -->
-    <div class="row d-flex justify-content-end mb-2" id="tblTraining-filters">
-      <div class="col-12 col-md-2">
-        <div class="from-group mb-2 mb-md-0">
-          <select class="form-select form-select-sm" id="type-filter">
-            <option value="" selected>{{ __('cycles.Select_Training_Type') }}</option>
-            @foreach(['Online_Training', 'Online_Session', 'Offline_Session'] as $type)
-              <option value="{{ $type }}">{{ __('cycles.'.$type) }}</option>
+  <div class="card border">
+    <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
+      <h5 class="card-title mb-3 mb-md-0">{{ $l == 'en' ? 'Programs Overview' : 'نظرة عامة على البرامج' }}</h5>
+      <div class="d-flex align-items-center gap-3">
+        <div class="btn-group">
+          <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+          </button>
+          <ul class="dropdown-menu">
+            @foreach(['csv', 'excel'] as $option)
+              <li>
+                <a class="dropdown-item text-uppercase" href="javascript:void(0)" onclick="exportCyclesKpi('{{$option}}')">
+                  {{$option}}
+                </a>
+              </li>
             @endforeach
-          </select>
-        </div>
-      </div>
-      <div class="col-12 col-md-3">
-        <div class="from-group mb-2 mb-md-0">
-          <select class="form-select form-select-sm" id="cycle-filter">
-            <option value="" selected>{{ __('cycles.Select_Cycle') }}</option>
-            @foreach($cycles as $cycle)
-              <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
-            @endforeach
-          </select>
-        </div>
-      </div>
-      <div class="col-12 col-md-3">
-        <div class="from-group mb-2 mb-md-0">
-          <select class="form-select form-select-sm" id="step-filter">
-            <option value="" selected>{{ __('cycles.Select_Step') }}</option>
-            @foreach ($steps as $step)
-              <option value="{{ $step->id }}">{{ $step->title }}
-            @endforeach
-          </select>
-        </div>
-      </div>
-      <div class="col-12 col-md-2">
-        <div class="from-group mb-2 mb-md-0">
-          <input 
-            type="text" 
-            id="start-date-filter"
-            class="form-control form-control-sm datepicker"
-            placeholder="{{ __('cycles.Start_Date') }}"
-          />
-        </div>
-      </div>
-      <div class="col-12 col-md-2">
-        <div class="from-group mb-2 mb-md-0">
-          <input 
-            type="text" 
-            id="end-date-filter" 
-            class="form-control form-control-sm datepicker"
-            placeholder="{{ __('cycles.End_Date') }}"
-          />
+          </ul>
         </div>
       </div>
     </div>
-
-    <!-- Table Data -->
-    <div id="trainingTableSection">
-    <div class="table-responsive">
-      <table class="table table-hover" id="tblTraining">
-        <thead class="table-light">
-          <tr>
-            <th>{{ __('cycles.Title') }}</th>
-            <th>{{ __('cycles.Type') }}</th>
-            <th>{{ __('cycles.Program') }}</th>
-            <th>{{ __('cycles.Training_Step') }}</th>
-            <th>{{ __('cycles.Date_Time') }}</th>
-            <th>{{ __('cycles.Duration') }}</th>
-            <th>{{ __('cycles.details') }}</th>
-            <th>{{ __('cycles.Actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach ($training_sessions as $session)
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover" id="tblCycleKPIs">
+          <thead class="table-light">
             <tr>
-              {{-- Title --}}
-              <td><small class="text-nowrap">{{ $session->title }}</small></td>
-
-              {{-- Type (badge) --}}
-              <td>
-                <small class="badge bg-label-{{ $session->type == 'offline' ? 'primary' : ($session->type == 'sessions' ? 'info' : 'success') }}">
-                  {{ $session->type == 'offline' ? __('cycles.Offline_Session') : ($session->type == 'sessions' ? __('cycles.Online_Session') : __('cycles.Online_Training')) }}
-                </small>
-              </td>
-
-              {{-- Program --}}
-              <td><small class="text-nowrap">{{ $session->step->cycle->title }}</small></td>
-
-              {{-- Training Step --}}
-              <td><small class="text-nowrap">{{ $session->step->title }}</small></td>
-
-              {{-- Date & Time --}}
-              <td>
-                <small class="text-nowrap">
-                  @php
-                    $startDate = FormatDate($session->datetime, 'Y-m-d');
-                    $endDate   = $session->enddatetime ? FormatDate($session->enddatetime, 'Y-m-d') : null;
-                    $startTime = FormatDate($session->datetime, 'H:i:s');
-                    $endTime   = $session->enddatetime ? FormatDate($session->enddatetime, 'H:i:s') : null;
-                  @endphp
-
-                  {{-- Show dates --}}
-                  @if($endDate && $endDate !== $startDate)
-                    {{ $startDate }} - {{ $endDate }}
-                  @else
-                    {{ $startDate }}
-                  @endif
-                </small>
-                <br>
-                {{-- Show times --}}
-                <small>
-                  @if($endTime && $endTime !== $startTime)
-                    {{ $startTime }} - {{ $endTime }}
-                  @else
-                    {{ $startTime }}
-                  @endif
-                </small>
-              </td>
-              @php
-                    $hours = floor($session->duration / 60);
-                    $minutes = $session->duration % 60;
-               @endphp
-                <td>
-                    {{ sprintf('%02d:%02d', $hours, $minutes) }}
-                </td>
-
-              {{-- Details (Trainer + Address if offline) --}}
-              <td>
-                @if($session->type == "offline" || $session->type == "sessions")
-                  <div class="text-nowrap">{{ __('cycles.trainer name') }}:</div> {{ $session->trainer_name }}<br>
-                  @if(!empty($session->training_Address))
-                    <small class="text-nowrap">{{ __('cycles.Training_Address') }}:</small> {{ $session->training_Address }}
-                  @endif
-                 @endif
-              </td>
-
-              {{-- Actions --}}
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  {{-- Online session (Zoom) --}}
-                  @if ($session->type == 'sessions')
-                    @if ($session->start_url)
-                      <a href="{{ $session->start_url }}" target="_blank" class="btn btn-icon btn-label-success rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Start_Meeting') }}">
-                        <i class="ti ti-brand-zoom"></i>
-                      </a>
-                    @endif
-                    @if ($session->join_url)
-                      <a href="{{ $session->join_url }}" target="_blank" class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.Join_Meeting') }}">
-                        <i class="ti ti-user"></i>
-                      </a>
-                    @endif
-                    @if(!empty($session->zoom_passcode))
-                      <button data-passcode="{{ $session->zoom_passcode }}" class="btn btn-icon btn-label-warning rounded-circle show-passcode">
-                        <i class="ti ti-key"></i>
-                      </button>
-                    @endif
-                    <button data-bs-toggle="modal" data-bs-target="#reportModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
-                      <i class="ti ti-file-text"></i>
-                    </button>
-                  @endif
-                  {{-- Offline session --}}
-                  @if ($session->type == 'offline')
-                    @if ($session->QrCode)
-                      <button data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
-                        <i class="ti ti-qrcode"></i>
-                      </button>
-                    @else
-                      <button onclick="createQrCode({{ $session->id }})" class="btn btn-icon btn-label-success rounded-circle">
-                        <i class="ti ti-qrcode"></i>
-                      </button>
-                    @endif
-
-                    @if ($session->training_location)
-                      <a href="{{ $session->training_location }}" class="btn btn-icon btn-label-primary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Location') }}">
-                        <i class="ti ti-map-pin"></i>
-                      </a>
-                    @endif
-
-                    <a href="/dashboard/training/Attendance-offline/{{ $session->id }}" class="btn btn-icon btn-label-dark rounded-circle">
-                      <i class="ti ti-calendar-check"></i>
-                    </a>
-                  @endif
-
-                  {{-- Online training --}}
-                  @if ($session->type == 'online')
-                    <a href="/dashboard/training/all/{{ $session->training_Address }}">
-                      <button class="btn btn-icon btn-label-dark rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('cycles.View_Course') }}">
-                        <i class="ti ti-book"></i>
-                      </button>
-                    </a>
-                  @endif
-                </div>
-              </td>
+              <th><small>{{ __('admin.Program') }}</small></th>
+              <th><small>{{ __('admin.Organization') }}</small></th>
+              <th><small>{{ __('admin.Start_Date') }}</small></th>
+              <th><small>{{ __('admin.End_Date') }}</small></th>
+              <th><small>{{ __('admin.Subscribed_Startups') }}</small></th>
+              <th><small>{{ __('admin.Enrolled_Mentors') }}</small></th>
+              <th><small>{{ __('admin.Mentorship_Requests') }}</small></th>
+              <th><small>{{ __('admin.Mentorship_Requests_Duration') }} (h)</small></th>
+              <th><small>{{ __('admin.Startups_Attendance_Rate') }}</small></th>
+              <th><small>{{ __('admin.Training_Sessions') }}</small></th>
+              <th><small>{{ __('admin.Training_Sessions_Duration') }} (h)</small></th>
+              <th><small>{{ __('admin.First_Screening') }}</small></th>
+              <th><small>{{ __('admin.Final_Screening') }}</small></th>
+              <th><small>{{ __('admin.Actions') }}</small></th>
             </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @foreach($cycles as $_cycle)
+              @php($kpi = $cycles_kpis[$_cycle->id] ?? null)
+              @if($kpi)
+                <tr>
+                  <td><small>{{ $_cycle->title }}</small></td>
+                  <td><small>{{ $_cycle->organization->name ?? '-' }}</small></td>
+                  <td><small>{{ $_cycle->start_format ?? '' }}</small></td>
+                  <td><small>{{ $_cycle->end_format ?? '' }}</small></td>
+                  <td><small>{{ $kpi['startups'] }}</small></td>
+                  <td><small>{{ $kpi['mentors_count'] }}</small></td>
+                  <td><small>{{ $kpi['mentorRequests_count'] }}</small></td>
+                  <td><small>{{ number_format($kpi['mentorships_period'], 1) }}</small></td>
+                  <td><small>{{ (int) ($kpi['mentorship_attendance_rate'] ?? 0) }}%</small></td>
+                  <td><small>{{ $kpi['training_sessions_count'] }}</small></td>
+                  <td><small>{{ number_format($kpi['training_sessions_period'], 1) }}</small></td>
+                  <td><small>{{ $kpi['screening_sessions_count'] }}</small></td>
+                  <td><small>{{ $kpi['final_screening_count'] }}</small></td>
+                  <td>
+                    <a href="/dashboard/programlist/report/{{ $_cycle->id }}" class="btn btn-sm btn-primary">
+                      <i class="ti ti-eye me-1"></i>{{ __('admin.View_Report') }}
+                    </a>
+                  </td>
+                </tr>
+              @endif
+            @endforeach
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
   $(document).ready(function() {
-      // Scroll to training table section
-    $('.scroll-to-table').on('click', function (e) {
-    e.preventDefault();
-    $('html, body').animate({
-      scrollTop: $('#trainingTableSection').offset().top - 100 
-    }, 500);
-     });
-    // Handle filter card clicks
-    $('.filter-card').on('click', function() {
-      const filter = $(this).data('filter');
-      
-      // Reset all cards' active state
-      $('.filter-card').removeClass('border-primary');
-      
-      if (filter === 'reset') {
-        // Reset all filters
-        $('#type-filter, #cycle-filter, #step-filter').val('').trigger('change');
-        $('#start-date-filter, #end-date-filter').val('').trigger('change');
-      } else if (filter) {
-        // If this card has a filter value
-        if ($('#type-filter').val() === filter) {
-          // If current filter is already active, clear it
-          $('#type-filter').val('').trigger('change');
-          $(this).removeClass('border-primary');
-        } else {
-          // Apply new filter
-          $('#type-filter').val(filter).trigger('change');
-          $(this).addClass('border-primary');
-        }
-      }
-    });
-
-    // Initalize datepicker
-    $('.datepicker').flatpickr({
-      monthSelectorType: 'static',
-      allowInput: true,
-      onReady: function (selectedDates, dateStr, instance) {
-        let btn = document.createElement("button");
-        btn.type = "button";
-        btn.innerHTML = "Clear";
-        btn.classList.add("btn", "btn-sm", "btn-outline-secondary", "mt-1");
-        btn.addEventListener("click", function () {
-          instance.clear(); // <-- clear flatpickr value
-          instance.close();
-          $('#tblTraining').DataTable().draw(); // refresh filter
-        });
-        instance.calendarContainer.appendChild(btn);
-      }
-    });
-    
-    // Initalize date table
-    let trainingTable = $('#tblTraining').DataTable({
+    // Initialize DataTable for Per Program KPIs
+    let cyclesKpiTable = $('#tblCycleKPIs').DataTable({
+      responsive: true,
       pageLength: 10,
-      columnDefs: [{
-        orderable: false,
-        targets: [6]
-      }],
       order: [[0, 'asc']],
       language: {
-        @if ($l == 'ar')
-          sEmptyTable: "لا توجد جلسات تدريبية متاحة لهذا البرنامج",
+        @if (app()->getLocale() == 'ar')
+          sEmptyTable: "ليست هناك بيانات متاحة في الجدول",
           sLoadingRecords: "جارٍ التحميل...",
           sProcessing: "جارٍ التحميل...",
           sLengthMenu: "أظهر _MENU_ مدخلات",
-          sZeroRecords: "لا توجد جلسات تدريبية متاحة لهذا البرنامج" ,
+          sZeroRecords: "لم يعثر على أية سجلات",
           sInfo: "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
           sInfoEmpty: "يعرض 0 إلى 0 من أصل 0 سجل",
           sInfoFiltered: "(منتقاة من مجموع _MAX_ مُدخل)",
@@ -483,104 +125,214 @@
             sSortAscending: ": تفعيل لترتيب العمود تصاعدياً",
             sSortDescending: ": تفعيل لترتيب العمود تنازلياً"
           }
-          @else
-          sEmptyTable: "No Training Sessions Available For this Program",
-          sLoadingRecords: "Loading...",
-          sProcessing: "Processing...",
-          sLengthMenu: "Show _MENU_ entries",
-          sZeroRecords: "No Training Sessions Available For this Program",
         @endif
       },
       buttons: [
-        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `tblTraining_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
-        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `tblTraining_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5] } }
+        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Programs_KPI_${new Date().toISOString().slice(0, 10)}` },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Programs_KPI_${new Date().toISOString().slice(0, 10)}` }
       ]
     });
 
-    // ============ FILTER HANDLERS ============ //
+    // Build and inject filters
+    addFiltersRow();
 
-    // Type filter (column 1)
-    $('#type-filter').on('change', function () {
-      let val = this.value ? $('#type-filter option:selected').text().trim() : '';
-      trainingTable.column(1).search(val, true, false).draw();
-    });
+    // Build and inject filters in a dedicated row above the table
+    function addFiltersRow() {
+      const START_DATE_COL_IDX = 2; // Start Date column index
+      const END_DATE_COL_IDX = 3;   // End Date column index
+      
+      // Create filters container above the DataTable wrapper
+      const $tableWrapper = $('#tblCycleKPIs_wrapper');
+      if (!$tableWrapper.length) return;
 
-    // Cycle filter (column 2)
-    $('#cycle-filter').on('change', function () {
-      let val = this.value ? $('#cycle-filter option:selected').text().trim() : '';
-      trainingTable.column(2).search(val, true, false).draw();
-    });
+      // Create main filters row
+      const $filtersRow = $('<div/>', {
+        id: 'cycleFiltersRow',
+        class: 'row mb-3 align-items-end'
+      });
 
-    // Step filter (column 3)
-    $('#step-filter').on('change', function () {
-      let val = this.value ? $('#step-filter option:selected').text().trim() : '';
-      trainingTable.column(3).search(val, true, false).draw();
-    });
+      // Organization Filter Column
+      const $orgCol = $('<div/>', {
+        class: 'col-md-3'
+      });
+     
+      const $orgSelect = $('<select/>', {
+        id: 'orgFilterSelect',
+        class: 'form-select form-select-sm',
+        'aria-label': 'Organization filter'
+      });
+      $orgCol.append($orgSelect);
 
-    // Date range filter (column 4)
-    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-      let startDate = $('#start-date-filter').val();
-      let endDate   = $('#end-date-filter').val();
+      // Start Date Filter Column
+      const $startCol = $('<div/>', {
+        class: 'col-md-3'
+      });
+      const $startInput = $('<input/>', {
+        type: 'text',
+        id: 'startDateFilter',
+        class: 'form-control form-control-sm datepicker',
+        placeholder: "{{ __('admin.Start_Date') }}"
+      });
+      $startCol.append($startInput);
 
-      // Column 4 text (date/time)
-      let dateText = data[4] || "";
+      // End Date Filter Column
+      const $endCol = $('<div/>', {
+        class: 'col-md-3'
+      });
+     
+      const $endInput = $('<input/>', {
+        type: 'text',
+        id: 'endDateFilter',
+        class: 'form-control form-control-sm datepicker',
+        placeholder: "{{ __('admin.End_Date') }}"
+      });
+      $endCol.append($endInput);
 
-      // Extract first date (format: YYYY-MM-DD …)
-      let match = dateText.match(/\d{4}-\d{2}-\d{2}/);
-      if (!match) return true; // no valid date in cell → keep row
+      // Assemble the row
+      $filtersRow.append($orgCol, $startCol, $endCol);
+      
+      // Insert before the table wrapper
+      $tableWrapper.before($filtersRow);
 
-      let cellDateObj = new Date(match[0]);
+      // Initialize Organization Filter
+      initializeOrganizationFilter();
+      
+      // Initialize Date Pickers
+      initializeDatePickers();
 
-      // Convert filter inputs
-      let startOk = startDate ? new Date(startDate) <= cellDateObj : true;
-      let endOk   = endDate ? new Date(endDate) >= cellDateObj : true;
+      // Initialize Organization Filter
+      function initializeOrganizationFilter() {
+        const ORG_COL_IDX = 1; // Organization column index
+        const orgSet = new Set();
+        
+        // Collect unique organization names from rendered cells
+        cyclesKpiTable.column(ORG_COL_IDX).nodes().each(function(cell) {
+          const name = $(cell).text().trim();
+          if (name && name !== '-') orgSet.add(name);
+        });
 
-      return startOk && endOk;
-    });
+        const orgs = Array.from(orgSet).sort((a, b) => a.localeCompare(b));
+        const $orgSelect = $('#orgFilterSelect');
+        
+        if (orgs.length === 0) return;
 
-    // Redraw when date inputs change
-    $('#start-date-filter, #end-date-filter').on('change', function () {
-      trainingTable.draw();
-    });
+        // Populate organization dropdown
+        const allText = "{{ __('admin.All_Organizations') }}";
+        $orgSelect.append($('<option/>', { value: '' }).text(allText));
+        orgs.forEach(o => $orgSelect.append($('<option/>', { value: o }).text(o)));
 
-
-    // Global export training function
-    window.exportTraining = function (format) {
-      if (!trainingTable) {
-        releaseFailureAlert({ message: 'No data available to export' });
-        return;
+        // Hook up the filtering logic
+        $orgSelect.on('change', function() {
+          const val = this.value;
+          const escaped = $.fn.dataTable.util.escapeRegex(val);
+          cyclesKpiTable
+            .column(ORG_COL_IDX)
+            .search(val ? '^' + escaped + '$' : '', true, false)
+            .draw();
+        });
       }
-      try {
-        trainingTable.button(`.buttons-${format}`).trigger();
-      } catch (error) {
-        console.error('Export error:', error);
-        releaseFailureAlert({ message: 'Failed to export data. Please try again.' });
+
+      // Initialize Date Pickers
+      function initializeDatePickers() {
+        const START_DATE_COL_IDX = 2;
+        const END_DATE_COL_IDX = 3;
+
+        // Initialize datepicker
+        $('.datepicker').flatpickr({
+          monthSelectorType: 'static',
+          allowInput: true,
+          onChange: function(selectedDates) {
+            filterByDateRange();
+          },
+          onReady: function (selectedDates, dateStr, instance) {
+            let btn = document.createElement("button");
+            btn.type = "button";
+            btn.innerHTML = "Clear";
+            btn.classList.add("btn", "btn-sm", "btn-outline-secondary", "mt-1");
+            btn.addEventListener("click", function () {
+              instance.clear();
+              instance.close();
+              filterByDateRange();
+            });
+            instance.calendarContainer.appendChild(btn);
+          }
+        });
+
+        // Date range filtering function
+        function filterByDateRange() {
+          const startDate = $('#startDateFilter').val();
+          const endDate = $('#endDateFilter').val();
+
+          // Remove previous custom filter
+          $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(function(fn) {
+            return fn.toString().indexOf('tblCycleKPIs') === -1;
+          });
+          
+          if (startDate || endDate) {
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+              if (settings.nTable.id !== 'tblCycleKPIs') return true;
+              
+              const rowStartDate = data[START_DATE_COL_IDX] ? data[START_DATE_COL_IDX].replace(/<[^>]*>/g, '').trim() : '';
+              const rowEndDate = data[END_DATE_COL_IDX] ? data[END_DATE_COL_IDX].replace(/<[^>]*>/g, '').trim() : '';
+              
+              // Convert dates to comparable format (YYYY-MM-DD)
+              const parseDate = (dateStr) => {
+                if (!dateStr || dateStr === '-') return null;
+                const date = new Date(dateStr);
+                return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+              };
+              
+              const parsedRowStartDate = parseDate(rowStartDate);
+              const parsedRowEndDate = parseDate(rowEndDate);
+              
+              // Apply start date filter
+              if (startDate && parsedRowStartDate) {
+                if (parsedRowStartDate < startDate) return false;
+              }
+              
+              // Apply end date filter
+              if (endDate && parsedRowEndDate) {
+                if (parsedRowEndDate > endDate) return false;
+              }
+              
+              return true;
+            });
+          }
+          
+          cyclesKpiTable.draw();
+        }
+
+        // Clear all filters functionality
+        $('#clearAllFilters').on('click', function() {
+          // Clear date pickers
+          $('#startDateFilter, #endDateFilter').each(function() {
+            if (this._flatpickr) {
+              this._flatpickr.clear();
+            }
+          });
+          
+          // Clear organization filter
+          $('#orgFilterSelect').val('').trigger('change');
+          
+          // Remove custom date filters
+          $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(function(fn) {
+            return fn.toString().indexOf('tblCycleKPIs') === -1;
+          });
+          
+          cyclesKpiTable.draw();
+        });
       }
     }
 
-    window.createQrCode = function (training) {
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      $.ajax({
-        type: "POST",
-        url: "/dashboard/training/QrCode-offline",
-        data: {
-          "id": training,
-        },
-        success: function(response) {
-          if (response) {
-            alert(response.massege);
-            location.reload();
-          }
-        },
-        error: function(error) {
-          console.log(error);
-          alert("Error Occurred, Try again!");
-        }
-      });
+
+    // Export helper
+    window.exportCyclesKpi = function(format) {
+      if (!cyclesKpiTable) return;
+      try {
+        cyclesKpiTable.button(`.buttons-${format}`).trigger();
+      } catch (e) {
+        console.error('Export error:', e);
+      }
     }
   });
 </script>
