@@ -103,6 +103,43 @@
   transition: all 0.3s ease-in-out, transform 0.3s ease-in-out;
   transform: scale(1.2);
 }
+
+/* Milestones Carousel Styles */
+.milestone-card {
+  min-width: 0; /* Ensures flex items can shrink */
+}
+
+#milestonesContainer {
+  transition: transform 0.3s ease;
+}
+
+/* Responsive adjustments for milestones */
+@media (max-width: 991px) {
+  .milestone-card {
+    width: 50% !important; /* Show 2 cards on tablet */
+  }
+}
+
+@media (max-width: 767px) {
+  .milestone-card {
+    width: 100% !important; /* Show 1 card on mobile */
+  }
+}
+
+/* Navigation button hover effects */
+#milestonesPrev:not(:disabled):hover,
+#milestonesNext:not(:disabled):hover {
+  background-color: var(--bs-primary);
+  color: white !important;
+  border-color: var(--bs-primary);
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+#milestonesPrev:not(:disabled):hover i,
+#milestonesNext:not(:disabled):hover i {
+  color: white !important;
+}
 </style>
 @stop
 
@@ -336,6 +373,149 @@
     </section>
 
     @include('admin.clients.startup.partials._working_team')
+
+    @if($company->milestones && $company->count() > 0)
+    <section class="mt-6">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  {{-- <i class="ti ti-target fs-3 me-3"></i> --}}
+                  <h5 class="mb-0">{{ $l == 'en' ? 'Milestones' : 'الإنجازات' }}</h5>
+                  <span class="badge bg-label-primary ms-3">{{ count($company->milestones) }}</span>
+                </div>
+                @if(count($company->milestones) > 3)
+                <div class="d-flex align-items-center gap-2">
+                  <button id="milestonesPrev" class="btn btn-icon btn-outline-secondary shadow-xs rounded-circle" disabled>
+                    <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-sm"></i>
+                  </button>
+                  <button id="milestonesNext" class="btn btn-icon btn-outline-secondary shadow-xs rounded-circle">
+                    <i class="ti ti-chevron-{{ $l == 'en' ? 'right' : 'left' }} ti-sm"></i>
+                  </button>
+                </div>
+                @endif
+              </div>
+              
+              <div class="position-relative">
+                <div id="milestonesCarousel" class="overflow-hidden">
+                  <div id="milestonesContainer" class="d-flex transition-all my-2" style="transform: translateX(0px); transition: transform 0.3s ease;">
+                    @foreach($company->milestones as $index => $milestone)
+                    <div class="milestone-card flex-shrink-0 pe-4" style="width: 33.333%;">
+                      <div class="card h-100 border shadow-xs">
+                        <div class="card-body d-flex flex-column">
+                          <!-- Milestone Header -->
+                          <div class="d-flex align-items-center mb-3">
+                            {{-- <div class="rounded-circle d-flex flex-shrink-0 align-items-center justify-content-center me-3 {{ $milestone->completion_percentage >= 100 ? 'bg-success' : 'bg-primary' }} text-white" 
+                                 style="width: 35px; height: 35px; font-size: 14px; font-weight: bold;">
+                              @if($milestone->completion_percentage >= 100)
+                                ✓
+                              @else
+                                {{ $index + 1 }}
+                              @endif
+                            </div> --}}
+                            <div class="flex-grow-1">
+                              <h6 class="mb-0 fw-semibold">{{ $milestone->name }}</h6>
+                              {{-- <small class="text-muted">
+                                {{ $l == 'ar' ? 'إنجاز' : 'Milestone' }} {{ $index + 1 }}
+                              </small> --}}
+                            </div>
+                          </div>
+                          
+                          <!-- Milestone Description -->
+                          <p class="text-muted mb-3 flex-grow-1" style="font-size: 0.9rem;">
+                            {{ $milestone->description }}
+                          </p>
+                          
+                          <!-- Progress Bar -->
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                              <small class="text-muted">{{ $l == 'ar' ? 'نسبة الإكمال' : 'Completion' }}</small>
+                              <small class="fw-semibold {{ $milestone->completion_percentage >= 100 ? 'text-success' : 'text-primary' }}">
+                                {{ $milestone->completion_percentage ?? 0 }}%
+                              </small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                              <div class="progress-bar {{ $milestone->completion_percentage >= 100 ? 'bg-success' : 'bg-primary' }}" 
+                                   role="progressbar" 
+                                   style="width: {{ $milestone->completion_percentage ?? 0 }}%"
+                                   aria-valuenow="{{ $milestone->completion_percentage ?? 0 }}" 
+                                   aria-valuemin="0" 
+                                   aria-valuemax="100">
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Supporting Documents -->
+                          @if($milestone->documents)
+                            @php
+                              $documents = is_string($milestone->documents) ? json_decode($milestone->documents, true) : $milestone->documents;
+                              $documents = is_array($documents) ? $documents : [];
+                            @endphp
+                            @if(count($documents) > 0)
+                            <div class="mt-auto">
+                              <div class="d-flex align-items-center justify-content-between mb-2">
+                                <small class="text-muted">{{ $l == 'ar' ? 'المستندات' : 'Documents' }}</small>
+                                <span class="badge bg-label-secondary">{{ count($documents) }}</span>
+                              </div>
+                              <div class="d-flex flex-wrap gap-1">
+                                @foreach(array_slice($documents, 0, 3) as $doc)
+                                  <a href="{{ $doc['url'] ?? '#' }}" 
+                                     target="_blank" 
+                                     class="btn btn-xs btn-outline-primary p-1" 
+                                     title="{{ $doc['name'] ?? 'Document' }}">
+                                    <i class="ti ti-file-text" style="font-size: 12px;"></i>
+                                  </a>
+                                @endforeach
+                                @if(count($documents) > 3)
+                                  <span class="btn btn-xs btn-outline-secondary p-1" title="{{ count($documents) - 3 }} more documents">
+                                    +{{ count($documents) - 3 }}
+                                  </span>
+                                @endif
+                              </div>
+                            </div>
+                            @endif
+                          @endif
+                          
+                          <!-- Milestone Status Badge -->
+                          <div class="mt-2">
+                            {{-- @if($milestone->completion_percentage >= 100)
+                              <span class="badge bg-label-success">
+                                <i class="ti ti-check me-1"></i>
+                                {{ $l == 'ar' ? 'مكتمل' : 'Completed' }}
+                              </span>
+                            @elseif($milestone->completion_percentage > 0)
+                              <span class="badge bg-label-warning">
+                                <i class="ti ti-clock me-1"></i>
+                                {{ $l == 'ar' ? 'قيد التنفيذ' : 'In Progress' }}
+                              </span>
+                            @else
+                              <span class="badge bg-label-secondary">
+                                <i class="ti ti-calendar me-1"></i>
+                                {{ $l == 'ar' ? 'مخطط' : 'Planned' }}
+                              </span>
+                            @endif --}}
+                            
+                            @if($milestone->created_at)
+                              <small class="text-muted d-block mt-1">
+                                {{ $l == 'ar' ? 'أضيف في' : 'Added on' }} {{ $milestone->created_at->format('M Y') }}
+                              </small>
+                            @endif
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    @endforeach
+                  </div>
+                </div>
+              </div>            
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    @endif
 
     <section>
       <div class="row">
@@ -624,58 +804,6 @@
                   </a>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        @endif
-        @if (count($Achieved_Milestones) > 0)
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">{{ __('admin.Achieved_Milestones') }}
-            </h5>
-            <div class="d-flex flex-column gap-2">
-              @foreach ($Achieved_Milestones as $key => $Achieved)
-              <div class="card" style="height: 132px;">
-                <div class="card-body">
-                  <h6 class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
-                    <div style="width: 32px; height: 32px;" class="rounded-circle bg-primary text-white d-flex 
-                      justify-content-center align-items-center me-2">
-                      {{ $key + 1 }}
-                    </div>
-                    {{ $Achieved->name }}
-                  </h6>
-                  <p class="text-muted line-clamp-2 fs-6">
-                    {{ $Achieved->description }}
-                  </p>
-                </div>
-              </div>
-              @endforeach
-            </div>
-          </div>
-        </div>
-        @endif
-        @if (count($Planned_Milestones) > 0)
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">{{ __('admin.Planned_Milestones') }}
-            </h5>
-            <div class="d-flex flex-column gap-2">
-              @foreach ($Planned_Milestones as $key => $Planned)
-              <div class="card" style="height: 132px;">
-                <div class="card-body">
-                  <h6 class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
-                    <div style="width: 32px; height: 32px;" class="rounded-circle bg-primary text-white d-flex 
-                      justify-content-center align-items-center me-2">
-                      {{ $key + 1 }}
-                    </div>
-                    {{ $Planned->name }}
-                  </h6>
-                  <p class="text-muted line-clamp-2 fs-6">
-                    {{ $Planned->description }}
-                  </p>
-                </div>
-              </div>
-              @endforeach
             </div>
           </div>
         </div>
@@ -1571,4 +1699,128 @@
     </script> --}}
 
   @endif
+
+  <script>
+    // Milestones Carousel Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const milestonesContainer = document.getElementById('milestonesContainer');
+      const prevBtn = document.getElementById('milestonesPrev');
+      const nextBtn = document.getElementById('milestonesNext');
+      
+      if (!milestonesContainer || !prevBtn || !nextBtn) return;
+      
+      const cards = document.querySelectorAll('.milestone-card');
+      const totalCards = cards.length;
+      let currentIndex = 0;
+      
+      function getCardsPerView() {
+        if (window.innerWidth <= 767) return 1; // Mobile
+        if (window.innerWidth <= 991) return 2; // Tablet
+        return 3; // Desktop
+      }
+      
+      function updateCarousel() {
+        const cardsPerView = getCardsPerView();
+        const cardWidth = 100 / cardsPerView;
+        const maxIndex = Math.max(0, totalCards - cardsPerView);
+        
+        // Adjust currentIndex if it exceeds new maxIndex
+        if (currentIndex > maxIndex) {
+          currentIndex = maxIndex;
+        }
+        
+        const translateX = -(currentIndex * cardWidth);
+        milestonesContainer.style.transform = `translateX(${translateX}%)`;
+        
+        // Update card widths for responsive behavior
+        cards.forEach(card => {
+          if (cardsPerView === 1) {
+            card.style.width = '100%';
+          } else if (cardsPerView === 2) {
+            card.style.width = '50%';
+          } else {
+            card.style.width = '33.333%';
+          }
+        });
+        
+        // Update button states
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= maxIndex || totalCards <= cardsPerView;
+        
+        // Update button styles
+        prevBtn.style.opacity = currentIndex === 0 ? '0.5' : '1';
+        nextBtn.style.opacity = (currentIndex >= maxIndex || totalCards <= cardsPerView) ? '0.5' : '1';
+        
+        // Hide navigation if not needed
+        const navButtons = document.querySelector('.d-flex.align-items-center.gap-2');
+        if (navButtons) {
+          navButtons.style.display = totalCards <= cardsPerView ? 'none' : 'flex';
+        }
+      }
+      
+      // Event listeners
+      prevBtn.addEventListener('click', function() {
+        if (currentIndex > 0) {
+          currentIndex--;
+          updateCarousel();
+        }
+      });
+      
+      nextBtn.addEventListener('click', function() {
+        const cardsPerView = getCardsPerView();
+        const maxIndex = Math.max(0, totalCards - cardsPerView);
+        if (currentIndex < maxIndex) {
+          currentIndex++;
+          updateCarousel();
+        }
+      });
+      
+      // Handle responsive behavior
+      function handleResize() {
+        updateCarousel();
+      }
+      
+      window.addEventListener('resize', handleResize);
+      
+      // Initialize carousel
+      updateCarousel();
+      
+      // Touch/swipe support for mobile
+      let startX = 0;
+      let isDragging = false;
+      
+      milestonesContainer.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+      });
+      
+      milestonesContainer.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+      });
+      
+      milestonesContainer.addEventListener('touchend', function(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const endX = e.changedTouches[0].clientX;
+        const diffX = startX - endX;
+        const cardsPerView = getCardsPerView();
+        const maxIndex = Math.max(0, totalCards - cardsPerView);
+        
+        // Minimum swipe distance
+        if (Math.abs(diffX) > 50) {
+          if (diffX > 0 && currentIndex < maxIndex) {
+            // Swipe left - next
+            currentIndex++;
+            updateCarousel();
+          } else if (diffX < 0 && currentIndex > 0) {
+            // Swipe right - previous
+            currentIndex--;
+            updateCarousel();
+          }
+        }
+      });
+    });
+  </script>
 @stop

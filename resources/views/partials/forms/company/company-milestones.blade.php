@@ -403,6 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
       
       documents.forEach(doc => {
         const listItem = document.createElement('li');
+        listItem.className = 'mb-2';
         listItem.innerHTML = `
           <a href="${doc.url}" target="_blank" class="d-flex align-items-center gap-2 bg-label-secondary rounded p-2">
             <i class="${getFileIcon(doc.name)}"></i>
