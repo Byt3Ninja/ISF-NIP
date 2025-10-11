@@ -1,5 +1,5 @@
 <a 
-  href="#"
+  href="/dashboard/hackathon/details/{{ $hackathon['id'] }}"
   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4"
 >
   <div>

@@ -171,6 +171,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');
     Route::delete('hackathon/deleteTodoList/{id}', 'TodoListController@destroy')->name('hackathon.deleteTodoList');
 
+    Route::get('viewHackathonSummary/{id}', 'HackathonController@hackathon_Summary')->name('hackathon.hackathon_Summary');
+
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
     // Route::get('hackathon/manage', [HackathonController::class, 'manage']);
