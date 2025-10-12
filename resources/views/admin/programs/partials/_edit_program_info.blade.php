@@ -1,4 +1,95 @@
 <div class="row">
+
+  @if ($_user->hasRole('organizationManager'))
+  <input type="hidden" name="organization_id2" value="{{ $_user->organization_id }}">
+  @endif
+
+  <!-- Organizations -->
+  @if (!$_user->hasRole('organizationManager'))
+  <div class="col-md-6">
+    <div class="form-group mb-4">
+      <label for="organization" class="form-label fs-6 fw-semibold">
+        {{ __('cycles.Select_Organization') }}
+      </label>
+      <select 
+        class="form-select select2" 
+        id="organization" 
+        name="organization_id2"
+        data-placeholder="{{ __('cycles.Select_Organization') }}"
+        value="{{ old('organization_id2', isset($ccycle) ? $ccycle->organization_id : '') }}"
+      >
+        <option value="">{{ __('cycles.Select_Organization') }}</option>
+        @foreach (\App\Organization::all() as $org)
+        @php if( $_user->hasRole('organizationManager') && $org->id != $_user->organization_id ) { continue; } @endphp
+        <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+        @endforeach
+      </select>
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+  @endif
+
+  <!-- Program Title -->
+  <div class="col-md-6">
+    <div class="form-group mb-4">
+      <label for="program-title" class="form-label fs-6 fw-semibold">
+        {{ __('cycles.Cycle title') }}
+      </label>
+      {{-- <input type="hidden" name="cycleid" id="cycleid"> --}}
+      <input 
+        type="text" 
+        class="form-control" 
+        id="title" 
+        name="title" 
+        placeholder="{{ __('cycles.Cycle title') }}"
+        oninput="this.value = this.value.trimStart()" 
+      />
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+
+  <!-- Program Type -->
+  <div class="col-md-6">
+    <div class="form-group mb-4">
+      <label class="form-label fs-6 fw-semibold" for="program_type">{{ __('admin.Program_Type') }}</label>
+      @php
+      $selectedType = old('program_type', isset($ccycle) ? $ccycle->type : '');
+      @endphp
+      <select 
+        class="form-select select2"
+        name="program_type" 
+        id="program_type" 
+        data-placeholder="{{ $l == 'en' ? 'Select Program Type' : 'اختر نوع البرنامج' }}"
+        {{ isset($id) ? 'disabled' : '' }}
+      >
+        <option value="">{{ $l == 'en' ? 'Select Program Type' : 'اختر نوع البرنامج' }}</option>
+        @foreach(\App\Cycle::programTypes() as $value => $label)
+        <option value="{{ $value }}" {{ $selectedType==$value ? 'selected' : '' }}>
+          {{ $label }}
+        </option>
+        @endforeach
+      </select>
+      <div class="invalid-feedback"></div>
+
+      @if(isset($ccycle) && $ccycle->exists)
+        <input type="hidden" name="program_type" value="{{ $ccycle->type }}">
+      @endif
+    </div>
+  </div>
+
+  <!-- Date Range Picker -->
+  <div class="col-md-6">
+    <div class="form-group mb-4">
+      <label for="date-range-picker" class="form-label fs-6 fw-semibold">
+        {{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:
+      </label>
+      <input type="hidden" name="start" id="start" />
+      <input type="hidden" name="end" id="end" />
+      <input type="text" name="date_range" id="date-range-picker" class="form-control" placeholder="{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}" />
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+
   <!-- Program Logo -->
   <div class="col-md-6">
     <div class="form-group mb-4">
@@ -34,96 +125,23 @@
     </div>
   </div>
 
-  @php
-    $user = auth()->user();
-  @endphp
-  @if ($user->hasRole('organizationManager'))
-  <input type="hidden" name="organization_id2" value="{{ $user->organization_id }}">
-  @endif
-
-  <!-- Organizations -->
-  @if (!$user->hasRole('organizationManager'))
+  <!-- Program Step Type -->
   <div class="col-md-6">
     <div class="form-group mb-4">
-      <label for="organization" class="form-label fs-6 fw-semibold">
-        {{ __('cycles.Select_Organization') }}
-      </label>
-      <select 
-        class="form-select select2" 
-        id="organization" 
-        name="organization_id2"
-        data-placeholder="{{ __('cycles.Select_Organization') }}"
-        value="{{ old('organization_id2', isset($ccycle) ? $ccycle->organization_id : '') }}"
-      >
-        <option value="">{{ __('cycles.Select_Organization') }}</option>
-        @foreach (\App\Organization::all() as $org)
-        @php if( $user->hasRole('organizationManager') && $org->id != $user->organization_id ) { continue; } @endphp
-        <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
-        @endforeach
-      </select>
-      <div class="invalid-feedback"></div>
-    </div>
-  </div>
-  @endif
-
-  <!-- Program Type -->
-  <div class="col-md-6">
-    <div class="form-group mb-4">
-      <label class="form-label fs-6 fw-semibold" for="program_type">{{ __('admin.Program_Type') }}</label>
-      @php
-      $selectedType = old('program_type', isset($ccycle) ? $ccycle->type : '');
-      @endphp
+      <label class="form-label fs-6 fw-semibold" for="program_step_type">{{ __('cycles.Program_Steps_Type') }}</label>
+      @php $selectedStepType = old('program_step_type', isset($ccycle) ? $ccycle->step_type : ''); @endphp
       <select 
         class="form-select select2"
-        name="program_type" 
-        id="program_type" 
-        data-placeholder="{{ $l == 'en' ? 'Select Program Type' : 'اختر نوع البرنامج' }}"
-        {{ isset($id) ? 'disabled' : '' }}
+        name="program_step_type" 
+        id="program_step_type" 
+        data-placeholder="{{ __('cycles.Select Program Steps Type') }}"
       >
-        <option value="">{{ $l == 'en' ? 'Select Program Type' : 'اختر نوع البرنامج' }}</option>
-        @foreach(\App\Cycle::programTypes() as $value => $label)
-        <option value="{{ $value }}" {{ $selectedType==$value ? 'selected' : '' }}>
-          {{ $label }}
-        </option>
-        @endforeach
+        <option value="">{{ __('cycles.Select Program Steps Type') }}</option>
+        <option value="cycle" {{ $selectedStepType == 'cycle' ? 'selected' : '' }}>{{ __('cycles.type_by_cycle') }}</option>
+        <option value="time" {{ $selectedStepType == 'time' ? 'selected' : '' }}>{{ __('cycles.type_by_time') }}</option>
       </select>
       <div class="invalid-feedback"></div>
-
-      @if(isset($ccycle) && $ccycle->exists)
-        <input type="hidden" name="program_type" value="{{ $ccycle->type }}">
-      @endif
-    </div>
-  </div>
-
-  <!-- Program Title -->
-  <div class="col-md-6">
-    <div class="form-group mb-4">
-      <label for="program-title" class="form-label fs-6 fw-semibold">
-        {{ __('cycles.Cycle title') }}
-      </label>
-      {{-- <input type="hidden" name="cycleid" id="cycleid"> --}}
-      <input 
-        type="text" 
-        class="form-control" 
-        id="title" 
-        name="title" 
-        placeholder="{{ __('cycles.Cycle title') }}"
-        oninput="this.value = this.value.trimStart()" 
-      />
-      <div class="invalid-feedback"></div>
-    </div>
-  </div>
-
-  <!-- Date Range Picker -->
-  <div class="col-md-6">
-    <div class="form-group mb-4">
-      <label for="date-range-picker" class="form-label fs-6 fw-semibold">
-        {{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:
-      </label>
-      <input type="hidden" name="start" id="start" />
-      <input type="hidden" name="end" id="end" />
-      <input type="text" name="date_range" id="date-range-picker" class="form-control" placeholder="{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}" />
-      <div class="invalid-feedback"></div>
+      <div id="program_step_type_help" class="text-muted"></div>
     </div>
   </div>
 
@@ -384,6 +402,14 @@ $(document).ready(function() {
   });
 
   $('#program_type').on('change', function() {
+    if ($(this).val()) {
+      $(this).removeClass('is-invalid');
+      $(this).next('.select2-container').removeClass('is-invalid');
+      $(this).closest('.form-group').find('.invalid-feedback').text('').removeClass('d-block');
+    }
+  });
+
+  $('#program_step_type').on('change', function() {
     if ($(this).val()) {
       $(this).removeClass('is-invalid');
       $(this).next('.select2-container').removeClass('is-invalid');
