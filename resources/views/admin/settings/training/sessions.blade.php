@@ -416,7 +416,7 @@
         <!-- No Recordings: Display Update Button -->
         <div class="d-flex justify-content-between align-items-center mt-4">
           <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording', $session->id) }}" class="btn btn-warning">
+          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'training']) }}" class="btn btn-warning">
             {{ __('admin.update_recordings') }}
           </a>
         </div>
