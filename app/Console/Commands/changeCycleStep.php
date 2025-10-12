@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\{Company, TeamFormation};
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use stdClass;
+
+class changeCycleStep extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'cycle:change-step';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'This command is used to change the current cycle step based on the current date';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $now = now()->format('Y-m-d H:i:s');
+        $this->info("Starting Command: " . $this->signature . " At: " . $now);
+        $cycles = DB::table('cycles AS c')
+            ->select([
+                'c.id',
+                'c.start',
+                'c.end',
+                's.id AS step_id',
+                's.arr AS step_arr',
+                's.from AS step_from',
+                's.to AS step_to',
+            ])
+            ->leftJoin('steps AS s', 'c.id', '=', 's.cycle_id')
+            ->where('c.step_type', 'time')
+            ->whereNull('c.deleted_at')
+            ->get();
+
+        $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) use ($now) {
+            $c = $groupedCycle->first();
+            $cycle = new stdClass;
+            $cycle->id = $c->id;
+            $cycle->start = Carbon::parse($c->start)->format('Y-m-d 00:00:00');
+            $cycle->end = Carbon::parse($c->end)->format('Y-m-d 23:59:59');
+            $cycle->steps = $groupedCycle->map(function ($step) {
+                $s = new stdClass;
+                $s->id = $step->step_id;
+                $s->arr = $step->step_arr;
+                $s->from = Carbon::parse($step->step_from)->format('Y-m-d 00:00:00');
+                $s->to = Carbon::parse($step->step_to)->format('Y-m-d 23:59:59');
+                return $s;
+            })->sortBy('from')->values();
+            $cycle->eligible_steps = $cycle->steps->filter(function( $step ) use ( $now ) {
+                return $now >= $step->from && $now < $step->to;
+            });
+            return $cycle;
+        })->values();
+        $cycles_ids = $cycles->pluck('id');
+
+        $companies = DB::table('companies AS c')
+            ->select([
+                'c.id',
+                'c.cycle',
+                'c.step',
+            ])
+            ->whereNull('c.deleted_at')
+            ->whereIn('c.cycle', $cycles_ids)
+            ->get();
+
+        $teams = DB::table('team_formations AS tf')
+            ->select([
+                'tf.id',
+                'tf.cycle_id',
+                'tf.step_id',
+            ])
+            ->whereIn('tf.cycle_id', $cycles_ids)
+            ->get();
+
+        $companiesToUpdate = []; $teamsToUpdate = [];
+        foreach( $companies as $company )
+        {
+            $cycle = $cycles->where('id', $company->cycle)->first();
+            if( !empty( $cycle ) )
+            {
+                $eligible_step = $cycle->eligible_steps;
+                if( !$eligible_step->isEmpty() && !in_array( $company->step, $eligible_step->pluck('id')->toArray() ) )
+                {
+                    $companiesToUpdate[] = [
+                        'id' => $company->id,
+                        'step' => $eligible_step->last()->id
+                    ];
+                }
+                
+            }
+        }
+
+        foreach( $teams as $team )
+        {
+            $cycle = $cycles->where('id', $team->cycle_id)->first();
+            if( !empty( $cycle ) )
+            {
+                $eligible_step = $cycle->eligible_steps;
+                if( !$eligible_step->isEmpty() && !in_array( $team->step_id, $eligible_step->pluck('id')->toArray() ) )
+                {
+                    $teamsToUpdate[] = [
+                        'id' => $team->id,
+                        'step' => $eligible_step->last()->id
+                    ];
+                }
+            }
+        }
+        $teamsToUpdate = collect($teamsToUpdate);
+        $companiesToUpdate = collect($companiesToUpdate);
+        if( !$companiesToUpdate->isEmpty() )
+        {
+            $this->info("Changing Step for: " . $companiesToUpdate->count() . " Companies");
+            $grouping = $companiesToUpdate->groupBy('step')->map(function( $step ) { return $step->pluck('id')->toArray(); });
+            foreach( $grouping as $step_id => $companies_ids ) { Company::whereIn('id', $companies_ids)->update(['step' => $step_id]); }
+        }
+        if( !$teamsToUpdate->isEmpty() )
+        {
+            $this->info("Changing Step for: " . $teamsToUpdate->count() . " Teams");
+            $grouping = $teamsToUpdate->groupBy('step')->map(function( $step ) { return $step->pluck('id')->toArray(); });
+            foreach( $grouping as $step_id => $teams_ids ) { TeamFormation::whereIn('id', $teams_ids)->update(['step_id' => $step_id]); }
+        }
+    }
+}

@@ -246,8 +246,6 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-
-       
         $isEdit = false;
         $isCreate = false;
         if( $request->has('typeedit') && $request->has('id') && intval( $request->id ) > 0 ) { $isEdit = true; }
@@ -274,21 +272,28 @@ class CyclesController extends Controller
             ]);
         }
 
-        if ($type == 1 || $isEdit == true) {
-            /// Edit Cycle
-           
+        if ($type == 1 || $isEdit == true)
+        {
+            /// Edit Cycle (to be moved to standalone controller)
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250|unique:cycles,title,' . $id,
                 'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
+                // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
+                'public_slug' => [
+                    Rule::requiredIf($request->is_public == 1),
+                    'nullable',
+                    'regex:/^[a-zA-Z0-9]+$/',
+                    Rule::unique('cycles', 'public_slug')->ignore($request->id),
+                ],
                 'start' => 'required|date',
                 'end' => 'required|date',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'program_step_type' => ['required', 'in:cycle,time'],
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
@@ -337,6 +342,7 @@ class CyclesController extends Controller
             $cycle->end = Carbon::parse($request->end);
             $cycle->private = $private;
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+            $cycle->step_type = $request->program_step_type;
 
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
@@ -394,7 +400,8 @@ class CyclesController extends Controller
 
            
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($type == 2) {
+        }
+        elseif ($type == 2) {
 
             /// Save Cycle
 
@@ -687,9 +694,10 @@ class CyclesController extends Controller
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'count_team_number' => $request->count_team_number, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($request->tab_id == 1) {
-            
-            
+        }
+        elseif ($request->tab_id == 1)
+        {
+            // create new cycle (to be moved to standalone controller)
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
@@ -703,6 +711,7 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_type' => ['required', 'in:General_Program,Hackathon'],
+                'program_step_type' => ['required', 'in:cycle,time'],
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
@@ -747,6 +756,7 @@ class CyclesController extends Controller
                 } else { $public_slug = $cycle->public_slug; }
 
                 $cycle->public_slug = $public_slug;
+                $cycle->step_type = $request->program_step_type;
                 $cycle->organization_id = $request->organization_id2;
                 $cycle->type = $request->program_type;
                 $cycle->title = $request->title;
@@ -847,7 +857,9 @@ class CyclesController extends Controller
                 }
             });
             return redirect()->route('programlist.index')->with('message', 'Saved');
-        } else {
+        }
+        else
+        {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
 

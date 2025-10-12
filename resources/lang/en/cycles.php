@@ -583,4 +583,10 @@ return [
     'Apply_Filters' => 'Apply Filters',
     'Total' => 'Total',
     'Startup_Surveys' => 'Startup Surveys',
+    'Program_Steps_Type' => 'Program Steps Types',
+    'Select Program Steps Type' => 'Select Program Steps Types',
+    'type_by_cycle' => 'Run by Cycle',
+    'type_by_time' => 'Run by Time',
+    'type_by_cycle_helper' => 'Steps begin automatically on the program start date and progress sequentially.',
+    'type_by_time_helper' => 'Steps follow the specific start date you set for each one.',
 ];
