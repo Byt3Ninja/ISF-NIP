@@ -321,7 +321,7 @@ class ReportController extends Controller
         $notFound = $allJudges->diff($existingJudges);
 
         $final_done_screenings = $existingJudges->where('status', 1)->count();
-        $draft_screenings_count = $existingJudges->where('status', 0)->count();
+        $draft_screenings_count = $existingJudges->where('status', 0);
         
 
         // $final_done_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
@@ -361,7 +361,7 @@ class ReportController extends Controller
             [ 'value' => $Judges ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $final_screening_count ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
             [ 'value' => $final_pending_screening_count->count() ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings_count ?? 0, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $draft_screenings_count->count() ?? 0, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $final_done_screening_count->count() ?? 0, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
