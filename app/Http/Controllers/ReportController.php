@@ -351,7 +351,7 @@ class ReportController extends Controller
        
         $final_screening_count = count($Company);
         $final_pending_screening_count = $notFound->count();
-        $final_done_screening_count = $final_done_screenings;
+        $final_done_screening_count = $found->count();
         $draft_screenings_count = $draft_screenings_count;
         $Judges = $allJudges->unique()->values()->count();
         // Kpi Cards Data (Dont' remove)
