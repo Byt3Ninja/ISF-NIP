@@ -350,17 +350,19 @@ class ReportController extends Controller
 
        
         $final_screening_count = count($Company);
-        $final_pending_screening_count = $notFound->count();
-        $final_done_screening_count = $found->count();
+        $final_pending_screening_count = $notFound;
+        $final_done_screening_count = $found;
         $draft_screenings_count = $draft_screenings_count;
         $Judges = $allJudges->unique()->values()->count();
+
+
         // Kpi Cards Data (Dont' remove)
         $kpiData = [
             [ 'value' => $Judges ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $final_screening_count ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
-            [ 'value' => $final_pending_screening_count ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
+            [ 'value' => $final_pending_screening_count->count() ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings_count ?? 0, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
-            [ 'value' => $final_done_screening_count ?? 0, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
+            [ 'value' => $final_done_screening_count->count() ?? 0, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
         // Get real startups data from database
