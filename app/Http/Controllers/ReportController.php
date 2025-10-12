@@ -147,17 +147,17 @@ class ReportController extends Controller
         }
         $data['available_surveys_map'] = $surveyMap;
         if (in_array($status, ['open', 'completed'])) {
-        $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) use ($data, $status) {
-        $key = $request->mentor_id . '-' . $request->id;
-        $survey = $data['available_surveys_map'][$key] ?? null;
+                $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) use ($data, $status) {
+                $key = $request->mentor_id . '-' . $request->id;
+                $survey = $data['available_surveys_map'][$key] ?? null;
 
-        if (!$survey) return false;
+                if (!$survey) return false;
 
-        $isCompleted = $survey->responses && count($survey->responses) > 0;
+                $isCompleted = $survey->responses && count($survey->responses) > 0;
 
-        return $status === 'completed' ? $isCompleted : !$isCompleted;
-    });
-}
+                return $status === 'completed' ? $isCompleted : !$isCompleted;
+            });
+        }
         // ==============> counts <=================
         $data['Total_Survey'] = $data['available_surveys']->count();
         $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
@@ -286,7 +286,15 @@ class ReportController extends Controller
         $evaluation_ids = ScreeningEvaluation::whereIn('step_id', $final_screening_steps)->pluck('id');
 
         // Get real data for final screenings
-        $final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
+        // $final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
+        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
+        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
+        //             $query->where('organization_id', $organization_id);
+        //         });
+        //     })->where('stype', 5);
+        // })->get();
+
+        $Company = Company::whereHas('stepdata', function ($q) use ($organization_id) {
             $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
                 return $q->whereHas('cycle', function ($query) use ($organization_id) {
                     $query->where('organization_id', $organization_id);
@@ -294,44 +302,61 @@ class ReportController extends Controller
             })->where('stype', 5);
         })->get();
 
-        $final_pending_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
-                });
-            })->where('stype', 5);
-        })->doesntHave('finalData')->get();
+                $final_screenings = DB::table('finalscreenings')
+            ->whereIn('company_id', $Company->pluck('id'))
+            ->get();
+        $allJudges = collect();
+        foreach ($final_screenings as $item) {
+            $judges = json_decode($item->judges, true);
+            if (is_array($judges)) {
+                $allJudges = $allJudges->merge($judges);
+            }
+        }
+        $allJudges = $allJudges->values();
+        $existingJudges = DB::table('screening_evaluation_results')
+        ->whereIn('company_id', $Company->pluck('id'))
+            ->whereIn('user_id', $allJudges)
+            ->pluck('user_id');
+        $found = $allJudges->intersect($existingJudges);
+        $notFound = $allJudges->diff($existingJudges);
 
-        $final_done_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
-                });
-            })->where('stype', 5);
-        })->whereHas('finalData')->get();
+        $final_done_screenings = $existingJudges->where('status', 1)->count();
+        $draft_screenings_count = $existingJudges->where('status', 0)->count();
+        
+
+        // $final_done_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
+        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
+        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
+        //             $query->where('organization_id', $organization_id);
+        //         });
+        //     })->where('stype', 5);
+        // })->whereHas('finalData')->get();
+        
 
         // Calculate draft count (companies with screening evaluations in draft status)
-        $draft_screenings_count = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-            $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                    $query->where('organization_id', $organization_id);
-                });
-            })->where('stype', 5);
-        })->whereExists(function ($query) use ($evaluation_ids) {
-            $query->select(DB::raw(1))
-                ->from('screening_evaluation_results')
-                ->whereIn('evaluation_id', $evaluation_ids)
-                ->whereRaw('screening_evaluation_results.company_id = companies.id')
-                ->where('status', 0); // 0 = draft, 1 = published
-        })->count();
+        // $draft_screenings_count = Company::whereHas('stepdata', function ($q) use ($organization_id) {
+        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
+        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
+        //             $query->where('organization_id', $organization_id);
+        //         });
+        //     })->where('stype', 5);
+        // })->whereExists(function ($query) use ($evaluation_ids) {
+        //     $query->select(DB::raw(1))
+        //         ->from('screening_evaluation_results')
+        //         ->whereIn('evaluation_id', $evaluation_ids)
+        //         ->whereRaw('screening_evaluation_results.company_id = companies.id')
+        //         ->where('status', 0); // 0 = draft, 1 = published
+        // })->count();
 
-        $final_screening_count = count($final_screenings);
-        $final_pending_screening_count = count($final_pending_screenings);
-        $final_done_screening_count = count($final_done_screenings);
-
+       
+        $final_screening_count = count($Company);
+        $final_pending_screening_count = $notFound->count();
+        $final_done_screening_count = $final_done_screenings;
+        $draft_screenings_count = $draft_screenings_count;
+        $Judges = $allJudges->unique()->values()->count();
         // Kpi Cards Data (Dont' remove)
         $kpiData = [
-            [ 'value' => $data['judgers_count'] ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
+            [ 'value' => $Judges ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $final_screening_count ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
             [ 'value' => $final_pending_screening_count ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
             [ 'value' => $draft_screenings_count ?? 0, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
