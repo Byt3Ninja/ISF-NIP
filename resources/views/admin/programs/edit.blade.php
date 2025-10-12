@@ -31,7 +31,7 @@
         'financial_policy' => $l == 'ar' ? 'السياسة المالية' : 'Financial Policy',
         'legal_policy' => $l == 'ar' ? 'السياسة القانونية' : 'Legal Policy',
         'mentorship_request' => $l == 'ar' ? 'طلب الإرشاد' : 'Mentorship Request',
-        'winner_selection' => $l == 'ar' ? 'اختيار الفائزين' : 'Winner Selection',
+        // 'winner_selection' => $l == 'ar' ? 'اختيار الفائزين' : 'Winner Selection',
         'Program_Settings' => $l == 'ar' ? 'إعدادات البرنامج' : 'Program Settings',
     ];
 
@@ -49,10 +49,10 @@
         'page_name' => $l == 'ar' ? 'يرجى إدخال اسم الصفحة.' : 'Please enter a page name.',
         'page_content' => $l == 'ar' ? 'يرجى إدخال محتوى الصفحة.' : 'Please enter page content.',
     ];
-    if( $ccycle->type == 'Hackathon' )
-    {
-        $tabs[] = ['id' => 'winner_selection', 'label' => $labels['winner_selection'], 'active' => false];
-    }
+    // if( $ccycle->type == 'Hackathon' )
+    // {
+    //     $tabs[] = ['id' => 'winner_selection', 'label' => $labels['winner_selection'], 'active' => false];
+    // }
 @endphp
 
 @section('content')
