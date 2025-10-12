@@ -1026,161 +1026,192 @@ class TrainingController extends Controller
 			}
 
 			$response = $this->meetingService->getSessionReport($zoomId);
-			if ($response['success']) {
-				$participants = $response['data']['participants'] ?? [];
 
-				foreach ($participants as $participant) {
-					$joinDate = isset($participant['join_time'])
-						? Carbon::parse($participant['join_time'])->toDateTimeString()
-						: null;
-					$endDate = isset($participant['leave_time'])
-						? Carbon::parse($participant['leave_time'])->toDateTimeString()
-						: null;
+			$serviceClass = get_class($this->meetingService);
+        	$isZoom = stripos($serviceClass, 'zoom') !== false;
+        	$isTeams = stripos($serviceClass, 'team') !== false || stripos($serviceClass, 'graph') !== false;
+			if ($isZoom) {
+             if (!empty($response['success'])) {
+                $participants = $response['data']['participants'] ?? [];
 
-					SessionReport::updateOrCreate(
-						[
-							'session_id' => $session ? $session->id : null,
-							'participant_user_id' => $participant['user_id'] ?? null,
-						],
-						[
-							'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
-							'participant_email' => $participant['user_email'] ?? null,
-							'participant_name' => $participant['name'] ?? null,
-							'participant_join_date' => $joinDate,
-							'participant_end_date' => $endDate,
-							'attendance_duration' => $participant['duration'] ?? 0,
-						]
-					);
-				}
-				return redirect()->back()->with(['message' => 'Session report updated', 'class' => 'success']);
-			} else {
-				return redirect()->back()->with(['message2' => 'session report is not available yet']);
-			}
-		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage());
-			return redirect()->back()->with(['message2' => 'session_report_not_available']);
-		}
+                foreach ($participants as $participant) {
+                    $joinDate = isset($participant['join_time']) ? Carbon::parse($participant['join_time'])->toDateTimeString() : null;
+                    $endDate = isset($participant['leave_time']) ? Carbon::parse($participant['leave_time'])->toDateTimeString() : null;
+
+                    SessionReport::updateOrCreate(
+                        [
+                            'session_id' => $session ? $session->id : null,
+                            'participant_user_id' => $participant['user_id'] ?? null,
+                        ],
+                        [
+                            'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
+                            'participant_email' => $participant['user_email'] ?? null,
+                            'participant_name' => $participant['name'] ?? null,
+                            'participant_join_date' => $joinDate,
+                            'participant_end_date' => $endDate,
+                            'attendance_duration' => $participant['duration'] ?? 0,
+                        ]
+                    );
+                }
+
+                return redirect()->back()->with(['message' => 'Session report updated', 'class' => 'success']);
+            } else {
+                Log::warning('Zoom sessionReport: no success', ['response' => $response]);
+                return redirect()->back()->with(['message2' => 'session report is not available yet']);
+            }
+        } elseif ($isTeams) {
+			 $participants = $response['participants'] ?? [];
+
+            if (empty($participants)) {
+                Log::warning('Teams sessionReport: participants empty', ['response' => $response]);
+                return redirect()->back()->with(['message2' => 'session report is not available yet', 'debug' => $response]);
+            }
+
+            foreach ($participants as $p) {
+                $identity = $p['identity'] ?? null;
+
+                $participantUserId = null;
+                $participantName = null;
+
+                if (is_array($identity)) {
+                    if (isset($identity['user']) && is_array($identity['user'])) {
+                        $participantUserId = $identity['user']['id'] ?? null;
+                        $participantName = $identity['user']['displayName'] ?? $identity['user']['displayname'] ?? null;
+                    } else {
+                        $participantUserId = $identity['id'] ?? null;
+                        $participantName = $identity['displayName'] ?? $identity['displayname'] ?? null;
+                    }
+                }
+
+                $email = $p['emailAddress'] ?? null;
+                $duration = $p['totalAttendanceInSeconds'] ?? 0;
+
+                $interval = $p['attendanceIntervals'][0] ?? null;
+                $joinDate = $interval['joinDateTime'] ?? $interval['joinDate'] ?? null;
+                $leaveDate = $interval['leaveDateTime'] ?? $interval['leaveDate'] ?? null;
+
+                try {
+                    $joinDateParsed = $joinDate ? Carbon::parse($joinDate)->toDateTimeString() : null;
+                } catch (\Throwable $ex) {
+                    $joinDateParsed = null;
+                }
+                try {
+                    $leaveDateParsed = $leaveDate ? Carbon::parse($leaveDate)->toDateTimeString() : null;
+                } catch (\Throwable $ex) {
+                    $leaveDateParsed = null;
+                }
+
+                SessionReport::updateOrCreate(
+                    [
+                        'session_id' => $session ? $session->id : null,
+                        'participant_user_id' => $participantUserId,
+                    ],
+                    [
+                        'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
+                        'participant_email' => $email,
+                        'participant_name' => $participantName,
+                        'participant_join_date' => $joinDateParsed,
+                        'participant_end_date' => $leaveDateParsed,
+                        'attendance_duration' => $duration ?? 0,
+                    ]
+                );
+            }
+            
+         return redirect()->back()->with(['message' => 'Session Report Updated', 'class' => 'success']);
+        } 
+    } catch (\Throwable $e) {
+        Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+        return redirect()->back()->with(['message2' => 'session_report_not_available']);
+    }
 	}
 
 	public function sessionRecord($id)
 	{
 		$this->meetingService =  OnlineMeetingFactory::create();
 		try {
-			$sessionId = null;
-			$zoomId = null;
-			$mentorshipRequest = null;
+        $sessionId = null;
+        $zoomId = null;
+        $mentorshipRequest = null;
 
-			$type = request()->query('type');
+        $type = request()->query('type');
 
-			if ($type === 'training') {
-				$session = TrainingSession::findOrFail($id);
-				$zoomId = $session->zoom_id;
-				$sessionId = $session->id;
-			} elseif ($type === 'mentorship') {
-				$mentorshipRequest = MentorshipRequest::findOrFail($id);
-				$zoomId = $mentorshipRequest->zoom_id;
-			}
+        if ($type === 'training') {
+            $session = TrainingSession::findOrFail($id);
+            $zoomId = $session->zoom_id;
+            $sessionId = $session->id;
+        } elseif ($type === 'mentorship') {
+            $mentorshipRequest = MentorshipRequest::findOrFail($id);
+            $zoomId = $mentorshipRequest->zoom_id;
+        }
 
-			if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
-				return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
-			}
+        if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
+            return redirect()->back()->with([
+                'message2' => 'Session Recording is not available yet'
+            ]);
+        }
 
-			$response = $this->meetingService->getSessionRecord($zoomId);
+        $response = $this->meetingService->getSessionRecord($zoomId);
 
-			$recordingFiles = $response['data']['recording_files'] ?? [];
-			$password = $response['data']['password'] ?? null;
+        if (!empty($response['data'][0])) {
+            $file = $response['data'][0];
 
-			$firstFile = $recordingFiles[0] ?? null;
+            $recordingId = $file['id'] ?? null;
+            $recordingUrl = $file['recordingContentUrl'] ?? $file['meetingId'] ?? null;
+            $createdDateTime = isset($file['createdDateTime']) ? Carbon::parse($file['createdDateTime'])->toDateTimeString() : null;
 
-			if ($response['success']) {
-				$recordingTime = isset($firstFile['recording_start'])
-					? Carbon::parse($firstFile['recording_start'])->toDateTimeString()
-					: null;
+            if ($recordingId) {
+                SessionRecording::updateOrCreate(
+                    ['recording_id' => $recordingId],
+                    [
+                        'session_id' => $sessionId,
+                        'mentorship_request_id' => $mentorshipRequest?->id,
+                        'recording_type' => 'Teams Recording',
+                        'recording_view_url' => $recordingUrl,
+                        'recording_download_url' => $recordingUrl,
+                        'recording_time' => $createdDateTime,
+                        'passcode' => null,
+                    ]
+                );
 
-				SessionRecording::updateOrCreate(
-					[
-						'recording_id' => $firstFile['id'],
-					],
-					[
-						'session_id' => $sessionId ? $sessionId : null,
-						'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
-						'recording_type' => $firstFile['recording_type'] ?? null,
-						'recording_view_url' => $firstFile['play_url'] ?? null,
-						'recording_download_url' => $firstFile['download_url'] ?? null,
-						'recording_time' => $recordingTime,
-						'passcode' => $password,
-					]
-				);
-				return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
-			} else {
-				return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
-			}
-		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage());
-			return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
-		}
+                return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
+            }
+        }
+
+        if (!empty($response['data']['recording_files'])) {
+            $file = $response['data']['recording_files'][0] ?? null;
+
+            if ($file) {
+                $recordingTime = isset($file['recording_start']) ? Carbon::parse($file['recording_start'])->toDateTimeString() : null;
+                $password = $response['data']['password'] ?? null;
+
+                SessionRecording::updateOrCreate(
+                    ['recording_id' => $file['id']],
+                    [
+                        'session_id' => $sessionId,
+                        'mentorship_request_id' => $mentorshipRequest?->id,
+                        'recording_type' => $file['recording_type'] ?? null,
+                        'recording_view_url' => $file['play_url'] ?? null,
+                        'recording_download_url' => $file['download_url'] ?? null,
+                        'recording_time' => $recordingTime,
+                        'passcode' => $password,
+                    ]
+                );
+
+                return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
+            }
+        }
+
+        return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
+
+    } catch (\Throwable $e) {
+        Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
+    }
 	}
 
-	public function attendanceReport(Request $request, $id)
-	{
-		try {
-			$session = TrainingSession::find($id);
-
-			if (!$session || !$session->zoom_id) {
-				return response()->json(['success' => false, 'message' => 'Session not found'], 404);
-			}
-
-			if ($this->meetingService instanceof \App\Services\TeamsService) {
-				$sessionReportResponse = $this->meetingService->getSessionReport($session->zoom_id);
-
-				if (!$sessionReportResponse['success']) {
-					return response()->json([
-						'success' => false,
-						'message' => 'Failed to fetch session reports: ' . $sessionReportResponse['message'],
-					], 500);
-				}
-
-				$reports = $sessionReportResponse['data']['value'] ?? [];
-				if (empty($reports)) {
-					return response()->json([
-						'success' => false,
-						'message' => 'No attendance reports found for this session.',
-					], 404);
-				}
-
-				$reportId = $reports[0]['id'] ?? null;
-
-				if (!$reportId) {
-					return response()->json([
-						'success' => false,
-						'message' => 'Unable to Determine the Report ID.',
-					], 500);
-				}
-
-				$attendanceReportResponse = $this->meetingService->getMeetingAttendanceReport($session->zoom_id, $reportId);
-
-				// dd($attendanceReportResponse);
-				if ($attendanceReportResponse['success']) {
-					return response()->json([
-						'success' => true,
-						'data' => $attendanceReportResponse['data'],
-					], 200);
-				}
-
-				return response()->json([
-					'success' => false,
-					'message' => 'Failed to fetch attendance report: ' . $attendanceReportResponse['message'],
-				], 500);
-			}
-
-			return response()->json([
-				'success' => false,
-				'message' => 'Invalid meeting service instance.',
-			], 500);
-		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@attendanceReport: ' . $e->getMessage());
-		}
-	}
 
 	public function getdsc($id)
 	{

@@ -2449,4 +2449,7 @@ return [
 	'Training_Sessions_Duration' => 'مدة جلسات التدريب',
 	'First_Screening' => 'الفحص الأول',
 	'Final_Screening' => 'الفحص النهائي',
+	'Session Record updated' => 'تم تحديث سجل الجلسة بنجاح',
+	'Session_report_updated' => 'تم تحديث تقرير الجلسة بنجاح',
+	'not_available' => 'غير متاح',
 ];
