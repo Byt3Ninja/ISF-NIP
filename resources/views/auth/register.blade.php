@@ -16,8 +16,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta name="description" content="VI Login">
   <meta name="author" content="info@growthlabs.app">
-  <title>{{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}} -
-     {{setting('title','title') }} </title>
+  <title>
+    {{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}}
+  </title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
@@ -250,7 +251,7 @@
                 <div class="col-12 mb-3">
                   <label for="first_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name" autofocus />
+                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autofocus />
                     @error('first_name')
                     <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                   @enderror
@@ -260,7 +261,7 @@
                 <div class="col-12 mb-3">
                   <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name" />
+                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required />
                   </div>
                   @error('last_name')
                     <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
