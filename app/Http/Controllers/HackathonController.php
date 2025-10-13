@@ -1034,18 +1034,18 @@ class HackathonController extends Controller
             $winners = TeamFormation::winnersMapping( $teams );
         }
         
-        $hackthonFinish = [];
+        $finishedHackathon = [];
         $hackthonCycle = Cycle::find($id);
 
         if($hackthonCycle->end < now()){
-            $hackthonFinish['id'] = $hackthonCycle->id;
-            $hackthonFinish['title'] = $hackthonCycle->title;
-            $hackthonFinish['description'] = $hackthonCycle->description;
-            $hackthonFinish['start'] = $hackthonCycle->start->format('Y-m-d');
-            $hackthonFinish['end'] = $hackthonCycle->end->format('Y-m-d');
-            $hackthonFinish['img'] = $hackthonCycle->img_url;
-            $hackthonFinish['teams'] = TeamFormation::teams($hackthonCycle->id);
-            $hackthonFinish['winners']= TeamFormation::winners($hackthonFinish['teams']);
+            $finishedHackathon['id'] = $hackthonCycle->id;
+            $finishedHackathon['title'] = $hackthonCycle->title;
+            $finishedHackathon['description'] = $hackthonCycle->description;
+            $finishedHackathon['start'] = $hackthonCycle->start->format('Y-m-d');
+            $finishedHackathon['end'] = $hackthonCycle->end->format('Y-m-d');
+            $finishedHackathon['img'] = $hackthonCycle->img_url;
+            $finishedHackathon['teams'] = TeamFormation::teams($hackthonCycle->id);
+            $finishedHackathon['winners']= TeamFormation::winners($finishedHackathon['teams']);
         }
         
             return view('admin.hackathon.hackathon-details', compact(
@@ -1070,7 +1070,7 @@ class HackathonController extends Controller
                 'steps_ids',
                 'teamJoins',
                 'winners',
-                'hackthonFinish'
+                'finishedHackathon'
             ));
         
     }

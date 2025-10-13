@@ -2397,4 +2397,5 @@ return [
 	'Session Record updated' => 'Session Record Updated Successfully',
 	'Session_report_updated' => 'Session Report Updated Successfully',
 	'not_available' => 'Not Available',
+	'Hackathons' => 'Hackathons',
 ];

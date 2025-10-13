@@ -2452,4 +2452,5 @@ return [
 	'Session Record updated' => 'تم تحديث سجل الجلسة بنجاح',
 	'Session_report_updated' => 'تم تحديث تقرير الجلسة بنجاح',
 	'not_available' => 'غير متاح',
+	'Hackathons' => 'برامج الهاكاثون',
 ];
