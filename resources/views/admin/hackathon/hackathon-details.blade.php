@@ -8,62 +8,115 @@
 @stop
 
 @php
+  // ====================================
+  // Tab Configuration for Hackathon Details
+  // ====================================
+  
   $user = Auth::user();
-  $tabsData = [];
-  foreach( $pages as $page )
-  {
-    $tabsData[] = ['title' => $page->code, 'icon' => 'bi-list', 'label' => $page->title, 'type' => 'dynamic'];
-  }
-if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
-    $tabsData[] = ['title' => 'submissions', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 'type' => 'static'];
-  }
-  // dd($user->team_member->teamFormation->user->company->cycle);
-  if($user->team_member != null){
-    $user_cycle_id = $user->team_member->teamFormation->user->company->cycle ?? null;
-  }else{
-    $user_cycle_id = $user->company->cycle ?? null;
-  }
-    if($currentHackathon['cycle_id'] == $user_cycle_id){
-      $tabsDatastatic =  [
-          // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
-          // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
-          // ['title' => 'schedule', 'icon' => 'bi-calendar2-week-fill', 'label' => $l == 'en' ? 'Schedule' : 'جدول الأعمال', 'type' => 'static'],
-          // ['title' => 'prizes', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Prizes' : 'الجوائز', 'type' => 'static'],
-          // ['title' => 'evaluation', 'icon' => 'bi-clipboard-check-fill', 'label' => $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم', 'type' => 'static'],
-
-          ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
-          ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
-          ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static'],
-          ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
-          // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
-          ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static']
-        ];
-    }else{
-      if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
-        $tabsDatastatic =  [
-          // ['title' => 'overview', 'icon' => 'bi-card-text', 'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 'type' => 'static'],
-          // ['title' => 'themes', 'icon' => 'bi-lightbulb-fill', 'label' => $l == 'en' ? 'Themes' : 'المحاور', 'type' => 'static'],
-          // ['title' => 'schedule', 'icon' => 'bi-calendar2-week-fill', 'label' => $l == 'en' ? 'Schedule' : 'جدول الأعمال', 'type' => 'static'],
-          // ['title' => 'prizes', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Prizes' : 'الجوائز', 'type' => 'static'],
-          // ['title' => 'evaluation', 'icon' => 'bi-clipboard-check-fill', 'label' => $l == 'en' ? 'Evaluation Criteria' : 'معايير التقييم', 'type' => 'static'],
-          ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : ' الفرق', 'type' => 'static'],
-          ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors ' : 'المرشدون ', 'type' => 'static'],
-          ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static'],
-          // ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
-          ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & winners' : 'النتائج والفائزون', 'type' => 'static']
-          
-          // ['title' => 'results', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Results' : 'النتائج', 'type' => 'static'],
-        ];
-      }else{
-        $tabsDatastatic =  []; 
-      }
+  $isAdmin = $user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('organizationmanager');
+  
+  // Determine if hackathon is finished and has results to display
+  $isFinishedHackathon = isset($currentHackathon['status']) && 
+                         $currentHackathon['status'] === 'Finished' && 
+                         isset($finishedHackathon) && 
+                         !empty($finishedHackathon);
+  
+  // Get user's cycle ID for permission checks
+  $userCycleId = $user->team_member?->teamFormation?->user?->company?->cycle ?? 
+                 $user->company?->cycle ?? 
+                 null;
+  
+  // Check if user is participating in current hackathon
+  $isUserParticipating = ($currentHackathon['cycle_id'] == $userCycleId);
+  
+  // ====================================
+  // Tab Data Generation
+  // ====================================
+  
+  if ($isFinishedHackathon) {
+    // Finished Hackathon: Show simplified results-focused tabs
+    $tabsData = [
+      [
+        'title' => 'overview', 
+        'icon' => 'ti ti-file-text', 
+        'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 
+        'type' => 'static'
+      ],
+      [
+        'title' => 'winners', 
+        'icon' => 'ti ti-trophy', 
+        'label' => $l == 'en' ? 'Winners' : 'الفائزون', 
+        'type' => 'static'
+      ],
+      [
+        'title' => 'projects', 
+        'icon' => 'ti ti-folder', 
+        'label' => $l == 'en' ? 'Projects Gallery' : 'معرض المشاريع', 
+        'type' => 'static'
+      ],
+    ];
+  } else {
+    // Active/Ongoing Hackathon: Show full feature set
+    $tabsData = [];
+    
+    // Add dynamic pages from database
+    foreach ($pages as $page) {
+      $tabsData[] = [
+        'title' => $page->code, 
+        'icon' => 'ti ti-list', 
+        'label' => $page->title, 
+        'type' => 'dynamic'
+      ];
     }
-
-  $tabsData = array_merge($tabsData, $tabsDatastatic);
-
+    
+    // Add admin-only submissions tab
+    if ($isAdmin) {
+      $tabsData[] = [
+        'title' => 'submissions', 
+        'icon' => 'ti ti-award', 
+        'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 
+        'type' => 'static'
+      ];
+    }
+    
+    // Generate participant/admin specific tabs
+    $participantTabs = [];
+    
+    if ($isUserParticipating) {
+      // Full participant experience
+      $participantTabs = [
+        
+        ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : 'الفرق', 'type' => 'static'],
+        ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors' : 'المرشدون', 'type' => 'static'],
+        ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static'],
+        ['title' => 'submission', 'icon' => 'bi-upload', 'label' => $l == 'en' ? 'Project Submission' : 'رفع المشاريع', 'type' => 'static'],
+        ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & Winners' : 'النتائج والفائزون', 'type' => 'static']
+      ];
+    } elseif ($isAdmin) {
+      // Admin view for non-participating hackathons
+      $participantTabs = [
+        ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : 'الفرق', 'type' => 'static'],
+        ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors' : 'المرشدون', 'type' => 'static'],
+        ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static'],
+        ['title' => 'results-winners', 'icon' => 'bi-trophy-fill', 'label' => $l == 'en' ? 'Results & Winners' : 'النتائج والفائزون', 'type' => 'static']
+      ];
+    }
+    
+    // Merge all tabs
+    $tabsData = array_merge($tabsData, $participantTabs);
+  }
+  
+  // ====================================
+  // Final Tab Processing
+  // ====================================
   
   $tabs = collect($tabsData)->map(function ($tab) {
-    return ['target' => $tab['title'], 'icon' => $tab['icon'], 'label' => $tab['label'], 'type' => $tab['type']];
+    return [
+      'target' => $tab['title'], 
+      'icon' => $tab['icon'], 
+      'label' => $tab['label'], 
+      'type' => $tab['type']
+    ];
   })->toArray();
   
 @endphp
@@ -72,20 +125,26 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Hackathon Details Banner -->
-    @include('admin.hackathon.partials.details-banner')
-    
+    @include('admin.hackathon.partials.details-banner') 
 
     <!-- Countdown Timers -->
     @include('admin.hackathon.partials.countdown')
     <!--/ Countdown Timers -->
 
     <!-- Tabs Navigation -->
-    <ul class="nav nav-tabs nav-fill mb-4 pb-4" id="hackathonTab" role="tablist">
+    <ul class="nav nav-pills flex-nowrap max-w-100 overflow-auto mb-2 pb-3" id="hackathonTab" role="tablist">
       @foreach($tabs as $tab)
       <li class="nav-item me-1" role="presentation">
-        <button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab['target'] }}-tab"
-          data-bs-toggle="tab" data-bs-target="#{{ $tab['target'] }}" type="button" role="tab"
-          aria-controls="{{ $tab['target'] }}" aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+        <button 
+          type="button" 
+          role="tab"
+          class="nav-link {{ $loop->first ? 'active' : '' }}" 
+          id="{{ $tab['target'] }}-tab"
+          data-bs-toggle="tab" 
+          data-bs-target="#{{ $tab['target'] }}" 
+          aria-controls="{{ $tab['target'] }}" 
+          aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+        >
           <i class="{{ $tab['icon'] }} me-2"></i> {{ $tab['label'] }}
         </button>
       </li>
@@ -94,7 +153,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     <!--/ Tabs Navigation -->
 
     <!-- Tabs Content -->
-    <div class="tab-content p-0 mb-12" id="hackathonTabContent">
+    <div class="tab-content p-0 shadow-none mb-12" id="hackathonTabContent">
       @foreach($tabs as $tab)
         @if( $tab['type'] == 'dynamic' )
           @php $get_page = $pages->where('code', $tab['target'])->first(); @endphp
@@ -107,32 +166,74 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
           </div>
         @else
           @php
-            // Map tab id to partial view
+            // ====================================
+            // Partials Mapping Configuration
+            // ====================================
+            
             $partials = [
-              // 'overview' => 'admin.hackathon.partials.about-tab',
+              // Overview and Information tabs
+              'overview' => $isFinishedHackathon ? 'admin.hackathon.partials.finished-overview-tab' : '',
               'themes' => 'admin.hackathon.partials.themes-tab',
               'schedule' => 'admin.hackathon.partials.schedule-tab',
               'prizes' => 'admin.hackathon.partials.prizes-tab',
               'evaluation' => 'admin.hackathon.partials.evaluation-tab',
+              
+              // People and Teams tabs  
               'mentors' => 'admin.hackathon.partials.mentors-tab',
               'teams' => 'admin.hackathon.partials.teams-tab',
+              
+              // Projects tabs
+              'projects' => 'admin.hackathon.partials.projects-gallery-tab',
+              
+              // Results and Winners tabs
+              'winners' => 'admin.hackathon.partials.finished-winners-tab',
               'results-winners' => 'admin.hackathon.partials.winners-tab',
-              'submission' => 'admin.hackathon.partials.projects-tab',
               'results' => 'admin.hackathon.partials.results-tab',
+              
+              // Activities tabs
+              'submission' => 'admin.hackathon.partials.projects-tab',
               'mentorship' => 'admin.hackathon.partials.mentorship-tab',
+              
+              // Admin tabs
               'submissions' => 'admin.hackathon.partials.submissions-tab',
             ];
+            
             $partial = $partials[$tab['target']] ?? null;
-            // Tab visibility conditions
+            
+            // ====================================
+            // Tab Visibility Logic
+            // ====================================
+            
             $showTab = true;
-            // if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = false; }
-            if ($tab['target'] === 'teams' && ( !($user->hasRole('admin') || $user->hasRole('organizationmanager')) ) && ( $showStep == false || $companyStep?->stype == 1)) { $showTab = true; }
-            if ($tab['target'] === 'submissions' && !($user->hasRole('admin') || $user->hasRole('organizationmanager')))
-            $showTab = false;
+            
+            if ($isFinishedHackathon) {
+              // For finished hackathons, only show the 3 configured tabs
+              $allowedFinishedTabs = ['overview', 'projects', 'winners'];
+              $showTab = in_array($tab['target'], $allowedFinishedTabs);
+            } else {
+              // For active hackathons, apply original visibility rules
+              if ($tab['target'] === 'teams' && !$isAdmin && (!isset($showStep) || $showStep == false || (isset($companyStep) && $companyStep?->stype == 1))) { 
+                $showTab = true; // Allow teams view for participants
+              }
+              if ($tab['target'] === 'submissions' && !$isAdmin) {
+                $showTab = false; // Hide submissions from non-admins
+              }
+            }
           @endphp
           @if($showTab && $partial)
             <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
-              @include($partial)
+              @if($isFinishedHackathon)
+                {{-- Pass finished hackathon data to partials --}}
+                @include($partial, [
+                  'hackathon' => $finishedHackathon,
+                  'teams' => $finishedHackathon['teams'] ?? collect([]),
+                  'winners' => $finishedHackathon['winners'] ?? collect([]),
+                  'isFinished' => true
+                ])
+              @else
+                {{-- Regular hackathon partials with existing data --}}
+                @include($partial)
+              @endif
             </div>
           @endif
         @endif
@@ -160,16 +261,6 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
 <!-- Session Modal -->
 @include('admin.clients.startup.partials._session_modal')
 
-{{--
-<footer class="footer mt-auto py-3 bg-dark text-white">
-  <div class="container text-center">
-    <span>
-      © 2024
-      {{ $l == 'en' ? 'Incubator Hackathon Platform. All rights reserved.' : 'منصة المسرعة للهاكثونات. جميع الحقوق
-      محفوظة.' }}
-    </span>
-  </div>
-</footer> --}}
 <div class="modal fade" id="sessionDetails" tabindex="-1" aria-labelledby="sessionDetailsLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -623,7 +714,7 @@ if($user->hasRole('admin') || $user->hasRole('organizationmanager')) {
     }
 
     // عند الضغط على أي تبويب، أطبع الـ ID
-    $(".nav-tabs .nav-link").on("click", function() {
+    $(".nav-pills .nav-link").on("click", function() {
         let tabId = $(this).attr("id");
         console.log("تم الضغط على التاب:", tabId);
 

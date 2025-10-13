@@ -2772,6 +2772,17 @@
                 ]
             },
             {
+                "name": "hackathon.viewTeam",
+                "description": "View Hackathon Team",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
                 "name": "hackathon.createTeam",
                 "description": "Create Hackathon Team",
                 "guard_name": "web",

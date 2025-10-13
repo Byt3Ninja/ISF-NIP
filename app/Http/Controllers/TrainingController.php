@@ -679,7 +679,7 @@ class TrainingController extends Controller
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
-				return back()->with(['message' => 'Online_Session_Added_Successfully', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Online_Session_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'online') {
 				$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online);
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {

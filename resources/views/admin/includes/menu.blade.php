@@ -450,7 +450,7 @@
           </li>
           <li class="{{ Request::is('dashboard/hackathon*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/hackathon" class="menu-link">
-              <span class="menu-item">{{ __('admin.Hackathon') }}</span>
+              <span class="menu-item">{{ __('admin.Hackathons') }}</span>
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
             </a>
           </li>

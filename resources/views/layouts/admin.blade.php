@@ -446,6 +446,21 @@
         });
       }
 
+      const releaseWarningAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'warning',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+
       const releaseFailureAlert = ({title, message}) => {
         Swal.fire({
           icon: 'error',

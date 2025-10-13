@@ -117,6 +117,10 @@ let industriesTable = null;
 let sectorsTable = null;
 let techTable = null;
 
+// Loading states to prevent duplicate requests
+let isAddingOtherSector = false;
+let isAddingOtherTech = false;
+
 // ID generators
 let nextIndustryId = Math.max(...DATA.map(d => d.id), 0) + 1;
 let nextTechId = Math.max(...TECHNOLOGIES.map(t => t.id), 0) + 1;
@@ -161,6 +165,31 @@ let currentModalId = null;   // ID instead of index
 let currentModalName = '';   // Old name for edit, or new name for add
 let currentModalIndustryId = null; // Industry ID for sector edit
 
+// Translation function
+const getTranslatedMessage = (key, type = null) => {
+  const translations = {
+    'industry_added': '{{ $l == 'en' ? 'Industry added successfully' : 'تمت إضافة الصناعة بنجاح' }}',
+    'sector_added': '{{ $l == 'en' ? 'Sector added successfully' : 'تمت إضافة القطاع بنجاح' }}',
+    'tech_added': '{{ $l == 'en' ? 'Technology added successfully' : 'تمت إضافة التكنولوجيا بنجاح' }}',
+    'industry_deleted': '{{ $l == 'en' ? 'Industry deleted successfully' : 'تم حذف الصناعة بنجاح' }}',
+    'sector_deleted': '{{ $l == 'en' ? 'Sector deleted successfully' : 'تم حذف القطاع بنجاح' }}',
+    'tech_deleted': '{{ $l == 'en' ? 'Technology deleted successfully' : 'تم حذف التكنولوجيا بنجاح' }}',
+    'industry_add_failed': '{{ $l == 'en' ? 'Failed to add industry' : 'فشل في إضافة الصناعة' }}',
+    'sector_add_failed': '{{ $l == 'en' ? 'Failed to add sector' : 'فشل في إضافة القطاع' }}',
+    'tech_add_failed': '{{ $l == 'en' ? 'Failed to add technology' : 'فشل في إضافة التكنولوجيا' }}',
+    'industry_delete_failed': '{{ $l == 'en' ? 'Failed to delete industry' : 'فشل في حذف الصناعة' }}',
+    'sector_delete_failed': '{{ $l == 'en' ? 'Failed to delete sector' : 'فشل في حذف القطاع' }}',
+    'tech_delete_failed': '{{ $l == 'en' ? 'Failed to delete technology' : 'فشل في حذف التكنولوجيا' }}'
+  };
+
+  // Build the translation key correctly
+  if (type && key) {
+    const translationKey = `${type}_${key}`;
+    return translations[translationKey] || key;
+  }
+  return translations[key] || key;
+};
+
 // AJAX Configuration
 const AJAX_CONFIG = {
   baseUrl: '/dashboard/industries', // Base URL for your industry management API
@@ -180,8 +209,8 @@ if (AJAX_CONFIG.csrfToken) {
 // AJAX Request Function
 function makeAjaxRequest(action, params, callback) {
   if (!navigator.onLine) {
-    releaseFailureAlert({ message: 'No internet connection. Please check your network and try again.' });
-    callback(false, { error: 'No internet connection' });
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No internet connection. Please check your network and try again.' : 'لا يوجد اتصال بالإنترنت. يرجى فحص شبكتك والمحاولة مرة أخرى.' }}' });
+    callback(false, { error: '{{ $l == 'en' ? 'No internet connection' : 'لا يوجد اتصال بالإنترنت' }}' });
     return;
   }
 
@@ -199,7 +228,7 @@ function makeAjaxRequest(action, params, callback) {
   const config = actionConfig[action];
   if (!config) {
     console.error('Unknown action:', action);
-    releaseFailureAlert({ message: 'Invalid operation requested' });
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Invalid operation requested' : 'طلب عملية غير صحيح' }}' });
     callback(false, { error: 'Unknown action' });
     return;
   }
@@ -227,24 +256,28 @@ function makeAjaxRequest(action, params, callback) {
       if (data.success !== false) {
         callback(true, { ...params, response: data });
 
-        // ✅ Auto-hide success alert
-        releaseSuccessAlert({ message: data.message || 'Operation successful' });
-        setTimeout(() => $(".alert-success").fadeOut(), 2000);
+        // ✅ Only show server message for non-CRUD operations
+        // CRUD operations will show their own translated messages
+        const crudActions = ['add-industry', 'add-sector', 'add-technology', 'industry-delete', 'sector-delete', 'tech-delete', 'edit'];
+        if (!crudActions.includes(action)) {
+          releaseSuccessAlert({ message: data.message || '{{ $l == 'en' ? 'Operation successful' : 'تمت العملية بنجاح' }}' });
+          setTimeout(() => $(".alert-success").fadeOut(), 2000);
+        }
 
       } else {
-        releaseFailureAlert({ message: data.message || 'Operation failed' });
+        releaseFailureAlert({ message: data.message || '{{ $l == 'en' ? 'Operation failed' : 'فشلت العملية' }}' });
         setTimeout(() => $(".alert-danger").fadeOut(), 2500);
-        callback(false, { ...params, error: data.message || 'Operation failed' });
+        callback(false, { ...params, error: data.message || '{{ $l == 'en' ? 'Operation failed' : 'فشلت العملية' }}' });
       }
     })
     .catch(error => {
       // showLoadingIndicator(false); // ✅ Hide spinner
       console.error('AJAX request failed:', error);
 
-      let errorMessage = 'Network error occurred';
-      if (error.name === 'AbortError') errorMessage = 'Request timeout';
-      else if (error.message.includes('HTTP error')) errorMessage = `Server error: ${error.message}`;
-      else if (error.message.includes('Failed to fetch')) errorMessage = 'Network connection failed';
+      let errorMessage = '{{ $l == 'en' ? 'Network error occurred' : 'حدث خطأ في الشبكة' }}';
+      if (error.name === 'AbortError') errorMessage = '{{ $l == 'en' ? 'Request timeout' : 'انتهت مهلة الطلب' }}';
+      else if (error.message.includes('HTTP error')) errorMessage = `{{ $l == 'en' ? 'Server error:' : 'خطأ في الخادم:' }} ${error.message}`;
+      else if (error.message.includes('Failed to fetch')) errorMessage = '{{ $l == 'en' ? 'Network connection failed' : 'فشل في الاتصال بالشبكة' }}';
 
       releaseFailureAlert({ message: errorMessage });
       setTimeout(() => $(".alert-danger").fadeOut(), 2500);
@@ -579,9 +612,9 @@ function handleAddAction(type, newName, industryId) {
           break;
       }
       dump();
-      releaseSuccessAlert({ message: `${type.charAt(0).toUpperCase() + type.slice(1)} added successfully` });
+      releaseSuccessAlert({ message: getTranslatedMessage('added', type) });
     } else {
-      releaseFailureAlert({ message: result.error || `Failed to add ${type}` });
+      releaseFailureAlert({ message: getTranslatedMessage('add_failed', type) });
     }
   });
 }
@@ -634,9 +667,9 @@ function handleEditAction(type, id, oldName, newName, industryId) {
           break;
       }
       dump();
-      releaseSuccessAlert({ message: 'Changes saved successfully' });
+      releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Changes saved successfully' : 'تم حفظ التغييرات بنجاح' }}' });
     } else {
-      releaseFailureAlert({ message: result.error || 'Failed to save changes' });
+      releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to save changes' : 'فشل في حفظ التغييرات' }}' });
     }
   });
 }
@@ -733,9 +766,9 @@ function handleDeleteConfirmation(type, id, industryId = null) {
               break;
           }
           dump();
-          releaseSuccessAlert({ message: `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully` });
+          releaseSuccessAlert({ message: getTranslatedMessage('deleted', type) });
         } else {
-          releaseFailureAlert({ message: result.error || `Failed to delete ${type}` });
+          releaseFailureAlert({ message: getTranslatedMessage('delete_failed', type) });
         }
       });
     }
@@ -754,35 +787,62 @@ document.getElementById('addOtherSector').addEventListener('click', () => {
   const selectedIndustryId = parseInt(elements.selIndustrySector.value);
   const industry = findIndustryById(selectedIndustryId);
   
+  // Prevent duplicate requests
+  if (isAddingOtherSector) {
+    return;
+  }
+  
   if (industry && !industry.sectors.find(s => s.name === 'Other')) {
+    isAddingOtherSector = true;
+    
     makeAjaxRequest('add-sector', { name: 'Other', industryId: selectedIndustryId }, (success, result) => {
+      isAddingOtherSector = false; // Reset loading state
+      
       if (success) {
         const newSectorId = result.response?.id || getNextSectorId(selectedIndustryId);
         industry.sectors.push({ id: newSectorId, name: 'Other' });
         renderSectors();
         renderPreview();
         dump();
-        releaseSuccessAlert({ message: 'Other sector added successfully' });
+        releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Other sector added successfully' : 'تمت إضافة قطاع "أخرى" بنجاح' }}' });
       } else {
-        releaseFailureAlert({ message: result.error || 'Failed to add Other sector' });
+        releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to add Other sector' : 'فشل في إضافة قطاع "أخرى"' }}' });
       }
     });
+  } else if (industry && industry.sectors.find(s => s.name === 'Other')) {
+    // Show warning that "Other" sector already exists
+    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Other sector already exists in this industry' : 'قطاع "أخرى" موجود بالفعل في هذه الصناعة' }}' });
+  } else if (!industry) {
+    // Show warning that no industry is selected
+    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Please select an industry first' : 'يرجى اختيار صناعة أولاً' }}' });
   }
 });
 
 document.getElementById('addOtherTech').addEventListener('click', () => {
+  // Prevent duplicate requests
+  if (isAddingOtherTech) {
+    return;
+  }
+  
   if (!TECHNOLOGIES.find(t => t.name === 'Other')) {
+    isAddingOtherTech = true;
+    
     makeAjaxRequest('add-technology', { name: 'Other' }, (success, result) => {
+      isAddingOtherTech = false; // Reset loading state
+      
       if (success) {
         const newTechId = result.response?.id || nextTechId++;
         TECHNOLOGIES.push({ id: newTechId, name: 'Other' });
         renderTech();
         dump();
-        releaseSuccessAlert({ message: 'Other technology added successfully' });
+        releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Other technology added successfully' : 'تمت إضافة تكنولوجيا "أخرى" بنجاح' }}' });
       } else {
-        releaseFailureAlert({ message: result.error || 'Failed to add Other technology' });
+        releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to add Other technology' : 'فشل في إضافة تكنولوجيا "أخرى"' }}' });
       }
     });
+  } else {
+    // Show warning that "Other" technology already exists
+    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Other technology already exists' : 'تكنولوجيا "أخرى" موجودة بالفعل' }}' });
   }
 });
 
@@ -838,13 +898,13 @@ document.getElementById('importJson').addEventListener('click', () => {
             renderIndustries();
             renderTech();
             dump();
-            releaseSuccessAlert({ message: 'JSON imported successfully' });
+            releaseSuccessAlert({ message: '{{ $l == 'en' ? 'JSON imported successfully' : 'تم استيراد JSON بنجاح' }}' });
           } else {
-            releaseFailureAlert({ message: result.error || 'Failed to import JSON data' });
+            releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to import JSON data' : 'فشل في استيراد بيانات JSON' }}' });
           }
         });
       } catch (e) {
-        releaseFailureAlert({ message: 'Invalid JSON file format' });
+        releaseFailureAlert({ message: '{{ $l == 'en' ? 'Invalid JSON file format' : 'تنسيق ملف JSON غير صحيح' }}' });
         console.error('JSON parse error:', e);
       }
     };
@@ -859,13 +919,13 @@ document.getElementById('saveAll').addEventListener('click', () => {
       elements.jsonOut.textContent = JSON.stringify({ industries: DATA, technologies: TECHNOLOGIES }, null, 2);
       elements.statusBtn.textContent = 'Saved';
       elements.statusBtn.className = 'btn btn-sm btn-label-success';
-      releaseSuccessAlert({ message: 'All changes saved successfully' });
+      releaseSuccessAlert({ message: '{{ $l == 'en' ? 'All changes saved successfully' : 'تم حفظ جميع التغييرات بنجاح' }}' });
       setTimeout(() => {
         elements.statusBtn.textContent = 'All saved';
         elements.statusBtn.className = 'btn btn-sm btn-label-success';
       }, 1200);
     } else {
-      releaseFailureAlert({ message: result.error || 'Failed to save changes' });
+      releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to save changes' : 'فشل في حفظ التغييرات' }}' });
     }
   });
 });
@@ -873,40 +933,40 @@ document.getElementById('saveAll').addEventListener('click', () => {
 // Global Export Functions
 window.exportIndustries = function (format) {
   if (!industriesTable) { 
-    releaseFailureAlert({ message: 'No data available to export' }); 
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
     return; 
   }
   try { 
     industriesTable.button(`.buttons-${format}`).trigger(); 
   } catch (error) { 
     console.error('Export error:', error); 
-    releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); 
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
   }
 }
 
 window.exportSectors = function (format) {
   if (!sectorsTable) { 
-    releaseFailureAlert({ message: 'No data available to export' }); 
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
     return; 
   }
   try { 
     sectorsTable.button(`.buttons-${format}`).trigger(); 
   } catch (error) { 
     console.error('Export error:', error); 
-    releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); 
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
   }
 }
 
 window.exportTechnologies = function (format) {
   if (!techTable) { 
-    releaseFailureAlert({ message: 'No data available to export' }); 
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
     return; 
   }
   try { 
     techTable.button(`.buttons-${format}`).trigger(); 
   } catch (error) { 
     console.error('Export error:', error); 
-    releaseFailureAlert({ message: 'Failed to export data. Please try again.' }); 
+    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
   }
 }
 
@@ -914,11 +974,11 @@ window.exportTechnologies = function (format) {
 let isOnline = navigator.onLine;
 window.addEventListener('online', () => {
   isOnline = true;
-  releaseSuccessAlert({ message: 'Connection restored' });
+  releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Connection Restored' : 'تمت استعادة الاتصال' }}' });
 });
 window.addEventListener('offline', () => {
   isOnline = false;
-  releaseFailureAlert({ message: 'Connection lost - changes will be saved when connection is restored' });
+  releaseFailureAlert({ message: '{{ $l == 'en' ? 'Connection lost - changes will be saved when connection is restored' : 'فقد الاتصال - سيتم حفظ التغييرات عند استعادة الاتصال' }}' });
 });
 
 // Retry Mechanism
@@ -930,7 +990,7 @@ function retryFailedRequest(action, params, maxRetries = 3, currentRetry = 0) {
         retryFailedRequest(action, params, maxRetries, currentRetry + 1);
       }, 1000 * Math.pow(2, currentRetry));
     } else if (!success) {
-      releaseFailureAlert({ message: result.error || 'Request failed after multiple attempts' });
+      releaseFailureAlert({ message: '{{ $l == 'en' ? 'Request failed after multiple attempts' : 'فشل الطلب بعد محاولات متعددة' }}' });
     }
   });
 }
