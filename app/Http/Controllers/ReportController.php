@@ -22,6 +22,7 @@ use App\Exports\FinalScreeningReportExport;
 use App\Exports\ScreeningReportExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use stdClass;
 
 class ReportController extends Controller
 {
@@ -312,6 +313,7 @@ class ReportController extends Controller
                 'sec_child.id AS sub_criteria_id',
                 'sec_child.title AS sub_criteria_name',
                 'sec_child.weight AS sub_criteria_weight',
+                'sec_child.parent_id AS sub_criteria_parent_id',
                 'ser.id AS result_id',
                 'ser.evaluation_id AS result_evaluation_id',
                 'ser.user_id AS result_judge_id',
@@ -354,7 +356,8 @@ class ReportController extends Controller
             return $final;
         });
 
-        $finals = $finals->groupBy('evaluation_id');
+        $finals_by_evaluation = $finals->groupBy('evaluation_id');
+        $finals_by_company = $finals->where('evaluation_status', 1)->groupBy('company_id');
         // dd($finals->groupBy('company_id')->count());
         // dd($finals->groupBy('criteria_id')->count());
         
@@ -417,11 +420,101 @@ class ReportController extends Controller
         //         ->where('status', 0); // 0 = draft, 1 = published
         // })->count();
 
-      
-        $final_screening_count = count($finals);
-        $final_pending_screening_count = $finals->where('criteria_id', 0);
-        $final_done_screening_count = $finals->where('result_status', 1)->where('criteria_id', '!=', 0);
-        $draft_screenings_count = $finals->where('result_status', 0)->where('criteria_id', '!=', 0);
+        $_companies = DB::table('companies AS c')
+            ->select([
+                'c.id',
+                'c.name_ar',
+                'c.name_en',
+            ])
+            ->whereIn('c.step', function($q) {
+                return $q->select(['s.id'])->from('steps AS s')->where('s.stype', 5);
+            })->get();
+
+        $finals_by_evaluation = $finals_by_evaluation->filter(function($evaluation) {
+            $evaluation = $evaluation->where('evaluation_status', 1);
+            return !$evaluation->isEmpty();
+        });
+        $evaluations_structure = $finals_by_evaluation->map(function($ev) {
+            $e = $ev->first();
+            $evaluation = new stdClass;
+            $evaluation->id = $e->evaluation_id;
+            $evaluation->step = $e->step_id;
+            $evaluation->status = $e->evaluation_status;
+            $evaluation->criteria = $ev->groupBy('criteria_id')->map(function($groupedCriteria) {
+                $c = $groupedCriteria->first();
+                $criteria = new stdClass;
+                $criteria->id = $c->criteria_id;
+                $criteria->name = $c->criteria_name;
+                $criteria->weight = $c->criteria_weight;
+                $criteria->children = $groupedCriteria->groupBy('sub_criteria_id')->map(function($groupedCriteriaChild) {
+                    $c = $groupedCriteriaChild->first();
+                    $criteriaChild = new stdClass;
+                    $criteriaChild->id = $c->sub_criteria_id;
+                    $criteriaChild->name = $c->sub_criteria_name;
+                    $criteriaChild->weight = $c->sub_criteria_weight;
+                    return $criteriaChild;
+                })->values();
+                return $criteria;
+            })->values();
+            return $evaluation;
+        })->values();
+        $evaluated_companies = $finals_by_company->map(function($groupedCompany) {
+            $c = $groupedCompany->first();
+            $company = new stdClass;
+            $company->id = $c->company_id;
+            $company->step = $c->step_id;
+            $company->judges = $c->judges;
+            $company->evaluations = $groupedCompany->pluck('evaluation_id')->unique()->values();
+            $company->results = $groupedCompany->map(function($r) {
+                $result = new stdClass;
+                $result->id = $r->result_id;
+                $result->evaluation_id = $r->result_evaluation_id;
+                $result->judge_id = $r->result_judge_id;
+                $result->company_id = $r->result_company_id;
+                $result->criteria_id = $r->result_criteria_id;
+                $result->score = $r->result_score;
+                $result->comment = $r->result_comment;
+                $result->status = $r->result_status;
+                return $result;
+            })->unique('id')->values();
+            return $company;
+        })->values();
+
+        $_companies = $_companies->map(function($company) use ($evaluated_companies, $evaluations_structure) {
+            $status = 'not_evaluated';
+            $evaluated_company = $evaluated_companies->where('id', $company->id)->first();
+
+            if( !empty( $evaluated_company ) )
+            {
+                $judges_ids = $evaluated_company->judges->pluck('id')->unique()->toArray();
+                $evaluations = $evaluations_structure->whereIn('id', $evaluated_company->evaluations->toArray())->values();
+                
+                $required_criteria = [];
+                foreach( $evaluations as $evaluation )
+                {
+                    foreach( $evaluation->criteria as $criteria )
+                    {
+                        $required_criteria = array_merge($required_criteria, $criteria->children->pluck('id')->toArray());
+                    }
+
+                }
+                $required_criteria = array_values( array_unique($required_criteria) );
+                $total_required_count = count( $judges_ids ) * count( $required_criteria );
+                if( $evaluated_company->results->count() > 0 )
+                {
+                    $published_results = $evaluated_company->results->where('status', 1)->values();
+                    if( $published_results->count() == $total_required_count ) { $status = 'published'; }
+                    else { $status = 'draft'; }
+                }
+            }
+            $company->status = $status;
+            return $company;
+        });
+
+        $final_screening_count = $_companies->count();
+        $final_pending_screening_count = $_companies->where('status', 'not_evaluated')->values();
+        $final_done_screening_count = $_companies->where('status', 'published')->values();
+        $draft_screenings_count = $_companies->where('status', 'draft')->values();
         $Judges = $judges->count();
 
 
