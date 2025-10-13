@@ -117,6 +117,10 @@ let industriesTable = null;
 let sectorsTable = null;
 let techTable = null;
 
+// Loading states to prevent duplicate requests
+let isAddingOtherSector = false;
+let isAddingOtherTech = false;
+
 // ID generators
 let nextIndustryId = Math.max(...DATA.map(d => d.id), 0) + 1;
 let nextTechId = Math.max(...TECHNOLOGIES.map(t => t.id), 0) + 1;
@@ -783,8 +787,17 @@ document.getElementById('addOtherSector').addEventListener('click', () => {
   const selectedIndustryId = parseInt(elements.selIndustrySector.value);
   const industry = findIndustryById(selectedIndustryId);
   
+  // Prevent duplicate requests
+  if (isAddingOtherSector) {
+    return;
+  }
+  
   if (industry && !industry.sectors.find(s => s.name === 'Other')) {
+    isAddingOtherSector = true;
+    
     makeAjaxRequest('add-sector', { name: 'Other', industryId: selectedIndustryId }, (success, result) => {
+      isAddingOtherSector = false; // Reset loading state
+      
       if (success) {
         const newSectorId = result.response?.id || getNextSectorId(selectedIndustryId);
         industry.sectors.push({ id: newSectorId, name: 'Other' });
@@ -796,12 +809,27 @@ document.getElementById('addOtherSector').addEventListener('click', () => {
         releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to add Other sector' : 'فشل في إضافة قطاع "أخرى"' }}' });
       }
     });
+  } else if (industry && industry.sectors.find(s => s.name === 'Other')) {
+    // Show warning that "Other" sector already exists
+    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Other sector already exists in this industry' : 'قطاع "أخرى" موجود بالفعل في هذه الصناعة' }}' });
+  } else if (!industry) {
+    // Show warning that no industry is selected
+    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Please select an industry first' : 'يرجى اختيار صناعة أولاً' }}' });
   }
 });
 
 document.getElementById('addOtherTech').addEventListener('click', () => {
+  // Prevent duplicate requests
+  if (isAddingOtherTech) {
+    return;
+  }
+  
   if (!TECHNOLOGIES.find(t => t.name === 'Other')) {
+    isAddingOtherTech = true;
+    
     makeAjaxRequest('add-technology', { name: 'Other' }, (success, result) => {
+      isAddingOtherTech = false; // Reset loading state
+      
       if (success) {
         const newTechId = result.response?.id || nextTechId++;
         TECHNOLOGIES.push({ id: newTechId, name: 'Other' });
@@ -812,6 +840,9 @@ document.getElementById('addOtherTech').addEventListener('click', () => {
         releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to add Other technology' : 'فشل في إضافة تكنولوجيا "أخرى"' }}' });
       }
     });
+  } else {
+    // Show warning that "Other" technology already exists
+    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Other technology already exists' : 'تكنولوجيا "أخرى" موجودة بالفعل' }}' });
   }
 });
 
