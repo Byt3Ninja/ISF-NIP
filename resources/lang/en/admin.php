@@ -2394,4 +2394,8 @@ return [
 	'Training_Sessions_Duration' => 'Training Sessions Duration',
 	'First_Screening' => 'First Screening',
 	'Final_Screening' => 'Final Screening',
+	'Session Record updated' => 'Session Record Updated Successfully',
+	'Session_report_updated' => 'Session Report Updated Successfully',
+	'not_available' => 'Not Available',
+	'Hackathons' => 'Hackathons',
 ];

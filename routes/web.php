@@ -161,8 +161,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
     Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners');
     Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
-    Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
-    Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
+    Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam')->name('hackathon.viewTeam');
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
