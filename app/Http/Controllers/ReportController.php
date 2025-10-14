@@ -827,6 +827,7 @@ class ReportController extends Controller
         $cycles_kpis = [];
         $cycles_sessions = [];
         $cycles_screenings = [];
+        $cycles_final_screenings = [];
         foreach ($cycles as $c) {
             $per_cycle_mentor_requests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
                 $q->where('organization_id', $organization_id);
@@ -883,6 +884,33 @@ class ReportController extends Controller
                 ->all();
 
             $cycles_screenings[$c->id] = $per_cycle_screening_companies;
+
+            $per_cycle_final_screening_companies = Company::with(['user'])
+                ->whereHas('stepdata', function ($q) use ($organization_id, $c) {
+                    return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                        $query->where('cycles.id', $c->id)
+                            ->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                                $q->where('organization_id', $organization_id);
+                            });
+                    })->where('stype', 5);
+                })
+                ->orderBy('name_en')
+                ->get()
+                ->map(function ($company) use ($c) {
+                    $representative = $company->user;
+                    return [
+                        'id' => $company->id,
+                        'name' => $company->{'name_' . app()->getLocale()} ?? $company->name_en,
+                        'representative' => $representative ? ($representative->{'first_name_' . app()->getLocale()} . ' ' . $representative->{'last_name_' . app()->getLocale()}) : '-',
+                        'email' => $representative->email ?? '-',
+                        'phone' => $representative->phone ?? '-',
+                        'cycle_id' => $c->id,
+                    ];
+                })
+                ->values()
+                ->all();
+
+            $cycles_final_screenings[$c->id] = $per_cycle_final_screening_companies;
 
             $per_cycle_training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id, $c) {
                 $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id, $c) {
@@ -951,6 +979,7 @@ class ReportController extends Controller
         $data['cycles_kpis'] = $cycles_kpis; // new: per-cycle KPI data
         $data['cycles_sessions'] = $cycles_sessions;
         $data['cycles_screenings'] = $cycles_screenings;
+        $data['cycles_final_screenings'] = $cycles_final_screenings;
         $data['steps'] = $steps;
         $data['startups'] = $startups->count();
         $data['screening_sessions_count'] = $screenings;

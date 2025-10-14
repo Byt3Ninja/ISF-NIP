@@ -13,7 +13,8 @@
           $isMentorshipDurationCard = $item['label'] == 'Mentorship_Sessions_Duration';
           $cardClasses = 'card card-border-shadow-' . $item['color'] . ' h-100';
           $isScreeningCard = $item['label'] == 'Screening';
-          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard || $isScreeningCard) {
+          $isFinalScreeningCard = $item['label'] == 'Final_Screening';
+          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard || $isScreeningCard || $isFinalScreeningCard) {
             $cardClasses .= ' cursor-pointer';
           }
           if ($isSubscribedCard) {
@@ -27,6 +28,9 @@
           }
           if ($isScreeningCard) {
             $cardClasses .= ' screening-startups-card';
+          }
+          if ($isFinalScreeningCard) {
+            $cardClasses .= ' final-screening-startups-card';
           }
 
           $unitSuffix = '';
@@ -43,6 +47,8 @@
             data-url="{{ route('mentorships.sessions_list', ['show' => 'all']) }}"
           @elseif($isScreeningCard)
             data-url="/dashboard/screening/results"
+          @elseif($isFinalScreeningCard)
+            data-url="/dashboard/final/results"
           @endif
         >
         <div class="card-body py-2" style="display: grid; place-items: center;">
@@ -453,6 +459,14 @@
     });
 
     $(document).on('click', '.screening-startups-card', function (event) {
+      event.preventDefault();
+      const targetUrl = $(this).data('url');
+      if (targetUrl) {
+        window.location.href = targetUrl;
+      }
+    });
+
+    $(document).on('click', '.final-screening-startups-card', function (event) {
       event.preventDefault();
       const targetUrl = $(this).data('url');
       if (targetUrl) {
