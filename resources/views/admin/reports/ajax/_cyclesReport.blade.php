@@ -38,11 +38,11 @@
           }
 
           $unitSuffix = '';
-          if (isset($item['unit']) && $item['unit']) {
-            if ($item['unit'] !== 'hh:mm') {
-              $unitSuffix = ' ' . $item['unit'];
-            }
-          }
+          // if (isset($item['unit']) && $item['unit']) {
+          //   if ($item['unit'] !== 'hh:mm') {
+          //     $unitSuffix = ' ' . $item['unit'];
+          //   }
+          // }
         @endphp
         @if($isEnrolledMentorsCard)
           <a href="/dashboard/show/Mentors?enrolledIn" class="text-decoration-none d-block">
