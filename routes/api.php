@@ -174,7 +174,13 @@ Route::prefix('training')->group(function () {
     Route::get('trainers', [TrainingReportController::class, 'trainers']);
     Route::get('topics', [TrainingReportController::class, 'topics']);
     Route::get('sessions/recent', [TrainingReportController::class, 'recentSessions']);
+    Route::post('session-reports', [TrainingReportController::class, 'getSessionReportsData']);
 });
+
+Route::prefix('mentorship')->group(function () {
+    Route::post('session-reports', [MentorshipReportController::class, 'sessionReportsData']);
+});
+
 
 
     // جروبات
