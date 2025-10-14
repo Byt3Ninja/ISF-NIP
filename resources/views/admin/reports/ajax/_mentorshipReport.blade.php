@@ -15,7 +15,7 @@
         'icon' => 'user-check',
         'color' => 'secondary', 
         'filter' => '', 
-        'href' => '/dashboard/show/mentors?enrolled=true' 
+        'href' => '/dashboard/show/mentors?enrolledInProgramFilter=1' 
       ],
       [ 
         'value' => $total_sessions_count ?? 0, 
