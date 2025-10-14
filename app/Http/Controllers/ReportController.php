@@ -246,7 +246,10 @@ class ReportController extends Controller
         $data['sessions'] = $sessions->get();
 
         $data['total_sessions_count'] = $sessions->count();
-        $data['sessions_period'] = $sessions->sum('duration')/60;
+        $totalMinutes = $sessions->sum('duration');
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+        $data['sessions_period'] = sprintf("%d:%02d", $hours, $minutes);
         $data['zoom_sessions_count'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
             $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
                 $query->whereHas('cycle',function ($query) use ($organization_id){
@@ -304,19 +307,7 @@ class ReportController extends Controller
         $final_screening_steps = $steps->pluck('id');
         $evaluation_ids = ScreeningEvaluation::whereIn('step_id', $final_screening_steps)->pluck('id');
 
-        // Get real data for final screenings
-        // $final_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
-        //             $query->where('organization_id', $organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })->get();
-
-      
-
-    
-    
+   
       $finals = DB::table('finalscreenings AS fs')
             ->select([
                 'fs.id',
@@ -376,67 +367,7 @@ class ReportController extends Controller
 
         $finals_by_evaluation = $finals->groupBy('evaluation_id');
         $finals_by_company = $finals->where('evaluation_status', 1)->groupBy('company_id');
-        // dd($finals->groupBy('company_id')->count());
-        // dd($finals->groupBy('criteria_id')->count());
         
-        // dd($judges->count());
-        // ScreeningEvaluation::getEvaluationData( $id )
-    
-        
-        // $Company = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
-        //             $query->where('organization_id', $organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })
-        // ->whereIn('id', $final_screenings->pluck('company_id'))
-        // ->get();
-
-                
-            
-        // $allJudges = collect();
-        // foreach ($final_screenings as $item) {
-        //     $judges = json_decode($item->judges, true);
-        //     if (is_array($judges)) {
-        //         $allJudges = $allJudges->merge($judges);
-        //     }
-        // }
-        // $allJudges = $allJudges->values();
-        // $existingJudges = DB::table('screening_evaluation_results')
-        // ->whereIn('company_id', $Company->pluck('id'))
-        //     ->whereIn('user_id', $allJudges)
-        //     ->pluck('user_id');
-        // $found = $allJudges->intersect($existingJudges);
-        // $notFound = $allJudges->diff($existingJudges);
-
-        // $final_done_screenings = $existingJudges->where('status', 1)->count();
-        // $draft_screenings_count = $existingJudges->where('status', 0);
-        
-
-        // $final_done_screenings = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
-        //             $query->where('organization_id', $organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })->whereHas('finalData')->get();
-        
-
-        // Calculate draft count (companies with screening evaluations in draft status)
-        // $draft_screenings_count = Company::whereHas('stepdata', function ($q) use ($organization_id) {
-        //     $q->when(!is_null($organization_id), function ($q) use ($organization_id) {
-        //         return $q->whereHas('cycle', function ($query) use ($organization_id) {
-        //             $query->where('organization_id', $organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })->whereExists(function ($query) use ($evaluation_ids) {
-        //     $query->select(DB::raw(1))
-        //         ->from('screening_evaluation_results')
-        //         ->whereIn('evaluation_id', $evaluation_ids)
-        //         ->whereRaw('screening_evaluation_results.company_id = companies.id')
-        //         ->where('status', 0); // 0 = draft, 1 = published
-        // })->count();
 
         $_companies = DB::table('companies AS c')
             ->select([
@@ -602,63 +533,7 @@ class ReportController extends Controller
         $data['startups'] = $startups;
         $data['judges'] = $judges;
 
-        // $metadata = ScreeningEvaluationResults::metadataReport($steps->pluck('id')->toArray());
-
-        // $allCompanies = collect();
-        // foreach ($metadata as $stepId => $dataSet) {
-        //     $allCompanies = $allCompanies->concat($dataSet['companies']);
-        // }
-        //  $allCompanies = $allCompanies->unique('id')->values();
-
-        // $data['screening_sessions_count'] = $allCompanies->count();
-        // $final_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id){
-        //     $q->when(!is_null($organization_id),function ($q) use($organization_id){
-        //         return $q->whereHas('cycle',function ($query) use ($organization_id){
-        //             $query->where('organization_id',$organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })->get();
-        // $final_pending_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id){
-        //     $q->when(!is_null($organization_id),function ($q) use($organization_id){
-        //         return $q->whereHas('cycle',function ($query) use ($organization_id){
-        //             $query->where('organization_id',$organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })->doesntHave('finalData')->get();
-        // $final_done_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id){
-        //     $q->when(!is_null($organization_id),function ($q) use($organization_id){
-        //         return $q->whereHas('cycle',function ($query) use ($organization_id){
-        //             $query->where('organization_id',$organization_id);
-        //         });
-        //     })->where('stype', 5);
-        // })->whereHas('finalData')->get();
-
-        // $screening_pending_sessions =  Company::whereHas('stepdata',function ($q)use ($organization_id){
-        //     $q->when(!is_null($organization_id),function ($q) use($organization_id){
-        //         return $q->whereHas('cycle',function ($query) use ($organization_id){
-        //             $query->where('organization_id',$organization_id);
-        //         });
-        //     })->where('stype', 2)->whereHas('formData',function ($q){
-        //         $q->where('screening','{}');
-        //     });
-        // })->get();
-        // $screening_done_sessions =  Company::whereHas('stepdata',function ($q)use ($organization_id){
-        //     $q->when(!is_null($organization_id),function ($q) use($organization_id){
-        //         return $q->whereHas('cycle',function ($query) use ($organization_id){
-        //             $query->where('organization_id',$organization_id);
-        //         });
-        //     })->where('stype', 2)->whereHas('formData',function ($q){
-        //         $q->where('screening','<>','{}');
-        //     });
-        // })->get();
-
-        // $data['screening_pending_sessions_count'] = count($screening_pending_sessions);
-        // $data['screening_done_sessions_count'] = count($screening_done_sessions);
-        // $data['final_screening_count']=count($final_screenings);
-        // $data['final_pending_screening_count']=count($final_pending_screenings);
-        // $data['final_done_screening_count']=count($final_done_screenings);
-        // $data['screening_companies']= $screening_pending_sessions;
-        // $data['final_screening_companies']= $final_pending_screenings;
+        
         return $data;
     }
 
@@ -967,7 +842,10 @@ class ReportController extends Controller
         // Overall aggregates (no cycle filter)
         $data['training_sessions_count'] = $training_sessions->count();
         $data['training_sessions'] = $training_sessions->get();
-        $data['training_sessions_period'] = $training_sessions->sum('duration') / 60;
+        $totalMinutes_training_sessions_period = $training_sessions->sum('duration');
+        $hours_training_sessions_period = floor($totalMinutes_training_sessions_period / 60);
+        $minutes_training_sessions_period = $totalMinutes_training_sessions_period % 60;
+        $data['training_sessions_period'] = sprintf("%d:%02d", $hours_training_sessions_period, $minutes_training_sessions_period);
         $data['mentorRequests_count'] = $mentorRequests->count();
         $data['mentorships_period_minutes'] = $totalMentorshipMinutes;
         $data['mentorships_period_formatted'] = $this->formatMinutesToHoursMinutes($totalMentorshipMinutes);
@@ -993,7 +871,7 @@ class ReportController extends Controller
             [ 'value' => $data['mentorships_period_formatted'] ?? '00:00', 'label' => 'Mentorship_Sessions_Duration', 'icon' => 'clock', 'color' => 'danger' ],
             [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
             [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
-            [ 'value' => number_format($data['training_sessions_period'] ?? 0, 1), 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary', 'unit' => 'h' ],
+            [ 'value' => $data['training_sessions_period'] ?? 0, 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary', 'unit' => 'h' ],
             [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'Screening', 'icon' => 'scale', 'color' => 'success' ],
             [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
         ];
