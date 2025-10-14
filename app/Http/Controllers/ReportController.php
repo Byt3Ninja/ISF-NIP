@@ -826,6 +826,7 @@ class ReportController extends Controller
         // Per-cycle KPI data
         $cycles_kpis = [];
         $cycles_sessions = [];
+        $cycles_screenings = [];
         foreach ($cycles as $c) {
             $per_cycle_mentor_requests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
                 $q->where('organization_id', $organization_id);
@@ -855,6 +856,33 @@ class ReportController extends Controller
             $cycles_sessions[$c->id] = $per_cycle_sessions;
 
             $cycleMentorshipMinutes = (clone $per_cycle_mentor_requests)->sum('period');
+
+            $per_cycle_screening_companies = Company::with(['user'])
+                ->whereHas('stepdata', function ($q) use ($organization_id, $c) {
+                    return $q->whereHas('cycle', function ($query) use ($organization_id, $c) {
+                        $query->where('cycles.id', $c->id)
+                            ->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                                $q->where('organization_id', $organization_id);
+                            });
+                    })->where('stype', 2);
+                })
+                ->orderBy('name_en')
+                ->get()
+                ->map(function ($company) use ($c) {
+                    $representative = $company->user;
+                    return [
+                        'id' => $company->id,
+                        'name' => $company->{'name_' . app()->getLocale()} ?? $company->name_en,
+                        'representative' => $representative ? ($representative->{'first_name_' . app()->getLocale()} . ' ' . $representative->{'last_name_' . app()->getLocale()}) : '-',
+                        'email' => $representative->email ?? '-',
+                        'phone' => $representative->phone ?? '-',
+                        'cycle_id' => $c->id,
+                    ];
+                })
+                ->values()
+                ->all();
+
+            $cycles_screenings[$c->id] = $per_cycle_screening_companies;
 
             $per_cycle_training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id, $c) {
                 $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id, $c) {
@@ -922,6 +950,7 @@ class ReportController extends Controller
         $data['cycles'] = $cycles; // all cycles
         $data['cycles_kpis'] = $cycles_kpis; // new: per-cycle KPI data
         $data['cycles_sessions'] = $cycles_sessions;
+        $data['cycles_screenings'] = $cycles_screenings;
         $data['steps'] = $steps;
         $data['startups'] = $startups->count();
         $data['screening_sessions_count'] = $screenings;
@@ -936,7 +965,7 @@ class ReportController extends Controller
             [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
             [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
             [ 'value' => number_format($data['training_sessions_period'] ?? 0, 1), 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary', 'unit' => 'h' ],
-            [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'First_Screening', 'icon' => 'scale', 'color' => 'success' ],
+            [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'Screening', 'icon' => 'scale', 'color' => 'success' ],
             [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
         ];
 
