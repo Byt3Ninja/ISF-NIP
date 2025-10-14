@@ -21,7 +21,7 @@
       }
       
       $kpiData = [
-        ['value' => $totalSessions, 'label' => 'total', 'icon' => 'chart-dots-3', 'color' => 'primary', 'filter' => 'total'],
+        ['value' => $totalSessions, 'label' => 'total_surveys', 'icon' => 'chart-dots-3', 'color' => 'primary', 'filter' => 'total'],
         ['value' => $answeredCount, 'label' => 'answered', 'icon' => 'circle-check', 'color' => 'success', 'filter' => 'answered'],
         ['value' => $notAnsweredCount, 'label' => 'notAnswered', 'icon' => 'circle-x', 'color' => 'danger', 'filter' => 'not-answered'],
       ];

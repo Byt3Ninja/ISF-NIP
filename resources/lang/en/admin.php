@@ -2404,7 +2404,7 @@ return [
 	'Mentorship_Sessions_Duration' => 'Mentorship Sessions Duration',
 	'Startups_Attendance_Rate' => 'Startups Attendance Rate',
 	'Training_Sessions' => 'Training Sessions',
-	'Training_Sessions_Duration' => 'Training Sessions Duration',
+	'Training_Sessions_Duration' => 'Training Sessions Durations',
 	'First_Screening' => 'First Screening',
 	'Final_Screening' => 'Final Screening',
 	'Session Record updated' => 'Session Record Updated Successfully',
@@ -2454,4 +2454,5 @@ return [
 	'request_timeout' => 'Request timed out. Please try again.',
 	'error_fetching_session_data' => 'Error occurred while fetching session data',
 	'Select_Sectors' => 'Select Sectors',
+	'total_surveys' => 'Total Surveys',
 ];
