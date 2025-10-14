@@ -401,6 +401,8 @@ return [
 	'Export' => 'Export',
 	'No_Startups_To_Export' => 'There are no startups to export with the selected filters.',
 	'No_Subscribed_Startups' => 'No subscribed startups available for this program.',
+	'No_Mentorship_Requests' => 'No mentorship requests available for this program.',
+	'View_Mentorship_Requests' => 'View mentorship requests',
 	'Technology_name_too_long' => 'Technology name must be 50 characters or less',
 	'You need to add your Startup details first' => 'You need to add your Startup details first.',
 	'Google Map full URL' => 'Google Map full URL',

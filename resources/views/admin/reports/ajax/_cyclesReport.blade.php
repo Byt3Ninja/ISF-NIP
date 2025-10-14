@@ -7,10 +7,25 @@
   <div class="row justify-content-center mb-8">
     @foreach($kpiData as $key => $item)
       <div class="col-sm-6 col-md-4 col-lg-2 mb-4">
-        <div
-          class="card card-border-shadow-{{ $item['color'] }} h-100 {{ $item['label'] == 'Subscribed_Startups' ? 'cursor-pointer subscribed-startups-card' : '' }}"
-          @if($item['label'] == 'Subscribed_Startups')
+        @php
+          $isSubscribedCard = $item['label'] == 'Subscribed_Startups';
+          $isMentorshipCard = $item['label'] == 'Mentorship_Requests';
+          $cardClasses = 'card card-border-shadow-' . $item['color'] . ' h-100';
+          if ($isSubscribedCard || $isMentorshipCard) {
+            $cardClasses .= ' cursor-pointer';
+          }
+          if ($isSubscribedCard) {
+            $cardClasses .= ' subscribed-startups-card';
+          }
+          if ($isMentorshipCard) {
+            $cardClasses .= ' mentorship-requests-card';
+          }
+        @endphp
+        <div class="{{ $cardClasses }}"
+          @if($isSubscribedCard)
             data-url="{{ route('users.view_companies', ['programFilter' => 'all']) }}"
+          @elseif($isMentorshipCard)
+            data-url="{{ route('mentorships.sessions_list', ['show' => 'all']) }}"
           @endif
         >
         <div class="card-body py-2" style="display: grid; place-items: center;">
@@ -344,6 +359,14 @@
     }
 
     $(document).on('click', '.subscribed-startups-card', function (event) {
+      event.preventDefault();
+      const targetUrl = $(this).data('url');
+      if (targetUrl) {
+        window.location.href = targetUrl;
+      }
+    });
+
+    $(document).on('click', '.mentorship-requests-card', function (event) {
       event.preventDefault();
       const targetUrl = $(this).data('url');
       if (targetUrl) {
