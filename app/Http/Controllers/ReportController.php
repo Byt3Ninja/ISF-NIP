@@ -178,6 +178,20 @@ class ReportController extends Controller
                 $query->where('organization_id',$organization_id);
             });
         })->get();
+        
+        // Get all sessions with relationships
+        $data['sessions'] = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])
+            ->when(!is_null($organization_id),function ($q)use ($organization_id){
+                $q->where('organization_id',$organization_id);
+            })
+            ->orderBy('zoom_date', 'desc')
+            ->get();
+        
+        // Get cycles for reference
+        $data['cycles'] = Cycle::when(!is_null($organization_id),function ($q)use ($organization_id){
+            $q->where('organization_id',$organization_id);
+        })->get();
+        
         // ==============> counts <=================
 
         // $data['mentors_count'] = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
@@ -188,7 +202,9 @@ class ReportController extends Controller
 			->count();
         $data['total_sessions_count']= $mentorRequests->count();
         $data['mentorships_period'] =$mentorRequests->sum('period')/60;
-        $data['approved_sessions_count'] = $mentorRequests->whereNotNull('start_url')->count();
+        $data['approved_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
+            $q->where('organization_id',$organization_id);
+        })->where('approved','Yes')->count();
         $data['pending_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->where('approved','Yes')->where(function($q){
