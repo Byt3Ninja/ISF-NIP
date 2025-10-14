@@ -2441,6 +2441,7 @@ return [
 	'Sectors' => 'القطاعات',
 	'All_Stages' => 'جميع المراحل',
 	'Subscribed_Startups' => 'الشركات الناشئة المشتركة',
+	'Subscribe_Startup_In_Program' => 'اشتراك الشركات الناشئة في البرنامج',
 	'Enrolled_Mentors' => 'المرشدين المسجلين',
 	'Mentorship_Requests' => 'طلبات الإرشاد',
 	'Mentorship_Requests_Duration' => 'مدة طلبات الإرشاد',

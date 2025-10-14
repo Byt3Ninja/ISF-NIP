@@ -1857,7 +1857,10 @@ class ClientCompanyController extends Controller
         
         // Handle program/cycle filter
         if ($request->filled('programFilter')) {
-            $filters['programId'] = $request->get('programFilter');
+            $programFilter = $request->get('programFilter');
+            if ($programFilter !== 'all') {
+                $filters['programId'] = $programFilter;
+            }
         }
         
         // Handle stage filter
