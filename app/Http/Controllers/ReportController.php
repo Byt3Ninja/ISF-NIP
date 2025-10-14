@@ -872,7 +872,7 @@ class ReportController extends Controller
                 'mentorships_period' => $per_cycle_mentor_requests->sum('period') / 60,
                 'mentorship_attendance_rate' => $per_cycle_mentor_requests->count() ? ($per_cycle_mentor_requests->sum('done') / $per_cycle_mentor_requests->count()) * 100 : 0,
                 'training_sessions_count' => $per_cycle_training_sessions->count(),
-                'training_sessions_period' => $per_cycle_training_sessions->sum('duration') / 60,
+                'training_sessions_period' => number_format($per_cycle_training_sessions->sum('duration') / 60, 2),
                 'startups' => $per_cycle_startups->count(),
                 'screening_sessions_count' => $per_cycle_screenings,
                 'final_screening_count' => $per_cycle_final_screenings,
@@ -904,7 +904,7 @@ class ReportController extends Controller
             [ 'value' => $data['mentorships_period'] ?? 0, 'label' => 'Mentorship_Requests_Duration', 'icon' => 'clock', 'color' => 'danger' ],
             [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
             [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
-            [ 'value' => $data['training_sessions_period'] ?? 0, 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary' ],
+            [ 'value' => number_format($data['training_sessions_period'] ?? 0, 2), 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary' ],
             [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'First_Screening', 'icon' => 'scale', 'color' => 'success' ],
             [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
         ];

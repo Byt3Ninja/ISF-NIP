@@ -2442,4 +2442,5 @@ return [
 	'network_error' => 'Network error occurred. Please check your connection.',
 	'request_timeout' => 'Request timed out. Please try again.',
 	'error_fetching_session_data' => 'Error occurred while fetching session data',
+	'Select_Sectors' => 'Select Sectors',
 ];

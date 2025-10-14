@@ -468,7 +468,11 @@
               @php $stages = App\Stage::all(); @endphp
               @foreach ($stages as $stage)
                 <option value="{{ $stage->id }}" {{ request('stage') == $stage->id ? 'selected' : '' }}>
-                  {{ $stage->{'name_' . $l} ?? '' }}
+                 @if(str_contains('name_' . $l, 'ar') || str_contains('name_' . $l, 'en'))
+                    {{ $stage->{'name_' . $l} }}
+                  @else
+                    {{ $stage->name }}
+                  @endif
                 </option>
               @endforeach
             </select>
@@ -477,7 +481,7 @@
           <!-- Sectors Filter -->
           <div class="form-group mb-4">
             <label for="sectors" class="form-label">{{ __('admin.Sectors') }}</label>
-            <select name="sectors[]" id="sectors" class="form-select select2" multiple="multiple">
+            <select name="sectors[]" id="sectors" class="form-select select2" multiple="multiple" data-placeholder="{{ __('admin.Select_Sectors') }}">
               @php
               $sectors = App\Sector::whereNull('parent_id')->get();
               $selectedSectors = request('sectors', []);
@@ -486,7 +490,11 @@
               <optgroup label="{{ $sector_group->name }}">
                 @foreach ($sector_group->children as $sector)
                 <option value="{{ $sector->id }}" {{ in_array($sector->id, $selectedSectors) ? 'selected' : '' }}>
-                  {{ $sector->{'name_' . $l} }}
+                  @if(str_contains('name_' . $l, 'ar') || str_contains('name_' . $l, 'en'))
+                    {{ $sector->{'name_' . $l} }}
+                  @else
+                    {{ $sector->name }}
+                  @endif
                 </option>
                 @endforeach
               </optgroup>
