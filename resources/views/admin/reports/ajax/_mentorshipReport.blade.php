@@ -63,7 +63,7 @@
         'icon' => 'checkbox',
         'color' => 'primary', 
         'filter' => '', 
-        'href' => '/dashboard/mentorship/sessions?done=yes' 
+        'href' => '/dashboard/mentorship/sessions?show=all&done=yes' 
       ],
       [ 
         'value' => $pending_sessions_count ?? 0, 
@@ -71,7 +71,7 @@
         'icon' => 'hourglass',
         'color' => 'dark', 
         'filter' => '', 
-        'href' => '/dashboard/mentorship/sessions?done=no' 
+        'href' => '/dashboard/mentorship/sessions?show=all&done=no' 
       ]
     ];
   @endphp

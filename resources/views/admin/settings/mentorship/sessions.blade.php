@@ -66,9 +66,15 @@
                     <i class="ti ti-filter me-2"></i>
                     {{ __('cycles.Filter') }}
                   </button>
-                  <button class="btn btn-light ExportExcelMentor">
-                    <i class="ti ti-file-export me-2"></i>{{ __('cycles.Export') }}
-                  </button>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="ti ti-file-export me-2"></i>{{ __('cycles.Export') }}
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportMentorship('csv')"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                      <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportMentorship('excel')"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -77,7 +83,7 @@
                 <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered modal-md">
                     <div class="modal-content">
-                      <form method="GET" action="{{ url()->current() }}">
+                      <form id="filterForm" method="GET" action="{{ url()->current() }}">
                         <input type="hidden" name="show" value="all">
                         <div class="modal-header">
                           <h5 class="modal-title" id="filterModalLabel">{{ __('cycles.Filter_Sessions') }}</h5>
@@ -89,15 +95,17 @@
                             <!-- Start Date -->
                             <div class="col-12 col-md-6">
                               <label for="start_date" class="form-label">{{ __('cycles.Start_Date') }}</label>
-                              <input type="text" name="start_date" class="form-control datepicker" 
-                                value="{{ request('start_date') }}" placeholder="Start Date">
+                              <input type="text" id="filter_start_date" name="start_date" class="form-control datepicker-filter" 
+                                value="{{ request('start_date') }}" placeholder="{{ __('cycles.Start_Date') }}">
+                              <div class="invalid-feedback" id="start_date_error"></div>
                             </div>
 
                             <!-- End Date -->
                             <div class="col-12 col-md-6">
                               <label for="end_date" class="form-label">{{ __('cycles.End_Date') }}</label>
-                              <input type="text" name="end_date" class="form-control datepicker" 
-                                value="{{ request('end_date') }}" placeholder="End Date">
+                              <input type="text" id="filter_end_date" name="end_date" class="form-control datepicker-filter" 
+                                value="{{ request('end_date') }}" placeholder="{{ __('cycles.End_Date') }}">
+                              <div class="invalid-feedback" id="end_date_error"></div>
                             </div>
 
                             
@@ -810,7 +818,7 @@
       $('#retryLoadBtn').on('click', () => fetchSessionData(currentSessionId));
     });
     $(document).ready(function() {
-    $('#userstable').DataTable({
+    let mentorshipTable = $('#userstable').DataTable({
       "responsive": true,
       "searching": true,
       "lengthChange": false,
@@ -848,8 +856,26 @@
             "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
           }
       @endif
-       }
+       },
+      buttons: [
+        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] } },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] } }
+      ]
       });
+
+    // Global export mentorship function
+    window.exportMentorship = function (format) {
+      if (!mentorshipTable) {
+        alert('{{ __("admin.no_data_to_export") }}');
+        return;
+      }
+      try {
+        mentorshipTable.button(`.buttons-${format}`).trigger();
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('{{ __("admin.export_failed") }}');
+      }
+    }
     });
   </script>
   <script>
@@ -867,6 +893,84 @@
     //     }
     //   }
     // });
+
+    // Initialize flatpickr for filter modal date pickers with validation
+    let startDatePicker = $('#filter_start_date').flatpickr({
+      enableTime: false,
+      dateFormat: "Y-m-d",
+      onChange: function(selectedDates, dateStr, instance) {
+        // Clear any previous error
+        $('#filter_start_date').removeClass('is-invalid');
+        $('#start_date_error').text('');
+        
+        // Update end date minDate
+        if (selectedDates.length > 0 && endDatePicker) {
+          endDatePicker.set('minDate', selectedDates[0]);
+          
+          // Validate if end date is already selected
+          const endDate = $('#filter_end_date').val();
+          if (endDate && new Date(endDate) < selectedDates[0]) {
+            $('#filter_end_date').addClass('is-invalid');
+            $('#end_date_error').text('{{ $l == "en" ? "End date must be after start date" : "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" }}');
+          } else {
+            $('#filter_end_date').removeClass('is-invalid');
+            $('#end_date_error').text('');
+          }
+        }
+      }
+    });
+
+    let endDatePicker = $('#filter_end_date').flatpickr({
+      enableTime: false,
+      dateFormat: "Y-m-d",
+      onChange: function(selectedDates, dateStr, instance) {
+        // Clear any previous error
+        $('#filter_end_date').removeClass('is-invalid');
+        $('#end_date_error').text('');
+        
+        // Validate against start date
+        const startDate = $('#filter_start_date').val();
+        if (startDate && selectedDates.length > 0 && new Date(startDate) > selectedDates[0]) {
+          $('#filter_end_date').addClass('is-invalid');
+          $('#end_date_error').text('{{ $l == "en" ? "End date must be after start date" : "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" }}');
+        }
+      }
+    });
+
+    // Form submission validation
+    $('#filterForm').on('submit', function(e) {
+      const startDate = $('#filter_start_date').val();
+      const endDate = $('#filter_end_date').val();
+      
+      // Check if there are already validation errors visible
+      if ($('#filter_end_date').hasClass('is-invalid') || $('#filter_start_date').hasClass('is-invalid')) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Validate if both dates are selected
+      if (startDate && endDate) {
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        
+        if (endDateObj < startDateObj) {
+          e.preventDefault();
+          $('#filter_end_date').addClass('is-invalid');
+          $('#end_date_error').text('{{ $l == "en" ? "End date must be after start date" : "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" }}');
+          return false;
+        }
+      }
+      
+      return true;
+    });
+
+    // Reset validation when modal is closed
+    $('#filterModal').on('hidden.bs.modal', function() {
+      $('#filter_start_date').removeClass('is-invalid');
+      $('#filter_end_date').removeClass('is-invalid');
+      $('#start_date_error').text('');
+      $('#end_date_error').text('');
+    });
 
     $('.datepicker').flatpickr({
       enableTime: false,
@@ -919,7 +1023,9 @@
       exportSuccess: "{{ __('cycles.export_willsuccess') }}",
     };
 
-    document.getElementById('searchBot').addEventListener('click', redirectWithDates);
+    // Note: searchBot element doesn't exist in the DOM, so this event listener is commented out
+    // If you need this functionality, add a button with id="searchBot" to the HTML
+    // document.getElementById('searchBot')?.addEventListener('click', redirectWithDates);
 
     function redirectWithDates() {
       // الحصول على قيم التواريخ

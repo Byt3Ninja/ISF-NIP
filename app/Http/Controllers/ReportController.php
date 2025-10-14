@@ -191,7 +191,9 @@ class ReportController extends Controller
         $data['approved_sessions_count'] = $mentorRequests->whereNotNull('start_url')->count();
         $data['pending_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
-        })->whereNotNull('start_url')->whereDate('zoom_date','>=',now()->format('Y-m-d'))->count();
+        })->where('approved','Yes')->where(function($q){
+            $q->whereNull('done')->orWhere('done','!=',1);
+        })->count();
         $data['done_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->where('approved','Yes')->whereDate('zoom_date','<',now()->format('Y-m-d'))->count();
