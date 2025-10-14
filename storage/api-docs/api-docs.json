@@ -3805,6 +3805,224 @@
                 ]
             }
         },
+        "/api/mentorship/session-reports": {
+            "post": {
+                "tags": [
+                    "Mentorship Report"
+                ],
+                "summary": "Get session reports & recordings for a mentorship session",
+                "description": "Returns reports, recordings and summary for a mentorship request. Will auto-fetch data from Zoom/Teams if not present.",
+                "operationId": "getMentorshipSessionReports",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "description": "Mentorship request / session ID",
+                                        "type": "integer",
+                                        "example": 123
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Session reports retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "session": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 123
+                                                        },
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Mentorship - Product Strategy"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "mentorship"
+                                                        },
+                                                        "datetime": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-09-15T14:00:00Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "summary": {
+                                                    "properties": {
+                                                        "totalDuration": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 95
+                                                        },
+                                                        "totalParticipants": {
+                                                            "type": "integer",
+                                                            "example": 25
+                                                        },
+                                                        "totalRecordings": {
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "reports": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "participant_name": {
+                                                                "type": "string",
+                                                                "example": "Ahmed Yassin"
+                                                            },
+                                                            "participant_email": {
+                                                                "type": "string",
+                                                                "example": "ahmed@example.com"
+                                                            },
+                                                            "participant_join_date": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-15T14:01:00Z"
+                                                            },
+                                                            "participant_end_date": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-15T15:30:00Z"
+                                                            },
+                                                            "attendance_duration": {
+                                                                "type": "number",
+                                                                "example": 89
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "recordings": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "recordingType": {
+                                                                "type": "string",
+                                                                "example": "Zoom Cloud Recording"
+                                                            },
+                                                            "recordingTime": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-15T14:00:00Z"
+                                                            },
+                                                            "recordingViewUrl": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/rec/play/..."
+                                                            },
+                                                            "recordingDownloadUrl": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/rec/download/..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "recordingPasscode": {
+                                                    "type": "string",
+                                                    "example": "z8sKp3",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid session id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "session_id_required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "session_not_found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error while fetching session data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "error_fetching_session_data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/messages": {
             "get": {
                 "tags": [
@@ -9747,6 +9965,270 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/training/session-reports": {
+            "post": {
+                "tags": [
+                    "Training Reports"
+                ],
+                "summary": "Get session reports & recordings for a training session",
+                "description": "Returns reports, recordings and summary for a training session. Will auto-fetch data from Zoom/Teams if not present.",
+                "operationId": "getTrainingSessionReports",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "description": "Training session ID",
+                                        "type": "integer",
+                                        "example": 123
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Session reports retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "session": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 123
+                                                        },
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Business Model Canvas"
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "sessions"
+                                                        },
+                                                        "datetime": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-09-15T14:00:00Z"
+                                                        },
+                                                        "enddatetime": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-09-15T15:30:00Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "summary": {
+                                                    "properties": {
+                                                        "totalDuration": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 95
+                                                        },
+                                                        "totalParticipants": {
+                                                            "type": "integer",
+                                                            "example": 25
+                                                        },
+                                                        "totalRecordings": {
+                                                            "type": "integer",
+                                                            "example": 2
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "reports": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "participantName": {
+                                                                "type": "string",
+                                                                "example": "Ahmed Yassin"
+                                                            },
+                                                            "participantEmail": {
+                                                                "type": "string",
+                                                                "example": "ahmed@example.com"
+                                                            },
+                                                            "participantJoinDate": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-15T14:01:00Z"
+                                                            },
+                                                            "participantEndDate": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-15T15:30:00Z"
+                                                            },
+                                                            "attendanceDuration": {
+                                                                "type": "number",
+                                                                "example": 89
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "recordings": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "recordingType": {
+                                                                "type": "string",
+                                                                "example": "Zoom Cloud Recording"
+                                                            },
+                                                            "recordingTime": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-15T14:00:00Z"
+                                                            },
+                                                            "recordingViewUrl": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/rec/play/..."
+                                                            },
+                                                            "recordingDownloadUrl": {
+                                                                "type": "string",
+                                                                "example": "https://zoom.us/rec/download/..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "recordingPasscode": {
+                                                    "type": "string",
+                                                    "example": "z8sKp3",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "debug": {
+                                            "properties": {
+                                                "sessionId": {
+                                                    "type": "integer",
+                                                    "example": 123
+                                                },
+                                                "meetingId": {
+                                                    "type": "string",
+                                                    "example": "832001"
+                                                },
+                                                "sessionType": {
+                                                    "type": "string",
+                                                    "example": "sessions"
+                                                },
+                                                "reportsCountBefore": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "recordingsCountBefore": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "reportsCountAfter": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "recordingsCountAfter": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "autoFetchReportsAttempted": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "autoFetchRecordingsAttempted": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid session id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "session_id_required"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Session not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "session_not_found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error while fetching session data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "error_fetching_session_data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
