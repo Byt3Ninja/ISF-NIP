@@ -901,7 +901,7 @@ class ReportController extends Controller
                 'mentorships_period_formatted' => $this->formatMinutesToHoursMinutes($cycleMentorshipMinutes),
                 'mentorship_attendance_rate' => $per_cycle_mentor_requests->count() ? ($per_cycle_mentor_requests->sum('done') / $per_cycle_mentor_requests->count()) * 100 : 0,
                 'training_sessions_count' => $per_cycle_training_sessions->count(),
-                'training_sessions_period' => $per_cycle_training_sessions->sum('duration') / 60,
+                'training_sessions_period' => number_format($per_cycle_training_sessions->sum('duration') / 60, 2),
                 'startups' => $per_cycle_startups->count(),
                 'screening_sessions_count' => $per_cycle_screenings,
                 'final_screening_count' => $per_cycle_final_screenings,
