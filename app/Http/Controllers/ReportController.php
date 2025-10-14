@@ -780,6 +780,8 @@ class ReportController extends Controller
             $q->where('organization_id', $organization_id);
         });
 
+        $totalMentorshipMinutes = (clone $mentorRequests)->sum('period');
+
         $training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
             $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id) {
                 $query->when(!is_null($organization_id), function ($query) use ($organization_id) {
@@ -823,10 +825,36 @@ class ReportController extends Controller
 
         // Per-cycle KPI data
         $cycles_kpis = [];
+        $cycles_sessions = [];
         foreach ($cycles as $c) {
             $per_cycle_mentor_requests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
                 $q->where('organization_id', $organization_id);
             })->where('cycle_id', $c->id);
+
+            $per_cycle_sessions = MentorshipRequest::with(['mentor', 'user.company'])
+                ->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    $q->where('organization_id', $organization_id);
+                })
+                ->where('cycle_id', $c->id)
+                ->orderBy('zoom_date', 'desc')
+                ->get()
+                ->map(function ($session) {
+                    $durationMinutes = (int) ($session->period ?? 0);
+                    return [
+                        'id' => $session->id,
+                        'mentor' => $session->mentor->name ?? '-',
+                        'startup' => optional(optional($session->user)->company)->{'name_' . app()->getLocale()} ?? '-',
+                        'zoom_date' => $session->zoom_date ? Carbon::parse($session->zoom_date)->format('Y-m-d H:i') : '-',
+                        'duration_minutes' => $durationMinutes,
+                        'duration_formatted' => $this->formatMinutesToHoursMinutes($durationMinutes),
+                    ];
+                })
+                ->values()
+                ->all();
+
+            $cycles_sessions[$c->id] = $per_cycle_sessions;
+
+            $cycleMentorshipMinutes = (clone $per_cycle_mentor_requests)->sum('period');
 
             $per_cycle_training_sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id, $c) {
                 $q->where('stype', 4)->whereHas('cycle', function ($query) use ($organization_id, $c) {
@@ -869,7 +897,8 @@ class ReportController extends Controller
                 'cycle' => $c,
                 'mentors_count' => $per_cycle_mentors_count,
                 'mentorRequests_count' => $per_cycle_mentor_requests->count(),
-                'mentorships_period' => $per_cycle_mentor_requests->sum('period') / 60,
+                'mentorships_period_minutes' => $cycleMentorshipMinutes,
+                'mentorships_period_formatted' => $this->formatMinutesToHoursMinutes($cycleMentorshipMinutes),
                 'mentorship_attendance_rate' => $per_cycle_mentor_requests->count() ? ($per_cycle_mentor_requests->sum('done') / $per_cycle_mentor_requests->count()) * 100 : 0,
                 'training_sessions_count' => $per_cycle_training_sessions->count(),
                 'training_sessions_period' => $per_cycle_training_sessions->sum('duration') / 60,
@@ -884,13 +913,15 @@ class ReportController extends Controller
         $data['training_sessions'] = $training_sessions->get();
         $data['training_sessions_period'] = $training_sessions->sum('duration') / 60;
         $data['mentorRequests_count'] = $mentorRequests->count();
-        $data['mentorships_period'] = $mentorRequests->sum('period') / 60;
+        $data['mentorships_period_minutes'] = $totalMentorshipMinutes;
+        $data['mentorships_period_formatted'] = $this->formatMinutesToHoursMinutes($totalMentorshipMinutes);
         $data['mentorship_attendance_rate'] = $mentorRequests->count() ? ($mentorRequests->sum('done') / $mentorRequests->count()) * 100 : 0;
 
         // Pass through references
         $data['cycle'] = $cycle; // kept for compatibility
         $data['cycles'] = $cycles; // all cycles
         $data['cycles_kpis'] = $cycles_kpis; // new: per-cycle KPI data
+        $data['cycles_sessions'] = $cycles_sessions;
         $data['steps'] = $steps;
         $data['startups'] = $startups->count();
         $data['screening_sessions_count'] = $screenings;
@@ -901,15 +932,27 @@ class ReportController extends Controller
             [ 'value' => $data['startups'] ?? 0, 'label' => 'Subscribed_Startups', 'icon' => 'building', 'color' => 'primary' ],
             [ 'value' => $data['mentors_count'] ?? 0, 'label' => 'Enrolled_Mentors', 'icon' => 'school', 'color' => 'warning' ],
             [ 'value' => $data['mentorRequests_count'] ?? 0, 'label' => 'Mentorship_Requests', 'icon' => 'book', 'color' => 'success' ],
-            [ 'value' => $data['mentorships_period'] ?? 0, 'label' => 'Mentorship_Requests_Duration', 'icon' => 'clock', 'color' => 'danger' ],
+            [ 'value' => $data['mentorships_period_formatted'] ?? '00:00', 'label' => 'Mentorship_Sessions_Duration', 'icon' => 'clock', 'color' => 'danger' ],
             [ 'value' => number_format($data['mentorship_attendance_rate'] ?? 0, 2), 'label' => 'Startups_Attendance_Rate', 'icon' => 'browser', 'color' => 'secondary', 'unit' => '%' ],
             [ 'value' => $data['training_sessions_count'] ?? 0, 'label' => 'Training_Sessions', 'icon' => 'user-screen', 'color' => 'warning' ],
-            [ 'value' => $data['training_sessions_period'] ?? 0, 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary' ],
+            [ 'value' => number_format($data['training_sessions_period'] ?? 0, 1), 'label' => 'Training_Sessions_Duration', 'icon' => 'clock', 'color' => 'primary', 'unit' => 'h' ],
             [ 'value' => $data['screening_sessions_count'] ?? 0, 'label' => 'First_Screening', 'icon' => 'scale', 'color' => 'success' ],
             [ 'value' => $data['final_screening_count'] ?? 0, 'label' => 'Final_Screening', 'icon' => 'gavel', 'color' => 'primary' ],
         ];
 
         return $data;
+    }
+
+    private function formatMinutesToHoursMinutes(int $totalMinutes): string
+    {
+        if ($totalMinutes <= 0) {
+            return '00:00';
+        }
+
+        $hours = intdiv($totalMinutes, 60);
+        $minutes = $totalMinutes % 60;
+
+        return sprintf('%02d:%02d', $hours, $minutes);
     }
 
     protected function companiesReport($organization_id,$company_id){
