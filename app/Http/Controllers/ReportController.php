@@ -201,7 +201,7 @@ class ReportController extends Controller
 			->select('users.*')
 			->count();
         $data['total_sessions_count']= $mentorRequests->count();
-        $data['mentorships_period'] =$mentorRequests->sum('period')/60;
+        $data['mentorships_period'] =$this->formatMinutesToHoursMinutes($mentorRequests->sum('period'));
         $data['approved_sessions_count'] = MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
             $q->where('organization_id',$organization_id);
         })->where('approved','Yes')->count();
@@ -842,10 +842,8 @@ class ReportController extends Controller
         // Overall aggregates (no cycle filter)
         $data['training_sessions_count'] = $training_sessions->count();
         $data['training_sessions'] = $training_sessions->get();
-        $totalMinutes_training_sessions_period = $training_sessions->sum('duration');
-        $hours_training_sessions_period = floor($totalMinutes_training_sessions_period / 60);
-        $minutes_training_sessions_period = $totalMinutes_training_sessions_period % 60;
-        $data['training_sessions_period'] = sprintf("%d:%02d", $hours_training_sessions_period, $minutes_training_sessions_period);
+        // $totalMinutes_training_sessions_period = $training_sessions->sum('duration');
+        $data['training_sessions_period'] = $this->formatMinutesToHoursMinutes($training_sessions->sum('duration'));
         $data['mentorRequests_count'] = $mentorRequests->count();
         $data['mentorships_period_minutes'] = $totalMentorshipMinutes;
         $data['mentorships_period_formatted'] = $this->formatMinutesToHoursMinutes($totalMentorshipMinutes);
