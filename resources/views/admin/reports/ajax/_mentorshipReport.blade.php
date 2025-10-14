@@ -173,7 +173,7 @@
     <!-- Filters -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">
-        <select class="form-select form-select-sm" id="programFilter">
+        <select class="form-select form-select-sm" id="tblSessions_programFilter">
           <option value="">{{ __('cycles.All_Cycles') }}</option>
           @foreach($unique_cycles as $cycle)
             <option value="{{ $cycle->title }}">{{ $cycle->title }}</option>
@@ -181,7 +181,7 @@
         </select>
       </div>
       <div class="col-md-3">
-        <select class="form-select form-select-sm" id="mentorFilter">
+        <select class="form-select form-select-sm" id="tblSessions_mentorFilter">
           <option value="">{{ __('admin.allMentors') }}</option>
           @foreach($unique_mentors as $mentor)
             <option value="{{ $mentor->name }}">{{ $mentor->name }}</option>
@@ -189,7 +189,7 @@
         </select>
       </div>
       <div class="col-md-2">
-        <select class="form-select form-select-sm" id="startupFilter">
+        <select class="form-select form-select-sm" id="tblSessions_startupFilter">
           <option value="">{{ __('cycles.All Startups') }}</option>
           @foreach($unique_companies as $company)
             <option value="{{ $company->{'name_' . $l} }}">{{ $company->{'name_' . $l} }}</option>
@@ -197,7 +197,7 @@
         </select>
       </div>
       <div class="col-md-2">
-        <select class="form-select form-select-sm" id="userFilter">
+        <select class="form-select form-select-sm" id="tblSessions_userFilter">
           <option value="">{{ __('admin.List All') }}</option>
           @foreach($unique_users as $user)
             <option value="{{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}">{{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}</option>
@@ -205,7 +205,7 @@
         </select>
       </div>
       <div class="col-md-2 d-flex align-items-center">
-        <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="clearFilters">{{ __('cycles.Clear Filters') }}</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="tblSessions_clearFilters">{{ __('cycles.Clear Filters') }}</button>
       </div>
     </div>
     <!-- Table Data -->
@@ -362,17 +362,17 @@
         
         let cells = $(row).find('td');
         if (cells.length < 8) return true;
-        
-        let programFilter = $('#programFilter').val();
-        let mentorFilter = $('#mentorFilter').val();
-        let startupFilter = $('#startupFilter').val();
-        let userFilter = $('#userFilter').val();
-        
-        let programMatch = !programFilter || $(cells[3]).text().trim() === programFilter;
-        let mentorMatch = !mentorFilter || $(cells[2]).text().trim().includes(mentorFilter);
+
+        let tblSessionsProgramFilter = $('#tblSessions_programFilter').val();
+        let tblSessionsMentorFilter = $('#tblSessions_mentorFilter').val();
+        let startupFilter = $('#tblSessions_startupFilter').val();
+        let tblSessionsUserFilter = $('#tblSessions_userFilter').val();
+
+        let programMatch = !tblSessionsProgramFilter || $(cells[3]).text().trim() === tblSessionsProgramFilter;
+        let mentorMatch = !tblSessionsMentorFilter || $(cells[2]).text().trim().includes(tblSessionsMentorFilter);
         let startupMatch = !startupFilter || $(cells[0]).text().trim().includes(startupFilter);
-        let userMatch = !userFilter || $(cells[1]).text().trim().includes(userFilter);
-        
+        let userMatch = !tblSessionsUserFilter || $(cells[1]).text().trim().includes(tblSessionsUserFilter);
+
         let currentFilter = window.currentSessionFilter || 'all';
         let kpiMatch = true;
         
@@ -406,23 +406,23 @@
 
     // Function to update clear button visibility
     function updateClearButtonVisibility() {
-      let hasFilter = $('#programFilter').val() || $('#mentorFilter').val() || $('#startupFilter').val() || $('#userFilter').val() || (window.currentSessionFilter && window.currentSessionFilter !== 'all');
+      let hasFilter = $('#tblSessions_programFilter').val() || $('#tblSessions_mentorFilter').val() || $('#tblSessions_startupFilter').val() || $('#tblSessions_userFilter').val() || (window.currentSessionFilter && window.currentSessionFilter !== 'all');
       if (hasFilter) {
-        $('#clearFilters').removeClass('d-none');
+        $('#tblSessions_clearFilters').removeClass('d-none');
       } else {
-        $('#clearFilters').addClass('d-none');
+        $('#tblSessions_clearFilters').addClass('d-none');
       }
     }
 
     // Trigger table redraw on filter change
-    $('#programFilter, #mentorFilter, #startupFilter, #userFilter').on('change', function() {
+    $('#tblSessions_programFilter, #tblSessions_mentorFilter, #tblSessions_startupFilter, #tblSessions_userFilter').on('change', function() {
       sessionsTable.draw();
       updateClearButtonVisibility();
     });
 
     // Clear filters button
-    $('#clearFilters').on('click', function() {
-      $('#programFilter, #mentorFilter, #startupFilter, #userFilter').val('');
+    $('#tblSessions_clearFilters').on('click', function() {
+      $('#tblSessions_programFilter, #tblSessions_mentorFilter, #tblSessions_startupFilter, #tblSessions_userFilter').val('');
       window.currentSessionFilter = 'all';
       $('.kpi-card').removeClass('active-filter');
       sessionsTable.draw();
@@ -435,7 +435,7 @@
 
     // Global filter function for KPI cards
     window.filterSessionsByKPI = function(filter, element) {
-      $('#programFilter, #mentorFilter, #startupFilter, #userFilter').val('');
+      $('#tblSessions_programFilter, #tblSessions_mentorFilter, #tblSessions_startupFilter, #tblSessions_userFilter').val('');
 
       // Update current filter
       window.currentSessionFilter = filter;
