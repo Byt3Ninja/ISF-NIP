@@ -12,7 +12,8 @@
           $isMentorshipCard = $item['label'] == 'Mentorship_Requests';
           $isMentorshipDurationCard = $item['label'] == 'Mentorship_Sessions_Duration';
           $cardClasses = 'card card-border-shadow-' . $item['color'] . ' h-100';
-          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard) {
+          $isScreeningCard = $item['label'] == 'Screening';
+          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard || $isScreeningCard) {
             $cardClasses .= ' cursor-pointer';
           }
           if ($isSubscribedCard) {
@@ -23,6 +24,9 @@
           }
           if ($isMentorshipDurationCard) {
             $cardClasses .= ' mentorship-duration-card';
+          }
+          if ($isScreeningCard) {
+            $cardClasses .= ' screening-startups-card';
           }
 
           $unitSuffix = '';
@@ -37,6 +41,8 @@
             data-url="{{ route('users.view_companies', ['programFilter' => 'all']) }}"
           @elseif($isMentorshipCard)
             data-url="{{ route('mentorships.sessions_list', ['show' => 'all']) }}"
+          @elseif($isScreeningCard)
+            data-url="/dashboard/screening/results"
           @endif
         >
         <div class="card-body py-2" style="display: grid; place-items: center;">
@@ -439,6 +445,14 @@
     });
 
     $(document).on('click', '.mentorship-requests-card', function (event) {
+      event.preventDefault();
+      const targetUrl = $(this).data('url');
+      if (targetUrl) {
+        window.location.href = targetUrl;
+      }
+    });
+
+    $(document).on('click', '.screening-startups-card', function (event) {
       event.preventDefault();
       const targetUrl = $(this).data('url');
       if (targetUrl) {
