@@ -130,7 +130,7 @@
 
                         <div class="modal-footer">
                           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                          <button type="submit" class="btn btn-primary">{{ __('Apply Filters') }}</button>
+                          <button type="submit" class="btn btn-primary">{{ __('cycles.Apply_Filters') }}</button>
                         </div>
                       </form>
                     </div>
