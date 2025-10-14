@@ -11,10 +11,11 @@
           $isSubscribedCard = $item['label'] == 'Subscribed_Startups';
           $isMentorshipCard = $item['label'] == 'Mentorship_Requests';
           $isMentorshipDurationCard = $item['label'] == 'Mentorship_Sessions_Duration';
+          $isEnrolledMentorsCard = $item['label'] == 'Enrolled_Mentors';
           $cardClasses = 'card card-border-shadow-' . $item['color'] . ' h-100';
           $isScreeningCard = $item['label'] == 'Screening';
           $isFinalScreeningCard = $item['label'] == 'Final_Screening';
-          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard || $isScreeningCard || $isFinalScreeningCard) {
+          if ($isSubscribedCard || $isMentorshipCard || $isMentorshipDurationCard || $isEnrolledMentorsCard || $isScreeningCard || $isFinalScreeningCard) {
             $cardClasses .= ' cursor-pointer';
           }
           if ($isSubscribedCard) {
@@ -25,6 +26,9 @@
           }
           if ($isMentorshipDurationCard) {
             $cardClasses .= ' mentorship-duration-card';
+          }
+          if ($isEnrolledMentorsCard) {
+            $cardClasses .= ' enrolled-mentors-card';
           }
           if ($isScreeningCard) {
             $cardClasses .= ' screening-startups-card';
@@ -40,6 +44,9 @@
             }
           }
         @endphp
+        @if($isEnrolledMentorsCard)
+          <a href="/dashboard/show/Mentors?enrolledIn" class="text-decoration-none d-block">
+        @endif
         <div class="{{ $cardClasses }}"
           @if($isSubscribedCard)
             data-url="{{ route('users.view_companies', ['programFilter' => 'all']) }}"
@@ -63,6 +70,9 @@
             <small class="text-center">{{ __('admin.' . $item['label']) }}</small>
           </div>
         </div>
+        @if($isEnrolledMentorsCard)
+          </a>
+        @endif
       </div>
     @endforeach
   </div>
