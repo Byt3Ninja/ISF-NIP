@@ -430,6 +430,28 @@
     @yield('pagescripts')
 
     <script>
+      // Global Toast function
+      function showToast(options) {
+        // Accept object with { message, type } properties
+        const message = options.message || '';
+        const type = options.type || 'info';
+        
+        // Simple toast notification - you can enhance this with your preferred toast library
+        const toast = `
+          <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <div class="d-flex">
+              <div class="toast-body">${message}</div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+          </div>
+        `;
+        
+        $('body').append(toast);
+        $('.toast').last().toast({ delay: 3000 }).toast('show').on('hidden.bs.toast', function() {
+          $(this).remove();
+        });
+      }
+
       // Global SweetAlert2 configuration
       const releaseSuccessAlert = ({title, message}) => {
         Swal.fire({

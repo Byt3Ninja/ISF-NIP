@@ -541,6 +541,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('mentorship/mine', 'MentorsController@mine')->name('mentorships.list_mine');
     Route::post('mentorship/rate', 'MentorsController@rate')->name('mentorships.sessions_rate');
     Route::post('mentorship/delsession/{id}', 'MentorsController@delSession')->name('mentorships.sessions_delete');
+    Route::post('mentorship/session-reports-data', 'MentorsController@getSessionReportsData')->name('mentorships.sessions_reports_data');
     Route::get('/export-mentorship', 'MentorsController@exportMentorship')->name('mentorships.export');
     Route::post('/mentorship/getDates', 'MentorsController@MentorDates')->name('mentorships.dates_view');
 
@@ -592,6 +593,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('training/session-attendance-offline/{id}', 'TrainingController@attendanceOffline')->name('trainings.attendance_offline_manage');
     Route::post('training/QrCode-offline', 'TrainingController@QrCodeTraining')->name('trainings.attendance_qr_code_create');
     Route::get('training/Attendance-offline/{id}', 'TrainingController@getattendanceOffline')->name('trainings.attendance_offline_view');
+    Route::post('training/session-reports-data', 'TrainingController@getSessionReportsData')->name('trainings.session_reports_data');
 
 
     Route::get('/Totalsurveys', 'MentorsController@total_surveys')->name('surveys.dashboard_count_view');

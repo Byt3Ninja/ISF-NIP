@@ -837,6 +837,287 @@ class MentorsController extends Controller
 		}
 	}
 
+	/**
+	 * Fetch session reports and recordings data for modal (AJAX endpoint)
+	 * Similar to TrainingController@getSessionReportsData but for mentorship sessions
+	 */
+	public function getSessionReportsData(Request $request)
+	{
+		try {
+			$sessionId = $request->id;
+			
+			if (!$sessionId) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.session_id_required')
+				], 400);
+			}
+
+			// For mentorship, we use MentorshipRequest model
+			$session = MentorshipRequest::with(['reports', 'recordings'])
+				->find($sessionId);
+
+			if (!$session) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.session_not_found')
+				], 404);
+			}
+
+			// Store original counts for debugging
+			$originalReportsCount = $session->reports->count();
+			$originalRecordingsCount = $session->recordings->count();
+
+			// Auto-fetch reports if none exist and session has zoom_id
+			if ($session->reports->count() === 0 && $session->zoom_id) {
+				try {
+					$this->meetingService = OnlineMeetingFactory::create();
+					if ($this->meetingService && method_exists($this->meetingService, 'getSessionReport')) {
+						$response = $this->meetingService->getSessionReport($session->zoom_id);
+						
+						$serviceClass = get_class($this->meetingService);
+						$isZoom = stripos($serviceClass, 'zoom') !== false;
+						$isTeams = stripos($serviceClass, 'team') !== false || stripos($serviceClass, 'graph') !== false;
+						
+						// Process Zoom reports
+						if ($isZoom && !empty($response['success']) && !empty($response['data']['participants'])) {
+							foreach ($response['data']['participants'] as $participant) {
+								$joinDate = isset($participant['join_time']) ? Carbon::parse($participant['join_time'])->utc()->toDateTimeString() : null;
+								$endDate = isset($participant['leave_time']) ? Carbon::parse($participant['leave_time'])->utc()->toDateTimeString() : null;
+
+								\App\SessionReport::updateOrCreate(
+									[
+										'mentorship_request_id' => $session->id,
+										'participant_user_id' => $participant['user_id'] ?? null,
+									],
+									[
+										'participant_email' => $participant['user_email'] ?? null,
+										'participant_name' => $participant['name'] ?? null,
+										'participant_join_date' => $joinDate,
+										'participant_end_date' => $endDate,
+										'attendance_duration' => $participant['duration'] ?? 0,
+									]
+								);
+							}
+							// Refresh the session data to include new reports
+							$session->load('reports');
+						}
+						// Process Teams reports
+						elseif ($isTeams && !empty($response['participants'])) {
+							foreach ($response['participants'] as $p) {
+								$identity = $p['identity'] ?? null;
+								$participantUserId = null;
+								$participantName = null;
+
+								if (is_array($identity)) {
+									if (isset($identity['user']) && is_array($identity['user'])) {
+										$participantUserId = $identity['user']['id'] ?? null;
+										$participantName = $identity['user']['displayName'] ?? $identity['user']['displayname'] ?? null;
+									} else {
+										$participantUserId = $identity['id'] ?? null;
+										$participantName = $identity['displayName'] ?? $identity['displayname'] ?? null;
+									}
+								}
+
+								$email = $p['emailAddress'] ?? null;
+								$duration = $p['totalAttendanceInSeconds'] ?? 0;
+
+								$interval = $p['attendanceIntervals'][0] ?? null;
+								$joinDate = $interval['joinDateTime'] ?? $interval['joinDate'] ?? null;
+								$leaveDate = $interval['leaveDateTime'] ?? $interval['leaveDate'] ?? null;
+
+								try {
+									$joinDateParsed = $joinDate ? Carbon::parse($joinDate)->utc()->toDateTimeString() : null;
+								} catch (\Throwable $ex) {
+									$joinDateParsed = null;
+								}
+								try {
+									$leaveDateParsed = $leaveDate ? Carbon::parse($leaveDate)->utc()->toDateTimeString() : null;
+								} catch (\Throwable $ex) {
+									$leaveDateParsed = null;
+								}
+
+								\App\SessionReport::updateOrCreate(
+									[
+										'mentorship_request_id' => $session->id,
+										'participant_user_id' => $participantUserId,
+									],
+									[
+										'participant_email' => $email,
+										'participant_name' => $participantName,
+										'participant_join_date' => $joinDateParsed,
+										'participant_end_date' => $leaveDateParsed,
+										'attendance_duration' => $duration ?? 0,
+									]
+								);
+							}
+							// Refresh the session data to include new reports
+							$session->load('reports');
+						}
+					}
+				} catch (\Throwable $e) {
+					// Silent fail for auto-fetch
+				}
+			}
+
+			// Auto-fetch recordings if none exist and session has zoom_id
+			if ($session->recordings->count() === 0 && $session->zoom_id) {
+				try {
+					$this->meetingService = OnlineMeetingFactory::create();
+					if ($this->meetingService && method_exists($this->meetingService, 'getSessionRecord')) {
+						$response = $this->meetingService->getSessionRecord($session->zoom_id);
+						
+						$serviceClass = get_class($this->meetingService);
+						$isZoom = stripos($serviceClass, 'zoom') !== false;
+						$isTeams = stripos($serviceClass, 'team') !== false || stripos($serviceClass, 'graph') !== false;
+						
+						// Process Zoom recordings
+						if ($isZoom && !empty($response['data']['recording_files'])) {
+							foreach ($response['data']['recording_files'] as $file) {
+								$recordingTime = isset($file['recording_start']) ? Carbon::parse($file['recording_start'])->utc()->toDateTimeString() : null;
+								$password = $response['data']['password'] ?? null;
+
+								\App\SessionRecording::updateOrCreate(
+									['recording_id' => $file['id']],
+									[
+										'mentorship_request_id' => $session->id,
+										'recording_type' => $file['recording_type'] ?? null,
+										'recording_view_url' => $file['play_url'] ?? null,
+										'recording_download_url' => $file['download_url'] ?? null,
+										'recording_time' => $recordingTime,
+										'passcode' => $password,
+									]
+								);
+							}
+							// Refresh the session data to include new recordings
+							$session->load('recordings');
+						}
+						// Process Teams recordings
+						elseif ($isTeams && !empty($response['data'][0])) {
+							$file = $response['data'][0];
+							$recordingId = $file['id'] ?? null;
+							$recordingUrl = $file['recordingContentUrl'] ?? $file['meetingId'] ?? null;
+							$createdDateTime = isset($file['createdDateTime']) ? Carbon::parse($file['createdDateTime'])->utc()->toDateTimeString() : null;
+
+							if ($recordingId) {
+								\App\SessionRecording::updateOrCreate(
+									['recording_id' => $recordingId],
+									[
+										'mentorship_request_id' => $session->id,
+										'recording_type' => 'Teams Recording',
+										'recording_view_url' => $recordingUrl,
+										'recording_download_url' => $recordingUrl,
+										'recording_time' => $createdDateTime,
+										'passcode' => null,
+									]
+								);
+								// Refresh the session data to include new recordings
+								$session->load('recordings');
+							}
+						}
+					}
+				} catch (\Throwable $e) {
+					// Silent fail for auto-fetch
+				}
+			}
+
+			// Prepare recordings data
+			$recordings = $session->recordings->map(function ($recording) {
+				// Format recording time properly for JavaScript
+				$recordingTime = $recording->recording_time;
+				if ($recordingTime) {
+					try {
+						// Treat stored time as UTC and convert to ISO string
+						$recordingTime = Carbon::parse($recordingTime, 'UTC')->toISOString();
+					} catch (\Exception $e) {
+						$recordingTime = null;
+					}
+				}
+
+				return [
+					'recording_type' => $recording->recording_type,
+					'recording_time' => $recordingTime,
+					'recording_view_url' => $recording->recording_view_url,
+					'recording_download_url' => $recording->recording_download_url,
+				];
+			});
+
+			// Prepare reports data
+			$reports = $session->reports->map(function ($report) {
+				// Format join and leave times properly for JavaScript
+				$joinDate = $report->participant_join_date;
+				if ($joinDate) {
+					try {
+						$joinDate = Carbon::parse($joinDate, 'UTC')->toISOString();
+					} catch (\Exception $e) {
+						$joinDate = null;
+					}
+				}
+				
+				$endDate = $report->participant_end_date;
+				if ($endDate) {
+					try {
+						$endDate = Carbon::parse($endDate, 'UTC')->toISOString();
+					} catch (\Exception $e) {
+						$endDate = null;
+					}
+				}
+				
+				return [
+					'participant_name' => $report->participant_name,
+					'participant_email' => $report->participant_email,
+					'participant_join_date' => $joinDate,
+					'participant_end_date' => $endDate,
+					'attendance_duration' => $report->attendance_duration,
+				];
+			});
+
+			// Calculate summary data
+			$totalDuration = $session->reports->sum('attendance_duration');
+			$totalParticipants = $session->reports->count();
+			$totalRecordings = $session->recordings->count();
+
+			// Get recording passcode (from first recording if available)
+			$recordingPasscode = $session->recordings->first()->passcode ?? null;
+
+			return response()->json([
+				'success' => true,
+				'data' => [
+					'session' => [
+						'id' => $session->id,
+						'title' => $session->comment ?? 'Mentorship Session',
+						'type' => 'mentorship',
+						'datetime' => $session->zoom_date,
+					],
+					'summary' => [
+						'total_duration' => $totalDuration,
+						'total_participants' => $totalParticipants,
+						'total_recordings' => $totalRecordings,
+					],
+					'reports' => $reports,
+					'recordings' => $recordings,
+					'recording_passcode' => $recordingPasscode,
+				],
+				'debug' => [
+					'session_id' => $sessionId,
+					'zoom_id' => $session->zoom_id,
+					'reports_count_before' => $originalReportsCount,
+					'recordings_count_before' => $originalRecordingsCount,
+					'reports_count_after' => $session->reports->count(),
+					'recordings_count_after' => $session->recordings->count(),
+				]
+			]);
+
+		} catch (\Throwable $e) {
+			Log::error('Error in MentorsController@getSessionReportsData: ' . $e->getMessage());
+			
+			return response()->json([
+				'success' => false,
+				'message' => __('admin.error_fetching_session_data')
+			], 500);
+		}
+	}
+
 	
 
 	
