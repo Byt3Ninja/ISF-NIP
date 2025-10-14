@@ -233,7 +233,7 @@
                             <i class="ti ti-key"></i>
                           </button>
                         @endif
-                        <button data-bs-toggle="modal" data-bs-target="#reportModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle">
+                        <button onclick="openReportsModal({{ $session->id }})" class="btn btn-icon btn-label-warning rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.session_reports') }}">
                           <i class="ti ti-file-text"></i>
                         </button>
                       @endif
@@ -306,129 +306,191 @@
   </div>
 </div>
 
-@foreach ($sessions as $session)
-<!-- Modal for Session Reports and Recordings -->
-<div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1"
-  aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+<!-- Enhanced Modal for Session Reports and Recordings -->
+<div class="modal fade" id="reportsModal" tabindex="-1" aria-labelledby="reportsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reportModalLabel{{ $session->id }}">
-          {{ __('admin.session_reports') }}: {{ $session->title }}
-        </h5>
+      <div class="modal-header bg-label-secondary pb-4">
+        <div class="d-flex align-items-center">
+          <div class="bg-white me-2 w-px-40 h-px-40 d-flex align-items-center justify-content-center rounded-circle">
+            <i class="ti ti-file-analytics"></i>
+          </div>
+          <div>
+            <h5 class="modal-title mb-0" id="reportsModalLabel">
+              {{ __('admin.session_reports_and_recordings') }}
+            </h5>
+            <small id="sessionTitleSubtext"></small>
+          </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <!-- Total Meeting Duration -->
-        <div class="mb-3">
-          <strong>{{ __('admin.total_meeting_duration') }}:</strong>
-          {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
-        </div>
-        <!-- Total Number of Participants -->
-        <div class="mb-3">
-          <strong>{{ __('admin.total_number_of_participants') }}:</strong>
-          {{ $session->reports->count() }}
+      
+      <div class="modal-body p-0">
+        <!-- Loading State -->
+        <div id="modalLoadingState" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">{{ __('admin.Loading') }}...</span>
+          </div>
+          <p class="mt-3 text-muted">{{ __('admin.fetching_session_data') }}...</p>
         </div>
 
-        <!-- Session Reports Section -->
-        @if ($session->reports->count() > 0)
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <h5>{{ __('admin.session_reports') }}</h5>
-        </div>
-        <table class="table table-bordered mt-2">
-          <thead>
-            <tr>
-              <th class="text-center">#</th>
-              <th class="text-center">{{ __('admin.participant_name') }}</th>
-              <th class="text-center">{{ __('admin.participant_email') }}</th>
-              <th class="text-center">{{ __('admin.join_time') }}</th>
-              <th class="text-center">{{ __('admin.leave_time') }}</th>
-              <th class="text-center">{{ __('admin.attendance_duration') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($session->reports as $key => $report)
-            <tr>
-              <td class="text-center">{{ $key + 1 }}</td>
-              <td class="text-center">{{ $report->participant_name }}</td>
-              <td class="text-center">{{ $report->participant_email }}</td>
-              <td class="text-center">{{ $report->participant_join_date }}</td>
-              <td class="text-center">{{ $report->participant_end_date }}</td>
-              <td class="text-center">{{ round($report->attendance_duration / 60, 2) }}
-                {{ __('admin.minutes') }}</td>
-            </tr>
+        <!-- Main Content -->
+        <div id="modalMainContent" style="display: none;">
+          <!-- Session Summary Cards -->
+          @php
+            $summaryData = [
+              ['label' => __('admin.total_duration'), 'id' => 'totalDuration', 'icon' => 'clock', 'color' => 'info'],
+              ['label' => __('admin.total_participants'), 'id' => 'totalParticipants', 'icon' => 'users', 'color' => 'success'],
+              ['label' => __('admin.recordings_count'), 'id' => 'totalRecordings', 'icon' => 'video', 'color' => 'warning'],
+            ]
+          @endphp
+          <div class="row g-3 p-8">
+            @foreach ($summaryData as $key => $item)
+              <div class="col-md-4">
+                <div class="card card-border-shadow-{{ $item['color'] }} h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-center text-center mb-2">
+                      <div class="avatar me-4">
+                        <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
+                          <i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
+                        </span>
+                      </div>
+                      <h5 class="mb-0" id="{{ $item['id'] }}">-</h5>
+                      @if ($key != 1)
+                        <small class="text-muted ms-2">{{ __('admin.min') }}</small>
+                      @endif
+                    </div>
+                    <h6 class="text-center mb-0">{{ $item['label'] }}</h6>
+                  </div>
+                </div>
+              </div>
             @endforeach
-          </tbody>
-        </table>
-        @else
-        <!-- No Reports: Display Update Button -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'training']) }}" class="btn btn-info">
-            {{ __('admin.update_reports') }}
-          </a>
-        </div>
-        @endif
+          </div>
 
-        <!-- Session Recordings Section -->
-        @if ($session->recordings->count() > 0)
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording', ['id' => $session->id, 'type' => 'training']) }}" class="btn btn-warning">
-            {{ __('admin.update_recordings') }}
-          </a>
+          <!-- Navigation Tabs -->
+          <div class="px-8 py-0">
+            <ul class="nav nav-pills nav-fill" id="reportsTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-content" type="button" role="tab">
+                  <i class="ti ti-file-text me-2"></i>{{ __('admin.session_reports') }}
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="recordings-tab" data-bs-toggle="tab" data-bs-target="#recordings-content" type="button" role="tab">
+                  <i class="ti ti-video me-2"></i>{{ __('admin.session_recordings') }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content p-8" id="reportsTabContent">
+            <!-- Reports Tab -->
+            <div class="tab-pane fade show active" id="reports-content" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">{{ __('admin.attendance_details') }}</h6>
+                <button id="refreshReportsBtn" class="btn btn-outline-info btn-sm">
+                  <i class="ti ti-refresh me-1"></i>{{ __('admin.refresh_reports') }}
+                </button>
+              </div>
+              
+              <div id="reportsTableContainer">
+                <div class="table-responsive">
+                  <table class="table table-hover" id="reportsTable">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center">#</th>
+                        <th>{{ __('admin.participant_name') }}</th>
+                        <th>{{ __('admin.participant_email') }}</th>
+                        <th class="text-center">{{ __('admin.join_time') }}</th>
+                        <th class="text-center">{{ __('admin.leave_time') }}</th>
+                        <th class="text-center">{{ __('admin.duration') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                      <!-- Dynamic content -->
+                    </tbody>
+                  </table>
+                </div>
+                <div id="reportsEmptyState" class="text-center py-5" style="display: none;">
+                  <div class="mb-3">
+                    <i class="ti ti-file-x display-1 text-secondary"></i>
+                  </div>
+                  <h6 class="mb-2">{{ __('admin.no_reports_available') }}</h6>
+                  <p class="text-muted mb-3">{{ __('admin.no_reports_description') }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recordings Tab -->
+            <div class="tab-pane fade" id="recordings-content" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">{{ __('admin.recording_details') }}</h6>
+                <button id="refreshRecordingsBtn" class="btn btn-outline-warning btn-sm">
+                  <i class="ti ti-refresh me-1"></i>{{ __('admin.refresh_recordings') }}
+                </button>
+              </div>
+
+              <div id="recordingPasscodeContainer" class="alert alert-info mb-3" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="ti ti-key me-2"></i>
+                  <strong>{{ __('admin.recording_passcode') }}:</strong>
+                  <span id="recordingPasscode" class="ms-2 font-monospace"></span>
+                  <button class="btn btn-sm btn-outline-info ms-auto" onclick="copyToClipboard('recordingPasscode')">
+                    <i class="ti ti-copy fs-6"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div id="recordingsTableContainer">
+                <div class="table-responsive">
+                  <table class="table table-hover" id="recordingsTable">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center">#</th>
+                        <th>{{ __('admin.recording_type') }}</th>
+                        <th class="text-center">{{ __('admin.recording_time') }}</th>
+                        <th class="text-center">{{ __('admin.actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recordingsTableBody">
+                      <!-- Dynamic content -->
+                    </tbody>
+                  </table>
+                </div>
+                <div id="recordingsEmptyState" class="text-center py-5" style="display: none;">
+                  <div class="mb-3">
+                    <i class="ti ti-video-off display-1 text-secondary"></i>
+                  </div>
+                  <h6 class="mb-2">{{ __('admin.no_recordings_available') }}</h6>
+                  <p class="text-muted mb-3">{{ __('admin.no_recordings_description') }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mt-2">
-          <strong>{{ __('admin.recording_passcode') }}:</strong>
-          <span>{{ $session->recordings->first()->passcode ?? __('admin.not_available') }}</span>
+
+        <!-- Error State -->
+        <div id="modalErrorState" class="text-center py-5" style="display: none;">
+          <div class="mb-3">
+            <i class="ti ti-alert-triangle display-1 text-danger"></i>
+          </div>
+          <h6 class="mb-2">{{ __('admin.error_loading_data') }}</h6>
+          <p class="text-muted mb-3" id="errorMessage"></p>
+          <button id="retryLoadBtn" class="btn btn-outline-primary">
+            <i class="ti ti-refresh me-2"></i>{{ __('admin.retry') }}
+          </button>
         </div>
-        <table class="table table-bordered mt-2">
-          <thead>
-            <tr>
-              <th class="text-center">#</th>
-              <th class="text-center">{{ __('admin.recording_type') }}</th>
-              <th class="text-center">{{ __('admin.recording_time') }}</th>
-              <th class="text-center">{{ __('admin.view_recording') }}</th>
-              <th class="text-center">{{ __('admin.download_recording') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($session->recordings as $key => $recording)
-            <tr>
-              <td class="text-center">{{ $key + 1 }}</td>
-              <td class="text-center">{{ $recording->recording_type }}</td>
-              <td class="text-center">{{ $recording->recording_time }}</td>
-              <td class="text-center">
-                <a href="{{ $recording->recording_view_url }}" target="_blank" class="btn btn-primary">
-                  {{ __('admin.View') }}
-                </a>
-              </td>
-              <td class="text-center">
-                <a href="{{ $recording->recording_download_url }}" target="_blank" class="btn btn-success">
-                  {{ __('admin.Download') }}
-                </a>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-        @else
-        <!-- No Recordings: Display Update Button -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'training']) }}" class="btn btn-warning">
-            {{ __('admin.update_recordings') }}
-          </a>
-        </div>
-        @endif
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+
+      <div class="modal-footer bg-label-secondary pt-6">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-2"></i>{{ __('admin.Close') }}
+        </button>
       </div>
     </div>
   </div>
 </div>
-@endforeach
 <!-- END: Content-->
 
 <div class="modal fade" id="addsession" tabindex="-1" role="dialog" aria-labelledby="addsession" aria-hidden="true">
@@ -1295,6 +1357,271 @@
           alert("Error Occurred, Try again!");
         }
       });
+    }
+
+    // Enhanced Reports Modal Functions
+    let currentSessionId = null;
+
+    function openReportsModal(sessionId) {
+      currentSessionId = sessionId;
+      
+      // Reset modal state
+      $('#modalLoadingState').show();
+      $('#modalMainContent').hide();
+      $('#modalErrorState').hide();
+      
+      // Show modal
+      $('#reportsModal').modal('show');
+      
+      // Fetch session data
+      fetchSessionData(sessionId);
+    }
+
+    function fetchSessionData(sessionId, showLoading = true) {
+      if (showLoading) {
+        $('#modalLoadingState').show();
+        $('#modalMainContent').hide();
+        $('#modalErrorState').hide();
+      }
+
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+
+      return $.ajax({
+        type: "POST",
+        url: "/dashboard/training/session-reports-data",
+        data: { "id": sessionId },
+        timeout: 30000,
+        success: function(response) {
+          if (response.success) {
+            populateModalData(response.data);
+            $('#modalLoadingState').hide();
+            $('#modalMainContent').show();
+          } else {
+            showError(response.message || '{{ __("admin.error_fetching_data") }}');
+          }
+        },
+        error: function(xhr, status, error) {
+          let message = '{{ __("admin.network_error") }}';
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+          } else if (status === 'timeout') {
+            message = '{{ __("admin.request_timeout") }}';
+          }
+          showError(message);
+        }
+      });
+    }
+
+    function populateModalData(data) {
+      // Update modal title
+      $('#sessionTitleSubtext').text(data.session.title || '{{ __("admin.untitled_session") }}');
+      
+      // Update summary cards
+      $('#totalDuration').text(Math.round(data.summary.total_duration / 60 * 100) / 100);
+      $('#totalParticipants').text(data.summary.total_participants);
+      $('#totalRecordings').text(data.summary.total_recordings);
+      
+      // Populate reports table
+      populateReportsTable(data.reports);
+      
+      // Populate recordings table
+      populateRecordingsTable(data.recordings, data.recording_passcode);
+    }
+
+    function populateReportsTable(reports) {
+      const tbody = $('#reportsTableBody');
+      tbody.empty();
+      
+      if (reports && reports.length > 0) {
+        reports.forEach((report, index) => {
+          const duration = Math.round(report.attendance_duration / 60 * 100) / 100;
+          const row = `
+            <tr>
+              <td class="text-center fw-semibold">${index + 1}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="me-2">
+                    <i class="ti ti-user fs-6 text-primary"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">${report.participant_name || '{{ __("admin.unknown") }}'}</h6>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-label-info">${report.participant_email || '{{ __("admin.not_provided") }}'}</span>
+              </td>
+              <td class="text-center">
+                <small class="text-muted">${formatDateTime(report.participant_join_date)}</small>
+              </td>
+              <td class="text-center">
+                <small class="text-muted">${formatDateTime(report.participant_end_date)}</small>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-label-success">${duration} {{ __("admin.min") }}</span>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+        
+        $('#reportsTableContainer table').show();
+        $('#reportsEmptyState').hide();
+      } else {
+        $('#reportsTableContainer table').hide();
+        $('#reportsEmptyState').show();
+      }
+    }
+
+    function populateRecordingsTable(recordings, passcode) {
+      const tbody = $('#recordingsTableBody');
+      tbody.empty();
+      
+      // Handle passcode
+      if (passcode) {
+        $('#recordingPasscode').text(passcode);
+        $('#recordingPasscodeContainer').show();
+      } else {
+        $('#recordingPasscodeContainer').hide();
+      }
+      
+      if (recordings && recordings.length > 0) {
+        recordings.forEach((recording, index) => {
+          const recordingType = recording.recording_type ? recording.recording_type.replace(/_/g, ' ') : '{{ __("admin.video") }}';
+          const row = `
+            <tr>
+              <td class="text-center fw-semibold">${index + 1}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="me-2">
+                    <i class="ti ti-video fs-6 text-warning"></i>
+                  </div>
+                  <div class="text-capitalize">
+                    <h6 class="mb-0">${recordingType}</h6>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <small class="text-muted">${formatDateTime(recording.recording_time)}</small>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm">
+                  ${recording.recording_view_url ? 
+                    `<a href="${recording.recording_view_url}" target="_blank" class="btn btn-outline-primary btn-sm">
+                      <i class="ti ti-eye fs-6"></i>
+                    </a>` : ''
+                  }
+                  ${recording.recording_download_url ? 
+                    `<a href="${recording.recording_download_url}" target="_blank" class="btn btn-outline-success btn-sm">
+                      <i class="ti ti-download fs-6"></i>
+                    </a>` : ''
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+        
+        $('#recordingsTableContainer table').show();
+        $('#recordingsEmptyState').hide();
+      } else {
+        $('#recordingsTableContainer table').hide();
+        $('#recordingsEmptyState').show();
+      }
+    }
+
+    function showError(message) {
+      $('#modalLoadingState').hide();
+      $('#modalMainContent').hide();
+      $('#errorMessage').text(message);
+      $('#modalErrorState').show();
+    }
+
+    function refreshReports() {
+      if (!currentSessionId) return;
+      
+      const btn = $('#refreshReportsBtn');
+      const originalHtml = btn.html();
+      btn.html('<i class="ti ti-loader-2 spinner-icon me-1"></i>{{ __("admin.refreshing") }}...');
+      btn.prop('disabled', true);
+      
+      fetchSessionData(currentSessionId, false).always(function() {
+        btn.html(originalHtml);
+        btn.prop('disabled', false);
+      });
+    }
+
+    function refreshRecordings() {
+      if (!currentSessionId) return;
+      
+      const btn = $('#refreshRecordingsBtn');
+      const originalHtml = btn.html();
+      btn.html('<i class="ti ti-loader-2 spinner-icon me-1"></i>{{ __("admin.refreshing") }}...');
+      btn.prop('disabled', true);
+      
+      fetchSessionData(currentSessionId, false).always(function() {
+        btn.html(originalHtml);
+        btn.prop('disabled', false);
+      });
+    }
+
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast({ message: '{{ __("admin.copied_to_clipboard") }}', type: 'success' });
+        });
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast({ message: '{{ __("admin.copied_to_clipboard") }}', type: 'success' });
+      }
+    }
+
+    // Event Listeners
+    $(document).ready(function() {
+      $('#refreshReportsBtn').on('click', refreshReports);
+      $('#refreshRecordingsBtn').on('click', refreshRecordings);
+      $('#retryLoadBtn').on('click', () => fetchSessionData(currentSessionId));
+    });
+
+    function formatDateTime(dateTime) {
+      if (!dateTime) return '{{ __("admin.not_available") }}';
+      
+      try {
+        const date = new Date(dateTime);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          return '{{ __("admin.invalid_date") }}';
+        }
+        
+        const options = {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZoneName: 'short'  // This will show the timezone (e.g., "GMT+3", "EST")
+        };
+        
+        return date.toLocaleString('{{ app()->getLocale() }}', options);
+      } catch (error) {
+        console.error('Date formatting error:', error);
+        return '{{ __("admin.invalid_date") }}';
+      }
     }
 </script>
 @stop

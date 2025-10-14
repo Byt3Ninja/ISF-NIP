@@ -1,8 +1,18 @@
+<style>
+.cursor-pointer {
+  cursor: pointer;
+}
+</style>
 <div class="col-12 mt-6">
   <div class="row justify-content-center mb-8">
     @foreach($kpiData as $key => $item)
       <div class="col-sm-6 col-md-4 col-lg-2 mb-4">
-        <div class="card card-border-shadow-{{ $item['color'] }} h-100">
+        <div
+          class="card card-border-shadow-{{ $item['color'] }} h-100 {{ $item['label'] == 'Subscribed_Startups' ? 'cursor-pointer subscribed-startups-card' : '' }}"
+          @if($item['label'] == 'Subscribed_Startups')
+            data-url="{{ route('users.view_companies', ['programFilter' => 'all']) }}"
+          @endif
+        >
         <div class="card-body py-2" style="display: grid; place-items: center;">
             <div class="d-flex align-items-center mb-2">
               <div class="avatar me-4">
@@ -93,8 +103,6 @@
       </div>
     </div>
   </div>
-</div>
-
 <script>
   $(document).ready(function() {
     // Initialize DataTable for Per Program KPIs
@@ -334,5 +342,13 @@
         console.error('Export error:', e);
       }
     }
+
+    $(document).on('click', '.subscribed-startups-card', function (event) {
+      event.preventDefault();
+      const targetUrl = $(this).data('url');
+      if (targetUrl) {
+        window.location.href = targetUrl;
+      }
+    });
   });
 </script>

@@ -5105,6 +5105,17 @@
                     "mentor",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "mentorships.sessions_reports_data",
+                "description": "Get Mentorship Sessions Report Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
             }
         ]
     },
@@ -5482,6 +5493,16 @@
             {
                 "name": "trainings.sessions_report",
                 "description": " View Trainings Sessions Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "trainings.session_reports_data",
+                "description": "View Training Session Reports Data",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

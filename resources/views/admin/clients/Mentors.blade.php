@@ -272,7 +272,7 @@
               @if(isset($cycles) && count($cycles) > 0)
                 @foreach ($cycles as $cycle)
                   <option value="{{ $cycle->id }}" {{ request('programFilter') == $cycle->id ? 'selected' : '' }}>
-                    {{ $l == 'ar' ? $cycle->title_ar : $cycle->title }}
+                    {{ $cycle->title }}
                   </option>
                 @endforeach
               @endif
