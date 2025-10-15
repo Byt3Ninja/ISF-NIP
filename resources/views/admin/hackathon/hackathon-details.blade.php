@@ -36,25 +36,61 @@
   if ($isFinishedHackathon) {
     // Finished Hackathon: Show simplified results-focused tabs
     $tabsData = [
-      [
-        'title' => 'overview', 
-        'icon' => 'ti ti-file-text', 
-        'label' => $l == 'en' ? 'Overview' : 'نظرة عامة', 
-        'type' => 'static'
-      ],
-      [
-        'title' => 'winners', 
-        'icon' => 'ti ti-trophy', 
-        'label' => $l == 'en' ? 'Winners' : 'الفائزون', 
-        'type' => 'static'
-      ],
-      [
-        'title' => 'projects', 
-        'icon' => 'ti ti-folder', 
-        'label' => $l == 'en' ? 'Projects Gallery' : 'معرض المشاريع', 
-        'type' => 'static'
-      ],
+        [
+            'title' => 'overview',
+            'icon' => 'ti ti-file-text',
+            'label' => $l == 'en' ? 'Overview' : 'نظرة عامة',
+            'type' => 'static',
+        ],
+        [
+            'title' => 'winners',
+            'icon' => 'ti ti-trophy',
+            'label' => $l == 'en' ? 'Winners' : 'الفائزون',
+            'type' => 'static',
+        ],
+        [
+            'title' => 'projects',
+            'icon' => 'ti ti-folder',
+            'label' => $l == 'en' ? 'Projects Gallery' : 'معرض المشاريع',
+            'type' => 'static',
+        ],
     ];
+
+    // لو المستخدم أدمن نضيف عناصر إضافية
+    if ($isAdmin) {
+        $tabsData = array_merge($tabsData, [
+            [
+                'title' => 'teams',
+                'icon' => 'bi-people-fill',
+                'label' => $l == 'en' ? 'Teams' : 'الفرق',
+                'type' => 'static',
+            ],
+            [
+                'title' => 'mentors',
+                'icon' => 'bi-person-video3',
+                'label' => $l == 'en' ? 'Mentors' : 'المرشدون',
+                'type' => 'static',
+            ],
+            [
+                'title' => 'mentorship',
+                'icon' => 'bi-award-fill',
+                'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الإرشاد وورش العمل',
+                'type' => 'static',
+            ],
+            [
+                'title' => 'results-winners',
+                'icon' => 'bi-trophy-fill',
+                'label' => $l == 'en' ? 'Results & Winners' : 'النتائج والفائزون',
+                'type' => 'static',
+            ],
+            [
+              'title' => 'submissions', 
+              'icon' => 'ti ti-award', 
+              'label' => $l == 'en' ? 'Applicants' : 'المتقدمين', 
+              'type' => 'static'
+            ],
+        ]);
+    }
   } else {
     // Active/Ongoing Hackathon: Show full feature set
     $tabsData = [];
@@ -219,6 +255,9 @@
                 $showTab = false; // Hide submissions from non-admins
               }
             }
+          if ($isAdmin) {
+              $showTab = true;
+          } 
           @endphp
           @if($showTab && $partial)
             <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
