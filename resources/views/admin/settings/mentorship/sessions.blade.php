@@ -66,8 +66,14 @@
                     <i class="ti ti-filter me-2"></i>
                     {{ __('cycles.Filter') }}
                   </button>
+                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id']))
+                  <button onclick="resetFilters()" class="btn btn-outline-secondary">
+                    <i class="ti ti-refresh me-2"></i>
+                    {{ __('cycles.Reset') }}
+                  </button>
+                  @endif
                   <div class="btn-group">
-                    <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="ti ti-file-export me-2"></i>{{ __('cycles.Export') }}
                     </button>
                     <ul class="dropdown-menu">
@@ -906,16 +912,6 @@
         // Update end date minDate
         if (selectedDates.length > 0 && endDatePicker) {
           endDatePicker.set('minDate', selectedDates[0]);
-          
-          // Validate if end date is already selected
-          const endDate = $('#filter_end_date').val();
-          if (endDate && new Date(endDate) < selectedDates[0]) {
-            $('#filter_end_date').addClass('is-invalid');
-            $('#end_date_error').text('{{ $l == "en" ? "End date must be after start date" : "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" }}');
-          } else {
-            $('#filter_end_date').removeClass('is-invalid');
-            $('#end_date_error').text('');
-          }
         }
       }
     });
@@ -930,9 +926,9 @@
         
         // Validate against start date
         const startDate = $('#filter_start_date').val();
-        if (startDate && selectedDates.length > 0 && new Date(startDate) > selectedDates[0]) {
+        if (startDate && dateStr && startDate > dateStr) {
           $('#filter_end_date').addClass('is-invalid');
-          $('#end_date_error').text('{{ $l == "en" ? "End date must be after start date" : "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" }}');
+          $('#end_date_error').text('{{ $l == "en" ? "End date must be on or after start date" : "تاريخ النهاية يجب أن يكون في أو بعد تاريخ البداية" }}');
         }
       }
     });
@@ -950,13 +946,10 @@
       
       // Validate if both dates are selected
       if (startDate && endDate) {
-        const startDateObj = new Date(startDate);
-        const endDateObj = new Date(endDate);
-        
-        if (endDateObj < startDateObj) {
+        if (endDate < startDate) {
           e.preventDefault();
           $('#filter_end_date').addClass('is-invalid');
-          $('#end_date_error').text('{{ $l == "en" ? "End date must be after start date" : "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" }}');
+          $('#end_date_error').text('{{ $l == "en" ? "End date must be on or after start date" : "تاريخ النهاية يجب أن يكون في أو بعد تاريخ البداية" }}');
           return false;
         }
       }
@@ -1165,37 +1158,13 @@
       });
     }
 
-    function deleteme(id) {
-      let url = '/dashboard/mentorship/delsession/' + id;
-      let token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-label-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
-            $.post(url, {
-                '_method': 'POST',
-                '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Session Deleted') }}.',
-                  'success');
-                window.location.href = '/dashboard/mentorship/sessions?show=all';
-              }).fail(function(error) {
-              console.log(error);
-            });
-          } else {
-            console.log('Canceled')
-          }
-        });
+    function resetFilters() {
+      const url = new URL(window.location);
+      url.searchParams.delete('start_date');
+      url.searchParams.delete('end_date');
+      url.searchParams.delete('done');
+      url.searchParams.delete('cycle_id');
+      window.location.href = url.toString();
     }
   </script>
 @stop
