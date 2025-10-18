@@ -184,7 +184,11 @@
                     $minutes = $session->duration % 60;
                @endphp
                 <td>
+                  @if($session->type == 'sessions')
                     {{ sprintf('%02d:%02d', $hours, $minutes) }}
+                  @else
+                    {{ __('admin.N/A') }}
+                  @endif
                 </td>
 
               {{-- Details (Trainer + Address if offline) --}}

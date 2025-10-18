@@ -2503,4 +2503,5 @@ return [
 	'error_fetching_session_data' => 'حدث خطأ أثناء جلب بيانات الجلسة',
 	'Select_Sectors' => 'اختر القطاعات',
 	'total_surveys' => 'كل الاستبيانات',
+	'N/A' => 'غير متوفر',
 ];
