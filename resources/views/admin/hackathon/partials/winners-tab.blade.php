@@ -23,7 +23,7 @@
                 <!-- Project Title -->
                 <div class="row">
                   <div class="col-md-9 col-lg-9 col-sm-12">
-                    <h5 class="card-title text-dark mb-3 fw-bold lh-base">{{ $winner->projectTitle }}</h5>
+                    <h5 class="card-title text-dark mb-3 fw-bold lh-base">{{ $winner?->projectTitle ?? '-' }}</h5>
                   </div>
                   <div class="col-md-3 col-lg-3 col-sm-12 text-end">
                     <i data-project="{{ $winner->id }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
