@@ -15,7 +15,7 @@
                 <img src="{{ $winner->logo ?? '/images/logo-placeholder.png' }}" class="rounded-circle me-3 border shadow-xs" alt="Startup Logo" width="45" height="45">
                 <div>
                   <h6 class="mb-0 fw-bold text-dark">{{ $winner->name }}</h6>
-                  <small class="text-dark">{{ $winner->teamName }}</small>
+                  <small class="text-dark">{{ $winner?->teamName }}</small>
                 </div>
               </div>
               
@@ -23,16 +23,16 @@
                 <!-- Project Title -->
                 <div class="row">
                   <div class="col-md-9 col-lg-9 col-sm-12">
-                    <h5 class="card-title text-dark mb-3 fw-bold lh-base">{{ $winner->projectTitle }}</h5>
+                    <h5 class="card-title text-dark mb-3 fw-bold lh-base">{{ $winner?->projectTitle }}</h5>
                   </div>
                   <div class="col-md-3 col-lg-3 col-sm-12 text-end">
-                    <i data-project="{{ $winner->id }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
+                    <i data-project="{{ $winner?->id }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
                     <span class="likes-count"> {{ $winner->likes->count() }} </span>
                   </div>
                 </div>
                 
                 <!-- Project Description -->
-                <p class="card-text text-muted mb-4 lh-lg">{{ $winner->description }}</p>
+                <p class="card-text text-muted mb-4 lh-lg">{{ $winner?->description }}</p>
                           
                 <!-- Team Members -->
                 <div class="mb-0">
@@ -41,21 +41,21 @@
                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1 small">{{ count($winner->teamMembers) }}</span>
                   </h6>
                   
-                  @if(count($winner->teamMembers) <= 4)
+                  @if(count($winner?->teamMembers) <= 4)
                     <!-- Full width layout for 4 or fewer members -->
                     <div class="row g-2">
                       @foreach ($winner->teamMembers as $member)
                       <div class="col-12">
-                        <div class="bg-white border rounded p-2 {{ $member->isLeader ? 'border-primary bg-opacity-10' : '' }}">
+                        <div class="bg-white border rounded p-2 {{ $member?->isLeader ? 'border-primary bg-opacity-10' : '' }}">
                           <div class="d-flex align-items-center">
                             <img src="{{ $member->image ?? '/icons/account.svg' }}" class="rounded-circle me-3 border" alt="{{ $member->name }}" width="40" height="40">
                             <div class="flex-grow-1">
                               <div class="fw-medium text-dark small mb-1 d-flex align-items-center">
-                                {{ $member->name }}
+                                {{ $member?->name }}
                               </div>
-                              <small class="text-muted">{{ $member->role }}</small>
+                              <small class="text-muted">{{ $member?->role }}</small>
                             </div>
-                            @if($member->isLeader)
+                            @if($member?->isLeader)
                               <span class="badge bg-label-primary text-primary fw-semibold px-2 py-1 small">
                                 <i class="bi bi-award me-1"></i> {{ $l == 'ar' ? 'قائد' : 'Leader' }}
                               </span>
@@ -75,16 +75,16 @@
                             <img src="{{ $member->image ?? '/icons/account.svg' }}" class="rounded-circle me-3 border" alt="{{ $member->name }}" width="32" height="32">
                             <div class="flex-grow-1">
                               <div class="fw-medium text-dark small d-flex align-items-center">
-                                {{ $member->name }}
-                                @if($member->isLeader)
+                                {{ $member?->name }}
+                                @if($member?->isLeader)
                                   <i class="bi bi-star-fill text-warning ms-2" title="Team Leader"></i>
                                 @endif
                               </div>
-                              <small class="text-muted">{{ $member->role }}</small>
+                              <small class="text-muted">{{ $member?->role }}</small>
                             </div>
                             @if($member->isLeader)
                               <span class="badge bg-warning text-dark fw-semibold px-2 py-1 small">
-                                <i class="bi bi-award me-1"></i>Leader
+                                <i class="bi bi-award me-1"></i>{{ $l == 'ar' ? 'قائد' : 'Leader' }}
                               </span>
                             @endif
                           </div>
