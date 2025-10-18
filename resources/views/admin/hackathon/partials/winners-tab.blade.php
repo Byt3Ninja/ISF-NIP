@@ -27,7 +27,7 @@
                   </div>
                   <div class="col-md-3 col-lg-3 col-sm-12 text-end">
                     <i data-project="{{ $winner?->id ?? 0 }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
-                    <span class="likes-count"> {{ issets($winner->likes) ? ( $winner->likes->count() ) : 0 }} </span>
+                    <span class="likes-count"> {{ issets($winner) ? ( $winner->likes->count() ) : 0 }} </span>
                   </div>
                 </div>
                 
