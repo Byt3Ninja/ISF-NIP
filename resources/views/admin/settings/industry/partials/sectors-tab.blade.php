@@ -9,14 +9,21 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-        <h5 class="card-title">{{ __('settings.Sectors') }}</h5>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-3 mb-3">
+        <h5 class="card-title mb-2 mb-md-0">{{ __('settings.Sectors') }}</h5>
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-primary" id="addSector"><i class="ti ti-plus ti-sm me-1"></i>{{ __('settings.Add_Sector') }}</button>
-          <button class="btn btn-label-primary" id="addOtherSector"><i class="ti ti-plus ti-sm me-1"></i>{{ __('settings.Add_Other') }}</button>
+          <button class="btn btn-primary" id="addSector">
+            <i class="ti ti-plus ti-sm me-md-2"></i>
+            <span class="d-none d-md-inline">{{ __('settings.Add_Sector') }}</span>
+          </button>
+          <button class="btn btn-label-primary" id="addOtherSector">
+            <i class="ti ti-plus ti-sm me-md-2"></i>
+            <span>{{ __('settings.Add_Other') }}</span>
+          </button>
           <div class="btn-group">
             <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="ti ti-download ti-sm me-1"></i>{{ __('settings.Export') }}
+              <i class="ti ti-download ti-sm me-md-2"></i>
+              <span class="d-none d-md-inline">{{ __('settings.Export') }}</span>
             </button>
             <ul class="dropdown-menu">
               <li>
@@ -40,6 +47,7 @@
               <th style="width:40px">#</th>
               <th>{{ __('settings.Sector') }}</th>
               <th>{{ __('settings.Industry') }}</th>
+              <th>{{ __('cycles.Created At') }}</th>
               <th class="text-end">{{ __('settings.Actions') }}</th>
             </tr>
           </thead>

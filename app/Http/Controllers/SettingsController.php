@@ -1139,6 +1139,7 @@ class SettingsController extends Controller
 				return [
 					'id'       => $industry->id,
 					'industry' => $industry->name,
+					'created_at' => $industry->created_at,
 					'sectors'  => $sectorsList,
 				];
 				
