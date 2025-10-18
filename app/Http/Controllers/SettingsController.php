@@ -1109,7 +1109,8 @@ class SettingsController extends Controller
 			$technologies = DB::table('technologies')->get()->map(function ($tech) {
 								return [
 									'id'   => $tech->id,
-									'name' => $tech->name, // أو $tech->{"name_$l"} إذا كانت الأسماء متعددة اللغات
+									'name' => $tech->name,
+									'created_at' => $tech->created_at
 								];
 							})->values()->toArray();
 
@@ -1123,6 +1124,7 @@ class SettingsController extends Controller
 						return [
 							'id'   => $sector->id,
 							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+							'created_at' => $sector->created_at
 						];
 					})->values()->toArray();
 				} else {
@@ -1130,6 +1132,7 @@ class SettingsController extends Controller
 						return [
 							'id'   => $sector->id,
 							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+							'created_at' => $sector->created_at
 						];
 					})->values()->toArray();
 				}

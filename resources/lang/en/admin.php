@@ -2455,4 +2455,5 @@ return [
 	'error_fetching_session_data' => 'Error occurred while fetching session data',
 	'Select_Sectors' => 'Select Sectors',
 	'total_surveys' => 'Total Surveys',
+	'N/A' => 'N/A',
 ];

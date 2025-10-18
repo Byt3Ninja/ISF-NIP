@@ -3,7 +3,7 @@
   @php
     $cards = [
       [ 'value' => $total_sessions_count ?? 0, 'label' => __('admin.Training sessions'), 'icon' => 'school', 'color' => 'primary', 'filter' => 'reset' ],
-      [ 'value' => $sessions_period . ' ', 'label' => __('admin.Training_Sessions_Duration'), 'icon' => 'clock-hour-3', 'color' => 'secondary' ],
+      [ 'value' => $sessions_period . ' ', 'label' => __('admin.Training_Sessions_Duration'), 'icon' => 'clock-hour-3', 'color' => 'secondary', 'filter' => 'reset' ],
       [ 'value' => $offline_sessions_count ?? 0, 'label' => __('admin.Offline Training Sessions Count'), 'icon' => 'building-community', 'color' => 'danger', 'filter' => 'Offline_Session','type' => 'offline' ],
       [ 'value' => $online_sessions_count ?? 0, 'label' => __('admin.Zoom Training Sessions Count'), 'icon' => 'screen-share', 'color' => 'info', 'filter' => 'Online_Session', 'type' => 'sessions' ],
       [ 'value' => $online_training_count ?? 0, 'label' => __('admin.Online Training Sessions Count'), 'icon' => 'certificate', 'color' => 'success', 'filter' => 'Online_Training', 'type' => 'online' ]
@@ -184,7 +184,11 @@
                     $minutes = $session->duration % 60;
                @endphp
                 <td>
+                  @if($session->type == 'sessions')
                     {{ sprintf('%02d:%02d', $hours, $minutes) }}
+                  @else
+                    {{ __('admin.N/A') }}
+                  @endif
                 </td>
 
               {{-- Details (Trainer + Address if offline) --}}
@@ -312,6 +316,7 @@
     
     // Initalize date table
     let trainingTable = $('#tblTraining').DataTable({
+      responsive: true,
       pageLength: 10,
       columnDefs: [{
         orderable: false,

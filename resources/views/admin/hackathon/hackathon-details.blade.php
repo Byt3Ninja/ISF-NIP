@@ -61,25 +61,25 @@
         $tabsData = array_merge($tabsData, [
             [
                 'title' => 'teams',
-                'icon' => 'bi-people-fill',
+                'icon' => 'ti ti-users-group',
                 'label' => $l == 'en' ? 'Teams' : 'الفرق',
                 'type' => 'static',
             ],
             [
                 'title' => 'mentors',
-                'icon' => 'bi-person-video3',
+                'icon' => 'ti ti-user',
                 'label' => $l == 'en' ? 'Mentors' : 'المرشدون',
                 'type' => 'static',
             ],
             [
                 'title' => 'mentorship',
-                'icon' => 'bi-award-fill',
+                'icon' => 'ti ti-school',
                 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الإرشاد وورش العمل',
                 'type' => 'static',
             ],
             [
                 'title' => 'results-winners',
-                'icon' => 'bi-trophy-fill',
+                'icon' => 'ti ti-trophy',
                 'label' => $l == 'en' ? 'Results & Winners' : 'النتائج والفائزون',
                 'type' => 'static',
             ],
@@ -121,7 +121,6 @@
     if ($isUserParticipating) {
       // Full participant experience
       $participantTabs = [
-        
         ['title' => 'teams', 'icon' => 'bi-people-fill', 'label' => $l == 'en' ? 'Teams' : 'الفرق', 'type' => 'static'],
         ['title' => 'mentors', 'icon' => 'bi-person-video3', 'label' => $l == 'en' ? 'Mentors' : 'المرشدون', 'type' => 'static'],
         ['title' => 'mentorship', 'icon' => 'bi-award-fill', 'label' => $l == 'en' ? 'Mentorship & Workshops' : 'الارشاد وورش العمل', 'type' => 'static'],
