@@ -248,7 +248,7 @@ class TeamFormation extends Model
                 $member->isLeader = $team_member->isLeader == 1 ? true : false;
                 return $member;
             });
-            $winner->likes = $team->likes ?? 0;
+            $winner->likes = $team->likes;
             return $winner;
         });
 
