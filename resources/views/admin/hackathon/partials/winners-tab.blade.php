@@ -14,8 +14,8 @@
               <div class="card-header bg-light border-0 d-flex align-items-center py-3">
                 <img src="{{ $winner->logo ?? '/images/logo-placeholder.png' }}" class="rounded-circle me-3 border shadow-xs" alt="Startup Logo" width="45" height="45">
                 <div>
-                  <h6 class="mb-0 fw-bold text-dark">{{ $winner->name }}</h6>
-                  <small class="text-dark">{{ $winner?->teamName }}</small>
+                  <h6 class="mb-0 fw-bold text-dark">{{ $winner?->name ?? '-' }}</h6>
+                  <small class="text-dark">{{ $winner?->teamName ?? '-' }}</small>
                 </div>
               </div>
               
@@ -84,7 +84,7 @@
                             </div>
                             @if($member->isLeader)
                               <span class="badge bg-warning text-dark fw-semibold px-2 py-1 small">
-                                <i class="bi bi-award me-1"></i>Leader
+                                <i class="bi bi-award me-1"></i>{{ $l == 'ar' ? 'قائد' : 'Leader' }}
                               </span>
                             @endif
                           </div>
