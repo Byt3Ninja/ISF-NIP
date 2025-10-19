@@ -518,7 +518,7 @@ class ReportController extends Controller
             [ 'value' => $Judges ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $final_screening_count ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
             [ 'value' => $final_pending_screening_count->count() ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings_count->count() ?? 0, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $draft_screenings_count->count() ?? 0, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $final_done_screening_count->count() ?? 0, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
@@ -647,7 +647,7 @@ class ReportController extends Controller
             [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
             [ 'value' => $pending_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
