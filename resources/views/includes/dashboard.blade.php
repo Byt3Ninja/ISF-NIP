@@ -414,54 +414,99 @@
 								</div>
 							</div>
 							@else
-							<div class="card mt-10">
-								<div class="card-header border-bottom">
-									<h4 class="card-title d-flex align-items-center">
-										<i class="ti ti-clipboard-list ti-28px"></i> <span
-											class="mx-2">{{__('dashboard.IncubationList')}}</span>
-									</h4>
-								</div>
-								<div class="card-body">
-									@if( count( $workingCycles ) > 0 )
-									@foreach( $workingCycles as $cycle )
-									<div class="border-bottom">
-										<div class="card-header">
-											<h4 class="primary"><i class="bx bxs-bell"></i> {{ $cycle->title }}</h4>
-											<div class="d-flex align-items-center mt-2">
-												<div class="media-left">
-													@if (!is_null( $cycle->organization->image_url ) )
-													<img src="{{ $cycle->organization->image_url }}" alt="avatar" class="rounded-circle"
-														height="40" width="40">
-													@endif
-												</div>
-												<div class="mx-2"> {{ $cycle->organization->name }} </div>
-											</div>
-										</div>
-										<div class="card-body bg-rgba-light">
-											<p class="card-text"> {{ $cycle->description }} </p>
-											<div class="d-flex align-items-center justify-content-between" style="width:100%">
-												<small class="text-muted" style="text-transform: capitalize"> {{__('dashboard.start from')}} {{
-													$cycle->start }} </small>
-												<a href="/dashboard/cycles/view/{{ $cycle->id}}" class="btn btn-primary">
-													<span class="mx-2">{{__('dashboard.Join')}}</span>
-													<i class="ti ti-arrows-join"></i>
-												</a>
-											</div>
-										</div>
-									</div>
-									@endforeach
-									@else
-									<div>
-										<h5 class="m-75 p-75">
-											<div class="avatar bg-rgba-warning m-0 mr-75">
-												<div class="avatar-content"> <i class="bx bx-stats text-warning"></i> </div>
-											</div>
-											{{__('dashboard.No Cycles started yet')}}...
-										</h5>
-									</div>
-									@endif
-								</div>
-							</div>
+							 <div class="card mt-10">
+    <div class="card-header border-bottom">
+        <h4 class="card-title d-flex align-items-center">
+            <i class="ti ti-clipboard-list ti-28px"></i>
+            <span class="mx-2">{{ __('dashboard.IncubationList') }}</span>
+        </h4>
+    </div>
+
+    <div class="card-body">
+        @if(count($workingCycles) > 0)
+            @foreach($workingCycles as $cycle)
+                <div class="border-bottom">
+                    <div class="card-header">
+                        <h4 class="primary">
+                            <i class="bx bxs-bell"></i>
+                            {{ $cycle->title }}
+                        </h4>
+
+                        <div class="d-flex align-items-center mt-2">
+                            <div class="media-left">
+                                @if(!empty($cycle->organization->image_url))
+                                    <img
+                                        src="{{ $cycle->organization->image_url }}"
+                                        alt="{{ $cycle->organization->name }} avatar"
+                                        class="rounded-circle"
+                                        height="40"
+                                        width="40"
+                                    >
+                                @endif
+                            </div>
+
+                            <div class="mx-2">{{ $cycle->organization->name }}</div>
+                        </div>
+                    </div>
+
+                    <div class="card-body bg-rgba-light">
+                        <p class="card-text mb-2">{{ $cycle->description }}</p>
+
+                        @php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
+
+                        @if($hasPreRequests)
+                            <div class="mb-2">
+                                <strong class="d-block mb-1">{{ __('admin.Before applying, please complete:') }}</strong>
+                                <ul class="list-unstyled mb-2 d-flex flex-wrap gap-2">
+                                    @foreach($cycle->pre_requests as $pr)
+                                        <li id="{{ $pr['id'] }}" class="pre-request-item mb-1">
+                                            <a href="{{ $pr['url'] }}" class="btn btn-outline-warning btn-sm" role="button" aria-label="{{ $pr['label'] }}">
+                                                 {{ __($pr['label']) }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <div class="d-flex align-items-center justify-content-between" style="width:100%">
+                            <small class="text-muted" style="text-transform: capitalize">
+                                {{ __('dashboard.start from') }} {{ $cycle->start }}
+                            </small>
+
+                            @if($hasPreRequests)
+                                <button
+                                    class="btn btn-secondary"
+                                    disabled
+                                    aria-disabled="true"
+                                    data-cycle-id="{{ $cycle->id }}"
+                                    title="{{ __('admin.Please complete required items before joining') }}"
+                                >
+                                    <span class="mx-2">{{ __('dashboard.Join') }}</span>
+                                    <i class="ti ti-arrows-join"></i>
+                                </button>
+                            @else
+                                <a href="{{ url('/dashboard/cycles/view/' . $cycle->id) }}" class="btn btn-primary" data-cycle-id="{{ $cycle->id }}">
+                                    <span class="mx-2">{{ __('dashboard.Join') }}</span>
+                                    <i class="ti ti-arrows-join"></i>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="text-center py-4">
+                <h5 class="m-75 p-75">
+                    <div class="avatar bg-rgba-warning m-0 mr-75 d-inline-flex align-items-center justify-content-center">
+                        <div class="avatar-content"> <i class="bx bx-stats text-warning"></i> </div>
+                    </div>
+                    {{ __('dashboard.No Cycles started yet') }}...
+                </h5>
+            </div>
+        @endif
+    </div>
+</div>
 							@endif
 						</div>
 					</div>

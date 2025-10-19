@@ -434,4 +434,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return true;
     }
 
+     public function hasCompletedProfile(): bool
+{
+        return filled($this->phone)
+        && filled($this->country_id)
+        && filled($this->address)
+        && filled($this->timezone);
+}
+
+public function hasCompletedStartup(): bool
+{
+    return filled($this->company->name_en)
+        && filled($this->company->address_en)
+        && filled($this->company->sector)
+        && filled($this->company->stage);
+}
+
 }
