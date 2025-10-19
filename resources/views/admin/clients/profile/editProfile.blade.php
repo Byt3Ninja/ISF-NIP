@@ -50,10 +50,7 @@ $phone_codes = App\Country::all();
 $tabs = [
 ['account', 'accountSection', 'users'],
 ['security', 'securitySection', 'lock'],
-['2FA', '2faSection', 'key'],
-['billing', 'billingSection', 'bookmark'],
 ['notifications', 'notificationsSection', 'bell'],
-['connections', 'connectionsSection', 'link'],
 ];
 
 // إضافة الشرط بشكل منفصل
