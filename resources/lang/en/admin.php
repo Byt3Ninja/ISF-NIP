@@ -1847,6 +1847,7 @@ return [
 	'submitDate' => 'Submit Date',
 	'user' => 'User',
 	'Startup' => 'Startup',
+	'organization_manager' => 'Organization Manager',
 	'mentor' => 'Mentor',
 	'program' => 'Program',
 	'loading' => 'Loading',
