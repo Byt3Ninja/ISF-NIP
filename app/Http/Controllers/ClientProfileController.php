@@ -767,29 +767,28 @@ class ClientProfileController extends Controller
     {
         try {
             $request->validate([
-                'accept_email' => 'boolean',
-                'accept_whatsapp' => 'boolean',
-                'accept_pusher' => 'boolean',
+                'accept_email' => 'sometimes|boolean',
+                'accept_whatsapp' => 'sometimes|boolean',
+                'accept_pusher' => 'sometimes|boolean',
             ]);
 
-            $settings = $request->only(['accept_email', 'accept_whatsapp', 'accept_pusher']);
-            
-            // Set defaults if not provided
-            $settings['accept_email'] = $settings['accept_email'] ?? true;
-            $settings['accept_whatsapp'] = $settings['accept_whatsapp'] ?? false;
-            $settings['accept_pusher'] = $settings['accept_pusher'] ?? false;
+            $settings = [
+                'accept_email' => filter_var($request->input('accept_email', auth()->user()->accept_email), FILTER_VALIDATE_BOOLEAN),
+                'accept_whatsapp' => filter_var($request->input('accept_whatsapp', auth()->user()->accept_whatsapp), FILTER_VALIDATE_BOOLEAN),
+                'accept_pusher' => filter_var($request->input('accept_pusher', auth()->user()->accept_pusher), FILTER_VALIDATE_BOOLEAN),
+            ];
 
             $updated = $this->notificationSettingsService->updateNotificationSettings($settings);
-            
+
             if ($updated) {
-                return redirect('/dashboard/myProfile')->with('success', 'Notification settings updated successfully');
+                return redirect()->back()->with('success', 'Notification settings updated successfully');
             }
 
-            return redirect('/dashboard/myProfile')->with('error', 'Failed to update notification settings');
+            return redirect()->back()->with('error', 'Failed to update notification settings');
 
         } catch (\Exception $e) {
             Log::channel('system_exceptions')->info('Exception updating notification settings:', [$e]);
-            return redirect('/dashboard/myProfile')->with('error', 'An error occurred while updating notification settings');
+            return redirect()->back()->with('error', 'An error occurred while updating notification settings');
         }
     }
 }

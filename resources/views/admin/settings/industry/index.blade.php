@@ -109,7 +109,7 @@
 <script>
 // Seed dataset with IDs
 let DATA = @json($data);
-// console.log(DATA);
+
 // Technologies with IDs
 let TECHNOLOGIES = @json($technologies);
 
@@ -337,12 +337,12 @@ const generateTableActions = (type, id, extraData = '') => {
 };
 
 // Initialize DataTable
-function initializeDataTable(tableId, tableVar, columns, dataPopulator, domConfig = 'Bfrtip', extraInitComplete = null) {
+function initializeDataTable(tableId, tableVar, columns, dataPopulator, domConfig = 'Bfrtip', extraInitComplete = null, orderConfig = null) {
   if (!tableVar) {
-    tableVar = $(`#${tableId}`).DataTable({
+    const dtConfig = {
       responsive: true,
       pageLength: 10,
-      ordering: false,
+      ordering: true,
       language: dataTableLanguageConfig,
       columnDefs: [
         { targets: 0, render: (data, type, row, meta) => meta.row + 1 },
@@ -352,10 +352,16 @@ function initializeDataTable(tableId, tableVar, columns, dataPopulator, domConfi
       dom: domConfig,
       initComplete: extraInitComplete,
       buttons: [
-        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `${tableId}_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1] } },
-        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `${tableId}_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1] } }
+        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `${tableId}_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: Array.from({length: columns.length - 1}, (_, i) => i) } },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `${tableId}_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: Array.from({length: columns.length - 1}, (_, i) => i) } }
       ]
-    });
+    };
+    
+    if (orderConfig) {
+      dtConfig.order = orderConfig;
+    }
+    
+    tableVar = $(`#${tableId}`).DataTable(dtConfig);
   }
   tableVar.clear();
   dataPopulator(tableVar);
@@ -367,11 +373,13 @@ function renderIndustries() {
   industriesTable = initializeDataTable(
     'tblIndustries',
     industriesTable,
-    ["#", "{{ __('settings.Name') }}", "{{ __('settings.Actions') }}"],
+    ["#", "{{ __('settings.Name') }}", "{{ __('cycles.Created At') }}", "{{ __('settings.Actions') }}"],
     (table) => {
-      DATA.forEach((d) => table.row.add([null, d.industry, generateTableActions('industry', d.id)]));
+      DATA.forEach((d) => table.row.add([null, d.industry, d.created_at ? moment(d.created_at).format('YYYY-MM-DD HH:mm:ss') : '-', generateTableActions('industry', d.id)]));
     },
-    '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>'
+    '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    null,
+    [[2, 'desc']]
   );
 
   elements.selIndustrySector.innerHTML = 
@@ -414,22 +422,24 @@ function renderSectors() {
     }
   }
 
-  sectorsTable = initializeDataTable(
+    sectorsTable = initializeDataTable(
     'tblSectors',
     sectorsTable,
-    ["#", "{{ __('settings.Sector') }}", "{{ __('settings.Industry') }}", "{{ __('settings.Actions') }}"],
+    ["#", "{{ __('settings.Sector') }}", "{{ __('settings.Industry') }}", "{{ __('cycles.Created At') }}", "{{ __('settings.Actions') }}"],
     (table) => {
       currentSectors.forEach((s) => {
         table.row.add([
           null,
           s.name,
           s.industryName || "-",
+          s.created_at ? moment(s.created_at).format('YYYY-MM-DD HH:mm:ss') : '-',
           generateTableActions('sector', s.id, s.industryId)
         ]);
       });
     },
     '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters-sector"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-    function () { $('.filters-sector').append($('#tblSectors-filters')); }
+    function () { $('.filters-sector').append($('#tblSectors-filters')); },
+    [[3, 'desc']]
   );
 }
 
@@ -437,11 +447,13 @@ function renderTech() {
   techTable = initializeDataTable(
     'tblTech',
     techTable,
-    ["#", "{{ __('settings.Technology') }}", "{{ __('settings.Actions') }}"],
+    ["#", "{{ __('settings.Technology') }}", "{{ __('cycles.Created At') }}", "{{ __('settings.Actions') }}"],
     (table) => {
-      TECHNOLOGIES.forEach((t) => table.row.add([null, t.name, generateTableActions('tech', t.id)]));
+      TECHNOLOGIES.forEach((t) => table.row.add([null, t.name, t.created_at ? moment(t.created_at).format('YYYY-MM-DD HH:mm:ss') : '-', generateTableActions('tech', t.id)]));
     },
-    '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>'
+    '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    null,
+    [[2, 'desc']]
   );
 }
 
@@ -590,7 +602,7 @@ function handleAddAction(type, newName, industryId) {
       switch (type) {
         case 'industry':
           const newIndustryId = result.response?.id || nextIndustryId++;
-          DATA.push({ id: newIndustryId, industry: newName, sectors: [{ id: 1, name: 'Other' }] });
+          DATA.push({ id: newIndustryId, industry: newName, sectors: [{ id: 1, name: 'Other', created_at: new Date().toISOString() }], created_at: new Date().toISOString() });
           renderIndustries();
           break;
         case 'sector':
@@ -598,7 +610,7 @@ function handleAddAction(type, newName, industryId) {
           const targetIndustry = findIndustryById(targetIndustryId);
           if (targetIndustry) {
             const newSectorId = result.response?.id || getNextSectorId(targetIndustryId);
-            targetIndustry.sectors.push({ id: newSectorId, name: newName });
+            targetIndustry.sectors.push({ id: newSectorId, name: newName, created_at: new Date().toISOString() });
             renderSectors();
             renderPreview();
           }
@@ -606,7 +618,7 @@ function handleAddAction(type, newName, industryId) {
         case 'tech':
           const newTechId = result.response?.id || nextTechId++;
           if (!TECHNOLOGIES.find(t => t.name === newName)) {
-            TECHNOLOGIES.push({ id: newTechId, name: newName });
+            TECHNOLOGIES.push({ id: newTechId, name: newName, created_at: new Date().toISOString() });
             renderTech();
           }
           break;
@@ -800,7 +812,7 @@ document.getElementById('addOtherSector').addEventListener('click', () => {
       
       if (success) {
         const newSectorId = result.response?.id || getNextSectorId(selectedIndustryId);
-        industry.sectors.push({ id: newSectorId, name: 'Other' });
+        industry.sectors.push({ id: newSectorId, name: 'Other', created_at: new Date().toISOString() });
         renderSectors();
         renderPreview();
         dump();
@@ -832,7 +844,7 @@ document.getElementById('addOtherTech').addEventListener('click', () => {
       
       if (success) {
         const newTechId = result.response?.id || nextTechId++;
-        TECHNOLOGIES.push({ id: newTechId, name: 'Other' });
+        TECHNOLOGIES.push({ id: newTechId, name: 'Other', created_at: new Date().toISOString() });
         renderTech();
         dump();
         releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Other technology added successfully' : 'تمت إضافة تكنولوجيا "أخرى" بنجاح' }}' });
@@ -878,11 +890,11 @@ document.getElementById('importJson').addEventListener('click', () => {
         // Validate structure
         if (!Array.isArray(importedData.industries) || 
             !importedData.industries.every(item => 
-              item.id && item.industry && Array.isArray(item.sectors) &&
-              item.sectors.every(s => s.id && s.name)
+              item.id && item.industry && item.created_at && Array.isArray(item.sectors) &&
+              item.sectors.every(s => s.id && s.name && s.created_at)
             ) || 
             !Array.isArray(importedData.technologies) ||
-            !importedData.technologies.every(t => t.id && t.name)) {
+            !importedData.technologies.every(t => t.id && t.name && t.created_at)) {
           throw new Error('Invalid data structure');
         }
         
