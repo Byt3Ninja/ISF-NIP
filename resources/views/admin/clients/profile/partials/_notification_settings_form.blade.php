@@ -15,7 +15,8 @@
       <div class="col-md-6">
         <!-- Email Notifications -->
         <div class="form-check form-switch mb-4">
-          <input class="form-check-input" type="checkbox" id="accept_email" name="accept_email" 
+          <input class="form-check-input" type="hidden" name="accept_email" value="0">
+          <input class="form-check-input" type="checkbox" id="accept_email" name="accept_email" value="1"
                  {{ auth()->user()->accept_email ? 'checked' : '' }}>
           <label class="form-check-label" for="accept_email">
             <div class="d-flex align-items-center">
@@ -32,7 +33,8 @@
       <div class="col-md-6">
         <!-- WhatsApp Notifications -->
         <div class="form-check form-switch mb-4">
-          <input class="form-check-input" type="checkbox" id="accept_whatsapp" name="accept_whatsapp" 
+          <input class="form-check-input" type="hidden" name="accept_whatsapp" value="0">
+          <input class="form-check-input" type="checkbox" id="accept_whatsapp" name="accept_whatsapp" value="1"
                  {{ auth()->user()->accept_whatsapp ? 'checked' : '' }}>
           <label class="form-check-label" for="accept_whatsapp">
             <div class="d-flex align-items-center">
@@ -51,7 +53,8 @@
       <div class="col-md-6">
         <!-- Push Notifications -->
         <div class="form-check form-switch mb-4">
-          <input class="form-check-input" type="checkbox" id="accept_pusher" name="accept_pusher" 
+          <input class="form-check-input" type="hidden" name="accept_pusher" value="0">
+          <input class="form-check-input" type="checkbox" id="accept_pusher" name="accept_pusher" value="1"
                  {{ auth()->user()->accept_pusher ? 'checked' : '' }}>
           <label class="form-check-label" for="accept_pusher">
             <div class="d-flex align-items-center">
