@@ -2505,4 +2505,5 @@ return [
 	'total_surveys' => 'كل الاستبيانات',
 	'N/A' => 'غير متوفر',
 	'organization_manager' => 'مدير المنظمة',
+	'No bio has been added yet' => 'لم تتم إضافة نبذة بعد',
 ];

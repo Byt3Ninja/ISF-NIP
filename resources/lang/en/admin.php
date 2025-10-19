@@ -2459,4 +2459,5 @@ return [
 	'Select_Sectors' => 'Select Sectors',
 	'total_surveys' => 'Total Surveys',
 	'N/A' => 'N/A',
+	'No bio has been added yet' => 'No bio has been added yet',
 ];
