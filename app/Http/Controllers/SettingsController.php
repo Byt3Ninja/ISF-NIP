@@ -561,9 +561,6 @@ class SettingsController extends Controller
 	{
 		$data = $request->validated();
     	$id = $data['id'];
-		$GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
-		$GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
-		$GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
 
 		$GOOGLE_CALENDAR_CLIENT_ID = $request->input('GOOGLE_CALENDAR_CLIENT_ID');
 		$GOOGLE_CALENDAR_CLIENT_SECRET = $request->input('GOOGLE_CALENDAR_CLIENT_SECRET');
@@ -574,9 +571,13 @@ class SettingsController extends Controller
 		$VFEmail1 = $request->VerficationEmail == 'on' ? '1' : '0';
 		$updateSittings = Settings::where('id', $id)->first();
 		
-		$updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
-		$updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
-		$updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+		$updateSittings->GOOGLE_LOGIN = $request->input('GOOGLE_LOGIN', $updateSittings->GOOGLE_LOGIN ?? 'disabled');
+
+    	if ($updateSittings->GOOGLE_LOGIN === 'enabled') {
+        	$updateSittings->GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
+        	$updateSittings->GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
+        	$updateSittings->GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+    	}
 
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_ID = $GOOGLE_CALENDAR_CLIENT_ID;
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_SECRET = $GOOGLE_CALENDAR_CLIENT_SECRET;
@@ -592,8 +593,25 @@ class SettingsController extends Controller
 
 		$updateSittings->VFEmail = $VFEmail1;
 		$updateSittings->save();
+		$activeTab = $request->input('active_tab');
 
-		return redirect()->back()->with('message', 'linkedinstored');
+   		switch ($activeTab) {
+        	case 'google-oauth':
+            	$message = 'google_login_saved';
+            	break;
+
+        	case 'google-calendar':
+				$message = 'google_calendar_saved';                
+           		break;
+        	case 'linkedin':
+            	$message = 'linkedin_login_saved';
+            	break;
+        	default:
+		 		$message = 'settings_saved';
+           		 break;
+    	}
+
+    	return redirect()->back()->with('message', $message)->with('active_tab', $activeTab);
 	}
 
 	public function update_settingsImgHome(Request $request)

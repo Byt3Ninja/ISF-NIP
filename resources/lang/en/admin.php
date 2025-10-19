@@ -2466,5 +2466,10 @@ return [
 	'LINKEDIN_LOGIN' => 'LinkedIn Login',
 	'disabled' => 'Disabled',
 	'enabled' => 'Enabled',
-	'linkedinstored' => 'LinkedIn Login Settings Saved Successfully',
+	'GOOGLE_LOGIN' => 'Google Login',
+	'google_login_saved' => 'Google Login Settings Saved Successfully',
+	'google_calendar_saved' => 'Google Calendar Settings Saved Successfully',
+    'linkedin_login_saved' => 'LinkedIn Login Settings Saved Successfully',
+    'settings_saved' => 'Settings Saved Successfully',
+
 ];
