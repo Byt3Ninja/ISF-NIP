@@ -2517,4 +2517,9 @@ return [
 	'LINKEDIN_CLIENT_ID' => 'معرف عميل لينكدإن',
 	'LINKEDIN_CLIENT_SECRET' => 'سرية عميل لينكدإن',
 	'LINKEDIN_REDIRECT_URI' => 'عنوان تحويل لينكدإن',
+	'GOOGLE_LOGIN' => 'تسجيل الدخول عبر جوجل',
+	'google_login_saved' => 'تم حفظ إعدادات تسجيل الدخول عبر جوجل بنجاح',
+    'google_calendar_saved' => 'تم حفظ إعدادات تقويم جوجل بنجاح',
+    'linkedin_login_saved' => 'تم حفظ إعدادات تسجيل الدخول عبر لينكدإن بنجاح',
+    'settings_saved' => 'تم حفظ الإعدادات بنجاح',
 ];

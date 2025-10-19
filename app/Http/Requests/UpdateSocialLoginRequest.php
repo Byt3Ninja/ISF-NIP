@@ -21,9 +21,11 @@ class UpdateSocialLoginRequest extends FormRequest
      */
     public function rules(): array
     {
+       $urlRegex = 'regex:/^https?:\/\/[a-zA-Z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]+$/';
        $rules = [
             'id' => ['required', 'integer', 'exists:settings,id'],
             'LINKEDIN_LOGIN' => ['required', 'in:enabled,disabled'],
+            'GOOGLE_LOGIN' => ['required', 'in:enabled,disabled'],
         ];
 
         if ($this->input('LINKEDIN_LOGIN') === 'enabled') {
@@ -41,6 +43,15 @@ class UpdateSocialLoginRequest extends FormRequest
             ];
             $rules['LINKEDIN_CLIENT_ID'] = ['nullable', 'sometimes', 'string'];
             $rules['LINKEDIN_CLIENT_SECRET'] = ['nullable', 'sometimes', 'string'];
+        }
+        if ($this->input('GOOGLE_LOGIN') === 'enabled') {
+            $rules['GOOGLE_CLIENT_ID'] = ['required', 'string'];
+            $rules['GOOGLE_CLIENT_SECRET'] = ['required', 'string'];
+            $rules['GOOGLE_REDIRECT'] = ['required', $urlRegex];
+        } else {
+            $rules['GOOGLE_CLIENT_ID'] = ['nullable', 'sometimes', 'string'];
+            $rules['GOOGLE_CLIENT_SECRET'] = ['nullable', 'sometimes', 'string'];
+            $rules['GOOGLE_REDIRECT'] = ['nullable', 'sometimes', $urlRegex];
         }
 
         return $rules;
@@ -60,6 +71,12 @@ class UpdateSocialLoginRequest extends FormRequest
                 'LINKEDIN_REDIRECT_URI.url' => 'يرجى إدخال رابط إعادة توجيه صالح',
                 'id.required' => 'معرف الإعداد مطلوب.',
                 'id.exists' => 'سجل الإعداد غير موجود.',
+                'GOOGLE_LOGIN.required' => 'يرجى اختيار حالة تسجيل الدخول عبر جوجل.',
+                'GOOGLE_LOGIN.in' => 'حالة تسجيل الدخول عبر جوجل غير صحيحة.',
+                'GOOGLE_CLIENT_ID.required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
+                'GOOGLE_CLIENT_SECRET.required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
+                'GOOGLE_REDIRECT.required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
+                'GOOGLE_REDIRECT.regex' => 'يرجى إدخال رابط إعادة توجيه صالح'
             ];
         }
 
@@ -70,6 +87,12 @@ class UpdateSocialLoginRequest extends FormRequest
             'LINKEDIN_CLIENT_SECRET.required' => 'Please complete all LinkedIn configuration fields before saving.',
             'LINKEDIN_REDIRECT_URI.required' => 'Please complete all LinkedIn configuration fields before saving.',
             'LINKEDIN_REDIRECT_URI.url' => 'Please enter a valid Redirect URL.',
+            'GOOGLE_LOGIN.required' => 'Please choose Google login state.',
+            'GOOGLE_LOGIN.in' => 'Invalid Google login state.',
+            'GOOGLE_CLIENT_ID.required' => 'Please complete all Google configuration fields before saving.',
+            'GOOGLE_CLIENT_SECRET.required' => 'Please complete all Google configuration fields before saving.',
+            'GOOGLE_REDIRECT.required' => 'Please complete all Google configuration fields before saving.',
+            'GOOGLE_REDIRECT.regex' => 'Please enter a valid Redirect URL.',
             'id.required' => 'Settings id is required.',
             'id.exists' => 'Settings record not found.',
         ];
