@@ -75,12 +75,12 @@ class ReportController extends Controller
                 break;
                 
             case 'mentorSurveys':
-                $data = $this->mentorSurveyReport($request->get('status', 'all'));
+                $data = $this->mentorSurveyReport($organization_id,$request->get('status', 'all'));
                 $view = '_mentorSurvey';
                 break;
 
             case 'startupSurveys':
-                $data = $this->startupSurveysReport();
+                $data = $this->startupSurveysReport($organization_id);
                 $view = '_startupSurveyReport';
                 break;
 
@@ -110,8 +110,12 @@ class ReportController extends Controller
 
     }
 
-    protected function startupSurveysReport(){
-        $data['mentorRequests'] =  MentorshipRequest::all();
+    protected function startupSurveysReport($organization_id){
+        $mentorRequestsQuery = MentorshipRequest::query()
+        ->whereHas('user', function($q) use ($organization_id) {
+            $q->where('organization_id', $organization_id);
+        });
+        $data['mentorRequests'] =  $mentorRequestsQuery->get();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
             return SurveyResponses::where('user_id', $request->user_id)
                 ->where('triggered_at', $request->id)
@@ -129,9 +133,13 @@ class ReportController extends Controller
         return $data;
     }
  // =============> ajax report MentorSurvey <=============
-    protected function mentorSurveyReport(){
+    protected function mentorSurveyReport($organization_id){
+        $mentorRequestsQuery = MentorshipRequest::query()
+        ->whereHas('mentor', function($q) use ($organization_id) {
+            $q->where('organization_id', $organization_id);
+        });
         $status = request('status', 'all'); 
-        $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['mentorRequests'] =  $mentorRequestsQuery->get();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
             return SurveyResponses::where('user_id', $request->mentor_id)
                 ->where('triggered_at', $request->id)
