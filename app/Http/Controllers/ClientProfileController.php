@@ -115,15 +115,17 @@ class ClientProfileController extends Controller
         $client = Auth::user();
         $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
 
-        if ($client->hasRole('Admin')) {
-            $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->where('status', 'pending')->get();
+        $globalRoles = ['Admin', 'Organization Manager'];
+
+        if ($client->hasAnyRole($globalRoles)) {
+            $mentorshipTasks = MentorshipTask::query()->get();
+        } elseif ($client->hasRole('Mentor')) {
+             $mentorshipTasks = MentorshipTask::where('mentor_id', $client->id)->get();
+        } elseif ($client->hasRole('Registered')) {
+            $companyId = optional($client->company)->id;
+            $mentorshipTasks = $companyId ? MentorshipTask::where('company_id', $companyId)->where('user_id', $client->id)->get() : collect();
         } else {
-            if ($client && $client->company) {
-                $companyId = $client->company->id;
-                $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
-            } else {
-                $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
-            }
+            $mentorshipTasks = collect();
         }
         $mentrequests = MentorshipRequest::where('mentor_id', Auth::user()->id);
         $mentrequests_count = $mentrequests->count();
