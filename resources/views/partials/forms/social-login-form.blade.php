@@ -71,22 +71,49 @@
 
       <!-- LinkedIn Tab -->
       <div class="tab-pane fade" id="linkedin" role="tabpanel" aria-labelledby="linkedin-tab">
-        <div class="form-group mb-6">
-          <label class="form-label mb-1" for="LINKEDIN_CLIENT_ID">{{ __('admin.LINKEDIN_CLIENT_ID') }}</label>
-          <input id="LINKEDIN_CLIENT_ID" type="text" class="form-control" value="{{ $Title->LINKEDIN_CLIENT_ID }}"
-            name="LINKEDIN_CLIENT_ID">
-        </div>
-        <div class="form-group mb-6">
-          <label class="form-label mb-1" for="LINKEDIN_CLIENT_SECRET">{{ __('admin.LINKEDIN_CLIENT_SECRET') }}</label>
-          <input type="text" class="form-control" value="{{ $Title->LINKEDIN_CLIENT_SECRET }}" name="LINKEDIN_CLIENT_SECRET"
-            id="LINKEDIN_CLIENT_SECRET">
-        </div>
-        <div class="form-group mb-6">
-          <label class="form-label mb-1" for="LINKEDIN_REDIRECT_URI">{{ __('admin.LINKEDIN_REDIRECT_URI') }}</label>
-          <input type="text" class="form-control" value="{{ $Title->LINKEDIN_REDIRECT_URI }}" name="LINKEDIN_REDIRECT_URI"
-            id="LINKEDIN_REDIRECT_URI">
-        </div>
-      </div>
+  <div class="form-group mb-6">
+    <label class="form-label mb-1" for="LINKEDIN_LOGIN">{{ __('admin.LINKEDIN_LOGIN') }}</label>
+    <select id="LINKEDIN_LOGIN" name="LINKEDIN_LOGIN" class="form-control">
+       <option value="enabled" {{ ($Title->LINKEDIN_LOGIN ?? 'disabled') === 'enabled' ? 'selected' : '' }}>
+        {{ __('admin.enabled') ?? 'Enabled' }}
+       </option>
+      <option value="disabled" {{ ($Title->LINKEDIN_LOGIN ?? 'disabled') === 'disabled' ? 'selected' : '' }}>
+        {{ __('admin.disabled') ?? 'Disabled' }}
+      </option>
+     
+    </select>
+    @error('LINKEDIN_LOGIN')
+      <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+  </div>
+
+  <div id="linkedin-config-fields">
+    <div class="form-group mb-6">
+      <label class="form-label mb-1" for="LINKEDIN_CLIENT_ID">{{ __('admin.LINKEDIN_CLIENT_ID') }}</label>
+      <input id="LINKEDIN_CLIENT_ID" type="text" class="form-control" value="{{ old('LINKEDIN_CLIENT_ID', $Title->LINKEDIN_CLIENT_ID) }}" name="LINKEDIN_CLIENT_ID">
+      @error('LINKEDIN_CLIENT_ID')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+      @enderror
+    </div>
+
+    <div class="form-group mb-6">
+      <label class="form-label mb-1" for="LINKEDIN_CLIENT_SECRET">{{ __('admin.LINKEDIN_CLIENT_SECRET') }}</label>
+      <input type="text" class="form-control" value="{{ old('LINKEDIN_CLIENT_SECRET', $Title->LINKEDIN_CLIENT_SECRET) }}" name="LINKEDIN_CLIENT_SECRET" id="LINKEDIN_CLIENT_SECRET">
+      @error('LINKEDIN_CLIENT_SECRET')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+      @enderror
+    </div>
+
+    <div class="form-group mb-6">
+      <label class="form-label mb-1" for="LINKEDIN_REDIRECT_URI">{{ __('admin.LINKEDIN_REDIRECT_URI') }}</label>
+      <input type="text" class="form-control" value="{{ old('LINKEDIN_REDIRECT_URI', $Title->LINKEDIN_REDIRECT_URI) }}" name="LINKEDIN_REDIRECT_URI" id="LINKEDIN_REDIRECT_URI">
+      @error('LINKEDIN_REDIRECT_URI')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+      @enderror
+    </div>
+  </div>
+
+</div>
 
       <!-- Email Settings Tab -->
       <div class="tab-pane fade" id="email-settings" role="tabpanel" aria-labelledby="email-settings-tab">
@@ -102,3 +129,39 @@
     <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
   </div>
 </form>
+
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const linkedinSelect = document.getElementById('LINKEDIN_LOGIN');
+  const configContainer = document.getElementById('linkedin-config-fields');
+  const configInputs = configContainer.querySelectorAll('input');
+
+  function setLinkedinState() {
+    const enabled = linkedinSelect.value === 'enabled';
+
+    configInputs.forEach(input => {
+      if (!enabled) {
+        input.setAttribute('disabled', 'disabled');
+        input.classList.add('opacity-50');
+      } else {
+        input.removeAttribute('disabled');
+        input.classList.remove('opacity-50');
+      }
+    });
+
+    configInputs.forEach(input => {
+      if (enabled) {
+        input.setAttribute('required', 'required');
+      } else {
+        input.removeAttribute('required');
+      }
+    });
+  }
+
+  linkedinSelect.addEventListener('change', setLinkedinState);
+  setLinkedinState();
+});
+</script>
+@endpush

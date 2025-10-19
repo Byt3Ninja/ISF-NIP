@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
+use App\Http\Requests\UpdateSocialLoginRequest;
 use App\Notifications\UserInvitationNotification;
 
 class SettingsController extends Controller
@@ -556,9 +557,10 @@ class SettingsController extends Controller
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
 
-	public function update_settingsLogin(Request $request)
+	public function update_settingsLogin(UpdateSocialLoginRequest  $request)
 	{
-		$id = $request->input('id');
+		$data = $request->validated();
+    	$id = $data['id'];
 		$GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
 		$GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
 		$GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
@@ -567,9 +569,6 @@ class SettingsController extends Controller
 		$GOOGLE_CALENDAR_CLIENT_SECRET = $request->input('GOOGLE_CALENDAR_CLIENT_SECRET');
 		$GOOGLE_CALENDAR_REDIRECT = $request->input('GOOGLE_CALENDAR_REDIRECT');
 
-		$LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
-		$LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
-		$LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
 
 		$VFEmail = $request->input('VerficationEmail');
 		$VFEmail1 = $request->VerficationEmail == 'on' ? '1' : '0';
@@ -583,14 +582,18 @@ class SettingsController extends Controller
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_SECRET = $GOOGLE_CALENDAR_CLIENT_SECRET;
 		$updateSittings->GOOGLE_CALENDAR_REDIRECT = $GOOGLE_CALENDAR_REDIRECT;
 
-		$updateSittings->LINKEDIN_CLIENT_ID = $LINKEDIN_CLIENT_ID;
-		$updateSittings->LINKEDIN_CLIENT_SECRET = $LINKEDIN_CLIENT_SECRET;
-		$updateSittings->LINKEDIN_REDIRECT_URI = $LINKEDIN_REDIRECT_URI;
+    	$updateSittings->LINKEDIN_LOGIN = $request->input('LINKEDIN_LOGIN', 'disabled');
+
+    	if ($updateSittings->LINKEDIN_LOGIN === 'enabled') {
+        	$updateSittings->LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
+        	$updateSittings->LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
+        	$updateSittings->LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
+    	}
 
 		$updateSittings->VFEmail = $VFEmail1;
 		$updateSittings->save();
 
-		return redirect()->back()->with('message', 'StoredSuccessfully');
+		return redirect()->back()->with('message', 'linkedinstored');
 	}
 
 	public function update_settingsImgHome(Request $request)

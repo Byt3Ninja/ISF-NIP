@@ -2510,4 +2510,11 @@ return [
 	'In Progress' => 'قيد التنفيذ',
 	'Select Program' => 'اختر البرنامج',
 	'Select program to filter reports' => 'اختر البرنامج لتصفية التقارير',
+	'LINKEDIN_LOGIN' => 'تسجيل الدخول عبر لينكدإن',
+	'disabled' => 'معطل',
+	'enabled' => 'مفعل',
+	'linkedinstored' =>  'تم حفظ إعدادات تسجيل الدخول عبر لينكدإن بنجاح',
+	'LINKEDIN_CLIENT_ID' => 'معرف عميل لينكدإن',
+	'LINKEDIN_CLIENT_SECRET' => 'سرية عميل لينكدإن',
+	'LINKEDIN_REDIRECT_URI' => 'عنوان تحويل لينكدإن',
 ];

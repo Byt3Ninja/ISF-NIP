@@ -2463,4 +2463,8 @@ return [
 	'no_available_yet' => 'Not Available Yet',
 	'In Progress' => 'In Progress',
 	'Select Program' => 'Select Program',
+	'LINKEDIN_LOGIN' => 'LinkedIn Login',
+	'disabled' => 'Disabled',
+	'enabled' => 'Enabled',
+	'linkedinstored' => 'LinkedIn Login Settings Saved Successfully',
 ];
