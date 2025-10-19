@@ -103,7 +103,7 @@
                 {{__('admin.Profile')}}
               </a>
             </li>
-
+          @if ($_user->hasAnyRole(['Mentor', 'Registered']))
             <li class="nav-item">
               <a class="nav-link" id="Programms-tab" data-bs-toggle="tab" href="#Programms" role="tab"
                 aria-controls="Programms" aria-selected="false">
@@ -111,6 +111,7 @@
                 {{__('admin.Programms')}}
               </a>
             </li>
+          @endif
 
 
 
