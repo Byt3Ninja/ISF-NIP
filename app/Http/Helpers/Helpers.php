@@ -216,3 +216,8 @@ if( !function_exists('date_ranges') )
 }
 }
 
+if (! function_exists('route_exists')) {
+    function route_exists(string $name): bool {
+        return \Illuminate\Support\Facades\Route::has($name);
+    }
+}

@@ -2471,5 +2471,8 @@ return [
 	'google_calendar_saved' => 'Google Calendar Settings Saved Successfully',
     'linkedin_login_saved' => 'LinkedIn Login Settings Saved Successfully',
     'settings_saved' => 'Settings Saved Successfully',
-
+	'Complete Profile' => 'Complete Profile',
+	'Complete Startup/Idea' => 'Complete Startup Profile',
+	'Please complete required items before joining' => 'Please complete required items before joining',
+	'Before applying, please complete:' => 'Before applying, Please Complete:',
 ];
