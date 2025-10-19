@@ -2507,4 +2507,7 @@ return [
 	'organization_manager' => 'مدير المنظمة',
 	'No bio has been added yet' => 'لم تتم إضافة نبذة بعد',
 	'no_available_yet' => 'غير متوفر بعد',
+	'In Progress' => 'قيد التنفيذ',
+	'Select Program' => 'اختر البرنامج',
+	'Select program to filter reports' => 'اختر البرنامج لتصفية التقارير',
 ];
