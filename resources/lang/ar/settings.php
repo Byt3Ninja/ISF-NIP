@@ -179,5 +179,11 @@ return [
 	'Delete_Industry_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه الصناعة؟',
 	'Delete_Sector_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذا القطاع؟',
 	'Delete_Technology_Confirmation' => 'هل أنت متأكد أنك تريد حذف هذه التقنية؟',
-	'Select_Industry' => 'اختر الصناعة'
+	'Select_Industry' => 'اختر الصناعة',
+	'GOOGLE_CLIENT_ID' => 'معرف عميل جوجل',
+	'GOOGLE_CLIENT_SECRET' => 'سرية عميل جوجل',
+	'GOOGLE_REDIRECT' => 'عنوان تحويل جوجل',
+	'GOOGLE_CALENDAR_CLIENT_ID' => 'معرف عميل جوجل التقويم',
+	'GOOGLE_CALENDAR_CLIENT_SECRET' => 'سرية عميل جوجل التقويم',
+	'GOOGLE_CALENDAR_REDIRECT' => 'عنوان تحويل جوجل التقويم',
 ];

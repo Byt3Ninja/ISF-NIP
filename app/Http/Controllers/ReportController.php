@@ -75,12 +75,12 @@ class ReportController extends Controller
                 break;
                 
             case 'mentorSurveys':
-                $data = $this->mentorSurveyReport($request->get('status', 'all'));
+                $data = $this->mentorSurveyReport($organization_id,$request->get('status', 'all'));
                 $view = '_mentorSurvey';
                 break;
 
             case 'startupSurveys':
-                $data = $this->startupSurveysReport();
+                $data = $this->startupSurveysReport($organization_id);
                 $view = '_startupSurveyReport';
                 break;
 
@@ -110,8 +110,12 @@ class ReportController extends Controller
 
     }
 
-    protected function startupSurveysReport(){
-        $data['mentorRequests'] =  MentorshipRequest::all();
+    protected function startupSurveysReport($organization_id){
+        $mentorRequestsQuery = MentorshipRequest::query()
+        ->whereHas('user', function($q) use ($organization_id) {
+            $q->where('organization_id', $organization_id);
+        });
+        $data['mentorRequests'] =  $mentorRequestsQuery->get();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
             return SurveyResponses::where('user_id', $request->user_id)
                 ->where('triggered_at', $request->id)
@@ -129,9 +133,13 @@ class ReportController extends Controller
         return $data;
     }
  // =============> ajax report MentorSurvey <=============
-    protected function mentorSurveyReport(){
+    protected function mentorSurveyReport($organization_id){
+        $mentorRequestsQuery = MentorshipRequest::query()
+        ->whereHas('mentor', function($q) use ($organization_id) {
+            $q->where('organization_id', $organization_id);
+        });
         $status = request('status', 'all'); 
-        $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['mentorRequests'] =  $mentorRequestsQuery->get();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
             return SurveyResponses::where('user_id', $request->mentor_id)
                 ->where('triggered_at', $request->id)
@@ -518,7 +526,7 @@ class ReportController extends Controller
             [ 'value' => $Judges ?? 0, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $final_screening_count ?? 0, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
             [ 'value' => $final_pending_screening_count->count() ?? 0, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings_count->count() ?? 0, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $draft_screenings_count->count() ?? 0, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $final_done_screening_count->count() ?? 0, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 
@@ -647,7 +655,7 @@ class ReportController extends Controller
             [ 'value' => $judgers_count, 'label' => 'Judgers', 'icon' => 'user', 'color' => 'info'],
             [ 'value' => $screening_count, 'label' => 'Total', 'icon' => 'gavel', 'color' => 'primary'],
             [ 'value' => $pending_screenings, 'label' => 'Not Evaluated', 'icon' => 'trending-up-2', 'color' => 'danger'],
-            [ 'value' => $draft_screenings, 'label' => 'Draft', 'icon' => 'pencil-check', 'color' => 'secondary'],
+            [ 'value' => $draft_screenings, 'label' => 'In Progress', 'icon' => 'pencil-check', 'color' => 'secondary'],
             [ 'value' => $published_screenings, 'label' => 'Published', 'icon' => 'progress-check', 'color' => 'success'],
         ];
 

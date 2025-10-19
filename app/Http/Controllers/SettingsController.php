@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
+use App\Http\Requests\UpdateSocialLoginRequest;
 use App\Notifications\UserInvitationNotification;
 
 class SettingsController extends Controller
@@ -556,41 +557,61 @@ class SettingsController extends Controller
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
 
-	public function update_settingsLogin(Request $request)
+	public function update_settingsLogin(UpdateSocialLoginRequest  $request)
 	{
-		$id = $request->input('id');
-		$GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
-		$GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
-		$GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+		$data = $request->validated();
+    	$id = $data['id'];
 
 		$GOOGLE_CALENDAR_CLIENT_ID = $request->input('GOOGLE_CALENDAR_CLIENT_ID');
 		$GOOGLE_CALENDAR_CLIENT_SECRET = $request->input('GOOGLE_CALENDAR_CLIENT_SECRET');
 		$GOOGLE_CALENDAR_REDIRECT = $request->input('GOOGLE_CALENDAR_REDIRECT');
 
-		$LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
-		$LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
-		$LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
 
 		$VFEmail = $request->input('VerficationEmail');
 		$VFEmail1 = $request->VerficationEmail == 'on' ? '1' : '0';
 		$updateSittings = Settings::where('id', $id)->first();
 		
-		$updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
-		$updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
-		$updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+		$updateSittings->GOOGLE_LOGIN = $request->input('GOOGLE_LOGIN', $updateSittings->GOOGLE_LOGIN ?? 'disabled');
+
+    	if ($updateSittings->GOOGLE_LOGIN === 'enabled') {
+        	$updateSittings->GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
+        	$updateSittings->GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
+        	$updateSittings->GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+    	}
 
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_ID = $GOOGLE_CALENDAR_CLIENT_ID;
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_SECRET = $GOOGLE_CALENDAR_CLIENT_SECRET;
 		$updateSittings->GOOGLE_CALENDAR_REDIRECT = $GOOGLE_CALENDAR_REDIRECT;
 
-		$updateSittings->LINKEDIN_CLIENT_ID = $LINKEDIN_CLIENT_ID;
-		$updateSittings->LINKEDIN_CLIENT_SECRET = $LINKEDIN_CLIENT_SECRET;
-		$updateSittings->LINKEDIN_REDIRECT_URI = $LINKEDIN_REDIRECT_URI;
+    	$updateSittings->LINKEDIN_LOGIN = $request->input('LINKEDIN_LOGIN', 'disabled');
+
+    	if ($updateSittings->LINKEDIN_LOGIN === 'enabled') {
+        	$updateSittings->LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
+        	$updateSittings->LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
+        	$updateSittings->LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
+    	}
 
 		$updateSittings->VFEmail = $VFEmail1;
 		$updateSittings->save();
+		$activeTab = $request->input('active_tab');
 
-		return redirect()->back()->with('message', 'StoredSuccessfully');
+   		switch ($activeTab) {
+        	case 'google-oauth':
+            	$message = 'google_login_saved';
+            	break;
+
+        	case 'google-calendar':
+				$message = 'google_calendar_saved';                
+           		break;
+        	case 'linkedin':
+            	$message = 'linkedin_login_saved';
+            	break;
+        	default:
+		 		$message = 'settings_saved';
+           		 break;
+    	}
+
+    	return redirect()->back()->with('message', $message)->with('active_tab', $activeTab);
 	}
 
 	public function update_settingsImgHome(Request $request)

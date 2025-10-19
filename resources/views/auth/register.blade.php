@@ -411,20 +411,25 @@
                 <span>{{ $l == 'en' ? 'Sign in instead' : 'سجل الدخول' }}</span>
               </a>
             </p>
-
+            @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
             <div class="divider my-6 mx-auto" style="width: 80%;">
-              <div class="divider-text">or</div>
+              <div class="divider-text">{{ __('auth.or') }}</div>
             </div>
+            @endif
             @php
             $data = request('data') ?? '2521';
         @endphp
             <div class="d-flex justify-content-center">
+             @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
               <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
                 <i class="fa-brands fa-linkedin-in text-white"></i>
               </a>
+              @endif
+              @if(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled')
               <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
                 <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
               </a>
+              @endif
             </div>
           </div>
         </div>

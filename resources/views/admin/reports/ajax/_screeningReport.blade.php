@@ -125,7 +125,7 @@
 						<select id="screening-status-filter" class="form-select">
 							<option value="">{{ __('cycles.All Status') }}</option>
 							<option value="published">{{ __('cycles.Published') }}</option>
-							<option value="draft">{{ __('cycles.Draft') }}</option>
+							<option value="draft">{{ __('admin.In Progress') }}</option>
 							<option value="not-evaluated">{{ __('cycles.Not Evaluated') }}</option>
 						</select>
 					</div>
