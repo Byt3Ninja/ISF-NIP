@@ -2506,4 +2506,5 @@ return [
 	'N/A' => 'غير متوفر',
 	'organization_manager' => 'مدير المنظمة',
 	'No bio has been added yet' => 'لم تتم إضافة نبذة بعد',
+	'no_available_yet' => 'غير متوفر بعد',
 ];

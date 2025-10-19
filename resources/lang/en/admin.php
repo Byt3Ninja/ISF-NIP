@@ -2460,4 +2460,5 @@ return [
 	'total_surveys' => 'Total Surveys',
 	'N/A' => 'N/A',
 	'No bio has been added yet' => 'No bio has been added yet',
+	'no_available_yet' => 'Not Available Yet',
 ];
