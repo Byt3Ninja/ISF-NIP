@@ -734,7 +734,7 @@ return [
 	'Course Deleted' => 'Session Deleted Successfully',
 	'CountProgram' => 'Program Count',
 	'Enroll' => 'Enroll',
-	'Mentorship Avr Rating' => ' Mentorship Avrage Rating ',
+	'Mentorship Avr Rating' => 'Mentorship Average Rating',
 	'New Program' => 'New Program ',
 	'rating' => 'Rating',
 	'Responsible' => 'Responsible',
