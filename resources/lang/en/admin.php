@@ -1847,6 +1847,7 @@ return [
 	'submitDate' => 'Submit Date',
 	'user' => 'User',
 	'Startup' => 'Startup',
+	'organization_manager' => 'Organization Manager',
 	'mentor' => 'Mentor',
 	'program' => 'Program',
 	'loading' => 'Loading',
@@ -2458,4 +2459,5 @@ return [
 	'Select_Sectors' => 'Select Sectors',
 	'total_surveys' => 'Total Surveys',
 	'N/A' => 'N/A',
+	'No bio has been added yet' => 'No bio has been added yet',
 ];

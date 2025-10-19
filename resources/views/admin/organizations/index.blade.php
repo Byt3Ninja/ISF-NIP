@@ -162,7 +162,7 @@
                   </div>
                   <!-- Organization Mangaer -->
                   <div class="d-flex flex-column mt-3">
-                    <p class="mb-1">{{ __('admin.Startup') }}</p>
+                    <p class="mb-1">{{ __('admin.organization_manager') }}</p>
                     <div class="d-flex justify-content-center align-items-center rounded border p-2">
                       <img src="{{ $organization->user->img_url ?? '/images/placeholder.png' }}"
                         onerror="this.src='/images/user-placeholder.jpeg'" alt="Manager Image"
