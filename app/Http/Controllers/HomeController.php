@@ -911,6 +911,71 @@ class HomeController extends Controller
             $cycle->organization->name = $item->{'org_name_' . $l};
             $cycle->organization->image_url = Organization::image_handler($item->org_img_url);
             $cycle->type = $item->type;
+            $preRequests = [];
+            $user = auth()->user();
+        if (isset($cycle->type) && $cycle->type === 'General_Program' && $user) {
+
+            if (method_exists($user, 'hasCompletedProfile')) {
+                $profileComplete = $user->hasCompletedProfile();
+            } else {
+                $profileComplete = filled($user->phone)
+                    && filled($user->city_id)
+                    && filled($user->country_id)
+                    && filled($user->address)
+                    && filled($user->timezone);
+            }
+
+            if (! $profileComplete) {
+                if (function_exists('route_exists') && route_exists('user.profile_Edit')) {
+                    $profileUrl = route('user.profile_Edit');
+                } elseif (function_exists('route_exists') && route_exists('user.profile_Edit')) {
+                    $profileUrl = route('user.profile_Edit');
+                } else {
+                    $profileUrl = route('user.profile_Edit');
+                }
+
+                $preRequests[] = [
+                    'key'   => 'profile',
+                    'label' => 'admin.Complete Profile',
+                    'url'   => $profileUrl,
+                    'id'    => 'pre-request-profile-' . $cycle->id,
+                ];
+            }
+
+            if (method_exists($user, 'hasCompletedStartup')) {
+                $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : $user->hasCompletedCompany();
+            } else {
+                $startupComplete = false;
+                if (method_exists($user, 'company') || isset($user->company)) {
+                    $company = $user->company ?? null;
+                    $startupComplete = $company
+                        && filled($company->name_en ?? '')
+                        && filled($company->sector ?? '')
+                        && filled($company->address_en ?? '')
+                        && filled($company->stage ?? '');
+                } 
+            }
+
+            if (!$startupComplete) {
+                if (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                    $startupUrl = route('company.profile_view_mine');
+                } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                    $startupUrl = route('company.profile_view_mine');
+                } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                    $startupUrl = route('company.profile_view_mine');
+                } else {
+                    $startupUrl = url('/dashboard/myCompany');
+                }
+                $preRequests[] = [
+                    'key'   => 'startup',
+                    'label' => 'admin.Complete Startup/Idea',
+                    'url'   => $startupUrl,
+                    'id'    => 'pre-request-startup-' . $cycle->id,
+                ];
+            }
+        }
+
+            $cycle->pre_requests = $preRequests;
             return $cycle;
         });
         $myFinal = null;

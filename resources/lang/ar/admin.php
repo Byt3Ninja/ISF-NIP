@@ -2522,4 +2522,7 @@ return [
     'google_calendar_saved' => 'تم حفظ إعدادات تقويم جوجل بنجاح',
     'linkedin_login_saved' => 'تم حفظ إعدادات تسجيل الدخول عبر لينكدإن بنجاح',
     'settings_saved' => 'تم حفظ الإعدادات بنجاح',
+	'Complete Profile' => 'اكمل الملف الشخصي',
+	'Complete Startup/Idea' => 'اكمل الملف الشخصي للشركة',
+	'Before applying, please complete:' => 'قبل التقديم، يرجى اكمال:',
 ];
