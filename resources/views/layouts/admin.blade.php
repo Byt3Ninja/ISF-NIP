@@ -25,7 +25,44 @@
           <!-- Navbar -->
           @include('admin.includes.header')
 
-          
+          @php
+              if(Auth::user()->hasAnyRole('Registered')){
+                $user = Auth::user();
+                $user_response = \App\SurveyResponses::where('user_id', $user->id)->whereNull('responses')->first();
+                $survey = \App\Surveys::where('is_required', 1)->where('id', $user_response->survey_id)->first();
+                $survey_data = $survey_data = [
+                                    'id' => $survey->id,
+                                    'title' => $survey->title,
+                                    'description' => $survey->description,
+                                    'is_required' => $survey->is_required,
+                                    'type' => $user_response->triggered_on,
+                                ];
+              }else{
+                $survey_data = null;
+              }
+          @endphp
+          {{-- @dd($survey_data) --}}
+    @if($survey_data)
+    <div class="modal fade" id="surveyModal" tabindex="-1" aria-labelledby="surveyModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered mx-2 mx-md-auto">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0">
+            <div class="w-100" style="max-height: 400px; overflow-y: auto;">
+              <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
+                <div class="col-12 col-sm-6 nav-item" data-label="survey">
+                  <a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{
+										__('dashboard.startSurvey') }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
 
           <!-- Content -->
           @yield('content')

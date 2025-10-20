@@ -2477,4 +2477,5 @@ return [
 	'Complete Startup/Idea' => 'Complete Startup Profile',
 	'Please complete required items before joining' => 'Please complete required items before joining',
 	'Before applying, please complete:' => 'Before applying, Please Complete:',
+	'Is_Required' => 'Is Requered',
 ];

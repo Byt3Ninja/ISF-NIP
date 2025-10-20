@@ -2526,3 +2526,5 @@ return [
 	'Complete Startup/Idea' => 'اكمل الملف الشخصي للشركة',
 	'Before applying, please complete:' => 'قبل التقديم، يرجى اكمال:',
 ];
+	'Is_Required' => 'مطلوب',
+];

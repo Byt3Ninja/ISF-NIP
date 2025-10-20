@@ -67,6 +67,10 @@
                         <input name="description" type="text" class="form-control" id="description" value="{{ $survey->description }}" placeholder="{{ __('admin.Description') }}" />
                     </div>
                 </div>
+                 <div class="card-group">
+                    <label class="form-label fs-6 mb-1 fw-semibold" for="required">{{ __('admin.Is_Required') }}:</label>
+                    <input name="is_required" type="checkbox" value="1" class="form-check-input" id="required" />
+                </div>
 
                 <div class="card-body">
                     <legend class="mb-6 fs-5 border-bottom pb-3 text-dark fw-semibold">{{ __('admin.SurveyQuestions') }}</legend>
