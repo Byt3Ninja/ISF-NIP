@@ -2525,6 +2525,5 @@ return [
 	'Complete Profile' => 'اكمل الملف الشخصي',
 	'Complete Startup/Idea' => 'اكمل الملف الشخصي للشركة',
 	'Before applying, please complete:' => 'قبل التقديم، يرجى اكمال:',
-];
 	'Is_Required' => 'مطلوب',
 ];
