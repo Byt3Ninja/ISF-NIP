@@ -1805,7 +1805,7 @@ class HomeController extends Controller
                 'icon' => 'ti ti-server',
                 'text' => 'Company Attendance Rate',
                 'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
-                'count' => $attends_rate,
+                'count' => preg_match('/^\d+(\.\d+)?%$/', $attends_rate) ? number_format((float)rtrim($attends_rate, '%'), 1) . '%' : $attends_rate,
                 'isRating' => false,
             ];
             

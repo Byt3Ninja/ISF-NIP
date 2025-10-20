@@ -2,11 +2,8 @@
 
 @section('vendorstyle')
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
@@ -73,8 +70,8 @@
 		<!-- Content -->
 		<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="card">
-				<!-- Startup Info Header -->
-				@if (!empty($tasks) && count($tasks) > 0)
+			@if (!empty($tasks) && count($tasks) > 0)
+			<!-- Startup Info Header -->
 			<div
 				class="card-header mx-6 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom mb-4">
 				<div class="d-flex align-items-center">
@@ -94,14 +91,14 @@
 					@endif
 				</div>
 				<div class="d-flex flex-column gap-3">
-					<div class="d-flex justify-content-between align-items-center gap-2">
+					<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
 						<span class="fw-bold me-6">{{ __('admin.Current_Step') }}</span>
-						<div class="badge bg-label-primary">{{ $data['step_name'] }}</div>
+						<div class="badge bg-label-primary" style="width: fit-content;">{{ $data['step_name'] }}</div>
 					</div>
-					<div class="d-flex justify-content-between align-items-center gap-2">
+					<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
 						<span class="fw-bold me-6">{{ __('admin.Mentor_Session_Appointment') }}</span>
 						@if (!empty($data['mentor_zoom_date']))
-							<div class="badge bg-label-secondary">
+							<div class="badge bg-label-secondary" style="width: fit-content;">
 								<i class="ti ti-calendar ti-16px me-1"></i>
 								<span>{{ \Carbon\Carbon::parse($data['mentor_zoom_date'])->format('M d, Y H:i') }}</span>
 							</div>
@@ -109,7 +106,7 @@
 					</div>
 				</div>
 			</div>
-				@endif
+			@endif
 
 
 				@if (!empty($tasks) && count($tasks) > 0)
@@ -122,8 +119,10 @@
 								</div>
 								@role('Mentor')
 								<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-									<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
-									<i class="ti ti-plus ti-16px"></i>
+									<div class="d-none d-md-inline me-2">
+										{{ __('admin.Add_Task') }}
+									</div>
+									<i class="ti ti-plus"></i>
 								</button>
 								@endrole
 							</div>
@@ -141,8 +140,8 @@
 								 {{ __('admin.No_Tasks') }}
 							</h4>
 							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-								<i class="ti ti-plus ti-16px me-2"></i>
-								<span class="align-middle">{{ __('admin.Add_Task') }}</span>
+								<i class="ti ti-plus me-2"></i>
+								{{ __('admin.Add_Task') }}
 							</button>
 						</div>
 					@endif
@@ -165,30 +164,10 @@
 									@endrole
 								</div>
 								
-								<div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+								<div class="cursor-pointer" id="confirmDeleteTask" data-task="">
 									@role('Mentor')
 									<i class="ti ti-trash text-danger ti-20px"></i>
 									@endrole
-								</div>
-								<div class="dropdown-menu border" aria-labelledby="warningDropdown" style="background-color: #ebebed; width: 300px;">
-									<div class="d-flex justify-content-between align-items-center p-2">
-										<div class="d-flex align-items-center gap-2">
-											<i class="ti ti-alert-square-rounded ti-20px"></i>
-											<h6 class="fw-medium mb-0">{{ __('admin.Warning') }}</h6>
-										</div>
-										<div id="closeViewTask" class="cursor-pointer" data-bs-toggle="dropdown" aria-label="Close">
-											<i class="ti ti-x ti-20px text-primary"></i>
-										</div>
-									</div>
-									<div class="bg-white rounded border border-secondary mb-2">
-										<p class="text-muted p-2" style="font-size: 13px;">{{ __('admin.Delete_Confirmation') }}</p>
-									</div>
-									
-									<button id="confirmDeleteTask" class="btn btn-danger" style="width: 100%;" data-task="">
-										<i class="ti ti-trash ti-20px me-2"></i>
-										 <span>{{ __('admin.Delete') }}</span>
-									</button>
-									
 								</div>
 								
 							</div>
@@ -233,11 +212,6 @@
 									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
-								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
-								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-									onclick="document.getElementById('fileInput').click();">
-									<i class="ti ti-plus ti-16px"></i>
-								</button>
 							</div>
 							<div class="d-flex flex-wrap gap-2" id="fileList"></div>
 						</div>
@@ -418,10 +392,10 @@
 						</form>
 					</div>
 					<div class="mt-4 d-flex align-items-center gap-3">
-						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="createTask" type="button" class="btn btn-primary">
-							<span class="me-3">{{ __('admin.Create') }}</span>
-							<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+						<button id="createTask" type="button" class="btn btn-primary w-px-100">
+							{{ __('admin.Create') }}
+							<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
 						</button>
 					</div>
 				</div>
@@ -555,10 +529,10 @@
 					</div>
 					<div class="mt-4 d-flex align-items-center gap-3">
 						<input type="hidden" id="edit-task-id" name="edit-task-id" value="0" />
-						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="editTaskBtn" type="button" class="btn btn-primary">
-							<span class="me-3">{{ __('admin.Edit') }}</span>
-							<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+						<button id="editTaskBtn" type="button" class="btn btn-primary w-px-100">
+							{{ __('admin.Edit') }}
+							<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
 						</button>
 					</div>
 				</div>
@@ -573,9 +547,7 @@
 
 @section('scripts')
 	<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 	<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
 	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
 	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
@@ -753,6 +725,16 @@
 		var boards = @json($kanban);
 		var lang = '{{ $l }}';
 
+		if (lang === 'en') {
+			boards.forEach(board => {
+				if (board.id === 'progress') {
+					board.title = 'In Progress';
+				} else if (board.id) {
+					board.title = board.id.charAt(0).toUpperCase() + board.id.slice(1);
+				}
+			});
+		}
+
 		var board_tasks = @json($tasks);
 		function getElement(el) { 
 			let id = $(el).data('eid');
@@ -762,6 +744,8 @@
 
 		// Render Kanban board
 		const renderKanbanBoard = () => {
+			const element = document.querySelector('.kanban-wrapper');
+			if (!element) return;
 			kanban = new jKanban({
 				element: '.kanban-wrapper',
 				gutter: '15px',
@@ -791,7 +775,7 @@
 							if( element.priority == 'high' ) { bg = 'danger'; }
 							else if( element.priority == 'medium' ) { bg = 'warning'; }
 							else { bg = 'success'; }
-							let priority = element.priority_visible;
+							let priority = lang === 'en' ? (element.priority.charAt(0).toUpperCase() + element.priority.slice(1)) : element.priority_visible;
 							let reported_at = new Date(element.reported_at);
 							let updated_at = new Date(element.updated_at);
 		
@@ -841,7 +825,15 @@
 								done_date = done_date.toISOString().split('T')[0];
 							}
 		
-							$('#task-details-status .fw-semibold').html( element.visible_status );
+							let statusText = element.visible_status;
+							if (lang === 'en') {
+								if (element.status === 'progress') {
+									statusText = 'In Progress';
+								} else {
+									statusText = element.status.charAt(0).toUpperCase() + element.status.slice(1);
+								}
+							}
+							$('#task-details-status .fw-semibold').html( statusText );
 		
 							$('#task-details-assignee img.rounded-circle').prop({src: element.assignee.photo, title: element.assignee.name, alt: element.assignee.name });
 							$('#task-details-reporter img.rounded-circle').prop({src: element.reporter.photo, title: element.reporter.name, alt: element.reporter.name });
@@ -923,7 +915,7 @@
 		
 
 							// Handle view attachments
-							renderFiles(element.files, 'view');
+							renderFilesHandler(element.files, 'view');
 		
 							$('#viewTaskModal').modal('show');
 						},
@@ -1018,7 +1010,7 @@
 				if( element.priority == 'high' ) { bg = 'danger'; }
 				else if( element.priority == 'medium' ) { bg = 'warning'; }
 				else { bg = 'success'; }
-				let priority = element.priority_visible;
+				let priority = lang === 'en' ? (element.priority.charAt(0).toUpperCase() + element.priority.slice(1)) : element.priority_visible;
 
 				let content = `
 					<div class="card shadow-sm p-3 d-flex flex-column">
@@ -1053,15 +1045,41 @@
 		};
 
 		const reloadKanban = () => {
+			if (kanban) {
+				kanban = null;
+			}
 			var kanbanWrapper = document.querySelector('.kanban-wrapper');
-			kanbanWrapper.innerHTML = '';
+			if (kanbanWrapper) {
+				var parent = kanbanWrapper.parentNode;
+				parent.removeChild(kanbanWrapper);
+				kanbanWrapper = document.createElement('div');
+				kanbanWrapper.className = 'kanban-wrapper';
+				parent.appendChild(kanbanWrapper);
+			} else {
+				// If the kanban wrapper doesn't exist (e.g., when adding the first task)
+				const appKanban = document.querySelector('.app-kanban');
+				if (appKanban) {
+					// Remove the 'no tasks' message
+					const noTasksMessage = appKanban.querySelector('.d-flex.flex-column.justify-content-center');
+					if (noTasksMessage) {
+						noTasksMessage.remove();
+					}
+					// Create and append the kanban wrapper
+					kanbanWrapper = document.createElement('div');
+					kanbanWrapper.className = 'kanban-wrapper';
+					appKanban.appendChild(kanbanWrapper);
+				}
+			}
 			renderKanbanBoard();
-			renderKanbanItem();
+			setTimeout(() => {
+				renderKanbanItem();
+			}, 10);
 		}
 
 		// Filter tasks on search
 		const searchTask = () => {
 			const searchInput = document.getElementById('search-task');
+			if (!searchInput) return;
 			searchInput.addEventListener('input', (e) => {
 				const searchValue = e.target.value;
 				const tasks = document.querySelectorAll('.kanban-item');
@@ -1076,9 +1094,11 @@
 			});
 		}
 
-		renderKanbanBoard();
-		renderKanbanItem();
-		searchTask();
+		if (board_tasks && board_tasks.length > 0) {
+			renderKanbanBoard();
+			renderKanbanItem();
+			searchTask();
+		}
 	</script>
 	<script>
 		// Handle attachments upload
@@ -1086,7 +1106,7 @@
 			const files = event.target.files;
 			
 			// Render files handler
-			renderFiles(files, 'upload');
+			renderFilesHandler(files, 'upload');
 		}
 		
 		// Handle attachments create
@@ -1095,11 +1115,11 @@
 			console.log('files', files);
 			
 			// Render files handler
-			renderFiles(files, 'create');
+			renderFilesHandler(files, 'create');
 		}
 
 		// Render files handler
-		const renderFiles = (files, mode) => {
+		const renderFilesHandler = (files, mode) => {
 			
 			if (mode == 'upload')
 			{
@@ -1132,7 +1152,7 @@
 									<span class="text-dark fw-bold">${file.name}</span>
 									<div 
 										class="cursor-pointer me-2" 
-										onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+										onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
 									>
 										<i class="ti ti-trash text-danger ti-16px ms-2"></i>
 									</div>
@@ -1166,7 +1186,7 @@
 						<span class="text-dark fw-bold">${file.name}</span>
 						<div 
 							class="cursor-pointer me-2" 
-							onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+							onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
 						>
 							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
 						</div>
@@ -1189,7 +1209,7 @@
 						<span class="text-dark fw-bold">${file.name}</span>
 						<div 
 							class="cursor-pointer me-2" 
-							onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+							onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
 						>
 							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
 						</div>
@@ -1204,7 +1224,7 @@
 		}
 
 		// Delete file handler
-		const deleteFileHandler = (fileName, fileId, ele) => {
+		const deleteFileHandlerFunc = (fileName, fileId, ele) => {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
 				title: "{{__('admin.SureDelete')}}",
@@ -1375,7 +1395,7 @@
 					$('#edit-task-status').trigger('change');
 					$('#edit-task-due-date').val( element.due_date );
 					$('#editFileInput').attr('data-task', element.id);
-					renderFiles(element.files, 'edit');
+					renderFilesHandler(element.files, 'edit');
 					if( typeof( EditAssigneeCustomInlineSuggestion ) !== 'undefined' )
 					{
 						EditAssigneeCustomInlineSuggestion.off('change');
@@ -1433,39 +1453,56 @@
 		DeleteTaskButton.addEventListener('click', function(e) {
 			e.preventDefault();
 			let task_id = $(this).attr('data-task');
-			var send_data = {
-				_token: "{{ csrf_token() }}",
-				mentorship_request_id: '{{ $session_id }}',
-				task_id: task_id,
-			}
-			$.ajax({
-				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/remove-task') }}",
-				type: "POST",
-				data: send_data,
-				dataType: "json",
-				success: function(response) {
-					if( response.status )
-					{
-						$('#viewTaskModal').modal('hide');
-						var data = response.data;
-						boards = data.kanban;
-						board_tasks = data.tasks;
-						Swal.fire({
-							icon: 'success',
-							title: response.title,
-							text: response.message,
-							showConfirmButton: false,
-							showCancelButton: false,
-							timer: 4500
-						});
-						reloadKanban();
-					} else { showError( response.message ); }
+			Swal.fire({
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
 				},
-				error: function(error) {
-					if( error.status == 422 )
-					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+				buttonsStyling: false,
+			}).then((result) => {
+				if (result.isConfirmed) {
+					var send_data = {
+						_token: "{{ csrf_token() }}",
+						mentorship_request_id: '{{ $session_id }}',
+						task_id: task_id,
 					}
+					$.ajax({
+						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/remove-task') }}",
+						type: "POST",
+						data: send_data,
+						dataType: "json",
+						success: function(response) {
+							if( response.status )
+							{
+								$('#viewTaskModal').modal('hide');
+								var data = response.data;
+								boards = data.kanban;
+								board_tasks = data.tasks;
+								Swal.fire({
+									icon: 'success',
+									title: response.title,
+									text: response.message,
+									showConfirmButton: false,
+									showCancelButton: false,
+									timer: 4500
+								});
+								reloadKanban();
+							} else { showError( response.message ); }
+						},
+						error: function(error) {
+							if( error.status == 422 )
+							{
+								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+							}
+						}
+					});
 				}
 			});
 		})
