@@ -1841,6 +1841,8 @@ return [
 	'exportExcel' => 'Export Excel',
 	'exportPDF' => 'Export PDF',
 	'allStatus' => 'All Status',
+	'allMentors' => 'All Mentors',
+	'allPrograms' => 'All Programs',
 	'Select a program' => 'Select a program',
 	'Select program to filter reports' => 'Select program to filter reports',
 	'searchSurveysPlaceholder' => 'Search survey results...',
