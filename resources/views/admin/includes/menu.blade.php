@@ -6,9 +6,7 @@
   }
 @endphp
 <!-- Menu -->
-@php
-      $updateSittings = App\Settings::where('id', 1)->first();
-@endphp
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
@@ -92,7 +90,7 @@
             </a>
           </li>
           @endif
-          @if($updateSittings->assessment == 1)
+          @if($setting->assessment == 1)
           {{-- @if (!app()->environment('production', 'beta')) --}}
           @if( $_user->ableTo('assessments.results_analysis_view', $permissions) )
           <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
@@ -133,7 +131,7 @@
           </a>
         </li>
         @endif
-        @if($updateSittings->assessment == 1)
+        @if($setting->assessment == 1)
         {{-- @if (!app()->environment('production', 'beta')) --}}
         @if( $_user->ableTo('assessments.results_analysis_view', $permissions) )
         <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
@@ -1050,7 +1048,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       @endif
       
     
-    @if ($updateSittings->HomePage == true)
+    @if ($setting->HomePage == true)
       @if ($_user->hasRole('Admin'))
         @if( $_user->ableToAny(['settings.system_general_view', 'settings.system_general_update'], $permissions) )
           <li id="settingMenu" class="menu-item">
