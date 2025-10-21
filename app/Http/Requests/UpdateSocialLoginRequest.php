@@ -59,43 +59,24 @@ class UpdateSocialLoginRequest extends FormRequest
 
      public function messages()
     {
-        $isArabic = app()->getLocale() === 'ar';
+      return [
+        'LINKEDIN_LOGIN.required' => trans('validation.linkedin_login_required'),
+        'LINKEDIN_LOGIN.in' => trans('validation.linkedin_login_in'),
+        'LINKEDIN_CLIENT_ID.required' => trans('validation.linkedin_client_id_required'),
+        'LINKEDIN_CLIENT_SECRET.required' => trans('validation.linkedin_client_secret_required'),
+        'LINKEDIN_REDIRECT_URI.required' => trans('validation.linkedin_redirect_required'),
+        'LINKEDIN_REDIRECT_URI.regex' => trans('validation.linkedin_redirect_invalid'),
 
-        if ($isArabic) {
-            return [
-                'LINKEDIN_LOGIN.required' => 'يرجى اختيار حالة تسجيل الدخول عبر لينكدإن.',
-                'LINKEDIN_LOGIN.in' => 'حالة تسجيل الدخول عبر لينكدإن غير صحيحة.',
-                'LINKEDIN_CLIENT_ID.required' => 'يرجى إدخال معرف العميل الخاص بلينكدإن.',
-                'LINKEDIN_CLIENT_SECRET.required' => 'يرجى إدخال السرّ الخاص بلينكدإن.',
-                'LINKEDIN_REDIRECT_URI.required' => 'يرجى إدخال رابط إعادة التوجيه الخاص بلينكدإن.',
-                'LINKEDIN_REDIRECT_URI.url' => 'يرجى إدخال رابط إعادة توجيه صالح',
-                'id.required' => 'معرف الإعداد مطلوب.',
-                'id.exists' => 'سجل الإعداد غير موجود.',
-                'GOOGLE_LOGIN.required' => 'يرجى اختيار حالة تسجيل الدخول عبر جوجل.',
-                'GOOGLE_LOGIN.in' => 'حالة تسجيل الدخول عبر جوجل غير صحيحة.',
-                'GOOGLE_CLIENT_ID.required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
-                'GOOGLE_CLIENT_SECRET.required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
-                'GOOGLE_REDIRECT.required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
-                'GOOGLE_REDIRECT.regex' => 'يرجى إدخال رابط إعادة توجيه صالح'
-            ];
-        }
+        'GOOGLE_LOGIN.required' => trans('validation.google_login_required'),
+        'GOOGLE_LOGIN.in' => trans('validation.google_login_in'),
+        'GOOGLE_CLIENT_ID.required' => trans('validation.google_client_id_required'),
+        'GOOGLE_CLIENT_SECRET.required' => trans('validation.google_client_secret_required'),
+        'GOOGLE_REDIRECT.required' => trans('validation.google_redirect_required'),
+        'GOOGLE_REDIRECT.regex' => trans('validation.google_redirect_invalid'),
 
-        return [
-            'LINKEDIN_LOGIN.required' => 'Please choose LinkedIn login state.',
-            'LINKEDIN_LOGIN.in' => 'Invalid LinkedIn login state.',
-            'LINKEDIN_CLIENT_ID.required' => 'Please complete all LinkedIn configuration fields before saving.',
-            'LINKEDIN_CLIENT_SECRET.required' => 'Please complete all LinkedIn configuration fields before saving.',
-            'LINKEDIN_REDIRECT_URI.required' => 'Please complete all LinkedIn configuration fields before saving.',
-            'LINKEDIN_REDIRECT_URI.url' => 'Please enter a valid Redirect URL.',
-            'GOOGLE_LOGIN.required' => 'Please choose Google login state.',
-            'GOOGLE_LOGIN.in' => 'Invalid Google login state.',
-            'GOOGLE_CLIENT_ID.required' => 'Please complete all Google configuration fields before saving.',
-            'GOOGLE_CLIENT_SECRET.required' => 'Please complete all Google configuration fields before saving.',
-            'GOOGLE_REDIRECT.required' => 'Please complete all Google configuration fields before saving.',
-            'GOOGLE_REDIRECT.regex' => 'Please enter a valid Redirect URL.',
-            'id.required' => 'Settings id is required.',
-            'id.exists' => 'Settings record not found.',
-        ];
+        'id.required' => trans('validation.settings_id_required'),
+        'id.exists' => trans('validation.settings_id_exists'),
+    ];
     }
 
 }

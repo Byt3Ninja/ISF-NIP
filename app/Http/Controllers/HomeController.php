@@ -1805,7 +1805,7 @@ class HomeController extends Controller
                 'icon' => 'ti ti-server',
                 'text' => 'Company Attendance Rate',
                 'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
-                'count' => $attends_rate,
+                'count' => preg_match('/^\d+(\.\d+)?%$/', $attends_rate) ? number_format((float)rtrim($attends_rate, '%'), 1) . '%' : $attends_rate,
                 'isRating' => false,
             ];
             
@@ -2388,6 +2388,13 @@ class HomeController extends Controller
         $team_member = DB::select($team_member_q, [$user->email]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;
+
+        // Determine if polling is needed for completion status
+        $user = auth()->user();
+        $profileComplete = method_exists($user, 'hasCompletedProfile') ? $user->hasCompletedProfile() : (!empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone));
+        $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
+        $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
+
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
@@ -3193,5 +3200,51 @@ class HomeController extends Controller
             abort(404);
         }
         return view('admin.documentation', compact('doc', 'menu'));
+    }
+
+    public function checkCompletionStatus()
+    {
+        $user = auth()->user();
+        $profileComplete = false;
+        $startupComplete = false;
+
+        if (method_exists($user, 'hasCompletedProfile')) {
+            $profileComplete = $user->hasCompletedProfile();
+        } else {
+            // fallback logic
+            $profileComplete = !empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone);
+        }
+
+        if (method_exists($user, 'hasCompletedStartup')) {
+            $startupComplete = $user->hasCompletedStartup();
+        } else {
+            // fallback logic for startup completion
+            $startupComplete = $user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage);
+        }
+
+        $preRequests = [];
+
+        if (!$profileComplete) {
+            $preRequests[] = [
+                'id' => 'complete_profile',
+                'url' => route('user.profile_Edit'),
+                'label' => __('admin.Complete Profile')
+            ];
+        }
+
+        if (!$startupComplete) {
+            $preRequests[] = [
+                'id' => 'complete_startup',
+                'url' => route('company.profile_view_mine', $user->company_id),
+                'label' => __('admin.Complete Startup/Idea')
+            ];
+        }
+
+        return response()->json([
+            'profile_complete' => $profileComplete,
+            'startup_complete' => $startupComplete,
+            'has_pre_requests' => count($preRequests) > 0,
+            'pre_requests' => $preRequests
+        ]);
     }
 }

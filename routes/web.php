@@ -106,6 +106,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/', 'HomeController@index')->name('core.admin_access');
     Route::get('/dashboard', 'HomeController@index')->name('core.dashboard_view');
     Route::get('/dark', 'HomeController@dark');
+    Route::get('/check-completion-status', 'HomeController@checkCompletionStatus')->name('cycles.completion_status_check');
     Route::get('/import-users', 'UserController@showImportForm')->name('import.view_form');
     Route::post('/import-users', 'UserController@import')->name('import.execute_users');
 

@@ -7,690 +7,645 @@
 @stop
 
 @section('content')
-  <!-- Content wrapper -->
   <div class="content-wrapper">
-    <!-- Content -->
-    @if( session()->has('error') )
-    <div class="row">
-      <div class="col-md-12">
-        <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
-          {{ __('dashboard.'.session()->get('error')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      </div>
-    </div>
-  @endif
-  @if( session()->has('msg') )
-    <div class="row">
-      <div class="col-md-12">
-        <div role="alert" class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2">
-          {{ __('admin.' . session()->get('msg')) }}
-          {{ Session::forget('msg') }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      </div>
-    </div>
-  @endif
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <!-- Header -->
+    {{-- Alert Messages --}}
+    @if(session()->has('error'))
       <div class="row">
+        <div class="col-md-12">
+          <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+            {{ __('dashboard.' . session()->get('error')) }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+    @endif
+
+    @if(session()->has('msg'))
+      <div class="row">
+        <div class="col-md-12">
+          <div role="alert" class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2">
+            {{ __('admin.' . session()->get('msg')) }}
+            {{ Session::forget('msg') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+    @endif
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+      {{-- Profile Header Section --}}
+      <section class="row">
         <div class="col-12">
-          <div class="card mb-6">
-            <div class="user-profile-header-banner">
-              <img src="/vuexy/assets/img/pages/profile-banner.png" alt="Banner image" class="rounded-top" />
-            </div>
+          <article class="card mb-6">
+            <header class="user-profile-header-banner">
+              <img src="/vuexy/assets/img/pages/profile-banner.png" 
+                   alt="Banner image" 
+                   class="rounded-top" />
+            </header>
+
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
-              <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
-                  style="height: 130px" />
-                  
-              </div>
+              <figure class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+                <img src="{{ $client->image_url }}" 
+                     alt="{{ $client->first_name_en }} {{ $client->last_name_en }}"
+                     class="d-block ms-0 ms-sm-6 rounded user-profile-img" 
+                     style="height: 130px" />
+              </figure>
+
               <div class="flex-grow-1 mt-3 mt-lg-5">
-                <div
-                  class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
+                <div class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
                   <div class="user-profile-info">
-                    <h4 class="mb-2 mt-lg-6">
-                      {{ 
-                        $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
-                      }}
-                      
+                    <h1 class="mb-2 mt-lg-6 h4">
+                      {{ $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en }}
+
                       @if(!empty($client->bio->linkedin))
-                      <a target="_blank" href="{{ $client->bio->linkedin }}">
-                        <i class="ti ti-brand-linkedin ti-lg"></i>
+                        <a target="_blank" 
+                           href="{{ $client->bio->linkedin }}"
+                           aria-label="LinkedIn Profile">
+                          <i class="ti ti-brand-linkedin ti-lg"></i>
                         </a>
-                        @endif
-                        @php
-    // جلب الأدوار كمجموعة
-    $roles = $client->getRoleNames();
-
-    // ترجمة الأدوار وإزالة الأقواس والدبل كوت
-    $translatedRoles = $roles->map(function ($role) {
-        return __('admin.' . strtolower($role)); // ترجمة الدور
-    })->implode(', '); // دمج الأدوار في سلسلة واحدة
-
-    // إزالة أي أقواس أو دبل كوت
-    $cleanedRoles = str_replace(['[', ']', '"'], '', $translatedRoles);
-@endphp
-                        <br><h5 class="fw-medium"><i class="ti ti-user ti-lg"></i> {{ $cleanedRoles }} </h5>
-                    </h4>
-                    
-                    <ul
-                      class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
-                      <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-palette ti-lg"></i><span class="fw-medium">
-                          {{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
-                        </span>
-                      </li>
-                      @if ($client->city ??0)
-                      <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-map-pin ti-lg"></i><span class="fw-medium">
-                          {{ $client->city->{'name_' . $l} }}
-                        </span>
-                      </li>
                       @endif
+                    </h1>
+
+                    @php
+                      $roles = $client->getRoleNames();
+                      $translatedRoles = $roles->map(fn($role) => __('admin.' . strtolower($role)))->implode(', ');
+                    @endphp
+
+                    <h2 class="fw-medium h5">
+                      <i class="ti ti-user ti-lg"></i> {{ $translatedRoles }}
+                    </h2>
+
+                    <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
+                        <i class="ti ti-palette ti-lg"></i>
+                        <span class="fw-medium">{{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
+                      </li>
+
+                      @if($client->city ?? 0)
+                        <li class="list-inline-item d-flex gap-2 align-items-center">
+                          <i class="ti ti-map-pin ti-lg"></i>
+                          <span class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
+                        </li>
+                      @endif
+
+                      <li class="list-inline-item d-flex gap-2 align-items-center">
+                        <i class="ti ti-calendar ti-lg"></i>
+                        <span class="fw-medium">
+                          {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}
+                        </span>
                       </li>
                     </ul>
                   </div>
 
                   <div>
-                  <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
-                    <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
-                  </a>
-                  @if(!empty($order))
-                  <button onclick="request({{$order->user_id}},'{{optional($order->user)->{'first_name_'.$l} }} {{optional($order->user)->{'last_name_'.$l} }}', {{ $order->cycle->organization_id }},{{ $order->cycle_id }})" title="Add new request" type="button" class="btn btn-primary mb-1">
-                    {{-- <i class="fa fa-plus"></i>  --}}
-                    {{__('admin.OrderSession')}}
-                </button>
- @endif              
-</div>
+                    <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
+                      <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
+                    </a>
 
+                    @if(!empty($order))
+                      <button onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
+                              title="Add new request" 
+                              type="button" 
+                              class="btn btn-primary mb-1">
+                        {{ __('admin.OrderSession') }}
+                      </button>
+                    @endif
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </article>
         </div>
-      </div>
-      <!--/ Header -->
+      </section>
 
-      <!-- Navbar pills -->
-      <div class="row">
+      {{-- Navigation Tabs --}}
+      <nav class="row">
         <div class="col-md-12">
           <div class="nav-align-top">
-            <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0">
+            <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0" role="tablist">
               <li class="nav-item">
-                <a class="nav-link active" id="Profile-tab" data-bs-toggle="tab" href="#Profile" role="tab" aria-controls="Profile" aria-selected="false">
+                <a class="nav-link active" 
+                   id="Profile-tab" 
+                   data-bs-toggle="tab" 
+                   href="#Profile" 
+                   role="tab"
+                   aria-controls="Profile" 
+                   aria-selected="true">
                   <i class="ti-sm ti ti-user-check me-1_5"></i>
-                  {{__('admin.Profile')}}
+                  {{ __('admin.Profile') }}
                 </a>
-            </li>
+              </li>
 
               <li class="nav-item">
-                <a class="nav-link" id="Programms-tab" data-bs-toggle="tab" href="#Programms" role="tab" aria-controls="Programms" aria-selected="false">
+                <a class="nav-link" 
+                   id="Programms-tab" 
+                   data-bs-toggle="tab" 
+                   href="#Programms" 
+                   role="tab"
+                   aria-controls="Programms" 
+                   aria-selected="false">
                   <i class="ti-sm ti ti-layout-grid me-1_5"></i>
-                  {{__('admin.Programms')}}
+                  {{ __('admin.Programms') }}
                 </a>
-            </li>
-
-             
-             
+              </li>
             </ul>
           </div>
         </div>
-      </div>
+      </nav>
 
-
-      <!-- Start Tabs Data -->
-      <div class="tab-content" id="settingsTabsContent">
-        <!-- general settings tab -->
+      {{-- Tab Content --}}
+      <div class="tab-content p-0" id="settingsTabsContent">
+        {{-- Profile Tab --}}
         <div class="tab-pane fade show active" id="Profile" role="tabpanel" aria-labelledby="Profile-tab">
-      <!--/ Navbar pills -->
-      <div class="row">
-        <div class="col-xl-12 col-lg-12 col-md-12">
-          <div class="card mb-6">
-            <div class="card-body">
-             
-              <small class="card-text text-uppercase text-muted small">
-                
-          {{__('admin.ProfileSummary')}}
-              </small><br><br>
-              @if(!empty($client->bio->bio_ar))
-          {{ $client->bio->bio }}
-          {{ 
-            $l == 'ar' 
-            ? $client->bio->bio_ar
-            : $client->bio->bio_en 
-            }}
-            @else
-            {{__('cycles.NA')}}
-           @endif
+          <section class="row">
+            {{-- Profile Summary --}}
+            <div class="col-xl-12">
+              <article class="card mb-6">
+                <div class="card-body">
+                  <h3 class="h5 cart-title">{{ __('admin.ProfileSummary') }}</h3>
+                  <p>
+                    {{ $l == 'ar' 
+                        ? optional($client->bio)->bio_ar ?? __('admin.N/A') 
+                        : optional($client->bio)->bio_en ?? __('admin.No bio has been added yet') }}
+                  </p>
+                </div>
+              </article>
+            </div>
+
+            {{-- Statistics Cards --}}
+            @hasanyrole('Admin|organizationManager')
+              <div class="col-lg-3 col-sm-6">
+                <article class="card card-border-shadow-primary h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                      <div class="avatar me-4">
+                        <span class="avatar-initial rounded bg-label-primary">
+                          <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+                        </span>
+                      </div>
+                      <p class="mb-0 text-center h4">{{ $mentrequests_count }}</p>
+                    </div>
+                    <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
+                  </div>
+                </article>
+              </div>
+
+              <div class="col-lg-3 col-sm-6">
+                <article class="card card-border-shadow-primary h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                      <div class="avatar me-4">
+                        <span class="avatar-initial rounded bg-label-primary">
+                          <i class="ti-calendar-event text-primary ti-28px"></i>
+                        </span>
+                      </div>
+                      <p class="mb-0 text-center h4">{{ $mentrequests_period }}</p>
+                    </div>
+                    <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
+                  </div>
+                </article>
+              </div>
+
+              <div class="col-lg-3 col-sm-6">
+                <article class="card card-border-shadow-primary h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                      <div class="avatar me-4">
+                        <span class="avatar-initial rounded bg-label-primary">
+                          <i class="ti-calendar-event text-primary ti-28px"></i>
+                        </span>
+                      </div>
+                      <p class="mb-0 text-center h4">{{ number_format($average_rating ?? 0, 1) }}</p>
+                    </div>
+                    <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
+                  </div>
+                </article>
+              </div>
+            @endhasanyrole
+          </section>
+
+          {{-- User Information Section --}}
+          <section class="row">
+            <aside class="col-xl-4 col-lg-5 col-md-5">
+              {{-- About User Card --}}
+              <article class="card mb-6">
+                <div class="card-body">
+                  <h3 class="card-text text-uppercase text-muted small">
+                    {{ $l == 'ar' ? 'المعلومات الشخصية' : 'About' }}
+                  </h3>
+
+                  <ul class="list-unstyled my-3 py-1">
+                    <li class="d-flex align-items-center mb-4">
+                      <i class="ti ti-user ti-lg"></i>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</strong>
+                      <span>
+                        {{ $l == 'ar' 
+                          ? $client->first_name_ar . ' ' . $client->last_name_ar 
+                          : $client->first_name_en . ' ' . $client->last_name_en }}
+                      </span>
+                    </li>
+
+                    <li class="d-flex align-items-center mb-4">
+                      <i class="ti ti-check ti-lg"></i>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'الحالة' : 'Status' }}:</strong>
+                      <span>{{ $l == 'ar' ? 'نشط' : 'Active' }}</span>
+                    </li>
+
+                    <li class="d-flex align-items-center mb-4">
+                      <i class="ti ti-crown ti-lg"></i>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:</strong>
+                      <span>{{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
+                    </li>
+
+                    @if($client->city ?? 0)
+                      <li class="d-flex align-items-center mb-4">
+                        <i class="ti ti-flag ti-lg"></i>
+                        <strong class="mx-2">{{ $l == 'ar' ? 'الدولة:' : 'Country:' }}</strong>
+                        <span>{{ $client->country->{'name_' . $l} }}</span>
+                      </li>
+                    @endif
+
+                    <li class="d-flex align-items-center mb-2">
+                      <i class="ti ti-language ti-lg"></i>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}</strong>
+                      <span>{{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}</span>
+                    </li>
+                  </ul>
+
+                  <h3 class="card-text text-uppercase text-muted small mt-4">
+                    {{ $l == 'ar' ? 'التواصل' : 'Contact' }}
+                  </h3>
+
+                  <ul class="list-unstyled my-3 py-1">
+                    <li class="d-flex align-items-center mb-4">
+                      <i class="ti ti-phone-call ti-lg"></i>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'الهاتف:' : 'Phone:' }}</strong>
+                      <span>{{ $client->phone }}</span>
+                    </li>
+
+                    <li class="d-flex align-items-center mb-4">
+                      <i class="ti ti-mail ti-lg"></i>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'البريد الإلكتروني:' : 'Email:' }}</strong>
+                      <span>{{ $client->email }}</span>
+                    </li>
+                  </ul>
+
+                  <h3 class="card-text text-uppercase text-muted small mt-4">
+                    {{ __('admin.Cycles') }}
+                  </h3>
+
+                  <ul class="list-unstyled mb-0 mt-3 pt-1">
+                    @foreach($mentors as $mentor)
+                      <li class="d-flex flex-wrap mb-4">
+                        - <span class="fw-medium me-2">{{ $mentor->cycle->title ?? '' }}</span>
+                      </li>
+                    @endforeach
+                  </ul>
+                </div>
+              </article>
+            </aside>
+
+            <main class="col-xl-8 col-lg-7 col-md-7">
+              {{-- Mentorship Tasks Table --}}
+              <article class="card mb-4">
+                <div class="card-datatable table-responsive">
+                  <table class="zero-configuration table border-top">
+                    <thead>
+                      <tr>
+                        <th class="text-center">{{ __('cycles.User/Title') }}</th>
+                        <th class="text-center">{{ __('cycles.Company') }}</th>
+                        <th class="text-center">{{ __('mentor.mentorshipTasks.title') }}</th>
+                        <th class="text-center">{{ __('cycles.Done') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach($mentorshipTasks as $task)
+                        <tr @class(['btn-light-warning' => is_null($task->title)]) id="row_{{ $task->id }}">
+                          <td>
+                            <a
+                              href="{{ route('mentors.profile_view', $task->user_id) }}"
+                              class="d-flex align-items-center gap-2"
+                            >
+                              <img src="{{ $task->user->image_url }}" 
+                                   alt="{{ $task->user->name }}" 
+                                   class="rounded-circle" 
+                                   height="40" 
+                                   width="40">
+                              <div>
+                                <h6 class="mb-0">{{ $task->user->name }}</h6>
+                                <small>{{ $task->user->title }}</small>
+                              </div>
+                            </a>
+                          </td>
+
+                          <td>
+                            <a 
+                              href="/dashboard/companyProfile/{{ $task->company_id }}"
+                              class="d-flex align-items-center gap-2"
+                            >
+                              <img src="{{ $task->company->logo_url }}" 
+                                   alt="{{ $task->company->name }}" 
+                                   class="rounded-circle" 
+                                   height="40" 
+                                   width="40">
+                              <span>{{ $task->company->name }}</span>
+                            </a>
+                          </td>
+
+                          <td class="text-center">{{ $task->title ?? '-----' }}</td>
+                          <td class="text-center">
+                            {{ $task->status == 'pending' ? __('Uncompleted') : __('Completed') }}
+                          </td>
+                        </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            </main>
+          </section>
+        </div>
+
+        {{-- Programs Tab --}}
+        <div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
+          <section class="row">
+            <div class="col-xl-12">
+              <article class="card mb-6">
+                <div class="card-body">
+                  <h3 class="card-text text-uppercase text-muted small">
+                    {{ __('admin.Programms') }}
+                  </h3>
+
+                  <div class="table-responsive mt-4">
+                    <table class="table zero-configuration">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>{{ __('admin.Title') }}</th>
+                          <th>{{ __('admin.Description') }}</th>
+                          <th>{{ __('admin.Start') }}</th>
+                          <th>{{ __('admin.End') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach($mentors as $n => $mentor)
+                          <tr>
+                            <td>{{ $n + 1 }}</td>
+                            <td>{{ $mentor->cycle->title ?? '' }}</td>
+                            <td>{{ $mentor->cycle->description ?? '' }}</td>
+                            <td>{{ $mentor->cycle->start ?? '' }}</td>
+                            <td>{{ $mentor->cycle->end ?? '' }}</td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
         </div>
       </div>
-        </div>
-        <!-- Count cards -->
- @hasanyrole('Admin|organizationManager')
-        
-        <a href="" class="col-lg-3 col-sm-6">
-          <div class="card card-border-shadow-primary h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-center align-items-center mb-2">
-                <div class="avatar me-4">
-                  <span class="avatar-initial rounded bg-label-primary">
-                    <i class="ti-brand-my-oppo text-primary ti-28px"></i>
-                  </span>
-                </div>
-                  <h4 class="mb-0 text-center">{{ $mentrequests_count }}</h4>
-              </div>
-              <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
-            </div>
-          </div>
-        </a>
-
-
-        <a href="" class="col-lg-3 col-sm-6">
-          <div class="card card-border-shadow-primary h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-center align-items-center mb-2">
-                <div class="avatar me-4">
-                  <span class="avatar-initial rounded bg-label-primary">
-                    <i class="ti-calendar-event text-primary ti-28px"></i>
-                  </span>
-                </div>
-                  <h4 class="mb-0 text-center">{{ $mentrequests_period }}</h4>
-              </div>
-              <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
-            </div>
-          </div>
-        </a>
-
-
-        <a href="" class="col-lg-3 col-sm-6">
-          <div class="card card-border-shadow-primary h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-center align-items-center mb-2">
-                <div class="avatar me-4">
-                  <span class="avatar-initial rounded bg-label-primary">
-                    <i class="ti-calendar-event text-primary ti-28px"></i>
-                  </span>
-                </div>
-                  <h4 class="mb-0 text-center">{{ number_format($average_rating ?? 0, 1) }}</h4>
-              </div>
-              <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
-            </div>
-          </div>
-        </a>
-        <br>
-        @endhasanyrole
-    <!-- / Count cards -->
-        
-      </div>
-      <br>
-
-
-      <!-- User Profile Content -->
-      <div class="row">
-        <div class="col-xl-4 col-lg-5 col-md-5">
-          <!-- About User -->
-          <div class="card mb-6">
-            <div class="card-body">
-              <small class="card-text text-uppercase text-muted small">
-                {{ $l == 'ar' ? 'المعلومات الشخصية' : 'About' }}
-              </small>
-              <ul class="list-unstyled my-3 py-1">
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
-                  
-                  <span>{{ 
-                  $l == 'ar' 
-                  ? $client->first_name_ar . ' ' . $client->last_name_ar 
-                  : $client->first_name_en . ' ' . $client->last_name_en
-                  }}</span>
-
-                </li>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar' ? 'الحالة' : 'Status' }}:
-                  </span>
-                  <span>{{ $l == 'ar' ? 'نشط' : 'Active' }}</span>
-                </li>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:
-                  </span>
-                  <span>
-                    {{ $l == 'ar' ? $client->title_ar : $client->title_en }}
-                  </span>
-                </li>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
-                  </span>
-                  @if ($client->city ??0)
-                  <span>
-                    {{ $client->country->{'name_' . $l} }}
-                  </span>
-                  @endif
-                </li>
-                <li class="d-flex align-items-center mb-2">
-                  <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar'
-                        ? 'اللغات:'
-                        : '
-                                        Languages:' }}
-                  </span>
-                  <span>
-                    {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
-                  </span>
-                </li>
-              </ul>
-              <small class="card-text text-uppercase text-muted small">
-                {{ $l == 'ar' ? 'التواصل' : 'Contact' }}
-              </small>
-              <ul class="list-unstyled my-3 py-1">
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-phone-call ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar' ? 'الهاتف:' : 'Phone:' }}
-                  </span>
-                  <span>{{ $client->phone }}</span>
-                </li>
-                
-
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar' ? 'البريد الإلكتروني:' : 'Email:' }}
-                  </span>
-                  <span>{{ $client->email }}</span>
-                </li>
-              </ul>
-              {{-- <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
-              <ul class="list-unstyled mb-0 mt-3 pt-1">
-                @foreach ($mentors as $cycleOrg) 
-                @php
-                  $Organizations = \App\Organization::where('id', $cycleOrg->cycle->organization_id ?? 0)->get();
-                  @endphp
-                @foreach ($Organizations as $org) 
-                <li class="d-flex flex-wrap mb-4">
-
-                  - <span class="fw-medium me-2">{{ $org->{'name_' . $l} }}</span>
-
-                </li>
-                @endforeach
-                @endforeach
-              </ul> --}}
-
-               <small class="card-text text-uppercase text-muted small">{{__('admin.Cycles')}}</small>
-              <ul class="list-unstyled mb-0 mt-3 pt-1">
-                @foreach ($mentors as $mentor) 
-                
-                <li class="d-flex flex-wrap mb-4">
-
-                  - <span class="fw-medium me-2">{{$mentor->cycle->title ?? ''}}</span>
-
-                </li>
-             
-               
-                @endforeach
-              </ul>
-            </div>
-          </div>
-          <!--/ About User -->
-          <!-- Profile Overview -->
-          {{-- <div class="card mb-6">
-            <div class="card-body">
-              <small class="card-text text-uppercase text-muted small">Overview</small>
-              <ul class="list-unstyled mb-0 mt-3 pt-1">
-                <li class="d-flex align-items-end mb-4">
-                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">Task Compiled:</span>
-                  <span>13.5k</span>
-                </li>
-                <li class="d-flex align-items-end mb-4">
-                  <i class="ti ti-layout-grid ti-lg"></i><span class="fw-medium mx-2">Projects Compiled:</span>
-                  <span>146</span>
-                </li>
-                <li class="d-flex align-items-end">
-                  <i class="ti ti-users ti-lg"></i><span class="fw-medium mx-2">Connections:</span>
-                  <span>897</span>
-                </li>
-              </ul>
-            </div>
-          </div> --}}
-          <!--/ Profile Overview -->
-        </div>
-
-        <div class="col-xl-8 col-lg-7 col-md-7">
-          
-          <!-- Projects table -->
-          <div class="card mb-4">
-            <div class="card-datatable table-responsive">
-              <table class="zero-configuration table border-top">
-                <thead>
-                  <tr>
-                    <th class="text-center">{{__('cycles.User/Title')}}</th>
-                                                <th class="text-center">{{__('cycles.Company')}}</th>
-                                                <th class="text-center">{{__('mentor.mentorshipTasks.title')}}</th>
-                                                <th class="text-center">{{__('cycles.Done')}}</th>
-                  </tr>
-                  <tbody>
-                    @foreach($mentorshipTasks as $task)
-                                                <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
-                                                    <td class="text-center">
-                                                        <div class="d-flex align-items-center gap-1">
-                                                            <a class="media-left mr-50" href="{{ route('mentors.profile_view', $task->user_id) }}">
-                                                                <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                                            </a>
-                                                            <a href="{{ route('mentors.profile_view', $task->user_id) }}">
-                                                                <div class="media-body">
-                                                                    <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
-                                                                    <span class="font-small-2">{{$task->user->title}}</span>
-                                                                </div>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                    
-                                                    <td class="text-center">
-                                                        <div class="d-flex align-items-center gap-1">
-                                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
-                                                                <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                                            </a>
-                                                            <a href="/dashboard/companyProfile/{{$task->company->id}}">
-                                                                <div class="d-flex align-items-center gap-1">
-                                                                    {{$task->company->name }}
-                                                                </div>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                    
-                                                    <td class="text-center">
-                                                        {{ $task->title??"-----" }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                     {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
-                                                    </td>
-                                                    
-                                                </tr>
-                                            @endforeach
-                  </tbody>
-                </thead>
-              </table>
-            </div>
-          </div>
-          <!--/ Projects table -->
-        </div>
-      </div>
-      <!--/ User Profile Content -->
-
-       
-
-
     </div>
-</div>
-
-
-<!-- Programms tab -->
-<div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
-
-    <div class="row">
-      <div class="col-xl-12 col-lg-12 col-md-12">
-        <div class="card mb-6">
-          <div class="card-body">
-            
-            <small class="card-text text-uppercase text-muted small">
-        {{__('admin.Programms')}}
-            </small>
-            <br><br>
-            
-             
-            <table class="table zero-configuration">
-              <thead>
-              <tr>
-                  <th>#</th>
-                  <th>{{__('admin.Title')}}</th>
-                  <th>{{__('admin.Description')}}</th>
-                  <th>{{__('admin.Start')}}</th>
-                  <th>{{__('admin.End')}}</th>
-              </tr>
-              </thead>
-              <tbody>
-                @foreach ($mentors as $n=>$mentor) 
-                <tr>
-                  <td>{{$n+1}}</td>
-                  <td>{{$mentor->cycle->title ?? ''}}</td>
-                  <td>{{$mentor->cycle->description ?? ''}}</td>
-                  <td>{{$mentor->cycle->start ?? ''}}</td>
-                  <td>{{$mentor->cycle->end ?? ''}}</td>
-                </tr>
-  
-            @endforeach
-          </tbody>
-        </table>
-  
-  
-      </div>
-    
-    </div>
-    
-  
   </div>
-  <!-- Programms tab -->
 
-    </div>
-    <!-- / Content -->
-
-    {{-- <div class="content-backdrop fade"></div> --}}
-  </div>
-  <!-- Content wrapper -->
-
-  <!--  Edit SP Modal -->
+  {{-- Send Request Modal --}}
   <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="text-center mb-6">
-                    <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-                </div>
-                <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
- 
-                  <div class="modal-body">
-                    @csrf
-                    <input type="hidden" name="mentorid" value="0" id="mentorid">
-                    <input type="hidden" name="organization_id" id="addOrganizationID">
-                    <input type="hidden" name="cycle_id" id="addCycleID">
-                    <div>
-                      <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
-                      <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
-                    </div>
-                    <hr>
-                    <div class="form-group" id="showdates">
-                      <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class="date width-250 form-control" type="text" id="datepp" name="date" value="">
-                    </div>
-                    <div class="form-group">
-                      <label>{{__('dashboard.Meeting duration')}}:</label>
-                      <select name="period" class="select form-control width-150">
-                        <option value="30">30 {{__('dashboard.Minutes')}}</option>
-                        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
-                        <option value="120">2 {{__('dashboard.Hours')}}</option>
-                        <option value="180">3 {{__('dashboard.Hours')}}</option>
-                        <option value="240">4 {{__('dashboard.Hours')}}</option>
-                        <option value="300">5 {{__('dashboard.Hours')}}</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                        <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
-                      </div>
-                    </div>
-                    <label>{{__('dashboard.Add note')}}:</label>
-                    <div class="form-group">
-                      <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary ml-1" >
-                      
-                      <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
-                    </button>
-                  </div>
-                </form>
+      <div class="modal-content">
+        <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          
+          <div class="text-center mb-6">
+            <h4 class="mb-2">
+              {{ __('dashboard.Add mentorship session with') }} 
+              <span class="primary" id="rname"></span>
+            </h4>
+          </div>
 
+          <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+            @csrf
+            <input type="hidden" name="mentorid" value="0" id="mentorid">
+            <input type="hidden" name="organization_id" id="addOrganizationID">
+            <input type="hidden" name="cycle_id" id="addCycleID">
 
-
+            <div>
+              <h5 class="text-primary">
+                <i class="bx bx-time text-secondary"></i> {{ __('dashboard.Mentor schedule') }}
+              </h5>
+              <span class="d-block bg-info p-1 white">
+                <ul class="mb-0" id="schedule"></ul>
+              </span>
             </div>
+
+            <hr>
+
+            <div class="form-group" id="showdates">
+              <label>{{ __('dashboard.Start meeting Date/ Time') }}:</label>
+              <input class="date width-250 form-control" type="text" id="datepp" name="date" value="">
+            </div>
+
+            <div class="form-group">
+              <label>{{ __('dashboard.Meeting duration') }}:</label>
+              <select name="period" class="select form-control width-150">
+                <option value="30">30 {{ __('dashboard.Minutes') }}</option>
+                <option value="60" selected>1 {{ __('dashboard.Hour') }}</option>
+                <option value="120">2 {{ __('dashboard.Hours') }}</option>
+                <option value="180">3 {{ __('dashboard.Hours') }}</option>
+                <option value="240">4 {{ __('dashboard.Hours') }}</option>
+                <option value="300">5 {{ __('dashboard.Hours') }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="inputGroupFile01">{{ __('dashboard.Send file with your request') }}</label>
+              <div class="custom-file">
+                <input type="file" 
+                       class="custom-file-input" 
+                       id="inputGroupFile01" 
+                       name="file_url" 
+                       accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                <label class="custom-file-label" for="inputGroupFile01">
+                  {{ __('dashboard.Choose file') }}
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>{{ __('dashboard.Add note') }}:</label>
+              <textarea class="form-control" 
+                        id="notes" 
+                        name="notes" 
+                        rows="4" 
+                        placeholder="{{ __('dashboard.Write your note here') }}"></textarea>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary ml-1">
+                <span class="d-none d-sm-block">{{ __('dashboard.Submit') }}</span>
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
-</div>
-<!--/ Edit SP Modal -->
+  </div>
 @stop
 
-<!-- Page JS -->
 @section('pagescripts')
   <script src="/vuexy/assets/js/pages-profile.js"></script>
 
   <script>
-    $( function() {
+    $(function() {
       flatpickr("#datepp", {
-    dateFormat: "Y-m-d", // سنة-شهر-يوم
-    allowInput: true
-});
-});
-function request(id,mentor,organization_id=null,cycle_id=null) {
-		$('#mentorid').val(id);
-		$('#rname').html(mentor);
-		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
-		$.ajax({
-			type: "POST", url: "/dashboard/mentors/modify",
-			data: {"id": id, "rtype": 5,},
-			success: function (response) {
-				$('#SendRequest li').remove();
-				$('#name').html(name);
-				if (response.length>0) {
-					$.each(response, function(i, item) {
-						let note = '';
-						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
-						if (item.notes) {note = item.notes;}
-						switch (item.type)
-						{
-							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
-							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
-							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
-							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
-							default:
-						}
-					});
-				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
-				$('#addOrganizationID').val(organization_id);
-				$('#addCycleID').val(cycle_id);
-				$('#SendRequest').modal('show');
-			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
-		});
-	}
+        dateFormat: "Y-m-d",
+        allowInput: true
+      });
+    });
 
+    function request(id, mentor, organization_id = null, cycle_id = null) {
+      $('#mentorid').val(id);
+      $('#rname').html(mentor);
+      
+      $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+      });
+
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/mentors/modify",
+        data: { id, rtype: 5 },
+        success: function(response) {
+          $('#SendRequest li').remove();
+          
+          if (response.length > 0) {
+            $.each(response, function(i, item) {
+              const time = `${item.tfrom} {{ __('dashboard.to') }} ${item.tto}`;
+              let html = '';
+
+              switch (item.type) {
+                case 'OneDay':
+                  html = `<b>${item.dfrom}</b> (${time}).`;
+                  break;
+                case 'Weekly':
+                  html = `<b>{{ __('dashboard.Weekly') }}</b> (${item.days}) - (${time}).`;
+                  break;
+                case 'WorkingDays':
+                  html = `<b>{{ __('dashboard.All working days') }}</b> (${time}).`;
+                  break;
+                case 'Period':
+                  html = `<b>{{ __('dashboard.from') }} ${item.dfrom} {{ __('dashboard.to') }} ${item.dto}</b> (${time}).`;
+                  break;
+              }
+
+              if (html) {
+                $('<li>').html(html).appendTo('#schedule');
+              }
+            });
+          } else {
+            $('<li>').html("{{ __('dashboard.No records saved') }}.").appendTo('#schedule');
+          }
+
+          $('#addOrganizationID').val(organization_id);
+          $('#addCycleID').val(cycle_id);
+          $('#SendRequest').modal('show');
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
 
     $(document).ready(function() {
-
-        $('.zero-configuration').DataTable({
-                    "language": {
-                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                        "sLoadingRecords": "جارٍ التحميل...",
-                        "sProcessing":   "جارٍ التحميل...",
-                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
-                        "sZeroRecords":  "لم يعثر على أية سجلات",
-                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
-                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-                        "sInfoPostFix":  "",
-                        "sSearch":       "ابحث:",
-                        "sUrl":          "",
-                        "oPaginate": {
-                            "sFirst":    "الأول",
-                            "sPrevious": "السابق",
-                            "sNext":     "التالي",
-                            "sLast":     "الأخير"
-                        },
-                        "oAria": {
-                            "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",
-                            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-                        }
-                    }
-                } );
-
-
+      $('.zero-configuration').DataTable({
+        language: {
+          sEmptyTable: "{{ __('admin.No_data_available_in_table') }}",
+          sLoadingRecords: "{{ __('admin.Loading') }}...",
+          sProcessing: "{{ __('admin.Loading') }}...",
+          sLengthMenu: "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
+          sZeroRecords: "{{ __('admin.No_matching_records_found') }}",
+          sInfo: "{{ __('admin.Show') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
+          sInfoEmpty: "{{ __('admin.Showing_0_to_0_of_0_entries') }}",
+          sInfoFiltered: "({{ __('admin.Filtered') }} _MAX_ {{ __('admin.Entries2') }})",
+          sSearch: "{{ __('admin.Search') }}:",
+          oPaginate: {
+            sFirst: "{{ __('admin.First') }}",
+            sPrevious: "{{ __('admin.Previous') }}",
+            sNext: "{{ __('admin.Next') }}",
+            sLast: "{{ __('admin.Last') }}"
+          }
+        }
+      });
 
       getStates($('#country_id').val());
+      
       $('#country_id').change(function() {
         getStates($(this).val());
       });
+
       $('#state_id').change(function() {
         getCities($(this).val());
       });
     });
 
     function getStates(country_id) {
-      var $state = $('#state_id');
-      var currentState = '{{ $client->state_id }}';
-      var selected = '';
+      const $state = $('#state_id');
+      const currentState = '{{ $client->state_id }}';
+
       $.ajax({
         url: "{{ route('utils.locations_list_states_by_country') }}",
-        data: {
-          country_id: country_id
-        },
+        data: { country_id },
         success: function(data) {
-          $state.html('<option value="" >{{ __('admin.State') }}</option>');
+          $state.html('<option value="">{{ __('admin.State') }}</option>');
+
           $.each(data, function(id, value) {
-            // selected = '';
+            const selected = currentState === id ? 'selected' : '';
+            $state.append(`<option value="${id}" ${selected}>${value}</option>`);
+
             if (currentState === id) {
-              selected = 'selected';
-              getCities(id)
-            } else {
-              selected = '';
+              getCities(id);
             }
-            $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
-            $('#city_id').html('<option value="" >{{ __('admin.City') }}</option>');
           });
+
           $('#state').show(150);
+          $('#city_id').html('<option value="">{{ __('admin.City') }}</option>');
         }
       });
     }
 
     function getCities(state_id) {
-      var $city = $('#city_id');
-      var currentCity = '{{ $client->city_id }}';
-      var selected = '';
+      const $city = $('#city_id');
+      const currentCity = '{{ $client->city_id }}';
+
       $.ajax({
         url: "{{ route('cities.index') }}",
-        data: {
-          state_id: state_id
-        },
+        data: { state_id },
         success: function(data) {
-          $city.html('<option value="" >{{ __('admin.City') }}</option>');
+          $city.html('<option value="">{{ __('admin.City') }}</option>');
+
           $.each(data, function(id, value) {
-            if (currentCity == id) {
-              selected = 'selected';
-            } else {
-              selected = '';
-            }
-            $city.append('<option value="' + id + '" ' + selected + ' >' + value + '</option>');
+            const selected = currentCity == id ? 'selected' : '';
+            $city.append(`<option value="${id}" ${selected}>${value}</option>`);
           });
+
           $('#city').show(150);
         }
       });
     }
   </script>
+
   @role('Mentor')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
-      var useDarkMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const useDarkMode = window.matchMedia('(prefers-color-scheme: light)').matches;
 
       tinymce.init({
         selector: '#basicTextarea',
         plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons',
         imagetools_cors_hosts: ['picsum.photos'],
         menubar: 'edit view insert format tools table help',
-        toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview  print | insertfile image media template link anchor codesample | ltr rtl',
+        toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen preview print | insertfile image media template link anchor codesample | ltr rtl',
         toolbar_sticky: true,
         autosave_ask_before_unload: true,
         autosave_interval: '30s',
@@ -709,7 +664,7 @@ function request(id,mentor,organization_id=null,cycle_id=null) {
         contextmenu: 'link image imagetools table',
         skin: useDarkMode ? 'oxide-dark' : 'oxide',
         content_css: useDarkMode ? 'dark' : 'default',
-        content_style: 'body { font-family:Times New Roman,Arial,sans-serif; font-size:14px }',
+        content_style: 'body { font-family: Times New Roman, Arial, sans-serif; font-size: 14px }',
         image_title: true,
         automatic_uploads: true,
         media_live_embeds: true,
@@ -719,61 +674,40 @@ function request(id,mentor,organization_id=null,cycle_id=null) {
         file_picker_types: 'image',
         convert_urls: true,
         file_picker_callback: function(cb, value, meta) {
-          var input = document.createElement('input');
+          const input = document.createElement('input');
           input.setAttribute('type', 'file');
           input.setAttribute('accept', 'image/*');
+
           input.onchange = function() {
-            var file = this.files[0];
-            var reader = new FileReader();
+            const file = this.files[0];
+            const reader = new FileReader();
+
             reader.readAsDataURL(file);
             reader.onload = function() {
-              var id = 'blobid' + (new Date()).getTime();
-              var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-              var base64 = reader.result.split(',')[1];
-              var blobInfo = blobCache.create(id, file, base64);
+              const id = 'blobid' + new Date().getTime();
+              const blobCache = tinymce.activeEditor.editorUpload.blobCache;
+              const base64 = reader.result.split(',')[1];
+              const blobInfo = blobCache.create(id, file, base64);
               blobCache.add(blobInfo);
-              cb(blobInfo.blobUri(), {
-                title: file.name
-              });
+              cb(blobInfo.blobUri(), { title: file.name });
             };
           };
+
           input.click();
         }
       });
-      @if ($l == 'ar')
-        tinyMCE.settings['directionality'] = 'rtl';
-      @endif
-    </script>
-    <script>
-      $(document).ready(function() {
-        @if ($client->bio)
-          switch ('{{ $client->bio->entrepreneurial_experience }}') {
-            case '1':
-              $('#entrepreneurial_experience_brief').show();
-              break;
-            case '0':
-              $('#entrepreneurial_experience_brief').hide();
-              break;
-            default:
-              $('#entrepreneurial_experience_brief').hide();
-              break;
-          }
-        @endif
 
-        $('.entrepreneurial_experience').change(function() {
-          var value = $(this).val();
-          switch (value) {
-            case '1':
-              $('#entrepreneurial_experience_brief').show();
-              break;
-            case '0':
-              $('#entrepreneurial_experience_brief').hide();
-              break;
-            default:
-              $('#entrepreneurial_experience_brief').hide();
-              break;
-          }
-        });
+      @if($l == 'ar')
+        tinyMCE.settings.directionality = 'rtl';
+      @endif
+
+      @if($client->bio)
+        const entrepreneurialExp = '{{ $client->bio->entrepreneurial_experience }}';
+        $('#entrepreneurial_experience_brief').toggle(entrepreneurialExp === '1');
+      @endif
+
+      $('.entrepreneurial_experience').change(function() {
+        $('#entrepreneurial_experience_brief').toggle($(this).val() === '1');
       });
     </script>
   @endrole

@@ -444,7 +444,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
 public function hasCompletedStartup(): bool
 {
-    return filled($this->company->name_en)
+    return $this->company
+        && filled($this->company->name_en)
         && filled($this->company->address_en)
         && filled($this->company->sector)
         && filled($this->company->stage);

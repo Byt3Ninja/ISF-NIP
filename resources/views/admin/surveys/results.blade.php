@@ -15,58 +15,56 @@
 							<div class="row align-items-center">
 								<div class="col-md-6">
 									<div class="d-flex align-items-center gap-2">
-										<i class="ti ti-chart-bar ti-lg text-primary"></i>
 										<h4 class="card-title mb-0">{{__('admin.surveyResults')}}</h4>
 									</div>
 								</div>
 								<div class="col-md-6 text-end">
-									<!-- Export Buttons -->
-									<div class="d-flex align-items-center justify-content-end gap-2" role="group">
-										<button type="button" class="btn btn-label-primary btn-sm" id="exportCSV">
-											<i class="ti ti-file-text me-1"></i>{{__('admin.exportCSV')}}
+									<!-- Export Dropdown Button -->
+									<div class="dropdown d-inline-block">
+										<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+											<i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
 										</button>
-										<button type="button" class="btn btn-label-success btn-sm" id="exportExcel">
-											<i class="ti ti-file-spreadsheet me-1"></i>{{__('admin.exportExcel')}}
-										</button>
+										<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportDropdown">
+											<li>
+												<a class="dropdown-item" href="#" id="exportCSV">
+													<i class="ti ti-file-text me-1"></i>{{ __('admin.exportCSV') }}
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item" href="#" id="exportExcel">
+													<i class="ti ti-file-spreadsheet me-1"></i>{{ __('admin.exportExcel') }}
+												</a>
+											</li>
+										</ul>
 									</div>
 								</div>
 							</div>
 						</div>
 						<div class="card-datatable">
-							<div class="row mx-2">
-								<div class="col-md-12">
-									<!-- Filters Row -->
-									<div class="row align-items-center mb-3 mt-3">
-										<div class="col-md-3">
-											<label class="form-label">{{__('admin.Status')}}</label>
-											<select class="form-select form-select-sm" id="statusFilter">
-												<option value="">{{__('admin.allStatus')}}</option>
-												<option value="answered">{{__('admin.answered')}}</option>
-												<option value="not_answered">{{__('admin.notAnswered')}}</option>
-											</select>
-										</div>
-										<div class="col-md-3">
-											<label class="form-label">{{__('admin.mentor')}}</label>
-											<select class="form-select form-select-sm" id="mentorFilter">
-												<option value="">{{__('admin.allMentors')}}</option>
-											</select>
-										</div>
-										<div class="col-md-3">
-											<label class="form-label">{{__('admin.program')}}</label>
-											<select class="form-select form-select-sm" id="programFilter">
-												<option value="">{{__('admin.allPrograms')}}</option>
-											</select>
-										</div>
-										<div class="col-md-3">
-											<label class="form-label">{{__('admin.Search')}}</label>
-											<input type="text" class="form-control form-control-sm" id="globalSearch" 
-												   placeholder="{{__('admin.searchSurveysPlaceholder')}}">
-										</div>
-									</div>
+							<div class="row mb-1 px-2">
+								<div class="col-md-3">
+									<select class="form-select form-select-sm" id="statusFilter">
+										<option value="">{{__('admin.allStatus')}}</option>
+										<option value="answered">{{__('admin.answered')}}</option>
+										<option value="not_answered">{{__('admin.notAnswered')}}</option>
+									</select>
+								</div>
+								<div class="col-md-3">
+									<select class="form-select form-select-sm" id="mentorFilter">
+										<option value="">{{__('admin.allMentors')}}</option>
+									</select>
+								</div>
+								<div class="col-md-3">
+									<select class="form-select form-select-sm" id="programFilter">
+										<option value="">{{__('admin.allPrograms')}}</option>
+									</select>
+								</div>
+								<div class="col-12 col-md-3 d-none align-items-end">
+									<button id="clear-filters" class="btn btn-sm btn-outline-secondary">{{ __('admin.Clear') }}</button>
 								</div>
 							</div>
 							<table class="table table-hover" id="surveyResultsTable">
-								<thead class="bg-label-light">
+								<thead class="table-light">
 									<tr>
 										<th class="text-center" style="width: 5%;">#</th>
 										<th>{{__('admin.user')}}</th>
@@ -164,8 +162,12 @@
 														@endif
 													@elseif($response->triggered_on == 'training')
 														@if($response->triggered_by == 'session')
-															<span class="text-dark">{{ '(' . __('cycles.' . $middleware->type) . ')' }}</span>
-															<span class="fw-medium">{{ $middleware->title }}</span>
+															@if($middleware)
+																<span class="text-dark">{{ '(' . __('cycles.' . $middleware->type) . ')' }}</span>
+																<span class="fw-medium">{{ $middleware->title }}</span>
+															@else
+																<span class="text-muted">-</span>
+															@endif
 														@elseif($response->triggered_by == 'due' || $response->triggered_by == 'quiz')
 															- <span class="fw-medium">{{ $middleware->title }}</span>
 														@else
@@ -220,12 +222,11 @@
 
 @section('pagescripts')
 <script>
-	console.log('responses', @json($responses));
 $(document).ready(function() {
     // Initialize DataTable
     const table = $('#surveyResultsTable').DataTable({
         responsive: true,
-        pageLength: 25,
+        pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
         order: [[6, 'desc']], // Sort by submit date (descending)
         language: {
@@ -410,6 +411,40 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Function to toggle clear button visibility
+    function toggleClearButton() {
+        const status = $('#statusFilter').val();
+        const mentor = $('#mentorFilter').val();
+        const program = $('#programFilter').val();
+        const search = table.search();
+        if (status || mentor || program || search) {
+            $('#clear-filters').parent().removeClass('d-none').addClass('d-flex');
+        } else {
+            $('#clear-filters').parent().removeClass('d-flex').addClass('d-none');
+        }
+    }
+
+    // Add change events to filters
+    $('#statusFilter, #mentorFilter, #programFilter').on('change', toggleClearButton);
+
+    // Hook into DataTable search event
+    table.on('search.dt', toggleClearButton);
+
+    // Clear filters functionality
+    $('#clear-filters').on('click', function() {
+        $('#statusFilter').val('');
+        $('#mentorFilter').val('');
+        $('#programFilter').val('');
+        table.column(4).search('', true, false);
+        table.column(3).search('', true, false);
+        table.search('');
+        table.draw();
+        toggleClearButton();
+    });
+
+    // Initial check
+    toggleClearButton();
 });
 </script>
 @stop

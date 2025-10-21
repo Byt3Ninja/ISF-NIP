@@ -454,43 +454,58 @@
 
                         @php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
 
-                        @if($hasPreRequests)
-                            <div class="mb-2">
-                                <strong class="d-block mb-1">{{ __('admin.Before applying, please complete:') }}</strong>
-                                <ul class="list-unstyled mb-2 d-flex flex-wrap gap-2">
-                                    @foreach($cycle->pre_requests as $pr)
-                                        <li id="{{ $pr['id'] }}" class="pre-request-item mb-1">
-                                            <a href="{{ $pr['url'] }}" class="btn btn-outline-warning btn-sm" role="button" aria-label="{{ $pr['label'] }}">
-                                                 {{ __($pr['label']) }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+												<div class="alert alert-info alert-dismissible p-3 rounded mb-4 position-relative"
+													style="display: {{ $hasPreRequests ? 'block' : 'none' }};">
+													<h6 class="d-flex align-items-center">
+														<i class="ti ti-info-circle text-info ti-24px me-2"></i>
+														@if($_user->company && $_user->company->name)
+														{{ __('dashboard.To join this program as a startup, please complete these requirements first:') }}
+														@else
+														{{ __('dashboard.To get started with this program, please complete your profile requirements:') }}
+														@endif
+													</h6>
+													<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
+														@foreach($cycle->pre_requests as $pr)
+														<li id="{{ $pr['id'] }}" class="pre-request-item">
+															<a href="{{ $pr['url'] }}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+																aria-label="{{ __($pr['label']) }}">
+																<i class="ti ti-external-link"></i>
+																<span>{{ __($pr['label']) }}</span>
+															</a>
+														</li>
+														@endforeach
+													</ul>
+													@if($_user->company && $_user->company->name)
+													<p class="text-muted small mt-2 mb-0">
+														<i class="ti ti-lightbulb me-1"></i>
+														{{ __('dashboard.Completing these steps will help your startup get the most out of the program.') }}
+													</p>
+													@else
+													<p class="text-muted small mt-2 mb-0">
+														<i class="ti ti-lightbulb me-1"></i>
+														{{ __('dashboard.Setting up your profile properly will ensure you have access to all program features.') }}
+													</p>
+													@endif
+													<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="position: absolute; top: 0; {{ $l == 'en' ? 'right' : 'left' }}: 0.15rem;">
+													</button>
+												</div>
 
                         <div class="d-flex align-items-center justify-content-between" style="width:100%">
                             <small class="text-muted" style="text-transform: capitalize">
                                 {{ __('dashboard.start from') }} {{ $cycle->start }}
                             </small>
 
-                            @if($hasPreRequests)
-                                <button
-                                    class="btn btn-secondary"
-                                    disabled
-                                    aria-disabled="true"
-                                    data-cycle-id="{{ $cycle->id }}"
-                                    title="{{ __('admin.Please complete required items before joining') }}"
-                                >
-                                    <span class="mx-2">{{ __('dashboard.Join') }}</span>
-                                    <i class="ti ti-arrows-join"></i>
-                                </button>
-                            @else
-                                <a href="{{ url('/dashboard/cycles/view/' . $cycle->id) }}" class="btn btn-primary" data-cycle-id="{{ $cycle->id }}">
-                                    <span class="mx-2">{{ __('dashboard.Join') }}</span>
-                                    <i class="ti ti-arrows-join"></i>
-                                </a>
-                            @endif
+                            <button
+                                class="btn {{ $hasPreRequests ? 'btn-warning' : 'btn-primary' }}"
+                                onclick="handleJoinClick(this)"
+                                data-cycle-id="{{ $cycle->id }}"
+                                data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
+                                data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
+                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? '')]; })->toArray()) }}"
+                            >
+                                <span class="me-2">{{ $hasPreRequests ? __('dashboard.Complete Prerequisites') : __('dashboard.Join now') }}</span>
+                                <i class="ti {{ $hasPreRequests ? 'ti-alert-triangle' : 'ti-arrows-join' }}"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1367,6 +1382,8 @@
 		</div>
 	</div>
 </div>
+<!-- / Content Wrapper -->
+
 @if( $_user->ableTo('mentors.settings_modify', $permissions) &&
 array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null( $cycle_id ) )
 <!--  Edit SP Modal -->
@@ -1446,8 +1463,46 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 @endif
 
 @include('mentor.partials._availability_slots')
-<!-- / Content Wrapper -->
+
+<!-- Program Prerequisites Modal -->
+<div class="modal fade" id="prerequisitesModal" tabindex="-1" aria-labelledby="prerequisitesModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="d-flex align-items-center">
+					<i class="ti ti-alert-triangle me-2"></i>
+					<h5 class="modal-title" id="prerequisitesModalLabel">
+						{{ __('dashboard.Prerequisites_Required') }}
+					</h5>
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>{{ __('dashboard.To join this program, you must complete the following prerequisites first:') }}</p>
+				<ul id="prerequisitesList" class="list-group list-group-flush">
+					<!-- Prerequisites will be populated here -->
+				</ul>
+				<div class="alert alert-warning mt-3">
+					<i class="ti ti-alert-triangle me-2"></i>
+					{{ __('dashboard.Completion of all prerequisites is required before you can join the program.') }}
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+					<i class="ti ti-x me-2"></i>
+					{{ __('admin.Cancel') }}
+				</button>
+				<button type="button" class="btn btn-primary" id="completePrerequisitesBtn">
+					<i class="ti ti-external-link me-2"></i>
+					{{ __('dashboard.Complete Prerequisites & Join') }}
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- / Program Prerequisites Modal -->
 @stop
+
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1505,6 +1560,141 @@ document.addEventListener('DOMContentLoaded', function() {
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
+<script>
+function handleJoinClick(button) {
+    const cycleId = button.getAttribute('data-cycle-id');
+    const hasPreRequests = button.getAttribute('data-has-pre');
+    const joinUrl = button.getAttribute('data-join-url');
+    const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+
+    if (hasPreRequests === 'true') {
+        // Populate modal
+        const list = document.getElementById('prerequisitesList');
+        list.innerHTML = '';
+        preRequests.forEach(pr => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex align-items-center';
+            li.innerHTML = `
+                <i class="ti ti-circle-check me-2 text-warning"></i>
+                <a href="${pr.url}" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
+            `;
+            list.appendChild(li);
+        });
+
+        // Set buttons
+        document.getElementById('completePrerequisitesBtn').onclick = function() {
+            if (preRequests.length > 0) {
+                // Set flag to indicate prerequisites were opened
+                localStorage.setItem('prerequisitesOpened', 'true');
+                window.open(preRequests[0].url, '_blank');
+            }
+            $('#prerequisitesModal').modal('hide');
+        };
+
+        // Show modal
+        $('#prerequisitesModal').modal('show');
+    } else {
+        window.location.href = joinUrl;
+    }
+}
+
+// Check if page should refresh when user returns from completing prerequisites
+window.addEventListener('focus', function() {
+    if (localStorage.getItem('prerequisitesOpened') === 'true') {
+        localStorage.removeItem('prerequisitesOpened');
+        // Refresh the page to update prerequisite status
+        window.location.reload();
+    }
+});
+
+// Real-time completion status checking
+let completionCheckInterval;
+
+function startCompletionStatusCheck() {
+    // Check every 5 seconds to reduce API calls
+    completionCheckInterval = setInterval(function() {
+        fetch('{{ route('cycles.completion_status_check') }}', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateUIWithCompletionStatus(data);
+        })
+        .catch(error => {
+            console.log('Error checking completion status:', error);
+        });
+    }, 5000); // Check every 5 seconds to reduce API calls
+}
+
+function updateUIWithCompletionStatus(data) {
+    const hasPreRequests = data.has_pre_requests;
+    const preRequests = data.pre_requests || [];
+
+    // Find all join buttons
+    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
+    if (joinButtons.length === 0) {
+        console.log('No join buttons found');
+        return;
+    }
+
+    // Update each button appearance and text
+    joinButtons.forEach(joinButton => {
+        if (hasPreRequests) {
+            joinButton.className = 'btn btn-warning';
+            joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Complete Prerequisites') }}</span><i class="ti ti-alert-triangle"></i>';
+        } else {
+            joinButton.className = 'btn btn-primary';
+            joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
+        }
+
+        // Update button data attributes
+        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+            url: pr.url,
+            label: pr.label
+        }))));
+    });
+
+    // Find all prerequisites alerts
+    const alertDivs = document.querySelectorAll('.alert.alert-info');
+    alertDivs.forEach(alertDiv => {
+        if (hasPreRequests) {
+            // Update the alert content
+            const listElement = alertDiv.querySelector('.list-unstyled');
+            if (listElement) {
+                listElement.innerHTML = '';
+                preRequests.forEach(pr => {
+                    const li = document.createElement('li');
+                    li.className = 'pre-request-item';
+                    li.innerHTML = `
+                        <a href="${pr.url}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
+                            <i class="ti ti-external-link"></i>
+                            <span>${pr.label}</span>
+                        </a>
+                    `;
+                    listElement.appendChild(li);
+                });
+            }
+            alertDiv.style.display = 'block';
+        } else {
+            // Hide the alert if no prerequisites
+            alertDiv.style.display = 'none';
+        }
+    });
+}
+
+// Start checking when page loads
+@if(isset($pollingNeeded) && $pollingNeeded)
+document.addEventListener('DOMContentLoaded', function() {
+    startCompletionStatusCheck();
+});
+@endif
+</script>
 <script>
 	// Initialize DataTable with pagination configuration
     $(document).on('click', '.show-passcode', function(e) {

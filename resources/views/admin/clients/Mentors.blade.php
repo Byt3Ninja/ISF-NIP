@@ -35,7 +35,7 @@
       <div class="card">
         <div class="card-body">
           <div class="row">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
               <div class="d-flex bg-label-warning p-2 justify-content-center align-items-center rounded shadow">
                 <div class="bg-white d-flex justify-content-center align-items-center rounded"
                   style="width: 40px; height: 40px; shadow">
@@ -51,7 +51,7 @@
                   </span>
                 </div>
               </div>
-              <div class="d-flex gap-3 align-items-center">
+              <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center mt-4 mt-md-0">
                 <!-- Search Bar -->
                 <div class="input-group input-group-merge search-form" style="width: 300px;">
                   <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
