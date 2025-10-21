@@ -7666,6 +7666,13 @@
       "guard_name": "web",
       "is_core": 0,
       "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "trainings.sessions_join",
+      "description": " Attendance to Training Session",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager", "registered", "mentor"]
     }
    ]
 }
