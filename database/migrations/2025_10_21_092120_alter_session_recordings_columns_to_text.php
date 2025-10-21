@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('session_recordings', function (Blueprint $table) {
-            $table->text('recording_view_url')->change();
-            $table->text('recording_download_url')->change();
+            $table->longText('recording_view_url')->nullable()->change();
+            $table->longText('recording_download_url')->nullable()->change();
         });
     }
 
