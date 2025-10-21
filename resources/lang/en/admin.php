@@ -2476,4 +2476,5 @@ return [
 	'Complete Profile' => 'Complete Profile',
 	'Complete Startup/Idea' => 'Complete Startup Profile',
 	'Is_Required' => 'Is Required',
+	'Is_Required_Survey_Description' => 'If checked, the survey will be mandatory for users to complete.'
 ];

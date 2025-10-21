@@ -573,6 +573,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('training/results/{id?}', 'TrainingController@results')->name('trainings.results_view');
     Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('trainings.sessions_list');
     Route::get('training/sessionsReport', 'TrainingController@sessionsReport')->name('trainings.sessions_report');
+    Route::get('/sessions/join/{session}', 'TrainingController@join')->name('trainings.sessions_join');
+
 
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
     Route::post('training/delsession/{id}', 'TrainingController@delsession')->name('trainings.sessions_delete');
@@ -614,6 +616,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.take');
     Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
     Route::post('surveys/{survey}/questions/delete', 'surveysController@delete_questions')->name('surveys.questions_delete');
+    
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
