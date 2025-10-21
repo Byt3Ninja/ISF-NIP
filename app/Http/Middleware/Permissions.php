@@ -31,6 +31,7 @@ class Permissions
         'groups*',
         'messages*',
         'users/search',
+        'cycles.completion_status_check',
     ];
 
     private $exceptControllers = [
