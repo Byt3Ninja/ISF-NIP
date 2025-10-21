@@ -2525,4 +2525,5 @@ return [
 	'Complete Profile' => 'اكمل الملف الشخصي',
 	'Complete Startup/Idea' => 'اكمل الملف الشخصي للشركة',
 	'Is_Required' => 'مطلوب',
+	'Is_Required_Survey_Description' => 'إذا تم تفعيل هذا الخيار، سيكون الاستبيان إلزاميًا للمستخدمين لإكماله.'
 ];
