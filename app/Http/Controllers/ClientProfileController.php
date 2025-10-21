@@ -118,12 +118,12 @@ class ClientProfileController extends Controller
         $globalRoles = ['Admin', 'Organization Manager'];
 
         if ($client->hasAnyRole($globalRoles)) {
-            $mentorshipTasks = MentorshipTask::query()->get();
+            $mentorshipTasks = MentorshipTask::query()->orderByDesc('created_at')->get();
         } elseif ($client->hasRole('Mentor')) {
-             $mentorshipTasks = MentorshipTask::where('mentor_id', $client->id)->get();
+             $mentorshipTasks = MentorshipTask::where('mentor_id', $client->id)->orderByDesc('created_at')->get();
         } elseif ($client->hasRole('Registered')) {
             $companyId = optional($client->company)->id;
-            $mentorshipTasks = $companyId ? MentorshipTask::where('company_id', $companyId)->where('user_id', $client->id)->get() : collect();
+            $mentorshipTasks = $companyId ? MentorshipTask::where('company_id', $companyId)->where('user_id', $client->id)->orderByDesc('created_at')->get() : collect();
         } else {
             $mentorshipTasks = collect();
         }

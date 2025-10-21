@@ -116,6 +116,22 @@ return [
     // 'uploaded'    => 'فشل في تحميل الـ :attribute.',
     'url'         => 'صيغة الرابط :attribute غير صحيحة.',
     'uuid'        => ':attribute يجب أن يكون بصيغة UUID سليمة.',
+    'linkedin_login_required' => 'يرجى اختيار حالة تسجيل الدخول عبر لينكدإن.',
+    'linkedin_login_in'       => 'حالة تسجيل الدخول عبر لينكدإن غير صحيحة.',
+    'linkedin_client_id_required' => 'يرجى إدخال معرف العميل الخاص بلينكدإن.',
+    'linkedin_client_secret_required' => 'يرجى إدخال السرّ الخاص بلينكدإن.',
+    'linkedin_redirect_required' => 'يرجى إدخال رابط إعادة التوجيه الخاص بلينكدإن.',
+    'linkedin_redirect_invalid' => 'يرجى إدخال رابط إعادة توجيه صالح',
+
+    'google_login_required' => 'يرجى اختيار حالة تسجيل الدخول عبر جوجل.',
+    'google_login_in'       => 'حالة تسجيل الدخول عبر جوجل غير صحيحة.',
+    'google_client_id_required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
+    'google_client_secret_required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
+    'google_redirect_required' => 'يرجى استكمال جميع حقول إعدادات جوجل قبل الحفظ',
+    'google_redirect_invalid' => 'يرجى إدخال رابط إعادة توجيه صالح',
+
+    'settings_id_required' => 'معرف الإعداد مطلوب.',
+    'settings_id_exists' => 'سجل الإعداد غير موجود.',
 
     /*
     |--------------------------------------------------------------------------
