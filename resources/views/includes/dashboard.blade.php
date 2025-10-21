@@ -451,8 +451,8 @@
 
                     <div class="card-body bg-rgba-light">
                         <p class="card-text mb-2">{{ $cycle->description }}</p>
-
                         @php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
+						
 
 												<div class="alert alert-info alert-dismissible p-3 rounded mb-4 position-relative"
 													style="display: {{ $hasPreRequests ? 'block' : 'none' }};">

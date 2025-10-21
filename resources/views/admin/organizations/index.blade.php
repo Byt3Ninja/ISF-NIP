@@ -171,6 +171,7 @@
                     </div>
                   </div>
                   <div class="d-flex justify-content-between mt-3">
+                    <a href="{{ route('users.view_companies', ['orgnization' => $organization->id]) }}" >
                     <div class="d-flex align-items-center gap-2">
                       <div class="badge bg-label-warning px-2">
                         <i class="ti ti-building-skyscraper fs-4"></i>
@@ -181,16 +182,19 @@
                         {{ $organization->total_startups }}
                       </p>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="badge bg-label-info px-2 py-1">
-                        <i class="ti ti-components fs-4"></i>
+                  </a>
+                    <a href="{{ route('programlist.index', ['organization_id' => $organization->id]) }}" >
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="badge bg-label-info px-2 py-1">
+                          <i class="ti ti-components fs-4"></i>
+                        </div>
+                        <p class="fw-semibold mb-0">{{ __('admin.Cycles') }}</p>
+                        <p
+                          class="fw-semibold mb-0 bg-light rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center">
+                          {{ $organization->cycles->count() }}
+                        </p>
                       </div>
-                      <p class="fw-semibold mb-0">{{ __('admin.Cycles') }}</p>
-                      <p
-                        class="fw-semibold mb-0 bg-light rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center">
-                        {{ $organization->cycles->count() }}
-                      </p>
-                    </div>
+                    </a>
                     <div class="dropdown">
                       <button class="btn btn-sm btn-icon rounded-circle shadow" type="button"
                         id="dropdownMenuButton{{ $organization->id }}" data-bs-toggle="dropdown" aria-expanded="false">

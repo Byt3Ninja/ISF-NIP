@@ -23,6 +23,7 @@ use App\TrainingContent;
 use App\TrainingSession;
 use App\SessionRecording;
 use App\MentorshipRequest;
+use App\SessionAttendance;
 use App\TrainingCompleted;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -1708,4 +1709,25 @@ class TrainingController extends Controller
 			], 500);
 		}
 	}
+
+	public function join($id)
+	{
+		$session = TrainingSession::findOrFail($id);
+		
+		$user = Auth::user();
+		SessionAttendance::updateOrCreate(
+			[
+				'session_id' => $session->id,
+				'user_id' => $user->id,
+			],
+			[
+				'attended' => true,
+				'joined_at' => now(),
+			]
+		);
+
+		
+		return redirect()->away($session->join_url);
+	}
+
 }
