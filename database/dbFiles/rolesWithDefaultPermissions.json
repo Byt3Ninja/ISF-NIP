@@ -7420,6 +7420,88 @@
                     "organizationmanager"
                 ]
             },
+
+                        {
+                "name": "chat.index",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                    {
+                "name": "chat.users",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                               {
+                "name": "chat.conversation",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                               {
+                "name": "chat.conversation.create",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                                           {
+                "name": "chat.conversation.messages",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                                                       {
+                "name": "chat.typing",
+                "description": "Typing indicator",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+
+            
+            
             {
                 "name": "chat.groups",
                 "description": "View Chat Groups",

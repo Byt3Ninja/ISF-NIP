@@ -123,6 +123,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     
     // Chat API routes (using web session authentication)
     Route::get('chat/messages', 'ChatController@messages')->name('chat.messages');
+    Route::get('chat/users', 'ChatController@getUsers')->name('chat.users');
     Route::get('chat/conversations/{conversationId}/messages', 'ChatController@getConversationMessages')->name('chat.conversation_messages');
     Route::post('chat/conversations', 'ChatController@createOrGetConversation')->name('chat.create_conversation');
     Route::get('chat/messages/{messageId}', 'ChatController@getMessage')->name('chat.get_message'); // For real-time broadcasting
@@ -135,6 +136,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('chat/messages', 'ChatController@sendMessage')->name('chat.send_message');
     Route::post('chat/groups/{groupId}/messages', 'ChatController@sendMessage')->name('chat.send_group_message');
     Route::delete('chat/messages/{messageId}', 'ChatController@deleteMessage')->name('chat.delete_message');
+    Route::post('chat/typing', 'ChatController@typing')->name('chat.typing');
     Route::get('chat/users/search', 'ChatController@searchUser')->name('chat.search_users');
 
     // Hackathon Routes
@@ -430,6 +432,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.read_status_mark_read');
     Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.read_status_mark_unread');
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.view');
+
     //products categories Manager routes
     Route::resource('productsCategories', 'ProductCategoryController');
 
