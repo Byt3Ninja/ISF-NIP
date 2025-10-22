@@ -1060,7 +1060,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           <div class="mb-3">
             <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف' }}</label>
             <input class="form-control" name="file" type="file" id="fileInput" required>
-            <div class="form-text">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+            <div class="invalid-feedback file-err" style="display: none;">{{ $l == 'en' ? 'Please select a file to upload.' : 'يرجى اختيار ملف للرفع.' }}</div>
+            <div class="invalid-feedback file-size-err" style="display: none;">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+            <div class="invalid-feedback file-type-err" style="display: none;">{{ $l == 'en' ? 'Allowed: PDF, DOCX, PPTX, ZIP' : 'المسموح: PDF, DOCX, PPTX, ZIP' }}</div>
           </div>
           <div class="mb-3">
             <label for="fileDescription" class="form-label">
@@ -1926,14 +1928,36 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const l = '{{ $l }}'; // "en" or "ar"
 
     if (!fileInput || fileInput.files.length === 0) {
-      releaseWarningAlert({
-        title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
-        message: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً." 
-      });
+      $('.file-err').show();
       return;
     }
   
     const file = fileInput.files[0];
+
+    // Allowed file types
+    const allowedTypes = [
+      'application/pdf', 
+      'application/zip',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   // docx
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      $('.file-type-err').show();
+      return;
+    }
+
+    // Max size: 10 MB
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      $('.file-size-err').show();
+      return;
+    }
+
+    // Reset error messages
+    $('.file-err').hide();
+    $('.file-type-err').hide();
+    $('.file-size-err').hide();
 
     // Build FormData
     const formData = new FormData();
