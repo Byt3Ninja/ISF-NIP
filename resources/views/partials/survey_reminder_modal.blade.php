@@ -7,33 +7,51 @@
   if (Auth::check() && Auth::user()->hasAnyRole('Registered')) {
     $user_id = Auth::id();
 
-    // Get all required surveys that the user hasn't completed
-    $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
-                              ->whereNotNull('responses')
-                              ->pluck('survey_id')
-                              ->toArray();
+    
+       // تحقق من وجود المستخدم في أحد جدولَي الحضور
+     
 
-    // Get incomplete survey responses for required surveys
-    $incomplete_responses = \App\SurveyResponses::where('user_id', $user_id)
-                              ->whereNull('responses')
-                              ->whereHas('survey', function($query) {
-                                $query->where('is_required', 1);
-                              })
-                              ->with('survey')
-                              ->get();
+      // هنا فقط لو المستخدم فعلاً حضر 👇
 
-    // Prepare the data for each survey
-    foreach ($incomplete_responses as $response) {
-      $survey_data[] = [
-        'id' => $response->id,  // Use response ID instead of survey ID
-        'survey_id' => $response->survey->id,  // Keep survey ID for reference
-        'title' => $response->survey->title,
-        'description' => $response->survey->description,
-        'is_required' => $response->survey->is_required,
-        'type' => $response->triggered_on,
-      ];
-    }
+      // الاستبيانات المكتملة
+      $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
+        ->whereNotNull('responses')
+        ->pluck('survey_id')
+        ->toArray();
+
+      // الاستبيانات الغير مكتملة المطلوبة
+      $incomplete_responses = \App\SurveyResponses::where('user_id', $user_id)
+        ->whereNull('responses')
+        ->whereHas('survey', function($query) {
+          $query->where('is_required', 1);
+        })
+        ->with('survey')
+        ->get();
+        
+      $existsInTraining = \DB::table('attendance_training_offline')->whereIn('training_session_id', $incomplete_responses->pluck('triggered_at'))->where('user_id', $user_id)->exists();
+
+      // لو مش موجود في أي جدول => اخرج
+      if (!( $existsInTraining)) {
+        // المستخدم ما حضرش، مش هنعرض أي استبيان
+        $survey_data = [];
+        return; // أو ممكن return response()->json(['surveys' => []]);
+      }
+
+      // تجهيز البيانات
+      $survey_data = [];
+      foreach ($incomplete_responses as $response) {
+        $survey_data[] = [
+          'id' => $response->id,
+          'survey_id' => $response->survey->id,
+          'title' => $response->survey->title,
+          'description' => $response->survey->description,
+          'is_required' => $response->survey->is_required,
+          'type' => $response->triggered_on,
+        ];
+      }
+      
   }
+  
 @endphp
 
 {{-- Only show the modal if there are pending surveys and user is not on the survey taking page --}}
