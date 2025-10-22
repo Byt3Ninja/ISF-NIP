@@ -179,7 +179,7 @@
                             </div>
                             <div class="d-flex align-items-center text-muted">
                               <i class="ti ti-align-box-center-middle text-warning me-1"></i>
-                              <small class="fw-medium">{{ __('cycles.' . $types[$cstep->data]) }}</small>
+                              <small class="fw-medium">{{ __('cycles.' . $types[$cstep?->data]) }}</small>
                             </div>
                           </div>
                         </div>

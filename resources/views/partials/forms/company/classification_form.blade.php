@@ -130,8 +130,7 @@ $(function() {
     value = String(value).trim();
     if (!value) return;
     if (value.length > MAX_TECH_LENGTH) {
-      alert("{{ $l == 'en' ? 'Technology name must be 50 characters or less.' : 'يجب ألا يتجاوز اسم التقنية 50 حرفًا.' }}");
-      return;
+      return; // Silently prevent adding tags that are too long
     }
     // prevent duplicates (case-insensitive)
     const exists = existingTechNames.some(t => t.toLowerCase() === value.toLowerCase());
@@ -330,6 +329,7 @@ $(function() {
   $techOtherEl.on('keypress', validateLettersOnly);
 
   $form.on('submit', function(e) {
+    e.preventDefault();
     let isValid = true;
     $industryErr.hide();
     $sectorErr.hide();
@@ -343,10 +343,16 @@ $(function() {
       $sectorErr.show();
       isValid = false;
     }
-    if (!$('.technology-checkbox:checked').length) {
+    
+    // Check if either technology checkboxes are checked or there are tech tags
+    const hasCheckedTech = $('.technology-checkbox:checked').length > 0;
+    const hasTechTags = existingTechNames && existingTechNames.length > 0;
+    
+    if (!hasCheckedTech && !hasTechTags) {
       $techErr.show();
       isValid = false;
     }
+    
     if ($('.sector-checkbox[value="other-sector"]:checked').length) {
       const sectorValue = $sectorOtherEl.val().trim();
       if (!sectorValue || !/^[A-Za-z\s]+$/.test(sectorValue)) {
@@ -363,10 +369,56 @@ $(function() {
     }
 
     if (!isValid) {
-      e.preventDefault();
-      return;
+      return false;
     }
-    updateHiddenInputs();
+
+    // Update hidden fields before form submission
+    const sectorIds = $('.sector-checkbox:checked').map((_, el) => $(el).val()).get();
+    $sectorHidden.val(JSON.stringify(sectorIds));
+
+    const techIds = $('.technology-checkbox:checked').map((_, el) => $(el).val()).get();
+    $techHidden.val(JSON.stringify(techIds));
+
+    // Ensure tech tags are up to date
+    $techTagsHidden.val(JSON.stringify(existingTechNames));
+
+    // Show loading state
+    $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ $l == "en" ? "Saving..." : "جاري الحفظ..." }}');
+
+    // Submit form via AJAX
+    const formData = new FormData($form[0]);
+    
+    // Add tech tags to form data
+    formData.set('tech_tags', JSON.stringify(existingTechNames));
+
+    // Log form data for debugging
+    const formDataObj = {};
+    formData.forEach((value, key) => {
+      formDataObj[key] = value;
+    });
+    console.log('Form data:', formDataObj);
+
+    $.ajax({
+      url: $form.attr('action'),
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(response) {
+        showToast('success', '{{ $l == "en" ? "Success" : "تم بنجاح" }}', '{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}');
+      },
+      error: function(xhr) {
+        console.error('Error:', xhr);
+        let errorMessage = '{{ $l == "en" ? "An error occurred. Please try again." : "حدث خطأ. يرجى المحاولة مرة أخرى." }}';
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          errorMessage = xhr.responseJSON.message;
+        }
+        showToast('error', '{{ $l == "en" ? "Error" : "خطأ" }}', errorMessage);
+      },
+      complete: function() {
+        $submitBtn.prop('disabled', false).html('{{ $l == "en" ? "Save" : "حفظ" }}');
+      }
+    });
   });
 
   // Init

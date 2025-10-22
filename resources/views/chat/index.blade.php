@@ -47,6 +47,11 @@
     .typing-indicator {
       opacity: 0.7;
     }
+
+    .app-chat-contacts .sidebar-body {
+      max-height: calc(100vh - 75px);
+      overflow-y: auto;
+    }
   </style>
 @stop
 
@@ -62,9 +67,7 @@
         <div class="col app-chat-sidebar-left app-sidebar overflow-hidden" id="app-chat-sidebar-left">
           <div
             class="chat-sidebar-left-user sidebar-header d-flex flex-column justify-content-center align-items-center flex-wrap px-6 pt-12">
-            <div class="avatar avatar-xl avatar-online chat-sidebar-avatar">
-              <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
-            </div>
+         
             <h5 class="mt-4 mb-0">John Doe</h5>
             <span>Admin</span>
             <i class="ti ti-x ti-lg cursor-pointer close-sidebar" data-bs-toggle="sidebar" data-overlay
@@ -145,11 +148,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         <div class="col app-chat-contacts app-sidebar flex-grow-0 overflow-hidden border-end" id="app-chat-contacts">
           <div class="sidebar-header h-px-75 px-5 border-bottom d-flex align-items-center">
             <div class="d-flex align-items-center me-6 me-lg-0">
-              <div class="flex-shrink-0 avatar avatar-online me-4" data-bs-toggle="sidebar"
-                data-overlay="app-overlay-ex" data-target="#app-chat-sidebar-left">
-                <img class="user-avatar rounded-circle cursor-pointer" src="/vuexy/assets/img/avatars/1.png"
-                  alt="Avatar" />
-              </div>
+   
               <div class="flex-grow-1 input-group input-group-merge">
                 <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search"></i></span>
                 <input type="text" class="form-control chat-search-input" placeholder="Search..." aria-label="Search..."
@@ -160,13 +159,13 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
               data-overlay data-bs-toggle="sidebar" data-target="#app-chat-contacts"></i>
           </div>
           <div class="sidebar-body">
-            <!-- Chats -->
-            <ul class="list-unstyled chat-contact-list py-2 mb-0" id="chat-list">
+            <!-- Users -->
+            <ul class="list-unstyled chat-contact-list py-2 mb-0" id="user-list">
               <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-                <h5 class="text-primary mb-0">Chats</h5>
+                <h5 class="text-primary mb-0">Users</h5>
               </li>
               <li class="chat-contact-list-item chat-list-item-0">
-                <h6 class="text-muted mb-0">Loading conversations...</h6>
+                <h6 class="text-muted mb-0">Loading users...</h6>
               </li>
             </ul>
             
@@ -197,7 +196,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
                     <small class="user-status text-body">Start chatting by searching for users</small>
                   </div>
                 </div>
-                <div class="d-flex align-items-center">
+                {{-- <div class="d-flex align-items-center">
                   <i
                     class="ti ti-phone ti-md cursor-pointer d-sm-inline-flex d-none me-1 btn btn-sm btn-text-secondary text-secondary btn-icon rounded-pill"></i>
                   <i
@@ -218,7 +217,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
                       <a class="dropdown-item" href="javascript:void(0);">Report</a>
                     </div>
                   </div>
-                </div>
+                </div> --}}
               </div>
             </div>
             <div class="chat-history-body">
@@ -235,13 +234,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
                 <input class="form-control message-input border-0 me-4 shadow-none"
                   placeholder="Type your message here..." />
                 <div class="message-actions d-flex align-items-center">
-                  <i
-                    class="speech-to-text ti ti-microphone ti-md btn btn-sm btn-text-secondary btn-icon rounded-pill cursor-pointer text-heading"></i>
-                  <label for="attach-doc" class="form-label mb-0">
-                    <i
-                      class="ti ti-paperclip ti-md cursor-pointer btn btn-sm btn-text-secondary btn-icon rounded-pill mx-1 text-heading"></i>
-                    <input type="file" id="attach-doc" hidden />
-                  </label>
+               
                   <button class="btn btn-primary d-flex send-msg-btn">
                     <span class="align-middle d-md-inline-block d-none">Send</span>
                     <i class="ti ti-send ti-16px ms-md-2 ms-0"></i>
@@ -334,7 +327,8 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/bootstrap-maxlength/bootstrap-maxlength.js"></script>
-@stop
+  <script src="{{ mix('js/app.js') }}"></script>
+@endsection
 
 @section('pagescripts')
   <!-- Custom chat implementation - removed conflicting app-chat.js -->
@@ -346,6 +340,16 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     let messagePollingInterval = null;
     let typingTimeout = null;
     let echo = null; // For Laravel Echo (real-time broadcasting)
+    let lastMessageByUserId = {};
+    let broadcastingEnabled = false;
+    let lastReadByConversation = {};
+    let unreadCounts = {};
+    let conversationByUserId = {};
+    const LS_KEYS = {
+      lastConversationId: 'chat.lastConversationId',
+      lastRead: 'chat.lastReadByConversation',
+      unread: 'chat.unreadCounts'
+    };
 
     // Get CSRF token for API requests
     function getCsrfToken() {
@@ -363,6 +367,63 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     function showError(message) {
       console.error('Chat Error:', message);
       // You can implement a toast notification here
+    }
+
+    function loadPersistedState() {
+      try {
+        const lr = localStorage.getItem(LS_KEYS.lastRead);
+        lastReadByConversation = lr ? JSON.parse(lr) : {};
+      } catch (e) { lastReadByConversation = {}; }
+      try {
+        const uc = localStorage.getItem(LS_KEYS.unread);
+        unreadCounts = uc ? JSON.parse(uc) : {};
+      } catch (e) { unreadCounts = {}; }
+    }
+
+    function persistState() {
+      try { localStorage.setItem(LS_KEYS.lastRead, JSON.stringify(lastReadByConversation)); } catch(e) {}
+      try { localStorage.setItem(LS_KEYS.unread, JSON.stringify(unreadCounts)); } catch(e) {}
+    }
+
+    function setLastRead(conversationId, dateStr) {
+      if (!conversationId) return;
+      lastReadByConversation[conversationId] = dateStr || new Date().toISOString();
+      persistState();
+    }
+
+    function incrementUnread(conversationId) {
+      if (!conversationId) return;
+      unreadCounts[conversationId] = (unreadCounts[conversationId] || 0) + 1;
+      persistState();
+      // Update badges without refetching
+      refreshUserListUnreadBadges();
+    }
+
+    function clearUnread(conversationId) {
+      if (!conversationId) return;
+      unreadCounts[conversationId] = 0;
+      persistState();
+      refreshUserListUnreadBadges();
+    }
+
+    function refreshUserListUnreadBadges() {
+      const items = document.querySelectorAll('#user-list .chat-contact-list-item a');
+      items.forEach(a => {
+        const onclick = a.getAttribute('onclick') || '';
+        const match = onclick.match(/startConversationWithUser\((\d+),/);
+        const userId = match ? parseInt(match[1]) : null;
+        if (!userId) return;
+        const convId = conversationByUserId[userId];
+        const count = convId ? (unreadCounts[convId] || 0) : 0;
+        const meta = a.querySelector('.chat-contact-meta');
+        if (meta) {
+          if (count > 0) {
+            meta.innerHTML = `<span class="badge bg-danger rounded-pill">${count}</span>`;
+          } else {
+            meta.innerHTML = '<i class="ti ti-message-circle-plus text-primary"></i>';
+          }
+        }
+      });
     }
 
     // API Helper function
@@ -402,12 +463,45 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     async function fetchMessages() {
       try {
         const chatList = document.getElementById('chat-list');
-        showLoading(chatList);
+        if (chatList) {
+          showLoading(chatList);
+        }
 
         const data = await makeApiCall('/dashboard/chat/messages');
         console.log('Fetched conversations:', data);
-        
+        lastMessageByUserId = {};
+        conversationByUserId = {};
+        (data.conversations || []).forEach(conversation => {
+          if (conversation.type === 'private') {
+            const other = (conversation.participants || []).find(p => p.participantable_id !== currentUser?.id);
+            const otherId = other?.participantable_id;
+            const last = (conversation.messages || [])[0];
+            if (otherId && last) {
+              lastMessageByUserId[otherId] = last;
+            }
+            if (otherId) {
+              conversationByUserId[otherId] = conversation.id;
+            }
+          }
+        });
+
+        // Reconcile unread counts with last read timestamps
+        (data.conversations || []).forEach(conversation => {
+          const last = (conversation.messages || [])[0];
+          if (!last) return;
+          const lastRead = lastReadByConversation[conversation.id];
+          if (lastRead) {
+            const msgTime = new Date(last.created_at).getTime();
+            const readTime = new Date(lastRead).getTime();
+            if (msgTime <= readTime) {
+              unreadCounts[conversation.id] = 0;
+            }
+          }
+        });
+        persistState();
+
         displayConversations(data.conversations);
+        refreshUserListUnreadBadges();
         return data.conversations;
       } catch (error) {
         showError('Failed to fetch conversations');
@@ -415,9 +509,70 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       }
     }
 
-    // Load conversations (alias for fetchMessages)
-    async function loadConversations() {
-      return await fetchMessages();
+    // Fetch and display users list
+    async function fetchUsers() {
+      try {
+        const userList = document.getElementById('user-list');
+        showLoading(userList);
+
+        const data = await makeApiCall('/dashboard/chat/users');
+        console.log('Fetched users:', data);
+
+        displayUsers(data.users);
+        return data.users;
+      } catch (error) {
+        showError('Failed to fetch users');
+        console.error('Error fetching users:', error);
+      }
+    }
+
+    // Display users in the user list
+    function displayUsers(users) {
+      const userList = document.getElementById('user-list');
+
+      if (!users || users.length === 0) {
+        userList.innerHTML = `
+          <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
+            <h5 class="text-primary mb-0">Users</h5>
+          </li>
+          <li class="chat-contact-list-item chat-list-item-0">
+            <h6 class="text-muted mb-0">No users available</h6>
+          </li>
+        `;
+        return;
+      }
+
+      let html = `
+        <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
+          <h5 class="text-primary mb-0">Users <span class="badge bg-primary ms-2">${users.length}</span></h5>
+        </li>
+      `;
+
+      users.forEach(user => {
+        const avatarUrl = resolveAvatarUrl(user);
+        const lastMsg = lastMessageByUserId[user.id]?.body || 'No messages yet';
+
+        const convId = conversationByUserId[user.id];
+        const count = convId ? (unreadCounts[convId] || 0) : 0;
+        html += `
+          <li class="chat-contact-list-item mb-1">
+            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id}, '${escapeHtml(user.name || '')}', '${avatarUrl}')">
+              <div class="flex-shrink-0 avatar">
+                <img src="${avatarUrl}" alt="Avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/vuexy/assets/img/avatars/${(user.id % 12) + 1}.png'" />
+              </div>
+              <div class="chat-contact-info flex-grow-1 ms-4">
+                <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(user.name || '')}</h6>
+                <small class="chat-contact-status text-truncate">${escapeHtml(lastMsg)}</small>
+              </div>
+              <div class="chat-contact-meta">
+                ${count > 0 ? `<span class="badge bg-danger rounded-pill">${count}</span>` : `<i class="ti ti-message-circle-plus text-primary"></i>`}
+              </div>
+            </a>
+          </li>
+        `;
+      });
+
+      userList.innerHTML = html;
     }
 
     // Fetch and display groups
@@ -437,6 +592,9 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     // Display conversations in chat list
     function displayConversations(conversations) {
       const chatList = document.getElementById('chat-list');
+      if (!chatList) {
+        return;
+      }
       if (!conversations || conversations.length === 0) {
         chatList.innerHTML = `
           <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
@@ -465,10 +623,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         if (conversation.type === 'private' && otherParticipants.length > 0) {
           const participant = otherParticipants[0].participantable;
           if (participant) {
-            // Try to build name from available fields
-            const firstName = participant.first_name_en || participant.first_name_ar || '';
-            const lastName = participant.last_name_en || participant.last_name_ar || '';
-            conversationName = (firstName + ' ' + lastName).trim() || participant.email || `User ${participant.id}`;
+            conversationName = getDisplayName(participant);
           }
         } else if (conversation.type === 'group') {
           conversationName = conversation.name || `Group Chat (${conversation.id})`;
@@ -512,7 +667,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     }
 
     // Load conversation messages
-    async function loadConversation(conversationId) {
+    async function loadConversation(conversationId, evt) {
       if (!conversationId) return;
       
       currentConversationId = conversationId;
@@ -522,7 +677,10 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         document.querySelectorAll('.chat-contact-list-item').forEach(item => {
           item.classList.remove('active');
         });
-        event.target.closest('.chat-contact-list-item')?.classList.add('active');
+        const e = evt || (typeof event !== 'undefined' ? event : null);
+        if (e && e.target) {
+          e.target.closest('.chat-contact-list-item')?.classList.add('active');
+        }
 
         // Show loading in messages area
         const messagesContainer = document.getElementById('chat-messages');
@@ -531,14 +689,19 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         // Setup real-time listeners for this conversation
         setupConversationListeners(conversationId);
 
-        // Fetch conversation messages
-        const messages = await loadConversationMessages(conversationId);
+        // Fetch conversation data and messages
+        const convoData = await loadConversationMessages(conversationId);
+        const messages = convoData?.messages || [];
         
-        // Update chat header
-        updateChatHeader(conversationId);
+        // Update chat header with conversation details
+        updateChatHeaderFromConversation(convoData?.conversation);
         
         // Display messages
         displayConversationMessages(messages);
+        // Mark as read, clear unread, persist last open conversation
+        setLastRead(conversationId, new Date().toISOString());
+        clearUnread(conversationId);
+        try { localStorage.setItem(LS_KEYS.lastConversationId, String(conversationId)); } catch(e) {}
         
       } catch (error) {
         showError('Failed to load conversation');
@@ -550,11 +713,11 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     async function loadConversationMessages(conversationId) {
       try {
         const data = await makeApiCall(`/dashboard/chat/conversations/${conversationId}/messages`);
-        return data.messages || [];
+        return data;
       } catch (error) {
         console.error('Error loading conversation messages:', error);
         showError('Failed to load conversation messages');
-        return [];
+        return { messages: [], conversation: null };
       }
     }
 
@@ -596,7 +759,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         const isCurrentUser = message.sendable_id === currentUser?.id;
         const messageClass = isCurrentUser ? 'chat-message-right' : '';
         const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
-        const senderName = isCurrentUser ? 'You' : (message.sendable?.name || 'Unknown');
+        const senderName = isCurrentUser ? 'You' : getDisplayName(message.sendable || {});
         const timeFormatted = formatMessageTime(message.created_at);
         
         html += `
@@ -718,10 +881,8 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
     // Update chat header with conversation info
     function updateChatHeader(conversationId) {
-      // Update chat header with conversation details
       const chatHeader = document.querySelector('.chat-history-header .chat-contact-info h6');
       const chatStatus = document.querySelector('.chat-history-header .user-status');
-      
       if (chatHeader) {
         chatHeader.textContent = `Conversation ${conversationId}`;
       }
@@ -730,13 +891,27 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       }
     }
 
+    function updateChatHeaderFromConversation(conversation) {
+      if (!conversation) return;
+      if (conversation.type === 'private') {
+        const other = (conversation.participants || []).find(p => p.participantable_id !== currentUser?.id);
+        const participant = other?.participantable || {};
+        const name = getDisplayName(participant);
+        const avatarUrl = resolveAvatarUrl({ id: participant.id, img_url: participant.img_url });
+        updateChatHeaderWithUser(name, avatarUrl);
+        return;
+      }
+      updateChatHeader(conversation.id);
+    }
+
     // Send message
     async function sendMessage(conversationId, messageText, userId = null) {
       if ((!conversationId && !userId) || !messageText.trim()) return;
 
+      let tempMessage = null;
       try {
         // Add message to UI immediately for better UX
-        const tempMessage = {
+        tempMessage = {
           id: Date.now(), // Temporary ID
           body: messageText.trim(),
           sendable_id: currentUser?.id,
@@ -776,7 +951,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         
         // If this was a new conversation, update the conversation list
         if (data.conversation && !conversationId) {
-          await loadConversations();
+          await fetchMessages();
           loadConversation(data.conversation.id);
         } else {
           // Refresh the current conversation to replace temp message with real one
@@ -791,7 +966,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         console.error('Error sending message:', error);
         
         // Remove the temporary message on error
-        const tempMessageEl = document.querySelector(`[data-message-id="${tempMessage.id}"]`);
+        const tempMessageEl = tempMessage ? document.querySelector(`[data-message-id="${tempMessage.id}"]`) : null;
         if (tempMessageEl) {
           tempMessageEl.remove();
         }
@@ -833,7 +1008,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     // Display search results
     function displaySearchResults(users) {
       const searchResults = document.getElementById('search-results');
-      const chatList = document.getElementById('chat-list');
+      const userList = document.getElementById('user-list');
       
       if (!users || users.length === 0) {
         searchResults.innerHTML = `
@@ -845,7 +1020,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
           </li>
         `;
         searchResults.style.display = 'block';
-        chatList.style.display = 'none';
+        if (userList) userList.style.display = 'none';
         return;
       }
 
@@ -859,21 +1034,15 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       `;
 
       users.forEach(user => {
-        const userInitials = getUserInitials(user.name || user.email);
-        const userAvatar = user.img_url || `/vuexy/assets/img/avatars/${(user.id % 12) + 1}.png`;
-        
+        const avatarUrl = resolveAvatarUrl(user);
         html += `
           <li class="chat-contact-list-item mb-1">
-            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id}, '${escapeHtml(user.name || user.email)}')">
+            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id}, '${escapeHtml(user.name || '')}', '${avatarUrl}')">
               <div class="flex-shrink-0 avatar">
-                ${user.img_url ? 
-                  `<img src="${userAvatar}" alt="Avatar" class="rounded-circle" />` :
-                  `<span class="avatar-initial rounded-circle bg-label-primary">${userInitials}</span>`
-                }
+                <img src="${avatarUrl}" alt="Avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/vuexy/assets/img/avatars/${(user.id % 12) + 1}.png'" />
               </div>
               <div class="chat-contact-info flex-grow-1 ms-4">
-                <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(user.name || user.email)}</h6>
-                <small class="chat-contact-status text-truncate">${escapeHtml(user.email || '')}</small>
+                <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(user.name || '')}</h6>
               </div>
               <div class="chat-contact-meta">
                 <i class="ti ti-message-circle-plus text-primary"></i>
@@ -885,17 +1054,17 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
       searchResults.innerHTML = html;
       searchResults.style.display = 'block';
-      chatList.style.display = 'none';
+      if (userList) userList.style.display = 'none';
     }
 
     // Hide search results and show conversations
     function hideSearchResults() {
       const searchResults = document.getElementById('search-results');
-      const chatList = document.getElementById('chat-list');
+      const userList = document.getElementById('user-list');
       const searchInput = document.querySelector('.chat-search-input');
       
       searchResults.style.display = 'none';
-      chatList.style.display = 'block';
+      if (userList) userList.style.display = 'block';
       
       if (searchInput) {
         searchInput.value = '';
@@ -908,8 +1077,32 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
 
+    function resolveAvatarUrl(user) {
+      if (user && user.img_url) {
+        if (user.img_url.startsWith('http://') || user.img_url.startsWith('https://')) {
+          return user.img_url;
+        }
+        return `/dashboard/uploads/photos/${user.id}/${encodeURIComponent(user.img_url)}`;
+      }
+      const id = user && user.id ? user.id : 1;
+      return `/vuexy/assets/img/avatars/${(id % 12) + 1}.png`;
+    }
+
+    function getDisplayName(person) {
+      if (!person) return 'User';
+      const direct = person.name || person.full_name || '';
+      if (direct) return direct;
+      const first = person.first_name_en || person.first_name_ar || person.first_name || person.firstname || '';
+      const last = person.last_name_en || person.last_name_ar || person.last_name || person.lastname || '';
+      const combined = (first + ' ' + last).trim();
+      if (combined) return combined;
+      if (person.email) return person.email;
+      if (person.id) return `User ${person.id}`;
+      return 'User';
+    }
+
     // Start conversation with a user
-    async function startConversationWithUser(userId, userName) {
+    async function startConversationWithUser(userId, userName, avatarUrl) {
       try {
         // Hide search results
         hideSearchResults();
@@ -923,7 +1116,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         
         if (conversation) {
           // Update chat header
-          updateChatHeaderWithUser(userName);
+          updateChatHeaderWithUser(userName, avatarUrl);
           
           // Load conversation messages
           currentConversationId = conversation.id;
@@ -931,11 +1124,15 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
           // Setup real-time listeners for this conversation
           setupConversationListeners(conversation.id);
           
-          const messages = await loadConversationMessages(conversation.id);
-          displayConversationMessages(messages);
+          const convoData = await loadConversationMessages(conversation.id);
+          updateChatHeaderFromConversation(convoData?.conversation);
+          displayConversationMessages(convoData?.messages || []);
+          setLastRead(conversation.id, new Date().toISOString());
+          clearUnread(conversation.id);
+          try { localStorage.setItem(LS_KEYS.lastConversationId, String(conversation.id)); } catch(e) {}
           
           // Refresh conversations list
-          await loadConversations();
+          await fetchMessages();
           
           // Update active state
           updateActiveConversation(conversation.id);
@@ -947,15 +1144,19 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     }
 
     // Update chat header with user info
-    function updateChatHeaderWithUser(userName) {
+    function updateChatHeaderWithUser(userName, avatarUrl) {
       const chatHeader = document.querySelector('.chat-history-header .chat-contact-info h6');
       const chatStatus = document.querySelector('.chat-history-header .user-status');
+      const headerAvatarImg = document.querySelector('.chat-history-header .avatar img');
       
       if (chatHeader) {
         chatHeader.textContent = userName;
       }
       if (chatStatus) {
         chatStatus.textContent = 'Online';
+      }
+      if (headerAvatarImg && avatarUrl) {
+        headerAvatarImg.src = avatarUrl;
       }
     }
 
@@ -1088,11 +1289,14 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     // Handle message form submission
     function handleMessageSubmit(event) {
       event.preventDefault();
-      
+
       const messageInput = document.querySelector('.message-input');
       const messageText = messageInput?.value?.trim();
-      
+
       if (messageText && currentConversationId) {
+        // Clear typing indicator before sending message
+        sendTypingIndicator(false);
+
         sendMessage(currentConversationId, messageText);
       }
     }
@@ -1198,40 +1402,64 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         
         console.log('Successfully created channel:', channel);
         
-        // Listen for new messages
-        channel.listen('MessageCreated', (e) => {
-          console.log('New message received via Echo:', e);
-          handleIncomingMessage(e.message);
+        // Listen for new messages (support both custom name and FQCN)
+        channel.listen('.MessageCreated', (e) => {
+          console.log('New message received via Echo (.MessageCreated):', e);
+          handleIncomingMessage(extractMessage(e));
+        });
+        channel.listen('App\\Events\\MessageCreated', (e) => {
+          console.log('New message received via Echo (App\\Events\\MessageCreated):', e);
+          handleIncomingMessage(extractMessage(e));
+        });
+        // WireChat vendor events
+        channel.listen('Namu\\WireChat\\Events\\MessageCreated', (e) => {
+          console.log('New message received via Echo (Namu\\WireChat\\Events\\MessageCreated):', e);
+          handleIncomingMessage(extractMessage(e));
         });
 
-        // Listen for message deletions
-        channel.listen('MessageDeleted', (e) => {
-          console.log('Message deleted via Echo:', e);
-          handleMessageDeletion(e.message);
+        // Listen for message deletions (support both custom name and FQCN)
+        channel.listen('.MessageDeleted', (e) => {
+          console.log('Message deleted via Echo (.MessageDeleted):', e);
+          handleMessageDeletion(extractMessage(e));
+        });
+        channel.listen('App\\Events\\MessageDeleted', (e) => {
+          console.log('Message deleted via Echo (App\\Events\\MessageDeleted):', e);
+          handleMessageDeletion(extractMessage(e));
+        });
+        // WireChat vendor events
+        channel.listen('Namu\\WireChat\\Events\\MessageDeleted', (e) => {
+          console.log('Message deleted via Echo (Namu\\WireChat\\Events\\MessageDeleted):', e);
+          handleMessageDeletion(extractMessage(e));
         });
 
-        // Listen for typing indicators (if implemented)
-        // Note: Client events disabled in Pusher - commenting out for now
-        // channel.listenForWhisper('typing', (e) => {
-        //   console.log('User typing via Echo:', e);
-        //   showTypingIndicator(e.user);
-        // });
+        // Listen for typing indicators
+        channel.listen('TypingIndicator', (e) => {
+          console.log('User typing received:', e);
+          if (e.is_typing) {
+            showTypingIndicator(e.user);
+          } else {
+            hideTypingIndicator(e.user);
+          }
+        });
 
         console.log(`Successfully joined conversation channel: ${channelName}`);
         
         // Test the channel by listening for any events (debugging)
-        channel.subscription.bind_global((eventName, data) => {
-          console.log('Received event on channel:', eventName, data);
-        });
+        if (channel.subscription && channel.subscription.bind_global) {
+          channel.subscription.bind_global((eventName, data) => {
+            console.log('Received event on channel:', eventName, data);
+          });
+        }
         
         // Test connection
-        channel.subscription.bind('pusher:subscription_succeeded', () => {
-          console.log('Successfully subscribed to channel:', channelName);
-        });
-        
-        channel.subscription.bind('pusher:subscription_error', (error) => {
-          console.error('Failed to subscribe to channel:', channelName, error);
-        });
+        if (channel.subscription) {
+          channel.subscription.bind('pusher:subscription_succeeded', () => {
+            console.log('Successfully subscribed to channel:', channelName);
+          });
+          channel.subscription.bind('pusher:subscription_error', (error) => {
+            console.error('Failed to subscribe to channel:', channelName, error);
+          });
+        }
         
       } catch (error) {
         console.error('Error setting up conversation listeners:', error);
@@ -1242,18 +1470,25 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     function handleIncomingMessage(messageData) {
       // Only add message if we're viewing the same conversation
       if (currentConversationId && messageData.conversation_id == currentConversationId) {
-        // Fetch the complete message data
-        loadMessageById(messageData.id).then(message => {
-          if (message) {
-            addMessageToConversation(message);
-            // Play notification sound or show notification
-            showMessageNotification(message);
-          }
-        });
+        // If full message body exists, use it directly; otherwise fetch by ID
+        if (messageData && messageData.body) {
+          addMessageToConversation(messageData);
+          showMessageNotification(messageData);
+        } else {
+          loadMessageById(messageData.id).then(message => {
+            if (message) {
+              addMessageToConversation(message);
+              showMessageNotification(message);
+            }
+          });
+        }
       }
       
       // Update conversation list to show new message
-      loadConversations();
+      if (!currentConversationId || messageData.conversation_id != currentConversationId) {
+        incrementUnread(messageData.conversation_id);
+      }
+      fetchMessages();
     }
 
     // Handle message deletions
@@ -1262,6 +1497,12 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (messageElement) {
         messageElement.remove();
       }
+    }
+
+    function extractMessage(e) {
+      if (!e) return e;
+      if (e.message) return e.message;
+      return e;
     }
 
     // Load a specific message by ID
@@ -1277,17 +1518,47 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
     // Show typing indicator
     function showTypingIndicator(user) {
+      if (!user || !user.id || !currentConversationId) return;
+
       const chatMessages = document.getElementById('chat-messages');
-      
-      // Remove existing typing indicator
-      const existingIndicator = document.querySelector('.typing-indicator');
+      if (!chatMessages) return;
+
+      // Remove existing typing indicator for this user
+      const existingIndicator = document.querySelector(`.typing-indicator[data-user-id="${user.id}"]`);
       if (existingIndicator) {
         existingIndicator.remove();
       }
-      
+
+      // Check if there are any existing typing indicators
+      const typingIndicators = document.querySelectorAll('.typing-indicator');
+      let indicatorText = '';
+
+      if (typingIndicators.length === 0) {
+        // First typing indicator
+        indicatorText = user.name + ' is typing...';
+      } else {
+        // Multiple users typing - show combined indicator
+        const typingUsers = [];
+        typingIndicators.forEach(indicator => {
+          const userId = indicator.getAttribute('data-user-id');
+          if (userId && userId !== user.id.toString()) {
+            typingUsers.push(indicator.getAttribute('data-user-name'));
+          }
+        });
+        typingUsers.push(user.name);
+
+        if (typingUsers.length === 1) {
+          indicatorText = typingUsers[0] + ' is typing...';
+        } else if (typingUsers.length === 2) {
+          indicatorText = typingUsers.join(' and ') + ' are typing...';
+        } else {
+          indicatorText = typingUsers[0] + ' and ' + (typingUsers.length - 1) + ' others are typing...';
+        }
+      }
+
       // Add new typing indicator
       const typingHtml = `
-        <li class="chat-message typing-indicator">
+        <li class="chat-message typing-indicator" data-user-id="${user.id}" data-user-name="${user.name}">
           <div class="d-flex overflow-hidden">
             <div class="user-avatar flex-shrink-0 me-4">
               <div class="avatar avatar-sm">
@@ -1301,21 +1572,41 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
                   <span></span>
                   <span></span>
                 </div>
-                <small class="text-muted">${user.name} is typing...</small>
+                <small class="text-muted">${indicatorText}</small>
               </div>
             </div>
           </div>
         </li>
       `;
-      
+
       chatMessages.insertAdjacentHTML('beforeend', typingHtml);
       scrollToBottom();
-      
-      // Remove typing indicator after 3 seconds
+
+      // Remove typing indicator after 3 seconds (in case no "stop typing" event is received)
       setTimeout(() => {
-        const indicator = document.querySelector('.typing-indicator');
-        if (indicator) indicator.remove();
+        const indicator = document.querySelector(`.typing-indicator[data-user-id="${user.id}"]`);
+        if (indicator) {
+          indicator.remove();
+
+          // Update other typing indicators if there are multiple users
+          updateTypingIndicators();
+        }
       }, 3000);
+    }
+
+    // Hide typing indicator
+    function hideTypingIndicator(user) {
+      if (!user || !user.id || !currentConversationId) return;
+
+      const chatMessages = document.getElementById('chat-messages');
+      if (!chatMessages) return;
+
+      // Remove existing typing indicator for this user
+      const existingIndicator = document.querySelector(`.typing-indicator[data-user-id="${user.id}"]`);
+      if (existingIndicator) {
+        existingIndicator.remove();
+        updateTypingIndicators();
+      }
     }
 
     // Show notification for new messages
@@ -1346,19 +1637,25 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       }
     }
 
-    // Send typing indicator (disabled due to Pusher client events restriction)
-    function sendTypingIndicator() {
-      // Note: Client events disabled in Pusher dashboard
-      // if (echo && currentConversationId && window.currentConversationChannel) {
-      //   echo.private(window.currentConversationChannel)
-      //     .whisper('typing', {
-      //       user: {
-      //         id: currentUser?.id,
-      //         name: 'You'
-      //       }
-      //     });
-      // }
-      console.log('Typing indicator disabled due to Pusher client events restriction');
+    // Send typing indicator
+    function sendTypingIndicator(isTyping) {
+      if (echo && currentConversationId && window.currentConversationChannel) {
+        // Dispatch typing indicator event to backend for broadcasting
+        fetch('/dashboard/chat/typing', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            conversation_id: currentConversationId,
+            is_typing: isTyping
+          })
+        }).catch(error => {
+          console.log('Typing indicator error (non-critical):', error);
+        });
+      }
     }
 
     // Auto-refresh messages periodically
@@ -1391,36 +1688,25 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         if (window.searchChatContacts) {
           window.searchChatContacts = function() {}; // Override conflicting function
         }
-        
-        // Add CSRF token to page if not already present
-        if (!document.querySelector('meta[name="csrf-token"]')) {
-          const meta = document.createElement('meta');
-          meta.name = 'csrf-token';
-          meta.content = '{{ csrf_token() }}';
-          document.head.appendChild(meta);
-        }
 
-        // Initialize real-time broadcasting with retry
-        const broadcastingEnabled = initializeBroadcastingWithRetry();
-        
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-          Notification.requestPermission();
-        }
+        // Fetch current user
 
         // Fetch current user info
         await fetchCurrentUser();
+        loadPersistedState();
 
         // Load initial data
         await Promise.all([
           fetchMessages(),
-          fetchGroups()
+          fetchGroups(),
+          fetchUsers()
         ]);
 
         // Set up event listeners
         setupEventListeners();
 
         // Start auto-refresh (reduce frequency if broadcasting is enabled)
+        broadcastingEnabled = initializeBroadcasting();
         if (broadcastingEnabled) {
           console.log('Real-time broadcasting enabled - reduced polling frequency');
           // Use longer intervals since we have real-time updates
@@ -1431,6 +1717,13 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         }
 
         console.log('Chat system initialized successfully');
+
+        // Auto-open last conversation and rejoin channel after refresh
+        const lastConvIdStr = localStorage.getItem(LS_KEYS.lastConversationId);
+        const lastConvId = lastConvIdStr ? parseInt(lastConvIdStr) : null;
+        if (lastConvId) {
+          loadConversation(lastConvId);
+        }
       } catch (error) {
         console.error('Failed to initialize chat system:', error);
         showError('Failed to initialize chat system');
@@ -1460,18 +1753,37 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       const messageInput = document.querySelector('.message-input');
       if (messageInput) {
         let typingTimer = null;
-        
+        let isTyping = false;
+
         messageInput.addEventListener('input', () => {
-          // Send typing indicator
-          sendTypingIndicator();
-          
-          // Clear previous timer
-          clearTimeout(typingTimer);
-          
-          // Set timer to stop typing indicator after 1 second of no input
-          typingTimer = setTimeout(() => {
-            // Stop typing indicator could be implemented here
-          }, 1000);
+          const messageText = messageInput.value.trim();
+
+          if (messageText.length > 0 && !isTyping) {
+            // User started typing
+            isTyping = true;
+            sendTypingIndicator(true);
+
+            // Clear previous timer
+            clearTimeout(typingTimer);
+
+            // Set timer to stop typing indicator after 2 seconds of no input
+            typingTimer = setTimeout(() => {
+              isTyping = false;
+              sendTypingIndicator(false); // Send stop typing event
+            }, 2000);
+          } else if (messageText.length === 0 && isTyping) {
+            // User cleared input while typing
+            isTyping = false;
+            clearTimeout(typingTimer);
+            sendTypingIndicator(false); // Send stop typing event
+          } else if (messageText.length > 0 && isTyping) {
+            // User is still typing, reset timer
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+              isTyping = false;
+              sendTypingIndicator(false); // Send stop typing event
+            }, 2000);
+          }
         });
       }
 
@@ -1584,5 +1896,224 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     window.hideSearchResults = hideSearchResults;
     window.deleteGroup = deleteGroup;
     window.searchUsers = searchUsers;
+
+    // Laravel Echo Real-time messaging setup
+    function setupRealTimeMessaging() {
+      if (typeof window.Echo === 'undefined') {
+        console.warn('Laravel Echo not available. Real-time messaging disabled.');
+        return;
+      }
+
+      // Listen for WebMessage events (global notifications)
+      window.Echo.channel('Web-Message')
+        .listen('.WebMessage', (data) => {
+          console.log('Received WebMessage:', data);
+          // Handle global web messages if needed
+        })
+        .error((error) => {
+          console.error('Web-Message channel error:', error);
+        });
+
+      console.log('Real-time messaging setup completed');
+    }
+
+    // Setup conversation-specific listeners
+    function setupConversationListeners(conversationId) {
+      if (typeof window.Echo === 'undefined' || !conversationId) {
+        return;
+      }
+
+      // Remove existing listeners for this conversation
+      if (window.currentConversationChannel) {
+        window.currentConversationChannel.stopListening('MessageCreated');
+        window.Echo.leave(window.currentConversationChannel.name);
+      }
+
+      // Create private channel for this conversation
+      const channelName = `conversation.${conversationId}`;
+      window.currentConversationChannel = window.Echo.private(channelName);
+
+      window.currentConversationChannel
+        .listen('.MessageCreated', (data) => {
+          console.log('New message received:', data);
+          handleNewMessage(data.message);
+        })
+        .error((error) => {
+          console.error(`Conversation ${conversationId} channel error:`, error);
+        });
+    }
+
+    // Handle incoming real-time messages
+    function handleNewMessage(messageData) {
+      if (currentConversationId && messageData.conversation_id == currentConversationId) {
+        // Only add if it's not already in the UI (avoid duplicates)
+        const existingMessage = document.querySelector(`[data-message-id="${messageData.id}"]`);
+        if (!existingMessage) {
+          addMessageToUI(messageData);
+          scrollToBottom();
+        }
+
+        // Clear typing indicator for the user who sent the message
+        if (messageData.sendable) {
+          hideTypingIndicator(messageData.sendable);
+        }
+      } else {
+        // Message for different conversation - increment unread count
+        incrementUnread(messageData.conversation_id);
+        refreshUserListUnreadBadges();
+      }
+    }
+
+    // Add message to UI
+    function addMessageToUI(messageData) {
+      const messagesContainer = document.getElementById('chat-messages');
+      if (!messagesContainer) return;
+
+      const isCurrentUser = messageData.sendable_id === currentUser?.id;
+      const messageClass = isCurrentUser ? 'chat-message-right' : '';
+      const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
+      const senderName = isCurrentUser ? 'You' : getDisplayName(messageData.sendable || {});
+      const timeFormatted = formatMessageTime(messageData.created_at);
+
+      const messageHtml = `
+        <li class="chat-message ${messageClass}" data-message-id="${messageData.id}">
+          <div class="d-flex overflow-hidden">
+            ${!isCurrentUser ? `
+              <div class="user-avatar flex-shrink-0 me-4">
+                <div class="avatar avatar-sm">
+                  <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="chat-message-wrapper flex-grow-1">
+              <div class="chat-message-text">
+                <p class="mb-0">${escapeHtml(messageData.body)}</p>
+              </div>
+              <div class="${isCurrentUser ? 'text-end' : ''} text-muted mt-1">
+                <small>${timeFormatted}</small>
+              </div>
+            </div>
+          </div>
+        </li>
+      `;
+
+      // Insert at the end of the messages list (newest at bottom)
+      messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+    }
+
+    // Laravel Echo Real-time messaging setup
+    function setupRealTimeMessaging() {
+      if (typeof window.Echo === 'undefined') {
+        console.warn('Laravel Echo not available. Real-time messaging disabled.');
+        return;
+      }
+
+      // Listen for WebMessage events (global notifications)
+      window.Echo.channel('Web-Message')
+        .listen('.WebMessage', (data) => {
+          console.log('Received WebMessage:', data);
+          // Handle global web messages if needed
+        })
+        .error((error) => {
+          console.error('Web-Message channel error:', error);
+        });
+
+      console.log('Real-time messaging setup completed');
+    }
+
+    // Setup conversation-specific listeners
+    function setupConversationListeners(conversationId) {
+      if (typeof window.Echo === 'undefined' || !conversationId) {
+        return;
+      }
+
+      // Remove existing listeners for this conversation
+      if (window.currentConversationChannel) {
+        window.currentConversationChannel.stopListening('MessageCreated');
+        window.Echo.leave(window.currentConversationChannel.name);
+      }
+
+      // Create private channel for this conversation
+      const channelName = `conversation.${conversationId}`;
+      window.currentConversationChannel = window.Echo.private(channelName);
+
+      window.currentConversationChannel
+        .listen('.MessageCreated', (data) => {
+          console.log('New message received:', data);
+          handleNewMessage(data.message);
+        })
+        .error((error) => {
+          console.error(`Conversation ${conversationId} channel error:`, error);
+        });
+    }
+
+    // Handle incoming real-time messages
+    function handleNewMessage(messageData) {
+      if (currentConversationId && messageData.conversation_id == currentConversationId) {
+        // Only add if it's not already in the UI (avoid duplicates)
+        const existingMessage = document.querySelector(`[data-message-id="${messageData.id}"]`);
+        if (!existingMessage) {
+          addMessageToUI(messageData);
+          scrollToBottom();
+        }
+
+        // Clear typing indicator for the user who sent the message
+        if (messageData.sendable) {
+          hideTypingIndicator(messageData.sendable);
+        }
+      } else {
+        // Message for different conversation - increment unread count
+        incrementUnread(messageData.conversation_id);
+        refreshUserListUnreadBadges();
+      }
+    }
+
+    // Add message to UI
+    function addMessageToUI(messageData) {
+      const messagesContainer = document.getElementById('chat-messages');
+      if (!messagesContainer) return;
+
+      const isCurrentUser = messageData.sendable_id === currentUser?.id;
+      const messageClass = isCurrentUser ? 'chat-message-right' : '';
+      const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
+      const senderName = isCurrentUser ? 'You' : getDisplayName(messageData.sendable || {});
+      const timeFormatted = formatMessageTime(messageData.created_at);
+
+      const messageHtml = `
+        <li class="chat-message ${messageClass}" data-message-id="${messageData.id}">
+          <div class="d-flex overflow-hidden">
+            ${!isCurrentUser ? `
+              <div class="user-avatar flex-shrink-0 me-4">
+                <div class="avatar avatar-sm">
+                  <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="chat-message-wrapper flex-grow-1">
+              <div class="chat-message-text">
+                <p class="mb-0">${escapeHtml(messageData.body)}</p>
+              </div>
+              <div class="${isCurrentUser ? 'text-end' : ''} text-muted mt-1">
+                <small>${timeFormatted}</small>
+              </div>
+            </div>
+          </div>
+        </li>
+      `;
+
+      // Insert at the end of the messages list (newest at bottom)
+      messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+    }
+
+    // Initialize real-time messaging when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait a bit for currentUser to be loaded
+      setTimeout(() => {
+        setupRealTimeMessaging();
+      }, 1000);
+    });
+
   </script>
 @stop

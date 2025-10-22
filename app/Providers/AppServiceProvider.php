@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
 use Illuminate\Support\Facades\Broadcast;
+use App\Observers\WireChatMessageObserver;
+use Namu\WireChat\Models\Message;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -128,6 +130,9 @@ class AppServiceProvider extends ServiceProvider
             // Log::error('Could not load mail settings from database: ' . $e->getMessage());
         }
     }
+
+        // Register the WireChat Message observer
+        Message::observe(WireChatMessageObserver::class);
     
     
     }
