@@ -1715,14 +1715,20 @@ class TrainingController extends Controller
 		$session = TrainingSession::findOrFail($id);
 		
 		$user = Auth::user();
-		SessionAttendance::updateOrCreate(
+		
+		AttendanceTrainingOffline::updateOrCreate(
 			[
-				'session_id' => $session->id,
+				'training_session_id' => $session->id,
 				'user_id' => $user->id,
+				'company_id' => $user->company_id,
 			],
 			[
-				'attended' => true,
-				'joined_at' => now(),
+				
+				'step_id' => $session->step_id,
+				'cycle_id' => $session->step->cycle_id,
+				'attendance' => true,
+				'location' => 'online',
+				'created_at' => now(),
 			]
 		);
 
