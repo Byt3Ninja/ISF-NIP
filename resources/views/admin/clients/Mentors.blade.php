@@ -391,10 +391,6 @@
 @include('admin.clients.startup.partials._session_modal')
 @stop
 
-@section('scripts')
-<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-@stop
-
 @section('pagescripts')
 <!-- Page JS -->
 <script src="/vuexy/assets/js/mentorship-session.js"></script>
