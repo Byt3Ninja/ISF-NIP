@@ -15,6 +15,7 @@ class AttendanceTrainingOffline extends Model
         'training_session_id',
         'step_id',
         'cycle_id',
+        'company_id',
         'attendance',
         'location',
     ];
