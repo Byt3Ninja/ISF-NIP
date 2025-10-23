@@ -161,7 +161,7 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
                   <!-- Location -->
                   <div class="mb-3 mb-md-0">
-                    <h6 class="mb-1">Location</h6>
+                    <h6 class="mb-1">{{ $l == 'en' ? 'Location' : 'الموقع' }}</h6>
                     <div class="location-info">
                       @if($company->google_map)
                         <a href="{{ $company->google_map }}" target="_blank" 
