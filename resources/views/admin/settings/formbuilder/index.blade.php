@@ -33,8 +33,11 @@
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card mb-4">
-      <div class="card-header d-flex align-items-center justify-content-between">
-        <h4 class="card-title mb-0">{{ __('builder.Form_Builder') }}</h4>
+      <div class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <div class="mb-4 mb-md-0">
+            <h4 class="card-title mb-0">{{ __('builder.Form_Builder') }}</h4>
+            <div class="text-muted">{{ __('builder.Build_custom_forms') }}</div>
+        </div>
         <div class="d-flex align-items-center gap-3">
           @if (request()->has('org_id') || request()->has('form_id'))
           <button class="btn btn-outline-secondary" onclick="location.href='/dashboard/show-builder'">
@@ -60,19 +63,28 @@
       <div class="card-body">
         @if(request()->segment(3))
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0">{{ $title->form_name }}</h5>
-          <div class="d-flex align-items-center gap-2 ms-2">
-            <button class="btn btn-label-primary btn-sm"
-                onclick="showForm(0,{{ $title->id }},'{{ $title->form_name }}',{{ $title->organization_id }})">
-                <i class="ti ti-pencil ti-16px"></i> <span class="d-none d-md-inline ms-2">{{ __('builder.Edit') }}</span>
-            </button>
-            <button class="btn btn-label-info btn-sm"
-                onclick="showForm(1,{{ $title->id }},'{{ $title->form_name }} {{ __('builder.Copy.') }}')">
-                <i class="ti ti-copy ti-16px"></i> <span class="d-none d-md-inline ms-2">{{ __('builder.Copy') }}</span>
-            </button>
-            <button class="btn btn-label-danger btn-sm" onclick="DoChange(3,{{ $title->id }},null)">
-                <i class="ti ti-trash ti-16px"></i> <span class="d-none d-md-inline ms-2">{{ __('builder.Delete') }}</span>
-            </button>
+          <h5 class="card-title mb-4 mb-md-0">{{ $title->form_name }}</h5>
+          <div class="d-flex align-items-center gap-2 ms-md-2">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="ti ti-dots-vertical"></i>
+            <span class="d-none d-md-inline ms-2">{{ __('builder.Actions') }}</span>
+              </button>
+              <ul class="dropdown-menu">
+            <li><button class="dropdown-item d-flex align-items-center gap-2" onclick="showForm(0,{{ $title->id }},'{{ $title->form_name }}',{{ $title->organization_id }})">
+              <i class="ti ti-pencil"></i> {{ __('builder.Edit') }}
+            </button></li>
+            <li><button class="dropdown-item d-flex align-items-center gap-2" onclick="showForm(1,{{ $title->id }},'{{ $title->form_name }} {{ __('builder.Copy.') }}')">
+              <i class="ti ti-copy"></i> {{ __('builder.Copy') }}
+            </button></li>
+            <li><button class="dropdown-item d-flex align-items-center gap-2 text-danger" onclick="DoChange(3,{{ $title->id }},null)">
+              <i class="ti ti-trash"></i> {{ __('builder.Delete') }}
+            </button></li>
+            <li><a class="dropdown-item d-flex align-items-center gap-2" href="/dashboard/show-form/{{ $title->id }}">
+              <i class="ti ti-eye"></i> {{ __('builder.Show_Saved_Form') }}
+            </a></li>
+              </ul>
+            </div>
           </div>
         </div>
         @endif
@@ -246,7 +258,7 @@
       $('#AddForm').modal('show')
     }
 
-    function DoChange(set, id, title, organization_id = 0) {
+    async function DoChange(set, id, title, organization_id = 0) {
       if (set === 0) {
         title = $('#mtitle').val();
         organization_id = $('#organization_id').val();
@@ -260,7 +272,22 @@
         title = $('#mtitle').val();
         organization_id = $('#organization_id').val();
       } else if (set === 3) {
-        title = confirm("{{ __('builder.deleting form') }}?")
+        const result = await Swal.fire({
+            title: "{{ __('Are you sure?') }}",
+            text: "{{ __('builder.deleting form') }}?",
+            icon: 'warning',
+            showCancelButton: true,
+            customClass: {
+                confirmButton: 'btn btn-danger',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            confirmButtonText: "{{ __('admin.DYes') }}",
+            cancelButtonText: "{{ __('No') }}"
+        });
+        if (!result.isConfirmed) {
+          return;
+        }
+        title = true; // Set to true to proceed, as confirmation is handled above
       }
       if (!title) {
         return false;
@@ -280,11 +307,11 @@
         },
         success: function(response) {
           // console.log(response);
-          location.href = '/dashboard/show-builder/' + response;
+          location.href = '/dashboard/show-builder';
         },
         error: function(error) {
           // console.log(error);
-          alert(translations.error_occurred);
+          releaseFailureAlert({ message: '{{ __("builder.Error_Occurred") }}' });
         }
       });
     }

@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\{Validator, DB, Mail};
 use App\BuilderForm;
 use App\BuilderField;
 use App\Field;
-use Exception;
 
 class FormBuilderController extends Controller
 {
@@ -16,38 +15,35 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
-    public function showBuilder(Request $request, $id=null)
+    public function showBuilder(Request $request, $id=1)
     {
         $organization_id=auth()->user()->organization_id;
 
         if (is_null($organization_id) && Organization::count() == 0){
             return redirect(route('organizations.index'))->with('message2','add organizations first');
         }
-
-        if ($id) {
-            $title = BuilderForm::where('id',$id)->when(!is_null($organization_id),function ($q) use($organization_id){
+        $title = BuilderForm::where('id',$id)->when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->first();
+        if (!$title){
+            $title = BuilderForm::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
             })->first();
             if (!$title){
-                // If specific id not found, redirect to new form or handle error
-                return redirect(route('formbuilder.showBuilder'))->with('error', 'Form not found');
-            }
-        } else {
-            // New mode: create a new empty form
-            if (!is_null($organization_id)){
-                $title = BuilderForm::firstOrCreate([
-                    'form_name'=> 'Untitled Form',
-                    'organization_id' => $organization_id
-                ]);
-            }else{
-                $title = BuilderForm::firstOrCreate([
-                    'form_name'=> 'Untitled Form',
-                    'organization_id'=> Organization::first()->id
-                ]);
+                if (!is_null($organization_id)){
+                    $title = BuilderForm::firstOrCreate([
+                        'form_name'=>'New Empty Form',
+                        'organization_id'=>$organization_id
+                    ]);
+                }else{
+                    $title = BuilderForm::firstOrCreate([
+                        'form_name'=>'New Empty Form',
+                        'organization_id'=>Organization::first()->id
+                    ]);
+                }
             }
             $id = $title->id;
         }
-
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->field_type => $field->id];
         });
@@ -280,12 +276,12 @@ class FormBuilderController extends Controller
 
         // attempt data save
         $save_success = 1;
-        $formId = $id;
-        DB::transaction(function () use ($config,$formId) {
+        $this->id = $id;
+        DB::transaction(function () use ($config,$id) {
             try {
-                BuilderForm::findOrFail($formId)->fields()->detach();
-                $config->each(function($item) use ($formId){
-                    BuilderForm::findOrFail($formId)->fields()->attach($item['field'],
+                BuilderForm::findOrFail($id)->fields()->detach();
+                $config->each(function($item){
+                    BuilderForm::findOrFail($this->id)->fields()->attach($item['field'],
                         [
                             'options' => json_encode($item['options'])
                         ]);
