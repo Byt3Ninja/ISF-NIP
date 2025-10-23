@@ -1928,6 +1928,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const l = '{{ $l }}'; // "en" or "ar"
 
     if (!fileInput || fileInput.files.length === 0) {
+      fileInput.classList.add('is-invalid');
       $('.file-err').show();
       return;
     }
@@ -1943,6 +1944,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     ];
 
     if (!allowedTypes.includes(file.type)) {
+      fileInput.classList.add('is-invalid');
       $('.file-type-err').show();
       return;
     }
@@ -1950,6 +1952,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     // Max size: 10 MB
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
+      fileInput.classList.add('is-invalid');
       $('.file-size-err').show();
       return;
     }
