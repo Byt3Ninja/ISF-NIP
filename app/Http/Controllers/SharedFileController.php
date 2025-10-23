@@ -28,61 +28,53 @@ class SharedFileController extends Controller
      * Store a newly created resource in storage.
      */
   public function store(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    // Permission Check
-    if (!$user->ableTo('hackathon.addSharedFile')) {
+        // Validation
+        try {
+            $request->validate([
+                'file'        => 'required|file|mimes:pptx,zip,docx,pdf|max:10240',
+                'description' => 'nullable|string'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        // Ensure user belongs to a team
+        $team_member = DB::select("SELECT id, team_formation_id FROM team_members WHERE user_id = ?", [$user->id]);
+        if (empty($team_member)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'No team found for user'
+            ], 400);
+        }
+
+        // File Upload
+        $file = $request->file('file');
+        $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('hackathon/sharedfiles/'), $fileName);
+
+        // Save record
+        $sharedFile = new SharedFile();
+        $sharedFile->team_formation_id = $team_member[0]->team_formation_id;
+        $sharedFile->team_member_id    = $team_member[0]->id;
+        $sharedFile->file              = 'hackathon/sharedfiles/' . $fileName;
+        $sharedFile->description       = $request->description;
+        $sharedFile->user_id           = $user->id;
+        $sharedFile->cycle_id          = $user->team_member->teamFormation->user->company->cycle;
+        $sharedFile->step_id           = $user->team_member->teamFormation->user->company->step;
+        $sharedFile->save();
+
+        // Success Response
         return response()->json([
-            'status'  => 'error',
-            'message' => 'Unauthorized: Permission denied'
-        ], 403);
-    }
-
-    // Validation
-    try {
-        $request->validate([
-            'file'        => 'required|file|mimes:pptx,zip,docx,pdf|max:10240',
-            'description' => 'nullable|string'
+            'status'  => 'success',
+            'message' => 'File uploaded successfully'
         ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'status' => 'error',
-            'errors' => $e->errors(),
-        ], 422);
     }
-
-    // Ensure user belongs to a team
-    $team_member = DB::select("SELECT id, team_formation_id FROM team_members WHERE user_id = ?", [$user->id]);
-    if (empty($team_member)) {
-        return response()->json([
-            'status'  => 'error',
-            'message' => 'No team found for user'
-        ], 400);
-    }
-
-    // File Upload
-    $file = $request->file('file');
-    $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '_' . time() . '.' . $file->getClientOriginalExtension();
-    $file->move(public_path('hackathon/sharedfiles/'), $fileName);
-
-    // Save record
-    $sharedFile = new SharedFile();
-    $sharedFile->team_formation_id = $team_member[0]->team_formation_id;
-    $sharedFile->team_member_id    = $team_member[0]->id;
-    $sharedFile->file              = 'hackathon/sharedfiles/' . $fileName;
-    $sharedFile->description       = $request->description;
-    $sharedFile->user_id           = $user->id;
-    $sharedFile->cycle_id          = $user->team_member->teamFormation->user->company->cycle;
-    $sharedFile->step_id           = $user->team_member->teamFormation->user->company->step;
-    $sharedFile->save();
-
-    // Success Response
-    return response()->json([
-        'status'  => 'success',
-        'message' => 'File uploaded successfully'
-    ]);
-}
 
 
 
