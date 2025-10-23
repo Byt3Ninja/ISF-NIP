@@ -9,7 +9,13 @@
 
 <!-- Messages Sidebar -->
 <div class="col app-email-sidebar border-end flex-grow-0" id="app-email-sidebar">
-  <div class="btn-compost-wrapper d-grid">
+  <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+    <h6 class="mb-0">{{ __('admin.Messages') }}</h6>
+    <button class="btn btn-icon btn-text-secondary rounded-pill d-lg-none" id="sidebar-close">
+      <i class="ti ti-x ti-lg"></i>
+    </button>
+  </div>
+  <div class="btn-compost-wrapper d-grid p-3">
     <button 
       class="btn btn-primary btn-compose" 
       data-bs-toggle="modal" 
