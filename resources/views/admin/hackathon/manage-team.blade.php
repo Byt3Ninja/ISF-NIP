@@ -1930,9 +1930,11 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     if (!fileInput || fileInput.files.length === 0) {
       fileInput.classList.add('is-invalid');
       $('.file-err').show();
-      return;
+      $('.file-type-err').hide(); // Hide other errors if no file is selected
+      $('.file-size-err').hide();
+      return; // Exit the function immediately
     }
-  
+    
     const file = fileInput.files[0];
 
     // Allowed file types
@@ -1946,7 +1948,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     if (!allowedTypes.includes(file.type)) {
       fileInput.classList.add('is-invalid');
       $('.file-type-err').show();
-      return;
+      $('.file-err').hide(); // Hide other errors
+      $('.file-size-err').hide();
+      return; // Exit the function immediately
     }
 
     // Max size: 10 MB
@@ -1954,10 +1958,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     if (file.size > maxSize) {
       fileInput.classList.add('is-invalid');
       $('.file-size-err').show();
-      return;
+      $('.file-err').hide(); // Hide other errors
+      $('.file-type-err').hide();
+      return; // Exit the function immediately
     }
 
-    // Reset error messages
+    // Reset error messages if all checks pass
+    fileInput.classList.remove('is-invalid');
     $('.file-err').hide();
     $('.file-type-err').hide();
     $('.file-size-err').hide();
