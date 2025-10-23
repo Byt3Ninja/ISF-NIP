@@ -188,7 +188,7 @@
       </div>
       <div class="modal-body">
         <form method="GET" action="/dashboard/show-builder">
-          <div class="form-group mb-4">
+          <div id="organizationFilterContainer" class="form-group mb-4">
             <label for="organizationFilter" class="form-label">{{ __('builder.Select_Organization') }}</label>
             <select class="form-select select2" id="organizationFilter" name="org_id">
               <option value="0">{{ __('admin.All_Organizations') }}</option>
@@ -218,8 +218,16 @@
 {{-- /Filter Modal --}}
 @stop
 
-@section('scripts')
+@section('pagescripts')
 <script>
+    $(document).ready(function(){
+        const isOrganizationManager = @json(auth()->user()->hasRole('organizationManager'));
+
+        if (isOrganizationManager) {
+            $('#organizationFilterContainer').hide();
+        }
+    });
+
   function showForm(set, id, title, organization_id) {
       $('#mtitle').val(title);
       if (typeof(organization_id) != "undefined") {
@@ -286,6 +294,9 @@
     var allForms = @json($allBuilderForms);
 
     function updateFormSelect() {
+        const lang = '{{ $l }}';
+        const isOrganizationManager = @json(auth()->user()->hasRole('organizationManager'));
+
         var selectedOrg = $('#organizationFilter').val();
         var filteredForms = selectedOrg == 0 ? allForms : allForms.filter(function(form) {
             return form.organization_id == selectedOrg;
@@ -293,9 +304,10 @@
         var $formSelect = $('#formFilter');
         $formSelect.find('option:not(:first)').remove();
         filteredForms.forEach(function(form) {
+            // console.log('form', form);
             var optionText = form.form_name;
             if (form.organization) {
-                optionText += ' - ' + form.organization.name;
+                optionText += isOrganizationManager ? '' : ' - ' + form.organization['name_' + lang];
             }
             if (form.cycles && form.cycles.length > 0) {
                 optionText += ' ' + form.cycles.map(function(c) { return c.title; }).join(' - ');
@@ -323,9 +335,6 @@
         location.href = url;
     });
 </script>
-@stop
-
-@section('pagescripts')
 <script>
   let itemCounter = 0;
         let questionCounters = {};
@@ -385,7 +394,6 @@
                 }
             });
         }
-
 
 
         function getSectionsList() {
@@ -942,12 +950,12 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert('{{ __("builder.Form_saved_successfully") }}');
+                releaseSuccessAlert({ message: '{{ __("builder.Form_saved_successfully") }}' });
                 console.log('Saved form data:', formData);
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('{{ __("builder.Error_saving_form") }}');
+                releaseFailureAlert({ message: '{{ __("builder.Error_saving_form") }}' });
             });
         }
 
