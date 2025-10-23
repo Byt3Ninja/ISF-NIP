@@ -47,6 +47,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Jobs\SendTrainingNotificationJob;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
+use App\TrainingDuration;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class TrainingController extends Controller
@@ -515,6 +516,28 @@ class TrainingController extends Controller
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@my: ' . $e->getMessage());
 		}
+	}
+
+	public function timeTracking(Request $request)
+	{
+		dd($request->all());
+		$user= Auth::user();
+		 $request->validate([
+            'duration_minutes' => 'required|integer|min:1',
+			'trainingId' => 'required|integer',
+        ]);
+
+        TrainingDuration::create([
+            'user_id' => $user->id,
+			'company_id' => $user->company_id,
+			'cycle_id' => $user->company->cycle,
+			'step_id' => $user->company->step,
+			'training_sessions_id' => $request->trainingId,
+            'page_url' => $request->page_url,
+            'duration_minutes' => $request->duration_minutes,
+        ]);
+
+        return response()->json(['status' => 'success']);
 	}
 
 	public function results($id = 0)

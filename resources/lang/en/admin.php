@@ -2478,4 +2478,5 @@ return [
 	'Is_Required' => 'Is Required',
 	'Is_Required_Survey_Description' => 'If checked, the survey will be mandatory for users to complete.',
 	'Create_form' => 'Create Form',
+	'Traditional_Evaluation_pending' => 'Traditional Evaluation Pending',
 ];
