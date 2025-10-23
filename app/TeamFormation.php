@@ -218,6 +218,7 @@ class TeamFormation extends Model
                 'judges' => $team->judges,
                 'rank' => $team->project->winner ?? '',
                 'leader' => $team->members->where('isLeader', 1)->first(),
+                'likes' => 1,
             ];
         });
 

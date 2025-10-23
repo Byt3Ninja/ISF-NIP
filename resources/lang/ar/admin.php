@@ -2527,4 +2527,5 @@ return [
 	'Is_Required' => 'مطلوب',
 	'Is_Required_Survey_Description' => 'إذا تم تفعيل هذا الخيار، سيكون الاستبيان إلزاميًا للمستخدمين لإكماله.',
 	'Create_form' => 'انشاء نموذج',
+	'Traditional_Evaluation_pending' => 'قيد التنفيذ',
 ];

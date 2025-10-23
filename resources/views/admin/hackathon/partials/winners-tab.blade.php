@@ -27,7 +27,7 @@
                   </div>
                   <div class="col-md-3 col-lg-3 col-sm-12 text-end">
                     <i data-project="{{ $winner?->id ?? 0 }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
-                    <span class="likes-count"> {{ $winner->likes->count() ?? 0 }} </span>
+                    <span class="likes-count"> @if($winner->likes == null) 0 @else {{ $winner->likes->count()  }} @endif  </span>
                   </div>
                 </div>
                 
@@ -37,7 +37,7 @@
                 <!-- Team Members -->
                 <div class="mb-0">
                   <h6 class="text-dark mb-3 fw-semibold d-flex align-items-center">
-                    <span class="me-2">Team Members</span>
+                    <span class="me-2">{{ $l == 'en' ? 'Team Members' : 'اعضاء الفريق' }}</span>
                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1 small">{{ count($winner->teamMembers) }}</span>
                   </h6>
                   

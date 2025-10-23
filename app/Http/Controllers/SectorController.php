@@ -29,6 +29,7 @@ class SectorController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
        $request->validate([
 				'name' => 'required',
 				'industryId' => 'required|exists:static_categories,id',
