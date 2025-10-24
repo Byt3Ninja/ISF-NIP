@@ -33,7 +33,7 @@
 								<div class="dropdown">
 									<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 										<i class="ti ti-file-export me-2"></i>
-										<span class="d-none d-md-inline">{{ __('admin.Export') }}</span>
+										<span>{{ __('admin.Export') }}</span>
 									</button>
 									<ul class="dropdown-menu" aria-labelledby="exportDropdown">
 										<li><a class="dropdown-item" href="javascript:void(0)" id="export-csv">
@@ -46,7 +46,7 @@
 								</div>
 								<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateTimeSheet">
 									<i class="ti ti-plus"></i>
-									<span class="d-none d-md-inline ms-2">{{ __('admin.Add_New') }}</span>
+									<span class="ms-2">{{ __('admin.Add_New') }}</span>
 								</button>
 							</div>
 						</div>
@@ -73,6 +73,8 @@
 										<tbody>
 											@php $c=1; @endphp
 											@foreach ($timeSheets as $timeSheet)
+											{{-- {{dd($timeSheet)}} --}}
+
 											<tr>
 												<td>{{$c++}}</td>
 												@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
@@ -112,118 +114,149 @@
 												@endif
 											</tr>
 											@if( $_user->ableToAny(['TimeSheet.edit', 'TimeSheet.update'], $permissions) )
-											<!-- Edit Timesheet Modal -->
-											<div class="modal fade" id="EditTimeSheet{{ $timeSheet->id }}" tabindex="-1" aria-hidden="true">
-												<div class="modal-dialog modal-lg modal-simple modal-edit-user">
-													<div class="modal-content">
-														<div class="modal-body">
-															<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-															<div class="text-center mb-6"> <h4 class="mb-2">{{__('admin.Edit')}}</h4> </div>
-															<form class="add-new-user pt-0" action="{{ route('TimeSheet.update', $timeSheet->id) }}" method="POST">
-																@csrf
-																@method('PUT')
-																<div class="ecommerce-customer-add-basic mb-4" >
-																	<div class="col-md-12">
-																		<div class="mb-6 width49">
-																			<div> <label for="TimeSheet_title" class="form-label" >{{__('admin.Title')}}</label> </div>
-																			<input class="form-control @error('TimeSheet_title') is-invalid @enderror"
-																				id="TimeSheet_title"
-																				type="text"
-																				name="title"
-																				autocomplete="off"
-																				value="{{ $timeSheet->title }}"
-																			/>
+												<!-- Edit Timesheet Modal -->
+												<div class="modal fade" id="EditTimeSheet{{ $timeSheet->id }}" tabindex="-1" aria-hidden="true">
+														<div class="modal-dialog modal-md">
+																<div class="modal-content">
+																		<div class="modal-header">
+																				<h5 class="modal-title mb-0">{{ $l == 'en' ? 'Edit Timesheet' : 'تعديل سجل زمني' }}</h5>
+																				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 																		</div>
-																		<div class="mb-6 width49">
-																			<div> <label for="TimeSheet_date" class="form-label" >{{__('admin.Date')}}</label> </div>
-																			<input class="datewithouttime form-control @error('TimeSheet_date') is-invalid @enderror"
-																				id="TimeSheet_date"
-																				type="text"
-																				name="TimeSheet_date"
-																				autocomplete="off"
-																				value="{{ $timeSheet->date }}"
-																			/>
+																		<div class="modal-body">
+																				<form class="pt-0" action="{{ route('TimeSheet.update', $timeSheet->id) }}" method="POST">
+																						@csrf
+																						@method('PUT')
+																						<div class="row">
+																								<div class="col-12">
+																										<div class="form-group mb-4">
+																												<label for="edit_title_{{ $timeSheet->id }}" class="form-label">{{__('admin.Title')}} <span class="text-danger">*</span></label>
+																												<input class="form-control @error('title') is-invalid @enderror" 
+																															id="edit_title_{{ $timeSheet->id }}" 
+																															type="text" 
+																															name="title" 
+																															autocomplete="off" 
+																															value="{{ old('title', $timeSheet->title) }}" 
+																															placeholder="{{__('admin.Title')}}" 
+																															required />
+																										</div>
+																								</div>
+																								
+																								<div class="col-12">
+																										<div class="form-group mb-4">
+																												<label for="edit_description_{{ $timeSheet->id }}" class="form-label">{{__('admin.Description')}} <span class="text-danger">*</span></label>
+																												<textarea id="edit_description_{{ $timeSheet->id }}" 
+																																	class="form-control @error('description') is-invalid @enderror" 
+																																	name="description" 
+																																	autocomplete="off" 
+																																	placeholder="{{__('admin.Description')}}"
+																																	required>{{ old('description', trim($timeSheet->description)) }}</textarea>
+																										</div>
+																								</div>
+																								
+																								<div class="col-12 col-md-{{ $_user->hasAnyRole('Admin|organizationManager|manager') ? '6' : '12' }}">
+																										<div class="form-group mb-4">
+																												<label class="form-label">{{ __('admin.Program') }} <span class="text-danger">*</span></label>
+																												<select class="form-select edit-select2" 
+																																id="edit_program_{{ $timeSheet->id }}" 
+																																name="program"
+																																required>
+																														@foreach ($cycles as $cycle)
+																																<option value="{{ $cycle->id }}" {{ old('program', $timeSheet->program_id) == $cycle->id ? 'selected' : '' }}>
+																																		{{ $cycle->title }}
+																																</option>
+																														@endforeach
+																												</select>
+																										</div>
+																								</div>
+																								
+																								@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
+																								<div class="col-12 col-md-6">
+																										<div class="form-group mb-4">
+																												<label class="form-label">{{ __('admin.Users') }}</label>
+																												<select class="form-select edit-select2" 
+																																id="edit_user_id_{{ $timeSheet->id }}" 
+																																name="user_id">
+																														@foreach ($users as $user)
+																																<option value="{{ $user->id }}" {{ old('user_id', $timeSheet->user_id) == $user->id ? 'selected' : '' }}>
+																																		{{ $user->{'first_name_'. $l} ." ". $user->{'last_name_'. $l} }}
+																																</option>
+																														@endforeach
+																												</select>
+																										</div>
+																								</div>
+																								@endif
+																								
+																								<div class="col-12 col-md-6">
+																										<div class="form-group mb-4">
+																												<label for="edit_TimeSheet_date_{{ $timeSheet->id }}" class="form-label">{{__('admin.Date')}}</label>
+																												<input class="datewithouttime form-control @error('TimeSheet_date') is-invalid @enderror" 
+																															id="edit_TimeSheet_date_{{ $timeSheet->id }}" 
+																															type="text" 
+																															name="TimeSheet_date" 
+																															autocomplete="off" 
+																															value="{{ old('TimeSheet_date', $timeSheet->date) }}" 
+																															placeholder="{{__('admin.Date')}}" 
+																															required />
+																										</div>
+																								</div>
+																								
+																								<div class="col-12 col-md-6">
+																										<div class="form-group mb-4">
+																												<label for="edit_hours_worked_{{ $timeSheet->id }}" class="form-label">{{__('admin.HoursWorked')}} <span class="text-danger">*</span></label>
+																												<input class="form-control @error('hours_worked') is-invalid @enderror" 
+																															id="edit_hours_worked_{{ $timeSheet->id }}" 
+																															type="number" 
+																															step="0.01"
+																															name="hours_worked" 
+																															autocomplete="off" 
+																															value="{{ old('hours_worked', $timeSheet->hours_worked) }}" 
+																															placeholder="{{__('admin.HoursWorked')}}" 
+																															required />
+																										</div>
+																								</div>
+																								
+																								<div class="col-12 col-md-6">
+																										<div class="form-group mb-4">
+																												<label class="form-label">{{ __('admin.Category') }}</label>
+																												<select class="form-select edit-select2" 
+																																id="edit_category_{{ $timeSheet->id }}" 
+																																name="category">
+																														<option value="">{{ $l == 'en' ? 'Select category' : 'اختر الفئة' }}</option>
+																														@foreach ($categories as $category)
+																																<option value="{{ $category->id }}" {{ old('category', $timeSheet->category_id) == $category->id ? 'selected' : '' }}>
+																																		{{ $category->{'category_name_'. $l} }}
+																																</option>
+																														@endforeach
+																												</select>
+																										</div>
+																								</div>
+																								
+																								<div class="col-12 col-md-6">
+																										<div class="form-group">
+																												<label class="form-label">{{ __('admin.Status') }} <span class="text-danger">*</span></label>
+																												<select class="form-select edit-select2" 
+																																id="edit_status_{{ $timeSheet->id }}" 
+																																name="status"
+																																required>
+																														<option value="0" {{ old('status', $timeSheet->status) == 0 ? 'selected' : '' }}>{{ __('cycles.Draft') }}</option>
+																														<option value="1" {{ old('status', $timeSheet->status) == 1 ? 'selected' : '' }}>{{ __('cycles.Published') }}</option>
+																												</select>
+																										</div>
+																								</div>
+																						</div>
+																						
+																						<div class="d-flex align-items-center justify-content-end gap-3 mt-6">
+																								<button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">{{__('admin.Cancel')}}</button>
+																								@if( $_user->ableToAny(['TimeSheet.edit', 'TimeSheet.update'], $permissions) )
+																										<button type="submit" class="btn btn-primary data-submit">{{__('admin.submit')}}</button>
+																								@endif
+																						</div>
+																				</form>
 																		</div>
-																		<div class="mb-6 width49">
-																			<div> <label for="hours_worked" class="form-label" >{{__('admin.HoursWorked')}}</label> </div>
-																			<input class="form-control @error('hours_worked') is-invalid @enderror"
-																				id="hours_worked"
-																				type="text"
-																				name="hours_worked"
-																				autocomplete="off"
-																				value="{{ $timeSheet->hours_worked }}"
-																			/>
-																		</div>
-																		<div class="mb-6 width49">
-																			<div> <label for="description" class="form-label" >{{__('admin.Description')}}</label> </div>
-																			<textarea id="description" class="form-control @error('description') is-invalid @enderror"
-																			type="text"
-																			name="description"
-																			autocomplete="off">{{ trim($timeSheet->description) }}</textarea>
-																		</div>
-																		<div class="mb-6 width49">
-																			<label class="form-label fs-6"> {{ __('admin.Category') }} </label>
-																			<select class=" form-select" name="category">
-																				<option value="" disabled selected> {{ $l == 'en' ? 'Choose category' : 'اختر القسم' }} </option>
-																				@foreach ($categories as $category)
-																					<option value="{{ $category->id }}" {{ $category->id == $timeSheet->category_id ? "selected" : "" }} >{{ $category->{'category_name_'. $l} }}</option>
-																				@endforeach
-																			</select>
-																		</div>
-																		<div class="mb-6 width49">
-																			<label class="form-label fs-6"> {{ __('admin.Program') }} </label>
-																			<select class=" form-select" name="program">
-																				<option value="" disabled selected> {{ $l == 'en' ? 'Choose program' : 'اختر البرنامج' }} </option>
-																				@foreach ($cycles as $cycle)
-																				<option value="{{ $cycle->id }}" {{ $cycle->id == $timeSheet->program_id ? "selected" : "" }}> {{ $cycle->title }} </option>
-																				@endforeach
-																			</select>
-																		</div>
-																		@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
-																		<div class="mb-6 width49">
-																			<label class="form-label fs-6"> {{ __('admin.Users') }} </label>
-																			<select class=" form-select" name="user_id">
-																				<option value="" disabled selected> {{ $l == 'en' ? 'Choose User' : 'اختر المستخدم' }} </option>
-																				@foreach ($users as $user)
-																				<option value="{{ $user->id }}" {{ $user->id == $timeSheet->user_id ? "selected" : "" }} >{{ $user->{'first_name_'. $l} ." ". $user->{'last_name_'. $l} }}</option>
-																				@endforeach
-																			</select>
-																		</div>
-																		@endif
-																		<div class="form-group mb-3 mt-4">
-																			<label class="form-label fs-6"> {{ __('admin.Status') }}</label>
-																			<div style="height: 45px; width: fit-content; background-color: #F5F3FF; padding: 0 0.5rem;" class="row align-items-center rounded-pill">
-																				<button class="rounded-pill border-none Val0 fw-bold mx-1 {{ $timeSheet->status == 0 ? "bg-primary text-white" : "text-primary" }} "
-																					id="statusButton"
-																					type="button"
-																					style="width: 140px; height: 30px; font-size: 12px;"
-																				>
-																					{{ __('cycles.Draft') }}
-																				</button>
-																				<button class="rounded-pill border-none Val1 fw-bold {{ $timeSheet->status == 1 ? "bg-primary text-white" : "text-primary" }}"
-																					id="statusButton"
-																					type="button"
-																					style="width: 140px; height: 30px; font-size: 12px;"
-																				>
-																					{{ __('cycles.Published') }}
-																				</button>
-																				<input class="getVal" name="status" type="hidden" value="{{ $timeSheet->status }}" >
-																			</div>
-																		</div>
-																	</div>
 																</div>
-																<div class="text-center">
-																	@if( $_user->ableToAny(['TimeSheet.edit', 'TimeSheet.update'], $permissions) )
-																	<button type="submit" class="btn btn-primary me-3 data-submit">{{__('admin.submit')}}</button>
-																	@endif
-																	<button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
-																</div>
-															</form>
 														</div>
-													</div>
 												</div>
-											</div>
-											<!--/ Edit Timesheet Modal -->
+												<!--/ Edit Timesheet Modal -->
 											@endif
 											@endforeach
 										</tbody>
@@ -237,107 +270,119 @@
 
 			@if( $_user->ableToAny(['TimeSheet.create', 'TimeSheet.store'], $permissions) )
 			<!-- Create Timesheet Modal -->
-			<div class="modal fade" id="CreateTimeSheet" tabindex="-1" aria-hidden="true" dir="rtl">
-				<div class="modal-dialog modal-lg modal-simple modal-edit-user">
+			<div class="modal fade" id="CreateTimeSheet" tabindex="-1" aria-labelledby="CreateTimeSheetLabel" aria-hidden="true">
+				<div class="modal-dialog modal-md">
 					<div class="modal-content">
-						<div class="modal-body">
+						<div class="modal-header">
+							<h5 class="modal-title mb-0">{{ $l == 'en' ? 'Add New Timesheet' : 'إضافة سجل زمني جديد' }}</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							<div class="text-center mb-6"> <h4 class="mb-2">{{__('admin.TimeSheet')}}</h4> </div>
+						</div>
+						<div class="modal-body">
 							<form method="POST" action="{{route('TimeSheet.store')}}" class="pt-0" >
 								@csrf
-								<div class="ecommerce-customer-add-basic mb-4" >
-									<div class="col-md-12">
-										<div class="mb-6 width49">
-											<div> <label for="TimeSheet_title" class="form-label" >{{__('admin.Title')}}</label> </div>
+								<div class="row">
+									<div class="col-12">
+										<div class="form-group mb-4">
+											<label for="TimeSheet_title" class="form-label">{{__('admin.Title')}} <span class="text-danger">*</span></label>
 											<input class="form-control @error('TimeSheet_title') is-invalid @enderror"
 												id="TimeSheet_title"
 												type="text"
 												name="title"
 												autocomplete="off"
+												placeholder="{{__('admin.Title')}}"
 											/>
 										</div>
-										<div class="mb-6 width49">
-											<div> <label for="TimeSheet_date" class="form-label" >{{__('admin.Date')}}</label> </div>
-											<input class="datewithouttime form-control @error('TimeSheet_date') is-invalid @enderror"
-												id="TimeSheet_date"
-												type="text"
-												name="TimeSheet_date"
-												autocomplete="off"
-											/>
-										</div>
-										<div class="mb-6 width49">
-											<div> <label for="hours_worked" class="form-label" >{{__('admin.HoursWorked')}}</label> </div>
-											<input class="form-control @error('hours_worked') is-invalid @enderror"
-												id="hours_worked"
-												type="text"
-												name="hours_worked"
-												autocomplete="off"
-											/>
-										</div>
-										<div class="mb-6 width49">
-											<div> <label for="description" class="form-label" >{{__('admin.Description')}}</label> </div>
+									</div>
+									<div class="col-12">
+										<div class="form-group mb-4">
+											<label for="description" class="form-label">{{__('admin.Description')}} <span class="text-danger">*</span></label>
 											<textarea id="description" class="form-control @error('description') is-invalid @enderror"
-											type="text"
-											name="description"
-											autocomplete="off"></textarea>
+												type="text"
+												name="description"
+												autocomplete="off"
+												placeholder="{{__('admin.Description')}}"
+											></textarea>
 										</div>
-										<div class="mb-6 width49">
-											<label class="form-label fs-6"> {{ __('admin.Category') }} </label>
-											<select class="select2 form-select" id="category" name="category" dropdownParent="#CreateTimeSheet">
-												<option value="" disabled selected> {{ $l == 'en' ? 'Choose category' : 'اختر القسم' }} </option>
-												@foreach ($categories as $category)
-												<option value="{{ $category->id }}">{{ $category->{'category_name_'. $l} }}</option>
-												@endforeach
-											</select>
-										</div>
-										<div class="mb-6 width49">
-											<label class="form-label fs-6"> {{ __('admin.Program') }} </label>
-											<select class="select2 form-select" id="program" name="program" dropdownParent="#CreateTimeSheet">
-												<option value="" disabled selected> {{ $l == 'en' ? 'Choose program' : 'اختر البرنامج' }} </option>
+									</div>
+
+									<div class="col-12 col-md-{{ $_user->hasAnyRole('Admin|organizationManager|manager') ? '6' : '12' }}">
+										<div class="form-group mb-4">
+											<label class="form-label"> {{ __('admin.Program') }} <span class="text-danger">*</span></label>
+											<select class="select2 form-select" id="program" name="program" dropdownParent="#CreateTimeSheet" data-placeholder="{{ $l == 'en' ? 'Select program' : 'اختر البرنامج' }}">
+												<option value="" disabled selected> {{ $l == 'en' ? 'Select program' : 'اختر البرنامج' }} </option>
 												@foreach ($cycles as $cycle)
 													<option value="{{ $cycle->id }}"> {{ $cycle->title }} </option>
 												@endforeach
 											</select>
 										</div>
+									</div>
+									<div class="col-12 col-md-6">
 										@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
-										<div class="mb-6 width49">
-											<label class="form-label fs-6"> {{ __('admin.Users') }} </label>
-											<select class="select2 form-select" id="user_id" name="user_id" dropdownParent="#CreateTimeSheet">
-												<option value="" disabled selected> {{ $l == 'en' ? 'Choose User' : 'اختر المستخدم' }} </option>
+										<div class="form-group mb-4">
+											<label class="form-label"> {{ __('admin.Users') }} </label>
+											<select class="select2 form-select" id="user_id" name="user_id" dropdownParent="#CreateTimeSheet" data-placeholder="{{ $l == 'en' ? 'Select User' : 'اختر المستخدم' }}">
+												<option value="" disabled selected> {{ $l == 'en' ? 'Select User' : 'اختر المستخدم' }} </option>
 												@foreach ($users as $user)
 													<option value="{{ $user->id }}">{{ $user->{'first_name_'. $l} ." ". $user->{'last_name_'. $l} }}</option>
 												@endforeach
 											</select>
 										</div>
 										@endif
-										<div class="form-group mb-3 mt-4">
-											<label class="form-label fs-6"> {{ __('admin.Status') }}</label>
-											<div style="height: 45px; width: fit-content; background-color: #F5F3FF; padding: 0 0.5rem;" class="row align-items-center rounded-pill">
-												<button class="rounded-pill border-none Val0 text-primary fw-bold mx-1"
-													id="statusButton"
-													type="button"
-													style="width: 140px; height: 30px; font-size: 12px;"
-												>
-													{{ __('cycles.Draft') }}
-												</button>
-												<button class="rounded-pill border-none Val1 text-primary fw-bold"
-													id="statusButton"
-													type="button"
-													style="width: 140px; height: 30px; font-size: 12px;"
-												>
-													{{ __('cycles.Published') }}
-												</button>
-												<input class="getVal" name="status" type="hidden" >
-											</div>
+									</div>
+
+									<div class="col-12 col-md-6">
+										<div class="form-group mb-4">
+											<label for="TimeSheet_date" class="form-label">{{__('admin.Date')}}</label>
+											<input class="datewithouttime form-control @error('TimeSheet_date') is-invalid @enderror"
+												id="TimeSheet_date"
+												type="text"
+												name="TimeSheet_date"
+												autocomplete="off"
+												placeholder="{{__('admin.Date')}}"
+											/>
+										</div>
+									</div>
+									<div class="col-12 col-md-6">
+										<div class="form-group mb-4">
+											<label for="hours_worked" class="form-label">{{__('admin.HoursWorked')}} <span class="text-danger">*</span></label>
+											<input class="form-control @error('hours_worked') is-invalid @enderror"
+												id="hours_worked"
+												type="text"
+												name="hours_worked"
+												autocomplete="off"
+												placeholder="{{__('admin.HoursWorked')}}"
+											/>
+										</div>
+									</div>
+
+									<div class="col-12 col-md-6">
+										<div class="form-group mb-4">
+											<label class="form-label"> {{ __('admin.Category') }} </label>
+											<select class="select2 form-select" id="category" name="category" dropdownParent="#CreateTimeSheet">
+												<option value="" disabled selected> {{ $l == 'en' ? 'Select category' : 'اختر الفئة' }} </option>
+												@foreach ($categories as $category)
+												<option value="{{ $category->id }}">{{ $category->{'category_name_'. $l} }}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+									<div class="col-12 col-md-6">
+										<div class="form-group">
+											<label class="form-label"> {{ __('admin.Status') }} <span class="text-danger">*</span></label>
+											<select class="form-select select2" id="status" name="status" required data-placeholder="{{ $l == 'en' ? 'Select status' : 'اختر الحالة' }}">
+												<option value="" disabled selected>{{ $l == 'en' ? 'Select status' : 'اختر الحالة' }}</option>
+												<option value="0">{{ __('cycles.Draft') }}</option>
+												<option value="1">{{ __('cycles.Published') }}</option>
+											</select>
 										</div>
 									</div>
 								</div>
-								<br /><br /><br />	
-								<div>
+
+								<div class="d-flex align-items-center justify-content-end gap-3 mt-6">
+									<button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">{{__('admin.Cancel')}}</button>
 									@if( $_user->ableToAny(['TimeSheet.create', 'TimeSheet.store'], $permissions) )
-									<button type="submit" class="btn btn-primary me-sm-4 data-submit">{{__('admin.submit')}}</button>
+										<button type="submit" class="btn btn-primary data-submit">{{__('admin.submit')}}</button>
 									@endif
-									<button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
 								</div>
 							</form>
 						</div>
@@ -345,107 +390,6 @@
 				</div>
 			</div>
 			<!--/ Create Timesheet Modal -->
-			@endif
-
-			@if( $_user->ableToAny(['TimeSheet.create', 'TimeSheet.store'], $permissions) )
-			<!-- Create TimeSheet Modal -->
-			<div class="modal fade" id="CreateTimeSheet" tabindex="-1" aria-labelledby="CreateTimeSheetLabel" aria-hidden="true">
-				<div class="modal-dialog modal-md">
-					<div class="modal-content">
-						<form method="POST" action="{{route('TimeSheet.store')}}">
-							@csrf
-							<div class="modal-header">
-								<h5 class="modal-title" id="CreateTimeSheetLabel">
-									<i class="ti ti-plus me-2"></i>
-									{{ __('admin.TimeSheet') }}
-								</h5>
-								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-12 mb-3">
-										<label for="TimeSheet_title" class="form-label">{{__('admin.Title')}}</label>
-										<input class="form-control @error('TimeSheet_title') is-invalid @enderror" id="TimeSheet_title"
-											type="text" name="title" autocomplete="off" placeholder="{{ __('admin.Title') }}" required />
-									</div>
-									<div class="col-12 mb-3">
-										<label for="description" class="form-label">{{__('admin.Description')}}</label>
-										<textarea id="description" class="form-control @error('description') is-invalid @enderror"
-											type="text" name="description" autocomplete="off" placeholder="{{ __('admin.Description') }}" required></textarea>
-									</div>
-									<div class="col-12 mb-3">
-										<label for="program" class="form-label">{{ __('admin.Program') }}</label>
-										<select class="select2 form-select" id="program" name="program"
-											dropdownParent="#CreateTimeSheet" required>
-											<option value="" disabled selected> {{ $l == 'en' ? 'Select program' : 'اختر البرنامج' }}
-											</option>
-											@foreach ($cycles as $cycle)
-											<option value="{{ $cycle->id }}"> {{ $cycle->title }} </option>
-											@endforeach
-										</select>
-									</div>
-									@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
-									<div class="col-12 mb-3">
-										<label for="user_id" class="form-label">{{ __('admin.User') }}</label>
-										<select class="select2 form-select" id="user_id" name="user_id"
-											dropdownParent="#CreateTimeSheet">
-											<option value="" disabled selected> {{ $l == 'en' ? 'Select User' : 'اختر المستخدم' }}
-											</option>
-											@foreach ($users as $user)
-											<option value="{{ $user->id }}">{{ $user->{'first_name_'. $l} ." ". $user->{'last_name_'. $l}
-												}}</option>
-											@endforeach
-										</select>
-									</div>
-									@endif
-									<div class="col-md-6 mb-3">
-										<label for="TimeSheet_date" class="form-label">{{__('admin.Date')}}</label>
-										<input class="datewithouttime form-control @error('TimeSheet_date') is-invalid @enderror"
-											id="TimeSheet_date" type="text" name="TimeSheet_date" autocomplete="off" placeholder="{{ __('admin.Date') }}" required />
-									</div>
-									<div class="col-md-6 mb-3">
-										<label for="hours_worked" class="form-label">{{__('admin.HoursWorked')}}</label>
-										<input class="form-control @error('hours_worked') is-invalid @enderror" id="hours_worked"
-											type="number" name="hours_worked" autocomplete="off" min="0" placeholder="{{ __('admin.HoursWorked') }}" required />
-									</div>
-									<div class="col-md-6 mb-3">
-										<label for="category" class="form-label">{{ __('admin.Category') }}</label>
-										<select class="select2 form-select" id="category" name="category"
-											dropdownParent="#CreateTimeSheet" data-placeholder="{{ $l == 'en' ? 'Select category' : 'اختر الفئة' }}">
-											<option value="" disabled selected> {{ $l == 'en' ? 'Select category' : 'اختر الفئة' }}
-											</option>
-											@foreach ($categories as $category)
-											<option value="{{ $category->id }}">{{ $category->{'category_name_'. $l} }}</option>
-											@endforeach
-										</select>
-									</div>
-									<div class="col-md-6 mb-3">
-										<label for="status" class="form-label">{{ __('admin.Status') }}</label>
-										<select class="form-select" id="status" name="status" required>
-											<option value="" disabled selected> {{ $l == 'en' ? 'Select status' : 'اختر الحالة' }} </option>
-											<option value="0">{{ __('cycles.Draft') }}</option>
-											<option value="1">{{ __('cycles.Published') }}</option>
-										</select>
-									</div>
-								</div>
-							</div>
-
-							<div class="modal-footer">
-								@if( $_user->ableToAny(['TimeSheet.create', 'TimeSheet.store'], $permissions) )
-								<button type="submit" class="btn btn-primary me-3 data-submit">
-									{{__('admin.submit')}}
-								</button>
-								@endif
-								<button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">
-									{{__('admin.Cancel')}}
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<!--/ Create TimeSheet Modal -->
 			@endif
 		</div>
 	</div>
@@ -528,8 +472,8 @@
 						sSortAscending: ": تفعيل لترتيب العمود تصاعدياً",
 						sSortDescending: ": تفعيل لترتيب العمود تنازلياً"
 					}
-				}
-			@endif,
+				},
+			@endif
 			initComplete: function (settings, json) {
 				@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
 				// User filter
@@ -663,11 +607,42 @@
 		dateFormat: 'Y-m-d'
 	});
 
-	// Initialize select2 for form dropdowns
-	$('.select2').select2({
-		dropdownParent: function() {
-			return $(this).closest('.modal');
-		}
-	});
+	// Initialize select2 for CREATE form dropdowns only
+$('#CreateTimeSheet .select2').select2({
+    dropdownParent: $('#CreateTimeSheet')
+});
+
+// Initialize Select2 for EDIT modals when shown
+$(document).on('shown.bs.modal', '[id^="EditTimeSheet"]', function() {
+    const $modal = $(this);
+    
+    // Destroy existing select2 instances
+    $modal.find('.edit-select2').each(function() {
+        if ($(this).hasClass('select2-hidden-accessible')) {
+            $(this).select2('destroy');
+        }
+    });
+    
+    // Re-initialize with proper settings
+    $modal.find('.edit-select2').select2({
+        dropdownParent: $modal,
+        width: '100%'
+    });
+    
+    // Reinitialize flatpickr for date fields in this modal
+    $modal.find('.datewithouttime').flatpickr({
+        dateFormat: 'Y-m-d'
+    });
+});
+
+// Clean up when modal is hidden
+$(document).on('hidden.bs.modal', '[id^="EditTimeSheet"]', function() {
+    const $modal = $(this);
+    $modal.find('.edit-select2').each(function() {
+        if ($(this).hasClass('select2-hidden-accessible')) {
+            $(this).select2('destroy');
+        }
+    });
+});
 </script>
 @stop
