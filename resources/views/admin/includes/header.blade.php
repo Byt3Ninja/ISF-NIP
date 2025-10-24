@@ -1383,24 +1383,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Fix dropdown positioning on mobile
+  // Fix dropdown positioning in RTL
   const dropdowns = document.querySelectorAll('.dropdown-toggle');
-  dropdowns.forEach(function(dropdown) {
-    dropdown.addEventListener('click', function() {
-      setTimeout(function() {
-        const dropdownMenu = dropdown.nextElementSibling;
-        if (dropdownMenu && window.innerWidth <= 768) {
-          const rect = dropdown.getBoundingClientRect();
-          const menuWidth = dropdownMenu.offsetWidth;
-          const screenWidth = window.innerWidth;
-          
-          // Adjust position if dropdown goes off screen
-          if (rect.left + menuWidth > screenWidth) {
-            dropdownMenu.style.transform = 'translateX(-' + (menuWidth - rect.width) + 'px)';
+  const isRTL = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
+
+  if (isRTL) {
+    dropdowns.forEach(function(dropdown) {
+      dropdown.addEventListener('click', function() {
+        setTimeout(function() {
+          const dropdownMenu = dropdown.nextElementSibling;
+          if (dropdownMenu && dropdownMenu.offsetParent !== null) {
+            const rect = dropdownMenu.getBoundingClientRect();
+            const menuWidth = dropdownMenu.offsetWidth;
+            const screenWidth = window.innerWidth;
+            
+            // Adjust position if dropdown goes off screen
+            if (rect.left < 0) {
+              // Off left side - move right
+              const overflowLeft = Math.abs(rect.left);
+              dropdownMenu.style.transform = 'translateX(' + overflowLeft + 'px)';
+            } else if (rect.left + menuWidth > screenWidth) {
+              // Off right side - move left
+              const overflowRight = rect.left + menuWidth - screenWidth;
+              dropdownMenu.style.transform = 'translateX(-' + overflowRight + 'px)';
+            } else {
+              // Reset if not off screen
+              dropdownMenu.style.transform = '';
+            }
           }
-        }
-      }, 10);
+        }, 50);
+      });
     });
-  });
+  }
 });
 </script>

@@ -8,18 +8,6 @@
     <!-- Forms Submissions Table -->
     <div class="card">
       <div class="card-datatable table-responsive pt-0">
-        <div class="row">
-          <div class="col-md-10 col-lg-10 col-sm-12 text-end"></div>
-          <div class="col-md-2 col-lg-2 col-sm-12 text-end">
-              <div class="dropdown pt-5 px-2">
-                <a class="btn btn-primary dropdown-toggle w-100" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $l == 'en' ? 'Export Forms' : 'تصدير النماذج' }}</a>
-                <ul class="dropdown-menu">
-                  <li><a data-type="Excel" class="dropdown-item export-form-btn" target="_blank" href='#'><i class="fas fa-fw fa-sm fa-file-excel me-2"></i> Excel</a></li>
-                  <li><a data-type="CSV" class="dropdown-item export-form-btn" target="_blank" href='#'><i class="fas fa-fw fa-sm fa-file-csv me-2"></i> CSV</a></li>
-                </ul>
-              </div>
-          </div>
-        </div>
         <table class="datatables-basic table">
           <thead class="table-light">
             <tr>
@@ -216,14 +204,14 @@
           dt_basic = dt_basic_table.DataTable({
             data: data,
             columns: [
-              { data: 'submission_id', title: t.submissionId },
-              { data: 'submitted_by', title: t.submittedBy },
-              { data: 'startup_name', title: t.startupName },
-              { data: 'organization_name', title: t.organizationName },
-              { data: 'program_name', title: t.programName },
-              { data: 'created_at', title: t.createdAt },
-              { data: 'step_name', title: t.stepName },
-              { data: null, title: t.actions, orderable: false, searchable: false }
+              { data: 'submission_id', title: t.submissionId, responsivePriority: 1 },
+              { data: 'submitted_by', title: t.submittedBy, responsivePriority: 1 },
+              { data: 'startup_name', title: t.startupName, responsivePriority: 1 },
+              { data: 'organization_name', title: t.organizationName, responsivePriority: 1 },
+              { data: 'program_name', title: t.programName, responsivePriority: 1 },
+              { data: 'created_at', title: t.createdAt, responsivePriority: 1 },
+              { data: 'step_name', title: t.stepName, responsivePriority: 1 },
+              { data: null, title: t.actions, orderable: false, searchable: false, responsivePriority: 1 }
             ],
             columnDefs: [
               {
@@ -247,7 +235,7 @@
               }
             ],
             order: [[0, 'asc']],
-            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
+            dom: '<"card-header d-flex justify-content-between"<"head-label"><"dt-action-buttons text-end pt-md-0"B>><"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
             displayLength: 7,
             lengthMenu: [7, 10, 25, 50, 75, 100],
             language: {
@@ -257,7 +245,7 @@
               },
               search: `${t.search || 'Search'}:`,
               searchPlaceholder: `${t.search || 'Search'}...`,
-              lengthMenu: `${t.show} <select class="form-select form-select-sm">` +
+              lengthMenu: `${t.show} <select class="form-select form-select-sm mb-3 mb-md-0">` +
                 `<option value="7">7</option>` +
                 `<option value="10">10</option>` +
                 `<option value="25">25</option>` +
@@ -274,38 +262,6 @@
             buttons: [
               // The "Add New Form" button object is removed from here
             ],
-            responsive: {
-              details: {
-                display: $.fn.dataTable.Responsive.display.modal({
-                  header: function (row) {
-                    var data = row.data();
-                    return `${t.detailsOf} ${data['form_name']}`;
-                  }
-                }),
-                type: 'column',
-                renderer: function (api, rowIdx, columns) {
-                  var data = $.map(columns, function (col, i) {
-                    return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                      ? '<tr data-dt-row="' +
-                      col.rowIndex +
-                      '" data-dt-column="' +
-                      col.columnIndex +
-                      '">' +
-                      '<td>' +
-                      col.title +
-                      ':' +
-                      '</td> ' +
-                      '<td>' +
-                      col.data +
-                      '</td>' +
-                      '</tr>'
-                      : '';
-                  }).join('');
-
-                  return data ? $('<table class="table"/><tbody />').append(data) : false;
-                }
-              }
-            },
             initComplete: function (settings, json) {
               $('.card-header').after('<hr class="my-0">');
               var tableId = this.api().table().node().id;
@@ -314,7 +270,7 @@
                 @if(auth()->user()->hasRole('OrganizationManager'))
                 ''
                 @else
-                const orgFilter = $(`<select id="orgFilter" class="form-select form-select-sm ms-12 me-3 w-px-150"><option value="">${t.allOrganizations}</option></select>`)
+                const orgFilter = $(`<select id="orgFilter" class="form-select form-select-sm ms-md-12 me-md-3 w-px-150 mb-3 mb-md-0"><option value="">${t.allOrganizations}</option></select>`)
                 .appendTo('.dataTables_length')
                 .on('change', function () {
                   const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -328,7 +284,7 @@
                 @endif
 
               // Program filter
-              const programFilter = $(`<select id="programFilter" class="form-select form-select-sm w-px-150"><option value="">${t.allPrograms}</option></select>`)
+              const programFilter = $(`<select id="programFilter" class="form-select form-select-sm w-px-150 mb-3 mb-md-0"><option value="">${t.allPrograms}</option></select>`)
                 .appendTo('.dataTables_length')
                 .on('change', function () {
                   const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -336,7 +292,7 @@
                 });
 
               // Step filter
-              const stepFilter = $(`<select id="stepFilter" class="form-select form-select-sm w-px-150"><option value="">${t.allSteps}</option></select>`)
+              const stepFilter = $(`<select id="stepFilter" class="form-select form-select-sm w-px-150 mb-md-0"><option value="">${t.allSteps}</option></select>`)
                 .appendTo('.dataTables_length')
                 .on('change', function () {
                   const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -357,7 +313,23 @@
             }
           });
 
-          $('div.head-label').html(`<h5 class="card-title mb-0">${t.submissionsList}</h5>`);
+          const headerContent = `
+            <h5 class="card-title mb-0">${t.submissionsList}</h5>
+          `;
+
+          $('div.head-label').html(`${headerContent}`);
+
+          const dropdownContent = `
+            <div class="dropdown">
+              <a class="btn btn-label-secondary dropdown-toggle" href="javascript:void(0)" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $l == 'en' ? 'Export' : 'تصدير' }}</a>
+              <ul class="dropdown-menu">
+                <li><a data-type="Excel" class="dropdown-item export-form-btn" target="_blank" href="javascript:void(0)"><i class="fas fa-fw fa-sm fa-file-excel me-2"></i> Excel</a></li>
+                <li><a data-type="CSV" class="dropdown-item export-form-btn" target="_blank" href="javascript:void(0)"><i class="fas fa-fw fa-sm fa-file-csv me-2"></i> CSV</a></li>
+              </ul>
+            </div>
+          `;
+
+          $('div.dt-action-buttons').html(`${dropdownContent}`);
 
           // Delete Record with SweetAlert warning
           $('.datatables-basic tbody').on('click', '.delete-record', function () {

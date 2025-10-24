@@ -134,11 +134,9 @@
             </ul>
             </div>
         
-            <button type="button" class="btn btn-lg btn-primary ml-2"
-            onclick="saveForm()"
-            >
-            {{ __('builder.Save_Form') }}
-            <i class="ti ti-check ms-2"></i>
+            <button type="button" class="btn btn-lg btn-primary ml-2" onclick="saveForm()">
+                <span class="text-nowrap">{{ __('builder.Save_Form') }}</span>
+                <i class="ti ti-check ms-2"></i>
             </button>
         </div>
     </div>

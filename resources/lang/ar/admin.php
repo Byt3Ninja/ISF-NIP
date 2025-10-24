@@ -217,8 +217,7 @@ return [
 	'Not Active' => 'غير مفعل',
 	'Commercial' => 'تجاري',
 	'Manage your files' => 'إدراة ملفاتي',
-	'Add Category' => 'إضافة قسم',
-	'Category' => 'القسم',
+	'Add Category' => 'إضافة فئة',
 	'Products Categories' => 'أقسام المنتجات',
 	'Other' => 'أخرى',
 	'Company`s Reports' => 'تقارير الشركات',
@@ -2528,4 +2527,5 @@ return [
 	'Is_Required_Survey_Description' => 'إذا تم تفعيل هذا الخيار، سيكون الاستبيان إلزاميًا للمستخدمين لإكماله.',
 	'Create_form' => 'انشاء نموذج',
 	'Traditional_Evaluation_pending' => 'قيد التنفيذ',
+	'Category' => 'الفئة',
 ];
