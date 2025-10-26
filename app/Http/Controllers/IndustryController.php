@@ -32,7 +32,8 @@ class IndustryController extends Controller
 				'name' => 'required',
 			]);
 			$industry = new StaticCategory();
-			$industry->name = $request->name;
+            $industry->name_ar = $request->name;
+            $industry->name_en = $request->name;
 			$industry->save();
 			
 			return response()->json(['status'=> 'success','message' => 'AddedSuccessfully']);

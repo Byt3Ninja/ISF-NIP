@@ -5,6 +5,7 @@ namespace App;
 use App\Like;
 
 use App\Traits\Auditable;
+use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
@@ -304,9 +305,9 @@ class Company extends Model
         $categories = [];
 
         foreach ($industries as $industry) {
-            $categories[__('admin.categories.' . $industry->name)] = (bool) $industry->is_other;
+            $categories[ $industry->{'name_'. App::getLocale() } ] = (bool) $industry->is_other;
         }
-
+        
         return $categories;
 
         // return [
