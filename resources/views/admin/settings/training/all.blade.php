@@ -18,13 +18,24 @@
         <div class="card-header border-bottom">
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <h4 class="card-title mb-0">{{ __('cycles.all courses') }}</h4>
-            @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
-              <a class="btn btn-primary"
-                href="{{ route('trainings.create') }}">
-                <i class="ti ti-plus me-2"></i>
-                {{ __('admin.Add_new_Courses') }}
-              </a>
-            @endif
+            <div class="d-flex align-items-center gap-3">
+              @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
+                <div class="dropdown">
+                  <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                  </ul>
+                </div>
+                <a class="btn btn-primary"
+                  href="{{ route('trainings.create') }}">
+                  <i class="ti ti-plus me-2"></i>
+                  {{ __('admin.Add_New') }}
+                </a>
+              @endif
+            </div>
           </div>
         </div>
 
@@ -74,10 +85,7 @@
                         $tagsList = [];
                         if($course->tags) {
                           foreach($course->tags as $tag) {
-                            // Each tag object has a 'name' field that contains JSON
                             $tagName = $tag->name ?? '';
-                            
-                            // Decode the JSON in the name field
                             if($tagName && (str_starts_with($tagName, '[') || str_starts_with($tagName, '{'))) {
                               $decoded = json_decode($tagName, true);
                               if(is_array($decoded)) {
@@ -93,14 +101,17 @@
                           }
                         }
                         $tagsList = array_filter(array_map('trim', $tagsList));
+                        $tagsText = implode(', ', $tagsList);
                       @endphp
-                      @if(count($tagsList) > 0)
-                        @foreach($tagsList as $tagName)
-                          <span class="badge bg-label-info me-1 mb-1">{{ $tagName }}</span>
-                        @endforeach
-                      @else
-                        <span class="text-muted">-</span>
-                      @endif
+                      <span data-export="{{ $tagsText }}">
+                        @if(count($tagsList) > 0)
+                          @foreach($tagsList as $tagName)
+                            <span class="badge bg-label-info me-1 mb-1">{{ $tagName }}</span>
+                          @endforeach
+                        @else
+                          <span class="text-muted">-</span>
+                        @endif
+                      </span>
                     </td>
                     <td>
                       @php
@@ -246,21 +257,84 @@
     let coursesTable;
 
     $(document).ready(function() {
-      // Initialize DataTable
+      // Initialize DataTable with Buttons
       coursesTable = $('#coursesTable').DataTable({
         responsive: true,
         searching: true,
         lengthChange: true,
         pageLength: 10,
         order: [[0, 'asc']],
-  			dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
+        dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
+        buttons: [
+          {
+            extend: 'excel',
+            text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
+            className: 'btn btn-label-success d-none',
+            title: '{{ $l == "en" ? "Courses List" : "قائمة الدورات" }}',
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+              format: {
+                body: function(data, row, column, node) {
+                  // Handle status column
+                  if (column === 4) {
+                    return $(node).attr('data-status') === 'draft' ? '{{ __("admin.Draft") }}' : '{{ __("admin.Published") }}';
+                  }
+                  // Handle tags column
+                  if (column === 5) {
+                    const exportData = $(node).find('[data-export]').attr('data-export');
+                    return exportData || '-';
+                  }
+                  // Handle categories column
+                  if (column === 6) {
+                    const categories = $(node).find('[data-categories]').attr('data-categories');
+                    return categories || '-';
+                  }
+                  // Handle content count column
+                  if (column === 7) {
+                    return $(node).find('.badge').text();
+                  }
+                  // Strip HTML for other columns
+                  return $('<div>').html(data).text().trim();
+                }
+              }
+            }
+          },
+          {
+            extend: 'csv',
+            text: '<i class="ti ti-file-text me-1"></i>CSV',
+            className: 'btn btn-label-info d-none',
+            title: '{{ $l == "en" ? "Courses List" : "قائمة الدورات" }}',
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+              format: {
+                body: function(data, row, column, node) {
+                  if (column === 4) {
+                    return $(node).attr('data-status') === 'draft' ? '{{ __("admin.Draft") }}' : '{{ __("admin.Published") }}';
+                  }
+                  if (column === 5) {
+                    const exportData = $(node).find('[data-export]').attr('data-export');
+                    return exportData || '-';
+                  }
+                  if (column === 6) {
+                    const categories = $(node).attr('data-categories');
+                    return categories || '-';
+                  }
+                  if (column === 7) {
+                    return $(node).find('.badge').text();
+                  }
+                  return $('<div>').html(data).text().trim();
+                }
+              }
+            }
+          },
+        ],
         columnDefs: [
           { orderable: false, targets: [5, 6, 8] }
         ],
         @if ($l === 'ar')
-          language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
-          },
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
+        },
         @endif
         initComplete: function() {
           // Create and insert Category Filter
@@ -288,7 +362,6 @@
               if (value === '') {
                 coursesTable.column(4).search('').draw();
               } else {
-                // Search by data-status attribute
                 $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
                   const status = $(coursesTable.row(dataIndex).node()).find('td[data-status]').attr('data-status');
                   return value === '' || status === value;
@@ -298,6 +371,15 @@
               }
             });
         }
+      });
+
+      // Export button click handlers
+      $('#exportExcel').on('click', function() {
+        coursesTable.button('.buttons-excel').trigger();
+      });
+
+      $('#exportCsv').on('click', function() {
+        coursesTable.button('.buttons-csv').trigger();
       });
     });
 
@@ -342,7 +424,6 @@
               _method: 'POST'
             },
             success: function(response) {
-              // Remove row from DataTable without page reload
               const row = coursesTable.row($('#course-row-' + id));
               row.remove().draw();
               
