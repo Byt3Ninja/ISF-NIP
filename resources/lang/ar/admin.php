@@ -2528,4 +2528,5 @@ return [
 	'Create_form' => 'انشاء نموذج',
 	'Traditional_Evaluation_pending' => 'قيد التنفيذ',
 	'Category' => 'الفئة',
+	'Select_Founder' => 'اختر المؤسس',
 ];
