@@ -1317,14 +1317,29 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
 
 <!-- Search Modal -->
 <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered mx-2 mx-md-auto">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-8 p-md-5">
+      <div class="modal-header px-0 px-md-8">
+        <h5 class="modal-title" id="searchModalLabel">{{ __('admin.Search_Pages') }}</h5>
+        <button type="button" class="btn-close border" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body pt-0">
+      <div class="modal-body px-0 py-3 py-md-4 px-md-8">
         <input type="text" id="menuSearch" class="form-control form-control-lg" placeholder="{{ __('admin.Search') }}...">
-        <div class="w-100" style="max-height: 400px; overflow-y: auto;">
+        <div class="w-100 d-none d-md-block" style="max-height: 450px; overflow-y: auto;">
+          <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
+            @foreach($flattenedMenuItems as $item)
+              <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
+                <a href="{{ isset($item['route']) ? (is_callable($item['route']) ? $item['route']() : (is_string($item['route']) && strpos($item['route'], '/') !== 0 ? ($item['route'] === 'company.profile_view' ? ($companyid ? route($item['route'], ['id' => $companyid]) : '#') : ($item['route'] === 'pages.update_mine' ? (Auth::user()->PageId ? route($item['route'], ['id' => Auth::user()->PageId]) : '#') : route($item['route']))) : $item['route'])) : '#' }}" class="nav-link d-flex justify-content-start align-items-center text-start p-2 p-md-3">
+                  @if (isset($item['icon']))
+                    <i class="ti {{ $item['icon'] }} ti-md me-2 flex-shrink-0"></i>
+                  @endif
+                  <span class="text-truncate">{{ $item['label'] }}</span>
+                </a>
+              </div>
+            @endforeach
+          </div>
+        </div>
+        <div class="w-100 d-block d-md-none">
           <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
             @foreach($flattenedMenuItems as $item)
               <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
@@ -1383,24 +1398,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Fix dropdown positioning on mobile
+  // Fix dropdown positioning in RTL
   const dropdowns = document.querySelectorAll('.dropdown-toggle');
-  dropdowns.forEach(function(dropdown) {
-    dropdown.addEventListener('click', function() {
-      setTimeout(function() {
-        const dropdownMenu = dropdown.nextElementSibling;
-        if (dropdownMenu && window.innerWidth <= 768) {
-          const rect = dropdown.getBoundingClientRect();
-          const menuWidth = dropdownMenu.offsetWidth;
-          const screenWidth = window.innerWidth;
-          
-          // Adjust position if dropdown goes off screen
-          if (rect.left + menuWidth > screenWidth) {
-            dropdownMenu.style.transform = 'translateX(-' + (menuWidth - rect.width) + 'px)';
+  const isRTL = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
+
+  if (isRTL) {
+    dropdowns.forEach(function(dropdown) {
+      dropdown.addEventListener('click', function() {
+        setTimeout(function() {
+          const dropdownMenu = dropdown.nextElementSibling;
+          if (dropdownMenu && dropdownMenu.offsetParent !== null) {
+            const rect = dropdownMenu.getBoundingClientRect();
+            const menuWidth = dropdownMenu.offsetWidth;
+            const screenWidth = window.innerWidth;
+            
+            // Adjust position if dropdown goes off screen
+            if (rect.left < 0) {
+              // Off left side - move right
+              const overflowLeft = Math.abs(rect.left);
+              dropdownMenu.style.transform = 'translateX(' + overflowLeft + 'px)';
+            } else if (rect.left + menuWidth > screenWidth) {
+              // Off right side - move left
+              const overflowRight = rect.left + menuWidth - screenWidth;
+              dropdownMenu.style.transform = 'translateX(-' + overflowRight + 'px)';
+            } else {
+              // Reset if not off screen
+              dropdownMenu.style.transform = '';
+            }
           }
-        }
-      }, 10);
+        }, 50);
+      });
     });
-  });
+  }
 });
 </script>

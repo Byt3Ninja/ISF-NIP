@@ -129,9 +129,9 @@
   <div class="container-xxl flex-grow-1 container-p-y">
 
     <div class="d-flex align-items-center mb-4">
-      <i class="ti ti-dashboard text-primary fs-3 me-2"></i>
+      <i class="ti ti-dashboard text-primary fs-3 me-2 d-none d-md-inline"></i>
       <h4 class="fw-bold mb-0">
-        {{ __('admin.Program Report') }} - {{ $cycle->title }}
+        {{ __('admin.Program Report') }} - <br class="d-md-none" /> {{ $cycle->title }}
       </h4>
     </div>
 

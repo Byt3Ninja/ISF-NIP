@@ -17,7 +17,7 @@ return [
     'Form' => 'نموذج',
     'ID' => 'رقم',
     'Choose Organization' => 'أختر مؤسسة',
-    'Build custom forms' => 'إنشاء نماذج مخصصة',
+    'Build_custom_forms' => 'إنشاء نماذج مخصصة عن طريق إضافة وسحب الأسئلة أو الأقسام أدناه',
     'Filter_Forms' => 'تصفية النماذج',
     'Select_Organization' => 'اختر المؤسسة',
     'Select_Form' => 'اختر النموذج',
@@ -74,4 +74,7 @@ return [
     'If' => 'إذا',
     'Error_Occurred' => 'حدث خطأ، حاول مرة أخرى!',
     'or' => 'أو',
+    'Show_Saved_Form' => 'عرض النموذج المحفوظ',
+    'No_fields_available' => 'لا توجد حقول متاحة. يرجى إضافة أسئلة أو أقسام.',
+    'Actions' => 'الإجراءات',
 ];

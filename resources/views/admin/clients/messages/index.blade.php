@@ -113,6 +113,21 @@
         $(`#${tab}-tab`).removeClass('active');
       }
     });
+
+    // Sidebar toggle for mobile
+    $('[data-bs-toggle="sidebar"]').on('click', function() {
+      const target = $(this).data('target');
+      $(target).toggleClass('show');
+      if ($(this).data('overlay')) {
+        $('.app-overlay').toggleClass('show');
+      }
+    });
+
+    // Close sidebar when clicking overlay or close button
+    $('.app-overlay, #sidebar-close').on('click', function() {
+      $('.app-email-sidebar').removeClass('show');
+      $('.app-overlay').removeClass('show');
+    });
   </script>
 
   <script>
@@ -342,7 +357,7 @@
           title: "{{ __('admin.No Messages Selected') }}",
           text: "{{ __('admin.Select at least one message') }}",
           icon: "warning",
-          confirmButtonText: "{{ __('admin.OK') }}"
+          confirmButtonText: "{{ __('admin.OK') }}",
           showCancelButton: false,
           customClass: {
             confirmButton: 'btn btn-primary',

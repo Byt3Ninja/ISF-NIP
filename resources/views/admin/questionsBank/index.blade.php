@@ -3,22 +3,10 @@
 @section('title', __('admin.Questions Bank') )
 @section('subTitle', __('admin.Questions Bank List'))
 @section('content')
+
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="content-header row my-2">
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<h4 class="mb-0 fw-bold">{{__('admin.Questions Bank List')}}</h4>
-					</div>
-					<div class="col-md-6">
-						<a 
-							href="{{ route('questions-bank.create') }}"
-							class="btn btn-primary float-end">
-							<i class="ti ti-plus me-2"></i>
-							{{ __('admin.Add New')}} 
-						</a>
-					</div>
-				</div>
 				@if( session()->has('success') )
 					<div class="col-md-12">
 						<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
@@ -41,11 +29,20 @@
 				<section class="organizations-list-wrapper">
 					<div class="organizations-list-table">
 						<div class="card">
+							<div class="card-header border-bottom d-flex flex-wrap justify-content-between align-items-center">
+								<h4 class="card-title">{{__('admin.Questions Bank List')}}</h4>
+								<a 
+									href="{{ route('questions-bank.create') }}"
+									class="btn btn-primary float-end">
+									<i class="ti ti-plus me-2"></i>
+									{{ __('admin.Add New')}} 
+								</a>
+							</div>
 							<div class="card-content">				
 								<div class="card-body">
 									<!-- Filter Controls -->
-									<div class="row mb-8">
-										<div class="col-md-1">
+									<div class="row mb-8 mt-8">
+										<div class="col-md-1 mb-3 mb-md-0">
 											<label class="form-label">{{ __('admin.Show') }}</label>
 											<select id="showEntries" class="form-select form-select-sm">
 												<option value="10">10</option>
@@ -55,31 +52,31 @@
 												<option value="-1">{{ __('admin.All') }}</option>
 											</select>
 										</div>
-										<div class="col-md-2">
+										<div class="col-md-2 mb-3 mb-md-0">
 											<label class="form-label">{{ __('admin.Organization') }}</label>
 											<select id="organizationFilter" class="form-select form-select-sm">
 												<option value="">{{ __('admin.All') }}</option>
 											</select>
 										</div>
-										<div class="col-md-2">
+										<div class="col-md-2 mb-3 mb-md-0">
 											<label class="form-label">{{ __('admin.questionGroup') }}</label>
 											<select id="questionGroupFilter" class="form-select form-select-sm">
 												<option value="">{{ __('admin.All') }}</option>
 											</select>
 										</div>
-										<div class="col-md-2">
+										<div class="col-md-2 mb-3 mb-md-0">
 											<label class="form-label">{{ __('admin.question_Type') }}</label>
 											<select id="questionTypeFilter" class="form-select form-select-sm">
 												<option value="">{{ __('admin.All') }}</option>
 											</select>
 										</div>
-										<div class="col-md-2">
+										<div class="col-md-2 mb-3 mb-md-0">
 											<label class="form-label">{{ __('admin.question_difficulty') }}</label>
 											<select id="difficultyFilter" class="form-select form-select-sm">
 												<option value="">{{ __('admin.All') }}</option>
 											</select>
 										</div>
-										<div class="col-md-3 ps-8">
+										<div class="col-md-3 ps-md-8 mb-3 mb-md-0">
 											<label class="form-label">{{ __('admin.Search') }}</label>
 											<div class="input-group input-group-sm">
 												<input type="text" id="globalSearch" class="form-control" placeholder="{{ __('admin.Search') }}...">
@@ -182,21 +179,24 @@
 				lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
 				language: {
 					@if($l == 'ar')
-					"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+					url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/ar.json',
+					search: "",
+					searchPlaceholder: "ابحث هنا...",
 					@else
-					"search": "{{ __('admin.Search') }}:",
-					"lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
-					"info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
-					"infoEmpty": "{{ __('admin.no_entries_available') }}",
-					"infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
-					"paginate": {
-						"first": "{{ __('admin.First') }}",
-						"last": "{{ __('admin.Last') }}",
-						"next": "{{ __('admin.Next') }}",
-						"previous": "{{ __('admin.Previous') }}"
+					search: "",
+					searchPlaceholder: "{{ __('admin.Search') }}:",
+					lengthMenu: "{{ __('admin.show') }} _MENU_ {{ __('admin.Entries') }}",
+					info: "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.of') }} _TOTAL_ {{ __('admin.Entries') }}",
+					infoEmpty: "{{ __('admin.showing') }} 0 {{ __('admin.To') }} 0 {{ __('admin.of') }} 0 {{ __('admin.Entries') }}",
+					infoFiltered: "({{ __('admin.filteredFrom') }} _MAX_ {{ __('admin.totalEntries') }})",
+					paginate: {
+							first: "{{ __('admin.First') }}",
+							last: "{{ __('admin.Last') }}",
+							next: "{{ __('admin.Next') }}",
+							previous: "{{ __('admin.Previous') }}"
 					},
-					"emptyTable": "{{ __('admin.No_data_available_in_table') }}",
-					"zeroRecords": "{{ __('admin.No_matching_records_found') }}"
+					emptyTable: "{{ __('admin.noDataAvailable') }}",
+					zeroRecords: "{{ __('admin.noMatchingRecords') }}"
 					@endif
 				},
 				dom: '<"row"<"col-sm-12"t>><"row"<"col-sm-5"i><"col-sm-7"p>>',
@@ -390,7 +390,7 @@
 							Swal.fire({
 								icon: 'error',
 								title: "{{ __('admin.Error') }}!",
-								text: "{{ __('admin.SomethingWentWrong') }}",
+								text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 								showCancelButton: false,
 								showConfirmButton: true,
 								confirmButtonText: "{{ __('admin.OK') }}",

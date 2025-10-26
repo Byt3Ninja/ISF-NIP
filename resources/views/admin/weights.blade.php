@@ -3,15 +3,6 @@
 @section('content')
 <div class="content-wrapper">
 	<div class="container-xxl flex-grow-1 container-p-y">
-		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-4">
-			<h3 class="mb-0 fw-bold">{{ __('admin.all Weights') }}</h3>
-			@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateWeights">
-				<i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
-			</button>
-			@endif
-		</div>
-
 		<div class="content-body">
 			<section id="multiple-column-form">
 				@if (session()->has('message'))
@@ -25,11 +16,19 @@
 			<section class="row">
 				<div class="col-xl-12 col-md-12 col-sm-12">
 					<div class="card">
+						<div class="card-header border-bottom d-flex flex-wrap justify-content-between align-items-center">
+							<h4 class="card-title">{{ __('admin.all Weights') }}</h4>
+							@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
+							<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateWeights">
+								<i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
+							</button>
+							@endif
+						</div>
 						<div class="card-body">
 							<div class="table-responsive">
 								<!-- Filter Controls -->
-								<div class="row mb-8">
-									<div class="col-md-1">
+								<div class="row mb-8 mt-8">
+									<div class="col-md-1 mb-3 mb-md-0">
 										<label class="form-label">{{ __('admin.Show') }}</label>
 										<select id="showEntries" class="form-select form-select-sm">
 											<option value="10">10</option>
@@ -39,31 +38,31 @@
 											<option value="-1">{{ __('admin.All') }}</option>
 										</select>
 									</div>
-									<div class="col-md-2">
+									<div class="col-md-2 mb-3 mb-md-0">
 										<label class="form-label">{{ __('admin.StageName') }}</label>
 										<select id="stageFilter" class="form-select form-select-sm">
 											<option value="">{{ __('admin.All') }}</option>
 										</select>
 									</div>
-									<div class="col-md-2">
+									<div class="col-md-2 mb-3 mb-md-0">
 										<label class="form-label">{{ __('admin.Category') }}</label>
 										<select id="categoryFilter" class="form-select form-select-sm">
 											<option value="">{{ __('admin.All') }}</option>
 										</select>
 									</div>
-									<div class="col-md-2">
+									<div class="col-md-2 mb-3 mb-md-0">
 										<label class="form-label">{{ __('admin.subCategory_Name') }}</label>
 										<select id="subcategoryFilter" class="form-select form-select-sm">
 											<option value="">{{ __('admin.All') }}</option>
 										</select>
 									</div>
-									<div class="col-md-2">
+									<div class="col-md-2 mb-3 mb-md-0">
 										<label class="form-label">{{ __('admin.Weight') }}</label>
 										<select id="weightFilter" class="form-select form-select-sm">
 											<option value="">{{ __('admin.All') }}</option>
 										</select>
 									</div>
-									<div class="col-md-3 ps-12">
+									<div class="col-md-3 ps-md-12 mb-3 mb-md-0">
 										<label class="form-label">{{ __('admin.Search') }}</label>
 										<div class="input-group input-group-sm">
 											<input type="text" id="globalSearch" class="form-control" placeholder="{{ __('admin.Search') }}...">

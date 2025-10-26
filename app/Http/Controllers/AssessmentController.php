@@ -113,7 +113,7 @@ class AssessmentController extends Controller
                         'category_id' => $question->ascategory_id,
                         'subcategory_id' => $question->subcategory_id,
                         'stage_id' => $company->stage,
-                        'weight' => $weight->weight,
+                        'weight' => $weight->weight ?? null,
                         'assessment_id' => $assessmentId,
                         'QuestionBank' => $question->question,
                         'explanation_QA_ar' => $question->explanation_QA_ar,

@@ -1060,7 +1060,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           <div class="mb-3">
             <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف' }}</label>
             <input class="form-control" name="file" type="file" id="fileInput" required>
-            <div class="form-text">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+            <div class="invalid-feedback file-err" style="display: none;">{{ $l == 'en' ? 'Please select a file to upload.' : 'يرجى اختيار ملف للرفع.' }}</div>
+            <div class="invalid-feedback file-size-err" style="display: none;">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+            <div class="invalid-feedback file-type-err" style="display: none;">{{ $l == 'en' ? 'Allowed: PDF, DOCX, PPTX, ZIP' : 'المسموح: PDF, DOCX, PPTX, ZIP' }}</div>
           </div>
           <div class="mb-3">
             <label for="fileDescription" class="form-label">
@@ -1925,156 +1927,141 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
     const l = '{{ $l }}'; // "en" or "ar"
 
-    if (fileInput && fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-
-      // Build FormData
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('description', fileDescription);
-
-      // URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const hackathonId = urlParams.get('hackathonId') || '1';
-      const teamId = urlParams.get('teamId') || '123';
-      formData.append('hackathon_id', hackathonId);
-      formData.append('team_id', teamId);
-
-      // Add CSRF token
-      formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
-
-      // // Show loading
-      // Swal.fire({
-      //   title: l === 'en' ? "Uploading..." : "جاري الرفع...",
-      //   text: l === 'en' ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف.",
-      //   allowOutsideClick: false,
-      //   didOpen: () => {
-      //     Swal.showLoading();
-      //   },
-      //   showCancelButton: false,
-      //   showConfirmButton: true,
-      //   buttonsStyling: false,
-      // });
-
-      // Helper function to choose icon
-      const getIconClass = (name) => {
-        if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
-        if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
-        if (name.endsWith('.docx')) return 'ti-file-text text-info';
-        if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
-        if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
-        return 'ti-file-text';
-      };
-
-      const createListItem = (file) => {
-        const fileList = document.getElementById('fileList');
-        if (!fileList) return;
-        const newItem = document.createElement('li');
-        newItem.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2 file-list-item';
-
-        const iconClass = getIconClass(file.name);
-        const uploadedByText = l === 'en' ? 'by You' : 'بواسطة أنت';
-
-        newItem.innerHTML = `
-          <div class="d-flex align-items-center">
-            <i class="ti ${iconClass} me-2"></i>
-            <div>
-              <div class="small fw-medium">${file.name}</div>
-              <div class="text-muted small">${(file.size / 1024).toFixed(1)}KB - ${uploadedByText}</div>
-            </div>
-          </div>
-          <div class="btn-group btn-group-sm">
-            <a href="#" class="btn btn-outline-primary btn-sm" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}">
-              <i class="ti ti-download"></i>
-            </a>
-            <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}">
-              <i class="ti ti-trash"></i>
-            </button>
-          </div>`;
-        fileList.prepend(newItem);
-      };
-
-      // Send request to the route
-      fetch('/dashboard/hackathon/addSharedFile', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
-            text: data.message,
-            confirmButtonText: l === 'en' ? "OK" : "موافق",
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-          });
-          createListItem(file);
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: l === 'en' ? "Error" : "خطأ",
-            text: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
-            confirmButtonText: l === 'en' ? "OK" : "موافق",
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Upload error:', error);
-        Swal.fire({
-          icon: 'error',
-          title: l === 'en' ? "Error" : "خطأ",
-          text: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
-          confirmButtonText: l === 'en' ? "OK" : "موافق",
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-        });
-      })
-      .finally(() => {
-        const uploadModalEl = document.getElementById('uploadFileModal');
-        const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
-        if (uploadModal) uploadModal.hide();
-
-        const form = document.getElementById('fileUploadForm');
-        if (form && typeof form.reset === 'function') form.reset();
-      });
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
-        text: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
-        confirmButtonText: l === 'en' ? "OK" : "موافق",
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
-      });
+    if (!fileInput || fileInput.files.length === 0) {
+      fileInput.classList.add('is-invalid');
+      $('.file-err').show();
+      $('.file-type-err').hide(); // Hide other errors if no file is selected
+      $('.file-size-err').hide();
+      return; // Exit the function immediately
     }
+    
+    const file = fileInput.files[0];
+
+    // Allowed file types
+    const allowedTypes = [
+      'application/pdf', 
+      'application/zip',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   // docx
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      fileInput.classList.add('is-invalid');
+      $('.file-type-err').show();
+      $('.file-err').hide(); // Hide other errors
+      $('.file-size-err').hide();
+      return; // Exit the function immediately
+    }
+
+    // Max size: 10 MB
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      fileInput.classList.add('is-invalid');
+      $('.file-size-err').show();
+      $('.file-err').hide(); // Hide other errors
+      $('.file-type-err').hide();
+      return; // Exit the function immediately
+    }
+
+    // Reset error messages if all checks pass
+    fileInput.classList.remove('is-invalid');
+    $('.file-err').hide();
+    $('.file-type-err').hide();
+    $('.file-size-err').hide();
+
+    // Build FormData
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('description', fileDescription);
+
+    // URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const hackathonId = urlParams.get('hackathonId') || '1';
+    const teamId = urlParams.get('teamId') || '123';
+    formData.append('hackathon_id', hackathonId);
+    formData.append('team_id', teamId);
+
+    // Add CSRF token
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+
+    // Helper function to choose icon
+    const getIconClass = (name) => {
+      if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
+      if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
+      if (name.endsWith('.docx')) return 'ti-file-text text-info';
+      if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
+      if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
+      return 'ti-file-text';
+    };
+
+    const createListItem = (file) => {
+      const fileList = document.getElementById('fileList');
+      if (!fileList) return;
+      const newItem = document.createElement('li');
+      newItem.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2 file-list-item';
+
+      const iconClass = getIconClass(file.name);
+      const uploadedByText = l === 'en' ? 'by You' : 'بواسطة أنت';
+
+      newItem.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="ti ${iconClass} me-2"></i>
+          <div>
+            <div class="small fw-medium">${file.name}</div>
+            <div class="text-muted small">${(file.size / 1024).toFixed(1)}KB - ${uploadedByText}</div>
+          </div>
+        </div>
+        <div class="btn-group btn-group-sm">
+          <a href="#" class="btn btn-outline-primary btn-sm" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}">
+            <i class="ti ti-download"></i>
+          </a>
+          <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>`;
+      fileList.prepend(newItem);
+    };
+
+    // Send request to the route
+    fetch('/dashboard/hackathon/addSharedFile', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        releaseSuccessAlert({
+          title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
+          message: data.message || (l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح."),
+        });
+        createListItem(file);
+      } else {
+        releaseFailureAlert({
+          title: l === 'en' ? "Error" : "خطأ",
+          message: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+        });
+      }
+    })
+    .catch(error => {
+      releaseFailureAlert({
+        title: l === 'en' ? "Error" : "خطأ",
+        message: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+      });
+    })
+    .finally(() => {
+      const uploadModalEl = document.getElementById('uploadFileModal');
+      const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
+      if (uploadModal) uploadModal.hide();
+
+      const form = document.getElementById('fileUploadForm');
+      if (form && typeof form.reset === 'function') form.reset();
+    });
+ 
+   
   }
 
   function deleteFile(buttonElement, fileId) {

@@ -571,6 +571,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
     Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
     Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
+    Route::post('/track-duration',  'TrainingController@timeTracking')->name('trainings.time_tracking');
+
 
 
     Route::get('training/results/{id?}', 'TrainingController@results')->name('trainings.results_view');
