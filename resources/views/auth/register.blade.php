@@ -16,8 +16,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta name="description" content="VI Login">
   <meta name="author" content="info@growthlabs.app">
-  <title>{{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}} -
-     {{setting('title','title') }} </title>
+  <title>
+    {{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}}
+  </title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
@@ -213,6 +214,7 @@
                   </label>
                 </div>
                 @endforeach
+                <!--/ Switch Role -->
 
             <div>
               @if (session('error'))
@@ -227,93 +229,99 @@
                 </div>
               @endif
                 
-                <!--/ Switch Role -->
-												<div class="col-12 mb-6">
-													<label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
-														style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
-														<img 
-															src="{{'/images/user-placeholder.jpeg' }}"
-															onerror="this.src='/images/user-placeholder.jpeg'"
-															alt="Organization Logo" 
-															class="rounded img-fluid border shadow-sm"
-															style="height: 140px; width: 200px; object-fit: cover;" 
-														/>
-														<input type="file" class="form-control d-none" id="file1" name="img_url">
-														<i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
-													</label>
+                <div class="col-12 mb-6">
+                  <label for="file1" class="d-flex justify-content-center align-items-center position-relative rounded"
+                    style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
+                    <img 
+                      src="{{'/images/user-placeholder.jpeg' }}"
+                      onerror="this.src='/images/user-placeholder.jpeg'"
+                      alt="Organization Logo" 
+                      class="rounded img-fluid border shadow-sm"
+                      style="height: 140px; width: 200px; object-fit: cover;" 
+                    />
+                    <input type="file" class="form-control d-none" id="file1" name="img_url">
+                    <i class="ti ti-camera-plus position-absolute fs-3 text-dark end-0 bottom-0 m-4 z-1"></i>
+                  </label>
                   @error('img_url')
-                    <small class="text-danger">{{ $message }}</small>
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                   @enderror
-												</div>
+                </div>
+
+
                 <div class="col-12 mb-3">
-                  <label for="username" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
+                  <label for="first_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.firstName') }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name" autofocus />
+                    <input name="first_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autofocus />
                     @error('first_name')
-                    <small class="text-danger">{{ $message }}</small>
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                   @enderror
                   </div>
                 </div>
+
                 <div class="col-12 mb-3">
                   <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.secondName") }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name" />
-                    @error('last_name')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
+                    <input name="last_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required />
                   </div>
+                  @error('last_name')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                  @enderror
                 </div>
+
                 <div class="col-12 mb-3">
                   <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
                   <div class="input-group input-group-merge">
                     <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
-                                     @error('email')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                   </div>
+                  @error('email')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                  @enderror
                 </div>
+
                 <div class="col-12 mb-4 form-password-toggle">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password">{{ __('auth.Password') }}</label>
                   <div class="input-group input-group-merge">
                     <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}" name="password" required aria-describedby="password" />
                     <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                  @error('password')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                   </div>
+                  @error('password')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                  @enderror
                 </div>
+
                 <div class="col-12 mb-4 form-password-toggle">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="password_confirmation">{{ __('auth.Confirm') }}</label>
                   <div class="input-group input-group-merge">
                     <input type="password" class="form-control" id="password_confirmation" placeholder="{{ __('auth.Password') }}" name="password_confirmation" required aria-describedby="new-password" />
                     <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                    @error('password_confirmation')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                   </div>
+                  @error('password_confirmation')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                  @enderror
                 </div>
+
                 <div class="col-12 mb-4">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ __('auth.gender') }}</label>
                   <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
                     <option value="Male">{{ __('Male') }}</option>
                     <option value="Female">{{ __('Female') }}</option>
                   </select>
-                                                                     @error('gender')
-                    <small class="text-danger">{{ $message }}</small>
+
+                  @error('gender')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                   @enderror
-              
                 </div>
+
                 <div class="col-12 mb-4 d-grid">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
                   <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
                   <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
                   <input type="hidden" name="country_code" id="phone_code" value="20">
-                 @error('phone')
-                    <small class="text-danger">{{ $message }}</small>
+                  @error('phone')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                   @enderror
-
-                   @error('country_code')
-                    <small class="text-danger">{{ $message }}</small>
+                  @error('country_code')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
                   @enderror
                 </div>
                 <div id="mentorInputsWrapper" style="display: none;">
@@ -321,11 +329,12 @@
                     <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
                     <div class="input-group input-group-merge">
                       <input name="title_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
-                                    @error('title_en')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                     </div>
+                    @error('title_en')
+                    <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                    @enderror
                   </div>
+
                   <div class="col-12 mb-3">
                     <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Industry Expertise') }}</label>
                     <div class="form-group">
@@ -341,33 +350,33 @@
                         </optgroup>
                         @endforeach
                       </select>
-                   
-                                                       @error('expertise')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                     </div>
+                    @error('expertise')
+                      <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                    @enderror
                   </div>
+
                   <div class="col-12 mb-3">
                     <label for="bio_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
                     <div class="input-group">
                       <textarea name="bio_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="bio_en" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
-                                     
-                                                       @error('bio_en')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                     </div>
+                    @error('bio_en')
+                      <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                    @enderror
                   </div>
+
                   <div class="col-12 mb-3">
                     <label for="Linkedin" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.Linkedin') }}</label>
                     <div class="input-group">
                       <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
-                                                         
-                                                       @error('Linkedin')
-                    <small class="text-danger">{{ $message }}</small>
-                  @enderror
                     </div>
+                    @error('Linkedin')
+                      <div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+                    @enderror
                   </div>
                 </div>
+
                 <div class="mb-6 mt-2">
                   @if(!empty($termsUrl) && !empty($privacyUrl))
                       <p class="ms-2">
@@ -402,20 +411,25 @@
                 <span>{{ $l == 'en' ? 'Sign in instead' : 'سجل الدخول' }}</span>
               </a>
             </p>
-
+            @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
             <div class="divider my-6 mx-auto" style="width: 80%;">
-              <div class="divider-text">or</div>
+              <div class="divider-text">{{ __('auth.or') }}</div>
             </div>
+            @endif
             @php
             $data = request('data') ?? '2521';
         @endphp
             <div class="d-flex justify-content-center">
+             @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
               <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
                 <i class="fa-brands fa-linkedin-in text-white"></i>
               </a>
+              @endif
+              @if(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled')
               <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
                 <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
               </a>
+              @endif
             </div>
           </div>
         </div>

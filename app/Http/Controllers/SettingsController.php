@@ -7,19 +7,21 @@ use App\User;
 use App\Cycle;
 use App\Event;
 use App\State;
+use File, URL;
+use App\Sector;
 use App\Country;
 use App\Calendar;
 use App\Currency;
 use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
-use File, URL;
 use App\Invitation;
+use App\Technology;
+use App\ReminderLog;
 use App\Organization;
+use App\StaticCategory;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
-use App\Notifications\UserInvitationNotification;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -27,6 +29,9 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Notification;
+use App\Http\Requests\UpdateSocialLoginRequest;
+use App\Notifications\UserInvitationNotification;
 
 class SettingsController extends Controller
 {
@@ -552,41 +557,61 @@ class SettingsController extends Controller
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
 
-	public function update_settingsLogin(Request $request)
+	public function update_settingsLogin(UpdateSocialLoginRequest  $request)
 	{
-		$id = $request->input('id');
-		$GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
-		$GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
-		$GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+		$data = $request->validated();
+    	$id = $data['id'];
 
 		$GOOGLE_CALENDAR_CLIENT_ID = $request->input('GOOGLE_CALENDAR_CLIENT_ID');
 		$GOOGLE_CALENDAR_CLIENT_SECRET = $request->input('GOOGLE_CALENDAR_CLIENT_SECRET');
 		$GOOGLE_CALENDAR_REDIRECT = $request->input('GOOGLE_CALENDAR_REDIRECT');
 
-		$LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
-		$LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
-		$LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
 
 		$VFEmail = $request->input('VerficationEmail');
 		$VFEmail1 = $request->VerficationEmail == 'on' ? '1' : '0';
 		$updateSittings = Settings::where('id', $id)->first();
 		
-		$updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
-		$updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
-		$updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+		$updateSittings->GOOGLE_LOGIN = $request->input('GOOGLE_LOGIN', $updateSittings->GOOGLE_LOGIN ?? 'disabled');
+
+    	if ($updateSittings->GOOGLE_LOGIN === 'enabled') {
+        	$updateSittings->GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
+        	$updateSittings->GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
+        	$updateSittings->GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+    	}
 
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_ID = $GOOGLE_CALENDAR_CLIENT_ID;
 		$updateSittings->GOOGLE_CALENDAR_CLIENT_SECRET = $GOOGLE_CALENDAR_CLIENT_SECRET;
 		$updateSittings->GOOGLE_CALENDAR_REDIRECT = $GOOGLE_CALENDAR_REDIRECT;
 
-		$updateSittings->LINKEDIN_CLIENT_ID = $LINKEDIN_CLIENT_ID;
-		$updateSittings->LINKEDIN_CLIENT_SECRET = $LINKEDIN_CLIENT_SECRET;
-		$updateSittings->LINKEDIN_REDIRECT_URI = $LINKEDIN_REDIRECT_URI;
+    	$updateSittings->LINKEDIN_LOGIN = $request->input('LINKEDIN_LOGIN', 'disabled');
+
+    	if ($updateSittings->LINKEDIN_LOGIN === 'enabled') {
+        	$updateSittings->LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
+        	$updateSittings->LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
+        	$updateSittings->LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
+    	}
 
 		$updateSittings->VFEmail = $VFEmail1;
 		$updateSittings->save();
+		$activeTab = $request->input('active_tab');
 
-		return redirect()->back()->with('message', 'StoredSuccessfully');
+   		switch ($activeTab) {
+        	case 'google-oauth':
+            	$message = 'google_login_saved';
+            	break;
+
+        	case 'google-calendar':
+				$message = 'google_calendar_saved';                
+           		break;
+        	case 'linkedin':
+            	$message = 'linkedin_login_saved';
+            	break;
+        	default:
+		 		$message = 'settings_saved';
+           		 break;
+    	}
+
+    	return redirect()->back()->with('message', $message)->with('active_tab', $activeTab);
 	}
 
 	public function update_settingsImgHome(Request $request)
@@ -818,11 +843,12 @@ class SettingsController extends Controller
     }
 
 	public function ReminderLogs(Request $request) {
+		// $delete = ReminderLog::truncate();
 							if(auth()->user()->hasRole('organizationManager')) {
-                                $cycles = \App\Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
-                                $ReminderLogs = \App\ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
+                                $cycles = Cycle::where('organization_id', auth()->user()->organization_id)->get(); 
+                                $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
                             }elseif(auth()->user()->hasRole('Admin')) {
-                                $ReminderLogs = \App\ReminderLog::all();
+                                $ReminderLogs = ReminderLog::all();
                             }else{
                                 $ReminderLogs = [];
                             }
@@ -957,10 +983,7 @@ class SettingsController extends Controller
 
     }
 
-		public function industrySettings(Request $request)
-		{
-			return view('admin.settings.industry_settings');
-		} 
+		
 
 	public function inviteUser(Request $request)
 	{
@@ -1100,4 +1123,50 @@ class SettingsController extends Controller
 
 		return back()->with('message', 'InvitationCanceled');
 	}
+
+	public function industrySettings(Request $request)
+		{
+			$l = app()->getLocale();
+			$technologies = DB::table('technologies')->get()->map(function ($tech) {
+								return [
+									'id'   => $tech->id,
+									'name' => $tech->name,
+									'created_at' => $tech->created_at
+								];
+							})->values()->toArray();
+
+			$allSectors = DB::table('sectors')->get();
+
+			$industries = StaticCategory::with('sectors')->get();
+			$data = $industries->map(function ($industry) use ($l, $allSectors) {
+
+				if ($industry->sectors->isNotEmpty()) {
+					$sectorsList = $industry->sectors->map(function ($sector) use ($l) {
+						return [
+							'id'   => $sector->id,
+							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+							'created_at' => $sector->created_at
+						];
+					})->values()->toArray();
+				} else {
+					$sectorsList = $allSectors->map(function ($sector) use ($l) {
+						return [
+							'id'   => $sector->id,
+							'name' => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+							'created_at' => $sector->created_at
+						];
+					})->values()->toArray();
+				}
+				return [
+					'id'       => $industry->id,
+					'industry' => $industry->name,
+					'created_at' => $industry->created_at,
+					'sectors'  => $sectorsList,
+				];
+				
+			});
+		
+			return view('admin.settings.industry.index', compact('data', 'technologies'));
+		}
+		
 }

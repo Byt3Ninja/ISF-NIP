@@ -179,7 +179,7 @@
                             </div>
                             <div class="d-flex align-items-center text-muted">
                               <i class="ti ti-align-box-center-middle text-warning me-1"></i>
-                              <small class="fw-medium">{{ __('cycles.' . $types[$cstep->data]) }}</small>
+                              <small class="fw-medium">{{ __('cycles.' . $types[$cstep?->data]) }}</small>
                             </div>
                           </div>
                         </div>
@@ -484,7 +484,7 @@
                       
                       <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
                            data-company-name="{{ strtolower($company->name) }}"
-                           data-user-name="{{ strtolower($company->user->name) }}"
+                           data-user-name="{{ strtolower($company->user?->{'first_name_'.$l}) . ' - ' . strtolower($company->user?->{'last_name_'.$l}) }}"
                            data-category="{{ strtolower($categoryString) }}"
                            data-score="{{ $filterScore }}"
                            data-status="{{ $primaryStatus }}"
@@ -694,9 +694,9 @@
                   <div class="error-state-icon mb-4">
                     <i class="ti ti-alert-triangle text-warning" style="font-size: 4rem;"></i>
                   </div>
-                  <h4 class="card-title text-dark mb-3">{{ __('admin.No_results_found') }}</h4>
+                  <h4 class="card-title text-dark mb-3">{{ __('admin.No_Screening_Startups') }}</h4>
                   <p class="text-muted mb-4">
-                    {{ __('cycles.No records screening from') }}
+                    {{ __('admin.No_Screening_Startups') }}
                   </p>
                   <a href="/dashboard/cycles" class="btn btn-primary rounded-pill px-4">
                     <i class="ti ti-arrow-left me-2"></i>

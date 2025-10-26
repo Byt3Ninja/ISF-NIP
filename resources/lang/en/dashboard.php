@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'First screening'=>'Filtration',
-    'Final screening'=>'Evaluation',
+    'First screening'=>'Screening',
+    'Final screening'=>'Final Screening',
     'Services' => 'Services',
     'newmessages' => 'New Messages',
     'cantAccessAllCompanies' => 'You can not access all companies',
@@ -174,4 +174,13 @@ return [
     'Invitation_accepted_successfully' => 'Invitation accepted successfully',
     'Invitation_not_found' => 'Invitation not found',
     'YouHaveNotCompany' => 'You have not company currently',
+    'Prerequisites_Required' => 'Prerequisites Required',
+    'To join this program as a startup, please complete these requirements first:' => 'To join this program as a startup, please complete these requirements first:',
+    'To get started with this program, please complete your profile requirements:' => 'To get started with this program, please complete your profile requirements:',
+    'Completing these steps will help your startup get the most out of the program.' => 'Completing these steps will help your startup get the most out of the program.',
+    'Setting up your profile properly will ensure you have access to all program features.' => 'Setting up your profile properly will ensure you have access to all program features.',
+    'To join this program, you must complete the following prerequisites first:' => 'To join this program, you must complete the following prerequisites first:',
+    'Completion of all prerequisites is required before you can join the program.' => 'Completion of all prerequisites is required before you can join the program.',
+    'Complete Prerequisites & Join' => 'Complete Prerequisites & Join',
+    'Complete Prerequisites' => 'Complete Prerequisites',
 ];

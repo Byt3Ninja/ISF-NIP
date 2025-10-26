@@ -1,4 +1,4 @@
-<div class="card border shadow-sm p-0">
+{{--  <div class="card border shadow-sm p-0">
  	<div class="card-header d-flex justify-content-between align-items-center">
  		<h5 class="mb-0 fw-bold card-title text-dark">
 			🏆 {{  $l == 'ar' ? 'نتائج التحكيم واختيار الفائز' : 'Judging Results & Winner Selection' }}
@@ -35,4 +35,4 @@
  			</table>
  		</div>
  	</div>
-</div>
+</div>  --}}

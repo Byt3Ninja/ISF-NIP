@@ -68,13 +68,19 @@
       navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          const targetId = link.getAttribute('href').substring(1);
+
+          const href = link.getAttribute('href');
+          if (!href) return; // Skip if no href
+
+          const targetId = href.substring(1);
           setActiveTab(targetId);
+
           if (targetId === 'evaluation-model') {
             renderModelEditor();
           }
         });
       });
+
 
       const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
       setActiveTab(initialTab);

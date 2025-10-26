@@ -198,6 +198,96 @@
                 "default_for": [
                     "admin"
                 ]
+            },
+            {
+                "name": "settings.industry_view",
+                "description": "View Industry Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.create_technologies",
+                "description": " Create Technologies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.update_technologies",
+                "description": " Update Technologies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.delete_technologies",
+                "description": " Delete Technologies",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.create_industries",
+                "description": " Create Industries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.update_industries",
+                "description": " Update Industries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.delete_industries",
+                "description": " Delete Industries ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.create_sectors",
+                "description": " Create Sectors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.update_sectors",
+                "description": " Update Sectors ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.delete_sectors",
+                "description": " Delete Sectors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
             }
         ]
     },
@@ -1893,6 +1983,18 @@
                     "admin"
                 ]
             },
+
+                        {
+                "name": "users.companies_export",
+                "description": "List Users",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+
+            
             {
                 "name": "users.create",
                 "description": "Create User Form",
@@ -2670,6 +2772,17 @@
                 ]
             },
             {
+                "name": "hackathon.viewTeam",
+                "description": "View Hackathon Team",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered"
+                ]
+            },
+            {
                 "name": "hackathon.createTeam",
                 "description": "Create Hackathon Team",
                 "guard_name": "web",
@@ -2917,6 +3030,18 @@
                     "organizationmanager",
                     "registered"
                    
+                ]
+            },
+            {
+                "name": "hackathon.hackathon_Summary",
+                "description": " View Finish Hackathon Summary ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "registered",
+                    "mentor"
                 ]
             }
 
@@ -3952,6 +4077,18 @@
                 ]
             },
             {
+                "name": "mentors.list.lowercase",
+                "description": "List Mentors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+            {
                 "name": "mentors.add",
                 "description": "Add New Mentor",
                 "guard_name": "web",
@@ -4968,6 +5105,17 @@
                     "mentor",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "mentorships.sessions_reports_data",
+                "description": "Get Mentorship Sessions Report Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager"
+                ]
             }
         ]
     },
@@ -5351,6 +5499,16 @@
                     "admin",
                     "organizationmanager"
                 ]
+            },
+            {
+                "name": "trainings.session_reports_data",
+                "description": "View Training Session Reports Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
             }
         ]
     },
@@ -5643,7 +5801,8 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
                 ]
             },
             {
@@ -5652,7 +5811,28 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "reports.export.finalScreening",
+                "description": "Export Final Screening Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "reports.export.screening",
+                "description": "Export Screening Report",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
                 ]
             }
         ]
@@ -7240,6 +7420,88 @@
                     "organizationmanager"
                 ]
             },
+
+                        {
+                "name": "chat.index",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                    {
+                "name": "chat.users",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                               {
+                "name": "chat.conversation",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                               {
+                "name": "chat.conversation.create",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                                           {
+                "name": "chat.conversation.messages",
+                "description": "View Chat Messages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+                                                                       {
+                "name": "chat.typing",
+                "description": "Typing indicator",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "registered",
+                    "organizationmanager"
+                ]
+            },
+
+
+            
+            
             {
                 "name": "chat.groups",
                 "description": "View Chat Groups",
@@ -7486,6 +7748,13 @@
       "guard_name": "web",
       "is_core": 0,
       "default_for": ["admin", "organizationmanager"]
+    },
+    {
+      "name": "trainings.sessions_join",
+      "description": " Attendance to Training Session",
+      "guard_name": "web",
+      "is_core": 0,
+      "default_for": ["admin", "organizationmanager", "registered", "mentor"]
     }
    ]
 }

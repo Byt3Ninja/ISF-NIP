@@ -165,6 +165,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/trends/by-program', [MentorshipReportController::class, 'trendsByProgram']);
     Route::get('/trends/peak-activity', [MentorshipReportController::class, 'peakActivity']);
 });
+
 Route::prefix('training')->group(function () {
     Route::get('summary', [TrainingReportController::class, 'summary']);
     Route::get('session-types', [TrainingReportController::class, 'sessionTypes']);
@@ -174,9 +175,14 @@ Route::prefix('training')->group(function () {
     Route::get('trainers', [TrainingReportController::class, 'trainers']);
     Route::get('topics', [TrainingReportController::class, 'topics']);
     Route::get('sessions/recent', [TrainingReportController::class, 'recentSessions']);
+    Route::post('session-reports', [TrainingReportController::class, 'getSessionReportsData']);
 });
 
+Route::prefix('mentorship')->group(function () {
+    Route::post('session-reports', [MentorshipReportController::class, 'sessionReportsData']);
+});
 
+Route::prefix('chat')->group(function () {
     // جروبات
     Route::post('/groups', [ChatController::class, 'createGroup']);
     Route::post('/groups/{groupId}/add-user', [ChatController::class, 'addUser']);
@@ -184,9 +190,6 @@ Route::prefix('training')->group(function () {
     Route::post('/groups/{groupId}/exit', [ChatController::class, 'exitGroup']);
     Route::delete('/groups/{groupId}/delete', [ChatController::class, 'deleteGroup']);
     Route::get('/my-groups', [ChatController::class, 'myGroups']);
-    
-
-
 
     // wirechat messages
     Route::get('/wirechat/messages', [ChatController::class, 'messages']);
@@ -195,12 +198,30 @@ Route::prefix('training')->group(function () {
 
     // Search Users
     Route::get('/users/search', [ChatController::class, 'searchUser']);
-    
+
+    // Get Users for Chat
+    Route::get('/users', [ChatController::class, 'getUsers']);
+
+    // Conversations
+    Route::get('/conversations', [ChatController::class, 'messages']);
+    Route::get('/conversations/{conversationId}/messages', [ChatController::class, 'getConversationMessages']);
+    Route::post('/conversations', [ChatController::class, 'createOrGetConversation']);
 });
 
+Route::prefix('training')->group(function () {
+    Route::get('summary', [TrainingReportController::class, 'summary']);
+    Route::get('session-types', [TrainingReportController::class, 'sessionTypes']);
+    Route::get('monthly-trends', [TrainingReportController::class, 'monthlyTrends']);
+    Route::get('type-breakdown', [TrainingReportController::class, 'typeBreakdown']);
+    Route::get('hours-trend', [TrainingReportController::class, 'hoursTrend']);
+    Route::get('trainers', [TrainingReportController::class, 'trainers']);
+    Route::get('topics', [TrainingReportController::class, 'topics']);
+    Route::get('sessions/recent', [TrainingReportController::class, 'recentSessions']);
+    Route::post('session-reports', [TrainingReportController::class, 'getSessionReportsData']);
+});
 
+Route::prefix('mentorship')->group(function () {
+    Route::post('session-reports', [MentorshipReportController::class, 'sessionReportsData']);
+});
 
-
-
-
-
+});

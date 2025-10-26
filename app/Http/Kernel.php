@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             Permissions::class,
             \App\Http\Middleware\SetUserTimezone::class,
+             \App\Http\Middleware\SetLocaleFromSession::class,
         ],
 
         'api' => [

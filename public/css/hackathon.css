@@ -90,7 +90,7 @@
     }
   }
 
-  .nav-tabs .nav-link.active {
+  /* .nav-tabs .nav-link.active {
     background-color: #7367f0;
     color: white;
     border-color: #7367f0;
@@ -107,7 +107,7 @@
   .nav-tabs .nav-link:hover {
     border-color: #7367f0;
     background-color: rgba(115, 103, 240, 0.1);
-  }
+  } */
 
   .timeline {
     list-style-type: none;

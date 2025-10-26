@@ -34,6 +34,7 @@
   $name = 'name_' . $l;
   $tabs = collect([
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
+      ['classification', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
       ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
       ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
       ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
@@ -41,7 +42,6 @@
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
-      ['classification', 'ti-apps', $l == 'en' ? 'Classification' : ' التصنيف '],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -125,6 +125,9 @@
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break
+                @case('classification')
+                  @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
+                @break
                 @case('company-contact-info')
                   @include('partials.forms.company.company-contact', ['heading' => $tab['label']])
                 @break
@@ -145,9 +148,6 @@
                 @break
                 @case('business_model')
                   @include('partials.forms.company.business_model', ['heading' => $tab['label']])
-                @break
-                @case('classification')
-                  @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
                 @break
               @endswitch
             </div>

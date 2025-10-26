@@ -253,7 +253,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 				<div class="hackathon-banner text-center shadow">
 					<div class="banner-content">
 						<h1 class="display-5 fw-bold text-black" id="hackathon-main-title"> {{ $program->title }} </h1>
-						<p class="lead fw-semibold line-clamp-5">{{ $program->description }}</p>
+						<p class="lead fw-semibold">{{ $program->description }}</p>
 						<p class="lead fw-semibold" id="hackathon-dates-location">
 							<i class="ti ti-calendar-event me-2"></i>
 							{{ $program->ranges }}
@@ -492,13 +492,14 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 													if (value.options.label) {
 														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
 													}
-													fields += `<select class="form-select" id="${value.id_for}" name='${value.field_name}'>`;
+													fields += `<select class="form-select" id="${value.id_for}" name='${value.field_name}' ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''}>`;
 													fields += `<option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>`;
 													$.each(value.options.values.split(','), function(key, option) {
 														fields += `<option value="${option}">${option}</option>`;
 													});
 													fields += `</select>`;
-													fields += `<div class="invalid-feedback">${value.options.label} required</div>`;
+													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
+													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
 													fields += `</div>`;
 													break;
 												}
@@ -508,8 +509,9 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 													if (value.options.label) {
 														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
 													}
-													fields += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${value.options.rows}"></textarea>`;
-													fields += `<div class="invalid-feedback">${value.options.label} required</div>`;
+													fields += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${value.options.rows}" ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''}></textarea>`;
+													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
+													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
 													fields += `</div>`;
 													break;
 												}
@@ -520,8 +522,9 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 														fields += `<label for="${value.id_for}" class="form-label fw-bold">${value.options.label}</label>`;
 													}
 													fields += `<div class="d-flex flex-column">`;
-													fields += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" required>`;
-													fields += `<div class="invalid-feedback">${value.options.label}</div>`;
+													fields += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''}>`;
+													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
+													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
 													fields += `</div>`;
 													fields += `</div>`;
 													break;
@@ -536,8 +539,9 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 																class="form-control ${value.options.type == 'date' ? 'datepicker' : ''}"
 																id="${value.id_for}"
 																name="${value.field_name}"
-																value="" />`;
-													fields += `<div class="invalid-feedback">${value.options.label} required</div>`;
+																value="" ${value.options.validation && value.options.validation.required == 1 ? 'required' : ''} />`;
+													const requiredText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
+													fields += `<div class="invalid-feedback">${value.options.label} ${requiredText}</div>`;
 													fields += `</div>`;
 												}
 										}
@@ -684,10 +688,10 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 			// Clear previous error highlights
 			$form.find('.is-invalid').removeClass('is-invalid');
 
-			// Custom Validation
+			// Custom Validation - Only validate fields that have the required attribute
 			$form.find('[required]').each(function() {
 				const $field = $(this);
-				if ($field.is(':visible')) { // Only validate visible fields
+				if ($field.is(':visible') && $field.attr('required') !== undefined) { // Only validate visible required fields
 					const type = $field.attr('type');
 					const value = $field.val();
 
@@ -699,7 +703,7 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 							$field.addClass('is-invalid');
 							isValid = false;
 						}
-					} else if (!value) {
+					} else if (!value || value.trim() === '') {
 						$field.addClass('is-invalid');
 						isValid = false;
 					}

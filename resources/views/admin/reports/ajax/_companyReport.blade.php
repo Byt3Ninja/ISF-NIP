@@ -40,7 +40,7 @@
 
 <div class="col-12 mt-6">
   <div class="row g-6">
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
+    <a href="#mentorshipSessionsSection" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-primary h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -51,12 +51,12 @@
             </div>
             <h4 class="mb-0">{{ $mentorRequests_count }}</h4>
           </div>
-          <p class="mb-1">{{ __('admin.Mentorship requests') }}</p>
+          <p class="mb-1">{{ __('admin.Mentorship Sessions') }}</p>
         </div>
       </div>
     </a>
 
-    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
+    <a href="#mentorshipSessionsSection" class="col-lg-4 col-sm-6">
       <div class="card card-border-shadow-primary h-100">
         <div class="card-body" style="display: grid; place-items: center;">
           <div class="d-flex align-items-center mb-2">
@@ -67,7 +67,7 @@
             </div>
             <h4 class="mb-0">{{ $mentorships_period }}</h4>
           </div>
-          <p class="mb-1">{{ __('admin.Mentorship requests Duration') }}</p>
+          <p class="mb-1">{{ __('admin.Mentorship Sessions Duration') }}</p>
         </div>
       </div>
     </a>
@@ -128,62 +128,69 @@
       <div>
         <h4 class="card-title align-items-center mb-3">
           <i class='ti ti-card ti-28px'></i>
-          <span class="mx-2">{{ __('admin.Mentorship requests') }}:</span>
+          <span class="mx-2">{{ __('admin.Mentorship Sessions') }}:</span>
         </h4>
-        <div class="card-body" style="height: 600px; overflow-y: auto;">
-          <div class="card ">
-            <div class="table-responsive">
-              <table class="table mb-0" id="userstable">
-                <thead class="bg-label-secondary">
-                  <tr>
-                    <th>{{ __('cycles.Mentor') }}</th>
-                    <th>{{ __('cycles.Rate/Comment') }}</th>
-                    <th>{{ __('cycles.Date/Time') }}</th>
-                    <th>{{ __('cycles.Approved') }}</th>
-                    <th>{{ __('cycles.Attendance') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($mentorship_sessions as $session)
+        <div id="mentorshipSessionsSection" class="card-body" style="height: 600px; overflow-y: auto;">
+          @if($mentorship_sessions->count())
+            <div class="card">
+              <div class="table-responsive">
+                <table class="table mb-0" id="mentorshipSessionsTable">
+                  <thead class="bg-label-secondary">
                     <tr>
-                      <td>
-                        <div style="cursor: pointer;" class="chip mr-1">
-                          <div class="d-flex align-items-center">
-                            <div class="avatar">
-                              <img class="img-fluid" src="{{ $session->mentor->image_url }}" alt="pic"
-                                height="20" width="20">
-                            </div>
-                            <span class="mx-2">
-                              {{ $session->mentor->name }}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <small>{!! $session->rate_comment
-                            ? str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>', $session->rating) .
-                                '<br>' .
-                                $session->rate_comment
-                            : $session->comment !!}</small>
-                      </td>
-                      <td>
-                        {{ $session->zoom_date }}
-                        <br>({{ $session->period }}M)
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center gap-1">
-                          {!! __($session->approved) ?? '<span class="warning">' . __('Waiting') . '</span>' !!}
-                        </div>
-                      </td>
-                      <td>
-                        {{ $session->done ? __('Yes') : __('No') }}
-                      </td>
+                      <th>{{ __('cycles.Mentor') }}</th>
+                      <th>{{ __('cycles.Rate/Comment') }}</th>
+                      <th>{{ __('cycles.Date/Time') }}</th>
+                      <th>{{ __('cycles.Approved') }}</th>
+                      <th>{{ __('cycles.Attendance') }}</th>
                     </tr>
-                  @endforeach
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @foreach ($mentorship_sessions as $session)
+                      <tr>
+                        <td>
+                          <div style="cursor: pointer;" class="chip mr-1">
+                            <div class="d-flex align-items-center">
+                              <div class="avatar">
+                                <img class="img-fluid" src="{{ $session->mentor->image_url }}" alt="pic"
+                                  height="20" width="20">
+                              </div>
+                              <span class="mx-2">
+                                {{ $session->mentor->name }}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <small>{!! $session->rate_comment
+                              ? str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>', $session->rating) .
+                                  '<br>' .
+                                  $session->rate_comment
+                              : $session->comment !!}</small>
+                        </td>
+                        <td>
+                          {{ $session->zoom_date }}
+                          <br>({{ $session->period }}M)
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center gap-1">
+                            {!! __($session->approved) ?? '<span class="warning">' . __('Waiting') . '</span>' !!}
+                          </div>
+                        </td>
+                        <td>
+                          {{ $session->done ? __('Yes') : __('No') }}
+                        </td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          @else
+            <div class="text-center py-5">
+              <i class="ti ti-calendar-x text-secondary" style="font-size: 3rem;"></i>
+              <p class="mt-3 mb-0">{{ __('admin.No_Mentorship_Sessions_Startup') }}</p>
+            </div>
+          @endif
         </div>
       </div>
     </div>

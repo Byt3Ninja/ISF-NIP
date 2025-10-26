@@ -1,312 +1,305 @@
 @extends('layouts.admin')
 
-@section('title', __('admin.Profile'))
-@section('subTitle', __('admin.Edit your profile information'))
-
-@section('vendorstyle')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/apex-charts/apex-charts.css" />
-@stop
-
 @section('style')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
+<style>
+  /* Custom styles for program selection card */
+  @media (max-width: 768px) {
+    .card-body .row > div {
+      margin-bottom: 1rem;
+    }
+
+    .card-body .row > div:last-child {
+      margin-bottom: 0;
+    }
+
+    #programSelect {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
+
+  /* Select2 customization for better mobile experience */
+  .select2-container--default .select2-selection--single {
+    border: 1px solid #d9dee3;
+    border-radius: 0.375rem;
+    min-height: 38px;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #6f6b7d;
+    line-height: 1.5;
+    padding: 0;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #a8aaae;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+    right: 10px;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #6f6b7d transparent transparent transparent;
+    border-style: solid;
+    border-width: 5px 4px 0 4px;
+    height: 0;
+    left: 50%;
+    margin-left: -4px;
+    margin-top: -2px;
+    position: absolute;
+    top: 50%;
+    width: 0;
+  }
+
+  .select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent #6f6b7d transparent;
+    border-width: 0 4px 5px 4px;
+  }
+</style>
 @stop
+
+@section('title', __('admin.Reports'))
+@section('subTitle', __('admin.View and analyze reports'))
 
 @section('content')
-  <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-header row">
-      </div>
-      <div class="content-body">
-        <section id="basic-input">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="card">
-                <div class="card-header">
-                  <h4 class="card-title d-flex align-items-center">
-                    <i class="ti ti-report-analytics ti-24px"></i>
-                    <span class="mx-2">{{ __('admin.Reports') }}</span>
-                  </h4>
-                  <hr>
+<div class="content-wrapper mb-12">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row py-md-3 h-100">
+      <div class="col-md-12 h-100">
+        {{-- Alerts --}}
+        @if (session()->has('msg'))
+          <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{ __('admin.' . session()->get('msg')) }}
+            {{ Session::forget('msg') }}
+          </div>
+        @endif
+
+        @if ($errors->any())
+          <div class="alert alert-danger">
+            <ul class="mb-0">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+    
+        <!-- Program Selection -->
+        <div class="card mb-4">
+          <div class="card-body py-3">
+            <div class="row align-items-center">
+              <div class="col-md-3 col-lg-2">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ti ti-components ti-lg text-primary"></i>
+                  <label for="programSelect" class="form-label mb-0 fw-semibold">{{ __('admin.Select Program') }}:</label>
                 </div>
-                <div class="card-content">
-                  <div class="card-body">
-                    @if (session()->has('msg'))
-                      <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        {{ __('admin.' . session()->get('msg')) }}
-                        {{ Session::forget('msg') }}
-                      </div>
-                    @endif
-                    <!-- Validation messages -->
-                    @if (count($errors) > 0)
-                      <div class="row">
-                        <div class="col-md-12">
-                          <div class="alert alert-danger">
-                            <ul>
-                              @foreach ($errors->all() as $error)
-                                <li>{{ $error }} </li>
-                              @endforeach
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    @endif
-
-                    <div class="col-md-12 col-12">
-                      <div class="form-group">
-                        <div class="card-content">
-                          <div class="px-2">
-                            <h5>{{ __('admin.Select Report Kind') }}</h5>
-                            <p></p>
-                            <ul class="list-unstyled mb-0">
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="mentorship" id="rad0" class="type">
-                                    <label for="rad0">{{ __('admin.Mentorship') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="training" id="rad1" class="type">
-                                    <label for="rad1">{{ __('admin.Training sessions') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="judge" id="rad2" class="type">
-                                    <label for="rad2">{{ __('admin.judge Sessions') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="cycles" id="rad3" class="type">
-                                    <label for="rad3">{{ __('admin.Cycles') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="companies" id="rad4" class="type">
-                                    <label for="rad4">{{ __('admin.Companies') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="mentorSurveys" id="rad5" class="type">
-                                    <label for="rad5">{{ __('admin.Surveys_Mentor') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-
-                              <li class="d-inline-block mx-2 mb-1">
-                                <fieldset>
-                                  <div class="radio">
-                                    <input type="radio" name="type" value="startupSurveys" id="rad6" class="type">
-                                    <label for="rad6">{{ __('admin.Surveys_Startup') }}</label>
-                                  </div>
-                                </fieldset>
-                              </li>
-
-
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-12 col-12 " id="cyclesSelectSection" style="display: none;">
-                      <div class="form-group mt-4 px-2">
-                        <h5 id="selectTitle">{{ __('admin.SelectCycle') }}</h5>
-                        <p id="selectSubtitle">{{ __('admin.SelectOrSearchCycle') }}.</p>
-                        <div class="form-group">
-                          <select class="form-control select2" id="cyclesSelectOptions">
-                            @foreach ($cycles as $cycle)
-                              <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div id="companiesSelectSection" style="display: none;">
-                      <div class="form-group mt-4 px-2">
-                        <h5>{{ __('admin.SelectCompany') }}</h5>
-                        <p>{{ __('admin.SelectOrSearchCompany') }}.</p>
-                        <div class="form-group">
-                          <select class="form-control select2" id="companiesSelectOptions">
-                            @foreach ($companies as $company)
-                              <option value="{{ $company->id }}">{{ $company->name }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row px-8 pb-8">
-                    <div class="col-12 d-flex">
-                      <button type="button" id="showReport"
-                        class="btn btn-primary mr-1 mb-1">{{ __('admin.ViewReport') }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              </div>
+              <div class="col-md-9 col-lg-10">
+                <select class="form-select select2" id="programSelect" style="width: 100%;">
+                  <option value="">{{ __('admin.All Programs') }}</option>
+                  @foreach ($cycles as $cycle)
+                    <option value="{{ $cycle->id }}" data-title="{{ $cycle->title }}">{{ $cycle->title }}</option>
+                  @endforeach
+                </select>
+                <small class="form-text text-muted mt-1">{{ __('admin.Select program to filter reports') }}</small>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section class="cart my-10">
-          <div id="reportContent" class="card-body">
+        <!-- Navigation Pills -->
+        @php
+          $pills = [
+            'mentorship'     => ['label' => __('admin.Mentorship'),      'icon' => 'ti ti-school'],
+            'training'       => ['label' => __('admin.Training sessions'),'icon' => 'ti ti-chalkboard'],
+            'screening'          => ['label' => __('admin.Screening'),  'icon' => 'ti ti-scale'],
+            'finalScreening'          => ['label' => __('admin.Final Screening'),  'icon' => 'ti ti-gavel'],
+            'cycles'         => ['label' => __('admin.Cycles'),          'icon' => 'ti ti-components'],
+            'companies'      => ['label' => __('admin.Companies'),       'icon' => 'ti ti-building'],
+            'mentorSurveys'  => ['label' => __('admin.Surveys_Mentor'),  'icon' => 'ti ti-clipboard-check'],
+            'startupSurveys' => ['label' => __('cycles.Startup_Surveys'), 'icon' => 'ti ti-clipboard-list'],
+          ];
+        @endphp
 
+        <div class="overflow-auto">
+          <ul class="nav nav-pills mb-4 flex-nowrap" id="reportTabs" role="tablist">
+            @foreach($pills as $key => $data)
+            <li class="nav-item" role="presentation">
+              <button 
+                class="nav-link px-4 py-2 d-flex align-items-center gap-2 @if ($loop->first) active @endif"
+                id="{{ $key }}-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#{{ $key }}"
+                type="button"
+                role="tab"
+                aria-controls="{{ $key }}"
+                aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+              >
+                <i class="{{ $data['icon'] }} ti-18px"></i>
+                <span style="font-size: 14px;">{{ $data['label'] }}</span>
+              </button>
+            </li>
+            @endforeach
+          </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content p-0 w-100 h-100" id="reportTabsContent">
+          @foreach($pills as $key => $label)
+          <div 
+            class="w-100 h-100 tab-pane fade @if($loop->first) show active @endif" 
+            id="{{ $key }}" 
+            role="tabpanel" 
+            aria-labelledby="{{ $key }}-tab"
+          >
+            <div class="card h-100 w-100">
+              <div class="card-body py-3 h-100 w-100">
+                @if ($key === 'companies')
+                  <h5>{{ __('admin.SelectCompany') }}</h5>
+                  <p>{{ __('admin.SelectOrSearchCompany') }}</p>
+                  <select class="form-control select2" id="companiesSelectOptions">
+                    @foreach ($companies as $company)
+                      <option value="{{ $company->id }}">{{ $company->name }}</option>
+                    @endforeach
+                  </select>
+                @else
+                  {{-- <div class="text-muted">{{ __('admin.LoadingReport') }}...</div> --}}
+                @endif
+
+                <!-- Report Content Area -->
+                <div class="report-content mt-3" id="report-{{ $key }}"></div>
+
+              </div>
+            </div>
           </div>
-        </section>
+          @endforeach
+        </div>
       </div>
     </div>
   </div>
-  <!-- END: Content-->
+</div>
 @stop
+
 @section('scripts')
-  {{-- <script src="/app-assets/js/core/dashboards-analytics.js"></script>
-    <script src="/app-assets/vendors/js/charts/apexcharts.min.js"></script> --}}
-  <script>
-    $(document).ready(function() {
-      $('#companiesSelectSection').hide();
-      $('#cyclesSelectSection').hide();
-      $('.type').change(function() {
-        if ($(this).val() === 'cycles') {
-          $('#cyclesSelectSection').show();
-          $('#companiesSelectSection').hide();
-        } else if ($(this).val() === 'companies') {
-          $('#cyclesSelectSection').hide();
-          $('#companiesSelectSection').show();
-        } else {
-          $('#companiesSelectSection').hide();
-          $('#cyclesSelectSection').hide();
-        }
-      });
-      $('#showReport').click(function() {
-        var value = $('.type:checked').val();
-        
-        if (value === 'cycles' || value === 'companies') {
-          var selectValue = $('#' + value + 'SelectOptions').val();
-          if (selectValue === '' || selectValue === undefined) {
-            alert('برجاء اختيار القيمة اولا');
-          } else {
-            
-            getAjaxReport(value, selectValue);
+<script>
+  // Define cleanup function first (function hoisting)
+  function cleanupTabContent(type) {
+    // Remove any global event handlers that might have been bound by the tab content
+    const reportContainer = $('#report-' + type);
+    
+    // Unbind any document-level events that might be specific to this tab
+    if (type === 'screening') {
+      $(document).off('click', '.show-company-evaluation');
+      $(document).off('click', '#export-csv, #export-excel');
+    } else if (type === 'finalScreening') {
+      $(document).off('click', '.show-company-evaluation');
+      $(document).off('click', '#export-csv, #export-excel');
+    }
+    
+    // Clear the container
+    reportContainer.empty();
+    
+    // Trigger cleanup event for any custom cleanup needed
+    $(document).trigger('tabContentCleanup', [type]);
+  }
+
+  function getAjaxReport(type, id = 0, programId = '') {
+    let dataToSend = { id: id, program_id: programId };
+
+    // Clean up existing content first
+    cleanupTabContent(type);
+
+    $.ajax({
+      url: "{{ route('reports.view.ajax') }}/" + type,
+      data: dataToSend,
+      beforeSend: function() {
+        $('#report-' + type).html(`
+          <div class="d-flex justify-content-center align-items-center py-4 loading-message">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        `);
+      },
+      success: function(data) {
+        if (data['value'] === 1) {
+          $('#report-' + type + ' .loading-message').remove();
+          $('#report-' + type).html(data['view']);
+
+          // Initialize components if this is the training report
+          if (type === 'training' && typeof initializeComponents === 'function') {
+            initializeComponents();
           }
 
-        } else {
-          
-          getAjaxReport(value)
+          // Trigger content loaded event for any additional initialization
+          $(document).trigger('tabContentLoaded', [type]);
+        }
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    // Get current selected program
+    function getSelectedProgram() {
+      return $('#programSelect').val() || '';
+    }
+
+    // Initialize Select2 for program selection
+    $('#programSelect').select2({
+      placeholder: '{{ __("admin.Select a program") }}',
+      allowClear: true,
+      width: '100%'
+    });
+
+    // Clear content of inactive tabs when switching
+    $('button[data-bs-toggle="pill"]').on('hide.bs.tab', function (e) {
+      var previousType = $(e.target).data('bs-target').replace('#','');
+      // Clean up the content of the tab being hidden to prevent conflicts
+      cleanupTabContent(previousType);
+    });
+
+    // Load report when tab is shown
+    $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+      var type = $(e.target).data('bs-target').replace('#',''); // e.g. "mentorship"
+
+      // Clear all other tab contents first to ensure only active tab has content
+      $('.report-content').each(function() {
+        if ($(this).attr('id') !== 'report-' + type) {
+          $(this).empty();
+        }
+      });
+
+      if (type !== 'companies') {
+        getAjaxReport(type, 0, getSelectedProgram());
+      }
+    });
+
+    // Load immediately first active tab
+    let firstTab = $('#reportTabs .nav-link.active').data('bs-target').replace('#','');
+    if (firstTab !== 'cycles' && firstTab !== 'companies') {
+      getAjaxReport(firstTab, 0, getSelectedProgram());
+    }
+
+    // Reload all reports when program selection changes
+    $('#programSelect').change(function() {
+      var selectedProgram = getSelectedProgram();
+
+      // Reload all active tabs with new program filter
+      $('button[data-bs-toggle="pill"]').each(function() {
+        var type = $(this).data('bs-target').replace('#','');
+        if (type !== 'companies' && $('#report-' + type).children().length > 0) {
+          getAjaxReport(type, 0, selectedProgram);
         }
       });
     });
 
-    function getAjaxReport(value, id = 0) {
-      
-      $.ajax({
-        url: "{{ route('reports.view.ajax') }}/" + value,
-        data: {
-          id: id
-        },
-        success: function(data) {
-        
-          if (data['value'] === 1) {
-            $('#reportContent').html(data['view']);
-          }
-        }
-      });
-    }
-
-
-
-var responses = @json($available_surveys)
-
-		$(document).on('click', '.open-responses', function() {
-			var id = $(this).data('id');
-			var responses = @json($available_surveys);
-			var response = responses.filter(function(oneResponse) {
-				return oneResponse.id == id;
-			});
-			var responses = response[0].responses;
-			var html = '';
-			responses.forEach(function(oneResponse) {
-				html += '<tr data-id="' + id + '" data-qid="' + oneResponse.id + '" class="cursor-pointer open-question-details">';
-				html += '<td>' + oneResponse.question + '</td>';
-				html += '<td class="text-center">' + ( oneResponse.type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : ( oneResponse.type == 'answers' ? "{{ __('admin.surveyQuestionAndAnswer') }}" : "{{ __('admin.surveyTypeStarRating') }}" ) ) + '</td>';
-				html += '</tr>';
-			});
-			$("#modelPreviewArea").html('<div class="text-center"> {{ __("admin.previewAreaPlaceholder") }} </div>');
-			$('#question-picker-tbody').html(html);
-			$('#questionsModal').modal('show');
-		});
-
-		$(document).on('click', '.open-question-details', function() {
-			var id = $(this).data('id');
-			var question_id = $(this).data('qid');
-			var responses = @json($available_surveys);
-			var response = responses.filter(function(oneResponse) {
-				return oneResponse.id == id;
-			});
-			var responses = response[0].responses;
-			var question = responses.filter(function(oneResponse) {
-				return oneResponse.id == question_id;
-			});
-			var question = question[0];
-			var html = '';
-			if( question.type == 'radio' )
-			{
-				question.answers.forEach( function(item, key) {
-					var count = key + 1;
-					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
-					html += '<div class="custom-py-1"> <button class="w-100 text-left btn ' + checked + '">' + count + '. ' + item.text + '</button> </div>';
-				});
-			}
-			else if( question.type == 'answers' )
-			{
-				question.answers.forEach( function(item, key) {
-					var count = key + 1;
-					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
-					html += '<div class="custom-py-1"> '+ question.answer +' </div>';
-				});
-			}
-			else if( question.type == 'stars' )
-			{
-				var answer = parseInt( question.answer );
-				html += '<ul class="custom-star-rating text-center p-0 my-1">';
-					for( var i = 0; i < question.answers.length; i++ )
-					{
-						if( i < answer )
-						{
-							html += '<li><i class="ti ti-star text-warning"></i> </li>';
-						}
-						else
-						{
-							html += '<li><i class="ti ti-star text-warning"></i> </li>';
-						}
-					}
-				html += '</ul>';
-			}
-			$("#modelPreviewArea").html(html);
-		});
-
-
-
-  </script>
-
-  {{-- <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script> --}}
+    $('#companiesSelectOptions').change(function() {
+      let id = $(this).val();
+      if (id) getAjaxReport('companies', id, getSelectedProgram());
+    });
+  });
+</script>
 @stop

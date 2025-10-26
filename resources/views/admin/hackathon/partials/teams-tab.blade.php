@@ -103,7 +103,7 @@
               </div>
               <div class="progress bg-light" style="height: 6px;">
                 <div class="progress-bar bg-gradient {{ count($team->members) == $team->max_members ? 'bg-danger' : 'bg-primary' }}" 
-                     style="width: {{ (count($team->members) / $team->max_members) * 100 }}%; transition: width 0.3s ease;"></div>
+                     style="width: {{ $team->max_members > 0 ? (count($team->members) / $team->max_members) * 100 : 0 }}%; transition: width 0.3s ease;"></div>
               </div>
             </div>
             

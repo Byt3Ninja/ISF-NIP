@@ -6,9 +6,7 @@
   }
 @endphp
 <!-- Menu -->
-@php
-      $updateSittings = App\Settings::where('id', 1)->first();
-@endphp
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
@@ -92,7 +90,7 @@
             </a>
           </li>
           @endif
-          @if($updateSittings->assessment == 1)
+          @if($setting->assessment == 1)
           {{-- @if (!app()->environment('production', 'beta')) --}}
           @if( $_user->ableTo('assessments.results_analysis_view', $permissions) )
           <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
@@ -133,7 +131,7 @@
           </a>
         </li>
         @endif
-        @if($updateSittings->assessment == 1)
+        @if($setting->assessment == 1)
         {{-- @if (!app()->environment('production', 'beta')) --}}
         @if( $_user->ableTo('assessments.results_analysis_view', $permissions) )
         <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
@@ -450,7 +448,7 @@
           </li>
           <li class="{{ Request::is('dashboard/hackathon*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/hackathon" class="menu-link">
-              <span class="menu-item">{{ __('admin.Hackathon') }}</span>
+              <span class="menu-item">{{ __('admin.Hackathons') }}</span>
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
             </a>
           </li>
@@ -580,12 +578,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <div> {{ __('admin.Results') }}</div>
             </a>
           </li>
-           <li class="{{ Request::is('dashboard/screening/resultsReport') ? 'active' : '' }} menu-item">
+           {{-- <li class="{{ Request::is('dashboard/screening/resultsReport') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/screening/resultsReport">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <div> {{ __('admin.resultsReport') }}</div>
             </a>
-          </li>
+          </li> --}}
         </ul>
       </li>
 
@@ -693,13 +691,6 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             <a class="menu-link" href="/dashboard/training/sessions">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Training sessions') }}</span>
-            </a>
-          </li>
-
-          <li class="{{ Request::is('dashboard/training/sessionsReport*') ? 'active' : '' }} menu-item">
-            <a class="menu-link" href="/dashboard/training/sessionsReport">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item">{{ __('admin.Training_sessions_report') }}</span>
             </a>
           </li>
           
@@ -953,26 +944,26 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
     <li class="{{ Request::is('dashboard/admin/notification-templates*') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-mail"></i>
-        <div>{{ __('notification Templates') }}</div>
+        <div>{{ __('settings.Notification_Templates') }}</div>
       </a>
       <ul class="menu-sub">
         <li class="{{ Request::is('dashboard/admin/notification-templates/create') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-templates.create') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('admin.Create Template') }}</span>
+            <span class="menu-item">{{ __('settings.Create_Template') }}</span>
           </a>
         </li>
         <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit', 'dashboard/admin/notification-templates/*') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-templates.index') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('admin.Manage Templates') }}</span>
+            <span class="menu-item">{{ __('settings.Manage_Templates') }}</span>
           </a>
         </li>
 
         <li class="{{ Request::is('dashboard/admin/notification-triggers', 'dashboard/admin/notification-triggers/*/edit', 'dashboard/admin/notification-triggers/*') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-triggers.index') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
-            <span class="menu-item">{{ __('admin.Manage Triggers') }}</span>
+            <span class="menu-item">{{ __('settings.Manage_Triggers') }}</span>
           </a>
         </li>
 
@@ -1040,24 +1031,24 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </li>
           @endif
           <li class="{{ Request::is('*queue-jobs') ? 'active' : '' }} menu-item">
-              <a href="{{ route('queue.jobs') }}" class="menu-link">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <div>{{ __('admin.QueueJobs') }}</div>
-              </a>
-            </li>
+            <a href="{{ route('queue.jobs') }}" class="menu-link">
+              <i class="menu-livicon" data-icon="globe"></i>
+              <div>{{ __('admin.QueueJobs') }}</div>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/industry-settings">
+              <i class="menu-livicon" data-icon="globe"></i>
+              <div>{{ __('admin.Industry_Settings') }}</div>
+            </a>
+          </li>
         </ul>
       </li>
 
       @endif
       
-    <li class="{{ Request::is('dashboard/industry-settings') ? 'active' : '' }} menu-item">
-      <a class="menu-link" href="/dashboard/industry-settings">
-        <i class="menu-icon tf-icons ti ti-augmented-reality"></i>
-        <div>{{ __('admin.Industry_Settings') }}</div>
-      </a>
-    </li>
     
-    @if ($updateSittings->HomePage == true)
+    @if ($setting->HomePage == true)
       @if ($_user->hasRole('Admin'))
         @if( $_user->ableToAny(['settings.system_general_view', 'settings.system_general_update'], $permissions) )
           <li id="settingMenu" class="menu-item">

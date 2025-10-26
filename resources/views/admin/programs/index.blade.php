@@ -89,13 +89,12 @@
             <!-- Add New Program Button -->
             <a class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;"
               href="/dashboard/programlist/create">
-              <span class="mx-2">{{ __('admin.New Program') }}</span>
-              <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
+              <i class="ti ti-plus"></i>
             </a>
             <a class="btn btn-primary d-none d-md-inline-block" style="border-radius: 15px; text-wrap: nowrap;"
               href="/dashboard/programlist/create">
-              <span class="mx-2">{{ __('admin.New Program') }}</span>
-              <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
+              <span>{{ __('admin.New Program') }}</span>
+              <i class="ti ti-plus ms-2"></i>
             </a>
           </div>
         </div>

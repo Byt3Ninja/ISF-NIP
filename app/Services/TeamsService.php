@@ -219,7 +219,9 @@ class TeamsService implements OnlineMeetingServiceInterface
             "lobbyBypassSettings" => [
                 "scope" => "everyone",
                 "isDialInBypassEnabled" => true
-            ]
+            ],
+             'allowRecording' => true,
+             'recordAutomatically' => true,
 
         ];
 
@@ -247,183 +249,230 @@ class TeamsService implements OnlineMeetingServiceInterface
     }
 
 
-    /**
-     * Get Microsoft Teams Attendance Report List.
-     */
-
-    // public function getSessionReport(string $meetingId, ?string $userId = null)
-    // {
-    //     $accessToken = $this->getAccessToken();
-
-    //     if (!$accessToken) {
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Failed to retrieve access token.',
-    //         ];
-    //     }
-
-    //     try {
-    //         $url = "/me/onlineMeetings/{$meetingId}/attendanceReports";
-
-    //         $response = $this->graph->createRequest("GET", $url)
-    //             ->addHeaders([
-    //                 "Content-Type" => "application/json",
-    //                 "Authorization" => "Bearer {$accessToken}",
-    //             ])
-    //             ->execute();
-
-    //         $data = $response->getBody();
-    //         if (is_string($data)) {
-    //             $data = json_decode($data, true);
-    //         }
-
-    //         return [
-    //             'success' => true,
-    //             'data' => $data,
-    //         ];
-    //     } catch (\Exception $e) {
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Failed to fetch Attendance Report: ' . $e->getMessage(),
-    //         ];
-    //     }
-    // }
-
-    public function getSessionReport(string $meetingId, ?string $userId = null)
+       public function getSessionReport(string $meetingId, ?string $userId = null)
     {
-        $accessToken = $this->getAccessToken();
+            // 1) Acquire access token (keep your getAccessToken implementation)
+    $accessTokenResult = $this->getAccessToken();
+    $accessToken = is_array($accessTokenResult)
+        ? ($accessTokenResult['data'] ?? $accessTokenResult['access_token'] ?? null)
+        : $accessTokenResult;
 
-        if (!$accessToken) {
-            return [
-                'success' => false,
-                'message' => 'Failed to retrieve access token.',
-            ];
-        }
+    if (!is_scalar($accessToken) || $accessToken === '') {
+        Log::error('getSessionReport: invalid/missing access token', ['accessTokenResult' => $accessTokenResult]);
+        return [
+            'success' => false,
+            'message' => 'Failed to retrieve a valid access token.',
+            'details' => $accessTokenResult,
+        ];
+    }
+    $accessToken = (string) $accessToken;
 
-        $Setting = Settings::where('id', 1)->first();
-        $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
+    // 2) Resolve userId (prefer passed-in, otherwise from settings via getUserIdByEmail)
+    if ($userId) {
+        $userIdSource = 'passed_in';
+    } else {
+        $setting = Settings::where('id', 1)->first();
+        $microsoftEmail = $setting->MICROSOFT_APP_EMAIL ?? null;
+        $userIdResult = $this->getUserIdByEmail($microsoftEmail);
 
-        try {
-            $url = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports";
+        $userId = is_array($userIdResult)
+            ? ($userIdResult['data'] ?? $userIdResult['user_id'] ?? $userIdResult['id'] ?? null)
+            : $userIdResult;
 
-            $response = $this->graph->createRequest("GET", $url)
-                ->addHeaders([
-                    "Content-Type" => "application/json",
-                    "Authorization" => "Bearer {$accessToken}",
-                ])
-                ->execute();
-
-            $data = $response->getBody();
-
-            return [
-                'success' => true,
-                'data' => $data,
-            ];
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to Fetch Attendance Report: ' . $e->getMessage(),
-            ];
-        }
+        $userIdSource = 'from_setting';
     }
 
-    /**
-     * Get Microsoft Teams Attendance Report ID.
-     */
+    if (!is_scalar($userId) || $userId === '' || $userId === null) {
+        Log::error('getSessionReport: invalid userId', [
+            'meetingId' => $meetingId,
+            'userId_raw' => $userId ?? $userIdResult ?? null,
+            'userIdSource' => $userIdSource ?? null,
+        ]);
+        return [
+            'success' => false,
+            'message' => 'Failed to retrieve a valid userId for building Graph URL.',
+            'details' => $userIdResult ?? $userId,
+        ];
+    }
+    $userId = (string)$userId;
 
-    // public function getMeetingAttendanceReport(string $meetingId, string $reportId)
-    // {
-    //     $accessToken = $this->getAccessToken();
-
-    //     if (!$accessToken) {
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Failed to retrieve access token.',
-    //         ];
-    //     }
-
-    //     try {
-    //         $url = "/me/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}";
-
-    //         $response = $this->graph->createRequest("GET", $url)
-    //             ->addHeaders([
-    //                 "Content-Type" => "application/json",
-    //                 "Authorization" => "Bearer {$accessToken}",
-    //             ])
-    //             ->execute();
-
-    //         $data = $response->getBody();
-    //         if (is_string($data)) {
-    //             $data = json_decode($data, true);
-    //         }
-
-    //         return [
-    //             'success' => true,
-    //             'data' => $data,
-    //         ];
-    //     } catch (\Exception $e) {
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Failed to fetch Meeting Attendance Report: ' . $e->getMessage(),
-    //         ];
-    //     }
-    // }
-
-    public function getMeetingAttendanceReport(string $meetingId, string $reportId)
-    {
-        $accessToken = $this->getAccessToken();
-
-        if (!$accessToken) {
-            return [
-                'success' => false,
-                'message' => 'Failed to retrieve access token.',
-            ];
+    // 3) helper to normalize different kinds of responses safely
+    $normalizeBody = function ($resp) {
+        if (method_exists($resp, 'getBody')) {
+            $candidate = $resp->getBody();
+        } else {
+            $candidate = $resp;
         }
 
-        // Fetch the Microsoft email from settings
-        $settings = Settings::where('id', 1)->first();
-        if (!$settings || !$settings->MICROSOFT_APP_EMAIL) {
-            return [
-                'success' => false,
-                'message' => 'Microsoft App Email not found in settings.',
-            ];
+        // If candidate is a string (typical), decode JSON if possible
+        if (is_string($candidate)) {
+            $raw = $candidate;
+            $decoded = json_decode($raw, true);
+            $data = json_last_error() === JSON_ERROR_NONE ? $decoded : $raw;
+            return ['raw' => $raw, 'data' => $data];
         }
 
-        // Get user ID using email
-        $userId = $this->getUserIdByEmail($settings->MICROSOFT_APP_EMAIL);
-
-        if (!$userId) {
-            return [
-                'success' => false,
-                'message' => 'Unable to fetch User ID for the provided Microsoft App Email.',
-            ];
+        // If candidate is array/object (SDK sometimes returns that), convert safely
+        if (is_array($candidate) || is_object($candidate)) {
+            $raw = @json_encode($candidate, JSON_UNESCAPED_UNICODE);
+            $data = is_array($candidate) ? $candidate : (array)$candidate;
+            return ['raw' => $raw, 'data' => $data];
         }
 
+        // Fallback: attempt string cast inside try/catch
         try {
-            $url = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}";
+            $raw = (string)$candidate;
+            $decoded = json_decode($raw, true);
+            $data = json_last_error() === JSON_ERROR_NONE ? $decoded : $raw;
+            return ['raw' => $raw, 'data' => $data];
+        } catch (\Throwable $e) {
+            return ['raw' => '<<unserializable_response>>', 'data' => null];
+        }
+    };
 
-            $response = $this->graph->createRequest("GET", $url)
-                ->addHeaders([
-                    "Content-Type" => "application/json",
-                    "Authorization" => "Bearer {$accessToken}",
-                ])
-                ->execute();
+    try {
+        // A) Get list of attendanceReports (users endpoint required for app-only tokens)
+        $reportsUrl = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports";
+        $reportsResponse = $this->graph->createRequest('GET', $reportsUrl)
+            ->addHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $accessToken,
+            ])->execute();
 
-            $data = $response->getBody();
-            if (!is_array($data)) {
-                $data = json_decode($data, true);
-            }
+        $normalizedReports = $normalizeBody($reportsResponse);
+        $reportsRaw = $normalizedReports['raw'];
+        $reportsData = $normalizedReports['data'];
 
-            return [
-                'success' => true,
-                'data' => $data,
-            ];
-        } catch (\Exception $e) {
+        // Find first reportId
+        $reportId = null;
+        if (is_array($reportsData) && !empty($reportsData['value']) && isset($reportsData['value'][0]['id'])) {
+            $reportId = $reportsData['value'][0]['id'];
+        } elseif (is_array($reportsData) && isset($reportsData[0]['id'])) {
+            $reportId = $reportsData[0]['id'];
+        }
+
+        if (!$reportId) {
+            Log::info('getSessionReport: no attendance reports found', [
+                'meetingId' => $meetingId,
+                'userId' => $userId,
+                'reports_sample' => is_array($reportsData) ? array_slice($reportsData, 0, 3) : substr((string)$reportsRaw, 0, 500),
+            ]);
+
             return [
                 'success' => false,
-                'message' => 'Failed to fetch Meeting Attendance Report: ' . $e->getMessage(),
+                'message' => 'No attendance report found for this meeting.',
+                'details' => $reportsData,
+                'raw_reports' => $reportsRaw,
             ];
         }
+
+        // B) Fetch the attendance report details (single report endpoint requested)
+        $reportUrl = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}";
+        $reportResponse = $this->graph->createRequest('GET', $reportUrl)
+            ->addHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $accessToken,
+            ])->execute();
+
+        $normalizedReport = $normalizeBody($reportResponse);
+        $reportRaw = $normalizedReport['raw'];
+        $reportData = $normalizedReport['data'];
+        $reportStatus = method_exists($reportResponse, 'getStatusCode') ? $reportResponse->getStatusCode() : null;
+
+        // C) Fetch the attendanceRecords (per-user rows) for that report
+        $attendanceUrl = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}/attendanceRecords";
+        $attendanceResponse = $this->graph->createRequest('GET', $attendanceUrl)
+            ->addHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $accessToken,
+            ])->execute();
+
+        $normalizedAttendance = $normalizeBody($attendanceResponse);
+        $attendanceRaw = $normalizedAttendance['raw'];
+        $attendanceData = $normalizedAttendance['data']; // typically ['value' => [ ... ]]
+
+        // Extract participants array from attendanceData
+        $participants = [];
+        if (is_array($attendanceData) && !empty($attendanceData['value']) && is_array($attendanceData['value'])) {
+            $participants = $attendanceData['value'];
+        } elseif (is_array($attendanceData) && !empty($attendanceData)) {
+            // sometimes the API may return array directly
+            $participants = $attendanceData;
+        }
+
+        // Normalize participants to consistent shape
+        $normalizedParticipants = [];
+        foreach ($participants as $p) {
+            $identity = $p['identity'] ?? ($p['user'] ?? null);
+            // handle nested user inside identity
+            $userNode = is_array($identity) && isset($identity['user']) ? $identity['user'] : $identity;
+
+            $normalizedParticipants[] = [
+                'emailAddress' => $p['emailAddress'] ?? ($userNode['upn'] ?? $userNode['email'] ?? null),
+                'totalAttendanceInSeconds' => $p['totalAttendanceInSeconds'] 
+                    ?? ($p['totalAttendanceSeconds'] ?? ($p['durationSeconds'] ?? ($p['totalAttendance'] ?? 0))),
+                'role' => $p['role'] ?? null,
+                'identity' => $identity,
+                'attendanceIntervals' => $p['attendanceIntervals'] ?? ($p['intervals'] ?? []),
+                '_raw' => $p,
+            ];
+        }
+
+        // Build result
+        $result = [
+            'success' => ($reportStatus === null) ? true : ($reportStatus >= 200 && $reportStatus < 300),
+            'status_code' => $reportStatus,
+            'report_id' => $reportId,
+            'data' => is_array($reportData) ? $reportData : null,       // the report details body
+            'participants' => $normalizedParticipants,                  // normalized participant rows
+            'attendance_raw' => $attendanceRaw,
+            'raw_report' => $reportRaw,
+            'raw_reports_list' => $reportsRaw,
+            'attendance_count' => count($normalizedParticipants),
+            'message' => ($reportStatus !== null && ($reportStatus < 200 || $reportStatus >= 300)) ? 'Non-2xx response' : 'OK',
+            'details' => is_array($reportData) ? $reportData : $reportRaw,
+        ];
+
+        Log::debug('getSessionReport completed', [
+            'meetingId' => $meetingId,
+            'userId' => $userId,
+            'reportId' => $reportId,
+            'participants_count' => count($normalizedParticipants),
+        ]);
+
+        return $result;
+    } catch (\GuzzleHttp\Exception\RequestException $re) {
+        $resp = $re->hasResponse() ? $re->getResponse()->getBody() : null;
+        $respRaw = $resp ? (method_exists($resp, 'getBody') ? (string)$resp->getBody() : (string)$resp) : null;
+        Log::error('RequestException in getSessionReport', [
+            'meetingId' => $meetingId,
+            'userId' => $userId,
+            'error' => $re->getMessage(),
+            'response' => $respRaw,
+        ]);
+        return [
+            'success' => false,
+            'message' => 'RequestException fetching attendance report/records.',
+            'details' => $respRaw ?? $re->getMessage(),
+        ];
+    } catch (\Throwable $e) {
+        $err = $e->getMessage();
+        if (!is_string($err)) {
+            $err = json_encode($err);
+        }
+        Log::error('Exception in getSessionReport', [
+            'meetingId' => $meetingId,
+            'userId' => $userId,
+            'error' => $err,
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return [
+            'success' => false,
+            'message' => 'Unexpected error: ' . $err,
+            'details' => null,
+        ];
+    }
+
     }
 
 
@@ -432,54 +481,73 @@ class TeamsService implements OnlineMeetingServiceInterface
      */
     public function getSessionRecord(string $meetingId, ?string $userId = null)
     {
-        if (is_null($userId)) {
-            $Setting = Settings::where('id', 1)->first();
-            $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
-            if (!$userId) {
-                return [
-                    'success' => false,
-                    'message' => 'Failed to fetch user ID for the organizer email.',
-                ];
-            }
+         if (is_null($userId)) {
+        $setting = Settings::where('id', 1)->first();
+        $userIdResult = $this->getUserIdByEmail($setting->MICROSOFT_APP_EMAIL ?? null);
+        $userId = is_array($userIdResult) ? ($userIdResult['data'] ?? $userIdResult['id'] ?? $userIdResult['user_id'] ?? null) : $userIdResult;
+    }
+
+    if (!is_scalar($userId) || $userId === '') {
+        Log::error('getSessionRecord: invalid userId', ['meetingId' => $meetingId, 'userId_raw' => $userIdResult ?? $userId]);
+        return [
+            'success' => false,
+            'message' => 'Failed to fetch user ID for the organizer email or userId invalid.',
+            'details' => $userIdResult ?? $userId,
+        ];
+    }
+    $userId = (string)$userId;
+
+    try {
+        $endpoint = "/users/{$userId}/onlineMeetings/{$meetingId}/recordings";
+        $recordingsResponse = $this->graph->createRequest("GET", $endpoint)
+            ->addHeaders(["Content-Type" => "application/json"])
+            ->execute();
+
+        $raw = method_exists($recordingsResponse, 'getBody') ? $recordingsResponse->getBody() : $recordingsResponse;
+        if (is_string($raw)) {
+            $data = json_decode($raw, true) ?: $raw;
+        } elseif (is_object($raw) || is_array($raw)) {
+            $data = (array)$raw;
+        } else {
+            $data = $raw;
         }
 
-        try {
-            $meetingDetailsResponse = $this->graph->createRequest("GET", "/users/{$userId}/onlineMeetings/{$meetingId}")
-                ->addHeaders(["Content-Type" => "application/json"])
-                ->execute();
-
-            $meetingData = $meetingDetailsResponse->getBody();
-
-            if (!isset($meetingData['iCalUid'])) {
-                return [
-                    'success' => false,
-                    'message' => 'This meeting is not calendar-backed and does not support recordings.',
-                ];
-            }
-
-            $response = $this->graph->createRequest("GET", "/me/onlineMeetings/{$meetingId}/recordings")
-                ->addHeaders(["Content-Type" => "application/json"])
-                ->execute();
-
-            $data = $response->getBody();
-
-            if (empty($data['value'])) {
-                return [
-                    'success' => false,
-                    'message' => 'No recordings found for this meeting.',
-                ];
-            }
-
+        if (is_array($data) && !empty($data['value'])) {
             return [
                 'success' => true,
                 'data' => $data['value'],
-            ];
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to Retrieve Recorded Video: ' . $e->getMessage(),
+                'raw' => is_string($raw) ? $raw : json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+                'source' => 'graph_call_recordings',
             ];
         }
+
+        return [
+            'success' => false,
+            'message' => 'No call recordings found via Graph recordings endpoint.',
+            'details' => $data,
+            'raw' => is_string($raw) ? $raw : json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+        ];
+
+    } catch (\GuzzleHttp\Exception\RequestException $re) {
+        $resp = $re->hasResponse() ? (string)$re->getResponse()->getBody() : null;
+        Log::error('RequestException in getSessionRecord', ['endpoint' => $endpoint ?? null, 'error' => $re->getMessage(), 'response' => $resp]);
+        return [
+            'success' => false,
+            'message' => 'RequestException fetching call recordings',
+            'details' => $resp ?? $re->getMessage(),
+        ];
+    } catch (\Throwable $e) {
+        $err = $e->getMessage();
+        if (is_array($err) || is_object($err)) {
+            $err = json_encode($err, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+        }
+        Log::error('Exception in getSessionRecord', ['endpoint' => $endpoint ?? null, 'error' => $err, 'trace' => $e->getTraceAsString()]);
+        return [
+            'success' => false,
+            'message' => 'Failed to Retrieve Call Recordings: ' . (is_string($err) ? $err : json_encode($err)),
+            'details' => null,
+        ];
+    }
     }
 
 

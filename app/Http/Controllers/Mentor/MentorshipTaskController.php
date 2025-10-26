@@ -74,11 +74,11 @@ class MentorshipTaskController extends Controller
 				];
 			}
 
-			$startup = "SELECT MT.id,
-			MT.mentor_id as MT_mentor_id,
-			MT.user_id as MT_user_id,
-			MT.mentorship_request_id as MT_mentorship_request_id,
-			MT.company_id as MT_company_id,
+			$startup = "SELECT MR.id,
+			MR.mentor_id as MT_mentor_id,
+			MR.user_id as MT_user_id,
+			MR.id as MT_mentorship_request_id,
+			C.id as MT_company_id,
 			C.name_en as C_name_en,
 			C.logo as C_logo,
 			C.step as C_step,
@@ -89,14 +89,13 @@ class MentorshipTaskController extends Controller
 			S.title as S_title,
 			S.id as S_id,
 			MR.zoom_date as MR_zoom_date
-			FROM 
-			mentorship_tasks as MT
-			LEFT JOIN companies as C ON C.id = MT.company_id
-			LEFT JOIN users as U ON U.id = MT.user_id
-			LEFT JOIN mentorship_requests as MR ON MR.id = MT.mentorship_request_id
+			FROM
+			mentorship_requests as MR
+			LEFT JOIN users as U ON U.id = MR.user_id
+			LEFT JOIN companies as C ON C.id = U.company_id
 			LEFT JOIN steps as S ON S.id = C.step
 			LEFT JOIN cycles as Cy ON Cy.id = C.cycle
-			WHERE MT.mentorship_request_id = ? ";
+			WHERE MR.id = ? ";
 			$startup = DB::select($startup, [$request->mentorship_id]);
 			$startup = collect($startup)->first();
 			$data = [];
@@ -619,7 +618,9 @@ class MentorshipTaskController extends Controller
 		$user = auth()->user();
 		$request->validate([
 			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
-			'task_id' => 'required|integer|exists:mentorship_tasks,id'
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'attachments' => 'required|array',
+			'attachments.*' => 'required|file|mimes:pdf,docx,xlsx,jpg,jpeg,png|max:10240'
 		]);
 		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find($request->task_id);
 		if (empty($task)) {

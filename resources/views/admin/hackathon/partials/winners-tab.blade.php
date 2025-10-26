@@ -14,8 +14,8 @@
               <div class="card-header bg-light border-0 d-flex align-items-center py-3">
                 <img src="{{ $winner->logo ?? '/images/logo-placeholder.png' }}" class="rounded-circle me-3 border shadow-xs" alt="Startup Logo" width="45" height="45">
                 <div>
-                  <h6 class="mb-0 fw-bold text-dark">{{ $winner->name }}</h6>
-                  <small class="text-dark">{{ $winner->teamName }}</small>
+                  <h6 class="mb-0 fw-bold text-dark">{{ $winner?->name ?? '-' }}</h6>
+                  <small class="text-dark">{{ $winner?->teamName ?? '-' }}</small>
                 </div>
               </div>
               
@@ -23,16 +23,16 @@
                 <!-- Project Title -->
                 <div class="row">
                   <div class="col-md-9 col-lg-9 col-sm-12">
-                    <h5 class="card-title text-dark mb-3 fw-bold lh-base">{{ $winner->projectTitle }}</h5>
+                    <h5 class="card-title text-dark mb-3 fw-bold lh-base">{{ $winner?->projectTitle ?? '-' }}</h5>
                   </div>
                   <div class="col-md-3 col-lg-3 col-sm-12 text-end">
-                    <i data-project="{{ $winner->id }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
-                    <span class="likes-count"> {{ $winner->likes->count() }} </span>
+                    <i data-project="{{ $winner?->id ?? 0 }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
+                    <span class="likes-count"> {{ $winner->likes->count() ?? 0 }} </span>
                   </div>
                 </div>
                 
                 <!-- Project Description -->
-                <p class="card-text text-muted mb-4 lh-lg">{{ $winner->description }}</p>
+                <p class="card-text text-muted mb-4 lh-lg">{{ $winner?->description ?? '-' }}</p>
                           
                 <!-- Team Members -->
                 <div class="mb-0">
@@ -84,7 +84,7 @@
                             </div>
                             @if($member->isLeader)
                               <span class="badge bg-warning text-dark fw-semibold px-2 py-1 small">
-                                <i class="bi bi-award me-1"></i>Leader
+                                <i class="bi bi-award me-1"></i>{{ $l == 'ar' ? 'قائد' : 'Leader' }}
                               </span>
                             @endif
                           </div>

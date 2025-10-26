@@ -55,7 +55,7 @@
                           @if( $session->type == 'sessions' )
                             {{--  @if( strtotime( $session->enddatetime ) > time() )  --}}
                               {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
-                              <a title="Click to join" href="{{ $session->join_url }}" target="_blank">
+                              <a title="Click to join" href="{{ route('trainings.sessions_join', $session->id ?? '0') }}" target="_blank">
                                 <button title="Join only" type="button" class="btn btn-icon rounded-circle btn-label-primary">
                                   <i class="ti ti-brand-zoom"></i>
                                 </button>
