@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class StaticCategory extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'is_other'];
+    protected $fillable = ['name_en', 'name_ar', 'is_other'];
     protected $table = 'static_categories';
 
 
