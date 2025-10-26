@@ -505,7 +505,7 @@
       
 <!-- Start Assessments -->
 <li
-class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
+class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
   <a class="menu-link menu-toggle">
   <i class="ti ti-circle-dashed-check ti-md me-3"></i>
   <div>{{ __('admin.Assessments') }}</div>

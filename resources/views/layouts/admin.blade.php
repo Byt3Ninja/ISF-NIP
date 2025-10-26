@@ -468,6 +468,8 @@
               confirmButton: 'btn btn-primary',
           },
           buttonsStyling: false,
+          timer: 2000,
+          timerProgressBar: true,
         });
       }
 
