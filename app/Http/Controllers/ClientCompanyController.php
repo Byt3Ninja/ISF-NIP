@@ -168,16 +168,11 @@ class ClientCompanyController extends Controller
     public function editOrCreate($id = null)
     {
 
-
         try {
-
-            
             if ($id == null) {
-
                 $client = User::where('HaveCompany', 1)->with('company')
                     ->with('company.city')
                     ->find(Auth::id());
-                   
                     if (empty($client)) {
                     return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
@@ -187,9 +182,7 @@ class ClientCompanyController extends Controller
                 $Setting = Settings::where('id', 1)->first();
                 $sectors = Sector::whereNull('parent_id')->get();
                 $funding_rounds = auth()->user()->company ? auth()->user()->company->fundingRounds : [];
-
                 $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
-
                 if (auth()->user()->company) {
                     $fonders = Team_Member::where('TeamMember', 'Founder')
                         ->where('Company_id', auth()->user()->company->id)->get();
@@ -327,20 +320,20 @@ class ClientCompanyController extends Controller
             }
 
             $l = app()->getLocale();
-            $companyRelations = CompanyRelation::where('company_id', $client->company->id)->get();
-
-            $selectedIndustryId   = $companyRelations->pluck('industry_id')->filter()->first(); // غالباً Industry واحد
-            $selectedSectorIds    = $companyRelations->pluck('sector_id')->filter()->toArray();
-            $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
-            $technologies = DB::table('technologies')->get()->map(function ($tech) use ($l, $selectedTechnologyIds) {
-                return [
-                    'id'       => $tech->id,
-                    'name'     => $tech->name,
-                    'selected' => in_array($tech->id, $selectedTechnologyIds),
-                ];
-            })->values()->toArray();
-            $allSectors = DB::table('sectors')->get();
-            $industries = StaticCategory::with('sectors')->get();
+            if ($client->company) {
+                $companyRelations = CompanyRelation::where('company_id', $client->company->id)->get();
+                $selectedIndustryId   = $companyRelations->pluck('industry_id')->filter()->first();
+                $selectedSectorIds    = $companyRelations->pluck('sector_id')->filter()->toArray();
+                $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
+                $technologies = DB::table('technologies')->get()->map(function ($tech) use ($l, $selectedTechnologyIds) {
+                    return [
+                        'id'       => $tech->id,
+                        'name'     => $tech->name,
+                        'selected' => in_array($tech->id, $selectedTechnologyIds),
+                    ];
+                })->values()->toArray();
+                $allSectors = DB::table('sectors')->get();
+                $industries = StaticCategory::with('sectors')->get();
             $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
                 if ($industry->sectors->isNotEmpty()) {
                     $sectorsList = $industry->sectors->map(function ($sector) use ($l, $selectedSectorIds) {
@@ -366,6 +359,11 @@ class ClientCompanyController extends Controller
                     'sectors'  => $sectorsList,
                 ];
             });
+        }else{
+           $industries = StaticCategory::with('sectors')->get();
+           $technologies = DB::table('technologies')->get();
+            $data = [];
+        }
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',

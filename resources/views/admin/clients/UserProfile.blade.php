@@ -98,16 +98,19 @@
                   </div>
 
                   <div>
-                    <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
+                    <a href="javascript:void(0)" class="btn btn-primary disabled me-3 mb-3 mb-md-0">
                       <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
                     </a>
 
                     @if(!empty($order))
-                      <button onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
-                              title="Add new request" 
-                              type="button" 
-                              class="btn btn-primary mb-1">
-                        {{ __('admin.OrderSession') }}
+                      <button 
+                        onclick="request({{ $order->user_id }}, '{{ optional($order->user)->{'first_name_' . $l} }} {{ optional($order->user)->{'last_name_' . $l} }}', {{ $order->cycle->organization_id }}, {{ $order->cycle_id }})" 
+                        title="Add new request" 
+                        type="button" 
+                        class="btn btn-primary"
+                      >
+                      <i class="ti ti-calendar-plus me-2"></i>
+                        {{ __('cycles.Request_Mentorship') }}
                       </button>
                     @endif
                   </div>
@@ -408,160 +411,16 @@
       </div>
     </div>
   </div>
-
-  {{-- Send Request Modal --}}
-  {{-- <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-      <div class="modal-content">
-        <div class="modal-body">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          
-          <div class="text-center mb-6">
-            <h4 class="mb-2">
-              {{ __('dashboard.Add mentorship session with') }} 
-              <span class="primary" id="rname"></span>
-            </h4>
-          </div>
-
-          <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-            @csrf
-            <input type="hidden" name="mentorid" value="0" id="mentorid">
-            <input type="hidden" name="organization_id" id="addOrganizationID">
-            <input type="hidden" name="cycle_id" id="addCycleID">
-
-            <div>
-              <h5 class="text-primary">
-                <i class="bx bx-time text-secondary"></i> {{ __('dashboard.Mentor schedule') }}
-              </h5>
-              <span class="d-block bg-info p-1 white">
-                <ul class="mb-0" id="schedule"></ul>
-              </span>
-            </div>
-
-            <hr>
-
-            <div class="form-group" id="showdates">
-              <label>{{ __('dashboard.Start meeting Date/ Time') }}:</label>
-              <input class="date width-250 form-control" type="text" id="datepp" name="date" value="">
-            </div>
-
-            <div class="form-group">
-              <label>{{ __('dashboard.Meeting duration') }}:</label>
-              <select name="period" class="select form-control width-150">
-                <option value="30">30 {{ __('dashboard.Minutes') }}</option>
-                <option value="60" selected>1 {{ __('dashboard.Hour') }}</option>
-                <option value="120">2 {{ __('dashboard.Hours') }}</option>
-                <option value="180">3 {{ __('dashboard.Hours') }}</option>
-                <option value="240">4 {{ __('dashboard.Hours') }}</option>
-                <option value="300">5 {{ __('dashboard.Hours') }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="inputGroupFile01">{{ __('dashboard.Send file with your request') }}</label>
-              <div class="custom-file">
-                <input type="file" 
-                       class="custom-file-input" 
-                       id="inputGroupFile01" 
-                       name="file_url" 
-                       accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                <label class="custom-file-label" for="inputGroupFile01">
-                  {{ __('dashboard.Choose file') }}
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>{{ __('dashboard.Add note') }}:</label>
-              <textarea class="form-control" 
-                        id="notes" 
-                        name="notes" 
-                        rows="4" 
-                        placeholder="{{ __('dashboard.Write your note here') }}"></textarea>
-            </div>
-
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary ml-1">
-                <span class="d-none d-sm-block">{{ __('dashboard.Submit') }}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div> --}}
+  
+  {{-- Session Request Modal --}}
  @include('admin.clients.startup.partials._session_modal')
-
-
 @stop
-@section('scripts')
-<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-@stop
+
 @section('pagescripts')
   <script src="/vuexy/assets/js/pages-profile.js"></script>
   <script src="/vuexy/assets/js/mentorship-session.js"></script>  
+
   <script>
-    $(function() {
-      flatpickr("#datepp", {
-        dateFormat: "Y-m-d",
-        allowInput: true
-      });
-    });
-
-    function request(id, mentor, organization_id = null, cycle_id = null) {
-      $('#mentorid').val(id);
-      $('#rname').html(mentor);
-      
-      $.ajaxSetup({
-        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-      });
-
-      $.ajax({
-        type: "POST",
-        url: "/dashboard/mentors/modify",
-        data: { id, rtype: 5 },
-        success: function(response) {
-          $('#SendRequest li').remove();
-          
-          if (response.length > 0) {
-            $.each(response, function(i, item) {
-              const time = `${item.tfrom} {{ __('dashboard.to') }} ${item.tto}`;
-              let html = '';
-
-              switch (item.type) {
-                case 'OneDay':
-                  html = `<b>${item.dfrom}</b> (${time}).`;
-                  break;
-                case 'Weekly':
-                  html = `<b>{{ __('dashboard.Weekly') }}</b> (${item.days}) - (${time}).`;
-                  break;
-                case 'WorkingDays':
-                  html = `<b>{{ __('dashboard.All working days') }}</b> (${time}).`;
-                  break;
-                case 'Period':
-                  html = `<b>{{ __('dashboard.from') }} ${item.dfrom} {{ __('dashboard.to') }} ${item.dto}</b> (${time}).`;
-                  break;
-              }
-
-              if (html) {
-                $('<li>').html(html).appendTo('#schedule');
-              }
-            });
-          } else {
-            $('<li>').html("{{ __('dashboard.No records saved') }}.").appendTo('#schedule');
-          }
-
-          $('#addOrganizationID').val(organization_id);
-          $('#addCycleID').val(cycle_id);
-          $('#SendRequest').modal('show');
-        },
-        error: function(error) {
-          console.log(error);
-          alert("Error Occurred, Try again!");
-        }
-      });
-    }
-
     $(document).ready(function() {
       $('.zero-configuration').DataTable({
         language: {

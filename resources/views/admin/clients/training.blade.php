@@ -318,6 +318,27 @@
         }
       });
     }
+
+
+    let startTime = Date.now();
+
+
+    let pathParts = window.location.pathname.split('/');
+    let trainingId = '{{ request()->route('id') }}';
+    console.log(trainingId);
+    window.addEventListener("beforeunload", function () {
+        let endTime = Date.now();
+        let durationMinutes = ((endTime - startTime) / 1000 / 60).toFixed(2);
+
+        navigator.sendBeacon("/dashboard/track-duration", JSON.stringify({
+            trainingId: trainingId, 
+            page_url: window.location.pathname + window.location.search,
+            duration_minutes: durationMinutes,
+            _token: "{{ csrf_token() }}"
+        }));
+    });
+
+
   </script>
 @stop
 

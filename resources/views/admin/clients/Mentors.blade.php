@@ -105,7 +105,7 @@
               <div
                 class="bg-white shadow-sm border border-label-secondary rounded px-2 py-1 d-flex justify-content-between align-items-center mb-2"
                 style="height: 55px;">
-                <a target="_blank" href="{{ route('mentors.profile_view', $mentor->id) }}" class="d-flex flex-column">
+                <a href="{{ route('mentors.profile_view', $mentor->id) }}" class="d-flex flex-column">
                   <span class="text-black fw-bold fs-6">{{ $mentor->name }}</span>
                   <small class="text-secondary">{{ $mentor->title }}</small>
                 </a>
@@ -389,10 +389,6 @@
 </div>
 
 @include('admin.clients.startup.partials._session_modal')
-@stop
-
-@section('scripts')
-<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
 
 @section('pagescripts')

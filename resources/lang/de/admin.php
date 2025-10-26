@@ -624,7 +624,7 @@ return [
 	'TimeSheet'=>'Time Sheet',
 	'UserTimeSheet'=>'Time Sheet Users',
 	'Financial Report'=>' Financial Report ',
-	'all TimeSheets'=>'all Time Sheets',
+	'all TimeSheets'=>'Time Sheets',
 	'Add new Time'=>' Add New Time',
 	'Program'=>' Program ',
 	'all Category'=>' all Category',

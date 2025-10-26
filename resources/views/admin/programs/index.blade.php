@@ -66,7 +66,7 @@
         @endforeach
       </div>
       @endif
-      <h3 class="content-header-title">{{ __('admin.Cycles') }}</h3>
+      {{-- <h3 class="content-header-title">{{ __('admin.Cycles') }}</h3> --}}
     </div>
 
     <div class="card mb-6" style="border-radius: 20px;">
@@ -151,7 +151,7 @@
               <div class="d-flex program-card py-4 py-md-5 px-0 px-md-4">
                 <div class="position-relative" style="width: fit-content; 
                         {{ $l == 'ar' ? 'margin-left: 20px;' : 'margin-right: 20px' }}">
-                  <div class="position-absolute top-0 start-0">
+                  <div class="position-absolute top-0 start-0 d-none d-md-block">
                     <div class="badge bg-{{ $cycle->type == 'General_Program' ? 'success' : 'warning  ' }} rounded-lg p-2">
                       {{ __('cycles.' . $cycle->type) }}
                     </div>
@@ -185,11 +185,21 @@
                 <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                   <!-- Program Title -->
                   <div class="d-flex justify-content-between align-items-center w-100 ">
-                    <div>
-                      <a href="/dashboard/programlist/show/{{ $cycle->id }}" class="text-primary fs-5 fw-bold">
+                    <div class="d-flex flex-column">
+                      <a href="/dashboard/programlist/show/{{ $cycle->id }}" class="text-primary fs-5 fw-bold mb-4 mb-md-0">
                         {{ $cycle->title }}
                       </a>
+                      <div class="d-flex d-md-none align-items-center gap-2 mb-3">
+                        <div class="badge bg-{{ $cycle->type == 'General_Program' ? 'success' : 'warning  ' }} rounded-lg p-2">
+                          {{ __('cycles.' . $cycle->type) }}
+                        </div>
+                         <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light">
+                            {{ __('cycles.View Report') }}
+                            <i class="ti ti-clipboard-data ti-sm ms-2"></i>
+                          </a>
+                      </div>
                     </div>
+
 
                     <div class="d-flex align-items-center gap-4">
                       @if (!empty($cycle->private))
@@ -201,7 +211,7 @@
                           <i class="ti ti-rosette-discount-check text-success"></i>
                         </div>
                       @endif
-                      <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light">
+                      <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light d-none d-md-inline-flex align-items-center">
                         {{ __('cycles.View Report') }}
                         <i class="ti ti-clipboard-data ti-sm ms-2"></i>
                       </a>
@@ -294,7 +304,7 @@
                           <i class="ti ti-stack-2 ti-24px"></i>
                         </div>
                         <div class="my-auto d-flex">
-                          <p class="fw-medium fs-6 my-auto">{{ __('admin.Traditional_Evaluation_pending') }}</p>
+                          <p class="fw-medium fs-6 my-auto">{{ $l == 'en' ? 'Pending Evaluation' : 'تقييم معلق' }}</p>
                           <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">{{ $answersPending
                             }}</span>
                         </div>

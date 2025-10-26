@@ -28,7 +28,7 @@
                   class="form-control rounded-right form-control-lg shadow pl-2" id="searchbar"
                   placeholder="{{ __('admin.Search') }}">
                 <button class="btn btn-primary search-btn rounded" type="submit">
-                  <span class="d-none d-sm-block">{{ __('admin.Search') }}</span>
+                  <span>{{ __('admin.Search') }}</span>
                   <i class="bx bx-search d-block d-sm-none"></i>
                 </button>
               </fieldset>

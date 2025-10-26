@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         buttons: [
           {
-            text: `<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">${t.addNewForm}</span>`,
+            text: `<i class="ti ti-plus me-sm-1"></i> <span class="">${t.addNewForm}</span>`,
             className: 'create-new btn btn-primary waves-effect waves-light d-flex'
           }
         ],
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           $('.card-header').after('<hr class="my-0">');
 
           // Add custom filter for Organization only (status filter removed)
-          const orgFilter = $(`<select class="form-select form-select-sm w-px-200"><option value="">${t.allOrganizations}</option></select>`)
+          const orgFilter = $(`<select class="form-select form-select-sm w-px-200 mt-6 mt-md-0"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
