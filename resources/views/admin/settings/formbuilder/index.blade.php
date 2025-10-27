@@ -970,10 +970,10 @@
                 method: 'POST',
                 headers: { 
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json' 
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                   form_fields_data: JSON.stringify(formData) // must be a JSON string
+                   form_fields_data: formData // must be a JSON string
                }),
             })
             .then(response => response.json())
