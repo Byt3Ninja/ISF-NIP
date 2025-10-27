@@ -967,11 +967,14 @@
             });
 
             fetch('{{ route("forms.design_save", ["id" => isset($title->id) ? $title->id : '0']) }}', {
-               method: 'POST',
-               headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                method: 'POST',
+                headers: { 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json' 
                 },
-                body: formData
+                body: JSON.stringify({
+                   form_fields_data: JSON.stringify(formData) // must be a JSON string
+               }),
             })
             .then(response => response.json())
             .then(data => {
