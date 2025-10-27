@@ -12,7 +12,7 @@
 								<div class="card-body">
 									<div class="d-flex justify-content-between align-items-center flex-wrap">
 										<div>
-											<h4 class="card-title mb-1">{{ $quiz->title ?? 'Quiz' }}</h4>
+											<h5 class="card-title mb-1">{{ $quiz->title ?? 'Quiz' }}</h5>
 											<p class="text-muted mb-0">{{ $training->title ?? 'Training Session' }}</p>
 										</div>
 										<div class="text-end">

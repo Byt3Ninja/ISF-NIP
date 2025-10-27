@@ -40,7 +40,7 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-              <h4 class="card-title primary">{{__('admin.ReminderLogs')}}</h4>
+              <h5 class="card-title primary">{{__('admin.ReminderLogs')}}</h5>
               <div class="card-title-elements">
                 <div class="dropdown">
                   <button class="btn btn-outline-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">

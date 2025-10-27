@@ -105,7 +105,7 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card mb-4">
             <div class="card-header">
-              <h4 class="card-title success">{{ $cstep->title }}</h4>
+              <h5 class="card-title success">{{ $cstep->title }}</h5>
               <p>{{ $cstep->description }}</p>
               <small class="text-muted">
                 {{ __('cycles.from') }}
@@ -146,7 +146,7 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
             <div class="card-header border-bottom border-light mb-0">
-              <h4 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h4>
+              <h5 class="card-title primary">{{ __('cycles.' . $types[$cstep->data]) }}</h5>
               <p>{{ __('cycles.Select judges from the menu') }}:</p>
             </div>
             <div class="card-body">

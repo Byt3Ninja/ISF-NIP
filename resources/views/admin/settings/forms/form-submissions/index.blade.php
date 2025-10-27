@@ -321,7 +321,7 @@
 
           const dropdownContent = `
             <div class="dropdown">
-              <a class="btn btn-label-secondary dropdown-toggle" href="javascript:void(0)" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ $l == 'en' ? 'Export' : 'تصدير' }}</a>
+              <a class="btn btn-label-secondary dropdown-toggle" href="javascript:void(0)" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="ti ti-file-export me-2"></i> {{ $l == 'en' ? 'Export' : 'تصدير' }}</a>
               <ul class="dropdown-menu">
                 <li><a data-type="Excel" class="dropdown-item export-form-btn" target="_blank" href="javascript:void(0)"><i class="fas fa-fw fa-sm fa-file-excel me-2"></i> Excel</a></li>
                 <li><a data-type="CSV" class="dropdown-item export-form-btn" target="_blank" href="javascript:void(0)"><i class="fas fa-fw fa-sm fa-file-csv me-2"></i> CSV</a></li>
@@ -343,7 +343,7 @@
               cancelButtonText: t.cancel,
               customClass: {
                 confirmButton: 'btn btn-danger me-3',
-                cancelButton: 'btn btn-secondary'
+                cancelButton: 'btn btn-label-secondary'
               },
               buttonsStyling: false
             }).then((result) => {

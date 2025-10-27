@@ -906,10 +906,10 @@
 						<div class="col-md-12">
 							<div class="card">
 								<div class="card-header border-bottom">
-									<h4 class="card-title d-flex align-items-center">
+									<h5 class="card-title d-flex align-items-center">
 										<i class="ti ti-clipboard-list ti-28px"></i>
                     <span class="mx-2">{{__('dashboard.IncubationList')}}</span>
-                  </h4>
+                  </h5>
 								</div>
 								<div class="card-body">
 									@php
@@ -984,7 +984,7 @@
             <div class="col-md-12">
               <div class="card">
                 <div class="card-header border-bottom">
-                  <h4 class="card-title align-items-center">
+                  <h5 class="card-title align-items-center">
                     <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
                   </h4>
                 </div>
@@ -1157,7 +1157,7 @@
 				<div class="col-md-12">
 					<div class="card">
 						<div class="card-header border-bottom">
-							<h4 class="card-title align-items-center">
+							<h5 class="card-title align-items-center">
 								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
 								@if($days!=14)
 								<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
@@ -1280,7 +1280,7 @@
 				<div class="col-md-12">
 					<div class="card">
 						<div class="card-header border-bottom mb-4">
-							<h4 class="card-title align-items-center">
+							<h5 class="card-title align-items-center">
                 <i class="ti ti-school ti-28px"></i>
                 <span class="mx-2">{{ __("dashboard.Mentors") }}</span>
 							</h4>

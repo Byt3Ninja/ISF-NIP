@@ -20,7 +20,7 @@
 					<div class="card">
 						@if( $_user->ableToAny(['assessments.create', 'assessments.store'], $permissions) )
 						<div class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between border-bottom">
-							<h4 class="card-title mb-3 mb-lg-0">{{ $l == 'en' ? 'Assessments' : 'التقييمات' }}</h4>
+							<h5 class="card-title mb-3 mb-lg-0">{{ $l == 'en' ? 'Assessments' : 'التقييمات' }}</h5>
 							<div class="d-flex align-items-center gap-2">
 								<div class="dropdown">
 									<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">

@@ -165,11 +165,9 @@
                 $('#rooms-list-datatable').DataTable().row($(e.target).closest('tr')).remove().draw();
               }
             ).fail(function(error) {
-              console.log(error);
-              Swal.fire({
-                icon: 'error',
+              releaseFailureAlert({
                 title: "{{ __('admin.Error') }}!",
-                text: "{{ __('admin.SomethingWentWrong') }}",
+                text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
             });
           }

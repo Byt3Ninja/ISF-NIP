@@ -416,10 +416,10 @@
 							@else
 							 <div class="card mt-10">
     <div class="card-header border-bottom">
-        <h4 class="card-title d-flex align-items-center">
+        <h5 class="card-title d-flex align-items-center">
             <i class="ti ti-clipboard-list ti-28px"></i>
             <span class="mx-2">{{ __('dashboard.IncubationList') }}</span>
-        </h4>
+        </h5>
     </div>
 
     <div class="card-body">

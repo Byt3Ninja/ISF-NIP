@@ -31,7 +31,7 @@
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
-                <h4 class="card-title pb-4 border-bottom">{{ __('admin.Add new user') }}</h4>
+                <h5 class="card-title pb-4 border-bottom">{{ __('admin.Add new user') }}</h5>
               </div>
               <div class="card-content">
                 <div class="card-body">

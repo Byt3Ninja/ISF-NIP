@@ -15,9 +15,9 @@
 					<div class="card">
 						<div class="card-body">
 						<div class=" border-bottom mb-8 pb-4">
-							<h4 class="card-title mb-0">
+							<h5 class="card-title mb-0">
 								{{__('admin.Edit Quiz')}}
-							</h4>
+							</h5>
 							<p class="card-text text-muted mt-1 mb-0">
 								{{ $l == 'en' ? 'Fill out the form below to edit the quiz' : 'أكمل النموذج أدناه لتعديل الاختبار' }}
 							</p>

@@ -28,7 +28,7 @@
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header">
-								<h4 class="card-title fw-bold pb-3 border-bottom text-capitalize">{{ __('admin.Add new organization') }}</h4>
+								<h5 class="card-title fw-bold pb-3 border-bottom text-capitalize">{{ __('admin.Add new organization') }}</h5>
 							</div>
 							<div class="card-body">
 								@if(session()->has('msg'))

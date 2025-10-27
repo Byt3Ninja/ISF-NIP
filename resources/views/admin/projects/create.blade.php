@@ -27,7 +27,7 @@
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
-                <h4 class="card-title fw-bold pb-3 border-bottom">{{__('admin.add_new_project')}}</h4>
+                <h5 class="card-title fw-bold pb-3 border-bottom">{{__('admin.add_new_project')}}</h5>
               </div>
               <div class="card-content">
                 <div class="card-body">
