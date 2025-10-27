@@ -96,7 +96,7 @@
             @if ($c)
               <div class="card">
                 <div class="card-header">
-                  <h4 class="card-title secondary">{{ $cstep->title }} <small class="text-muted">
+                  <h5 class="card-title secondary">{{ $cstep->title }} <small class="text-muted">
                       {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
                       {{ $cstep->to->format('d-m-Y') ?? '-' }}</small>
                     {{ __('cycles.for') }} :
@@ -104,7 +104,7 @@
                       <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40"
                         width="40">
                       {{ $c->{'name_' . $l} }}</a>
-                  </h4>
+                  </h5>
                   <p>{{ $cstep->description }}</p>
                 </div>
                 <hr style="margin:-20px 0;">

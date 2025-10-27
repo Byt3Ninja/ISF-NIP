@@ -145,10 +145,10 @@
   <div class="row">
     <div class="col-md-12">
       <div>
-        <h4 class="card-title align-items-center mb-3">
+        <h5 class="card-title align-items-center mb-3">
           <i class='ti ti-card ti-28px'></i>
-          <span class="mx-2">{{ __('admin.Mentorship Sessions') }}:</span>
-        </h4>
+          <span class="ms-2">{{ __('admin.Mentorship Sessions') }}:</span>
+        </h5>
         <div id="mentorshipSessionsSection" class="card-body" style="height: 600px; overflow-y: auto;">
           @if($mentorship_sessions->count())
           <div class="card">
@@ -218,7 +218,7 @@
 
 <div class="col-md-12 mt-6">
   <div>
-    <h4 class="card-title align-items-center mb-3">
+    <h5 class="card-title align-items-center mb-3">
       <i class='ti ti-card ti-28px'></i>
       <span class="mx-2">{{ __('admin.Training sessions') }}:</span>
     </h4>

@@ -20,7 +20,7 @@
                     <div class="col-md-8 col-lg-6">
                         <div class="card shadow-sm border-0">
                             <div class="card-header">
-                                <h4 class="card-title mb-0">{{__('admin.Edit service category')}}</h4>
+                                <h5 class="card-title mb-0">{{__('admin.Edit service category')}}</h5>
                             </div>
                             <div class="card-body">
                                 @if(session()->has('msg'))

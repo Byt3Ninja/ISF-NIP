@@ -58,7 +58,7 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title primary">{{__('admin.Display all companies data')}}</h4>
+                    <h5 class="card-title primary">{{__('admin.Display all companies data')}}</h5>
                 </div>
                 <hr style="margin:-10px 0 5px 0;">
                 <div class="card-body">

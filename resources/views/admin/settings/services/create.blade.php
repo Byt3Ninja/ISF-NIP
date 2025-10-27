@@ -19,16 +19,15 @@
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
     <div class="content-body">
-      <!-- BuilderForm start -->
       <section id="basic-input">
         <div class="row">
           <div class="col-md-12">
             <div class="card">
-              <div class="card-header">
-                <h4 class="card-title">{{ __('admin.Add new service') }}</h4>
+              <div class="card-header border-bottom">
+                <h5 class="card-title">{{ __('admin.Add new service') }}</h5>
               </div>
               <div class="card-content">
-                <div class="card-body">
+                <div class="card-body mt-6">
                   @if (session()->has('msg'))
                   <div class="row">
                     <div class="col-md-12">
@@ -54,19 +53,20 @@
                     </div>
                   </div>
                   @endif
+
                   <form method="post" action="{{ route('services.store') }}" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     <div class="row">
                       <div class="col-md-12">
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Service_Name') }}</label>
+                          <label class="form-label" for="basicInput">{{ __('admin.Service_Name') }}</label>
                           <input style="direction: ltr;" type="text" class="form-control col-md-6 col-sm-12"
                             id="name_en" name='name_en' required value="{{ old('name_en') }}">
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Price') }}
+                          <label class="form-label" for="basicInput">{{ __('admin.Price') }}
                             {{ $Setting->Currency }}</label>
                           <input style="direction: ltr;" type="text" class="form-control col-md-3 col-sm-12" id="price"
                             name='price' required placeholder="{{ __('admin.Price') }} {{ $Setting->Currency }}"
@@ -74,14 +74,14 @@
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Description') }}</label>
+                          <label class="form-label" for="basicInput">{{ __('admin.Description') }}</label>
                           <input type="hidden" name="description_en" id="description_en"
                             value="{{ old('description_en') }}" />
                           <div id="quill-editor" style="height: 200px;">{!! old('description_en') !!}</div>
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Services Categories') }}</label>
+                          <label class="form-label" for="basicInput">{{ __('admin.Services Categories') }}</label>
                           <select class="select2 form-control" required id="service_category_id"
                             name='service_category_id'>
                             <option value="">{{ __('admin.Services Categories') }}</option>
@@ -94,7 +94,7 @@
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2">{{ __('admin.Organizations') }}</label>
+                          <label class="form-label">{{ __('admin.Organizations') }}</label>
                           <div class="row">
                             @foreach ($organizations as $organization)
                             <div class="col-md-4">
@@ -113,19 +113,19 @@
 
                         <!-- Vendor Details -->
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>
+                          <label class="form-label">{{ __('admin.Vendor_Name') }}</label>
                           <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_name"
                             value="{{ old('vendor_name') }}">
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2">{{ __('admin.Vendor_Email') }}</label>
+                          <label class="form-label">{{ __('admin.Vendor_Email') }}</label>
                           <input type="email" class="form-control col-md-6 col-sm-12" name="vendor_email"
                             value="{{ old('vendor_email') }}">
                         </fieldset>
 
                         <fieldset class="form-group mb-4">
-                          <label class="fs-5 mb-2">{{ __('admin.Vendor_Phone') }}</label>
+                          <label class="form-label">{{ __('admin.Vendor_Phone') }}</label>
                           <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_phone"
                             value="{{ old('vendor_phone') }}">
                         </fieldset>
@@ -150,7 +150,7 @@
                         </fieldset>
 
                         <fieldset class="form-group mt-3">
-                          <label for="img_url" class="fs-5 mb-2">{{ __('admin.Image') }}</label>
+                          <label for="img_url" class="form-label">{{ __('admin.Image') }}</label>
                           <div class="input-group">
                             <input type="file" class="form-control" id="img_url" name="img_url" accept="image/*">
                             <label class="input-group-text" for="img_url">
@@ -174,7 +174,6 @@
           </div>
         </div>
       </section>
-      <!-- BuilderForm end -->
     </div>
   </div>
 </div>

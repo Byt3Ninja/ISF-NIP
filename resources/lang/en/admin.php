@@ -2480,4 +2480,5 @@ return [
 	'Create_form' => 'Create Form',
 	'Traditional_Evaluation_pending' => 'Traditional Evaluation Pending',
 	'Select_Founder' => 'Select Founder',
+	'All_Options' => 'All Options'
 ];

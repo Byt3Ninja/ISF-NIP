@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           cancelButtonText: t.cancel,
           customClass: {
             confirmButton: 'btn btn-primary me-3',
-            cancelButton: 'btn btn-secondary'
+            cancelButton: 'btn btn-label-secondary'
           },
           buttonsStyling: false
         }).then((result) => {

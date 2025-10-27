@@ -17,12 +17,23 @@
 				<div class="col-xl-12 col-md-12 col-sm-12">
 					<div class="card">
 						<div class="card-header border-bottom d-flex flex-wrap justify-content-between align-items-center">
-							<h4 class="card-title">{{ __('admin.all Weights') }}</h4>
-							@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
-							<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateWeights">
-								<i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
-							</button>
-							@endif
+							<h5 class="card-title mb-3 mb-md-0">{{ __('admin.all Weights') }}</h5>
+							<div class="d-flex align-items-center gap-3">
+								<div class="dropdown">
+									<button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="exportDropdown">
+										<li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+										<li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+									</ul>
+								</div>
+								@if( $_user->ableToAny(['weights.create', 'weights.store'], $permissions) )
+								<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateWeights">
+									<i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
+								</button>
+								@endif
+							</div>
 						</div>
 						<div class="card-body">
 							<div class="table-responsive">
@@ -332,6 +343,7 @@
 @section('scripts')
 <script>
 	$(document).ready(function() {
+		const isArabic = "{{ $l }}" === "ar";
 		// Initialize DataTable
 		var table = $('#userstable').DataTable({
 			"responsive": true,
@@ -369,9 +381,25 @@
 					"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
 					"sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
 				}
-			}
+			},
 			@endif
+			buttons: [
+				{
+					extend: 'excel',
+					title: isArabic ? 'الأوزان' : 'Weights',
+					exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
+				},
+				{
+					extend: 'csv',
+					title: isArabic ? 'الأوزان' : 'Weights',
+					exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
+				},
+			],
 		});
+
+		// Export button handlers
+		$('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
+		$('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
 
 		// Populate filter dropdowns based on current table data
 		function populateFilters() {
@@ -520,17 +548,9 @@
 				if (result.value) {
 					$.post(url, {'_method': 'DELETE' , '_token': token},
 						function(response) {
-							Swal.fire({
-								icon: 'success',
+							releaseSuccessAlert({
 								title: "{{ __('admin.Deleted') }}!",
-								html: "{{ __('admin.DeletedSuccessfully') }}.",
-								showCancelButton: false,
-								showConfirmButton: true,
-								confirmButtonText: "{{ __('admin.OK') }}",
-								customClass: {
-									confirmButton: 'btn btn-primary',
-								},
-								buttonsStyling: false,
+								message: "{{ __('admin.DeletedSuccessfully') }}.",
 							});
 							// Remove the row from DataTable
 							table.row($(e.target).closest('tr')).remove().draw();
@@ -539,17 +559,9 @@
 						}
 					).fail(function(error) { 
 						console.log(error);
-						Swal.fire({
-							icon: 'error',
+						releaseFailureAlert({
 							title: "{{ __('admin.Error') }}!",
-							text: "{{ __('admin.DeleteFailed') }}",
-							showCancelButton: false,
-							showConfirmButton: true,
-							confirmButtonText: "{{ __('admin.OK') }}",
-							customClass: {
-								confirmButton: 'btn btn-primary',
-							},
-							buttonsStyling: false,
+							text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 						});
 					});
 				}

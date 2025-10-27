@@ -24,9 +24,9 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="border-bottom mb-8 pb-4">
-								<h4 class="card-title mb-0">
+								<h5 class="card-title mb-0">
 									{{__('admin.Edit Question')}}
-								</h4>
+								</h5>
 								<p class="card-text text-muted mt-1 mb-0">
 									{{ $l == 'en' ? 'Update the form below to edit the question' : 'حدث النموذج أدناه لتعديل السؤال' }}
 								</p>

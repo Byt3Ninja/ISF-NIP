@@ -2529,4 +2529,5 @@ return [
 	'Traditional_Evaluation_pending' => 'قيد التنفيذ',
 	'Category' => 'الفئة',
 	'Select_Founder' => 'اختر المؤسس',
+	'All_Options' => 'كل الخيارات'
 ];

@@ -135,10 +135,10 @@
             <div class="card-body">
               <div id="mentors" style="display: none;" class="mb-3">
                 <hr class="my-3">
-                <h4 class="card-title mb-4">
+                <h5 class="card-title mb-4">
                   <b id="name"></b>
                   {{ __('cycles.Schedule') }}:
-                </h4>
+                </h5>
                 <div class="table-responsive">
                   <table class="table" id="mentorstable">
                   </table>

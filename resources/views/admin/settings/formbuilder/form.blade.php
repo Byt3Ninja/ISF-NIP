@@ -15,11 +15,11 @@ $title=App\BuilderForm::findOrFail($id);
           <div class="col-12">
             <div class="card shadow-sm">
               <div class="card-header pb-0">
-                <h4 class="card-title mb-0">
+                <h5 class="card-title mb-0">
                   <strong>{{ __('builder.Form') }}:</strong> {{ $title->form_name }},
                   <strong>{{ __('builder.ID') }}:</strong> {{ $title->id }}
                   <a href="/dashboard/show-builder/{{ $id }}" class="ms-1">({{ __('builder.Edit') }})</a>
-                </h4>
+                </h5>
               </div>
               <hr class="my-2" />
               <div class="card-body">

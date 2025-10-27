@@ -50,10 +50,10 @@
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
               <div class="card-header border-bottom">
-                <h4 class="card-title align-items-center">
+                <h5 class="card-title align-items-center">
                   <i class='bx bx-card font-medium-4 mr-1'></i>
                   {{ $l == 'en' ? 'Mentorship Sessions' : 'جلسات الارشاد' }}
-                </h4>
+                </h5>
               </div>
               <div class="card-body">
                 <div class="card-text">

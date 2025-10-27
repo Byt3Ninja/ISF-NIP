@@ -179,7 +179,7 @@
           <div class="card">
             <div class="card-header border-bottom d-flex align-items-center">
               <i class="ti ti-device-desktop-analytics ti-24px"></i>
-              <h4 class="card-title mx-3">{{ __('dashboard.Your Judging List') }}</h4>
+              <h5 class="card-title mx-3">{{ __('dashboard.Your Judging List') }}</h5>
             </div>
             <div class="card-body">
               @if (count($csteps) > 0)
@@ -282,7 +282,7 @@
           <div class="card">
             <div class="card-header border-bottom d-flex align-items-center">
               <i class="ti ti-device-laptop ti-24px"></i>
-              <h4 class="card-title mx-3">{{ __('dashboard.Cycle final screening') }}</h4>
+              <h5 class="card-title mx-3">{{ __('dashboard.Cycle final screening') }}</h4>
             </div>
             <div class="card-body">
               @php
