@@ -109,9 +109,9 @@
                   <div class="card-header border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
-                        <h4 class="card-title mb-1">
+                        <h5 class="card-title mb-1">
                           {{ $l == 'en' ? 'Startups Final Screening' : $cstep->title }}
-                        </h4>
+                        </h5>
                         <p class="text-muted mb-1">{{ __('cycles.Select judges from the menu') }}.</p>
                         <small class="text-muted">
                           {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} 

@@ -35,7 +35,7 @@
     <div class="card mb-4">
       <div class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between">
         <div class="mb-4 mb-md-0">
-            <h4 class="card-title mb-0">{{ __('builder.Form_Builder') }}</h4>
+            <h5 class="card-title mb-0">{{ __('builder.Form_Builder') }}</h5>
             <div class="text-muted">{{ __('builder.Build_custom_forms') }}</div>
         </div>
         <div class="d-flex align-items-center gap-3">
@@ -967,11 +967,14 @@
             });
 
             fetch('{{ route("forms.design_save", ["id" => isset($title->id) ? $title->id : '0']) }}', {
-               method: 'POST',
-               headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                method: 'POST',
+                headers: { 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json' 
                 },
-                body: formData
+                body: JSON.stringify({
+                   form_fields_data: JSON.stringify(formData) // must be a JSON string
+               }),
             })
             .then(response => response.json())
             .then(data => {

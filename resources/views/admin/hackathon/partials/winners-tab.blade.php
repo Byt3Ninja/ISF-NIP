@@ -8,6 +8,7 @@
       </div>
       @else
         @foreach( $winners as $winner )
+          @php $winner = (object) $winner; @endphp
           <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100 border-0 shadow">
               <!-- Header -->
@@ -27,7 +28,7 @@
                   </div>
                   <div class="col-md-3 col-lg-3 col-sm-12 text-end">
                     <i data-project="{{ $winner?->id ?? 0 }}" class="like-project-action {{ Auth::check() ? ( in_array( Auth::user()->id, $winner->likes->toArray() ) ? 'fas' : 'far' ) : 'fas' }} fa-fw fa-sm fa-heart text-danger cursor-pointer"></i>
-                    <span class="likes-count"> @if($winner['likes'] == null) 0 @else {{ $winner->likes->count()  }} @endif  </span>
+                    <span class="likes-count"> @if($winner->likes == null) 0 @else {{ $winner->likes->count() }} @endif  </span>
                   </div>
                 </div>
                 

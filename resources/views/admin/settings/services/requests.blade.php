@@ -1,73 +1,40 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
-
 @section('content')
-  <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="d-flex justify-content-between align-items-center mb-6 mt-3">
-        <h3 class="mb-0 fw-bold">{{ __('cycles.Services requests') }}</h3>
-        @if (count($received) > 0 && $countold)
-          <a href="/dashboard/requests/old" class="btn btn-primary">
-            {{ __('cycles.Show old records') }}
-            <i class="ti ti-eye ms-2"></i>
-          </a>
-        @endif
-      </div>
-
-      <div class="card card-body">
-        <form id="filter-form" method="GET" action="{{ route('service_requests.list_all') }}">
-          <div class="row border-bottom mb-4 pb-3">
-            <div class="col-10">
-              <div class="row">
-                <div class="col-3">
-                  <select name="Service_id" class="form-select select2"
-                    data-placeholder="{{ __('admin.Select Service') }}">
-                    <option value="">{{ __('admin.Select Service') }}</option>
-                    <option value="0">All</option>
-                    @php
-                      $Services = App\Service::all();
-                    @endphp
-                    @foreach ($Services as $Service)
-                      <option value="{{ $Service->id }}" {{ $Service->id == request('Service_id') ? 'selected' : '' }}>
-                        {{ $Service->{'name_' . $l} }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="col-3">
-                  <select name="status" class="form-select select2" data-placeholder="{{ __('admin.Select Status') }}">
-                    <option value="">{{ __('admin.Select Status') }}</option>
-                    <option value="0">All</option>
-                    <option value="Pending" {{ 'Pending' == request('status') ? 'selected' : '' }}>
-                      {{ __('admin.Pending') }}</option>
-                    <option value="Done" {{ 'Done' == request('status') ? 'selected' : '' }}>
-                      {{ __('admin.Done') }}</option>
-                  </select>
-                </div>
-                <div class="col-3">
-                  <input type="text" class="form-control datepicker" placeholder="{{ __('admin.StartDate') }}"
-                    name="start_date" value="{{ request('start_date') }}" />
-                </div>
-                <div class="col-3">
-                  <input type="text" name="end_date" class="form-control datepicker"
-                    placeholder="{{ __('admin.EndDate') }}" value="{{ request('end_date') }}" />
-                </div>
-              </div>
+      
+      <div class="card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center border-bottom">
+          <h5 class="card-title text-capitalize mb-3 mb-md-0">{{ __('cycles.Services requests') }}</h5>
+          <div class="d-flex align-items-center gap-3">
+            <div class="dropdown">
+              <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+              </ul>
             </div>
+            @if (count($received) > 0 && $countold)
+              <a href="/dashboard/requests/old" class="btn btn-primary text-nowrap">
+                {{ __('cycles.Show old records') }}
+                <i class="ti ti-eye ms-1 ms-md-2"></i>
+              </a>
+            @endif
           </div>
-        </form>
-        
-        @if (count($received) > 0)
+        </div>
+
+        <div class="card-body">          
           <div class="table-responsive">
-            <table class="table zero-configuration">
+            <table class="table services-requests-table">
               <thead class="table-light">
                 <tr>
                   <th>#</th>
                   <th>{{ __('cycles.SenderName') }}</th>
                   <th>{{ __('cycles.Service') }}</th>
+                  <th>{{ __('admin.Status') }}</th>
                   <th>{{ __('cycles.Comments') }}</th>
                   <th>{{ __('cycles.Date/Time') }}</th>
                   <th>{{ __('cycles.Actions') }}</th>
@@ -109,6 +76,13 @@
                       @endif
                     </td>
                     <td>{{ $rec->service->{'name_' . $l} }}</td>
+                    <td>
+                      @if($rec->status == 'Pending')
+                        <span class="badge bg-label-warning">{{ __('admin.Pending') }}</span>
+                      @else
+                        <span class="badge bg-label-success">{{ __('admin.Done') }}</span>
+                      @endif
+                    </td>
                     <td>{{ $rec->comment ?? '-' }}</td>
                     <td>{{ $rec->date_time }}</td>
                     <td>
@@ -134,21 +108,18 @@
               </tbody>
             </table>
           </div>
-        @else
-          @include('includes.no-result')
-        @endif
+        </div>
       </div>
     </div>
   </div>
-  <!-- END: Content-->
 
   <div class="modal fade text-left" id="MessageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="myModalLabel33">
+          <h5 class="modal-title" id="myModalLabel33">
             {{ __('messages.SendMessageTo') }} <span id="uname"></span>
-          </h4>
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -157,12 +128,12 @@
             <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
             <input type="hidden" name="receiver" id="rid" value="">
             <div class="form-group mb-3">
-              <label for="subject" class="fs-6 fw-semibold form-label mb-2">{{ __('messages.Subject') }}:</label>
+              <label for="subject" class="form-label">{{ __('messages.Subject') }}:</label>
               <input id="subject" name="subject" type="text" placeholder="{{ __('messages.Subject') }}"
                 class="form-control" required>
             </div>
             <div class="form-group mb-3">
-              <label for="message" class="fs-6 fw-semibold form-label mb-2">{{ __('messages.Message') }}: </label>
+              <label for="message" class="form-label">{{ __('messages.Message') }}: </label>
               <textarea class="form-control" id="message" name='message' rows="8"
                 placeholder="{{ __('messages.Write your message') }}" required></textarea>
             </div>
@@ -185,9 +156,9 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="myModalLabel33">
+          <h5 class="modal-title" id="myModalLabel33">
             {{ __('cycles.Response to') }} <span id="rname"></span>
-          </h4>
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -195,22 +166,22 @@
           <input type="hidden" name="receiver" id="resid" value="">
 
           <div class="mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2">{{ __('admin.Vendor_Name') }}:</label>
+            <label class="form-label">{{ __('admin.Vendor_Name') }}:</label>
             <p id="vendor_name" class="form-control-plaintext">-</p>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2">{{ __('admin.Vendor_Email') }}:</label>
+            <label class="form-label">{{ __('admin.Vendor_Email') }}:</label>
             <p id="vendor_email" class="form-control-plaintext">-</p>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2">{{ __('admin.Vendor_Phone') }}:</label>
+            <label class="form-label">{{ __('admin.Vendor_Phone') }}:</label>
             <p id="vendor_phone" class="form-control-plaintext">-</p>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2">{{ __('cycles.Add a comment') }}:</label>
+            <label class="form-label">{{ __('cycles.Add a comment') }}:</label>
             <textarea class="form-control" id="admin_comment" name='admin_comment' rows="4"
               placeholder="{{ __('cycles.Write a response comment') }}"></textarea>
           </div>
@@ -229,92 +200,130 @@
 @stop
 
 @section('scripts')
-  <script>
-    $('.datepicker').flatpickr({
-      monthSelectorType: 'static',
-    });
+<script>
+  // --- DataTable Initialization ---
+  $(document).ready(function() {
+    const isArabic = "{{ $l }}" === "ar";
 
-    $('#filter-form .form-select, #filter-form .form-control').on('change', function() {
-      $('#filter-form').submit();
-    });
-  </script>
+    // Initialize DataTable
+    const table = $('.services-requests-table').DataTable({
+      responsive: true,
+      searching: true,
+      lengthChange: true,
+      pageLength: 10,
+      order: [[5, "desc"]],
+      dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l>' +
+           '<"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>' +
+           't<"row"<"col-sm-12 col-md-6"i>' +
+           '<"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
+      buttons: [
+        {
+          extend: 'excel',
+          title: isArabic ? 'طلبات الخدمات' : 'Services Requests',
+          exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
+        },
+        {
+          extend: 'csv',
+          title: isArabic ? 'طلبات الخدمات' : 'Services Requests',
+          exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
+        },
+      ],
+      columnDefs: [{ orderable: false, targets: [0, 6] }],
+      language: isArabic ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
+      initComplete: function() {
+        const api = this.api();
 
-  @if ($l == 'ar')
-    <script type="text/javascript">
-      $(document).ready(function() {
-        $('.zero-configuration').DataTable({
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
+        // Create Service Filter
+        const serviceSelect = $('<select class="form-select form-select-sm ms-md-8 mb-2 mb-md-0" style="width:auto;min-width:170px;">' +
+          `<option value="">${isArabic ? 'جميع الخدمات' : 'All Services'}</option>` +
+        '</select>');
+
+        const services = [...new Set(api.column(2).data().map(d => d.trim()).toArray())].sort();
+        services.forEach(service => serviceSelect.append(`<option value="${service}">${service}</option>`));
+        $('.dataTables_length').after(serviceSelect);
+
+        // Create Status Filter
+        const statusSelect = $('<select class="form-select form-select-sm ms-md-2 mb-2 mb-md-0" style="width:auto;min-width:170px;">' +
+          `<option value="">${isArabic ? 'جميع الحالات' : 'All Statuses'}</option>` +
+          `<option value="{{ __("admin.Pending") }}">{{ __("admin.Pending") }}</option>` +
+          `<option value="{{ __("admin.Done") }}">{{ __("admin.Done") }}</option>` +
+        '</select>');
+        serviceSelect.after(statusSelect);
+
+        // Create Date Filter (after Status Filter)
+        const dateInput = $('<input type="text" id="dateFilter" class="form-control form-control-sm ms-md-2" placeholder="' + 
+          (isArabic ? 'تصفية حسب التاريخ' : 'Filter by Date') + 
+        '" style="width:auto;min-width:160px;">');
+        statusSelect.after(dateInput);
+
+        // Initialize Flatpickr for date filter
+        flatpickr('#dateFilter', {
+          dateFormat: "Y-m-d",
+           onReady: function (selectedDates, dateStr, instance) {
+            let btn = document.createElement("button");
+            btn.type = "button";
+            btn.innerHTML = "{{ __('admin.Clear') }}";
+            btn.classList.add("btn", "btn-sm", "btn-outline-secondary", "my-4");
+            btn.addEventListener("click", function () {
+              instance.clear(); // <-- clear flatpickr value
+              instance.close();
+              api.column(5).search('').draw();
+            });
+            instance.calendarContainer.appendChild(btn);
+          },
+          onChange: function(selectedDates, dateStr) {
+            api.column(5).search(dateStr).draw();
           }
         });
-      });
-    </script>
-  @endif
-  <script>
-    function OpenModal(id, name, title) {
-      $('#uname').html(name);
-      $('#rid').val(id);
-      $('#subject').val('{{ __('cycles.Your request') }} - ' + title);
-      $('#MessageModal').modal('show');
-    }
 
-    function reply(id, name, title, vendorName, vendorEmail, vendorPhone) {
-      $('#rname').html('"' + title + '" {{ __('cycles.Request from') }} ' + name);
-      $('#resid').val(id);
-      // Update vendor details dynamically
-      $('#vendor_name').text(vendorName || '-');
-      $('#vendor_email').text(vendorEmail || '-');
-      $('#vendor_phone').text(vendorPhone || '-');
-      $('#ReplyModal').modal('show');
-    }
+        // Filter logic
+        serviceSelect.on('change', function() {
+          api.column(2).search(this.value).draw();
+        });
 
-    function approve(stat) {
-      let comment = $('#admin_comment').val();
-      let id = $('#resid').val();
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
+        statusSelect.on('change', function() {
+          api.column(3).search(this.value).draw();
+        });
+      }
+    });
+
+    // Export button handlers
+    $('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
+    $('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
+  });
+
+  // --- Modal and Approval Functions ---
+  function OpenModal(id, name, title) {
+    $('#uname').html(name);
+    $('#rid').val(id);
+    $('#subject').val('{{ __('cycles.Your request') }} - ' + title);
+    $('#MessageModal').modal('show');
+  }
+
+  function reply(id, name, title, vendorName, vendorEmail, vendorPhone) {
+    $('#rname').html('"' + title + '" {{ __('cycles.Request from') }} ' + name);
+    $('#resid').val(id);
+    $('#vendor_name').text(vendorName || '-');
+    $('#vendor_email').text(vendorEmail || '-');
+    $('#vendor_phone').text(vendorPhone || '-');
+    $('#ReplyModal').modal('show');
+  }
+
+  function approve(stat) {
+    const comment = $('#admin_comment').val();
+    const id = $('#resid').val();
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+    $.post('/dashboard/requests/approve', { id, stat, comment })
+      .done(() => {
+        location.reload();
+      })
+      .fail(err => {
+        releaseFailureAlert({
+          title: "{{ __('admin.Error') }}",
+          message: "{{ __('admin.An unexpected error occurred, please try again later') }}",
+        });
       });
-      $.ajax({
-        type: "POST",
-        url: "/dashboard/requests/approve",
-        data: {
-          "id": id,
-          "stat": stat,
-          "comment": comment
-        },
-        success: function(response) {
-          location.reload();
-        },
-        error: function(error) {
-          console.log(error);
-          alert("Error Occurred, Try again!");
-        }
-      });
-    }
-  </script>
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
+  }
+</script>
 @stop
+

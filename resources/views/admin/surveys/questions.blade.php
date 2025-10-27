@@ -640,7 +640,7 @@
         reverseButtons: true,
         customClass: {
           confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-secondary'
+          cancelButton: 'btn btn-label-secondary'
         },
         buttonsStyling: false
       }).then((result) => {

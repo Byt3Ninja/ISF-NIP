@@ -571,7 +571,7 @@
                   <div class="error-state-icon mb-4">
                     <i class="ti ti-alert-triangle text-warning" style="font-size: 4rem;"></i>
                   </div>
-                  <h4 class="card-title text-dark mb-3">{{ __('admin.No_results_found') }}</h4>
+                  <h5 class="card-title mb-3">{{ __('admin.No_results_found') }}</h5>
                   <p class="text-muted mb-4">
                     {{ __('cycles.No records screening from') }}
                   </p>

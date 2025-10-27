@@ -15,7 +15,7 @@
 							<div class="row align-items-center">
 								<div class="col-md-6">
 									<div class="d-flex align-items-center gap-2">
-										<h4 class="card-title mb-0">{{__('admin.surveyResults')}}</h4>
+										<h5 class="card-title mb-0">{{__('admin.surveyResults')}}</h5>
 									</div>
 								</div>
 								<div class="col-md-6 text-end">

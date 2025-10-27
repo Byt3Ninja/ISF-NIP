@@ -21,7 +21,7 @@
       <div class="card">
         <div class="card-header">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-            <h4 class="card-title mb-0">{{__('admin.Judge`s List')}}</h4>
+            <h5 class="card-title mb-0">{{__('admin.Judge`s List')}}</h5>
             <div class="d-flex align-items-center">
               <div class="dropdown me-2">
                 <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -240,12 +240,10 @@
               });
             }
           ).fail(function(error) { 
-            console.log(error);
-            Swal.fire({
-              icon: 'error',
-              title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.SomethingWentWrong') }}",
-            });
+            releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+						});
           });
         }
       });

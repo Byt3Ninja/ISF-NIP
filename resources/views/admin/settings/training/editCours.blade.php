@@ -49,7 +49,7 @@
         <div class="col-12 col-md-8 col-lg-9">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title pb-4 border-bottom">{{ $editCourse }}</h4>
+              <h5 class="card-title pb-4 border-bottom">{{ $editCourse }}</h5>
             </div>
             <div class="card-body">
               <div id="multiple-column-form">

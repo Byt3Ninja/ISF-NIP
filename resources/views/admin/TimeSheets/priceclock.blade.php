@@ -16,7 +16,7 @@
       <div class="col-xl-12 col-md-12 col-sm-12">
         <div class="card">
           <div class="card-header d-flex flex-wrap align-items-md-center justify-content-between border-bottom">
-            <h4 class="card-title mb-0">{{ $l == 'en' ? 'Users Timesheet' : 'الجداول الزمنية للمستخدمين' }}</h4>
+            <h5 class="card-title mb-0">{{ $l == 'en' ? 'Users Timesheet' : 'الجداول الزمنية للمستخدمين' }}</h5>
             <div class="d-flex align-items-center gap-2">
               <div class="dropdown">
                 <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
