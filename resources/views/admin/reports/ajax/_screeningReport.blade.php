@@ -178,7 +178,7 @@
               } elseif ($hasDraft) {
                 $primaryStatus = 'draft';
               }
-              
+              $primaryStatus = strtolower( str_replace(' ', '-', $company->status) );
               // Create searchable category string
               $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
               $categoryString = is_array($categories) ? implode(' ', array_filter($categories ?? [])) : ($company->business_categories ?? '');
