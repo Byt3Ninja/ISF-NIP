@@ -51,7 +51,7 @@
 					<div class="organizations-list-table">
 						<div class="card">
               <div class="card-header border-bottom">
-                <h4 class="card-title">{{ __('admin.My Quizzes') }}</h4>
+                <h5 class="card-title mb-0">{{ __('admin.My Quizzes') }}</h5>
               </div>
 							<div class="card-content">
 								<div class="card-body">
