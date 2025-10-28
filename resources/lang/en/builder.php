@@ -77,4 +77,5 @@ return [
     'Show_Saved_Form' => 'View Saved Form',
     'No_fields_available' => 'No fields available. Please add questions or sections.',
     'Actions' => 'Actions',
+    'All_Forms' => 'All Forms',
 ];

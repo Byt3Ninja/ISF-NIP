@@ -91,7 +91,7 @@
         <input 
           type="text" 
           id="formTitle" 
-          class="form-control form-control-lg mb-2 border-0 border-bottom border-2"
+          class="form-control form-control-lg mb-2 border-0 border-bottom"
           placeholder="{{ __('builder.Untitled_form') }}" 
           value="{{ old('title', $title->form_name ?? '') }}"
         />
