@@ -15,125 +15,95 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
-    public function showBuilder(Request $request, $id=1)
+   public function showBuilder(Request $request, $id = null)
     {
-        $organization_id=auth()->user()->organization_id;
+        $organization_id = auth()->user()->organization_id;
 
-        if (is_null($organization_id) && Organization::count() == 0){
-            return redirect(route('organizations.index'))->with('message2','add organizations first');
+        // Check if there are no organizations
+        if (is_null($organization_id) && Organization::count() == 0) {
+            return redirect(route('organizations.index'))->with('message2', 'add organizations first');
         }
-        $title = BuilderForm::where('id',$id)->when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->where('organization_id',$organization_id);
-        })->first();
-        if (!$title){
-            $title = BuilderForm::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->where('organization_id',$organization_id);
-            })->first();
-            if (!$title){
-                if (!is_null($organization_id)){
+
+        // When there’s NO id in the URL → treat it as a new form creation
+        if (is_null($id)) {
+            $title = null; // <-- new form, so title is null
+        } else {
+            // Otherwise, load the existing form by id
+            $title = BuilderForm::where('id', $id)
+                ->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    return $q->where('organization_id', $organization_id);
+                })
+                ->first();
+
+            // If not found, fall back to organization-based defaults
+            if (!$title) {
+                $title = BuilderForm::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                    return $q->where('organization_id', $organization_id);
+                })->first();
+
+                if (!$title) {
                     $title = BuilderForm::firstOrCreate([
-                        'form_name'=>'New Empty Form',
-                        'organization_id'=>$organization_id
-                    ]);
-                }else{
-                    $title = BuilderForm::firstOrCreate([
-                        'form_name'=>'New Empty Form',
-                        'organization_id'=>Organization::first()->id
+                        'form_name' => 'New Empty Form',
+                        'organization_id' => $organization_id ?? Organization::first()->id
                     ]);
                 }
+
+                $id = $title->id;
             }
-            $id = $title->id;
         }
-        $fields = Field::all()->mapWithKeys(function ($field) {
-            return [$field->field_type => $field->id];
-        });
 
+        $fields = Field::all()->mapWithKeys(fn($field) => [$field->field_type => $field->id]);
 
+        $builder_fields = BuilderField::where('builder_form_id', $id)->orderBy('id', 'asc');
 
-        $builder_fields = BuilderField::where([
-            'builder_form_id'=>$id,
-        ])->orderBy('id', 'asc');
-
-        if($builder_fields->exists()) {
-
-            $field_data = $builder_fields->get()->map(function($field) use ($fields) {
-
+        if ($builder_fields->exists()) {
+            $field_data = $builder_fields->get()->map(function ($field) use ($fields) {
                 switch ($fields->search($field->field_id)) {
                     case 'select':
-                        $field_config_data = [
-                            'type'=> 'select',
-                            'additionalConfig'=> [
-                                'listOptions' => $field->options->values
-                            ]
-                        ];
-
+                        $type = ['type' => 'select', 'additionalConfig' => ['listOptions' => $field->options->values]];
                         break;
-
                     case 'textarea':
-                        $field_config_data = [
-                            'type'=> 'textarea',
-                            'additionalConfig'=> [
-                                'textAreaRows' => $field->options->rows
-                            ]
-                        ];
-
+                        $type = ['type' => 'textarea', 'additionalConfig' => ['textAreaRows' => $field->options->rows]];
                         break;
                     case 'file':
-                        $field_config_data = [
-                            'type'=> 'file',
-                            'additionalConfig'=> [
-                                'inputType' => $field->options->type
-                            ]
-                        ];
-
+                        $type = ['type' => 'file', 'additionalConfig' => ['inputType' => $field->options->type]];
                         break;
-
                     default:
-                        if($field->options->type != "date") {
-                            $field_config_data = [
-                                'type'=> 'input',
-                                'additionalConfig'=> [
-                                    'inputType' => $field->options->type
-                                ]
-                            ];
-                        }
-                        else {
-                            $field_config_data = [
-                                'type'=> 'date',
-                                'additionalConfig'=> []
-                            ];
-                        }
-
+                        $type = ($field->options->type != 'date')
+                            ? ['type' => 'input', 'additionalConfig' => ['inputType' => $field->options->type]]
+                            : ['type' => 'date', 'additionalConfig' => []];
                 }
 
-                $common_data = [
+                return [[
                     'id' => $field->id,
-                    'label'=> $field->options->label,
-                    'isRequired'=> intval( $field?->options?->validation?->required ) == 1 ? true : false,
-                ];
-
-                return [array_merge($common_data, $field_config_data)];
+                    'label' => $field->options->label,
+                    'isRequired' => intval($field?->options?->validation?->required) === 1,
+                    ...$type
+                ]];
             });
         }
 
-        if (!is_null(auth()->user()->organization_id)){
-            $builderForms = BuilderForm::where('organization_id',auth()->user()->organization_id)->get();
-        }else{
+        // Load builder forms list
+        if (!is_null(auth()->user()->organization_id)) {
+            $builderForms = BuilderForm::where('organization_id', auth()->user()->organization_id)->get();
+        } else {
             $builderForms = BuilderForm::all();
         }
 
-        if($request->org_id){
-            $builderForms = BuilderForm::where('organization_id',$request->org_id)->get();
+        if ($request->org_id) {
+            $builderForms = BuilderForm::where('organization_id', $request->org_id)->get();
         }
 
         $data = [
-            'builderForms'=>$builderForms,
+            'builderForms' => $builderForms,
             'title' => 'form builder',
-            'builder_data' => $builder_fields->exists()? $field_data->flatten(1)->toArray() : []
+            'builder_data' => $builder_fields->exists() ? $field_data->flatten(1)->toArray() : []
         ];
 
-        return view('admin.settings.formbuilder.index', $data)->with('title',$title);
+        // The `$title` variable passed to view can be null safely
+        return view('admin.settings.formbuilder.index', $data)->with('title', $title);
     }
+
 
     /**
      * show the form

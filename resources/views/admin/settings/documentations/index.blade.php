@@ -7,16 +7,6 @@
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-3 mb-6">
-        <h3 class="mb-0 fw-bold">{{ __('admin.Documentations') }}</h3>
-        @if($_user->ableToAny(['documentation.create', 'documentation.store'], $permissions))
-        <div class="invoice-create-btn">
-          <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
-            <i class="ti ti-plus me-2"></i> {{ __('admin.Add New') }}
-          </a>
-        </div>
-        @endif
-      </div>
       @if (session()->has('msg'))
       <div class="row mb-6">
         <div class="col-md-12">
@@ -33,6 +23,16 @@
           <div class="row">
             <div class="col-12">
               <div class="card">
+                <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
+                  <h5 class="card-title mb-0">{{ __('admin.Documentations') }}</h5>
+                  @if($_user->ableToAny(['documentation.create', 'documentation.store'], $permissions))
+                  <div class="invoice-create-btn">
+                    <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
+                      <i class="ti ti-plus me-2"></i> {{ __('admin.Add New') }}
+                    </a>
+                  </div>
+                  @endif
+                </div>
                 <div class="card-content">
                   <div class="card-body">
                     <div class="table-responsive">
@@ -189,7 +189,7 @@
             ).fail(function(error) { 
               releaseFailureAlert({
                 title: "{{ __('admin.Error') }}!",
-                text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+                message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
             });
           }

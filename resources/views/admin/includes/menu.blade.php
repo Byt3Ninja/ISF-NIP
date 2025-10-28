@@ -769,7 +769,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
 
       @if (!$_user->hasAnyRole('Mentor|Judger'))
         <li
-          class="{{ Request::is('*services*', '', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
+          class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-arrows-move"></i>
             <div>{{ __('admin.Services') }}</div>
@@ -941,7 +941,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
    @endif
 
    @if ($_user->hasAnyRole('Admin|organizationManager'))
-    <li class="{{ Request::is('dashboard/admin/notification-templates*') ? 'sidebar-group-active open' : '' }} menu-item">
+    <li class="{{ Request::is('dashboard/admin/notification-templates*', 'dashboard/admin/notification-triggers*') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-mail"></i>
         <div>{{ __('settings.Notification_Templates') }}</div>
@@ -953,7 +953,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
             <span class="menu-item">{{ __('settings.Create_Template') }}</span>
           </a>
         </li>
-        <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit', 'dashboard/admin/notification-templates/*') ? 'active' : '' }} menu-item">
+        <li class="{{ Request::is('dashboard/admin/notification-templates', 'dashboard/admin/notification-templates/*/edit') ? 'active' : '' }} menu-item">
           <a class="menu-link" href="{{ route('notification-templates.index') }}">
             <i class="bx bx-{{ $arrow ?? 'right' }}-arrow-alt"></i>
             <span class="menu-item">{{ __('settings.Manage_Templates') }}</span>

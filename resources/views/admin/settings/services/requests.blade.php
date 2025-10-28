@@ -19,8 +19,8 @@
             </div>
             @if (count($received) > 0 && $countold)
               <a href="/dashboard/requests/old" class="btn btn-primary text-nowrap">
+                <i class="ti ti-eye me-1 me-md-2"></i>
                 {{ __('cycles.Show old records') }}
-                <i class="ti ti-eye ms-1 ms-md-2"></i>
               </a>
             @endif
           </div>

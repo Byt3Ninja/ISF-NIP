@@ -1612,19 +1612,10 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               $('#member-count').text(currentCount - 1);
             });
           }).fail(function(error) { 
-            console.log(error);
-            Swal.fire({
-              icon: 'error',
-              title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.DeleteFailed') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
-            });
+            releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							message: error?.message || "{{ __('admin.DeleteFailed') }}",
+						});
           });
       }
     });
@@ -1666,17 +1657,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             });
           }).fail(function(error) { 
             console.log(error);
-            Swal.fire({
-              icon: 'error',
+            releaseFailureAlert({
               title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.CancelFailed') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: error?.message || "{{ __('admin.CancelFailed') }}",
             });
           });
       }

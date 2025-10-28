@@ -8,8 +8,6 @@
 @section('content')
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-overlay"></div>
-			<div class="content-header mb-4"> <h4 class="card-title">{{ __('admin.all Questions') }}</h4> </div>
 			<div class="content-body">
 				<section id="multiple-column-form">
 					@if (session()->has('message'))
@@ -24,9 +22,10 @@
 					<div class="col-xl-12 col-md-12 col-sm-12">
 						<div class="card">
 							@if( $_user->ableToAny(['questions.create', 'questions.store'], $permissions) )
-							<div class="card-header">
+							<div class="card-header border-bottom d-flex justify-content-between align-items-center">
+								<h5 class="card-title mb-0 text-capitalize">{{ __('admin.all Questions') }}</h5>
 								<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateCategory">
-									{{ __('admin.Add new Question') }}
+									{{ __('admin.Add_New') }}
 									<i class="ti ti-plus mx-2"></i>
 								</button>
 							</div>
@@ -35,7 +34,7 @@
 								<div class="card-text">
 									<div class="table-responsive">
 										<table class="table mb-0" id="userstable">
-											<thead class="thead-dark">
+											<thead class="table-light">
 												<tr>
 													<th>#</th>
 													<th>{{ __('admin.Question') }}</th>

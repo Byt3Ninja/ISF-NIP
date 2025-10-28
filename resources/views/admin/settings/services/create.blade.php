@@ -24,7 +24,7 @@
           <div class="col-md-12">
             <div class="card">
               <div class="card-header border-bottom">
-                <h5 class="card-title">{{ __('admin.Add new service') }}</h5>
+                <h5 class="card-title mb-0">{{ __('admin.Add new service') }}</h5>
               </div>
               <div class="card-content">
                 <div class="card-body mt-6">

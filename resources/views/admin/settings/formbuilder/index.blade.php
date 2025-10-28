@@ -27,9 +27,14 @@
     $organizations = App\Organization::all();
     $allBuilderForms = App\BuilderForm::with('organization', 'cycles')->get();
   }
+
+    $mode = !request()->segment(3) ? 'ADD' : 'EDIT';
+
+    $orgIdParam = request()->get('org_id');
   @endphp
 
 @section('content')
+
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card mb-4">
@@ -49,19 +54,19 @@
             <i class="ti ti-filter"></i>
             <span class="d-none d-md-inline ms-2">{{ __('cycles.Show_Filters') }}</span>
           </button>
-           <button class="btn btn-primary" onclick="showForm(2,0,null)">
+           {{-- <button class="btn btn-primary" onclick="showForm(2,0,null)">
             <i class="ti ti-plus"></i> 
             <span class="d-none d-md-inline ms-2">{{ __('admin.Add_New') }}</span>
-          </button>
+          </button> --}}
         </div>
       </div>
     </div>
 
      <!-- Form Header -->
-    <div class="card mb-4">
+    <div class="card mb-8">
       <div class="bg-primary rounded-top" style="height: 8px;"></div>
       <div class="card-body">
-        @if(request()->segment(3))
+        @if($mode == 'EDIT')
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-4 mb-md-0">{{ $title->form_name }}</h5>
           <div class="d-flex align-items-center gap-2 ms-md-2">
@@ -88,13 +93,31 @@
           </div>
         </div>
         @endif
-        <input 
-          type="text" 
-          id="formTitle" 
-          class="form-control form-control-lg mb-2 border-0 border-bottom border-2"
-          placeholder="{{ __('builder.Untitled_form') }}" 
-          value="{{ old('title', $title->form_name ?? '') }}"
-        />
+        <div class="form-group">
+          <label class="form-label">{{ __('builder.Form_Title') }}</label>
+          <input 
+            type="text" 
+            id="formTitle" 
+            class="form-control"
+            placeholder="{{ __('builder.Untitled_form') }}" 
+            value="{{ old('title', optional($title)->form_name ?? '') }}"
+          />
+        </div>
+        @if (is_null(auth()->user()->organization_id))
+        <div class="form-group mt-4" id="mmenu1">
+          <label class="form-label">{{ __('builder.Organization') }}</label>
+          <div class="form-group mb-0">           
+            <select class="select2 form-control" id="organization_id" name="organization_id" data-placeholder="{{ __('builder.Select_Organization') }}" required>
+              <option value="" disabled {{ !$orgIdParam ? 'selected' : '' }}>{{ __('builder.Select_Organization') }}</option>
+              @foreach (\App\Organization::all() as $org)
+              <option value="{{ $org->id }}" {{ $org->id == $orgIdParam ? 'selected' : '' }}>{{ $org->name }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+        @else
+        <input type="hidden" name="organization_id" value="{{ auth()->user()->organization_id }}" id="organization_id">
+        @endif
       </div>
     </div>
 
@@ -105,37 +128,14 @@
 
     <div class="card card-body">
         <div class="d-flex align-items-center gap-4">
-            <!-- Add Button with Dropdown Menu -->
-            <div class="dropdown">
-            <button type="button" class="btn btn-lg btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+            <!-- Add Section Button -->
+            <button type="button" class="btn btn-lg btn-outline-secondary d-flex align-items-center gap-2" onclick="addSection()">
                 <i class="ti ti-plus"></i>
-                {{ __('builder.Add') }}
+                {{ __('builder.Add_Section') }}
             </button>
         
-            <!-- Dropdown Menu -->
-            <ul class="dropdown-menu" style="min-width: 16rem;">
-                <li><button type="button" onclick="addStandaloneQuestion()"
-                class="dropdown-item d-flex align-items-center gap-3 py-3">
-                <i class="ti ti-question-mark text-primary"></i>
-                <div>
-                    <div class="font-weight-medium">{{ __('builder.Add_Question') }}</div>
-                    <div class="text-muted small">{{ __('builder.Create_standalone_question') }}</div>
-                </div>
-                </button></li>
-        
-                <li><button type="button" onclick="addSection()"
-                class="dropdown-item d-flex align-items-center gap-3 py-3">
-                <i class="ti ti-list text-primary"></i>
-                <div>
-                    <div class="font-weight-medium">{{ __('builder.Add_Section') }}</div>
-                    <div class="text-muted small">{{ __('builder.Organize_questions_section') }}</div>
-                </div>
-                </button></li>
-            </ul>
-            </div>
-        
             <button type="button" class="btn btn-lg btn-primary ml-2" onclick="saveForm()">
-                <span class="text-nowrap">{{ __('builder.Save_Form') }}</span>
+                <span class="text-nowrap">{{ $mode == 'EDIT' ? __('builder.Edit_Form') : __('builder.Add_Form') }}</span>
                 <i class="ti ti-check ms-2"></i>
             </button>
         </div>
@@ -147,7 +147,7 @@
 <!--Modify custom form step Modal -->
 <div class="modal fade text-left" id="AddForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="AddFormTitle">{{ __('builder.Add_New_Form') }}</h5>
@@ -158,9 +158,9 @@
         <div class="mb-4" id="mmenu1">
           <label class="form-label">{{ __('builder.Select_Organization') }}: </label>
           <div class="form-group mb-0">
-            <select class="select2 form-control" id="organization_id" name="organization_id" required>
+            <select class="select2 form-control" id="organization_id" name="organization_id" data-placeholder="{{ __('builder.Select_Organization') }}" required>
               @foreach (\App\Organization::all() as $org)
-              <option value="{{ $org->id }}">{{ $org->name }}</option>
+              <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? 'selected' : '' }}>{{ $org->name }}</option>
               @endforeach
             </select>
           </div>
@@ -200,7 +200,7 @@
         <form method="GET" action="/dashboard/show-builder">
           <div id="organizationFilterContainer" class="form-group mb-4">
             <label for="organizationFilter" class="form-label">{{ __('builder.Select_Organization') }}</label>
-            <select class="form-select select2" id="organizationFilter" name="org_id">
+            <select class="form-select select2" id="organizationFilter" name="org_id" data-placeholder="{{ __('builder.Select_Organization') }}">
               <option value="0">{{ __('admin.All_Organizations') }}</option>
               @foreach ($organizations as $organization)
               <option value="{{$organization->id}}" {{ $organization->id == request('org_id') ? 'selected' : '' }}
@@ -236,6 +236,11 @@
         if (isOrganizationManager) {
             $('#organizationFilterContainer').hide();
         }
+        
+        // Add a section on first render if no existing form data
+        @if($mode == 'ADD')
+        addSection();
+        @endif
     });
 
   function showForm(set, id, title, organization_id) {
@@ -353,10 +358,22 @@
         var org_id = $('#organizationFilter').val();
         var form_id = $('#formFilter').val();
         var url = '/dashboard/show-builder';
+        
         if (form_id) {
             url += '/' + form_id;
+            // Get organization ID from selected form
+            var selectedForm = allForms.find(function(form) {
+                return form.id == form_id;
+            });
+            if (selectedForm) {
+                org_id = selectedForm.organization_id;
+            }
         }
-        url += '?org_id=' + org_id;
+        
+        if (org_id && org_id != '0') {
+            url += '?org_id=' + org_id;
+        }
+        
         location.href = url;
     });
 </script>
@@ -830,21 +847,24 @@
             const sections = getSectionsList();
             
             const sectionHtml = `
-                <div class="section-wrapper mb-5" data-item-id="${sectionId}" data-item-type="section">
+                <div class="section-wrapper mb-5 position-relative" data-item-id="${sectionId}" data-item-type="section">
+                    <div class="position-absolute start-0 z-1" style="top: -0.5rem;">
+                        <span class="badge bg-primary">{{ __('builder.Section') }} ${sections.length + 1}</span>
+                    </div>
                     <div class="item-card section-card card mb-3">
                         <div class="card-body">
-                            <div class="d-flex align-items-start gap-3">
+                            <div class="d-flex align-items-start gap-3 mt-3">
                                 <i class="ti ti-grip-vertical text-muted drag-handle cursor-move mt-1"></i>
                                 <div class="flex-fill">
                                     <input 
                                         type="text" 
-                                        class="section-title form-control form-control-xl border-0 border-bottom border-2 mb-2"
-                                        placeholder="{{ __('builder.Section_title') }}"
+                                        class="section-title form-control mb-2"
+                                        placeholder="{{ __('builder.Section_title_optional') }}"
                                         onchange="updateAllLogicPanels()"
                                     >
                                     <input 
                                         type="text" 
-                                        class="section-description form-control form-control-sm text-muted border-0 border-bottom mb-3"
+                                        class="section-description form-control mb-3"
                                         placeholder="{{ __('builder.Section_description_optional') }}"
                                     >
                                 </div>
@@ -853,6 +873,9 @@
                                     type="button" 
                                     class="delete-section btn btn-link text-muted p-0"
                                     onclick="deleteSection(this)"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="{{ __('builder.Remove_Section') }}"
                                 >
                                     <i class="ti ti-trash"></i>
                                 </button>
@@ -878,7 +901,7 @@
                         class="btn btn-outline-primary border-2 border-dashed d-flex align-items-center justify-content-center gap-2 w-100 p-3"
                     >
                         <i class="ti ti-plus"></i>
-                        {{ __('builder.Add_Question_Section') }}
+                        {{ __('builder.Add_Question_Section') }} ${sectionId + 1}
                     </button>
                 </div>
             `;
@@ -928,14 +951,22 @@
         }
 
         function saveForm() {
-            // const formId = '{{ isset($title->id) ? $title->id : '' }}';
-            // if (!formId) {
-            //     $('#AddForm').modal('show');
-            //     return;
-            // }
+            const formTitle = document.getElementById('formTitle').value.trim();
+            const organizationId = document.getElementById('organization_id').value;
+            
+            if (!formTitle) {
+                releaseWarningAlert({ message: '{{ __("builder.Form_title_required") }}' });
+                return;
+            }
+            
+            if (!organizationId) {
+                releaseWarningAlert({ message: '{{ __("builder.Organization_required") }}' });
+                return;
+            }
 
             const formData = {
-                title: document.getElementById('formTitle').value,
+                title: formTitle,
+                organization_id: organizationId,
                 items: []
             };
 
@@ -1110,19 +1141,19 @@
                 <div class="section-wrapper mb-5" data-item-id="${sectionId}" data-item-type="section">
                     <div class="item-card section-card card mb-3">
                         <div class="card-body">
-                            <div class="d-flex align-items-start gap-3">
+                            <div class="d-flex align-items-start gap-3 mt-3">
                                 <i class="ti ti-grip-vertical text-muted drag-handle cursor-move mt-1"></i>
                                 <div class="flex-fill">
                                     <input 
                                         type="text" 
-                                        class="section-title form-control form-control-xl border-0 border-bottom border-2 mb-2"
-                                        placeholder="{{ __('builder.Section_title') }}"
+                                        class="section-title form-control mb-2"
+                                        placeholder="{{ __('builder.Section_title_optional') }}"
                                         onchange="updateAllLogicPanels()"
                                         value="${sectionData.title || ''}"
                                     >
                                     <input 
                                         type="text" 
-                                        class="section-description form-control form-control-sm text-muted border-0 border-bottom mb-3"
+                                        class="section-description form-control mb-3"
                                         placeholder="{{ __('builder.Section_description_optional') }}"
                                         value="${sectionData.description || ''}"
                                     >
@@ -1132,6 +1163,9 @@
                                     type="button" 
                                     class="delete-section btn btn-link text-muted p-0"
                                     onclick="deleteSection(this)"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="{{ __('builder.Remove_Section') }}"
                                 >
                                     <i class="ti ti-trash"></i>
                                 </button>

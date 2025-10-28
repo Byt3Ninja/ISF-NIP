@@ -43,12 +43,12 @@
               <h5 class="card-title primary">{{__('admin.ReminderLogs')}}</h5>
               <div class="card-title-elements">
                 <div class="dropdown">
-                  <button class="btn btn-outline-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ti ti-download me-1"></i> {{ __('admin.Export') }}
+                  <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                    <li><a class="dropdown-item" href="javascript:void(0)" id="export-csv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
                     <li><a class="dropdown-item" href="javascript:void(0)" id="export-excel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="export-csv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
                   </ul>
                 </div>
               </div>

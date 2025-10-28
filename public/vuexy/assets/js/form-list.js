@@ -20,7 +20,7 @@ const translations = {
     edit: 'Edit',
     delete: 'Delete',
     formId: 'Form ID',
-    formName: 'Form Name',
+    formName: 'Form Title',
     assignedOrganization: 'Assigned Organization',
     submissions: 'Submissions',
     lastModified: 'Last Modified',
@@ -54,7 +54,7 @@ const translations = {
     edit: 'تعديل',
     delete: 'حذف',
     formId: 'معرف النموذج',
-    formName: 'اسم النموذج',
+    formName: 'عنوان النموذج',
     assignedOrganization: 'المنظمة المعينة',
     submissions: 'الإرسالات',
     lastModified: 'آخر تعديل',
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           $('.card-header').after('<hr class="my-0">');
 
           // Add custom filter for Organization only (status filter removed)
-          const orgFilter = $(`<select class="form-select form-select-sm w-px-200 mt-6 mt-md-0"><option value="">${t.allOrganizations}</option></select>`)
+          const orgFilter = $(`<select class="form-select form-select-sm w-px-200 mt-6 mt-md-0 ${isOrgManager ? 'd-none' : 'd-inline'}"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -257,7 +257,21 @@ document.addEventListener('DOMContentLoaded', function (e) {
           // Populate form with existing data
           editOffCanvasElement.querySelector('.form_id').value = rowData.form_id;
           editOffCanvasElement.querySelector('.dt-form-name').value = rowData.form_name;
-          editOffCanvasElement.querySelector('.dt-org-select').value = rowData.assigned_organization;
+          
+          // Set organization by ID if available, otherwise by name
+          const orgSelect = $(editOffCanvasElement.querySelector('.dt-org-select'));
+          if (rowData.organization_id) {
+            orgSelect.val(rowData.organization_id).trigger('change');
+          } else {
+            // Fallback: find option by organization name
+            const options = orgSelect.find('option');
+            options.each(function() {
+              if ($(this).text().trim() === rowData.assigned_organization) {
+                orgSelect.val($(this).val()).trigger('change');
+                return false;
+              }
+            });
+          }
           
           // Show the edit canvas
           editOffCanvasEl = new bootstrap.Offcanvas(editOffCanvasElement);
@@ -276,8 +290,19 @@ document.addEventListener('DOMContentLoaded', function (e) {
         newRecord.addEventListener('click', function () {
           offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
           // Empty fields on offCanvas open
-          (offCanvasElement.querySelector('.dt-form-name').value = ''),
-            (offCanvasElement.querySelector('.dt-org-select').value = '');
+          offCanvasElement.querySelector('.dt-form-name').value = '';
+          
+          const orgSelect = $(offCanvasElement.querySelector('.dt-org-select'));
+          if (isOrgManager) {
+            // Auto-select the first (and only) organization for org managers
+            const firstOption = orgSelect.find('option:not([disabled])').first();
+            if (firstOption.length) {
+              orgSelect.val(firstOption.val()).trigger('change');
+            }
+          } else {
+            orgSelect.val('').trigger('change');
+          }
+          
           // Open offCanvas with form
           offCanvasEl.show();
         });

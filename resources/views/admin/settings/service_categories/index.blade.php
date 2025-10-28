@@ -89,7 +89,7 @@
                                 <li>
                                   <a class="dropdown-item d-flex align-items-center"
                                     href="{{ route('serviceCategories.edit', ['serviceCategory' => $category->id]) }}">
-                                    <i class="ti ti-pencil me-1"></i> {{ __('Edit') }}
+                                    <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
                                   </a>
                                 </li>
                                 @endif
@@ -197,7 +197,7 @@
             ).fail(function(error) { 
               releaseFailureAlert({
                 title: "{{ __('admin.Error') }}!",
-                text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+                message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
             });
           }

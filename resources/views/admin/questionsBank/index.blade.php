@@ -414,18 +414,9 @@
 								populateFilters();
 							}
 						).fail(function(error) { 
-							console.log(error);
-							Swal.fire({
-								icon: 'error',
+							releaseFailureAlert({
 								title: "{{ __('admin.Error') }}!",
-								text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-								showCancelButton: false,
-								showConfirmButton: true,
-								confirmButtonText: "{{ __('admin.OK') }}",
-								customClass: {
-									confirmButton: 'btn btn-primary',
-								},
-								buttonsStyling: false,
+								message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 							});
 						});
 					}
