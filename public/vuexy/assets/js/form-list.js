@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           $('.card-header').after('<hr class="my-0">');
 
           // Add custom filter for Organization only (status filter removed)
-          const orgFilter = $(`<select class="form-select form-select-sm w-px-200 mt-6 mt-md-0"><option value="">${t.allOrganizations}</option></select>`)
+          const orgFilter = $(`<select class="form-select form-select-sm w-px-200 mt-6 mt-md-0 ${isOrgManager ? 'd-none' : 'd-inline'}"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -290,8 +290,19 @@ document.addEventListener('DOMContentLoaded', function (e) {
         newRecord.addEventListener('click', function () {
           offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
           // Empty fields on offCanvas open
-          (offCanvasElement.querySelector('.dt-form-name').value = ''),
-            (offCanvasElement.querySelector('.dt-org-select').value = '');
+          offCanvasElement.querySelector('.dt-form-name').value = '';
+          
+          const orgSelect = $(offCanvasElement.querySelector('.dt-org-select'));
+          if (isOrgManager) {
+            // Auto-select the first (and only) organization for org managers
+            const firstOption = orgSelect.find('option:not([disabled])').first();
+            if (firstOption.length) {
+              orgSelect.val(firstOption.val()).trigger('change');
+            }
+          } else {
+            orgSelect.val('').trigger('change');
+          }
+          
           // Open offCanvas with form
           offCanvasEl.show();
         });

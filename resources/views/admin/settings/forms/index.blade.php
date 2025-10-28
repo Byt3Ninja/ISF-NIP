@@ -192,6 +192,9 @@
 @stop
 
 @section('pagescripts')
+<script>
+  let isOrgManager = @json(auth()->user()->hasAnyRole(['organizationManager']));
+</script>
 <script src="/vuexy/assets/js/form-list.js"></script>
 
 <script>
@@ -222,7 +225,8 @@
         success: function(response) {
           if (response) {
             // console.log(response);
-            location.href = 'show-builder/' + (response || '');        
+            const url = 'show-builder/' + (response || '');
+            location.href = isOrgManager ? url : url + '?org_id=' + organization_id;        
           }
         },
         error: function(error) {
