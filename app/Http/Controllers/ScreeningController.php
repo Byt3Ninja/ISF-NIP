@@ -84,7 +84,6 @@ class ScreeningController extends Controller
 			$judgers_count = $cList->flatten()->unique()->count();
 		}
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
-		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
 
 		$judgers_list = collect( json_decode($cstep?->list) )->map(function($user) {
 			if( is_array( $user ) ) { $user = array_map('intval', $user); } else { $user = intval( $user ); }
@@ -110,17 +109,9 @@ class ScreeningController extends Controller
 			$evaluation->step_id = $id;
 			$evaluation->save();
 		}
+		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		if($cstep){
-		$companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get();
-		}else{
-			$companies = [];
-		}
-		if($cstep){
-			$cstep = $cstep;
-		}else{
-			$cstep = [];
-		}
+		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
 		return view('admin.settings.screening.index', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
@@ -451,7 +442,7 @@ class ScreeningController extends Controller
 			$item->companies = $companies;
 			return $item;
 		});
-		$criteria = $evaluationForm->categories;
+		$criteria = $evaluationForm ? $evaluationForm->categories : collect();
 		$criteria = $criteria->map(function( $item ) use ( $results ) {
 			$subs = $item->subCriteria;
 			$subs = $subs->map(function( $sub ) use ( $results ) {
@@ -543,7 +534,7 @@ class ScreeningController extends Controller
 				AND cf.evaluation_id = ?
 		", [
 			$company,
-			$evaluationForm->id
+			$evaluationForm?->id
 		]))->map(function( $item ) use ( $l ) {
 			$output = new stdClass;
 			$output->id = $item->id;
