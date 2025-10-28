@@ -769,7 +769,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/answerOption*
 
       @if (!$_user->hasAnyRole('Mentor|Judger'))
         <li
-          class="{{ Request::is('*services*', '', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
+          class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-arrows-move"></i>
             <div>{{ __('admin.Services') }}</div>

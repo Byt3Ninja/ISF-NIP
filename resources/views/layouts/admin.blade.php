@@ -122,14 +122,14 @@
       @endif
     @endauth
 
-    @auth
+    {{-- @auth
       <script>
         console.log('User roles:', @json(auth()->user()->roles->pluck('name')));
         console.log('Has Registered role:', @json(auth()->user()->hasRole('Registered')));
         console.log('Has Mentor role:', @json(auth()->user()->hasRole('Mentor')));
         console.log('Has any role (Registered|Mentor):', @json(auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor')));
       </script>
-    @endauth
+    @endauth --}}
 
    @if (auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor'))
       <script>console.log('Echo script section executing - user has correct role');</script>
