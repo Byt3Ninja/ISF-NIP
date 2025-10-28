@@ -203,10 +203,9 @@
 								table.row('#row_' + id).remove().draw();
 							}
 						).fail(function(error) { 
-							Swal.fire({
-								icon: 'error',
+							releaseFailureAlert({
 								title: "{{ __('admin.Error') }}!",
-								text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+								message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 							});
 						});
 					}

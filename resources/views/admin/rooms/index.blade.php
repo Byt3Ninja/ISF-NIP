@@ -90,29 +90,14 @@
 @section('scripts')
 <script type="text/javascript">
   $(document).ready(function() {
+      const isRtl = "{{ $l }}" === "ar";
+
+      // Initialize DataTable
       $('#rooms-list-datatable').DataTable({
         responsive: true,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-        language: {
-          @if($l == 'ar')
-          "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
-          @else
-          "search": "{{ __('admin.Search') }}:",
-          "lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
-          "info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
-          "infoEmpty": "{{ __('admin.no_entries_available') }}",
-          "infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
-          "paginate": {
-            "first": "{{ __('admin.First') }}",
-            "last": "{{ __('admin.Last') }}",
-            "next": "{{ __('admin.Next') }}",
-            "previous": "{{ __('admin.Previous') }}"
-          },
-          "emptyTable": "{{ __('admin.No_data_available_in_table') }}",
-          "zeroRecords": "{{ __('admin.No_matching_records_found') }}"
-          @endif
-        },
+        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
         dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
         displayLength: 10,
         lengthMenu: [10, 25, 50, 75, 100],
@@ -167,7 +152,7 @@
             ).fail(function(error) {
               releaseFailureAlert({
                 title: "{{ __('admin.Error') }}!",
-                text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+                message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
             });
           }

@@ -13,8 +13,8 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">{{__('admin.EditPermission')}}</h4>
+                            <div class="card-header border-bottom">
+                                <h5 class="card-title mb-0">{{__('admin.EditPermission')}}</h5>
                             </div>
                             <div class="card-content">
                                 <div class="card-body">
@@ -50,15 +50,15 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <fieldset class="form-group my-6">
-                                                    <label class="fs-6 mb-1" for="basicInput">{{ __('admin.Title')}}</label>
+                                                    <label class="form-label" for="basicInput">{{ __('admin.Title')}}</label>
                                                     <input type="text" class="form-control" id="name" name='name' required placeholder="{{__('admin.Title')}}" style="direction: ltr;" value="{{ $permission->name }}" />
                                                 </fieldset>
                                                 <fieldset class="form-group my-6">
-                                                    <label class="fs-6 mb-2" for="description">{{ __('admin.Description')}}</label>
+                                                    <label class="form-label" for="description">{{ __('admin.Description')}}</label>
                                                     <input type="text" class="form-control" id="description" name='description' placeholder="{{__('admin.Description')}}" value="{{ $permission->description }}" />
                                                 </fieldset>
                                                 <fieldset class="form-group my-6">
-                                                    <label class="fs-6 mb-1" for="permission_group_id">{{ __('admin.permissionsGroup')}}</label>
+                                                    <label class="form-label" for="permission_group_id">{{ __('admin.permissionsGroup')}}</label>
                                                     <select class="form-control form-select" name="permission_group_id" id="permission_group_id">
                                                         <option value="">Un categorized</option>
                                                         @foreach( $groups as $group )

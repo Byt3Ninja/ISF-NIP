@@ -19,18 +19,18 @@
 
     <div class="users-list-table">
       <div class="card">
-        <div class="card-header">
-          <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-            <h5 class="card-title mb-0">{{__('admin.Judge`s List')}}</h5>
-            <div class="d-flex align-items-center">
-              <div class="dropdown me-2">
+        <div class="card-header border-bottom">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-3 mb-md-0">{{__('admin.Judge`s List')}}</h5>
+            <div class="d-flex align-items-center gap-3">
+              <div class="dropdown">
                 <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="ti ti-file-export me-1"></i> {{ __('admin.Export') }}
+                  <i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
                 </button>
-                <div class="dropdown-menu" aria-labelledby="exportDropdown">
-                  <a class="dropdown-item" href="javascript:void(0);" id="exportCsv">CSV</a>
-                  <a class="dropdown-item" href="javascript:void(0);" id="exportExcel">Excel</a>
-                </div>
+                <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                  <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                  <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                </ul>
               </div>
               {{-- <a href="{{ route('users.create') }}" class="btn btn-primary">
                 <i class="ti ti-plus me-1"></i>
@@ -46,7 +46,7 @@
             <!-- /Datatable filter configuration fields -->
 
             <!-- datatable start -->
-            <div class="table-responsive mt-2">
+            <div class="table-responsive">
               <table id="users-list-datatable" class="table datatables-ajax">
                 <thead>
                   <tr class="table-light">
@@ -115,29 +115,14 @@
 @section('pagescripts')
 <script>
   $(document).ready(function() {
+    const isRtl = {{ $l == 'ar' ? 'true' : 'false' }};
+
+    // Initialize DataTable
     var usersTable = $('#users-list-datatable').DataTable({
       responsive: true,
       pageLength: 10,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-      language: {
-        @if($l == 'ar')
-        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
-        @else
-        "search": "{{ __('admin.Search') }}:",
-        "lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
-        "info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
-        "infoEmpty": "{{ __('admin.no_entries_available') }}",
-        "infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
-        "paginate": {
-          "first": "{{ __('admin.First') }}",
-          "last": "{{ __('admin.Last') }}",
-          "next": "{{ __('admin.Next') }}",
-          "previous": "{{ __('admin.Previous') }}"
-        },
-        "emptyTable": "{{ __('admin.No_judges_available') }}",
-        "zeroRecords": "{{ __('admin.No_matching_records_found') }}"
-        @endif
-      },
+      language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
       dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
       initComplete: function() {
         $('.filters').append( $('#datatable-filters') );
@@ -221,28 +206,18 @@
         if (result.value) {
           $.post(url, {'_method': 'DELETE' , '_token': token},
             function(response) {
-              Swal.fire({
-                icon: 'success',
+              // Remove the row from DataTable
+              usersTable.row('#row_' + id).remove().draw();
+
+              releaseSuccessAlert({
                 title: "{{ __('admin.Deleted') }}!",
-                html: "{{ __('admin.DeletedSuccessfully') }}.",
-                showCancelButton: false,
-                showConfirmButton: true,
-                confirmButtonText: "{{ __('admin.OK') }}",
-                customClass: {
-                  confirmButton: 'btn btn-primary',
-                },
-                buttonsStyling: false,
-              }).then(function() {
-                // Remove the row from DataTable
-                usersTable.row('#row_' + id).remove().draw();
-                // To avoid full page reload, if needed. If a full refresh is desired, uncomment the below.
-                // window.location.href = "{{ route('users.index') }}";
+                message: "{{ __('admin.DeletedSuccessfully') }}.",
               });
             }
           ).fail(function(error) { 
             releaseFailureAlert({
 							title: "{{ __('admin.Error') }}!",
-							text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 						});
           });
         }

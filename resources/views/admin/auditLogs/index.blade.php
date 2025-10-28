@@ -7,20 +7,28 @@
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-3 mb-6">
-      <h3 class="mb-0 fw-bold">{{ __('audit.Portal Log') }}</h3>
-      @if( $_user->ableTo('manage_log', $permissions) && count($auditLogs)>0 )
-      <div class="invoice-create-btn d-flex gap-2">
-        <a href="/reports/audit-log" class="btn btn-primary glow">{{__('audit.Download all records')}}</a>
-        <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a>
-      </div>
-      @endif
-    </div>
     <div class="content-body">
       <section id="basic-datatable">
         <div class="row">
           <div class="col-12">
             <div class="card">
+              <div class="card-header border-bottom">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                  <h5 class="card-title mb-3 mb-md-0">{{ __('audit.Portal Log') }}</h5>
+                  @if( $_user->ableTo('manage_log', $permissions) && count($auditLogs)>0 )
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                      <a href="/reports/audit-log" class="btn btn-primary text-capitalize">
+                        <i class="ti ti-download me-2"></i>
+                        {{__('audit.Download all records')}}
+                      </a>
+                      <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger text-capitalize">
+                        <i class="ti ti-trash me-2"></i>
+                        {{__('audit.Empty Log table')}}
+                      </a>
+                    </div>
+                  @endif
+                </div>
+              </div>
               <div class="card-content">
                 <div class="card-body">
                   <div class="table-responsive">
@@ -77,29 +85,14 @@
 @section('scripts')
 <script type="text/javascript">
   $(document).ready(function() {
+      const isRtl = {{ $l == 'ar' ? 'true' : 'false' }};
+
+      // Initialize DataTable
       $('#audit-logs-list-datatable').DataTable({
         responsive: true,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-        language: {
-          @if($l == 'ar')
-          "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
-          @else
-          "search": "{{ __('admin.Search') }}:",
-          "lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
-          "info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
-          "infoEmpty": "{{ __('admin.no_entries_available') }}",
-          "infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
-          "paginate": {
-            "first": "{{ __('admin.First') }}",
-            "last": "{{ __('admin.Last') }}",
-            "next": "{{ __('admin.Next') }}",
-            "previous": "{{ __('admin.Previous') }}"
-          },
-          "emptyTable": "{{ __('admin.No_data_available_in_table') }}",
-          "zeroRecords": "{{ __('admin.No_matching_records_found') }}"
-          @endif
-        },
+        language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
         dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
         displayLength: 10,
         lengthMenu: [10, 25, 50, 75, 100],
@@ -153,7 +146,7 @@
             ).fail(function(error) {
               releaseFailureAlert({
                 title: "{{ __('admin.Error') }}!",
-                text: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+                message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
             });
           }
