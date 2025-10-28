@@ -20,7 +20,7 @@ const translations = {
     edit: 'Edit',
     delete: 'Delete',
     formId: 'Form ID',
-    formName: 'Form Name',
+    formName: 'Form Title',
     assignedOrganization: 'Assigned Organization',
     submissions: 'Submissions',
     lastModified: 'Last Modified',
@@ -54,7 +54,7 @@ const translations = {
     edit: 'تعديل',
     delete: 'حذف',
     formId: 'معرف النموذج',
-    formName: 'اسم النموذج',
+    formName: 'عنوان النموذج',
     assignedOrganization: 'المنظمة المعينة',
     submissions: 'الإرسالات',
     lastModified: 'آخر تعديل',
@@ -257,7 +257,21 @@ document.addEventListener('DOMContentLoaded', function (e) {
           // Populate form with existing data
           editOffCanvasElement.querySelector('.form_id').value = rowData.form_id;
           editOffCanvasElement.querySelector('.dt-form-name').value = rowData.form_name;
-          editOffCanvasElement.querySelector('.dt-org-select').value = rowData.assigned_organization;
+          
+          // Set organization by ID if available, otherwise by name
+          const orgSelect = $(editOffCanvasElement.querySelector('.dt-org-select'));
+          if (rowData.organization_id) {
+            orgSelect.val(rowData.organization_id).trigger('change');
+          } else {
+            // Fallback: find option by organization name
+            const options = orgSelect.find('option');
+            options.each(function() {
+              if ($(this).text().trim() === rowData.assigned_organization) {
+                orgSelect.val($(this).val()).trigger('change');
+                return false;
+              }
+            });
+          }
           
           // Show the edit canvas
           editOffCanvasEl = new bootstrap.Offcanvas(editOffCanvasElement);

@@ -63,7 +63,7 @@
     </div>
 
      <!-- Form Header -->
-    <div class="card mb-4">
+    <div class="card mb-8">
       <div class="bg-primary rounded-top" style="height: 8px;"></div>
       <div class="card-body">
         @if($mode == 'EDIT')
