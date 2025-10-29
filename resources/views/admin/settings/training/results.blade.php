@@ -204,8 +204,8 @@
                       <div class="d-flex align-items-center gap-2">
                         <a class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
                           href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
-                          @if ($company->user->img_url)
-                          <img src="/191014/{{ $company->user->img_url }}"
+                          @if ($company?->user?->img_url)
+                          <img src="/191014/{{ $company?->user?->img_url }}"
                             alt="avatar" class="img-fluid w-100 h-100">
                           @else
                           <img src="/icons/account.svg" class="img-fluid" />
@@ -214,10 +214,10 @@
                         <a href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
                           <div class="text-black d-flex flex-column">
                             <strong>
-                              {{ $company->user->{'first_name_' . $l} }}
-                              {{ $company->user->{'last_name_' . $l} }}
+                              {{ $company?->user?->{'first_name_' . $l} }}
+                              {{ $company?->user?->{'last_name_' . $l} }}
                             </strong>
-                            <small class="text-muted">{{ $company->user->{'title_' . $l} }}</small>
+                            <small class="text-muted">{{ $company?->user?->{'title_' . $l} }}</small>
                           </div>
                         </a>
                       </div>
