@@ -4146,7 +4146,10 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered"
+                    "mentor",
+                    "judger",
+                    "registered",
+                    "organizationmanager"
                 ]
             },
             {

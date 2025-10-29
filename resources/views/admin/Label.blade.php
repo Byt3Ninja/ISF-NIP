@@ -8,8 +8,6 @@
 @section('content')
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-overlay"></div>
-			<div class="content-header mb-4"> <h4 class="card-title">{{ __('admin.all_labels') }}</h4> </div>
 			<div class="content-body">
 				<section id="multiple-column-form">
 					@if (session()->has('message'))
@@ -23,14 +21,15 @@
 				<section class="row">
 					<div class="col-xl-12 col-md-12 col-sm-12">
 						<div class="card">
-							@if( $_user->ableToAny(['Labels.create', 'Labels.store'], $permissions) )
-							<div class="card-header">
+							<div class="card-header d-flex align-items-center justify-content-between border-bottom">
+								<h5 class="card-title mb-0">{{ __('admin.Labels') }}</h5>
+								@if( $_user->ableToAny(['Labels.create', 'Labels.store'], $permissions) )
 								<button	class="btn btn-primary"	data-bs-toggle="modal" data-bs-target="#createLabels">
-									{{ __('admin.Add_new_labels') }}
-									<i class="ti ti-plus mx-2"></i>
+									<i class="ti ti-plus me-2"></i>
+									{{ __('admin.Add_New') }}
 								</button>
+								@endif
 							</div>
-							@endif
 							<div class="card-body">
 								<div class="card-text">
 									<div class="table-responsive">

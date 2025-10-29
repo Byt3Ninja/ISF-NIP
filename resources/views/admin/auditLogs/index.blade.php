@@ -14,9 +14,9 @@
             <div class="card">
               <div class="card-header border-bottom">
                 <div class="d-flex flex-wrap justify-content-between align-items-center">
-                  <h5 class="card-title mb-3 mb-md-0">{{ __('audit.Portal Log') }}</h5>
+                  <h5 class="card-title mb-0">{{ __('audit.Portal Log') }}</h5>
                   @if( $_user->ableTo('manage_log', $permissions) && count($auditLogs)>0 )
-                    <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="d-flex flex-wrap align-items-center gap-3 mt-3 mt-md-0">
                       <a href="/reports/audit-log" class="btn btn-primary text-capitalize">
                         <i class="ti ti-download me-2"></i>
                         {{__('audit.Download all records')}}

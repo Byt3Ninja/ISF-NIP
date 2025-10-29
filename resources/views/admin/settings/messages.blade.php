@@ -33,12 +33,14 @@
       <div class="app-email card">
         <div class="row g-0">
           <!-- Messages List -->
-          <div class="col app-emails-list">
+          <div class="col-12 app-emails-list">
             <div class="card shadow-none border-0 rounded-0">
-              <div class="card-body emails-list-header p-3 py-2">
-                <h4 class="px-4 mt-4">
+              <div class="card-header pb-0 mb-0">
+                <h5 class="card-title mb-0">
                   {{ $l == 'ar' ? 'رسائل الزوار' : 'Visitors Messages' }}
-                </h4>
+                </h5>
+              </div>
+              <div class="card-body emails-list-header p-3 py-2">
                 <!-- Messages List: Search -->
                 {{-- <div class="d-flex justify-content-between align-items-center px-3 mt-2">
                   <div class="d-flex align-items-center w-100">
@@ -65,19 +67,15 @@
                 @if (count($getmsgs) > 0)
                   <ul class="list-unstyled m-0">
                     @foreach ($getmsgs as $getmsg)
-                      <li class="email-list-item d-flex align-items-center" data-starred="true" data-bs-toggle="sidebar"
+                      <li class="email-list-item d-flex align-items-center flex-wrap flex-md-nowrap" data-starred="true" data-bs-toggle="sidebar"
                         data-target="#app-email-view">
                         <div class="d-flex align-items-center w-100">
-                          <div class="form-check mb-0 ms-2">
-                            <input class="email-list-item-input form-check-input" type="checkbox" id="email-4" />
-                            <label class="form-check-label" for="email-4"></label>
-                          </div>
-                          <span class="ms-sm-3 me-4 d-sm-inline-block d-none"><i
-                              class="email-list-item-bookmark ti ti-star ti-md cursor-pointer ms-1"></i></span>
+
+
                           <img src="/vuexy/assets/img/avatars/3.png" alt="user-avatar"
-                            class="d-block flex-shrink-0 rounded-circle me-sm-2 me-0" height="32" width="32" />
-                          <div class="email-list-item-content ms-2 ms-sm-0 me-2">
-                            <span class="email-list-item-username me-2 h6">
+                            class="d-block flex-shrink-0 rounded-circle me-2" height="32" width="32" />
+                          <div class="email-list-item-content flex-grow-1 me-2">
+                            <span class="email-list-item-username me-2 h6 d-block">
                               @if ($getmsg->internal_id)
                                 <a href="/dashboard/users/{{ $getmsg->internal_id }}/edit">{{ $getmsg->name }}
                                   ({{ __('admin.user') }})
@@ -86,31 +84,33 @@
                                 {{ $getmsg->name }}
                               @endif
                             </span>
-                            <small class="email-list-item-subject d-xl-inline-block d-block">
+                            <small class="email-list-item-subject d-block text-truncate">
                               {{ $getmsg->subject }}
                             </small>
                           </div>
-                          <div class="email-list-item-meta ms-auto d-flex align-items-center justify-content-end">
-                            <small class="email-list-item-time text-muted mx-6"
-                              style="width: 70px;">{{ $getmsg->created_at }}
+                          <div class="email-list-item-meta d-flex align-items-center justify-content-end flex-shrink-0">
+                            <small class="email-list-item-time text-muted d-none d-lg-block me-2"
+                              style="min-width: 70px;">{{ $getmsg->created_at }}
                             </small>
 
                             <a href="javascript:void(0);" onclick="makeread({{ $getmsg->id }});"
-                              class="btn btn-icon btn-label-secondary rounded-circle">
+                              class="btn btn-icon btn-sm btn-label-secondary rounded-circle me-1"
+                              data-bs-toggle="tooltip" title="{{ $getmsg->read ? __('Mark as unread') : __('Mark as read') }}">
                               <i id="ico{{ $getmsg->id }}"
                                 class='ti ti-{{ $getmsg->read ? 'square-rounded-check' : 'x' }}'>
                               </i>
                             </a>
 
                             <button type="button" id="msg" onclick="OpenModal({{ $getmsg->id }});"
-                              class="btn btn-icon btn-label-info rounded-circle mx-4" data-bs-toggle="modal"
-                              data-bs-target="#MessageModal">
+                              class="btn btn-icon btn-sm btn-label-info rounded-circle me-1" data-bs-toggle="modal"
+                              data-bs-target="#MessageModal" title="{{ __('View message') }}">
                               <i class="ti ti-eye"></i>
                             </button>
 
                             <a onclick="return confirm('{{ __('Are you sure?') }}');"
                               href="{{ URL::to('/dashboard/deletemsg/' . $getmsg->id ?? null) }}"
-                              class="btn btn-icon btn-label-danger rounded-circle">
+                              class="btn btn-icon btn-sm btn-label-danger rounded-circle"
+                              data-bs-toggle="tooltip" title="{{ __('Delete message') }}">
                               <i class="ti ti-trash text-danger"></i>
                             </a>
                           </div>
@@ -143,10 +143,8 @@
       <div class="modal-dialog modal-dialog-scrollable" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="Title">
-            </h5>
-
-            
+            <h5 class="modal-title" id="Title"></h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <form action="{{ URL::to('dashboard/msgreply') }}" method="POST" enctype="multipart/form-data"
             autocomplete="off">
@@ -165,31 +163,24 @@
               <input type="hidden" name="remail" value="" id="remail">
               <input type="hidden" name="rname" value="" id="rname">
               <input type="hidden" name="mid" value="" id="mid">
-              <label>{{ __('messages.Subject') }}</label>
-              <div class="form-group">
+              <div class="form-group mb-4">
+                <label class="form-label">{{ __('messages.Subject') }}</label>
                 <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control"
                   required="">
               </div>
-              <label class="mt-4">{{ __('messages.yourMessage') }}:</label>
               <div class="form-group">
+                <label class="form-label">{{ __('messages.yourMessage') }}:</label>
                 <textarea class="form-control" name='message' rows="3" placeholder="{{ __('messages.Write your message') }}"
                   required></textarea>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="submit" class="btn btn-primary send-btn">
-                
-                <span class="d-none d-sm-inline"> {{ __('messages.Send') }}</span>
-              </button>
-              {{-- <a id="DelMe" onclick="return confirm('{{ __('Are you sure?') }}');" href="#">
-                <button type="button" class="btn btn-light-danger">
-                  
-                  <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
-                </button></a>
               <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                
-                <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
-              </button> --}}
+                {{ __('messages.Close') }}
+              </button>
+              <button type="submit" class="btn btn-primary send-btn">
+                <span> {{ __('messages.Send') }}</span>
+              </button>
             </div>
           </form>
         </div>
@@ -201,40 +192,7 @@
   @section('scripts')
     <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
     <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-    <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
     <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
-
-    @if ($l == 'ar')
-      <script type="text/javascript">
-        $(document).ready(function() {
-          $('.zero-configuration').DataTable({
-            "language": {
-              "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-              "sLoadingRecords": "جارٍ التحميل...",
-              "sProcessing": "جارٍ التحميل...",
-              "sLengthMenu": "أظهر _MENU_ مدخلات",
-              "sZeroRecords": "لم يعثر على أية سجلات",
-              "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-              "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-              "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-              "sInfoPostFix": "",
-              "sSearch": "ابحث:",
-              "sUrl": "",
-              "oPaginate": {
-                "sFirst": "الأول",
-                "sPrevious": "السابق",
-                "sNext": "التالي",
-                "sLast": "الأخير"
-              },
-              "oAria": {
-                "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-                "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-              }
-            }
-          });
-        });
-      </script>
-    @endif
 
     <script>
       function OpenModal(id) {

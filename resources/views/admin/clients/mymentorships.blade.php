@@ -16,8 +16,8 @@
             @if (count($sessions) > 0)
               <div class="col-12">
                 <div class="card">
-                  <div class="card-header">
-                    <h4 class="content-title">{{ __('admin.Mentorship requests') }}</h4>
+                  <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
+                    <h5 class="card-title mb-0">{{ __('admin.Mentorship requests') }}</h5>
                   </div>
                   <div class="card-content">
                     <div class="card-body card-dashboard">

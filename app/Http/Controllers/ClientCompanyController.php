@@ -929,43 +929,125 @@ class ClientCompanyController extends Controller
             $result->save();
             if( $data['CompanyN'] == 14 )
             {               
-                $request->validate([
-                    'industry_id' => 'required',
-                    'sector_ids' => 'required|json',
-                    // Accept either pre-existing tech ids (tech_ids) or freeform tags (tech_tags)
-                    'tech_ids' => 'nullable|json', // max limit to be defined later from admin panel settings
-                    'tech_tags' => 'nullable|string', // comma separated or json string of tags
-                    'other_sector' => 'nullable|regex:/^[A-Za-z\s]+$/|max:255',
-                    'other_tech' => 'nullable|regex:/^[A-Za-z\s]+$/|max:50',
-                ], [
-                    'industry_id.required' => __('admin.industry is required'),
-                    'sector_ids.required' => __('admin.sectors is required'),
-                    'sector_ids.json' => __('admin.sectors data is invalid'),
-                    'tech_ids.json' => __('admin.technologies data is invalid'),
-                    'other_sector.regex' => __('admin.other sector must contain letters only'),
-                    'other_tech.regex' => __('admin.other technology must contain letters only'),                    
+                // Set up debug logging using Laravel's Log facade
+                Log::debug('Starting company update process', [
+                    'company_id' => $id,
+                    'user_id' => $user->id,
+                    'request_data' => [
+                        'industry_id' => $request->industry_id,
+                        'sector_ids' => $request->sector_ids,
+                        'tech_tags' => $request->tech_tags,
+                        'CompanyN' => $request->CompanyN,
+                        'other_sector' => $request->other_sector,
+                        'other_tech' => $request->other_tech
+                    ]
                 ]);
 
+                    $rules = [
+                        'industry_id' => 'required|exists:static_categories,id',
+                        'sector_ids' => 'required',
+                        'tech_tags' => 'nullable|array',
+                        'tech_tags.*' => 'nullable|string|max:50',
+                        'other_sector' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:255',
+                        'other_tech' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:50',
+                    ];
+
+                    $messages = [
+                        'industry_id.required' => __('admin.industry is required'),
+                        'industry_id.exists' => __('admin.invalid industry selected'),
+                        'sector_ids.required' => __('admin.sectors is required'),
+                        'tech_tags.array' => __('admin.technologies must be an array'),
+                        'tech_tags.*.string' => __('admin.technology name must be text'),
+                        'tech_tags.*.max' => __('admin.technology name too long'), 
+                        'other_sector.regex' => __('admin.other sector contains invalid characters'),
+                        'other_tech.regex' => __('admin.other technology contains invalid characters'),
+                        'other_sector.max' => __('admin.other sector name too long'),
+                        'other_tech.max' => __('admin.other technology name too long'),
+                    ];
+
+                    $validator = \Validator::make($request->all(), $rules, $messages);
+
                 // Normalize incoming sector and technology inputs
-                if($request->tech_ids == 'null' && empty($request->tech_tags) && $request->other_tech == null ){
-                    return redirect()->back()->with(['msg' => __('Please select at least one sector or technology, or provide an "Other" value.'), 'class' => 'danger'])->withInput();
+                // Process sector IDs
+                $sectorIds = [];
+                if (!empty($data['sector_ids'])) {
+                    Log::debug('Processing sector IDs', ['raw' => $data['sector_ids']]);
+                    
+                    try {
+                        if (is_string($data['sector_ids'])) {
+                            $decoded = json_decode($data['sector_ids'], true);
+                            if (is_array($decoded)) {
+                                $sectorIds = array_filter($decoded);
+                            }
+                        } elseif (is_array($data['sector_ids'])) {
+                            $sectorIds = array_filter($data['sector_ids']);
+                        }
+
+                        // Validate sectors exist
+                        $validSectorIds = Sector::whereIn('id', $sectorIds)->pluck('id')->toArray();
+                        $invalidSectorIds = array_diff($sectorIds, $validSectorIds);
+                        
+                        if (!empty($invalidSectorIds)) {
+                            Log::warning('Invalid sector IDs provided', ['invalid_ids' => $invalidSectorIds]);
+                            throw new \Exception(__('admin.invalid_sectors_selected'));
+                        }
+                        
+                        $sectorIds = $validSectorIds;
+                        
+                    } catch (\Exception $e) {
+                        Log::error('Error processing sector IDs', [
+                            'error' => $e->getMessage(),
+                            'raw_data' => $data['sector_ids']
+                        ]);
+                        return redirect()->back()->with([
+                            'msg' => __('admin.error_processing_sectors'), 
+                            'class' => 'danger'
+                        ])->withInput();
+                    }
                 }
 
-                $sectorIds = json_decode($data['sector_ids'], true) ?: [];
-                $techIds   = json_decode($data['tech_ids'], true) ?: [];
-
-                // If tech_tags provided (from tag input), parse into array of trimmed strings
-                $techTags = [];
-                if (!empty($data['tech_tags'])) {
-                    // tech_tags may be a JSON string or comma-separated
-                    $maybeJson = $data['tech_tags'];
-                    $decoded = json_decode($maybeJson, true);
-                    if (is_array($decoded)) {
-                        $techTags = array_map('trim', $decoded);
-                    } else {
-                        // split by comma
-                        $techTags = array_filter(array_map('trim', explode(',', $maybeJson)));
+                // Process existing tech IDs
+                $techIds = [];
+                if (!empty($data['tech_ids'])) {
+                    if (is_string($data['tech_ids'])) {
+                        try {
+                            $rawTechIds = json_decode($data['tech_ids'], true);
+                            if (is_array($rawTechIds)) {
+                                $validTechIds = Technology::whereIn('id', $rawTechIds)->pluck('id')->toArray();
+                                $techIds = array_values(array_unique($validTechIds));
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('Error processing tech IDs', ['error' => $e->getMessage()]);
+                        }
+                    } elseif (is_array($data['tech_ids'])) {
+                        $validTechIds = Technology::whereIn('id', $data['tech_ids'])->pluck('id')->toArray();
+                        $techIds = array_values(array_unique($validTechIds));
                     }
+                }
+
+                // Process new tech tags
+                $techTags = [];
+                if (!empty($request->tech_tags)) {
+                    if (is_array($request->tech_tags)) {
+                        $techTags = array_filter(array_map('trim', $request->tech_tags));
+                    } elseif (is_string($request->tech_tags)) {
+                        try {
+                            $decoded = json_decode($request->tech_tags, true);
+                            if (is_array($decoded)) {
+                                $techTags = array_filter(array_map('trim', $decoded));
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('Error processing tech tags', ['error' => $e->getMessage()]);
+                        }
+                    }
+                }
+
+                // Require at least one technology selection
+                if (empty($techIds) && empty($techTags) && empty($request->other_tech)) {
+                    return redirect()->back()->with([
+                        'msg' => __('admin.please_select_technology'),
+                        'class' => 'danger'
+                    ])->withInput();
                 }
                 
                 // Validate that we have valid arrays after decoding
@@ -976,32 +1058,89 @@ class ClientCompanyController extends Controller
                     $techIds = [];
                 }
                 
-                if(isset($data['other_sector']) && !empty(trim($data['other_sector']))){
-                    $sectorName = trim($data['other_sector']);
-                    // Validate that it contains only letters and spaces
-                    if (preg_match('/^[A-Za-z\s]+$/', $sectorName)) {
-                        $addSector = new Sector();
-                        $addSector->name_en = $sectorName;
-                        $addSector->name_ar = $sectorName;
-                        $addSector->save();
-                        $sectorIds[] = $addSector->id;
-                        $addSectorWithIndustry = StaticCategory::where('id', $data['industry_id'])->first();
-                        $addSectorWithIndustry->sectors()->attach($addSector->id);
-                        $addSectorWithIndustry->save();
-                    } else {
-                        Log::warning('Invalid sector name provided: ' . $sectorName);
+                // Process "Other" sector if provided
+                if (!empty(trim($data['other_sector'] ?? ''))) {
+                    try {
+                        $sectorName = trim($data['other_sector']);
+                        
+                        // Check if sector with similar name already exists (case-insensitive)
+                        $existingSector = Sector::whereRaw('LOWER(name_en) = ?', [strtolower($sectorName)])
+                            ->orWhereRaw('LOWER(name_ar) = ?', [strtolower($sectorName)])
+                            ->first();
+                            
+                        if ($existingSector) {
+                            $sectorIds[] = $existingSector->id;
+                            Log::info('Using existing sector', [
+                                'name' => $sectorName,
+                                'id' => $existingSector->id
+                            ]);
+                        } else {
+                            // Create new sector
+                            $addSector = new Sector();
+                            $addSector->name_en = $sectorName;
+                            $addSector->name_ar = $sectorName; // Consider translation if needed
+                            $addSector->save();
+                            
+                            // Associate with industry
+                            $industry = StaticCategory::findOrFail($data['industry_id']);
+                            $industry->sectors()->attach($addSector->id);
+                            
+                            $sectorIds[] = $addSector->id;
+                            
+                            Log::info('Created new sector', [
+                                'name' => $sectorName,
+                                'id' => $addSector->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error processing other sector', [
+                            'name' => $sectorName ?? null,
+                            'error' => $e->getMessage()
+                        ]);
+                        return redirect()->back()->with([
+                            'msg' => __('admin.error_creating_sector'),
+                            'class' => 'danger'
+                        ])->withInput();
                     }
                 }
-                if(isset($data['other_tech']) && !empty(trim($data['other_tech']))){
-                    $techName = trim($data['other_tech']);
-                    // Validate that it contains only letters and spaces
-                    if (preg_match('/^[A-Za-z\s]+$/', $techName)) {
-                        $addTech = new Technology();
-                        $addTech->name = $techName;
-                        $addTech->save();
-                        $techIds[] = $addTech->id;
-                    } else {
-                        Log::warning('Invalid technology name provided: ' . $techName);
+                
+                // Process "Other" technology if provided
+                if (!empty(trim($data['other_tech'] ?? ''))) {
+                    try {
+                        $techName = trim($data['other_tech']);
+                        
+                        // Check if technology with similar name exists
+                        $existingTech = Technology::whereRaw('LOWER(name) = ?', [strtolower($techName)])
+                            ->first();
+                            
+                        if ($existingTech) {
+                            $techIds[] = $existingTech->id;
+                            Log::info('Using existing technology', [
+                                'name' => $techName,
+                                'id' => $existingTech->id
+                            ]);
+                        } else {
+                            // Create new technology
+                            $addTech = new Technology();
+                            $addTech->name = $techName;
+                            $addTech->save();
+                            
+                            $techIds[] = $addTech->id;
+                            
+                            Log::info('Created new technology', [
+                                'name' => $techName,
+                                'id' => $addTech->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error processing other technology', [
+                            'name' => $techName ?? null,
+                            'error' => $e->getMessage()
+                        ]);
+                        return redirect()->back()->with([
+                            'msg' => __('admin.error_creating_technology'),
+                            'class' => 'danger'
+                        ])->withInput();
                     }
                 }
 
@@ -1025,30 +1164,62 @@ class ClientCompanyController extends Controller
                     }
                 }
 
-               // remove previous relations for this company/user
-               $deleteCompanyRelations = CompanyRelation::where('company_id', $result->id)->where('user_id', $user->id)->delete();
-                if (!empty($sectorIds)) {
+                DB::beginTransaction();
+                try {
+                    // Remove existing relations
+                    CompanyRelation::where('company_id', $result->id)
+                        ->where('user_id', $user->id)
+                        ->delete();
+
+                    $timestamp = now();
+                    $relations = [];
+
+                    // Add sector relations
                     foreach ($sectorIds as $sectorId) {
-                        $relation = new CompanyRelation();
-                        $relation->company_id   = $result->id;
-                        $relation->user_id      = $user->id;
-                        $relation->industry_id  = $data['industry_id'];
-                        $relation->sector_id    = $sectorId;
-                        $relation->save();
+                        $relations[] = [
+                            'company_id' => $result->id,
+                            'user_id' => $user->id,
+                            'industry_id' => $data['industry_id'],
+                            'sector_id' => $sectorId,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp
+                        ];
                     }
-                }
-                // Technologies
-                if (!empty($techIds)) {
-                    // make unique
-                    $techIds = array_values(array_unique($techIds));
+
+                    // Add technology relations
                     foreach ($techIds as $techId) {
-                        $relation = new CompanyRelation();
-                        $relation->company_id   = $result->id;
-                        $relation->user_id      = $user->id;
-                        $relation->industry_id  = $data['industry_id'];
-                        $relation->technology_id = $techId;
-                        $relation->save();
+                        $relations[] = [
+                            'company_id' => $result->id,
+                            'user_id' => $user->id,
+                            'industry_id' => $data['industry_id'],
+                            'technology_id' => $techId,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp
+                        ];
                     }
+
+                    // Bulk insert all relations
+                    if (!empty($relations)) {
+                        CompanyRelation::insert($relations);
+                    }
+
+                    DB::commit();
+                    Log::info('Company relations updated', [
+                        'company_id' => $result->id,
+                        'sector_count' => count($sectorIds),
+                        'tech_count' => count($techIds)
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Failed to update company relations', [
+                        'error' => $e->getMessage(),
+                        'company_id' => $result->id
+                    ]);
+                    
+                    return redirect()->back()
+                        ->with('msg', __('admin.error_updating_company_relations'))
+                        ->with('class', 'danger')
+                        ->withInput();
                 }   
             }
             if( is_null( $id ) )
