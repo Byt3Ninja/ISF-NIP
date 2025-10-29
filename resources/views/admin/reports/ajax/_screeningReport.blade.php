@@ -38,9 +38,22 @@
     <div class="card border">
       <div class="card-header overflow-hidden">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-					<h5 class="card-title mb-3 mb-md-0">
-						{{ __('cycles.Screening results') }}
-					</h5>
+          <div>
+            <h5 class="card-title mb-1">
+              {{ __('cycles.Screening results') }}
+              @if(request('program_id'))
+                <span class="badge bg-label-primary ms-2">
+                  @php
+                    $selectedProgram = $cycles->firstWhere('id', request('program_id'));
+                    echo $selectedProgram ? $selectedProgram->title : '';
+                  @endphp
+                </span>
+              @endif
+            </h5>
+            @if(request('program_id'))
+              <p class="text-muted mb-0 small">{{ __('cycles.Viewing screening results for selected program') }}</p>
+            @endif
+          </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">            
             <!-- Search Input -->
             <div class="search-wrapper position-relative">
@@ -79,15 +92,17 @@
 
         <!-- Enhanced Filter Section -->
 				<div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
-					<!-- Cycle Filter -->
-					<div class="col-lg-2 col-md-4 col-sm-6">
-						<select id="screening-cycle-filter" class="form-select">
-							<option value="">{{ __('cycles.All_Cycles') }}</option>
-							@foreach ($cycles as $cycle)
-								<option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
-							@endforeach
-						</select>
-					</div>
+					        <!-- Program Filter -->
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <select id="screening-cycle-filter" class="form-select" onchange="updateProgramFilter(this.value)">
+            <option value="">{{ __('cycles.All_Programs') }}</option>
+            @foreach ($cycles as $cycle)
+              <option value="{{ $cycle->id }}" {{ request('program_id') == $cycle->id ? 'selected' : '' }}>
+                {{ $cycle->title }}
+              </option>
+            @endforeach
+          </select>
+        </div>
 
 					<!-- Step Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
@@ -1175,4 +1190,16 @@
 			}, 2000);
 		});
 	}
+  // Update program filter and reload the page with the selected program
+  function updateProgramFilter(programId) {
+    const url = new URL(window.location.href);
+    if (programId) {
+      url.searchParams.set('program_id', programId);
+    } else {
+      url.searchParams.delete('program_id');
+    }
+    // Also clear any step filter when changing programs
+    url.searchParams.delete('step_id');
+    window.location.href = url.toString();
+  }
 </script>
