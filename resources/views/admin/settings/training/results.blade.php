@@ -178,7 +178,7 @@
                     <td>
                       <div class="d-flex align-items-center gap-1">
                         <input type="checkbox" class="chboxTresult" do="{{ $company->id }}"
-                          userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
+                          userid="{{ $company?->user?->id }}" value="1" name="chboxcyclesReg[]">
                       </div>
                     </td>
                     <td>
@@ -203,7 +203,7 @@
                     <td>
                       <div class="d-flex align-items-center gap-2">
                         <a class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
-                          href="/dashboard/users/{{ $company->user->id }}/edit">
+                          href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
                           @if ($company->user->img_url)
                           <img src="/191014/{{ $company->user->img_url }}"
                             alt="avatar" class="img-fluid w-100 h-100">
@@ -211,7 +211,7 @@
                           <img src="/icons/account.svg" class="img-fluid" />
                           @endif
                         </a>
-                        <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                        <a href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
                           <div class="text-black d-flex flex-column">
                             <strong>
                               {{ $company->user->{'first_name_' . $l} }}
