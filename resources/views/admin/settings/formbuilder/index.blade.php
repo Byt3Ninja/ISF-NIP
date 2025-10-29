@@ -849,7 +849,7 @@
             const sectionHtml = `
                 <div class="section-wrapper mb-5 position-relative" data-item-id="${sectionId}" data-item-type="section">
                     <div class="position-absolute start-0 z-1" style="top: -0.5rem;">
-                        <span class="badge bg-primary">{{ __('builder.Section') }} ${sections.length + 1}</span>
+                        <span class="badge bg-primary">{{ __('builder.Section') }} ${sectionId + 1}</span>
                     </div>
                     <div class="item-card section-card card mb-3">
                         <div class="card-body">
