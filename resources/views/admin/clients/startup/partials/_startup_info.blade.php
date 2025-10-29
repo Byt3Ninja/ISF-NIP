@@ -157,6 +157,18 @@
                   @endif
                 </div>
                 @endif
+                
+                <!-- Technologies Used -->
+                @if($company->technologies_used)
+                <div class="mb-4">
+                  <h6 class="mb-2">{{ __('Technologies Used') }}</h6>
+                  <div class="d-flex flex-wrap gap-2">
+                    @foreach(explode(',', $company->technologies_used) as $tech)
+                      <span class="badge bg-label-primary rounded-pill">{{ trim($tech) }}</span>
+                    @endforeach
+                  </div>
+                </div>
+                @endif
                 <!-- Contact Information -->
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
                   <!-- Location -->

@@ -248,6 +248,21 @@
             <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }}>Arabic</option>
           </select>
         </div>
+        
+        <!-- Technologies Used -->
+        @php
+          $technologies = $client->company ? explode(',', $client->company->technologies_used) : [];
+        @endphp
+        <div class="mb-4 col-12">
+          <label for="technologies_used" class="form-label fs-6 fw-bold">{{ __('Technologies Used') }} <span class="text-danger">*</span></label>
+          <select class="form-control" id="technologies_used" name="technologies_used[]" multiple="multiple" required>
+            @foreach($technologies as $tech)
+              <option value="{{ trim($tech) }}" selected>{{ trim($tech) }}</option>
+            @endforeach
+          </select>
+          <small class="form-text text-muted">{{ __('Enter technologies separated by commas') }}</small>
+        </div>
+        
         <div class="mb-4 col-md-6">
           <label for="timeZones" class="form-label fs-6 fw-bold">{{ __('admin.Timezone') }}</label>
           <select id="timeZones" name="timezone" class="select2 form-select">

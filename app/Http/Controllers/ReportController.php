@@ -132,7 +132,7 @@ class ReportController extends Controller
         return $data;
     }
  // =============> ajax report MentorSurvey <=============
-    protected function mentorSurveyReport($organization_id){
+    protected function mentorSurveyReport($organization_id, $program_id = null){
         $mentorRequestsQuery = MentorshipRequest::query()
         ->whereHas('mentor', function($q) use ($organization_id) {
             $q->where('organization_id', $organization_id);
@@ -600,24 +600,30 @@ class ReportController extends Controller
 
     protected function screeningReport($organization_id, $program_id = null)
     {
-        $steps = DB::table('steps')->where('stype', 2)->whereNull('deleted_at')->get();
+        // First get steps based on program filter
+        $stepsQuery = Step::where('stype', 2)
+            ->whereNull('deleted_at')
+            ->when(!is_null($organization_id), function($q) use ($organization_id) {
+                return $q->whereHas('cycle', function($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            })
+            ->when(!is_null($program_id), function($q) use ($program_id) {
+                return $q->where('cycle_id', $program_id);
+            });
+            
+        $steps = $stepsQuery->get();
         $metadata = collect([]);
-        foreach( $steps as $step )
-        {
-            $metadata->push( ScreeningEvaluationResults::metadata( $step->id ) );
+        
+        // Only process metadata for the filtered steps
+        foreach($steps as $step) {
+            $metadata->push(ScreeningEvaluationResults::metadata($step->id));
         }
 
         $l = app()->getLocale();
-
-        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
-            return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                $query->where('organization_id', $organization_id);
-            });
-        })->when(!is_null($program_id), function ($q) use ($program_id) {
-            return $q->whereHas('cycle', function ($query) use ($program_id) {
-                $query->where('id', $program_id);
-            });
-        })->where('stype', 2)->orderBy('from')->get();
+        
+        // Use the already filtered steps query and order them
+        $steps = $stepsQuery->orderBy('from')->get();
         
         $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
             return $q->where('organization_id', $organization_id);
