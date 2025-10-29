@@ -24,19 +24,6 @@
           </div>
       </div>
       @endif
-      <div class="w-100 d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-6 mt-3">
-        <h3 class="fw-bold mb-2 mb-md-0">{{ __('admin.Currencies') }}</h3>
-        <div class="d-flex align-items-center">
-          <button type="button" class="btn btn-label-primary UpdateAllCurrencies me-3">
-            <i class="ti ti-refresh me-2"></i>
-            {{ __('admin.update_currencies') }}
-          </button>
-          <a href="{{ route('currencies.create') }}" class="btn btn-primary">
-            <i class="ti ti-plus"></i>
-            {{ __('admin.Add New') }}
-          </a>
-        </div>
-      </div>
     </div>
 
     <div class="content-body">
@@ -44,6 +31,19 @@
         <div class="organizations-list-table">
           <div class="card">
             <div class="card-content">
+              <div class="card-header d-flex flex-wrap justify-content-between align-items-md-center border-bottom">
+                <h5 class="card-title mb-3 mb-md-0">{{ __('admin.Currencies') }}</h5>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                  <button type="button" class="btn btn-label-primary UpdateAllCurrencies">
+                    <i class="ti ti-refresh me-2"></i>
+                    {{ __('admin.update_currencies') }}
+                  </button>
+                  <a href="{{ route('currencies.create') }}" class="btn btn-primary">
+                    <i class="ti ti-plus"></i>
+                    {{ __('admin.Add New') }}
+                  </a>
+                </div>
+              </div>
               <div class="card-body">
                 <!-- datatable start -->
                 <div class="table-responsive">
@@ -76,17 +76,19 @@
 
                           </td>
                           <td class="text-center">
-                            <a href="{{ route('currencies.edit', $currency->id) }}" class="btn btn-label-warning btn-sm">
-                              <i class="ti ti-edit text-warning"></i>
-                            </a>
-                            <form action="{{ route('currencies.destroy', $currency->id) }}" method="POST"
-                              style="display:inline-block;">
-                              @csrf
-                              @method('DELETE')
-                              <button type="submit" class="btn btn-label-danger btn-sm">
-                                <i class="ti ti-trash text-danger"></i>
-                              </button>
-                            </form>
+                            <div class="d-flex align-items-center gap-2">
+                              <a href="{{ route('currencies.edit', $currency->id) }}" class="btn btn-label-info btn-icon rounded-circle">
+                                <i class="ti ti-edit"></i>
+                              </a>
+                              <form action="{{ route('currencies.destroy', $currency->id) }}" method="POST"
+                                style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-label-danger btn-icon rounded-circle">
+                                  <i class="ti ti-trash"></i>
+                                </button>
+                              </form>
+                            </div>
                           </td>
                         </tr>
                       @endforeach
