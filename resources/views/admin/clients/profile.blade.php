@@ -143,7 +143,7 @@
                     <h3 class="h5 cart-title">{{ __('admin.ProfileSummary') }}</h3>
                     <p>
                       {{ $l == 'ar' 
-                          ? optional($client->bio)->bio_ar ?? __('admin.N/A') 
+                          ? optional($client->bio)->bio_ar ?? __('admin.No bio has been added yet') 
                           : optional($client->bio)->bio_en ?? __('admin.No bio has been added yet') }}
                     </p>
                   </div>
