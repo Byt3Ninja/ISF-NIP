@@ -53,9 +53,23 @@
           @elseif($isMentorshipCard)
             data-url="{{ route('mentorships.sessions_list', ['show' => 'all']) }}"
           @elseif($isScreeningCard)
-            data-url="/dashboard/screening/results"
+            @php
+              // Get the screening step for the selected program
+              $screeningStep = \App\Step::where('cycle_id', request('program_id'))
+                ->where('stype', 2) // stype 2 is for screening
+                ->first();
+              $screeningStepId = $screeningStep ? $screeningStep->id : 0;
+            @endphp
+            data-url="/dashboard/screening/results/{{ $screeningStepId }}"
           @elseif($isFinalScreeningCard)
-            data-url="/dashboard/final/results"
+            @php
+              // Get the final screening step for the selected program
+              $finalScreeningStep = \App\Step::where('cycle_id', request('program_id'))
+                ->where('stype', 5) // stype 5 is for final screening
+                ->first();
+              $stepId = $finalScreeningStep ? $finalScreeningStep->id : 0;
+            @endphp
+            data-url="/dashboard/final/results/{{ $stepId }}"
           @endif
         >
         <div class="card-body py-2" style="display: grid; place-items: center;">
@@ -205,6 +219,27 @@
     </div>
   </div>
 <script>
+  // Handle card clicks for screening and final screening
+  function handleCardClick(event) {
+    const card = $(event.currentTarget);
+    const url = card.data('url');
+    
+    if (url) {
+      if (url.includes('screening/results') || url.includes('final/results')) {
+        // For screening and final screening, the URL already includes the step ID
+        event.preventDefault();
+        window.location.href = url;
+        return false;
+      }
+      
+      // For other card types, use default behavior
+      window.location.href = url;
+    }
+  }
+
+  // Initialize card click handlers
+  $('.screening-startups-card, .final-screening-startups-card').on('click', handleCardClick);
+
   $(document).ready(function() {
     // Initialize DataTable for Per Program KPIs
     let cyclesKpiTable = $('#tblCycleKPIs').DataTable({

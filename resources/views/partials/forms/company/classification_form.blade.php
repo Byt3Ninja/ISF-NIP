@@ -9,7 +9,7 @@
       id="classificationForm" 
       method="post" 
       enctype="multipart/form-data" 
-      action="{{ $_user->hasAnyRole('Admin|organizationManager') ? route('company.profile_update_mine', $client->company->id) : route('company.profile_update_mine') }}"
+      action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}"
       novalidate
     >
       {!! csrf_field() !!}
