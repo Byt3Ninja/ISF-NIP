@@ -218,7 +218,7 @@ class FormBuilderController extends Controller
      */
     public function saveForm($id, Request $request)
     {
-         // dd($request->all());
+        //  dd($request->all());
 
         $request->validate([
             'form_fields_data' => 'required|array',
@@ -227,7 +227,19 @@ class FormBuilderController extends Controller
 
         $form_data = $request->form_fields_data;
 
+        
+        $form = BuilderForm::where('form_name', $form_data['title'])->where('organization_id', $form_data['organization_id'])->first();
        
+        if ($form) {
+            $id = $form->id;
+        }else{
+        $form = new BuilderForm;
+            $form->form_name = $form_data['title'];
+            $form->organization_id = $form_data['organization_id'];
+            $form->save();
+            $id = $form->id;
+        }
+        
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->field_type => $field->id];
         });
