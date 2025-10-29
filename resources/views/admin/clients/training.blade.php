@@ -320,23 +320,52 @@
     }
 
 
+    // خزن وقت بداية الجلسة
     let startTime = Date.now();
 
+    // ID الدورة التدريبية الحالية
+    const trainingId = "{{ $training->id ?? 0 }}"; // غيّرها حسب متغيرك
+    const pageUrl = window.location.href;
 
-    let pathParts = window.location.pathname.split('/');
-    let trainingId = '{{ request()->route('id') }}';
-    console.log(trainingId);
+    // دالة لحساب المدة بالدقائق
+    function getDurationMinutes() {
+        const now = Date.now();
+        const diffMs = now - startTime;
+        const minutes = Math.floor(diffMs / 60000); // 1 دقيقة = 60000ms
+        return minutes > 0 ? minutes : 1;
+    }
+
+    // دالة لإرسال الوقت للسيرفر
+    function sendTrainingTime() {
+        const duration = getDurationMinutes();
+        
+        fetch("{{ route('trainings.time_tracking') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: {
+                trainingId: trainingId,
+                page_url: pageUrl,
+                duration_minutes: duration,
+            }
+        });
+    }
+
+    // استخدم sendBeacon لو المستخدم قفل الصفحة فجأة
     window.addEventListener("beforeunload", function () {
-        let endTime = Date.now();
-        let durationMinutes = ((endTime - startTime) / 1000 / 60).toFixed(2);
-
-        navigator.sendBeacon("/dashboard/track-duration", JSON.stringify({
-            trainingId: trainingId, 
-            page_url: window.location.pathname + window.location.search,
-            duration_minutes: durationMinutes,
-            _token: "{{ csrf_token() }}"
-        }));
+        const duration = getDurationMinutes();
+        const data = {
+            trainingId: trainingId,
+            page_url: pageUrl,
+            duration_minutes: duration,
+        };
+        navigator.sendBeacon("{{ route('trainings.time_tracking') }}", JSON.stringify(data));
     });
+
+    // كمان ممكن تبعت تحديث كل 5 دقايق لو المستخدم قاعد فترة طويلة
+    setInterval(sendTrainingTime, 5 * 60 * 1000);
 
 
   </script>
