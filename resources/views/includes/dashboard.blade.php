@@ -385,11 +385,11 @@
 														$step->description ? $step->description : '...' }} </span>
 												</td>
 												<td>
-													@if( $step->stype == 1 || $step->stype == 5 )
-													{{-- @if( $step->status == 'Started' ) --}}
+													@if( $step->stype == 1 or $step->stype == 5 )
+													@if( $step->status == 'On going' )
 													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
 														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
-													{{-- @endif --}}
+													@endif
 													@endif
 													 @if($step->stype == 1 && isset($step->form) && $step->form)
 															<a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
