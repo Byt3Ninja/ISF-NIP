@@ -236,7 +236,7 @@
             
             <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
                   data-company-name="{{ strtolower($company->name ?? '') }}"
-                  data-user-name="{{ strtolower($company->user->name ?? '') }}"
+                  data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
                   data-score="{{ $filterScore ?? 0 }}"
                   data-status="{{ $primaryStatus ?? 'not-evaluated' }}"
@@ -307,9 +307,9 @@
                   <!-- User Information -->
                   <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                     <div class="d-flex align-items-center">
-                      <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                      <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
                         <img
-                          src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
+                          src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
                           alt="img"
                           class="rounded-circle me-3 shadow-sm"
                           height="40"
@@ -317,9 +317,9 @@
                         />
                       </a>
                       <div class="flex-grow-1">
-                        <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
-                          <h6 class="mb-0 fw-semibold text-dark">{{ $company->user->name }}</h6>
-                          <small class="text-muted">{{ $company->user->title ?: __('cycles.No title') }}</small>
+                        <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
+                          <h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
+                          <small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
                         </a>
                       </div>
                     </div>
