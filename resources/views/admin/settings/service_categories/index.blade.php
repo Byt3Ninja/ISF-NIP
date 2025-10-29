@@ -55,8 +55,8 @@
                         <tr>
                           <th>#</th>
                           <th class="text-center">{{__('admin.Organization')}}</th>
-                          <th class="text-center">{{ __('admin.English Name') }}</th>
-                          <th class="text-center">{{ __('admin.Arabic Name') }}</th>
+                          <th class="text-center">{{ $l == 'en' ? 'Service Name (EN)' : 'اسم الخدمة بالانجليزية' }}</th>
+                          <th class="text-center">{{ $l == 'en' ? 'Service Name (AR)' : 'اسم الخدمة بالعربية' }}</th>
                           <th class="text-center">{{ __('admin.Created At') }}</th>
                           @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit',
                           'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )<th
