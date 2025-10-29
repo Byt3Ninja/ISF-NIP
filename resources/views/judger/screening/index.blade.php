@@ -9,6 +9,20 @@
     
     <!-- Screening Table -->
     <div class="card">
+      <div class="card-header border-bottom">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+          <h5 class="card-title mb-0">{{ $l == 'en' ? 'Screening List' : 'قائمة الفحص' }}</h5>
+          <div class="dropdown d-inline-block ms-2">
+            <button class="btn btn-label-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="ti ti-file-export me-2"></i> {{ __('admin.Export') }}
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
       <div class="card-datatable table-responsive pt-0">
         <table class="datatables-screening table">
           <thead class="table-light">
@@ -174,8 +188,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         ],
         order: [[0, 'asc']],
-        dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
-        displayLength: 25,
+        dom: '<"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>><"d-none"B>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
+        buttons: [
+        {
+          extend: 'excel',
+          title: t.screeningList,
+          exportOptions: { columns: [0, 1, 2, 3] }
+        },
+        {
+          extend: 'csv',
+          title: t.screeningList,
+          exportOptions: { columns: [0, 1, 2, 3] }
+        },
+      ],
+        displayLength: 10,
         lengthMenu: [10, 25, 50, 75, 100],
         language: {
           paginate: {
@@ -230,38 +256,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         },
         initComplete: function (settings, json) {
-          $('.card-header').after('<hr class="my-0">');
-
-          // Add export dropdown after the Export button
-          const exportDropdown = `
-            <div class="dropdown d-inline-block ms-2">
-              <button class="btn btn-label-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="ti ti-download me-1"></i> ${t.export}
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" id="exportExcel"><i class="fas fa-file-excel me-2 text-success"></i>Excel</a></li>
-                <li><a class="dropdown-item" href="#" id="exportCSV"><i class="fas fa-file-csv me-2 text-danger"></i>CSV</a></li>
-              </ul>
-            </div>
-          `;
-          $('.dt-action-buttons').html(exportDropdown);
-
-          // Export Excel functionality
-          $('#exportExcel').on('click', function(e) {
-            e.preventDefault();
-            exportToExcel();
-          });
-
-          // Export CSV functionality
-          $('#exportCSV').on('click', function(e) {
-            e.preventDefault();
-            exportToCSV();
-          });
-
           // Add custom filters for Program, Step, and Status
           
           // Program filter
-          const programFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-150"><option value="">${t.allPrograms}</option></select>`)
+          const programFilter = $(`<select class="form-select form-select-sm ms-md-12 me-3 w-px-150 mb-3 mt-3 mt-lg-0 mb-lg-0"><option value="">${t.allPrograms}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -269,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             });
 
           // Step filter
-          const stepFilter = $(`<select class="form-select form-select-sm me-3 w-px-150"><option value="">${t.allSteps}</option></select>`)
+          const stepFilter = $(`<select class="form-select form-select-sm me-3 w-px-150 mb-3 mb-lg-0"><option value="">${t.allSteps}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -308,60 +306,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       });
 
-      $('div.head-label').html(`<h5 class="card-title mb-0">${t.screeningList}</h5>`);
 
-      // Export functions
-      function exportToExcel() {
-        // Get filtered data
-        const filteredData = dt_screening.rows({ search: 'applied' }).data().toArray();
-        
-        // Create worksheet data
-        const wsData = [
-          [t.programName, t.stepName, t.startupName, t.status], // Headers
-          ...filteredData.map(row => [
-            row.program_name,
-            row.step_name,
-            row.startup_name,
-            row.status.replace('-', ' ')
-          ])
-        ];
-
-        // Create workbook and worksheet
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        
-        // Add worksheet to workbook
-        XLSX.utils.book_append_sheet(wb, ws, "Screening Data");
-        
-        // Save file
-        XLSX.writeFile(wb, "screening_data.xlsx");
-      }
-
-      function exportToCSV() {
-        // Get filtered data
-        const filteredData = dt_screening.rows({ search: 'applied' }).data().toArray();
-        
-        // Create CSV content
-        const csvContent = [
-          [t.programName, t.stepName, t.startupName, t.status].join(','), // Headers
-          ...filteredData.map(row => [
-            `"${row.program_name}"`,
-            `"${row.step_name}"`,
-            `"${row.startup_name}"`,
-            `"${row.status.replace('-', ' ')}"`
-          ].join(','))
-        ].join('\n');
-
-        // Create and download file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'screening_data.csv';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+      // Export button handlers
+      $('#exportExcel').on('click', () => dt_screening.button('.buttons-excel').trigger());
+      $('#exportCsv').on('click', () => dt_screening.button('.buttons-csv').trigger());
     }
   });
 });
