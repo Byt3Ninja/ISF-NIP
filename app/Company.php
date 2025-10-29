@@ -21,6 +21,11 @@ class Company extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function resolveUser()
+    {
+        return $this->user ? : $this->users->first();
+    }
+
     protected $fillable = [
         'user_id',
         'country_id',
