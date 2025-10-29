@@ -214,16 +214,16 @@
                                   </a>
                                 </td>
                                 <td>
-                                  <a href="/dashboard/users/{{ $company->user->id }}/edit" class="d-flex align-items-center gap-2">
+                                  <a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="d-flex align-items-center gap-2">
                                     @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                       <img
-                                        src="{{ isset($company->user->img_url) ? asset("191014/{$company->user->img_url}") : asset('icons/account.svg') }}"
+                                        src="{{ isset($company->resolveUser()->img_url) ? asset("191014/{$company->resolveUser()->img_url}") : asset('icons/account.svg') }}"
                                         onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}" alt="avatar" class="rounded-circle"
                                         height="40" width="40" />
                                     @endif
                                     <div class="media-body">
-                                      <h6 class="media-heading mb-0">{{ $company->user->name }} </h6>
-                                      <span class="font-small-2">{{ $company->user->title }}</span>
+                                      <h6 class="media-heading mb-0">{{ $company->resolveUser()->name }} </h6>
+                                      <span class="font-small-2">{{ $company->resolveUser()->title }}</span>
                                     </div>
                                   </a>
                                 </td>
