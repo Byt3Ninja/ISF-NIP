@@ -35,10 +35,12 @@
           <!-- Messages List -->
           <div class="col-12 app-emails-list">
             <div class="card shadow-none border-0 rounded-0">
-              <div class="card-body emails-list-header p-3 py-2">
-                <h4 class="px-2 px-md-4 mt-4">
+              <div class="card-header pb-0 mb-0">
+                <h5 class="card-title mb-0">
                   {{ $l == 'ar' ? 'رسائل الزوار' : 'Visitors Messages' }}
-                </h4>
+                </h5>
+              </div>
+              <div class="card-body emails-list-header p-3 py-2">
                 <!-- Messages List: Search -->
                 {{-- <div class="d-flex justify-content-between align-items-center px-3 mt-2">
                   <div class="d-flex align-items-center w-100">
