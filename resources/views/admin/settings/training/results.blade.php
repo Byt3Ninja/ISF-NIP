@@ -162,7 +162,7 @@
                   @endphp
                   @foreach ($companies as $company)
                   @php
-                  $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
+                  $cc = \App\TrainingCompleted::where('user_id', $company?->user?->id)
                   ->where('course_id', $csession->training_Address)
                   ->count();
                   $per = $contents ? ($cc / $contents) * 100 : '0';
