@@ -4221,6 +4221,17 @@
                     "admin",
                     "registered"
                 ]
+            },
+            {
+                "name": "company.profile_images_delete",
+                "description": "Delete Document (General)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager"
+                ]
             }
         ]
     },

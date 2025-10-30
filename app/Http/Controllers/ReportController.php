@@ -329,6 +329,7 @@ class ReportController extends Controller
                 });
             });
         })->where('type','online')->count();
+        
         return $data;
     }
 

@@ -13,7 +13,6 @@
 @endphp
 @section('style')
 <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-<link rel="stylesheet" href="/path/to/select2.min.css">
 <style>
   /* Custom fade animation for tab content */
   @keyframes fadeIn {
@@ -43,7 +42,6 @@
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-overlay"></div>
     <div class="content-body">
       @if ($cstep)
       <section id="multiple-column-form">
@@ -395,8 +393,10 @@
 @endif
 @stop
 
+@section('scripts')
+@stop
+
 @section('pagescripts')
-  <script src="/path/to/select2.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script type="text/javascript">
     $('.date').datetimepicker({
