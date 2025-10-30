@@ -951,7 +951,7 @@ class HomeController extends Controller
                     $company = $user->company ?? null;
                     $startupComplete = $company
                         && filled($company->name_en ?? '')
-                        && filled($company->sector ?? '')
+                        && filled($company->est_date ?? '')
                         && filled($company->address_en ?? '')
                         && filled($company->stage ?? '');
                 } 

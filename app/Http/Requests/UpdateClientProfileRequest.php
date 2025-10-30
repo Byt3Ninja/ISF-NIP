@@ -39,7 +39,7 @@ class UpdateClientProfileRequest extends FormRequest
                         ],
             'HaveCompany' => 'nullable|max:1',
             'technologies_used' => 'nullable|array',
-            'technologies_used.*' => 'required|string|max:50',
+            'technologies_used.*' => 'nullable|string|max:50',
         ];
     }
 }
