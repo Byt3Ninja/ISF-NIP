@@ -506,7 +506,7 @@
                                 data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
                                 data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? '')]; })->toArray()) }}"
                             >
-                                <span class="me-2">{{ $hasPreRequests ? __('dashboard.Complete Prerequisites') : __('dashboard.Join now') }}</span>
+                                <span class="me-2">{{ __('dashboard.Join now') }}</span>
                                 <i class="ti {{ $hasPreRequests ? 'ti-alert-triangle' : 'ti-arrows-join' }}"></i>
                             </button>
                         </div>
@@ -1564,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
 <script>
-function handleJoinClick(button) {
+window.handleJoinClick = function(button) {
     const cycleId = button.getAttribute('data-cycle-id');
     const hasPreRequests = button.getAttribute('data-has-pre');
     const joinUrl = button.getAttribute('data-join-url');
@@ -1647,21 +1647,16 @@ function updateUIWithCompletionStatus(data) {
 
     // Update each button appearance and text
     joinButtons.forEach(joinButton => {
-        if (hasPreRequests) {
-            joinButton.className = 'btn btn-warning';
-            joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Complete Prerequisites') }}</span><i class="ti ti-alert-triangle"></i>';
-        } else {
-            joinButton.className = 'btn btn-primary';
-            joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
-        }
-
-        // Update button data attributes
-        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-            url: pr.url,
-            label: pr.label
-        }))));
-    });
+			joinButton.className = 'btn btn-primary';
+			joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
+  
+			// Update button data attributes
+			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+					url: pr.url,
+					label: pr.label
+			}))));
+	});
 
     // Find all prerequisites alerts
     const alertDivs = document.querySelectorAll('.alert.alert-info');
