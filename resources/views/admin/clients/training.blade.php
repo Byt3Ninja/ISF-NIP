@@ -355,13 +355,13 @@
     window.addEventListener('beforeunload', (e) => {
       const duration = getDurationMinutes();
         
-        const data = {
-            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            trainingId: trainingId,
-            page_url: pageUrl,
-            duration_minutes: duration,
-        };
-        navigator.sendBeacon("{{ route('trainings.time_tracking') }}", data);
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        formData.append('trainingId', trainingId);
+        formData.append('page_url', pageUrl);
+        formData.append('duration_minutes', duration);
+
+        navigator.sendBeacon("{{ route('trainings.time_tracking') }}", formData);
     });
    
 
