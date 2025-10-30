@@ -470,7 +470,7 @@
 													<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
 														@foreach($cycle->pre_requests as $pr)
 														<li id="{{ $pr['id'] }}" class="pre-request-item">
-															<a href="{{ $pr['url'] }}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+															<a href="{{ $pr['url'] }}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
 																aria-label="{{ __($pr['label']) }}">
 																<i class="ti ti-external-link"></i>
 																<span>{{ __($pr['label']) }}</span>
@@ -499,12 +499,12 @@
                             </small>
 
                             <button
-                                class="btn {{ $hasPreRequests ? 'btn-warning' : 'btn-primary' }}"
+                                class="btn btn-primary"
                                 onclick="handleJoinClick(this)"
                                 data-cycle-id="{{ $cycle->id }}"
                                 data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
                                 data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
-                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => 'complete-profile']; })->toArray()) }}"
+                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => $pr['action'] ?? '']; })->toArray()) }}"
                             >
                                 <span class="me-2">{{ __('dashboard.Join now') }}</span>
                                 <i class="ti ti-arrows-join"></i>
@@ -1579,7 +1579,7 @@ window.handleJoinClick = function(button) {
             li.className = 'list-group-item d-flex align-items-center';
             li.innerHTML = `
                 <i class="ti ti-circle-check me-2 text-warning"></i>
-                <a href="${pr.url}" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
+                <a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
             `;
             list.appendChild(li);
         });
@@ -1588,11 +1588,11 @@ window.handleJoinClick = function(button) {
         document.getElementById('completePrerequisitesBtn').onclick = function() {
             if (preRequests.length > 0) {
                 const firstReq = preRequests[0];
-                if (firstReq.action === 'completed-profile') {
-                    window.location.href = firstReq.url + '?action=completed-profile';
+                if (firstReq.action === 'complete-profile') {
+                    window.location.href = firstReq.url + '?action=complete-profile';
                 } else {
                     localStorage.setItem('prerequisitesOpened', 'true');
-                    window.open(firstReq.url, '_blank');
+                    window.open(`${firstReq.url}?action=complete-profile`, '_blank');
                 }
             }
             $('#prerequisitesModal').modal('hide');
@@ -1657,9 +1657,8 @@ function updateUIWithCompletionStatus(data) {
 			// Update button data attributes
 			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
 			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-					url: pr.url,
+					url: `${pr.url}?action=complete-profile`,
 					label: pr.label,
-					action: 'complete-profile'
 			}))));
 	});
 
@@ -1675,7 +1674,7 @@ function updateUIWithCompletionStatus(data) {
                     const li = document.createElement('li');
                     li.className = 'pre-request-item';
                     li.innerHTML = `
-                        <a href="${pr.url}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
+                        <a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
                             <i class="ti ti-external-link"></i>
                             <span>${pr.label}</span>
                         </a>
