@@ -38,8 +38,8 @@ class FinalScreeningReportExport implements FromCollection, WithHeadings, WithMa
         $headers = [
             'Export Timestamp',
             'Startup Name',
-            'Startup User',
-            'Program Title',
+            'Startup Leader',
+            'Program Name',
             'Step Name',
             'Average Score (%)',
             'Judges Names',
