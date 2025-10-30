@@ -95,7 +95,7 @@
 					        <!-- Program Filter -->
         <div class="col-lg-3 col-md-4 col-sm-6">
           <select id="screening-cycle-filter" class="form-select" onchange="updateProgramFilter(this.value)">
-            <option value="">{{ __('cycles.All_Programs') }}</option>
+            <option value="">{{ __('cycles.All_Cycles') }}</option>
             @foreach ($cycles as $cycle)
               <option value="{{ $cycle->id }}" {{ request('program_id') == $cycle->id ? 'selected' : '' }}>
                 {{ $cycle->title }}
@@ -186,14 +186,8 @@
                 }
               }
               
-              // Determine primary status for filtering
-              $primaryStatus = 'not-evaluated';
-              if ($hasPublished && !$hasDraft && !$hasNotEvaluated) {
-                $primaryStatus = 'published';
-              } elseif ($hasDraft) {
-                $primaryStatus = 'draft';
-              }
-              $primaryStatus = strtolower( str_replace(' ', '-', $company->status) );
+              // Determine primary status for filtering - use the actual company status from database
+              $primaryStatus = strtolower(str_replace(' ', '-', $company->status ?? 'not-evaluated'));
               // Create searchable category string
               $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
               $categoryString = is_array($categories) ? implode(' ', array_filter($categories ?? [])) : ($company->business_categories ?? '');
@@ -514,6 +508,14 @@
 			// Enable debug mode by setting: window.debugFilters = true in browser console
 			if (window.debugFilters) {
 				console.log('Regular Screening filtration system initialized with', screeningCompanyCards.length, 'companies');
+				
+				// Show status distribution
+				const statusCounts = {};
+				screeningCompanyCards.forEach(card => {
+					const status = $(card).data('status') || 'undefined';
+					statusCounts[status] = (statusCounts[status] || 0) + 1;
+				});
+				console.log('Status distribution:', statusCounts);
 			}
 		}
 
@@ -526,7 +528,7 @@
 				console.log('Visible cards:', $('.company-card:visible').length);
 				
 				// Sample data from first few cards
-				screeningCompanyCards.slice(0, 3).forEach((card, index) => {
+				screeningCompanyCards.slice(0, 5).forEach((card, index) => {
 					const $card = $(card);
 					console.log(`Card ${index + 1} data:`, {
 						companyName: $card.data('company-name'),
@@ -534,12 +536,19 @@
 						category: $card.data('category'),
 						score: $card.data('score'),
 						status: $card.data('status'),
+						statusRaw: $card.attr('data-status'),
 						evaluationStatuses: $card.data('evaluation-statuses'),
+						evaluationStatusesRaw: $card.attr('data-evaluation-statuses'),
 						judgeIds: $card.data('judge-ids'),
 						cycleId: $card.data('cycle-id'),
 						stepId: $card.data('step-id')
 					});
 				});
+				
+				// Show unique status values
+				const allStatuses = screeningCompanyCards.map(card => $(card).data('status')).filter(s => s);
+				const uniqueStatuses = [...new Set(allStatuses)];
+				console.log('Unique status values found:', uniqueStatuses);
 			};
 		}
 	});
@@ -661,28 +670,17 @@
 				if (window.debugFilters) console.log('After score filter:', filteredCards.length);
 			}
 
-			// Apply status filter
+			// Apply status filter - based purely on company status
 			if (screeningCurrentFilters.status) {
 				filteredCards = filteredCards.filter(card => {
 					const $card = $(card);
-					const primaryStatus = String($card.data('status') || 'not-evaluated');
-					const evaluationStatusesString = String($card.data('evaluation-statuses') || '');
-					const evaluationStatuses = evaluationStatusesString ? evaluationStatusesString.split(',').filter(status => status.trim()) : [];
+					const companyStatus = String($card.data('status') || 'not-evaluated').toLowerCase();
 					
-					switch (screeningCurrentFilters.status) {
-						case 'published':
-							// Show companies where ALL evaluations are published (primaryStatus === 'published')
-							// OR companies with at least some published evaluations (for mixed cases)
-							return primaryStatus === 'published' || evaluationStatuses.includes('published');
-						case 'draft':
-							return primaryStatus === 'draft' || evaluationStatuses.includes('draft');
-						case 'not-evaluated':
-							return primaryStatus === 'not-evaluated' || 
-											evaluationStatuses.length === 0 || 
-											evaluationStatuses.every(status => status === 'not-evaluated' || status === '');
-						default:
-							return true;
+					if (window.debugFilters) {
+						console.log('Filtering card with company status:', companyStatus, 'filter:', screeningCurrentFilters.status);
 					}
+					
+					return companyStatus === screeningCurrentFilters.status;
 				});
 				if (window.debugFilters) console.log('After status filter:', filteredCards.length);
 			}
