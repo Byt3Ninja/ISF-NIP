@@ -269,16 +269,9 @@ class ClientProfileController extends Controller
             // Debug: Dump request data and company info
             \Log::info('Full request data:', $request->all());
             \Log::info('Current user ID: ' . $user->id);
-            \Log::info('Current user company:', $user->company ? $user->company->toArray() : 'No company found');
             \Log::info('Tech tags received:', ['tech_tags' => $request->tech_tags]);
             
-            if ($request->has('tech_tags') && !empty($request->tech_tags)) {
-                // Log the raw tech_tags value and its type
-                \Log::info('Raw tech_tags type: ' . gettype($request->tech_tags));
-                \Log::info('Raw tech_tags value:', ['value' => $request->tech_tags]);
-                $techTags = $request->tech_tags;
-                \Log::info('Tech tags before processing:', ['techTags' => $techTags]);
-                
+            if ($request->has('tech_tags') && !empty($request->tech_tags)) {                
                 // If it's a string, try to decode it as JSON
                 if (is_string($techTags)) {
                     $techTags = json_decode($techTags, true);
