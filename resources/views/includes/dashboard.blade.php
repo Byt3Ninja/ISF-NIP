@@ -504,10 +504,10 @@
                                 data-cycle-id="{{ $cycle->id }}"
                                 data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
                                 data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
-                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? '')]; })->toArray()) }}"
+                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => 'complete-profile']; })->toArray()) }}"
                             >
                                 <span class="me-2">{{ __('dashboard.Join now') }}</span>
-                                <i class="ti {{ $hasPreRequests ? 'ti-alert-triangle' : 'ti-arrows-join' }}"></i>
+                                <i class="ti ti-arrows-join"></i>
                             </button>
                         </div>
                     </div>
@@ -1587,9 +1587,13 @@ window.handleJoinClick = function(button) {
         // Set buttons
         document.getElementById('completePrerequisitesBtn').onclick = function() {
             if (preRequests.length > 0) {
-                // Set flag to indicate prerequisites were opened
-                localStorage.setItem('prerequisitesOpened', 'true');
-                window.open(preRequests[0].url, '_blank');
+                const firstReq = preRequests[0];
+                if (firstReq.action === 'completed-profile') {
+                    window.location.href = firstReq.url + '?action=completed-profile';
+                } else {
+                    localStorage.setItem('prerequisitesOpened', 'true');
+                    window.open(firstReq.url, '_blank');
+                }
             }
             $('#prerequisitesModal').modal('hide');
         };
@@ -1637,7 +1641,7 @@ function startCompletionStatusCheck() {
 function updateUIWithCompletionStatus(data) {
     const hasPreRequests = data.has_pre_requests;
     const preRequests = data.pre_requests || [];
-
+		
     // Find all join buttons
     const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
     if (joinButtons.length === 0) {
@@ -1654,7 +1658,8 @@ function updateUIWithCompletionStatus(data) {
 			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
 			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
 					url: pr.url,
-					label: pr.label
+					label: pr.label,
+					action: 'complete-profile'
 			}))));
 	});
 
