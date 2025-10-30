@@ -520,8 +520,13 @@ class TrainingController extends Controller
 
 	public function timeTracking(Request $request)
 	{
+		
 		Log::info($request->all());
 		$user= Auth::user();
+		if(!$user->hasAnyRole('registered')){
+			return back()->withInput()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
+		}
+		
 		 $request->validate([
             'duration_minutes' => 'required|integer|min:1',
 			'trainingId' => 'required|integer',
@@ -536,6 +541,12 @@ class TrainingController extends Controller
             'page_url' => $request->page_url,
             'duration_minutes' => $request->duration_minutes,
         ]);
+
+		$totalDuration = TrainingDuration::where('training_sessions_id', $request->trainingId)->sum('duration_minutes');
+
+		TrainingSession::where('id', $request->trainingId)->update([
+			'duration' => $totalDuration,
+		]);
 
         return response()->json(['status' => 'success']);
 	}
