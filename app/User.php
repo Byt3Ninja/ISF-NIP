@@ -447,7 +447,7 @@ public function hasCompletedStartup(): bool
     return $this->company
         && filled($this->company->name_en)
         && filled($this->company->address_en)
-        && filled($this->company->sector)
+        && filled($this->company->est_date)
         && filled($this->company->stage);
 }
 
