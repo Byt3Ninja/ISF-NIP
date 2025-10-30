@@ -1241,7 +1241,7 @@ class ClientCompanyController extends Controller
             // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
+            return redirect()->back()->with(['msg' => 'please_complete_startup_info', 'class' => 'danger']);
         }
     }
 
