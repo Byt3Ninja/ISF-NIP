@@ -746,7 +746,7 @@ return [
 	'Show' => 'Show',
 
 	'TimeSheet' => 'Time Sheet',
-	'UserTimeSheet' => 'Time Sheet Users',
+	'UserTimeSheet'=>'Users Timesheets',
 	'Financial Report' => ' Financial Report ',
 	'all TimeSheets' => 'Time Sheets',
 	'Add new Time' => ' Add New Time',

@@ -50,6 +50,7 @@
   </div>
 </section>
 
+@push('scripts')
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
       // --- Tab Navigation ---
@@ -568,10 +569,7 @@
 
     $(document).on('click', '#addPanelBtn', function(e) {
       e.preventDefault();
-      // let tBody = $('#panels-list-body');
-      // let lastTr = tBody.children('tr').last();
-      // let lastTrData = $(lastTr).data('panel');
-      lastTrData = $('#panels-list-body tr').length ?? 0;
+      let lastTrData = $('#panels-list-body tr').length ?? 0;
       let panel = lastTrData + 1;
       let html = `<tr data-panel="${panel}">
         <td>
@@ -622,13 +620,14 @@
       $('#panels-list-body tr').each(function() {
         const $tr = $(this);
         let line = `
-            <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+            <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
             {{ __('cycles.Panel list') }} ${index}
         `;
-        index++
+        index++;
         $($tr).find('td').eq(0).html(line);
         $($tr).find('td').eq(1).find('select').attr('name', `judges[${index}][]`);
         $($tr).find('td').eq(2).find('select').attr('name', `users[${index}][]`);
       });
     });
   </script>
+@endpush
