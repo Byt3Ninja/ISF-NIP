@@ -520,7 +520,7 @@ class TrainingController extends Controller
 
 	public function timeTracking(Request $request)
 	{
-		dd($request->all());
+		Log::info($request->all());
 		$user= Auth::user();
 		 $request->validate([
             'duration_minutes' => 'required|integer|min:1',

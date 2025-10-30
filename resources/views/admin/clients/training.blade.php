@@ -326,7 +326,7 @@
     // ID الدورة التدريبية الحالية
     const trainingId = "{{ $training->id ?? 0 }}"; // غيّرها حسب متغيرك
     const pageUrl = window.location.href;
-
+  
     // دالة لحساب المدة بالدقائق
     function getDurationMinutes() {
         const now = Date.now();
@@ -338,7 +338,6 @@
     // دالة لإرسال الوقت للسيرفر
     function sendTrainingTime() {
         const duration = getDurationMinutes();
-        
         fetch("{{ route('trainings.time_tracking') }}", {
             method: "POST",
             headers: {
@@ -353,16 +352,18 @@
         });
     }
 
-    // استخدم sendBeacon لو المستخدم قفل الصفحة فجأة
-    window.addEventListener("beforeunload", function () {
-        const duration = getDurationMinutes();
+    window.addEventListener('beforeunload', (e) => {
+      const duration = getDurationMinutes();
+        
         const data = {
+            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             trainingId: trainingId,
             page_url: pageUrl,
             duration_minutes: duration,
         };
-        navigator.sendBeacon("{{ route('trainings.time_tracking') }}", JSON.stringify(data));
+        navigator.sendBeacon("{{ route('trainings.time_tracking') }}", data);
     });
+   
 
     // كمان ممكن تبعت تحديث كل 5 دقايق لو المستخدم قاعد فترة طويلة
     setInterval(sendTrainingTime, 5 * 60 * 1000);

@@ -249,6 +249,7 @@
           </select>
         </div>
         
+        @if(Auth::user()->hasAnyRole(['Registered']))
         <!-- Technologies Used -->
         @php
           $technologies = $client->company ? explode(',', $client->company->technologies_used) : [];
@@ -262,6 +263,7 @@
           </select>
           <small class="form-text text-muted">{{ __('Enter technologies separated by commas') }}</small>
         </div>
+        @endif
         
         <div class="mb-4 col-md-6">
           <label for="timeZones" class="form-label fs-6 fw-bold">{{ __('admin.Timezone') }}</label>
