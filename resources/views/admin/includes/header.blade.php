@@ -295,7 +295,7 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Hackathon Program' : 'برنامج الهاكاثون',
+                'label' => $l == 'en' ? 'Hackathons' : 'الهاكاثونات',
                 'icon' => 'ti ti-trophy',
                 'route' => '/dashboard/hackathon',
                 'permission' => 'hackathon.view',
@@ -309,7 +309,7 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Startups' : 'الشركات الناشئة',
+                'label' => $l == 'en' ? 'Registered Startups' : 'الشركات الناشئة المسجلة',
                 'icon' => 'ti ti-rocket',
                 'route' => '/dashboard/cycles/0/registered',
                 'permission' => 'cycles.users_manage',
@@ -341,7 +341,7 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'User TimeSheet' : 'الجدول الزمني للمستخدم',
+                'label' => $l == 'en' ? 'Users TimeSheets' : 'الجدول الزمني للمستخدمين',
                 'icon' => 'ti ti-user-check',
                 'route' => 'time_sheets.view.mine',
                 'permission' => 'time_sheets.view.mine',
@@ -402,7 +402,7 @@
         'isVisible' => '$_user->ableToAny(["mentorships.requests_list", "mentorships.requests_view", "mentorships.sessions_list"], $permissions)',
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Cycles Mentors' : 'مرشدو الدورات',
+                'label' => $l == 'en' ? 'Programs Mentors' : 'مرشدو البرامج',
                 'icon' => 'ti ti-school',
                 'route' => '/dashboard/mentorship/assign',
                 'permission' => 'mentorships.requests_list',
@@ -624,7 +624,7 @@
         'isVisible' => '$_user->hasAnyRole("organizationManager|Admin") && $_user->ableToAny(["users.index"], $permissions)',
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Add New' : 'إضافة جديد',
+                'label' => $l == 'en' ? 'Add New User' : 'إضافة مستخدم جديد',
                 'icon' => 'ti ti-user-plus',
                 'route' => 'users.create',
                 'permission' => 'users.create',
@@ -638,8 +638,15 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Companies' : 'الشركات',
-                'icon' => 'ti ti-building-store',
+                'label' => $l == 'en' ? 'Judges' : 'المحكمون',
+                'icon' => 'ti ti-gavel',
+                'route' => 'users.judger',
+                'permission' => 'users.judger',
+                'isVisible' => true
+            ],
+            [
+                'label' => __('admin.Companies'),
+                'icon' => 'ti ti-building',
                 'route' => 'users.view_companies',
                 'permission' => 'users.view_companies',
                 'isVisible' => true
@@ -942,15 +949,15 @@
         ]
     ],
 
-    // Chat System
-    [
-        'label' => $l == 'en' ? 'Chat' : 'الدردشة',
-        'icon' => 'ti ti-message-circle',
-        'route' => '/dashboard/chat',
-        'permission' => 'chat.messages',
-        'isVisible' => true,
-        'subItems' => []
-    ]
+    // // Chat System
+    // [
+    //     'label' => $l == 'en' ? 'Chat' : 'الدردشة',
+    //     'icon' => 'ti ti-message-circle',
+    //     'route' => '/dashboard/chat',
+    //     'permission' => 'chat.messages',
+    //     'isVisible' => true,
+    //     'subItems' => []
+    // ]
 ];
 
 /**
@@ -1329,7 +1336,29 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
           <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
             @foreach($flattenedMenuItems as $item)
               <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
-                <a href="{{ isset($item['route']) ? (is_callable($item['route']) ? $item['route']() : (is_string($item['route']) && strpos($item['route'], '/') !== 0 ? ($item['route'] === 'company.profile_view' ? ($companyid ? route($item['route'], ['id' => $companyid]) : '#') : ($item['route'] === 'pages.update_mine' ? (Auth::user()->PageId ? route($item['route'], ['id' => Auth::user()->PageId]) : '#') : route($item['route']))) : $item['route'])) : '#' }}" class="nav-link d-flex justify-content-start align-items-center text-start p-2 p-md-3">
+                @php
+                  $href = '#';
+                  if (isset($item['route']) && !empty($item['route'])) {
+                    if (strpos($item['route'], '/') === 0) {
+                      // Direct URL path
+                      $href = $item['route'];
+                    } else {
+                      // Named route
+                      try {
+                        if ($item['route'] === 'company.profile_view' && $companyid) {
+                          $href = route($item['route'], ['id' => $companyid]);
+                        } elseif ($item['route'] === 'pages.update_mine' && Auth::user()->PageId) {
+                          $href = route($item['route'], ['id' => Auth::user()->PageId]);
+                        } else {
+                          $href = route($item['route']);
+                        }
+                      } catch (Exception $e) {
+                        $href = '#';
+                      }
+                    }
+                  }
+                @endphp
+                <a href="{{ $href }}" class="nav-link d-flex justify-content-start align-items-center text-start p-2 p-md-3">
                   @if (isset($item['icon']))
                     <i class="ti {{ $item['icon'] }} ti-md me-2 flex-shrink-0"></i>
                   @endif
@@ -1343,7 +1372,29 @@ $flattenedMenuItems = flattenMenuItems($filteredMenuItems);
           <div id="menuGrid" class="nav nav-pills row g-2 g-md-3 mt-3">
             @foreach($flattenedMenuItems as $item)
               <div class="col-12 col-sm-6 nav-item" data-label="{{ strtolower($item['label']) }}">
-                <a href="{{ isset($item['route']) ? (is_callable($item['route']) ? $item['route']() : (is_string($item['route']) && strpos($item['route'], '/') !== 0 ? ($item['route'] === 'company.profile_view' ? ($companyid ? route($item['route'], ['id' => $companyid]) : '#') : ($item['route'] === 'pages.update_mine' ? (Auth::user()->PageId ? route($item['route'], ['id' => Auth::user()->PageId]) : '#') : route($item['route']))) : $item['route'])) : '#' }}" class="nav-link d-flex justify-content-start align-items-center text-start p-2 p-md-3">
+                @php
+                  $href = '#';
+                  if (isset($item['route']) && !empty($item['route'])) {
+                    if (strpos($item['route'], '/') === 0) {
+                      // Direct URL path
+                      $href = $item['route'];
+                    } else {
+                      // Named route
+                      try {
+                        if ($item['route'] === 'company.profile_view' && $companyid) {
+                          $href = route($item['route'], ['id' => $companyid]);
+                        } elseif ($item['route'] === 'pages.update_mine' && Auth::user()->PageId) {
+                          $href = route($item['route'], ['id' => Auth::user()->PageId]);
+                        } else {
+                          $href = route($item['route']);
+                        }
+                      } catch (Exception $e) {
+                        $href = '#';
+                      }
+                    }
+                  }
+                @endphp
+                <a href="{{ $href }}" class="nav-link d-flex justify-content-start align-items-center text-start p-2 p-md-3">
                   @if (isset($item['icon']))
                     <i class="ti {{ $item['icon'] }} ti-md me-2 flex-shrink-0"></i>
                   @endif
