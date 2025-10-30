@@ -171,13 +171,8 @@
                 }
               }
               
-              // Determine primary status for filtering
-              $primaryStatus = 'not-evaluated';
-              if ($hasPublished && !$hasDraft && !$hasNotEvaluated) {
-                $primaryStatus = 'published';
-              } elseif ($hasDraft) {
-                $primaryStatus = 'draft';
-              }
+              // Use company status for filtering
+              $primaryStatus = strtolower(str_replace(' ', '-', $company->status ?? 'not-evaluated'));
               
               // Create searchable category string
               $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
@@ -641,28 +636,13 @@
 			if (window.debugFilters) console.log('After score filter:', filteredCards.length);
 		}
 
-		// Apply status filter
+		// Apply status filter - based purely on company status
 		if (finalScreeningCurrentFilters.status) {
 			filteredCards = filteredCards.filter(card => {
 				const $card = $(card);
-				const primaryStatus = String($card.data('status') || 'not-evaluated');
-				const evaluationStatusesString = String($card.data('evaluation-statuses') || '');
-				const evaluationStatuses = evaluationStatusesString ? evaluationStatusesString.split(',').filter(status => status.trim()) : [];
+				const companyStatus = String($card.data('status') || 'not-evaluated').toLowerCase();
 				
-				switch (finalScreeningCurrentFilters.status) {
-					case 'published':
-						// Show companies where ALL evaluations are published (primaryStatus === 'published')
-						// OR companies with at least some published evaluations (for mixed cases)
-						return primaryStatus === 'published' || evaluationStatuses.includes('published');
-					case 'draft':
-						return primaryStatus === 'draft' || evaluationStatuses.includes('draft');
-					case 'not-evaluated':
-						return primaryStatus === 'not-evaluated' || 
-										evaluationStatuses.length === 0 || 
-										evaluationStatuses.every(status => status === 'not-evaluated' || status === '');
-					default:
-						return true;
-				}
+				return companyStatus === finalScreeningCurrentFilters.status;
 			});
 			if (window.debugFilters) console.log('After status filter:', filteredCards.length);
 		}
