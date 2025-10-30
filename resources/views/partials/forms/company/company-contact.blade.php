@@ -42,6 +42,7 @@
                 id="file1" 
                 name="img_url" 
                 accept="image/*" 
+                value="{{ $client->company ? $client->company->logo : old('img_url') }}"
               />
             </div>
 
