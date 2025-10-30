@@ -251,7 +251,7 @@
       @endif
     @endif
   
-    @if ($_user->hasAnyRole('Mentor|Registered|Admin'))
+    @if ($_user->hasAnyRole('Mentor|Registered|Admin|organizationManager'))
       @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
           href="/dashboard/show/Mentors" class="menu-link">
