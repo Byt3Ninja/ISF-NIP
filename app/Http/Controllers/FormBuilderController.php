@@ -110,50 +110,52 @@ class FormBuilderController extends Controller
      */
     public function showForm($id)
     {
-        // $form_id_toshow = $id;
-        // $the_form = BuilderForm::findOrFail($form_id_toshow);
-
-        // $fields = $the_form->fields()
-        //     ->withPivot('options')
-        //     ->orderBy('builder_fields.id', 'asc')
-        //     ->get();
-
-        // $grouped_fields = $fields->map(function ($field) {
-        //     // تأكد أن options دايمًا array
-        //     $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
-
-        //     // ضمان وجود المفاتيح حتى لو ناقصة
-        //     return [
-        //         'field_id'   => $field->id,
-        //         'label'      => $options['label'] ?? '',
-        //         'section'    => $options['section'] ?? 'بدون قسم',
-        //         'type'       => $options['type'] ?? null,
-        //         'values'     => $options['values'] ?? null,
-        //         'required'   => $options['validation']['required'] ?? 0,
-        //         'logic'      => $options['logic'] ?? [],
-        //         'raw_field'  => $field,
-        //     ];
-        // })
-        // // هنا مفيش خوف من null
-        // ->groupBy(fn($item) => $item['section']);
-
-        // $data = [
-        //     'title'          => 'the form',
-        //     'sections'       => $grouped_fields,
-        //     'builderform_id' => $form_id_toshow,
-        //     'field_ids'      => $fields->pluck('id')->implode(','),
-        // ];
         $form_id_toshow = $id;
         $the_form = BuilderForm::findOrFail($form_id_toshow);
-        $field_map_ids = BuilderField::where('builder_form_id', $form_id_toshow)->select('id')->pluck('id')->toArray();
+
+        $fields = $the_form->fields()
+            ->withPivot('options')
+            ->orderBy('builder_fields.id', 'asc')
+            ->get();
+
+        $grouped_fields = $fields->map(function ($field) {
+            // تأكد أن options دايمًا array
+            $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
+
+            // ضمان وجود المفاتيح حتى لو ناقصة
+            return [
+                'field_id'   => $field->id,
+                'label'      => $options['label'] ?? '',
+                'section'    => $options['section'] ?? 'بدون قسم',
+                'type'       => $options['type'] ?? null,
+                'values'     => $options['values'] ?? null,
+                'required'   => $options['validation']['required'] ?? 0,
+                'logic'      => $options['logic'] ?? [],
+                'raw_field'  => $field,
+            ];
+        })
+        // هنا مفيش خوف من null
+        ->groupBy(fn($item) => $item['section']);
 
         $data = [
-            'title' => 'the form',
-            'fields' => $the_form->fields()->orderBy('builder_fields.id', 'asc')->get(),
-            'buolderform_id' => $form_id_toshow,
-            'field_ids' => implode(",", $field_map_ids)
+            'title'          => 'the form',
+            'sections'       => $grouped_fields,
+            'builderform_id' => $form_id_toshow,
+            'field_ids'      => $fields->pluck('id')->implode(','),
         ];
-        
+
+
+        // $form_id_toshow = $id;
+        // $the_form = BuilderForm::findOrFail($form_id_toshow);
+        // $field_map_ids = BuilderField::where('builder_form_id', $form_id_toshow)->select('id')->pluck('id')->toArray();
+
+        // $data = [
+        //     'title' => 'the form',
+        //     'fields' => $the_form->fields()->orderBy('builder_fields.id', 'asc')->get(),
+        //     'buolderform_id' => $form_id_toshow,
+        //     'field_ids' => implode(",", $field_map_ids)
+        // ];
+        // dd($data);
 
         return view('admin.settings.formbuilder.form', $data)->with('id',$id);
     }
@@ -328,9 +330,11 @@ class FormBuilderController extends Controller
         } catch (Exception $e) {
             $save_success = false;
         }
-
+        
         return response()->json([
             'success' => $save_success,
+            'id' => $id,
+            'organization_id' => $form_data['organization_id'],
         ]);
 
     }
