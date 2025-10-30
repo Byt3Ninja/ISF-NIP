@@ -200,6 +200,22 @@
   </script>  -->
 
   <script>
+    
+    document.getElementById('reset-company-logo').addEventListener('click', async () => {
+        if (!confirm('هل أنت متأكد من حذف الشعار؟')) return;
+
+        const response = await fetch("{{ route('company.profile_images_delete', $client->company->id ?? 0) }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                "Content-Type": "application/json"
+            }
+        });
+    });
+
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
       const pitchTabs = document.querySelectorAll('#pitch-tab');
       const tabs = document.querySelectorAll('#company-tab');

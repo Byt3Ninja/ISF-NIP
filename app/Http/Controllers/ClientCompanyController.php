@@ -392,6 +392,15 @@ class ClientCompanyController extends Controller
             abort(500);
         }
     }
+
+     public function deleteImage($id)
+     {
+        $user = Auth::user();
+        $company = Company::where('id', $user->company_id)->first(); 
+        $company->logo = null;
+        $company->save();
+        return response()->json(['status' => 'success']);
+     }
     /**
      * Update/Store the specified resource in storage.
      *
