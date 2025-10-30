@@ -208,13 +208,17 @@
       const pitchContent = document.querySelectorAll('#pitch-tab-content .tab-pane');
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
       const activePitchTab = localStorage.getItem('activePitchTab');
+      
+      // Check URL parameter first, then localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasCompleteProfile = urlParams.get('action') === 'complete-profile';
 
       pitchTabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
           localStorage.setItem('activePitchTab', JSON.stringify(index));
         });
 
-        if (!activePitchTab) {
+        if (hasCompleteProfile || !activePitchTab) {
           pitchTabs[0].classList.add('active');
           return;
         }
@@ -240,7 +244,7 @@
           localStorage.setItem('activeCompanyTab', JSON.stringify(index));
         });
 
-        if (!activeCompanyTab) {
+        if (hasCompleteProfile || !activeCompanyTab) {
           mobileTabs[0].classList.add('active');
           return;
         }
@@ -255,7 +259,7 @@
           localStorage.setItem('activeCompanyTab', JSON.stringify(index));
         });
 
-        if (!activeCompanyTab) {
+        if (hasCompleteProfile || !activeCompanyTab) {
           tabs[0].classList.add('active');
           return;
         }
@@ -266,7 +270,7 @@
       });
 
       tabsContent.forEach((tab, index) => {
-        if (!activeCompanyTab) {
+        if (hasCompleteProfile || !activeCompanyTab) {
           tabsContent[0].classList.add('show', 'active');
           return;
         }

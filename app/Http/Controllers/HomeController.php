@@ -3244,8 +3244,9 @@ class HomeController extends Controller
         if (!$startupComplete) {
             $preRequests[] = [
                 'id' => 'complete_startup',
-                'url' => route('company.profile_view_mine', $user->company_id),
-                'label' => __('admin.Complete Startup/Idea')
+                'url' => route('company.profile_view_mine', ['company' => $user->company_id]),
+                'label' => __('admin.Complete Startup/Idea'),
+                'action' => 'complete-profile'
             ];
         }
 
