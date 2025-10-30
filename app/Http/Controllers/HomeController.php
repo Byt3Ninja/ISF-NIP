@@ -951,7 +951,7 @@ class HomeController extends Controller
                     $company = $user->company ?? null;
                     $startupComplete = $company
                         && filled($company->name_en ?? '')
-                        && filled($company->sector ?? '')
+                        && filled($company->est_date ?? '')
                         && filled($company->address_en ?? '')
                         && filled($company->stage ?? '');
                 } 
@@ -2324,7 +2324,7 @@ class HomeController extends Controller
             
         
                 $user = Auth::user();
-			if(isset($user->team_member) && $user->team_member->teamFormation->user->company->cycle != null){
+			if(isset($user->team_member) && $user->team_member->teamFormation->user->company?->cycle != null){
 				$cycle = $user->team_member->teamFormation->user->company->cycle;
             }elseif(isset($user->company) && $user->company->cycle != null){
                     $cycle = $user->company->cycle;
@@ -3244,8 +3244,9 @@ class HomeController extends Controller
         if (!$startupComplete) {
             $preRequests[] = [
                 'id' => 'complete_startup',
-                'url' => route('company.profile_view_mine', $user->company_id),
-                'label' => __('admin.Complete Startup/Idea')
+                'url' => route('company.profile_view_mine', ['company' => $user->company_id]),
+                'label' => __('admin.Complete Startup/Idea'),
+                'action' => 'complete-profile'
             ];
         }
 

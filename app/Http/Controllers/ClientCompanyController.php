@@ -498,13 +498,12 @@ class ClientCompanyController extends Controller
                     'name_en' => 'required|string|max:255',
                     'country_id' => 'required|exists:countries,id',
                     'state_id' => 'required|exists:states,id',
-                    'sector' => 'required|string|max:255',
+                    'sector' => 'nullable|string|max:255',
                     'address_en' => 'required|string|max:500',
                     'est_date' => 'required|date',
                     'years_of_operations' => 'required|string',
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
-                    'business_categories.*' => ['string', Rule::in($allCategories)],
                     'other_category' => 'nullable|string|max:255',
                     'Commercial_Register' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
                     'Tax_Card' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
@@ -581,7 +580,7 @@ class ClientCompanyController extends Controller
                 $result->name_ar = $data['name_en'];
                 $result->country_id = $data['country_id'];
                 $result->state_id = $data['state_id'];
-                $result->sector = $data['sector'];
+                $result->sector = $data['sector'] ?? null;
                 $result->address_en = $data['address_en'];
                 $result->address_ar = $data['address_en'];
                 $result->est_date = $data['est_date'];
@@ -1242,7 +1241,7 @@ class ClientCompanyController extends Controller
             // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
+            return redirect()->back()->with(['msg' => 'please_complete_startup_info', 'class' => 'danger']);
         }
     }
 

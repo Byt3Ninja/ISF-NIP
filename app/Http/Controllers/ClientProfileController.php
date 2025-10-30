@@ -269,16 +269,9 @@ class ClientProfileController extends Controller
             // Debug: Dump request data and company info
             \Log::info('Full request data:', $request->all());
             \Log::info('Current user ID: ' . $user->id);
-            \Log::info('Current user company:', $user->company ? $user->company->toArray() : 'No company found');
             \Log::info('Tech tags received:', ['tech_tags' => $request->tech_tags]);
             
-            if ($request->has('tech_tags') && !empty($request->tech_tags)) {
-                // Log the raw tech_tags value and its type
-                \Log::info('Raw tech_tags type: ' . gettype($request->tech_tags));
-                \Log::info('Raw tech_tags value:', ['value' => $request->tech_tags]);
-                $techTags = $request->tech_tags;
-                \Log::info('Tech tags before processing:', ['techTags' => $techTags]);
-                
+            if ($request->has('tech_tags') && !empty($request->tech_tags)) {                
                 // If it's a string, try to decode it as JSON
                 if (is_string($techTags)) {
                     $techTags = json_decode($techTags, true);
@@ -468,7 +461,7 @@ class ClientProfileController extends Controller
         $programFilter = $request->input('programFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
-            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -542,7 +535,7 @@ class ClientProfileController extends Controller
             }
         } else {
 
-            if (Auth::user()->hasanyRole('Admin')) {
+            if (Auth::user()->hasanyRole('Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -578,9 +571,11 @@ class ClientProfileController extends Controller
                 }
                 // Program filter - filter by specific program/cycle
                 if (!empty($programFilter)) {
-                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                        $query->where('cycle_id', $programFilter);
-                    });
+                   $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                    $query->when(!is_null($programFilter), function ($q) use ($programFilter) {
+                        $q->where('cycle_id', $programFilter);
+                     });
+                });
                 }
                 // Enrolled in program filter - All/Yes/No options
                 if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
