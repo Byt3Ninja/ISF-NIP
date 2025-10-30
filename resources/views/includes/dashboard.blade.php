@@ -470,7 +470,7 @@
 													<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
 														@foreach($cycle->pre_requests as $pr)
 														<li id="{{ $pr['id'] }}" class="pre-request-item">
-															<a href="{{ $pr['url'] }}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+															<a href="{{ $pr['url'] }}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
 																aria-label="{{ __($pr['label']) }}">
 																<i class="ti ti-external-link"></i>
 																<span>{{ __($pr['label']) }}</span>
@@ -499,15 +499,15 @@
                             </small>
 
                             <button
-                                class="btn {{ $hasPreRequests ? 'btn-warning' : 'btn-primary' }}"
+                                class="btn btn-primary"
                                 onclick="handleJoinClick(this)"
                                 data-cycle-id="{{ $cycle->id }}"
                                 data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
                                 data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
-                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? '')]; })->toArray()) }}"
+                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => $pr['action'] ?? '']; })->toArray()) }}"
                             >
-                                <span class="me-2">{{ $hasPreRequests ? __('dashboard.Complete Prerequisites') : __('dashboard.Join now') }}</span>
-                                <i class="ti {{ $hasPreRequests ? 'ti-alert-triangle' : 'ti-arrows-join' }}"></i>
+                                <span class="me-2">{{ __('dashboard.Join now') }}</span>
+                                <i class="ti ti-arrows-join"></i>
                             </button>
                         </div>
                     </div>
@@ -1564,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
 <script>
-function handleJoinClick(button) {
+window.handleJoinClick = function(button) {
     const cycleId = button.getAttribute('data-cycle-id');
     const hasPreRequests = button.getAttribute('data-has-pre');
     const joinUrl = button.getAttribute('data-join-url');
@@ -1579,7 +1579,7 @@ function handleJoinClick(button) {
             li.className = 'list-group-item d-flex align-items-center';
             li.innerHTML = `
                 <i class="ti ti-circle-check me-2 text-warning"></i>
-                <a href="${pr.url}" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
+                <a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
             `;
             list.appendChild(li);
         });
@@ -1587,9 +1587,13 @@ function handleJoinClick(button) {
         // Set buttons
         document.getElementById('completePrerequisitesBtn').onclick = function() {
             if (preRequests.length > 0) {
-                // Set flag to indicate prerequisites were opened
-                localStorage.setItem('prerequisitesOpened', 'true');
-                window.open(preRequests[0].url, '_blank');
+                const firstReq = preRequests[0];
+                if (firstReq.action === 'complete-profile') {
+                    window.location.href = firstReq.url + '?action=complete-profile';
+                } else {
+                    localStorage.setItem('prerequisitesOpened', 'true');
+                    window.open(`${firstReq.url}?action=complete-profile`, '_blank');
+                }
             }
             $('#prerequisitesModal').modal('hide');
         };
@@ -1637,7 +1641,7 @@ function startCompletionStatusCheck() {
 function updateUIWithCompletionStatus(data) {
     const hasPreRequests = data.has_pre_requests;
     const preRequests = data.pre_requests || [];
-
+		
     // Find all join buttons
     const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
     if (joinButtons.length === 0) {
@@ -1647,21 +1651,16 @@ function updateUIWithCompletionStatus(data) {
 
     // Update each button appearance and text
     joinButtons.forEach(joinButton => {
-        if (hasPreRequests) {
-            joinButton.className = 'btn btn-warning';
-            joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Complete Prerequisites') }}</span><i class="ti ti-alert-triangle"></i>';
-        } else {
-            joinButton.className = 'btn btn-primary';
-            joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
-        }
-
-        // Update button data attributes
-        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-            url: pr.url,
-            label: pr.label
-        }))));
-    });
+			joinButton.className = 'btn btn-primary';
+			joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
+  
+			// Update button data attributes
+			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+					url: `${pr.url}?action=complete-profile`,
+					label: pr.label,
+			}))));
+	});
 
     // Find all prerequisites alerts
     const alertDivs = document.querySelectorAll('.alert.alert-info');
@@ -1675,7 +1674,7 @@ function updateUIWithCompletionStatus(data) {
                     const li = document.createElement('li');
                     li.className = 'pre-request-item';
                     li.innerHTML = `
-                        <a href="${pr.url}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
+                        <a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
                             <i class="ti ti-external-link"></i>
                             <span>${pr.label}</span>
                         </a>

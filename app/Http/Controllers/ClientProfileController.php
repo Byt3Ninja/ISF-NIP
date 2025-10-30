@@ -461,7 +461,7 @@ class ClientProfileController extends Controller
         $programFilter = $request->input('programFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
-            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -535,7 +535,7 @@ class ClientProfileController extends Controller
             }
         } else {
 
-            if (Auth::user()->hasanyRole('Admin')) {
+            if (Auth::user()->hasanyRole('Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -571,9 +571,11 @@ class ClientProfileController extends Controller
                 }
                 // Program filter - filter by specific program/cycle
                 if (!empty($programFilter)) {
-                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                        $query->where('cycle_id', $programFilter);
-                    });
+                   $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                    $query->when(!is_null($programFilter), function ($q) use ($programFilter) {
+                        $q->where('cycle_id', $programFilter);
+                     });
+                });
                 }
                 // Enrolled in program filter - All/Yes/No options
                 if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
