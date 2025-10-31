@@ -179,7 +179,7 @@ class FormBuilderController extends Controller
         //     'buolderform_id' => $form_id_toshow,
         //     'field_ids' => implode(",", $field_map_ids)
         // ];
-        dd($data);
+        // dd($data);
 
         return view('admin.settings.formbuilder.form', $data)->with('id',$id);
     }
