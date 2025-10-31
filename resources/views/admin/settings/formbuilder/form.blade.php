@@ -23,14 +23,15 @@ $title=App\BuilderForm::findOrFail($id);
               </div>
               <hr class="my-2" />
               <div class="card-body">
-                @if(count($fields) > 0)
+                @if(count($sections) > 0)
                 <form action="{{ route('forms.submissions_create') }}" method="POST" class="mt-3">
                   @csrf
                   <input type="hidden" name="builder_form_id" value="{{ $id }}" />
                   <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
 
                   <div class="row">
-                    @foreach($fields as $field)
+                    @dd($sections);
+                    @foreach($sections as $field)
                     @php
                       $options = $field->pivot->options ? json_decode($field->pivot->options) : null;
                       $field_name = 'field_' . $field->pivot->id;

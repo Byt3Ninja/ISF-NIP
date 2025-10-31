@@ -118,32 +118,56 @@ class FormBuilderController extends Controller
             ->orderBy('builder_fields.id', 'asc')
             ->get();
 
-        $grouped_fields = $fields->map(function ($field) {
-            // تأكد أن options دايمًا array
+        // نفك الخيارات ونجمعها في أقسام مثل الأصل
+        $structured = $fields->map(function ($field) {
             $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
-
-            // ضمان وجود المفاتيح حتى لو ناقصة
+        
             return [
-                'field_id'   => $field->id,
-                'label'      => $options['label'] ?? '',
-                'section'    => $options['section'] ?? 'بدون قسم',
-                'type'       => $options['type'] ?? null,
-                'values'     => $options['values'] ?? null,
-                'required'   => $options['validation']['required'] ?? 0,
-                'logic'      => $options['logic'] ?? [],
-                'raw_field'  => $field,
+                'section'     => $options['section'] ?? 'بدون قسم',
+                'title'       => $options['label'] ?? '',
+                'question_type' => $options['type'] ?? null,
+                'required'    => $options['validation']['required'] ?? 0,
+                'options'     => isset($options['values'])
+                    ? explode(',', $options['values'])
+                    : [],
+                'logic'       => $options['logic'] ?? [],
             ];
         })
-        // هنا مفيش خوف من null
-        ->groupBy(fn($item) => $item['section']);
+        ->groupBy('section')
+        ->map(function ($questions, $section_title) {
+            // نحول كل مجموعة أسئلة إلى section بنفس التنسيق الأصلي
+            return [
+                'type'        => 'section',
+                'title'       => $section_title,
+                'description' => '',
+                'logic'       => '',
+                'questions'   => $questions->values()->map(function ($q) {
+                    return [
+                        'type'          => 'question',
+                        'title'         => $q['title'],
+                        'question_type' => $q['question_type'],
+                        'required'      => (bool)$q['required'],
+                        'options'       => $q['options'],
+                        'logic'         => $q['logic'],
+                    ];
+                })->toArray(),
+            ];
+        })
+        ->values()
+        ->toArray();
 
+        // البنية النهائية زي ما كانت جاية وقت الإدخال
         $data = [
-            'title'          => 'the form',
-            'sections'       => $grouped_fields,
-            'builderform_id' => $form_id_toshow,
-            'field_ids'      => $fields->pluck('id')->implode(','),
+            'form_fields_data' => [
+                'title'           => $the_form->form_name,
+                'organization_id' => $the_form->organization_id,
+                'items'           => $structured,
+            ]
         ];
 
+        // return response()->json($data);
+
+    
 
         // $form_id_toshow = $id;
         // $the_form = BuilderForm::findOrFail($form_id_toshow);
@@ -155,7 +179,7 @@ class FormBuilderController extends Controller
         //     'buolderform_id' => $form_id_toshow,
         //     'field_ids' => implode(",", $field_map_ids)
         // ];
-        // dd($data);
+        dd($data);
 
         return view('admin.settings.formbuilder.form', $data)->with('id',$id);
     }
@@ -273,18 +297,47 @@ class FormBuilderController extends Controller
 
                     case 'paragraph':
                         $field_id = $fields['textarea'] ?? 0;
-                        $additional_config = ['rows' => 3];
+                        $additional_config = ['type' => 'textarea', 'rows' => 3];
+                        break;
+
+                    case 'multiple_choice':
+                        $field_id = $fields['radio'] ?? 0;
+                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
+                        $additional_config = ['type' => 'radio', 'values' => $values];
+                        break;
+
+                    case 'checkboxes':
+                        $field_id = $fields['checkbox'] ?? 0;
+                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
+                        $additional_config = ['type' => 'checkbox','values' => $values];
                         break;
 
                     case 'dropdown':
                         $field_id = $fields['select'] ?? 0;
                         $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['values' => $values];
+                        $additional_config = ['type' => 'select','values' => $values];
+                        break;
+
+                    case 'linear_scale':
+                        $field_id = $fields['range'] ?? 0;
+                        $min = $question['min'] ?? 1;
+                        $max = $question['max'] ?? 5;
+                        $additional_config = [
+                            'type' => 'range',
+                            'min' => $min,
+                            'max' => $max,
+                            'step' => 1
+                        ];
                         break;
 
                     case 'date':
                         $field_id = $fields['input'] ?? 0;
                         $additional_config = ['type' => 'date'];
+                        break;
+
+                    case 'time':
+                        $field_id = $fields['input'] ?? 0;
+                        $additional_config = ['type' => 'time'];
                         break;
 
                     case 'file':
@@ -298,9 +351,10 @@ class FormBuilderController extends Controller
                         break;
                 }
 
+
                 $common_data = [
                     'label' => $question['title'] ?? 'Untitled',
-                    'section' => $section_title, // استخدم عنوان القسم هنا
+                    'section' => $section_title, 
                     'validation' => [
                         'required' => !empty($question['required']) ? 1 : 0
                     ],
