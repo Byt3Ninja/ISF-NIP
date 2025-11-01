@@ -480,10 +480,6 @@
                         </div>
                     `;
                     
-                    // Add logic panel for multiple choice
-                    if (type === 'multiple_choice') {
-                        addLogicPanel(questionCard);
-                    }
                     break;
                 case 'dropdown':
                     optionsContainer.innerHTML = `
@@ -493,7 +489,6 @@
                             <button type="button" class="btn btn-link text-primary p-0 font-weight-medium mt-2" onclick="addOption(this, 'dropdown')">{{ __('builder.Add_option') }}</button>
                         </div>
                     `;
-                    addLogicPanel(questionCard);
                     break;
                 case 'linear_scale':
                     optionsContainer.innerHTML = `
@@ -536,6 +531,9 @@
                     `;
                     break;
             }
+            
+            // Always call addLogicPanel to show/hide logic based on question type
+            addLogicPanel(questionCard);
         }
 
         function addLogicPanel(questionCard, currentLogic = {}) {
@@ -546,11 +544,18 @@
             }
 
             const questionType = questionCard.querySelector('.question-type').value;
+            
+            // Only show logic for dropdown, multiple choice, and checkboxes
+            if (!['multiple_choice', 'dropdown', 'checkboxes'].includes(questionType)) {
+                return;
+            }
+
             const sections = getSectionsList();
             const options = questionCard.querySelectorAll('.option-input');
             
             let logicHTML = '';
             
+            // Only multiple choice and dropdown support individual option logic
             if (questionType === 'multiple_choice' || questionType === 'dropdown') {
                 logicHTML = `
                     <div class="logic-panel mt-4 p-4 rounded">
@@ -620,7 +625,7 @@
             const questionCard = input.closest('.item-card');
             const questionType = questionCard.querySelector('.question-type').value;
             
-            if (questionType === 'multiple_choice' || questionType === 'dropdown') {
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(questionType)) {
                 addLogicPanel(questionCard);
             }
         }
@@ -662,7 +667,7 @@
             }
             
             // Update logic panel
-            if (qt === 'multiple_choice' || qt === 'dropdown') {
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(qt)) {
                 addLogicPanel(questionCard, currentLogic);
             }
         }
@@ -701,7 +706,7 @@
             optionsContainer.insertBefore(newOption, button.closest('div'));
             
             const qc = button.closest('.item-card');
-            if (qt === 'multiple_choice') {
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(qt)) {
                 addLogicPanel(qc, currentLogic);
             }
         }
@@ -732,7 +737,7 @@
             }
             
             // Update logic panel
-            if (questionType === 'multiple_choice' || questionType === 'dropdown') {
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(questionType)) {
                 addLogicPanel(questionCard, currentLogic);
             }
 
@@ -1009,8 +1014,26 @@
             })
             .then(response => response.json())
             .then(data => {
+                const currentMode = '{{ isset($mode) ? $mode : '' }}';
+                const redirectUrl = `/dashboard/show-builder/${data.id}${data.organization_id ? '?org_id=' + data.organization_id : ''}`;
+
                 releaseSuccessAlert({ message: '{{ __("builder.Form_saved_successfully") }}' });
-                console.log('Saved form data:', formData);
+
+                if (!data || !data.success) {
+                    return;
+                }
+
+                setTimeout(() => {    
+                    if (data.id) {
+                        if (currentMode === 'EDIT') {
+                            window.location.href = `/dashboard/show-form/${data.id}`;
+                            return;
+                        }
+                        window.location.href = redirectUrl;
+                    }
+
+                }, 2000);
+
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -1296,7 +1319,7 @@
             }
 
             // Set logic if applicable
-            if (questionData.question_type === 'multiple_choice' || questionData.question_type === 'dropdown') {
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(questionData.question_type)) {
                 addLogicPanel(questionCard, questionData.logic || {});
             }
         }
