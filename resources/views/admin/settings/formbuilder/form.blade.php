@@ -139,31 +139,11 @@
                 </a>
               </div>
               <div class="card-body">
-<<<<<<< Updated upstream
-                @if(count($fields) > 0)
-=======
                 @if($form && $form['build_data'] && count($form['build_data']) > 0)
->>>>>>> Stashed changes
                 <form action="{{ route('forms.submissions_create') }}" method="POST" class="mt-3">
                   @csrf
                   <input type="hidden" name="builder_form_id" value="{{ $id }}" />
 
-<<<<<<< Updated upstream
-                  <div class="row">
-                    @dd($sections);
-                    @foreach($sections as $field)
-                    @php
-                      $options = $field->pivot->options ? json_decode($field->pivot->options) : null;
-                      $field_name = 'field_' . $field->pivot->id;
-                      $id_for = 'input-fld-'. $loop->iteration;
-                    @endphp
-
-                    <div class="col-md-6 mb-3">
-                      @if($options->label)
-                        <label for="{{ $id_for }}" class="form-label fw-bold">
-                          {{ $options->label }}
-                        </label>
-=======
                   @foreach($form['build_data'] as $sectionIndex => $section)
                   <div class="section-wrapper mb-4" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
                     @if($section['title'] || $section['description'])
@@ -173,7 +153,6 @@
                       @endif
                       @if($section['description'])
                       <p class="section-description text-muted mb-0">{{ $section['description'] }}</p>
->>>>>>> Stashed changes
                       @endif
                     </div>
                     @endif
