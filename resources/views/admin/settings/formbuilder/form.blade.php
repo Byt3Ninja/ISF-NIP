@@ -1,9 +1,124 @@
 @extends('layouts.admin')
+
 <?php
-$title=App\BuilderForm::findOrFail($id);
+  // Fetch form info (example using Eloquent)
+  $data = App\BuilderForm::findOrFail($id);
+
+  // Static form structure
+  $form = [
+    'id' => $data->id,
+    'title' => $data->form_name,
+    'organization_id' => 1, // Example static org ID
+    'build_data' => [
+      [
+        'title' => 'Personal Information',
+        'description' => 'Please provide your personal details.',
+        'logic' => 'submit', // continue | section-{index} | submit
+        'questions' => [
+          [
+            'id' => 1,
+            'label' => 'Full Name',
+            'is_required' => true,
+            'type' => 'short_answer',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 2,
+            'label' => 'Email Address',
+            'is_required' => true,
+            'type' => 'short_answer',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 3,
+            'label' => 'Gender',
+            'is_required' => false,
+            'type' => 'dropdown',
+            'options' => ['Male', 'Female', 'Other'],
+            'logic' => [
+              'Male' => 'continue',
+              'Female' => 'continue',
+              'Other' => 'section-1',
+            ],
+          ],
+        ],
+      ],
+      [
+        'title' => 'Preferences',
+        'description' => 'Choose your preferences below.',
+        'logic' => 'continue',
+        'questions' => [
+          [
+            'id' => 4,
+            'label' => 'Favorite Color',
+            'is_required' => false,
+            'type' => 'multiple_choice',
+            'options' => ['Red', 'Blue', 'Green', 'Other'],
+            'logic' => [
+              'Red' => 'continue',
+              'Blue' => 'continue',
+              'Green' => 'continue',
+              'Other' => 'submit',
+            ],
+          ],
+          [
+            'id' => 5,
+            'label' => 'Hobbies',
+            'is_required' => false,
+            'type' => 'checkboxes',
+            'options' => ['Reading', 'Sports', 'Music', 'Traveling'],
+            'logic' => [
+              'Reading' => 'continue',
+              'Sports' => 'continue',
+              'Music' => 'continue',
+              'Traveling' => 'submit',
+            ],
+          ],
+        ],
+      ],
+      [
+        'title' => 'Feedback',
+        'description' => 'Help us improve by sharing your opinion.',
+        'logic' => 'submit',
+        'questions' => [
+          [
+            'id' => 6,
+            'label' => 'Rate your experience',
+            'is_required' => true,
+            'type' => 'linear_scale',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 7,
+            'label' => 'Additional Comments',
+            'is_required' => false,
+            'type' => 'paragraph',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 8,
+            'label' => 'Hobbies',
+            'is_required' => false,
+            'type' => 'checkboxes',
+            'options' => ['Reading', 'Sports', 'Music', 'Traveling'],
+            'logic' => [
+              'Reading' => 'section-0',
+              'Sports' => 'continue',
+              'Music' => 'continue',
+              'Traveling' => 'submit',
+            ],
+          ],
+        ],
+      ],
+    ],
+  ];
 ?>
 
-@section('title', __('builder.Forms builder') )
+@section('title', __('builder.Forms builder'))
 @section('subTitle', __('builder.Preview'))
 
 @section('content')
@@ -14,21 +129,26 @@ $title=App\BuilderForm::findOrFail($id);
         <div class="row">
           <div class="col-12">
             <div class="card shadow-sm">
-              <div class="card-header pb-0">
-                <h5 class="card-title mb-0">
-                  <strong>{{ __('builder.Form') }}:</strong> {{ $title->form_name }},
-                  <strong>{{ __('builder.ID') }}:</strong> {{ $title->id }}
-                  <a href="/dashboard/show-builder/{{ $id }}" class="ms-1">({{ __('builder.Edit') }})</a>
-                </h5>
+              <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+                <div>
+                  <h4 class="card-title mb-1">{{ $form['title'] }}</h4>
+                  <small class="text-muted">{{ __('builder.Form') }} ID: {{ $form['id'] }}</small>
+                </div>
+                <a href="/dashboard/show-builder/{{ $form['id'] }}" class="btn btn-outline-primary btn-sm">
+                  <i class="ti ti-edit me-1"></i>{{ __('builder.Edit') }}
+                </a>
               </div>
-              <hr class="my-2" />
               <div class="card-body">
-                @if(count($sections) > 0)
+<<<<<<< Updated upstream
+                @if(count($fields) > 0)
+=======
+                @if($form && $form['build_data'] && count($form['build_data']) > 0)
+>>>>>>> Stashed changes
                 <form action="{{ route('forms.submissions_create') }}" method="POST" class="mt-3">
                   @csrf
                   <input type="hidden" name="builder_form_id" value="{{ $id }}" />
-                  <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
 
+<<<<<<< Updated upstream
                   <div class="row">
                     @dd($sections);
                     @foreach($sections as $field)
@@ -43,48 +163,196 @@ $title=App\BuilderForm::findOrFail($id);
                         <label for="{{ $id_for }}" class="form-label fw-bold">
                           {{ $options->label }}
                         </label>
+=======
+                  @foreach($form['build_data'] as $sectionIndex => $section)
+                  <div class="section-wrapper mb-4" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
+                    @if($section['title'] || $section['description'])
+                    <div class="section-header mb-3">
+                      @if($section['title'])
+                      <h5 class="section-title text-primary mb-1">{{ $section['title'] }}</h5>
                       @endif
-
-                      @switch($field->field_type)
-                        @case('select')
-                          <select id="{{ $id_for }}" name="{{ $field_name }}"
-                            class="form-select @error($field_name) is-invalid @enderror">
-                            <option value="">{{ $l == 'ar' ? 'اختر' : 'Choose' }}...</option>
-                            @foreach(explode(',', $options->values) as $value)
-                              <option value="{{ trim($value) }}" {{ old($field_name) == trim($value) ? 'selected' : '' }}>
-                                {{ trim($value) }}
-                              </option>
-                            @endforeach
-                          </select>
-                          @break
-
-                        @case('textarea')
-                          <textarea id="{{ $id_for }}" name="{{ $field_name }}" rows="{{ $options->rows }}"
-                            class="form-control @error($field_name) is-invalid @enderror">{{ old($field_name) }}</textarea>
-                          @break
-
-                        @default
-                          <input type="{{ trim($options->type) === 'date' ? 'text' : $options->type }}"
-                            class="form-control {{ trim($options->type) === 'date' ? 'datepicker' : '' }} @error($field_name) is-invalid @enderror"
-                            id="{{ $id_for }}" name="{{ $field_name }}" value="{{ old($field_name) }}" />
-                      @endswitch
-
-                      @error($field_name)
-                      <div class="invalid-feedback">{{ $message }}</div>
-                      @enderror
+                      @if($section['description'])
+                      <p class="section-description text-muted mb-0">{{ $section['description'] }}</p>
+>>>>>>> Stashed changes
+                      @endif
                     </div>
-                    @endforeach
-                  </div>
-
-                  <div class="d-flex justify-content-start gap-2 mt-4">
-                    @if ($_user->hasAnyRole('Registered'))
-                    <button type="submit" class="btn btn-primary">
-                      <i class="ti ti-send me-2 ti-sm"></i> {{ $l == 'ar' ? 'ارسال' : 'Submit' }}
-                    </button>
                     @endif
-                    <button type="button" class="btn btn-outline-secondary" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
-                      <i class="ti ti-edit me-2 ti-sm"></i> {{ $l == 'ar' ? 'تحرير' : 'Edit' }}
-                    </button>
+                    <div class="card border shadow-sm">
+                      <div class="card-body p-4">
+                        <div class="row g-4">
+                          @foreach($section['questions'] as $question)
+                          @php
+                            $field_name = 'field_' . $question['id'];
+                            $id_for = 'input-fld-' . $question['id'];
+                          @endphp
+
+                          <div class="col-12">
+                            <div class="form-group">
+                              @if($question['label'])
+                                <label for="{{ $id_for }}" class="form-label fw-semibold mb-2">
+                                  {{ $question['label'] }}
+                                  @if($question['is_required'])
+                                    <span class="text-danger ms-1">*</span>
+                                  @endif
+                                </label>
+                              @endif
+
+                              @switch($question['type'])
+                                @case('dropdown')
+                                  <select 
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}"
+                                    class="form-select question-logic @error($field_name) is-invalid @enderror"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  >
+                                    <option value="">{{ $question['label'] }}</option>
+                                    @foreach($question['options'] as $option)
+                                      <option value="{{ $option }}" 
+                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                        {{ old($field_name) == $option ? 'selected' : '' }}>
+                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                      </option>
+                                    @endforeach
+                                  </select>
+                                  @break
+
+                                @case('paragraph')
+                                  <textarea 
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}" 
+                                    rows="3"
+                                    class="form-control @error($field_name) is-invalid @enderror"
+                                    placeholder="{{ $question['label'] }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  >{{ old($field_name) }}</textarea>
+                                  @break
+
+                                @case('multiple_choice')
+                                  <div class="options-group">
+                                    @foreach($question['options'] as $optionIndex => $option)
+                                    <div class="form-check mb-2">
+                                      <input 
+                                        class="form-check-input question-logic" 
+                                        type="radio" 
+                                        name="{{ $field_name }}" 
+                                        id="{{ $id_for }}_{{ $optionIndex }}" 
+                                        value="{{ $option }}"
+                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                        {{ old($field_name) == $option ? 'checked' : '' }}
+                                        {{ $question['is_required'] ? 'required' : '' }}
+                                      />
+                                      <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
+                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                      </label>
+                                    </div>
+                                    @endforeach
+                                  </div>
+                                  @break
+
+                                @case('checkboxes')
+                                  <div class="options-group">
+                                    @foreach($question['options'] as $optionIndex => $option)
+                                    <div class="form-check mb-2">
+                                      <input 
+                                        class="form-check-input question-logic" 
+                                        type="checkbox" 
+                                        name="{{ $field_name }}[]" 
+                                        id="{{ $id_for }}_{{ $optionIndex }}" 
+                                        value="{{ $option }}"
+                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                      />
+                                      <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
+                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                      </label>
+                                    </div>
+                                    @endforeach
+                                  </div>
+                                  @break
+
+                                @case('linear_scale')
+                                  <select 
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}"
+                                    class="form-select @error($field_name) is-invalid @enderror"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  >
+                                    <option value="">Select a rating</option>
+                                    @for($i = 1; $i <= 5; $i++)
+                                      <option value="{{ $i }}" {{ old($field_name) == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                  </select>
+                                  @break
+
+                                @case('date')
+                                  <input 
+                                    type="text"
+                                    class="form-control datepicker @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}" 
+                                    value="{{ old($field_name) }}"
+                                    placeholder="{{ $question['label'] }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                                  @break
+
+                                @case('time')
+                                  <input 
+                                    type="text"
+                                    class="form-control timepicker @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}" 
+                                    value="{{ old($field_name) }}"
+                                    placeholder="{{ $question['label'] }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                                  @break
+
+                                @case('file')
+                                  <input 
+                                    type="file"
+                                    class="form-control @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                                  @break
+
+                                @case('short_answer')
+                                @default
+                                  <input 
+                                    type="text"
+                                    class="form-control @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}" 
+                                    value="{{ old($field_name) }}"
+                                    placeholder="{{ $question['label'] }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                              @endswitch
+
+                              @error($field_name)
+                              <div class="invalid-feedback">{{ $message }}</div>
+                              @enderror
+                            </div>
+                          </div>
+                          @endforeach
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  @endforeach
+
+                  <div class="card border-0 mt-4">
+                    <div class="card-body p-4 text-center">
+                      <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                          <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
+                          <i class="ti ti-edit me-2"></i>{{ __('builder.Edit_Form') }}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </form>
                 @else
@@ -102,12 +370,90 @@ $title=App\BuilderForm::findOrFail($id);
 </div>
 @stop
 
-@section('scripts')
+@section('pagescripts')
 <script>
-  // Initialize Date Picker
-  flatpickr(".datepicker", {
-    dateFormat: "Y-m-d", 
-    allowInput: true, 
+  // Initialize date/time pickers
+  flatpickr(".datepicker", { dateFormat: "Y-m-d", allowInput: true });
+  flatpickr(".timepicker", { enableTime: true, noCalendar: true, dateFormat: "H:i", allowInput: true });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const sections = document.querySelectorAll(".section-wrapper");
+    const form = document.querySelector("form");
+    const submitBtn = form?.querySelector('.btn[type="submit"]');
+    const submitCard = submitBtn?.closest('.card');
+    const logicInputs = document.querySelectorAll(".question-logic");
+
+    // All sections visible
+    sections.forEach(section => {
+      section.style.display = "block";
+    });
+
+    function handleLogic(element) {
+      if (!element) return;
+      let logic = "continue";
+
+      // --- Determine logic type ---
+      if (element.tagName === "SELECT") {
+        const selectedOption = element.options[element.selectedIndex];
+        logic = selectedOption ? selectedOption.dataset.logic : "continue";
+      } else if (element.type === "radio") {
+        logic = element.dataset.logic || "continue";
+      } else if (element.type === "checkbox") {
+        const optionsGroup = element.closest(".options-group");
+        if (optionsGroup) {
+          const checkedBoxes = optionsGroup.querySelectorAll("input[type='checkbox']:checked");
+          for (const box of checkedBoxes) {
+            if (box.dataset.logic === "submit") {
+              logic = "submit";
+              break;
+            } else if (box.dataset.logic.startsWith("section-")) {
+              logic = box.dataset.logic;
+              break;
+            }
+          }
+        }
+      }
+
+      const currentSection = element.closest(".section-wrapper");
+      if (!currentSection) return;
+      const currentIndex = Array.from(sections).indexOf(currentSection);
+
+      // --- Check section-level logic ---
+      const sectionLogic = currentSection.dataset.sectionLogic || "continue";
+      if (sectionLogic === "submit" && logic === "continue") {
+        logic = "submit";
+      }
+
+      // --- Apply logic behavior ---
+      if (logic === "continue") {
+        const nextSection = sections[currentIndex + 1];
+        if (nextSection) {
+          nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (submitCard) {
+          submitCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      } else if (logic.startsWith("section-")) {
+        const targetId = parseInt(logic.replace("section-", ""));
+        if (sections[targetId]) {
+          sections[targetId].scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      } else if (logic === "submit") {
+        // Scroll to submit button smoothly, then trigger submit
+        if (submitCard) {
+          submitCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        // setTimeout(() => {
+        //   if (form) form.submit();
+        // }, 600); // small delay for scroll animation
+      }
+    }
+
+    // --- Attach listeners ---
+    logicInputs.forEach(input => {
+      input.addEventListener("change", function () {
+        handleLogic(this);
+      });
+    });
   });
 </script>
 @stop
