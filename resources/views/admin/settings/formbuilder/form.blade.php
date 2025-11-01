@@ -324,9 +324,11 @@
                   <div class="card border-0 mt-4">
                     <div class="card-body p-4 text-center">
                       <div class="d-flex justify-content-center gap-3">
+                        @if(auth()->user()->hasAnyRole('registered'))
                         <button type="submit" class="btn btn-primary btn-lg px-5">
                           <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }}
                         </button>
+                        @endif
                         <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
                           <i class="ti ti-edit me-2"></i>{{ __('builder.Edit_Form') }}
                         </button>
