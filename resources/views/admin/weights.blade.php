@@ -558,7 +558,6 @@
 							populateFilters();
 						}
 					).fail(function(error) { 
-						console.log(error);
 						releaseFailureAlert({
 							title: "{{ __('admin.Error') }}!",
 							message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",

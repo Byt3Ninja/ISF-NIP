@@ -12,7 +12,7 @@
                 class="badge bg-primary rounded-circle w-px-30 h-px-30 d-flex justify-content-center align-items-center milestone-number">
                 <!-- Milestone number goes here -->
               </div>
-              <h5 class="card-title mb-0 me-2 text-truncate milestone-title-display w-50">Milestone Name</h5>
+              <h5 class="card-title mb-0 me-2 text-truncate milestone-title-display w-50">{{ __('admin.Milestone_Name') }}</h5>
             </div>
             <div class="milestone-header-actions d-flex gap-2">
               <!-- Remove button for unsaved cards (initially hidden by JS) -->

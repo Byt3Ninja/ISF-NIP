@@ -800,7 +800,7 @@ return [
 	'Problem_We_Are_Facing' => 'المشكله القائمة',
 	'solution_problem' => 'حلول المشكله',
 	'Achieved_Milestones' => 'الانجازات المحققة',
-	'Milestone_Name' => 'اسم الانجاز',
+	'Milestone_Name' => 'عنوان المرحلة الانتقالية',
 	'Planned_Milestones' => 'الانجازات المخطط لها',
 	'Archived_Milestones' => 'ارشيف الانجازات ',
 	'investor_name' => ' اسم المستثمر ',
