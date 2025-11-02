@@ -328,7 +328,7 @@
                 <span class="border px-2 rounded bg-label-secondary">
                   <small class="fw-bold text-success">
                     @if ($company->cycle && optional($company->cycleRelation))
-                      {{ $l == 'ar' ? optional($company->cycleRelation)->title_ar : optional($company->cycleRelation)->title }}
+                      {{ optional($company->cycleRelation)->title }}
                     @else
                       N/A
                     @endif

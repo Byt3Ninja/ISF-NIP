@@ -2483,4 +2483,5 @@ return [
 	'Select_Founder' => 'Select Founder',
 	'All_Options' => 'All Options',
 	'Select_Users' => 'Select Users',
+	'dont_have_permission' => 'You do not have permission to perform this action',
 ];
