@@ -64,7 +64,8 @@ class IndustryController extends Controller
 			$name = $request->input('newName');
 
 			$updateindustry = StaticCategory::where('id', $id)->first();
-			$updateindustry->name = $name;
+			$updateindustry->name_ar = $name;
+            $updateindustry->name_en = $name;
 			$updateindustry->save();
 
 			return response()->json(['message' => 'UpdatedSuccessfully']);

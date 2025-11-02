@@ -2532,4 +2532,5 @@ return [
 	'Select_Founder' => 'اختر المؤسس',
 	'All_Options' => 'كل الخيارات',
 	'Select_Users' => 'اختر المستخدمين',
+	'Evaluation' => 'التقييم',
 ];
