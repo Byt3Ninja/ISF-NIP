@@ -292,7 +292,7 @@
 						<form action="#" method="POST">
 							<div class="mb-3">
 								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="task-name" name="task-name" />
+								<input type="text" class="form-control" id="task-name" name="task-name" placeholder="{{ __('admin.Task_Name') }}" />
 							</div>
 							<div class="mb-3">
 								<label for="task-content" class="form-label">{{ __('admin.Description') }}</label>
@@ -359,7 +359,7 @@
 										<option value="2">User 2</option>
 										<option value="3">User 3</option>
 									</select> --}}
-									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_User') }}" value="" />
+									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_Users') }}" value="" />
 								</div>
 							</div>
 							<div class="row mb-3">
@@ -418,7 +418,7 @@
 						<form action="#" method="POST" id="editTaskForm">
 							<div class="mb-3">
 								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" />
+								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" placeholder="{{ __('admin.Task_Name') }}" />
 							</div>
 							<div class="mb-3">
 								<label class="form-label">{{ __('admin.Description') }}</label>
@@ -1607,12 +1607,16 @@
 						refreshLabelsForCreate();
 						$('#task-name').val('');
 						$('#task-content').val('');
-						editQuill.root.innerHTML = '';
+						quill.root.innerHTML = '';
 						$("#task-due-date").val('');
 						$('#task-status').val('pending');
 						$("#task-priority").val('low');
 						$("#task-labels").val('');
 						$("#task-assignee").val('');
+						// Reset attachments
+						$('#createFileList').empty();
+						$('#createAttachmentCount').text('0');
+						$('#createFileInput').val('');
 						releaseSuccessAlert({ message: response.message, title: response.title });
 						reloadKanban();
 					} else { releaseFailureAlert({ message: response.message }); }
@@ -1723,6 +1727,11 @@
 			$('#formTaskModal').on('show.bs.modal', function() {
 				quill.root.innerHTML = '';
 				document.getElementById('task-content').value = '';
+				// Reset attachments when modal opens
+				$('#createFileList').empty();
+				$('#createAttachmentCount').text('0');
+				$('#createFileInput').val('');
+				pendingCreateAttachments = [];
 			});
 		});
 	</script>
