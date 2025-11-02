@@ -532,19 +532,21 @@ class TrainingController extends Controller
 			'trainingId' => 'required|integer',
         ]);
 
+		$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
+
         TrainingDuration::create([
             'user_id' => $user->id,
 			'company_id' => $user->company_id,
 			'cycle_id' => $user->company->cycle,
 			'step_id' => $user->company->step,
-			'training_sessions_id' => $request->trainingId,
+			'training_sessions_id' => $training->id,
             'page_url' => $request->page_url,
             'duration_minutes' => $request->duration_minutes,
         ]);
 
-		$totalDuration = TrainingDuration::where('training_sessions_id', $request->trainingId)->sum('duration_minutes');
+		$totalDuration = TrainingDuration::where('training_sessions_id', $training->id)->sum('duration_minutes');
 
-		TrainingSession::where('id', $request->trainingId)->update([
+		TrainingSession::where('id', $training->id)->update([
 			'duration' => $totalDuration,
 		]);
 
@@ -1154,10 +1156,10 @@ class TrainingController extends Controller
             
          return redirect()->back()->with(['message' => 'Session Report Updated', 'class' => 'success']);
         } 
-    } catch (\Throwable $e) {
-        Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-        return redirect()->back()->with(['message2' => 'session_report_not_available']);
-    }
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+			return redirect()->back()->with(['message2' => 'session_report_not_available']);
+		}
 	}
 
 	public function sessionRecord($id)
@@ -1238,13 +1240,13 @@ class TrainingController extends Controller
 
         return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
 
-    } catch (\Throwable $e) {
-        Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString()
-        ]);
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage(), [
+				'trace' => $e->getTraceAsString()
+			]);
 
-        return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
-    }
+			return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
+		}
 	}
 
 
