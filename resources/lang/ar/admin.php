@@ -2533,4 +2533,5 @@ return [
 	'All_Options' => 'كل الخيارات',
 	'Select_Users' => 'اختر المستخدمين',
 	'Evaluation' => 'التقييم',
+	'dont_have_permission' => 'ليس لديك إذن لأداء هذا الإجراء',
 ];

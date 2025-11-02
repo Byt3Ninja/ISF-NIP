@@ -2485,4 +2485,5 @@ return [
 	'Select_Users' => 'Select Users',
 	'Evaluation' => 'Evaluation',
 	
+	'dont_have_permission' => 'You do not have permission to perform this action',
 ];
