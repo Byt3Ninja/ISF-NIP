@@ -12,7 +12,6 @@
   }
 @endphp
 @section('style')
-<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 <style>
   /* Custom fade animation for tab content */
   @keyframes fadeIn {
@@ -65,7 +64,19 @@
               </div>
               <div class="card-body mt-6">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
-                  <div class="form-group mb-4 mb-md-0" class="d-flex flex-column flex-md-row gap-3">
+                  <div class="form-group mb-4 mb-md-0 w-50 d-none d-md-block">
+                    <label class="form-label">{{ __('cycles.Select step from list to manage') }}</label>
+                    <select id="cstep" class="select2 form-select"
+                      onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/screening','_self');">
+                      @foreach ($steps as $step)
+                      <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
+                        ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" -
+                        {{ __('cycles.Start') }} {{ $step->from->format('d-m-Y') ?? '-' }}) -
+                        {{ optional(optional($step->cycle)->organization)->name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="form-group mb-4 mb-md-0 w-50 d-md-none">
                     <label class="form-label">{{ __('cycles.Select step from list to manage') }}</label>
                     <select id="cstep" class="select2 form-select"
                       onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/screening','_self');">
@@ -108,8 +119,8 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card mb-4">
             <div class="card-header">
-              <h5 class="card-title success">{{ $cstep->title }}</h5>
-              <p>{{ $cstep->description }}</p>
+              <h5 class="card-title success mb-1">{{ $cstep->title }}</h5>
+              <p class="text-muted mb-1">{{ $cstep->description }}</p>
               <div class="d-flex align-items-center text-muted">
                 <i class="ti ti-calendar-event me-2"></i>
                 <small>
@@ -347,7 +358,7 @@
               required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.to') }}: </label>
+            <label class="form-label">{{ __('admin.End at') }}: </label>
             <input value="{{ $cstep->to->format('Y-m-d') }}" name='toDate' type="text" class="form-control date"
               required>
           </div>
@@ -405,11 +416,10 @@
 @stop
 
 @section('pagescripts')
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script type="text/javascript">
-    $('.date').datetimepicker({
-      timepicker: false,
-      format: 'Y-m-d'
+    $('.date').flatpickr({
+      enableTime: false,
+      dateFormat: 'Y-m-d'
     });
 
     function DoChange(set) {
