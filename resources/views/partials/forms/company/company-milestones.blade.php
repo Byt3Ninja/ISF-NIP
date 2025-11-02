@@ -382,6 +382,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update card state
     card.dataset.isNew = false;
     if (data.milestone?.id) card.dataset.milestoneId = data.milestone.id;
+    
+    // Update milestone data for future edits
+    if (data.milestone) {
+      card.milestoneData = data.milestone;
+    }
 
     // Update button visibility
     card.querySelector('.remove-unsaved-milestone-btn').classList.add('d-none');
@@ -396,11 +401,16 @@ document.addEventListener('DOMContentLoaded', function () {
     card.querySelector('.milestone-completion-display').textContent = `${completionPercentage}%`;
 
     // Update documents list
-    if (data.milestone?.documents) {
-      const documents = parseDocuments(data.milestone.documents);
-      const uploadedFilesList = card.querySelector('.uploaded-files-list');
-      uploadedFilesList.innerHTML = '';
-      
+    const documents = data.milestone?.documents ? parseDocuments(data.milestone.documents) : [];
+    const uploadedFilesList = card.querySelector('.uploaded-files-list');
+    const documentsCount = card.querySelector('.milestone-documents-count');
+    const noDocumentsDiv = card.querySelector('.milestone-no-documents');
+    
+    uploadedFilesList.innerHTML = '';
+    documentsCount.textContent = documents.length;
+    
+    if (documents.length > 0) {
+      noDocumentsDiv.classList.add('d-none');
       documents.forEach(doc => {
         const listItem = document.createElement('li');
         listItem.className = 'mb-2';
@@ -413,6 +423,8 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         uploadedFilesList.appendChild(listItem);
       });
+    } else {
+      noDocumentsDiv.classList.remove('d-none');
     }
 
     releaseSuccessAlert({
@@ -606,6 +618,29 @@ document.addEventListener('DOMContentLoaded', function () {
     createMilestoneCard(false); // New cards are generally removable
   });
 
+  // Handle file input changes to check against existing documents
+  milestonesContainer.addEventListener('change', function (event) {
+    if (event.target.classList.contains('milestone-documents')) {
+      const documentsInput = event.target;
+      const card = documentsInput.closest('.milestone-card');
+      const files = documentsInput.files;
+      
+      if (files.length > 0) {
+        const existingDocs = card.milestoneData?.documents ? parseDocuments(card.milestoneData.documents) : [];
+        const existingNames = existingDocs.filter(doc => !card.querySelector(`[data-document-index="${existingDocs.indexOf(doc)}"].document-to-remove`)).map(doc => doc.name);
+        
+        for (const file of files) {
+          if (existingNames.includes(file.name)) {
+            showValidationError(documentsInput, card.querySelector('.milestone-documents-error'), '{{ $l == "ar" ? "هذا الملف موجود بالفعل" : "This file already exists" }}');
+            documentsInput.value = '';
+            return;
+          }
+        }
+        clearSingleValidation(documentsInput);
+      }
+    }
+  });
+
   // Event delegation for actions within milestone cards
   milestonesContainer.addEventListener('click', function (event) {
     const card = event.target.closest('.milestone-card');
@@ -658,6 +693,10 @@ document.addEventListener('DOMContentLoaded', function () {
       // Validate documents
       const files = documentsInput.files;
       if (files.length > 0) {
+        // Get existing document names
+        const existingDocs = card.milestoneData?.documents ? parseDocuments(card.milestoneData.documents) : [];
+        const existingNames = existingDocs.filter(doc => !card.querySelector(`[data-document-index="${existingDocs.indexOf(doc)}"].document-to-remove`)).map(doc => doc.name);
+        
         for (const file of files) {
           if (!ALLOWED_FILE_TYPES.includes(file.type)) {
             showValidationError(documentsInput, card.querySelector('.milestone-documents-error'), MESSAGES.fileType);
@@ -667,6 +706,12 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           if (file.size > MAX_FILE_SIZE) {
             showValidationError(documentsInput, card.querySelector('.milestone-documents-error'), MESSAGES.fileSize);
+            isValid = false;
+            if (!firstInvalidInput) firstInvalidInput = documentsInput;
+            break;
+          }
+          if (existingNames.includes(file.name)) {
+            showValidationError(documentsInput, card.querySelector('.milestone-documents-error'), '{{ $l == "ar" ? "هذا الملف موجود بالفعل" : "This file already exists" }}');
             isValid = false;
             if (!firstInvalidInput) firstInvalidInput = documentsInput;
             break;

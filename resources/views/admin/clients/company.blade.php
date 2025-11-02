@@ -62,7 +62,7 @@
               <a 
                 id="mobile-company-tab"
                 href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link"
+                class="nav-link {{ $key == 0 ? 'active' : '' }}"
                 data-bs-toggle="tab" 
                 role="tab"
               >
@@ -86,7 +86,7 @@
               <a 
                   id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link py-3"
+                  class="nav-link py-3 {{ $key == 0 ? 'active' : '' }}"
                   data-bs-toggle="tab"
                   role="tab"
                 >
@@ -120,7 +120,7 @@
           <!-- / Alert -->
 
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
+            <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="navs-left-{{ $tab['target'] }}">
               @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
@@ -225,74 +225,71 @@
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
       const activePitchTab = localStorage.getItem('activePitchTab');
       
-      // Check URL parameter first, then localStorage
       const urlParams = new URLSearchParams(window.location.search);
       const hasCompleteProfile = urlParams.get('action') === 'complete-profile';
+      const activeIndex = hasCompleteProfile || !activeCompanyTab ? 0 : JSON.parse(activeCompanyTab);
+      const activePitchIndex = hasCompleteProfile || !activePitchTab ? 0 : JSON.parse(activePitchTab);
 
+      // Clear localStorage if complete-profile action
+      if (hasCompleteProfile) {
+        localStorage.removeItem('activeCompanyTab');
+        localStorage.removeItem('activePitchTab');
+      }
+
+      // Initialize pitch tabs (internal tabs within pitch deck)
       pitchTabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
           localStorage.setItem('activePitchTab', JSON.stringify(index));
         });
-
-        if (hasCompleteProfile || !activePitchTab) {
-          pitchTabs[0].classList.add('active');
-          return;
-        }
-
-        if (index === JSON.parse(activePitchTab)) {
+        
+        if (index === activePitchIndex) {
           tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
         }
       });
 
-      pitchContent.forEach((tab, index) => {
-        if (!activePitchTab) {
-          pitchContent[0].classList.add('show', 'active');
-          return;
-        }
-
-        if (index === JSON.parse(activePitchTab)) {
-          tab.classList.add('fade', 'show', 'active');
+      // Initialize pitch content
+      pitchContent.forEach((content, index) => {
+        if (index === activePitchIndex) {
+          content.classList.add('show', 'active');
+        } else {
+          content.classList.remove('show', 'active');
         }
       });
 
-      mobileTabs.forEach((tab, index) => {
-        tab.addEventListener('click', function() {
-          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
-        });
-
-        if (hasCompleteProfile || !activeCompanyTab) {
-          mobileTabs[0].classList.add('active');
-          return;
-        }
-
-        if (index === JSON.parse(activeCompanyTab)) {
-          tab.classList.add('active');
-        }
-      });
-
+      // Initialize desktop tabs
       tabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
           localStorage.setItem('activeCompanyTab', JSON.stringify(index));
         });
-
-        if (hasCompleteProfile || !activeCompanyTab) {
-          tabs[0].classList.add('active');
-          return;
-        }
-
-        if (index === JSON.parse(activeCompanyTab)) {
+        
+        if (index === activeIndex) {
           tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
         }
       });
 
-      tabsContent.forEach((tab, index) => {
-        if (hasCompleteProfile || !activeCompanyTab) {
-          tabsContent[0].classList.add('show', 'active');
-          return;
+      // Initialize mobile tabs
+      mobileTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+        
+        if (index === activeIndex) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
         }
+      });
 
-        if (index === JSON.parse(activeCompanyTab)) {
-          tab.classList.add('fade', 'show', 'active');
+      // Initialize tab content
+      tabsContent.forEach((tab, index) => {
+        if (index === activeIndex) {
+          tab.classList.add('show', 'active');
+        } else {
+          tab.classList.remove('show', 'active');
         }
       });
     });
