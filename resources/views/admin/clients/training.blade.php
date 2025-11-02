@@ -258,7 +258,6 @@
       </div>
     </div>
     <!-- / Content -->
-
     <div class="content-backdrop fade"></div>
   </div>
   <!-- Content wrapper -->
@@ -324,7 +323,7 @@
     let startTime = Date.now();
 
     // ID الدورة التدريبية الحالية
-    const trainingId = "{{ $training->id ?? 0 }}"; // غيّرها حسب متغيرك
+    const trainingId = "{{ $content->training_id ?? 0 }}"; // غيّرها حسب متغيرك
     const pageUrl = window.location.href;
   
     // دالة لحساب المدة بالدقائق
