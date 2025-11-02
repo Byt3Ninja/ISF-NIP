@@ -1634,17 +1634,17 @@ class ClientCompanyController extends Controller
                 'completion_percentage' => 'required|integer|min:0|max:100',
                 'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
             ], [
-                'name.required' => __('Please enter a milestone title.'),
-                'name.max' => __('Milestone title must not exceed 300 characters.'),
-                'description.required' => __('Please enter a milestone description.'),
-                'description.max' => __('Milestone description must not exceed 1000 characters.'),
-                'completion_percentage.required' => __('Please enter a completion percentage.'),
-                'completion_percentage.integer' => __('Completion percentage must be a number.'),
-                'completion_percentage.min' => __('Completion percentage must be between 0 and 100.'),
-                'completion_percentage.max' => __('Completion percentage must be between 0 and 100.'),
-                'documents.*.file' => __('Each document must be a valid file.'),
-                'documents.*.mimes' => __('Only PDF, JPG, PNG, DOCX, and XLSX files are allowed.'),
-                'documents.*.max' => __('File too large. Maximum size allowed is 10 MB.'),
+                'name.required' => __('startup.Please enter a milestone title'),
+                'name.max' => __('startup.Milestone title must not exceed 300 characters'),
+                'description.required' => __('startup.Please enter a milestone description'),
+                'description.max' => __('startup.Milestone description must not exceed 1000 characters'),
+                'completion_percentage.required' => __('startup.Please enter a completion percentage'),
+                'completion_percentage.integer' => __('startup.Completion percentage must be a number'),
+                'completion_percentage.min' => __('startup.Completion percentage must be between 0 and 100'),
+                'completion_percentage.max' => __('startup.Completion percentage must be between 0 and 100'),
+                'documents.*.file' => __('startup.Each document must be a valid file'),
+                'documents.*.mimes' => __('startup.Only PDF, JPG, PNG, DOCX, and XLSX files are allowed'),
+                'documents.*.max' => __('startup.File too large. Maximum size allowed is 10 MB'),
             ]);
 
             if ($validator->fails()) {
