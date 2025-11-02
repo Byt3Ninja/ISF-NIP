@@ -151,7 +151,7 @@
 
                 {{-- Statistics Cards --}}
                 @if(auth()->user()->id == $client->id)
-                  <div class="row">
+                  <div class="row mb-4">
                     <div class="col-6 col-md-4">
                       <article class="card card-border-shadow-primary h-100">
                         <div class="card-body">

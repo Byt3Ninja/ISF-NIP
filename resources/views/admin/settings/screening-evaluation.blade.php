@@ -54,49 +54,49 @@
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
       // --- Tab Navigation ---
-      const navLinks = document.querySelectorAll('.nav-link');
-      const tabContents = document.querySelectorAll('.main-content .tab-content');
+      // const navLinks = document.querySelectorAll('.nav-link');
+      // const tabContents = document.querySelectorAll('.main-content .tab-content');
 
-      function setActiveTab(targetId) {
-        navLinks.forEach(l => {
-          l.classList.toggle('active', l.getAttribute('href') === `#${targetId}`);
-        });
-        tabContents.forEach(t => {
-          t.classList.toggle('active', t.id === targetId);
-        });
-      }
+      // function setActiveTab(targetId) {
+      //   navLinks.forEach(l => {
+      //     l.classList.toggle('active', l.getAttribute('href') === `#${targetId}`);
+      //   });
+      //   tabContents.forEach(t => {
+      //     t.classList.toggle('active', t.id === targetId);
+      //   });
+      // }
 
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
+      // navLinks.forEach(link => {
+      //   link.addEventListener('click', (e) => {
+      //     e.preventDefault();
 
-          const href = link.getAttribute('href');
-          if (!href) return; // Skip if no href
+      //     const href = link.getAttribute('href');
+      //     if (!href) return; // Skip if no href
 
-          const targetId = href.substring(1);
-          setActiveTab(targetId);
+      //     const targetId = href.substring(1);
+      //     setActiveTab(targetId);
 
-          if (targetId === 'evaluation-model') {
-            renderModelEditor();
-          }
-        });
-      });
+      //     if (targetId === 'evaluation-model') {
+      //       renderModelEditor();
+      //     }
+      //   });
+      // });
 
 
-      const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
-      setActiveTab(initialTab);
+      // const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
+      // setActiveTab(initialTab);
 
-      // --- Chart Initialization ---
-      const revenueChartCanvas = document.getElementById('revenueChart');
-      if (revenueChartCanvas) {
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-        const ctx = revenueChartCanvas.getContext('2d');
-        new Chart(ctx, {
-          type: 'line',
-          data: { /* ... chart data ... */ },
-          options: { /* ... chart options ... */ }
-        });
-      }
+      // // --- Chart Initialization ---
+      // const revenueChartCanvas = document.getElementById('revenueChart');
+      // if (revenueChartCanvas) {
+      //   const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      //   const ctx = revenueChartCanvas.getContext('2d');
+      //   new Chart(ctx, {
+      //     type: 'line',
+      //     data: { /* ... chart data ... */ },
+      //     options: { /* ... chart options ... */ }
+      //   });
+      // }
 
       // --- Evaluation Model CRUD Logic ---
       const modelEditorContainer = document.getElementById('model-editor');
