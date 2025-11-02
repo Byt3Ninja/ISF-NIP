@@ -438,7 +438,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
-                    @if (app()->environment('local', 'dev'))
+                    @if (app()->environment('local', 'dev', 'test'))
                       <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
                         <div class="modal-body">
                           @csrf
