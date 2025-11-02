@@ -862,7 +862,7 @@
                 </tr>
               </tbody>
             </table>
-            @php($fdata = \App\Formdata::where('user_id', $company->user->id)->with(['field'])->get())
+            @php($fdata = \App\Formdata::where('user_id', $company?->user?->id)->with(['field'])->get())
             <br /><br />
             <h5 class="mb-4 pb-3">
               {{ __('admin.Data collected through Cycle') }}
