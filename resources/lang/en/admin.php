@@ -832,7 +832,7 @@ return [
 	'Problem_We_Are_Facing' => 'Problem We Are Facing',
 	'solution_problem' => 'Solution to the Problem',
 	'Achieved_Milestones' => 'Achieved Milestones',
-	'Milestone_Name' => 'Milestone Name',
+	'Milestone_Name' => 'Milestone Title',
 	'Archived_Milestones' => 'Archived Milestones',
 	'Planned_Milestones' => 'Planned Milestones',
 	'investor_name' => 'Investor Name',
