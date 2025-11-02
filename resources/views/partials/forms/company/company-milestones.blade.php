@@ -34,7 +34,6 @@
                 type="text" 
                 id="milestone-title-input" 
                 class="form-control milestone-title" 
-                maxlength="300"
                 placeholder="{{ __('admin.Milestone_Name') }}"
               />
               <div class="invalid-feedback milestone-title-error"></div>
@@ -45,7 +44,6 @@
                 id="milestone-description-textarea" 
                 class="form-control milestone-description" 
                 rows="3"
-                maxlength="1000" 
                 placeholder="{{ __('admin.Description') }}"
               ></textarea>
               <div class="invalid-feedback milestone-description-error"></div>
@@ -149,19 +147,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Constants for validation messages and allowed file types
   const MESSAGES = {
-    titleRequired: "{{ $l == 'ar' ? 'يرجى إدخال اسم الإنجاز.' : 'Please enter a milestone title.' }}",
-    descriptionRequired: "{{ $l == 'ar' ? 'يرجى إدخال وصف الإنجاز.' : 'Please enter a milestone description.' }}",
-    completionRequired: "{{ $l == 'ar' ? 'يرجى إدخال النسبة المئوية للإكمال.' : 'Please enter a completion percentage.' }}",
-    completionRange: "{{ $l == 'ar' ? 'النسبة المئوية للإكمال يجب أن تكون بين 0 و 100.' : 'Completion percentage must be between 0 and 100.' }}",
-    fileType: "{{ $l == 'ar' ? 'يُسمح فقط بملفات PDF وJPG وPNG وDOCX وXLSX.' : 'Only PDF, JPG, PNG, DOCX, and XLSX files are allowed.' }}",
-    fileSize: "{{ $l == 'ar' ? 'حجم الملف كبير جداً. الحد الأقصى المسموح به 10 ميجابايت.' : 'File too large. Maximum size allowed is 10 MB.' }}",
-    saving: "{{ $l == 'ar' ? 'جاري الحفظ...' : 'Saving...' }}",
-    success: "{{ $l == 'ar' ? 'تم تقديم الإنجاز بنجاح.' : 'Milestone submitted successfully.' }}",
-    deleteSuccess: "{{ $l == 'ar' ? 'تم حذف الإنجاز بنجاح.' : 'Your milestone has been deleted successfully.' }}",
-    deleteConfirm: "{{ $l == 'ar' ? 'أنت على وشك حذف هذا الإنجاز نهائيًا. لا يمكن التراجع عن هذا الإجراء.' : 'You are about to permanently delete this milestone. This action cannot be undone.' }}",
-    documentDeleteConfirm: "{{ $l == 'ar' ? 'أنت على وشك حذف هذا المستند. لا يمكن التراجع عن هذا الإجراء.' : 'You are about to delete this document. This action cannot be undone.' }}",
-    error: "{{ $l == 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.' }}",
-    deleteError: "{{ $l == 'ar' ? 'فشل في حذف الإنجاز. يرجى المحاولة مرة أخرى.' : 'Failed to delete milestone. Please try again.' }}"
+    titleRequired: "{{ __('startup.milestone_title_required') }}",
+    titleMaxLength: "{{ __('startup.milestone_title_max_length') }}",
+    descriptionRequired: "{{ __('startup.milestone_description_required') }}",
+    descriptionMaxLength: "{{ __('startup.milestone_description_max_length') }}",
+    completionRequired: "{{ __('startup.completion_percentage_required') }}",
+    completionRange: "{{ __('startup.completion_percentage_range') }}",
+    fileType: "{{ __('startup.document_invalid_type') }}",
+    fileSize: "{{ __('startup.document_too_large') }}",
+    saving: "{{ __('startup.saving') }}",
+    success: "{{ __('startup.milestone_submit_success') }}",
+    deleteSuccess: "{{ __('startup.milestone_delete_success') }}",
+    deleteConfirm: "{{ __('startup.milestone_delete_confirm') }}",
+    documentDeleteConfirm: "{{ __('startup.milestone_document_delete_confirm') }}",
+    error: "{{ __('startup.milestone_unknown_error') }}",
+    deleteError: "{{ __('startup.milestone_delete_failed') }}"
   };
 
   const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
@@ -633,7 +633,9 @@ document.addEventListener('DOMContentLoaded', function () {
       // Validation rules
       const validationRules = [
         { input: titleInput, errorSelector: '.milestone-title-error', message: MESSAGES.titleRequired, validate: () => !titleInput.value.trim() },
+        { input: titleInput, errorSelector: '.milestone-title-error', message: MESSAGES.titleMaxLength, validate: () => titleInput.value.trim() && titleInput.value.length > 300 },
         { input: descriptionInput, errorSelector: '.milestone-description-error', message: MESSAGES.descriptionRequired, validate: () => !descriptionInput.value.trim() },
+        { input: descriptionInput, errorSelector: '.milestone-description-error', message: MESSAGES.descriptionMaxLength, validate: () => descriptionInput.value.trim() && descriptionInput.value.length > 1000 },
         { input: completionInput, errorSelector: '.milestone-completion-error', message: MESSAGES.completionRequired, validate: () => !completionInput.value.trim() },
         { input: completionInput, errorSelector: '.milestone-completion-error', message: MESSAGES.completionRange, validate: () => {
           if (!completionInput.value.trim()) return false;
@@ -642,10 +644,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }}
       ];
 
-      // Validate inputs
+      // Validate inputs - stop at first error per input
+      const processedInputs = new Set();
       validationRules.forEach(rule => {
-        if (rule.validate()) {
+        if (!processedInputs.has(rule.input) && rule.validate()) {
           showValidationError(rule.input, card.querySelector(rule.errorSelector), rule.message);
+          processedInputs.add(rule.input);
           isValid = false;
           if (!firstInvalidInput) firstInvalidInput = rule.input;
         }

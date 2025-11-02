@@ -1,15 +1,32 @@
 <?php
 
 return [
-  'Please enter a milestone title' => 'يرجى إدخال عنوان الانجاز',
-  'Milestone title must not exceed 300 characters' => 'يجب ألا يتجاوز عنوان الانجاز 300 حرف',
-  'Please enter a milestone description' => 'يرجى إدخال وصف الانجاز',
-  'Milestone description must not exceed 1000 characters' => 'يجب ألا يتجاوز وصف الانجاز 1000 حرف',
-  'Please enter a completion percentage' => 'يرجى إدخال نسبة الانجاز',
-  'Completion percentage must be a number' => 'يجب أن تكون نسبة الانجاز رقمًا',
-  'Completion percentage must be between 0 and 100' => 'يجب أن تكون نسبة الانجاز بين 0 و 100',
-  'Completion percentage must be between 0 and 100' => 'يجب أن تكون نسبة الانجاز بين 0 و 100',
-  'Each document must be a valid file' => 'يجب أن يكون كل مستند ملفًا صالحًا',
-  'Only PDF, JPG, PNG, DOCX, and XLSX files are allowed' => 'يُسمح فقط بملفات PDF و JPG و PNG و DOCX و XLSX',
-  'File too large. Maximum size allowed is 10 MB' => 'الملف كبير جدًا. الحد الأقصى المسموح به هو 10 ميغابايت',
+  'startup_not_found' => 'لم يتم العثور على الشركة الناشئة',
+
+  'saving' => 'جارٍ الحفظ...',
+
+  'milestone_title_required' => 'يرجى إدخال عنوان المرحلة الانتقالية',
+  'milestone_title_max_length' => 'يجب ألا يتجاوز عنوان المرحلة الانتقالية 300 حرف',
+
+  'milestone_description_required' => 'يرجى إدخال وصف المرحلة الانتقالية',
+  'milestone_description_max_length' => 'يجب ألا يتجاوز وصف المرحلة الانتقالية 1000 حرف',
+
+  'completion_percentage_required' => 'يرجى إدخال نسبة المرحلة الانتقالية',
+  'completion_percentage_numeric' => 'يجب أن تكون نسبة المرحلة الانتقالية رقمًا',
+  'completion_percentage_range' => 'يجب أن تكون نسبة المرحلة الانتقالية بين 0 و 100',
+
+  'document_invalid_file' => 'يجب أن يكون كل مستند ملفًا صالحًا',
+  'document_invalid_type' => 'يُسمح فقط بملفات PDF و JPG و PNG و DOCX و XLSX',
+  'document_too_large' => 'الملف كبير جدًا. الحد الأقصى المسموح به هو 10 ميغابايت',
+
+  'milestone_submit_success' => 'تم تقديم المرحلة الانتقالية بنجاح',
+  'milestone_delete_success' => 'تم حذف المرحلة الانتقالية بنجاح',
+
+  'milestone_delete_confirm' => 'هل أنت متأكد أنك تريد حذف هذه المرحلة الانتقالية نهائيًا؟',
+  'milestone_document_delete_confirm' => 'أنت على وشك حذف هذا المستند. هل أنت متأكد؟',
+
+  'milestone_delete_failed' => 'فشل حذف المرحلة الانتقالية. يرجى المحاولة مرة أخرى لاحقًا.',
+  'milestone_unknown_error' => 'حدث خطأ غير معروف. يرجى المحاولة مرة أخرى لاحقًا.',
+  'milestone_not_found' => 'لم يتم العثور على المرحلة الانتقالية.',
+  'milestone_id_required' => 'معرف المرحلة الانتقالية مطلوب.',
 ];
