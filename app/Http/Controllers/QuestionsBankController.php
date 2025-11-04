@@ -9,6 +9,7 @@ use App\QuestionsBank;
 use App\QuestionCategories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use stdClass;
 
@@ -136,7 +137,6 @@ class QuestionsBankController extends Controller
 
 	public function store(Request $request)
 	{
-		
 		if ($request->question_group != 'assessment') {
 			if ($request->has('quiz_answer_status')) {
 				$quiz_answer_status = [];
@@ -148,12 +148,13 @@ class QuestionsBankController extends Controller
 
 			$rules = [
 				'organization_id' => 'required|array',
-				'category_id' => 'required_if:question_group,quiz|exists:question_categories,id',
-				'difficulty' => 'required_if:question_group,quiz|in:easy,medium,hard',
+				'category_id' => 'required_if:question_group,quiz|nullable|exists:question_categories,id',
+				'difficulty' => 'required_if:question_group,quiz|nullable|in:easy,medium,hard',
 				'question' => 'required|string',
-				'type' => 'required|in:mcq,tfq',
+				'type' => 'required_if:question_group,quiz|nullable|in:mcq,tfq',
 				'question_group' => 'required|in:quiz,survey',
-				'correct' => 'required_if:question_group,quiz|required_if:type,tfq|in:tfq_true,tfq_false',
+				'survey_type' => 'required_if:question_group,survey|nullable|in:stars,radio,answers',
+				'correct' => 'required_if:type,tfq|nullable|in:tfq_true,tfq_false',
 				'explanation' => 'nullable|sometimes',
 			];
 			if ($request->question_group == 'quiz') {
@@ -167,9 +168,9 @@ class QuestionsBankController extends Controller
 			}
 			if ($request->question_group == 'survey') {
 
-				$text_status = ($request->survey_type != 'stars' && $request->survey_type != 'answers') ?  'required_if:type,mcq' : 'nullable';
+				$text_status = ($request->survey_type != 'stars' && $request->survey_type != 'answers') ?  'required' : 'nullable';
 				$rules = array_merge($rules, [
-					'quiz_answer_text' => 'required_if:type,mcq|array',
+					'quiz_answer_text' => 'array|nullable',
 					"quiz_answer_text.*" => "$text_status|string",
 				]);
 			}
@@ -183,12 +184,29 @@ class QuestionsBankController extends Controller
 			}
 			$answers = [];
 			$correct = null;
-			if ($request->type == 'mcq' && ($request->has('quiz_answer_text')) && ($request->has('quiz_answer_status'))) {
+			
+			// Process answers for quiz questions (MCQ)
+			if ($request->question_group == 'quiz' && $request->type == 'mcq' && 
+				$request->has('quiz_answer_text') && $request->has('quiz_answer_status')) {
 				foreach ($request->quiz_answer_text as $key => $answer) {
-					$answers[] = ['text' => $answer, 'status' => $request->quiz_answer_status[$key]];
+					if (!empty($answer)) {
+						$answers[] = ['text' => $answer, 'status' => $request->quiz_answer_status[$key]];
+					}
 				}
 			}
-			if ($request->type == 'tfq') {
+			
+			// Process answers for survey questions (radio, answers types)
+			if ($request->question_group == 'survey' && $request->survey_type != 'stars' && 
+				$request->has('quiz_answer_text')) {
+				foreach ($request->quiz_answer_text as $key => $answer) {
+					if (!empty($answer)) {
+						$answers[] = ['text' => $answer];
+					}
+				}
+			}
+			
+			// Process TFQ correct answer
+			if ($request->question_group == 'quiz' && $request->type == 'tfq') {
 				$correct = ($request->has('correct') && $request->correct == 'tfq_true') ? true : false;
 			}
 			$type = null;
@@ -311,9 +329,10 @@ class QuestionsBankController extends Controller
 					'category_id' => 'required_if:question_group,quiz|exists:question_categories,id',
 					'difficulty' => 'required_if:question_group,quiz|in:easy,medium,hard',
 					'question' => 'required|string',
-					'type' => 'required|in:mcq,tfq',
+					'type' => 'required_if:question_group,quiz|in:mcq,tfq',
 					'question_group' => 'required|in:quiz,survey',
-					'correct' => 'required_if:question_group,quiz|required_if:type,tfq|in:tfq_true,tfq_false',
+					'survey_type' => 'required_if:question_group,survey|in:stars,radio,answers',
+					'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
 					'explanation' => 'nullable|sometimes',
 				];
 				if ($request->question_group == 'quiz') {
@@ -325,21 +344,38 @@ class QuestionsBankController extends Controller
 					]);
 				}
 				if ($request->question_group == 'survey') {
-					$text_status = ($request->survey_type != 'stars' && $request->survey_type != 'answers') ?  'required_if:type,mcq' : 'nullable';
+					$text_status = ($request->survey_type != 'stars') ? 'required' : 'nullable';
 					$rules = array_merge($rules, [
-						'quiz_answer_text' => 'required_if:type,mcq|array',
+						'quiz_answer_text' => 'array|nullable',
 						"quiz_answer_text.*" => "$text_status|string",
 					]);
 				}
 				$this->validate($request, $rules);
 				$answers = [];
 				$correct = null;
-				if ($request->type == 'mcq' && ($request->has('quiz_answer_text')) && ($request->has('quiz_answer_status'))) {
+				
+				// Process answers for quiz questions (MCQ)
+				if ($request->question_group == 'quiz' && $request->type == 'mcq' && 
+					$request->has('quiz_answer_text') && $request->has('quiz_answer_status')) {
 					foreach ($request->quiz_answer_text as $key => $answer) {
-						$answers[] = ['text' => $answer, 'status' => $request->quiz_answer_status[$key]];
+						if (!empty($answer)) {
+							$answers[] = ['text' => $answer, 'status' => $request->quiz_answer_status[$key]];
+						}
 					}
 				}
-				if ($request->type == 'tfq') {
+				
+				// Process answers for survey questions (radio, answers types)
+				if ($request->question_group == 'survey' && $request->survey_type != 'stars' && 
+					$request->has('quiz_answer_text')) {
+					foreach ($request->quiz_answer_text as $key => $answer) {
+						if (!empty($answer)) {
+							$answers[] = ['text' => $answer];
+						}
+					}
+				}
+				
+				// Process TFQ correct answer
+				if ($request->question_group == 'quiz' && $request->type == 'tfq') {
 					$correct = ($request->has('correct') && $request->correct == 'tfq_true') ? true : false;
 				}
 				$type = null;

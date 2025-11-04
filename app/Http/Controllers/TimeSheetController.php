@@ -118,6 +118,7 @@ class TimeSheetController extends Controller
 	 */
 	public function update(Request $request, string $id)
 	{
+		// dd($request->all());
 		$request->validate([
 			'title' => 'required|string|max:255',
 			'TimeSheet_date' => 'required|date',
@@ -125,13 +126,14 @@ class TimeSheetController extends Controller
 			'description' => 'required|string',
 			'category' => 'nullable|sometimes|exists:categories,id',
 			'program' => 'required|exists:cycles,id',
-			'user_id' => 'required|exists:users,id',
+			'user_id' => 'nullable|sometimes|exists:users,id',
 			'status' => 'required|numeric',
 		]);
 		
 		$timeSheet = TimeSheet::find($id);
+		$usedId = $request->has('user_id') && trim( $request->user_id ) ? $request->user_id : $timeSheet->user_id;
 		$timeSheet->title = $request->title;
-		$timeSheet->user_id = $request->user_id;
+		$timeSheet->user_id = $usedId;
 		$timeSheet->date = $request->TimeSheet_date;
 		$timeSheet->hours_worked = $request->has('hours_worked') ? $request->hours_worked : 0;
 		$timeSheet->description = $request->has('description') ? $request->description : null;

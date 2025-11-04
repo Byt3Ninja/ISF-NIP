@@ -33,7 +33,12 @@ class organizationsController extends Controller
  
 	public function index(Request $request)
 	{
+		$user = auth()->user();
 		$organizations = Organization::with(['user', 'cycles']);
+		if( !empty($user->organization_id) && !is_null($user->organization_id) && trim($user->organization_id) )
+		{
+			$organizations = $organizations->where('id', $user->organization_id);
+		}
 		if($request->status !== null && $request->status !== 'all') {
 		$organizations = $organizations->where('status', $request->status)->get();
 		}else{

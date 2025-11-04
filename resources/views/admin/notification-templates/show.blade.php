@@ -1,316 +1,336 @@
 @extends('layouts.admin')
 
-@section('title', 'View Notification Template')
+@section('title', __('notification_templates.view_template'))
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card">
+      <div class="card-header mb-6 border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0 text-capitalize">
+            <i class="ti ti-eye me-2"></i>
+            {{ __('notification_templates.view_template') }}
+          </h5>
+          <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('notification-templates.edit', $notificationTemplate) }}" class="btn btn-primary">
+              <i class="ti ti-edit me-1"></i>
+              {{ __('notification_templates.edit') }}
+            </a>
+            <a href="{{ route('notification-templates.index') }}" class="btn btn-label-secondary">
+              <i class="ti ti-arrow-left me-1"></i>
+              {{ __('notification_templates.back') }}
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <!-- Template Information -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card border">
+              <div class="card-header">
+                <h6 class="card-title mb-0">
+                  <i class="ti ti-info-circle me-1"></i>
+                  {{ __('notification_templates.template_information') }}
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.name') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    <code>{{ $notificationTemplate->name }}</code>
+                    @if($notificationTemplate->parent_template_id)
+                      <small class="text-muted d-block">
+                        <i class="ti ti-git-branch"></i> {{ __('notification_templates.cloned') }}
+                      </small>
+                    @endif
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.title') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    {{ $notificationTemplate->title }}
+                  </div>
+                </div>
+                @if($notificationTemplate->description)
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.description') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    {{ $notificationTemplate->description }}
+                  </div>
+                </div>
+                @endif
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.channel') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    <span class="badge bg-label-{{ $notificationTemplate->channel == 'email' ? 'danger' : ($notificationTemplate->channel == 'whatsapp' ? 'success' : 'info') }}">
+                      <i class="ti ti-{{ $notificationTemplate->channel == 'email' ? 'mail' : ($notificationTemplate->channel == 'whatsapp' ? 'brand-whatsapp' : 'bell') }} me-1"></i>
+                      {{ ucfirst($notificationTemplate->channel) }}
+                    </span>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.status') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    <span class="badge bg-label-{{ $notificationTemplate->is_active ? 'success' : 'secondary' }}">
+                      <i class="ti ti-circle-dot me-1"></i>
+                      {{ $notificationTemplate->is_active ? __('notification_templates.active') : __('notification_templates.inactive') }}
+                    </span>
+                  </div>
+                </div>
+                @if($notificationTemplate->sender)
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.sender') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    <code>{{ $notificationTemplate->sender }}</code>
+                  </div>
+                </div>
+                @endif
+                @if($notificationTemplate->subject)
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.subject') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    {{ $notificationTemplate->subject }}
+                  </div>
+                </div>
+                @endif
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="card border">
+              <div class="card-header">
+                <h6 class="card-title mb-0">
+                  <i class="ti ti-clock me-1"></i>
+                  {{ __('notification_templates.metadata') }}
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.version') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    <span class="badge bg-label-info">v{{ $notificationTemplate->version }}</span>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.created_by') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    {{ $notificationTemplate->creator->first_name_en ?? __('notification_templates.unknown') }}
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.created_at') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    {{ $notificationTemplate->created_at->format('M d, Y H:i') }}
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-4">
+                    <strong>{{ __('notification_templates.updated_at') }}:</strong>
+                  </div>
+                  <div class="col-sm-8">
+                    {{ $notificationTemplate->updated_at->format('M d, Y H:i') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Template Content -->
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="card border">
+              <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                  <li class="nav-item">
+                    <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#content-tab" role="tab">
+                      <i class="ti ti-code me-1"></i>
+                      {{ __('notification_templates.template_content') }}
+                    </button>
+                  </li>
+                  <li class="nav-item">
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#preview-tab" role="tab">
+                      <i class="ti ti-eye me-1"></i>
+                      {{ __('notification_templates.preview') }}
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <div class="card-body">
+                <div class="tab-content">
+                  <div class="tab-pane fade show active" id="content-tab" role="tabpanel">
+                    <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>{{ $notificationTemplate->content }}</code></pre>
+                  </div>
+                  
+                  <div class="tab-pane fade" id="preview-tab" role="tabpanel">
+                    <div id="preview-body" class="border rounded p-3" style="min-height: 300px; background: #f8f9fa;">
+                      <div class="alert alert-info">
+                        <small><i class="ti ti-info-circle"></i> {{ __('notification_templates.preview_sample_data') }}</small>
+                      </div>
+                      <div class="preview-content p-3">
+                        {!! $renderedContent ?? $notificationTemplate->content !!}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-4">
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">{{ $notificationTemplate->title }}</h3>
-                    <div class="card-tools">
-                        <a href="{{ route('notification-templates.edit', $notificationTemplate) }}" class="btn btn-warning">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <a href="{{ route('notification-templates.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Templates
-                        </a>
+              <div class="card-header">
+                <h6 class="card-title mb-0">
+                  <i class="ti ti-tags me-1"></i>
+                  {{ __('notification_templates.available_variables') }}
+                </h6>
+              </div>
+              <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                <div id="variables-container">
+                  <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
                     </div>
+                    <p class="text-muted mb-0 mt-2">{{ __('notification_templates.loading_variables') }}</p>
+                  </div>
                 </div>
-                
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Template Information -->
-                        <div class="col-md-6">
-                            <h5>Template Information</h5>
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th width="30%">Name</th>
-                                    <td>{{ $notificationTemplate->name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Title</th>
-                                    <td>{{ $notificationTemplate->title }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Description</th>
-                                    <td>{{ $notificationTemplate->description ?: 'No description' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Channel</th>
-                                    <td>
-                                        <span class="badge badge-{{ $notificationTemplate->channel == 'email' ? 'primary' : ($notificationTemplate->channel == 'whatsapp' ? 'success' : 'info') }}">
-                                            {{ ucfirst($notificationTemplate->channel) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @if($notificationTemplate->subject)
-                                <tr>
-                                    <th>Subject</th>
-                                    <td>{{ $notificationTemplate->subject }}</td>
-                                </tr>
-                                @endif
-                                <tr>
-                                    <th>Sender</th>
-                                    <td>{{ $notificationTemplate->sender ?: 'Default' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Status</th>
-                                    <td>
-                                        <span class="badge badge-{{ $notificationTemplate->is_active ? 'success' : 'secondary' }}">
-                                            {{ $notificationTemplate->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Version</th>
-                                    <td>v{{ $notificationTemplate->version }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Created By</th>
-                                    <td>{{ $notificationTemplate->creator->first_name_en ?? 'Unknown' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Created At</th>
-                                    <td>{{ $notificationTemplate->created_at->format('M d, Y H:i') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Updated At</th>
-                                    <td>{{ $notificationTemplate->updated_at->format('M d, Y H:i') }}</td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <!-- Variables -->
-                        <div class="col-md-6">
-                            <h5>Available Variables</h5>
-                            @if($notificationTemplate->variables && count($notificationTemplate->variables))
-                                <div class="alert alert-info">
-                                    <p><strong>Variables detected in this template:</strong></p>
-                                    @foreach($notificationTemplate->variables as $variable)
-                                        <span class="badge badge-light mr-1 mb-1">{{ '{' . '{' }} {{ $variable }} {{ '}' . '}' }}</span>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="alert alert-warning">
-                                    No variables detected in this template.
-                                </div>
-                            @endif
-
-                            @if($notificationTemplate->parentTemplate)
-                                <div class="alert alert-info">
-                                    <h6><i class="fas fa-code-branch"></i> Template History</h6>
-                                    <p>This template is based on: <strong>{{ $notificationTemplate->parentTemplate->name }}</strong></p>
-                                </div>
-                            @endif
-
-                            @if($notificationTemplate->childTemplates->count() > 0)
-                                <div class="alert alert-info">
-                                    <h6><i class="fas fa-sitemap"></i> Child Templates</h6>
-                                    <p>This template has {{ $notificationTemplate->childTemplates->count() }} child version(s):</p>
-                                    <ul class="list-unstyled">
-                                        @foreach($notificationTemplate->childTemplates as $child)
-                                            <li>
-                                                <a href="{{ route('notification-templates.show', $child) }}">
-                                                    {{ $child->name }} (v{{ $child->version }})
-                                                </a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Template Content -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h5>Template Content</h5>
-                            <div class="card">
-                                <div class="card-body">
-                                    <pre class="bg-light p-3" style="white-space: pre-wrap;">{{ $notificationTemplate->content }}</pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Preview Section -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title mb-0">Preview with Sample Data</h5>
-                                    <button type="button" class="btn btn-sm btn-info" id="refresh-preview">
-                                        <i class="fas fa-sync"></i> Refresh Preview
-                                    </button>
-                                </div>
-                                <div class="card-body">
-                                    <div id="preview-content" class="border p-3 bg-light">
-                                        <p class="text-muted">Loading preview...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    <button type="button" class="btn btn-success" id="test-send">
-                        <i class="fas fa-paper-plane"></i> Test Send
-                    </button>
-                    <button type="button" class="btn btn-info" onclick="cloneTemplate({{ $notificationTemplate->id }})">
-                        <i class="fas fa-copy"></i> Clone Template
-                    </button>
-                    <a href="{{ route('notification-templates.edit', $notificationTemplate) }}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Edit Template
-                    </a>
-                </div>
+              </div>
             </div>
+          </div>
         </div>
-    </div>
-</div>
-
-<!-- Test Send Modal -->
-<div class="modal fade" id="testSendModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Test Send Notification</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form id="test-send-form">
-                <div class="modal-body">
-                    <div class="form-group" id="test-email-group">
-                        <label for="test-email">Test Email Address</label>
-                        <input type="email" class="form-control" id="test-email" name="test_email">
-                    </div>
-                    <div class="form-group" id="test-phone-group" style="display: none;">
-                        <label for="test-phone">Test Phone Number</label>
-                        <input type="text" class="form-control" id="test-phone" name="test_phone">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Send Test</button>
-                </div>
-            </form>
+        
+        <!-- Actions -->
+        <div class="d-flex justify-content-between align-items-center mt-6">
+          <a href="{{ route('notification-templates.index') }}" class="btn btn-label-secondary">
+            <i class="ti ti-arrow-left me-1"></i>
+            {{ __('notification_templates.back') }}
+          </a>
+          
+          <div>
+            <button type="button" class="btn btn-outline-info me-2" onclick="cloneTemplate({{ $notificationTemplate->id }})">
+              <i class="ti ti-copy me-1"></i>
+              {{ __('notification_templates.clone') }}
+            </button>
+            
+            <button type="button" class="btn btn-outline-primary me-2" id="test-template-btn">
+              <i class="ti ti-send me-1"></i>
+              {{ __('notification_templates.test_send') }}
+            </button>
+            
+            <a href="{{ route('notification-templates.edit', $notificationTemplate) }}" class="btn btn-primary">
+              <i class="ti ti-edit me-1"></i>
+              {{ __('notification_templates.edit') }}
+            </a>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Clone Modal -->
-<div class="modal fade" id="cloneModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Clone Template</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form id="clone-form">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="clone-name">Template Name</label>
-                        <input type="text" class="form-control" id="clone-name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="clone-title">Template Title (optional)</label>
-                        <input type="text" class="form-control" id="clone-title" name="title">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Clone Template</button>
-                </div>
-            </form>
+<div class="modal fade" id="cloneModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ __('notification_templates.clone_template') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="clone-form">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label for="clone-name" class="form-label">{{ __('notification_templates.template_name') }}</label>
+            <input type="text" class="form-control" id="clone-name" name="name" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="clone-title" class="form-label">{{ __('notification_templates.template_title_optional') }}</label>
+            <input type="text" class="form-control" id="clone-title" name="title">
+          </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('notification_templates.cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ __('notification_templates.clone_template') }}</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-let templateId = {{ $notificationTemplate->id }};
-let templateChannel = '{{ $notificationTemplate->channel }}';
-
 $(document).ready(function() {
-    // Load initial preview
-    refreshPreview();
-
-    // Preview refresh
-    $('#refresh-preview').click(function() {
-        refreshPreview();
-    });
-
-    // Test send functionality
-    $('#test-send').click(function() {
-        updateTestSendModal(templateChannel);
-        $('#testSendModal').modal('show');
-    });
-
-    $('#test-send-form').submit(function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            test_email: $('#test-email').val(),
-            test_phone: $('#test-phone').val()
-        };
-        
-        $.post(`/admin/notification-templates/${templateId}/test-send`, formData)
-            .done(function(response) {
-                $('#testSendModal').modal('hide');
-                alert('Test notification sent successfully!');
-            })
-            .fail(function(xhr) {
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    alert('Error: ' + xhr.responseJSON.error);
-                } else {
-                    alert('Failed to send test notification');
-                }
-            });
-    });
+    loadVariables();
 });
 
-function refreshPreview() {
-    $('#preview-content').html('<p class="text-muted">Loading preview...</p>');
-    
-    $.get(`/admin/notification-templates/${templateId}/preview`)
-        .done(function(response) {
-            $('#preview-content').html(`
-                <div class="alert alert-success mb-3">
-                    <small><i class="fas fa-check-circle"></i> Preview rendered with sample data</small>
-                </div>
-                <div class="preview-content">${response.rendered_content.replace(/\n/g, '<br>')}</div>
-            `);
+function loadVariables() {
+    $.get('{{ route("notification-templates.variables") }}')
+        .done(function(variables) {
+            var newContainer = $('<div id="variables-container"></div>');
+            
+            Object.keys(variables).forEach(function(category) {
+                var categoryHeader = $('<h6 class="text-primary mb-2"></h6>').text(category.charAt(0).toUpperCase() + category.slice(1));
+                newContainer.append(categoryHeader);
+                
+                var variablesRow = $('<div class="mb-3"></div>');
+                
+                Object.keys(variables[category]).forEach(function(key) {
+                    var fullKey = category + '.' + key;
+                    var displayText = '{' + '{' + fullKey + '}' + '}';
+                    
+                    var variableSpan = $('<span class="badge bg-label-primary me-2 mb-1"></span>')
+                        .attr('title', variables[category][key])
+                        .text(displayText);
+                    
+                    variablesRow.append(variableSpan);
+                });
+                
+                newContainer.append(variablesRow);
+            });
+            
+            $('#variables-container').replaceWith(newContainer);
         })
         .fail(function() {
-            $('#preview-content').html('<p class="text-danger">Failed to load preview</p>');
+            $('#variables-container').html('<p class="text-danger">{{ __("notifications.variables_load_failed") }}</p>');
         });
-}
-
-function updateTestSendModal(channel) {
-    $('#test-email-group, #test-phone-group').hide();
-    
-    if (channel === 'email') {
-        $('#test-email-group').show();
-        $('#test-email').attr('required', true);
-        $('#test-phone').removeAttr('required');
-    } else if (channel === 'whatsapp') {
-        $('#test-phone-group').show();
-        $('#test-phone').attr('required', true);
-        $('#test-email').removeAttr('required');
-    } else {
-        $('#test-email, #test-phone').removeAttr('required');
-    }
 }
 
 function cloneTemplate(templateId) {
     $('#clone-form')[0].reset();
-    $('#cloneModal').modal('show');
+    new bootstrap.Modal(document.getElementById('cloneModal')).show();
     
     $('#clone-form').off('submit').on('submit', function(e) {
         e.preventDefault();
@@ -322,7 +342,7 @@ function cloneTemplate(templateId) {
         
         $.post(`/admin/notification-templates/${templateId}/clone`, formData)
             .done(function(response) {
-                $('#cloneModal').modal('hide');
+                bootstrap.Modal.getInstance(document.getElementById('cloneModal')).hide();
                 window.location.href = `/admin/notification-templates/${response.id}/edit`;
             })
             .fail(function(xhr) {
@@ -333,7 +353,7 @@ function cloneTemplate(templateId) {
                     });
                     alert(errorMsg);
                 } else {
-                    alert('Failed to clone template');
+                    alert('{{ __("notifications.clone_failed") }}');
                 }
             });
     });

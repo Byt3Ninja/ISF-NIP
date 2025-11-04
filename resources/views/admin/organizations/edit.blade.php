@@ -29,9 +29,9 @@
             <div class="col-md-12 mb-4">
               <div class="card">
                 <div class="card-header">
-                  <h4 class="card-title fw-bold pb-3 border-bottom text-capitalize">
+                  <h5 class="card-title fw-bold pb-3 border-bottom text-capitalize">
 										{{ __('admin.Edit organization') }}
-                  </h4>
+                  </h5>
                 </div>
                 <div class="card-content">
                   <div class="card-body">

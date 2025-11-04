@@ -399,85 +399,72 @@ class IndexController extends Controller
     public function reminderMentorShipRequest()
     {
         $l = app()->getLocale();
-        $data = [];
-        $schedules = MentorshipSchedule::get()->groupBy('organization_id');
-        $mentorshipRequests = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])->get();
+        $mentorshipRequests = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])->where('approved', 'Yes')->get();
+        
         foreach ($mentorshipRequests as $request) {
-            $orgId = $request->organization_id;
-            if (!$orgId || !isset($schedules[$orgId])) {
+            if (!$request->cycle) {
                 continue;
             }
-            foreach ($schedules[$orgId] as $schedule) {
-                    $hours = $schedule->value;
-                    $diffInHours = now()->diffInHours($request->zoom_date, false);
-
-                    if ($diffInHours > 0 && $diffInHours <= $hours) {
-                        $data['date']        = $request->zoom_date->format('Y-m-d H:i:s');
-                        $data['company_name']= $request->user->company->{'name_' . $l};
-                        $data['Mentorname']  = $request->mentor->first_name_en . " " . $request->mentor->last_name_en;
-                        $data['period']      = $request->period;
-                        $data['title']       = $request->title;
-                        $data['join_url']    = $request->join_url;
-                        $data['start_url']   = $request->start_url;
-
-                        if ($request->approved == 'No') {
-                            $data['status'] = 'Rejected';
-                        } elseif ($request->approved == 'Yes') {
-                            $data['status'] = 'Approved';
-                        } else {
-                            $data['status'] = 'Pending';
-                        }
-                        if ($request->mentor) {
-                            $request->mentor->notify(
-                                new MentorshipRequestNotification($data, 'Reminder')
-                            );
-                        }
-                        if ($request->user) {
-                            $request->user->notify(
-                                new MentorshipRequestNotification($data)
-                            );
-                        }
-                    }
+            $schedules = MentorshipSchedule::where('cycle_id', $request->cycle->id)->get();
+            foreach ($schedules as $schedule) {
+                $hours = $schedule->value; 
                 
-                if ($request->cycle && $request->cycle->is_active_Rminder == 1) {
-                    $status = 'sent';
-                } elseif ($request->cycle && $request->cycle->is_active_Rminder == 0) {
-                    $status = 'skipped';
-                } else {
-                    $status = 'failed';
-                }
-                $user = User::find($request->mentor_id);
-                $channel = [];
-                if ($user && $user->accept_whatsapp == 1) {
-                    $channel[] = 'whatsapp';
-                }
-                if ($user && $user->accept_email == 1) {
-                    $channel[] = 'email';
-                }
-                if ($user && $user->accept_pusher == 1) {
-                    $channel[] = 'in-app';
-                }
-                $channel = implode(',', $channel);
-                if ($request->mentor) {
-                    ReminderLog::create([
-                        'user_id'  => $user->id,
-                        'type'     => 'Mentor',
-                        'cycle_id' => $request->cycle->id ?? null,
-                        'channel'  => $channel,
-                        'status'   => $status
-                    ]);
-                }
-                if ($request->user) {
-                    ReminderLog::create([
-                        'user_id'  => $request->user->id,
-                        'type'     => 'User',
-                        'cycle_id' => $request->cycle->id ?? null,
-                        'channel'  => $channel,
-                        'status'   => $status
-                    ]);
+                $diffInHours = now()->diffInHours($request->zoom_date, false);
+               
+                if ($diffInHours > 0 && $diffInHours == $hours) {
+                    $data['date']         = $request->zoom_date->format('Y-m-d H:i:s');
+                    $data['company_name'] = $request->user->company->{'name_' . $l} ?? '';
+                    $data['Mentorname']   = $request->mentor?->first_name_en . " " . $request->mentor?->last_name_en;
+                    $data['period']       = $request->period;
+                    $data['title']        = $request->title;
+                    $data['join_url']     = $request->join_url;
+                    $data['start_url']    = $request->start_url;
+                    if ($request->approved == 'No') {
+                        $data['status'] = 'Rejected';
+                    } elseif ($request->approved == 'Yes') {
+                        $data['status'] = 'Approved';
+                    } else {
+                        $data['status'] = 'Pending';
+                    }
+                    if ($request->mentor) {
+                        $request->mentor->notify(
+                            new MentorshipRequestNotification($data, 'Reminder')
+                        );
+                    }
+                    if ($request->user) {
+                        $request->user->notify(
+                            new MentorshipRequestNotification($data)
+                        );
+                    }
+                    $status = ($request->cycle && $request->cycle->is_active_Rminder == 1) ? 'sent' : 'failed';
+                    $mentor = User::find($request->mentor_id);
+                    $channels = [];
+                    if ($mentor && $mentor->accept_whatsapp == 1) $channels[] = 'whatsapp';
+                    if ($mentor && $mentor->accept_email == 1) $channels[] = 'email';
+                    if ($mentor && $mentor->accept_pusher == 1) $channels[] = 'in-app';
+                    $channel = implode(',', $channels);
+                    if ($request->mentor) {
+                        ReminderLog::create([
+                            'user_id'  => $mentor->id,
+                            'type'     => 'Mentor',
+                            'cycle_id' => $request->cycle->id,
+                            'channel'  => $channel,
+                            'status'   => $status
+                        ]);
+                    }
+                    if ($request->user) {
+                        ReminderLog::create([
+                            'user_id'  => $request->user->id,
+                            'type'     => 'User',
+                            'cycle_id' => $request->cycle->id,
+                            'channel'  => $channel,
+                            'status'   => $status
+                        ]);
+                    }
                 }
             }
         }
+
 
         return response()->json(['state' => 'success'], 200);
     }

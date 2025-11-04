@@ -9,7 +9,7 @@
   <div class="col-12">
     <ul class="nav nav-pills">
       <li class="nav-item me-2">
-        <a class="nav-link" id="pitch-tab" data-bs-toggle="pill" href="#pitch-deck-content">{{ __('admin.Pitch_Deck') }}</a>
+        <a class="nav-link active" id="pitch-tab" data-bs-toggle="pill" href="#pitch-deck-content">{{ __('admin.Pitch_Deck') }}</a>
       </li>
       <li class="nav-item me-2">
         <a class="nav-link" id="pitch-tab" data-bs-toggle="pill" href="#pitch-deck-video-content">{{ __('admin.Pitch_Deck_Video') }}</a>
@@ -22,7 +22,7 @@
 
   <div id="pitch-tab-content" class="tab-content w-100">
     <!-- Pitch Deck Column -->
-    <div class="pitch-content tab-pane fade" id="pitch-deck-content">
+    <div class="pitch-content tab-pane fade show active" id="pitch-deck-content">
       <div class="col-12 mb-3">
         <form
           method="post"

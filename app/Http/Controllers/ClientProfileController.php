@@ -115,15 +115,17 @@ class ClientProfileController extends Controller
         $client = Auth::user();
         $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
 
-        if ($client->hasRole('Admin')) {
-            $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->where('status', 'pending')->get();
+        $globalRoles = ['Admin', 'Organization Manager'];
+
+        if ($client->hasAnyRole($globalRoles)) {
+            $mentorshipTasks = MentorshipTask::query()->orderByDesc('created_at')->get();
+        } elseif ($client->hasRole('Mentor')) {
+             $mentorshipTasks = MentorshipTask::where('mentor_id', $client->id)->orderByDesc('created_at')->get();
+        } elseif ($client->hasRole('Registered')) {
+            $companyId = optional($client->company)->id;
+            $mentorshipTasks = $companyId ? MentorshipTask::where('company_id', $companyId)->where('user_id', $client->id)->orderByDesc('created_at')->get() : collect();
         } else {
-            if ($client && $client->company) {
-                $companyId = $client->company->id;
-                $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
-            } else {
-                $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
-            }
+            $mentorshipTasks = collect();
         }
         $mentrequests = MentorshipRequest::where('mentor_id', Auth::user()->id);
         $mentrequests_count = $mentrequests->count();
@@ -167,6 +169,7 @@ class ClientProfileController extends Controller
     }
     public function update(UpdateClientProfileRequest $request)
     {
+      
         try {
             $first_name_ar = substr($request->first_name_en, 0, 250);
             $last_name_ar = substr($request->last_name_en, 0, 250);
@@ -261,8 +264,73 @@ class ClientProfileController extends Controller
                         ->notify(new ConfirmEmailUpdateNotification($verificationUrl));
                     return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
                 }
+            }
 
-
+            // Debug: Dump request data and company info
+            \Log::info('Full request data:', $request->all());
+            \Log::info('Current user ID: ' . $user->id);
+            \Log::info('Tech tags received:', ['tech_tags' => $request->tech_tags]);
+            
+            if ($request->has('tech_tags') && !empty($request->tech_tags)) {                
+                // If it's a string, try to decode it as JSON
+                if (is_string($techTags)) {
+                    $techTags = json_decode($techTags, true);
+                    \Log::info('Tech tags after JSON decode:', ['techTags' => $techTags]);
+                }
+                
+                // If we have a valid array of technologies
+                if (is_array($techTags) && !empty($techTags)) {
+                    \Log::info('Processing tech tags array:', $techTags);
+                    // Filter out any empty values and trim whitespace
+                    $technologies = array_filter(array_map('trim', $techTags));
+                    
+                    // Eager load the company relationship if not already loaded
+                    if (!$user->relationLoaded('company')) {
+                        $user->load('company');
+                    }
+                    
+                    // Update or create company with technologies
+                    if ($user->company) {
+                        // Log before update
+                        \Log::info('Current technologies_used in DB:', [
+                            'before' => $user->company->technologies_used,
+                            'will_update_to' => $technologies
+                        ]);
+                        
+                        // Force update to bypass any model events
+                        $updateResult = \DB::table('companies')
+                            ->where('id', $user->company->id)
+                            ->update(['technologies_used' => implode(',', $technologies)]);
+                            
+                        \Log::info('Direct DB update result:', ['success' => $updateResult]);
+                        
+                        // Refresh the company model
+                        $user->load('company');
+                        \Log::info('After update - technologies_used in DB:', [
+                            'after' => $user->company->technologies_used
+                        ]);
+                        $techString = implode(',', array_unique($technologies));
+                        \Log::info('Updating company with technologies:', ['company_id' => $user->company->id, 'technologies' => $techString]);
+                        $result = $user->company->update([
+                            'technologies_used' => $techString
+                        ]);
+                        \Log::info('Update result:', ['success' => $result]);
+                    } else {
+                        // If company doesn't exist, create it with the user_id
+                        $techString = implode(',', array_unique($technologies));
+                        \Log::info('Creating new company with technologies:', ['user_id' => $user->id, 'technologies' => $techString]);
+                        $company = new \App\Company([
+                            'user_id' => $user->id,
+                            'name_en' => $user->name,
+                            'technologies_used' => $techString
+                        ]);
+                        $result = $user->company()->save($company);
+                        \Log::info('Create company result:', ['success' => (bool)$result, 'company_id' => $company->id ?? null]);
+                    }
+                } else if ($user->company) {
+                    // If technologies_used is empty, clear the field
+                    $user->company->update(['technologies_used' => null]);
+                }
             }
 
             if ($result)
@@ -388,10 +456,12 @@ class ClientProfileController extends Controller
         $setting = Settings::where('id', 1)->first();
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
-        $ExpertiesSearch = $request->input('expertises');
+        $expertisesSearch = $request->input('expertises', []);
         $linkedin = $request->input('linkedin');
+        $programFilter = $request->input('programFilter');
+        $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($setting->mentor_list == 1) {
-            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')) {
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -405,19 +475,42 @@ class ClientProfileController extends Controller
                         })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
-                if (!empty($ExpertiesSearch)) {
-                    $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
-                    if ($expertiesMentor) {
-                        $expid = $expertiesMentor->id;
-                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
-                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                if (!empty($expertisesSearch) && is_array($expertisesSearch)) {
+                    $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expertisesSearch) {
+                        $query->whereIn('expertise_id', $expertisesSearch);
+                    });
+                }
+                // LinkedIn filter - All/Yes/No options
+                if ($linkedin !== null && $linkedin !== '') {
+                    if ($linkedin == '1') {
+                        // Yes - has LinkedIn profile
+                        $mentors = $mentors->whereHas('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
+                        });
+                    } elseif ($linkedin == '0') {
+                        // No - doesn't have LinkedIn profile
+                        $mentors = $mentors->whereDoesntHave('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
                         });
                     }
+                    // If linkedin is empty string (''), show all (no filter applied)
                 }
-                if (!empty($linkedin)) {
-                    $mentors = $mentors->whereHas('bio', function ($query) use ($linkedin) {
-                        $query->whereNotNull('linkedin');
+                // Program filter - filter by specific program/cycle
+                if (!empty($programFilter)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                        $query->where('cycle_id', $programFilter);
                     });
+                }
+                // Enrolled in program filter - All/Yes/No options
+                if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
+                    if ($enrolledInProgramFilter == '1') {
+                        // Yes - enrolled in at least one program
+                        $mentors = $mentors->has('mentorCycles');
+                    } elseif ($enrolledInProgramFilter == '0') {
+                        // No - not enrolled in any program
+                        $mentors = $mentors->doesntHave('mentorCycles');
+                    }
+                    // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
                 if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
                     $cycleId = Auth::user()->company->cycle;
@@ -428,13 +521,21 @@ class ClientProfileController extends Controller
                 }
 
                 $mentors = $mentors->get();
+
+                $cycles = [];
+
+                if (Auth::user()->organization_id) {
+                    $cycles = Cycle::where('organization_id', Auth::user()->organization_id)->get();
+                } else {
+                    $cycles = Cycle::all();
+                }
              
                 // $mentors = User::role('mentor')->get();
-                return view('admin/clients/Mentors', compact('mentors'));
+                return view('admin/clients/Mentors', compact('mentors', 'cycles'));
             }
         } else {
 
-            if (Auth::user()->hasanyRole('Admin')) {
+            if (Auth::user()->hasanyRole('Admin|OrganizationManager')) {
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
@@ -448,18 +549,56 @@ class ClientProfileController extends Controller
                         })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
-                if (!empty($ExpertiesSearch)) {
-                    $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
-                    if ($expertiesMentor) {
-                        $expid = $expertiesMentor->id;
-                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
-                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                if (!empty($expertisesSearch) && is_array($expertisesSearch)) {
+                    $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expertisesSearch) {
+                        $query->whereIn('expertise_id', $expertisesSearch);
+                    });
+                }
+                // LinkedIn filter - All/Yes/No options
+                if ($linkedin !== null && $linkedin !== '') {
+                    if ($linkedin == '1') {
+                        // Yes - has LinkedIn profile
+                        $mentors = $mentors->whereHas('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
+                        });
+                    } elseif ($linkedin == '0') {
+                        // No - doesn't have LinkedIn profile
+                        $mentors = $mentors->whereDoesntHave('bio', function ($query) {
+                            $query->whereNotNull('linkedin')->where('linkedin', '!=', '');
                         });
                     }
+                    // If linkedin is empty string (''), show all (no filter applied)
+                }
+                // Program filter - filter by specific program/cycle
+                if (!empty($programFilter)) {
+                   $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
+                    $query->when(!is_null($programFilter), function ($q) use ($programFilter) {
+                        $q->where('cycle_id', $programFilter);
+                     });
+                });
+                }
+                // Enrolled in program filter - All/Yes/No options
+                if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
+                    if ($enrolledInProgramFilter == '1') {
+                        // Yes - enrolled in at least one program
+                        $mentors = $mentors->has('mentorCycles');
+                    } elseif ($enrolledInProgramFilter == '0') {
+                        // No - not enrolled in any program
+                        $mentors = $mentors->doesntHave('mentorCycles');
+                    }
+                    // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
                 $mentors = $mentors->get();
+                
+                $cycles = [];
+                if (Auth::user()->organization_id) {
+                    $cycles = Cycle::where('organization_id', Auth::user()->organization_id)->get();
+                } else {
+                    $cycles = Cycle::all();
+                }
+                
                 // $mentors = User::role('mentor')->get();
-                return view('admin/clients/Mentors', compact('mentors'));
+                return view('admin/clients/Mentors', compact('mentors', 'cycles'));
             } else {
                 return redirect()->route('core.dashboard_view');
             }
@@ -698,29 +837,28 @@ class ClientProfileController extends Controller
     {
         try {
             $request->validate([
-                'accept_email' => 'boolean',
-                'accept_whatsapp' => 'boolean',
-                'accept_pusher' => 'boolean',
+                'accept_email' => 'sometimes|boolean',
+                'accept_whatsapp' => 'sometimes|boolean',
+                'accept_pusher' => 'sometimes|boolean',
             ]);
 
-            $settings = $request->only(['accept_email', 'accept_whatsapp', 'accept_pusher']);
-            
-            // Set defaults if not provided
-            $settings['accept_email'] = $settings['accept_email'] ?? true;
-            $settings['accept_whatsapp'] = $settings['accept_whatsapp'] ?? false;
-            $settings['accept_pusher'] = $settings['accept_pusher'] ?? false;
+            $settings = [
+                'accept_email' => filter_var($request->input('accept_email', auth()->user()->accept_email), FILTER_VALIDATE_BOOLEAN),
+                'accept_whatsapp' => filter_var($request->input('accept_whatsapp', auth()->user()->accept_whatsapp), FILTER_VALIDATE_BOOLEAN),
+                'accept_pusher' => filter_var($request->input('accept_pusher', auth()->user()->accept_pusher), FILTER_VALIDATE_BOOLEAN),
+            ];
 
             $updated = $this->notificationSettingsService->updateNotificationSettings($settings);
-            
+
             if ($updated) {
-                return redirect('/dashboard/myProfile')->with('success', 'Notification settings updated successfully');
+                return redirect()->back()->with('success', 'Notification settings updated successfully');
             }
 
-            return redirect('/dashboard/myProfile')->with('error', 'Failed to update notification settings');
+            return redirect()->back()->with('error', 'Failed to update notification settings');
 
         } catch (\Exception $e) {
             Log::channel('system_exceptions')->info('Exception updating notification settings:', [$e]);
-            return redirect('/dashboard/myProfile')->with('error', 'An error occurred while updating notification settings');
+            return redirect()->back()->with('error', 'An error occurred while updating notification settings');
         }
     }
 }

@@ -56,17 +56,15 @@ return [
         'trouble_clicking' => 'If you’re having trouble clicking the "Activate Your Account" button, copy and paste the URL below into your web browser: :link ',
         'if_trouble' => 'If you have trouble clicking the button, please copy and paste the URL below into your web browser:',
     ],
-
-    'mentorship_request_reminder' => [
-        'subject' => 'Mentorship Request Reminder',
-        'title' => 'Mentorship Request Reminder',
-        'dear' => 'Dear',
-        'in_body_1' => 'Reminder Your mentorship on ',
-        'in_body_2' => 'Link To Start ',
-        'in_body_3' => 'Link To Join ',
-        'in_body_4' => ' Status ',
-        'regards' => 'Best regards,',
-        'Mentorship_Request' => 'Mentorship Request',
+    'hackathon_email' => [
+        'subject' => ' Status of Hackathon Invitation ',
+        'title' => ' Status of Hackathon Invitation ',
+        'dear' => ' Dear',
+        'in_body_1' => ' Congratulations! Your hackathon invitation has been accepted.',
+        'in_body_2' => '  Sorry, your hackathon invitation has not been accepted.',
+        'in_body_4' => '  Your hackathon invitation has been cancelled.',
+        'in_body_3' => ' The Team ',
+        'regards' => ' Best regards،',
     ],
 
 ];

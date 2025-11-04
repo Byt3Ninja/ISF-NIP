@@ -31,7 +31,8 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <i class="ti ti-picture-in-picture-top text-primary"></i>
-              <span>{{ __('admin.Upcoming Sessions') }}</span><span class="fw-bold ms-1">{{ $cycle->mentorshipRequests()->count() }}</span>
+              
+              <span>{{ __('admin.Upcoming Sessions') }}</span><span class="fw-bold ms-1">{{ $cycle->mentorshipRequests()->where('zoom_date' , '>', now())->count() }}</span>
             </div>
             <div class="d-flex align-items-center gap-1">
               <i class="ti ti-archive text-primary"></i>

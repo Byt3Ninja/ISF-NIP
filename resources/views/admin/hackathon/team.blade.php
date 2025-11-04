@@ -139,6 +139,8 @@
               </button>
             </li>
             @endif
+            
+            @if(isset($team->todo_lists[0]) && $team->todo_lists[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
             @if(count($team->todo_lists) > 0)
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="tasks-tab" data-bs-toggle="pill" 
@@ -147,6 +149,7 @@
                 <i class="ti ti-checklist me-2"></i>{{ $l == 'ar' ? 'المهام' : 'Tasks' }} ({{ count($team->todo_lists) }})
               </button>
             </li>
+            @endif
             @endif
           </ul>
         </div>
@@ -440,6 +443,7 @@
         </div>
 
         {{-- Files Tab --}}
+        {{-- @if(isset($team->shared_files[0]) && $team->shared_files[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id) --}}
         @if(count($team->shared_files) > 0)
         <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
           <div class="row">
@@ -505,8 +509,11 @@
           </div>
         </div>
         @endif
+        
+        {{-- @endif --}}
 
         {{-- Tasks Tab --}}
+        @if(isset($team->todo_lists[0]) && $team->todo_lists[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
         @if(count($team->todo_lists) > 0)
         <div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
           <div class="row">
@@ -564,6 +571,7 @@
             @endforeach
           </div>
         </div>
+        @endif
         @endif
 
       </div> {{-- End tab content --}}

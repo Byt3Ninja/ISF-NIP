@@ -116,6 +116,22 @@ return [
     // 'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute format is invalid.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'linkedin_login_required' => 'Please choose LinkedIn login state.',
+    'linkedin_login_in'       => 'Invalid LinkedIn login state.',
+    'linkedin_client_id_required' => 'Please complete all LinkedIn configuration fields before saving.',
+    'linkedin_client_secret_required' => 'Please complete all LinkedIn configuration fields before saving.',
+    'linkedin_redirect_required' => 'Please complete all LinkedIn configuration fields before saving.',
+    'linkedin_redirect_invalid' => 'Please Enter a Valid Redirect URL.',
+
+    'google_login_required' => 'Please choose Google login state.',
+    'google_login_in'       => 'Invalid Google login state.',
+    'google_client_id_required' => 'Please complete all Google configuration fields before saving.',
+    'google_client_secret_required' => 'Please complete all Google configuration fields before saving.',
+    'google_redirect_required' => 'Please complete all Google configuration fields before saving.',
+    'google_redirect_invalid' => 'Please enter a valid Redirect URL.',
+
+    'settings_id_required' => 'Settings id is required.',
+    'settings_id_exists' => 'Settings record not found.',
 
     /*
     |--------------------------------------------------------------------------

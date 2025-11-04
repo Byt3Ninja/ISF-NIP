@@ -7,16 +7,6 @@
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-3 mb-6">
-      <h3 class="mb-0 fw-bold">{{ __('cycles.Services') }}</h3>
-      @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
-      <div class="invoice-create-btn">
-        <a href="{{ route('services.create') }}" class="btn btn-primary glow">
-          <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
-        </a>
-      </div>
-      @endif
-    </div>
     
     @if (session()->has('msg'))
     <div class="row mb-6">
@@ -29,18 +19,39 @@
       </div>
     </div>
     @endif
-
+    
     <div class="content-body">
       <section id="basic-datatable">
         <?php $index = 1; ?>
-
+        
         <div class="row">
           <div class="col-12">
             <div class="card">
+              <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
+                <h5 class="card-title mb-3 mb-md-0">{{ __('cycles.Services') }}</h5>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="dropdown">
+                    <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                      <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                      <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                    </ul>
+                  </div>
+                  @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
+                  <div class="invoice-create-btn">
+                    <a href="{{ route('services.create') }}" class="btn btn-primary glow">
+                      <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
+                    </a>
+                  </div>
+                  @endif
+                </div>
+              </div>
               <div class="card-content">
                 <div class="card-body">
                   <div class="table-responsive">
-                    <table class="table zero-configuration" id="organizations-list-datatable" style="font-size: 0.92rem;">
+                    <table class="table zero-configuration" id="services-table" style="font-size: 0.92rem;">
                       <thead class="table-light">
                         <tr>
                           <th>#</th>
@@ -118,7 +129,7 @@
                           </td>
                           <td class="text-center">
                             @if ($service->img_url)
-                            <img src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="img"
+                            <img class="rounded" src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="img"
                               style="width: 50px; height: 50px;">
                             @else
                             -
@@ -139,7 +150,7 @@
                                 <li>
                                   <a class="dropdown-item d-flex align-items-center"
                                     href="{{ route('services.edit', ['service' => $service->id]) }}">
-                                    <i class="ti ti-pencil me-1"></i> {{ __('Edit') }}
+                                    <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
                                   </a>
                                 </li>
                                 @endif
@@ -191,52 +202,35 @@
 @section('scripts')
 <script type="text/javascript">
   $(document).ready(function() {
+      const isArabic = "{{ $l }}" === 'ar';
       // Initialize DataTable
-      $('#organizations-list-datatable').DataTable({
+      const table = $('#services-table').DataTable({
         responsive: true,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-        language: {
-          @if($l == 'ar')
-          "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
-          @else
-          "search": "{{ __('admin.Search') }}:",
-          "lengthMenu": "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
-          "info": "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
-          "infoEmpty": "{{ __('admin.no_entries_available') }}",
-          "infoFiltered": "({{ __('admin.filtered from') }} _MAX_ {{ __('admin.total entries') }})",
-          "paginate": {
-            "first": "{{ __('admin.First') }}",
-            "last": "{{ __('admin.Last') }}",
-            "next": "{{ __('admin.Next') }}",
-            "previous": "{{ __('admin.Previous') }}"
-          },
-          "emptyTable": "{{ __('admin.No_data_available_in_table') }}",
-          "zeroRecords": "{{ __('admin.No_matching_records_found') }}"
-          @endif
-        },
+        language: isArabic ? { url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json' } : {},
         dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
         displayLength: 10,
         lengthMenu: [10, 25, 50, 75, 100],
-        order: [[0, 'desc']],
-        columnDefs: [
+        order: [[6, 'desc']],
+        columnDefs: [{ orderable: false, targets: [0, 7] }],
+        buttons: [
           {
-            targets: [5], // Actions column
-            orderable: false,
-            searchable: false
-          }
-        ]
+            extend: 'excel',
+            title: isArabic ? 'الخدمات' : 'Services',
+            exportOptions: { columns: [0, 1, 2, 3, 4, 6] }
+          },
+          {
+            extend: 'csv',
+            title: isArabic ? 'الخدمات' : 'Services',
+            exportOptions: { columns: [0, 1, 2, 3, 4, 6] }
+          },
+        ],
       });
 
-      // Type filter functionality
-      $('.Type').change(function () {
-        var selectedGroup = $(this).val();
-        const url = new URL(window.location.origin + window.location.pathname);
-        if (selectedGroup !== 'all') {
-          url.searchParams.set('search', selectedGroup);
-        }
-        window.location.href = url.toString();
-      });
+      // Export button handlers
+      $('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
+      $('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
 
       // Handle delete action
       $(document).on("click", ".delete-service-action", function (e) {
@@ -263,27 +257,17 @@
           if (result.value) {
             $.post(url, {'_method': 'DELETE' , '_token': token},
               function(response) {
-                Swal.fire({
-                  icon: 'success',
+                releaseSuccessAlert({
                   title: "{{ __('admin.Deleted') }}!",
-                  html: "{{ __('admin.DeletedSuccessfully') }}.",
-                  showCancelButton: false,
-                  showConfirmButton: true,
-                  confirmButtonText: "{{ __('admin.OK') }}",
-                  customClass: {
-                      confirmButton: 'btn btn-primary',
-                  },
-                  buttonsStyling: false,
+                  message: "{{ __('admin.DeletedSuccessfully') }}.",
                 });
                 // Remove the row from DataTable if still on same page
-                $('#organizations-list-datatable').DataTable().row($(e.target).closest('tr')).remove().draw();
+                $('#services-table').DataTable().row($(e.target).closest('tr')).remove().draw();
               }
             ).fail(function(error) { 
-              console.log(error);
-              Swal.fire({
-                icon: 'error',
+              releaseFailureAlert({
                 title: "{{ __('admin.Error') }}!",
-                text: "{{ __('admin.SomethingWentWrong') }}",
+								message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
             });
           }

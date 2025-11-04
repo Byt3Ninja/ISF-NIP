@@ -438,10 +438,20 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   @endif
                   
                   @if($leaderOrnot->count() > 0)
-                  <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal">
-                    <i class="ti ti-edit me-1"></i>
-                    {{ $l == 'en' ? 'Edit Team Info' : 'تعديل معلومات الفريق' }}
-                  </button>
+                    @if (app()->environment('local', 'dev', 'test'))
+                      <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
+                        <div class="modal-body">
+                          @csrf
+                          <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+                          </div>
+                          <button type="submit" class="btn btn-sm btn-danger"><i class="ti ti-trash me-1"></i>{{ $l == 'en' ? 'Delete Team' : 'حذف الفريق' }}</button>
+                      </form>
+                    @endif
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal">
+                      <i class="ti ti-edit me-1"></i>
+                      {{ $l == 'en' ? 'Edit Team Info' : 'تعديل معلومات الفريق' }}
+                    </button>
+                  
                   @endif
                   <a 
                     href="/dashboard/hackathon/team/{{ $team_Formation_raw->first()->tf_id }}"
@@ -703,6 +713,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      
       <form method="POST" action="/dashboard/hackathon/EditTeamInfo" id="editTeamInfoForm" enctype="multipart/form-data">
         <div class="modal-body">
           @csrf
@@ -1049,7 +1060,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           <div class="mb-3">
             <label for="fileInput" class="form-label">{{ $l == 'en' ? 'Choose File' : 'اختر ملف' }}</label>
             <input class="form-control" name="file" type="file" id="fileInput" required>
-            <div class="form-text">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+            <div class="invalid-feedback file-err" style="display: none;">{{ $l == 'en' ? 'Please select a file to upload.' : 'يرجى اختيار ملف للرفع.' }}</div>
+            <div class="invalid-feedback file-size-err" style="display: none;">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
+            <div class="invalid-feedback file-type-err" style="display: none;">{{ $l == 'en' ? 'Allowed: PDF, DOCX, PPTX, ZIP' : 'المسموح: PDF, DOCX, PPTX, ZIP' }}</div>
           </div>
           <div class="mb-3">
             <label for="fileDescription" class="form-label">
@@ -1183,21 +1196,20 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <input type="text" class="form-control" name="title" id="EtaskTitle" required>
           </div>
         
-            
+            {{-- @dd($team_Formation_leader ) --}}
             <div class="mb-3">
               <label for="EtaskAssignee" class="form-label">{{ $l == 'en' ? 'Assignee' : 'المسؤول' }}</label>
               <select class="form-select" id="EtaskAssignee" name="assignee" required>
                 <option value="">{{ $l == 'en' ? 'Select assignee...' : 'اختر المسؤول...' }}</option>
-                <option value="You">{{ $l == 'en' ? 'You' : 'أنت' }}</option>
-                @if($team_Formation_leader)
-                @if(isset($team_members))
+                <option value="You" >{{ $l == 'en' ? 'You' : 'أنت' }}</option>
+                @if(isset($team_Formation_leader) && !empty($team_members))
                   @foreach($team_members as $member)
-                    <option value="{{ $member->tm_id }}" >
-                      {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
-                    </option>
+                      <option value="{{ $member->tm_id }}"
+                          {{ $member->tm_id == $team_Formation_leader->tf_user_id ? 'selected' : '' }}>
+                          {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
+                      </option>
                   @endforeach
-                @endif
-                @endif
+              @endif
               </select>
             </div>
 
@@ -1600,19 +1612,10 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               $('#member-count').text(currentCount - 1);
             });
           }).fail(function(error) { 
-            console.log(error);
-            Swal.fire({
-              icon: 'error',
-              title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.DeleteFailed') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
-            });
+            releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							message: error?.message || "{{ __('admin.DeleteFailed') }}",
+						});
           });
       }
     });
@@ -1654,17 +1657,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             });
           }).fail(function(error) { 
             console.log(error);
-            Swal.fire({
-              icon: 'error',
+            releaseFailureAlert({
               title: "{{ __('admin.Error') }}!",
-              text: "{{ __('admin.CancelFailed') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: error?.message || "{{ __('admin.CancelFailed') }}",
             });
           });
       }
@@ -1915,156 +1910,141 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
     const l = '{{ $l }}'; // "en" or "ar"
 
-    if (fileInput && fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-
-      // Build FormData
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('description', fileDescription);
-
-      // URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const hackathonId = urlParams.get('hackathonId') || '1';
-      const teamId = urlParams.get('teamId') || '123';
-      formData.append('hackathon_id', hackathonId);
-      formData.append('team_id', teamId);
-
-      // Add CSRF token
-      formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
-
-      // // Show loading
-      // Swal.fire({
-      //   title: l === 'en' ? "Uploading..." : "جاري الرفع...",
-      //   text: l === 'en' ? "Please wait while we upload your file." : "يرجى الانتظار أثناء رفع الملف.",
-      //   allowOutsideClick: false,
-      //   didOpen: () => {
-      //     Swal.showLoading();
-      //   },
-      //   showCancelButton: false,
-      //   showConfirmButton: true,
-      //   buttonsStyling: false,
-      // });
-
-      // Helper function to choose icon
-      const getIconClass = (name) => {
-        if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
-        if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
-        if (name.endsWith('.docx')) return 'ti-file-text text-info';
-        if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
-        if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
-        return 'ti-file-text';
-      };
-
-      const createListItem = (file) => {
-        const fileList = document.getElementById('fileList');
-        if (!fileList) return;
-        const newItem = document.createElement('li');
-        newItem.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2 file-list-item';
-
-        const iconClass = getIconClass(file.name);
-        const uploadedByText = l === 'en' ? 'by You' : 'بواسطة أنت';
-
-        newItem.innerHTML = `
-          <div class="d-flex align-items-center">
-            <i class="ti ${iconClass} me-2"></i>
-            <div>
-              <div class="small fw-medium">${file.name}</div>
-              <div class="text-muted small">${(file.size / 1024).toFixed(1)}KB - ${uploadedByText}</div>
-            </div>
-          </div>
-          <div class="btn-group btn-group-sm">
-            <a href="#" class="btn btn-outline-primary btn-sm" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}">
-              <i class="ti ti-download"></i>
-            </a>
-            <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}">
-              <i class="ti ti-trash"></i>
-            </button>
-          </div>`;
-        fileList.prepend(newItem);
-      };
-
-      // Send request to the route
-      fetch('/dashboard/hackathon/addSharedFile', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
-            text: data.message,
-            confirmButtonText: l === 'en' ? "OK" : "موافق",
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-          });
-          createListItem(file);
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: l === 'en' ? "Error" : "خطأ",
-            text: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
-            confirmButtonText: l === 'en' ? "OK" : "موافق",
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Upload error:', error);
-        Swal.fire({
-          icon: 'error',
-          title: l === 'en' ? "Error" : "خطأ",
-          text: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
-          confirmButtonText: l === 'en' ? "OK" : "موافق",
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-        });
-      })
-      .finally(() => {
-        const uploadModalEl = document.getElementById('uploadFileModal');
-        const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
-        if (uploadModal) uploadModal.hide();
-
-        const form = document.getElementById('fileUploadForm');
-        if (form && typeof form.reset === 'function') form.reset();
-      });
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
-        text: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
-        confirmButtonText: l === 'en' ? "OK" : "موافق",
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
-      });
+    if (!fileInput || fileInput.files.length === 0) {
+      fileInput.classList.add('is-invalid');
+      $('.file-err').show();
+      $('.file-type-err').hide(); // Hide other errors if no file is selected
+      $('.file-size-err').hide();
+      return; // Exit the function immediately
     }
+    
+    const file = fileInput.files[0];
+
+    // Allowed file types
+    const allowedTypes = [
+      'application/pdf', 
+      'application/zip',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   // docx
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      fileInput.classList.add('is-invalid');
+      $('.file-type-err').show();
+      $('.file-err').hide(); // Hide other errors
+      $('.file-size-err').hide();
+      return; // Exit the function immediately
+    }
+
+    // Max size: 10 MB
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      fileInput.classList.add('is-invalid');
+      $('.file-size-err').show();
+      $('.file-err').hide(); // Hide other errors
+      $('.file-type-err').hide();
+      return; // Exit the function immediately
+    }
+
+    // Reset error messages if all checks pass
+    fileInput.classList.remove('is-invalid');
+    $('.file-err').hide();
+    $('.file-type-err').hide();
+    $('.file-size-err').hide();
+
+    // Build FormData
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('description', fileDescription);
+
+    // URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const hackathonId = urlParams.get('hackathonId') || '1';
+    const teamId = urlParams.get('teamId') || '123';
+    formData.append('hackathon_id', hackathonId);
+    formData.append('team_id', teamId);
+
+    // Add CSRF token
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+
+    // Helper function to choose icon
+    const getIconClass = (name) => {
+      if (name.endsWith('.zip')) return 'ti-file-zip text-warning';
+      if (name.endsWith('.pptx')) return 'ti-file-type-ppt text-danger';
+      if (name.endsWith('.docx')) return 'ti-file-text text-info';
+      if (name.endsWith('.pdf')) return 'ti-file-type-pdf text-danger';
+      if (name.match(/\.(jpe?g|png)$/i)) return 'ti-photo text-success';
+      return 'ti-file-text';
+    };
+
+    const createListItem = (file) => {
+      const fileList = document.getElementById('fileList');
+      if (!fileList) return;
+      const newItem = document.createElement('li');
+      newItem.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2 file-list-item';
+
+      const iconClass = getIconClass(file.name);
+      const uploadedByText = l === 'en' ? 'by You' : 'بواسطة أنت';
+
+      newItem.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="ti ${iconClass} me-2"></i>
+          <div>
+            <div class="small fw-medium">${file.name}</div>
+            <div class="text-muted small">${(file.size / 1024).toFixed(1)}KB - ${uploadedByText}</div>
+          </div>
+        </div>
+        <div class="btn-group btn-group-sm">
+          <a href="#" class="btn btn-outline-primary btn-sm" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}">
+            <i class="ti ti-download"></i>
+          </a>
+          <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>`;
+      fileList.prepend(newItem);
+    };
+
+    // Send request to the route
+    fetch('/dashboard/hackathon/addSharedFile', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        releaseSuccessAlert({
+          title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
+          message: l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح.",
+        });
+        createListItem(file);
+      } else {
+        releaseFailureAlert({
+          title: l === 'en' ? "Error" : "خطأ",
+          message: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+        });
+      }
+    })
+    .catch(error => {
+      releaseFailureAlert({
+        title: l === 'en' ? "Error" : "خطأ",
+        message: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+      });
+    })
+    .finally(() => {
+      const uploadModalEl = document.getElementById('uploadFileModal');
+      const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
+      if (uploadModal) uploadModal.hide();
+
+      const form = document.getElementById('fileUploadForm');
+      if (form && typeof form.reset === 'function') form.reset();
+    });
+ 
+   
   }
 
   function deleteFile(buttonElement, fileId) {
@@ -2271,9 +2251,15 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     console.log('editTask called with:',taskAssigneeId);
     
     try {
+      let currentUserId = {{ auth()->user()->id }};
+      if (taskAssigneeId == currentUserId) {
+          document.getElementById('EtaskAssignee').value = 'You';
+      } else {
+          document.getElementById('EtaskAssignee').value = taskAssigneeId || '';
+      }
       // Pre-fill the modal with existing task data
       document.getElementById('EtaskTitle').value = taskTitle;
-      document.getElementById('EtaskAssignee').value = taskAssigneeId || 'You';
+      // document.getElementById('EtaskAssignee').valsue = taskAssigneeId || 'You';
       document.getElementById('EtaskDueDate').value = taskDueDate || '';
       document.getElementById('EtaskDescription').value = taskDescription || '';
       document.getElementById('EtaskStatus').value = taskStatus || 'todo';

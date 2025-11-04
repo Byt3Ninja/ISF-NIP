@@ -1,7 +1,7 @@
 <div class="text-center hackathon-banner">
 <div class="banner-content">
   <div class="hackathon-status-badge">
-    {{ $l == 'en' ? $currentHackathon['status'] : $currentHackathon['status'] }}
+    {{ $currentHackathon['status'] == 'Finished' ? __('cycles.Completed') : $currentHackathon['status'] }}
   </div>
   <h1 class="display-5 fw-bold" id="hackathon-main-title">
     {{ $l == 'en' ? $currentHackathon['title'] : $currentHackathon['title'] }}

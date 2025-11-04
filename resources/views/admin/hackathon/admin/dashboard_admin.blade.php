@@ -123,7 +123,6 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
               </tr>
             </thead>
             <tbody>
-              <!-- This is example data, should be populated from a loop in a real application -->
               @foreach ($data['all_teams'] as $team)
               <tr>
                 <td>{{ $team->name }}</td>
@@ -133,19 +132,22 @@ $teamsStatusPieData = [$completedTeamCount, $uncompletedTeamCount]; // Result: [
                 <td>{{ $team->count_members }} / {{ $team->max_count_members }}</td>
                 <td>{{ $team->created_at }}</td>
                 <td>
-                  <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
-                    data-team-id="{{ $team->id }}"><i class="bi bi-eye-fill me-2"></i> {{ __('admin.details')
-                    }}</button>
+                  <button class="btn btn-icon btn-sm btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#teamDetailsModal"
+                    data-team-id="{{ $team->id }}">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                  @php $leader_id = $team->members->where('is_leader', 1)->first()->id; @endphp
+                  <button class="btn btn-icon btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#sendMessageModal"
+                    data-team-id="{{ $leader_id }}" data-team-leader="{{ $team->user_name }}">
+                    <i class="bi bi-envelope-fill"></i>
+                  </button>
 
-                  {{-- <button class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-fill me-2"></i> {{
-                    __('admin.message') }}</button> --}}
                 </td>
               </tr>
               @endforeach
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
 
@@ -833,6 +835,38 @@ $mentorsLists = showMintors($request);
   </div>
 </div>
 
+<!-- Send Message Modal -->
+<div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sendMessageModalLabel">
+          {{ $l == 'en' ? 'Send message to team leader' : 'إرسال رسالة إلى قائد الفريق' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="sendMessageForm">
+          <div class="mb-3">
+            <label for="messageSubject" class="form-label">{{ $l == 'en' ? 'Subject' : 'الموضوع' }}</label>
+            <input type="text" class="form-control" id="messageSubject" name="subject" placeholder="{{ $l == 'en' ? 'Enter subject' : 'أدخل الموضوع' }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="messageContent" class="form-label">{{ $l == 'en' ? 'Message' : 'الرسالة' }}</label>
+            <textarea class="form-control" id="messageContent" name="message" rows="5" placeholder="{{ $l == 'en' ? 'Enter your message' : 'أدخل رسالتك' }}" required></textarea>
+          </div>
+          <input type="hidden" id="recipientId" name="recipient_id">
+
+          <div class="d-flex justify-content-end items-center gap-3 mt-6">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.cancel') }}</button>
+            <button type="submit" class="btn btn-primary w-px-150">{{ __('admin.Send_Message') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 @php
 $teamsJson = $data['all_teams']->map(function($team) {
   return [
@@ -1121,5 +1155,70 @@ $teamsJson = $data['all_teams']->map(function($team) {
         }
     });
 });
+
+
+  // Send Message Modal Logic
+  $(document).ready(function() {
+    $('#sendMessageModal').on('show.bs.modal', function(event) {
+      var button = $(event.relatedTarget); // Button that triggered the modal
+      var teamLeader = button.data('team-leader'); // Extract info from data-* attributes
+      var recipientId = button.data('team-id');
+
+      var modal = $(this);
+      modal.find('.modal-title').text('{{ $l == 'ar' ? 'إرسال رسالة إلى' : 'Send Message to' }} ' + teamLeader);
+
+      // Clear previous message/subject if needed
+      modal.find('#messageSubject').val('');
+      modal.find('#messageContent').val('');
+      modal.find('#recipientId').val(recipientId); // Set recipient ID in hidden input
+    });
+
+    // Handle send message form submission
+    $('#sendMessageForm').on('submit', function(event) {
+      event.preventDefault(); // Prevent default form submission
+
+      var form = $(this);
+      var formSubmitButton = form.find('button[type="submit"]');
+
+      var originalButtonText = formSubmitButton.text(); // Store original text
+      var subject = form.find('#messageSubject').val();
+      var message = form.find('#messageContent').val();
+      var recipientId = form.find('#recipientId').val();
+
+      // Set pending state
+      formSubmitButton.prop('disabled', true);
+      formSubmitButton.text('{{ $l == 'en' ? 'Sending...' : 'جاري الإرسال...' }}');
+
+      $.ajax({
+        url: '/dashboard/sendteammessage',
+        type: 'POST',
+        data: {
+          subject: subject,
+          message: message,
+          receiver: recipientId,
+          _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+          console.log('response:', response);
+          if (response.success) {
+            // Global success alert function
+            releaseSuccessAlert({message: '{{ $l == 'en' ? 'Message sent successfully' : 'تم إرسال الرسالة بنجاح' }}'});
+            $('#sendMessageModal').modal('hide'); // Hide the modal on success
+          } else {
+            // Global error alert function
+            releaseErrorAlert({message: response.message || '{{ $l == 'en' ? 'Failed to send message' : 'فشل في إرسال الرسالة' }}'});
+          }
+        },
+        error: function(xhr, status, error) {
+          releaseErrorAlert({message: '{{ $l == 'en' ? 'An error occurred while sending the message' : 'حدث خطأ أثناء إرسال الرسالة' }}'});
+        },
+        complete: function() {
+          // This function runs regardless of success or error
+          formSubmitButton.prop('disabled', false); // Re-enable the button
+          formSubmitButton.text(originalButtonText); // Restore original text
+        }
+      });
+    });
+  });
 </script>
 @stop

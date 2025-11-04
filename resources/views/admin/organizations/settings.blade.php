@@ -3,15 +3,13 @@
 @section('style')
   <link rel="stylesheet" href="/css/whatsapp-auth.css" />
   <style>
-     .custom-container {
-      width: 100%;
+    /* Mobile first - full width */
+    .nav-tabs-shadow {
+      box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.15);
+      border-radius: 0.375rem;
     }
-
-    @media screen and (min-width: 768px) {
-      .custom-container {
-        width: 75%;
-      }
-    }
+    
+    /* No custom container styles needed - using Bootstrap grid */
   </style>
 @stop
 
@@ -24,8 +22,7 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
-    ['Schedule', 'ti-brand-slack', __('admin.Schedule')],
-    ['ReminderLogs', 'ti-alarm', __('admin.ReminderLogs')],
+    // ['Schedule', 'ti-calendar-bolt', __('admin.Schedule')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
   })->toArray();
@@ -66,67 +63,65 @@
         </ul>
       </div>
       <!-- / Tabs (mobile) -->
-      <div class="d-flex justify-content-start w-100 mb-6">
-        <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
-          style="height: 500px; min-width: 18%; max-width: 18%;">
-          <!-- Tabs -->
-          <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
-            @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
-                <a href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
-                  data-bs-toggle="tab" role="tab">
-                  <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
-                  {{ $tab['label'] }}
-                </a>
-              </li>
-            @endforeach
-          </ul>
-          <!-- / Tabs -->
-        </nav>
-        <!-- Tab Content On Tab Click -->
-        <div class="tab-content p-0 overflow-y-auto custom-container mb-6" 
-          style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
-        >
-          @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6"
-              id="navs-left-{{ $tab['target'] }}">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
-                </div>
-                <div class="card-body">
-                  @switch($tab['target'])
-                    @case('general')
-                      @include('admin.organizations.partials.general')
-                      @break
-                    @case('MeetingTab')
-                      @include('admin.organizations.partials.meeting')
-                      @break
-                    @case('SocialMediaLinks')
-                      @include('admin.organizations.partials.social-links')
-                      @break
-
-                    @case('teamMembers')
-                      @include('admin.organizations.partials.team-members')
-                      @break
-                    @case('WhatsApp')
-                      @include('partials.forms.whatsapp-settings-form')
-                      @break
+      <div class="row mb-6">
+        <!-- Sidebar for desktop -->
+        <div class="col-md-3 d-none d-md-block">
+          <nav class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-sticky w-100" 
+               style="top: 1rem;">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs nav-fill border-none m-auto w-100" role="tablist">
+              @foreach ($tabs as $key => $tab)
+                <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
+                  <a href="#navs-left-{{ $tab['target'] }}"
+                    class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+                    data-bs-toggle="tab" role="tab">
+                    <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
+                    {{ $tab['label'] }}
+                  </a>
+                </li>
+              @endforeach
+            </ul>
+            <!-- / Tabs -->
+          </nav>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="col-md-9">
+          <div class="tab-content p-0 overflow-y-auto mb-6">
+            @foreach ($tabs as $index => $tab)
+              <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6"
+                id="navs-left-{{ $tab['target'] }}">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
+                  </div>
+                  <div class="card-body">
+                    @switch($tab['target'])
+                      @case('general')
+                        @include('admin.organizations.partials.general')
+                        @break
+                      @case('MeetingTab')
+                        @include('admin.organizations.partials.meeting')
+                        @break
+                      @case('SocialMediaLinks')
+                        @include('admin.organizations.partials.social-links')
+                        @break
+                      @case('teamMembers')
+                        @include('admin.organizations.partials.team-members')
+                        @break
+                      @case('WhatsApp')
+                        @include('partials.forms.whatsapp-settings-form')
+                        @break
                       @case('Schedule')
-                      @include('partials.forms.schedule')
-                      @break
-                      @case('ReminderLogs')
-                      @include('admin.organizations.partials.ReminderLogs')
-                      @break
-                  @endswitch
+                        @include('partials.forms.schedule')
+                        @break
+                    @endswitch
+                  </div>
                 </div>
               </div>
-            </div>
-          @endforeach
+            @endforeach
+          </div>
         </div>
-        <!-- / Tab Content On Tab Click -->
       </div>
     </div>
     <!-- / Content -->
@@ -136,58 +131,6 @@
 
 @section('pagescripts')
 <script>
-  $(document).ready(function() {
-   $('#addSchedule').click(function() {
-        let value = $('#value').val();
-        let unit = $('#unit').val();
-
-      $.ajax({
-          url: "{{ route('mentorship.schedule_store') }}",
-          type: "POST",
-          data: {
-              value: value,
-              unit: unit,
-              _token: "{{ csrf_token() }}" // مهم جداً في POST
-          },
-          success: function(response) {
-              alert('Schedule saved successfully');
-              console.log(response);
-          },
-          error: function(xhr) {
-              console.error(xhr.responseText);
-              alert('Error while saving schedule');
-          }
-        });
-      });
-
-       $(document).on('change', '.toggle-active', function() {
-          let id = $(this).data('id');
-          let is_active = $(this).is(':checked') ? 1 : 0;
-          let value = $(this).data('value');
-          let unit = $(this).data('unit');
-
-          $.ajax({
-              url: "{{ route('mentorship.schedule_update') }}",
-              type: "POST",
-              data: {
-                  _token: "{{ csrf_token() }}",
-                  id: id,
-                  is_active: is_active,
-                  value: value,
-                  unit: unit
-              },
-              success: function(response) {
-                  console.log("Updated:", response);
-              },
-              error: function(xhr) {
-                  alert("Error updating status");
-                  console.error(xhr.responseText);
-              }
-          });
-      });
-
-    });
-
 class WhatsAppAuthenticator {
   constructor() {
     this.pollingInterval = 3000; // 3 seconds

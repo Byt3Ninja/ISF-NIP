@@ -70,7 +70,7 @@
             @endforeach
           </select>
         </div>
-        <div class="col-md-12 col-12 mb-6">
+        {{-- <div class="col-md-12 col-12 mb-6">
           <label class="form-label fs-6 fw-semibold mb-2" for="sector">{{ __('admin.Sector') }} *</label>
           <select class="form-select select2" id="selectsector" name="sector" required onchange="ssector(this.options[this.selectedIndex].value)">
             @foreach ($sectors as $sector_group)
@@ -83,7 +83,7 @@
               </optgroup>
             @endforeach
           </select>
-        </div>
+        </div> --}}
         <div class="mb-3">
           <label class="form-label fs-6 fw-semibold mb-2" for="categories">{{ __('admin.Categories') }} *</label>
           <div class="row">
@@ -141,7 +141,8 @@
           </select>
         </div>
         <div class="row ShowCreatedTax mb-3" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}">
-          <div class="col-md-4 col-12 mb-3">
+          <!-- Country of Company Registration -->
+          <div class="col-12 mb-4">
             <label class="form-label fs-6 fw-semibold mb-2" for="Country_Register">{{ __('admin.Country_Register') }}</label>
             <select class="form-select select2 Country_Register" id="Country_Register" name="Country_Register"
               data-placeholder="{{ __('admin.Country') }}"
@@ -154,15 +155,116 @@
               @endforeach
             </select>
           </div>
-          <div class="col-md-4 col-12 mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2" for="Commercial_Register">{{ __('admin.Commercial_Register') }} *</label>
-            <input class="form-control Commercial_Register" id="Commercial_Register" name="Commercial_Register" type="text" value="{{ $client->company ? $client->company->Commercial_Register : old('Commercial_Register') }}" style="direction: rtl;" placeholder="{{ __('admin.Commercial_Register') }} *" autocomplete="Commercial_Register">
+
+          <!-- Company Register Attachment -->
+          <div class="col-12 mb-4">
+            <label class="form-label fs-6 fw-semibold mb-2" for="Commercial_Register">
+              {{ __('admin.Commercial_Register') }} *
+            </label>
+
+            <input 
+              class="form-control Commercial_Register" 
+              id="Commercial_Register" 
+              name="Commercial_Register" 
+              type="file"
+              placeholder="{{ __('admin.Commercial_Register') }} *"
+            />
+            
+
+            <input type="hidden" name="Commercial_Register_value" value="{{ $client->company ? $client->company->Commercial_Register : '' }}">
+
+            @if ($client->company && $client->company->Commercial_Register)
+              <div class="mt-2 d-flex align-items-center gap-2">
+                @php
+                  $fileUrl = $client->company->Commercial_Register;
+                  $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                @endphp
+
+                @if (in_array($extension, ['jpg','jpeg','png']))
+                  <a href="{{ $fileUrl }}" target="_blank">
+                    <i class="ti ti-photo text-secondary fs-5"></i>
+                  </a>
+                @elseif ($extension === 'pdf')
+                  <a href="{{ $fileUrl }}" target="_blank" class="d-flex align-items-center">
+                    <i class="ti ti-file-type-pdf text-danger fs-5"></i>
+                  </a>
+                @else
+                  <a href="{{ $fileUrl }}" target="_blank" class="d-flex align-items-center">
+                    <i class="ti ti-file text-secondary fs-5"></i>
+                  </a>
+                @endif
+
+                <a 
+                  class="badge bg-label-secondary" 
+                  href="{{ $fileUrl }}" 
+                  target="_blank"
+                >
+                  {{ basename($fileUrl) }}
+                </a>
+              </div>
+            @endif
           </div>
-          <div class="col-md-4 col-12 mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2" for="Tax_Card">{{ __('admin.Tax_Card') }} *</label>
-            <input class="form-control Tax_Card" id="Tax_Card" name="Tax_Card" type="text" value="{{ $client->company ? $client->company->Tax_Card : old('Tax_Card') }}" style="direction: rtl;" placeholder="{{ __('admin.Tax_Card') }} *" autocomplete="Tax_Card">
+
+          <!-- Tax Card Attachment -->
+          <div class="col-12 mb-4">
+            <label
+              class="form-label fs-6 fw-semibold mb-2"
+              for="Tax_Card"
+            >
+              {{ __('admin.Tax_Card') }} *
+            </label>
+
+            <input
+              class="form-control Tax_Card"
+              id="Tax_Card"
+              name="Tax_Card"
+              type="file"
+              placeholder="{{ __('admin.Tax_Card') }} *"
+            />
+
+            <input type="hidden" name="Tax_Card_value" value="{{ $client->company ? $client->company->Tax_Card : '' }}">
+
+            @if ($client->company && $client->company->Tax_Card)
+              <div class="mt-2 d-flex align-items-center gap-2">
+                @php
+                  $fileUrl = $client->company->Tax_Card;
+                  $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                @endphp
+
+                @if (in_array($extension, ['jpg','jpeg','png']))
+                  <a href="{{ $fileUrl }}" target="_blank">
+                    <i class="ti ti-photo text-secondary fs-5"></i>
+                  </a>
+                @elseif ($extension === 'pdf')
+                  <a
+                    href="{{ $fileUrl }}"
+                    target="_blank"
+                    class="d-flex align-items-center"
+                  >
+                    <i class="ti ti-file-type-pdf text-danger fs-5"></i>
+                  </a>
+                @else
+                  <a
+                    href="{{ $fileUrl }}"
+                    target="_blank"
+                    class="d-flex align-items-center"
+                  >
+                    <i class="ti ti-file text-secondary fs-5"></i>
+                  </a>
+                @endif
+
+                <a
+                  class="badge bg-label-secondary"
+                  href="{{ $fileUrl }}"
+                  target="_blank"
+                >
+                  {{ basename($fileUrl) }}
+                </a>
+              </div>
+            @endif
           </div>
         </div>
+
         <div class="col-md-6 col-12 mb-4">
           <div class="form-group w-100">
             <label class="form-label fs-6 fw-semibold mb-2" for="years_of_operations">{{ __('admin.Years of Operations') }} *</label>

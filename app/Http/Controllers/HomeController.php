@@ -9,6 +9,7 @@ use App\Cycle;
 use App\Sector;
 use App\Company;
 use App\Service;
+use App\ServiceCategory;
 use App\Calendar;
 use App\Currency;
 use App\Messages;
@@ -911,6 +912,71 @@ class HomeController extends Controller
             $cycle->organization->name = $item->{'org_name_' . $l};
             $cycle->organization->image_url = Organization::image_handler($item->org_img_url);
             $cycle->type = $item->type;
+            $preRequests = [];
+            $user = auth()->user();
+        if (isset($cycle->type) && $cycle->type === 'General_Program' && $user) {
+
+            if (method_exists($user, 'hasCompletedProfile')) {
+                $profileComplete = $user->hasCompletedProfile();
+            } else {
+                $profileComplete = filled($user->phone)
+                    && filled($user->city_id)
+                    && filled($user->country_id)
+                    && filled($user->address)
+                    && filled($user->timezone);
+            }
+
+            if (! $profileComplete) {
+                if (function_exists('route_exists') && route_exists('user.profile_Edit')) {
+                    $profileUrl = route('user.profile_Edit');
+                } elseif (function_exists('route_exists') && route_exists('user.profile_Edit')) {
+                    $profileUrl = route('user.profile_Edit');
+                } else {
+                    $profileUrl = route('user.profile_Edit');
+                }
+
+                $preRequests[] = [
+                    'key'   => 'profile',
+                    'label' => 'admin.Complete Profile',
+                    'url'   => $profileUrl,
+                    'id'    => 'pre-request-profile-' . $cycle->id,
+                ];
+            }
+
+            if (method_exists($user, 'hasCompletedStartup')) {
+                $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : $user->hasCompletedCompany();
+            } else {
+                $startupComplete = false;
+                if (method_exists($user, 'company') || isset($user->company)) {
+                    $company = $user->company ?? null;
+                    $startupComplete = $company
+                        && filled($company->name_en ?? '')
+                        && filled($company->est_date ?? '')
+                        && filled($company->address_en ?? '')
+                        && filled($company->stage ?? '');
+                } 
+            }
+
+            if (!$startupComplete) {
+                if (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                    $startupUrl = route('company.profile_view_mine');
+                } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                    $startupUrl = route('company.profile_view_mine');
+                } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                    $startupUrl = route('company.profile_view_mine');
+                } else {
+                    $startupUrl = url('/dashboard/myCompany');
+                }
+                $preRequests[] = [
+                    'key'   => 'startup',
+                    'label' => 'admin.Complete Startup/Idea',
+                    'url'   => $startupUrl,
+                    'id'    => 'pre-request-startup-' . $cycle->id,
+                ];
+            }
+        }
+
+            $cycle->pre_requests = $preRequests;
             return $cycle;
         });
         $myFinal = null;
@@ -1693,7 +1759,7 @@ class HomeController extends Controller
                 'icon' => 'ti-alarm',
                 'text' => 'Training sessions Duration',
                 'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
-                'count' => $training_sessions->sum('duration') / 60,
+                'count' => number_format($training_sessions->sum('duration') / 60, 2),
                 'isRating' => false,
             ];
             
@@ -1740,7 +1806,7 @@ class HomeController extends Controller
                 'icon' => 'ti ti-server',
                 'text' => 'Company Attendance Rate',
                 'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
-                'count' => $attends_rate,
+                'count' => preg_match('/^\d+(\.\d+)?%$/', $attends_rate) ? number_format((float)rtrim($attends_rate, '%'), 1) . '%' : $attends_rate,
                 'isRating' => false,
             ];
             
@@ -2050,13 +2116,13 @@ class HomeController extends Controller
         GROUP BY
              c.sector, s.name_en, s.name_ar
         ";
-    $sector_distribution = collect(DB::select($sector_distribution_q))->map(function ($item) {
-        return [
-            'sector_en' => $item->name_en ?? $item->sector ?? __('admin.undefined', [], 'en'),
-            'sector_ar' => $item->name_ar ?? $item->sector ?? __('admin.undefined', [], 'ar'),
-            'count'     => $item->total,
-        ];
-    });
+        $sector_distribution = collect(DB::select($sector_distribution_q))->map(function ($item) {
+            return [
+                'sector_en' => $item->name_en ?? $item->sector ?? __('admin.undefined', [], 'en'),
+                'sector_ar' => $item->name_ar ?? $item->sector ?? __('admin.undefined', [], 'ar'),
+                'count'     => $item->total,
+            ];
+        });
 
         $cycles_labels = $cycles->pluck('title')->toArray();
         $cycles_startups_count = $cycles->map(function ($key) {
@@ -2254,10 +2320,41 @@ class HomeController extends Controller
         $data['initial_screening_steps'] = $filtration;
         $data['final_screening_steps'] = $evaluation;
 
-        $newhackathon_q = "SELECT * FROM cycles WHERE `type` = 'hackathon' ORDER BY created_at DESC LIMIT 1";
-        $newhackathon = DB::select($newhackathon_q);
+        if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor')){
+            
+        
+                $user = Auth::user();
+			if(isset($user->team_member) && $user->team_member->teamFormation->user->company?->cycle != null){
+				$cycle = $user->team_member->teamFormation->user->company->cycle;
+            }elseif(isset($user->company) && $user->company->cycle != null){
+                    $cycle = $user->company->cycle;
+                    $cycleType = Cycle::where('id', $cycle)->first();
+                    if($cycleType->type != 'Hackathon'){
+                        $cycle = null;
+                    }else{
+                        $cycle = $user->company->cycle;
+                    }
+            }
+            $params = [];
+        $newhackathon_q = "SELECT *
+                            FROM 
+                            cycles
+                            WHERE `type` = 'hackathon' ";
+                            if($cycle != null){
+                                $newhackathon_q .= "AND id = ? ";
+                                $params[] = $cycle;
+                                $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                            $newhackathon = DB::select($newhackathon_q, $params);
+                            }else{
+                                $newhackathon_q .= "AND `start` < now() ";
+                                $newhackathon_q .= "AND `end` > now() ";
+                                $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
+                                $newhackathon = DB::select($newhackathon_q);
+                                
+                            }
         $newhackathon = collect($newhackathon)->first();
         $data['newhackathon'] = $newhackathon;
+        }
         
 
         $team_member_q = "SELECT 
@@ -2288,10 +2385,17 @@ class HomeController extends Controller
                         users as u ON u.id = tf.user_id
                     WHERE tm.Email = ? 
                     AND tm.TeamMember = 'hackathon' 
-                    AND tm.acceptInvition = 'pending' ";
+                    AND tm.acceptInvition IN ('pending', 'join') ";
         $team_member = DB::select($team_member_q, [$user->email]);
         $team_member = collect($team_member);
         $data['team_member'] = $team_member;
+
+        // Determine if polling is needed for completion status
+        $user = auth()->user();
+        $profileComplete = method_exists($user, 'hasCompletedProfile') ? $user->hasCompletedProfile() : (!empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone));
+        $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
+        $data['pollingNeeded'] = !$profileComplete || !$startupComplete;
+
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
@@ -3015,17 +3119,25 @@ class HomeController extends Controller
     {
         $t = $request->input('type');
         $find = $request->input('find');
-        $services = Service::whereNotNull('id');
-        if ($t) {
-            $services = $services->where('service_category_id', $t);
-        }
-        if ($find) {
-            $services = $services->where(function ($query) use ($find) {
-                $query->where('services.name_en', 'like', '%' . $find . '%')
-                    ->orWhere('services.name_ar', 'like', '%' . $find . '%');
+        $services = Service::with('serviceCategory')
+            ->whereHas('organizations')
+            ->get()
+            ->map(function ($service) {
+                $service->category_name_en = $service->serviceCategory->name_en ?? null;
+                $service->category_name_ar = $service->serviceCategory->name_ar ?? null;
+                return $service;
             });
-        }
-        $services = Service::whereHas('organizations')->get();
+        
+        // if ($t) {
+        //     $services = $services->where('service_category_id', $t);
+        // }
+        // if ($find) {
+        //     $services = $services->where(function ($query) use ($find) {
+        //         $query->where('services.name_en', 'like', '%' . $find . '%')
+        //             ->orWhere('services.name_ar', 'like', '%' . $find . '%');
+        //     });
+        // }
+
         $setting = Settings::where('id', 1)->first();
         $currency = Currency::where('id', $setting->Currency)->first();
         return view('admin.clients.directory')->with('services', $services)->with('setting', $setting)->with('currency', $currency);
@@ -3097,5 +3209,52 @@ class HomeController extends Controller
             abort(404);
         }
         return view('admin.documentation', compact('doc', 'menu'));
+    }
+
+    public function checkCompletionStatus()
+    {
+        $user = auth()->user();
+        $profileComplete = false;
+        $startupComplete = false;
+
+        if (method_exists($user, 'hasCompletedProfile')) {
+            $profileComplete = $user->hasCompletedProfile();
+        } else {
+            // fallback logic
+            $profileComplete = !empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone);
+        }
+
+        if (method_exists($user, 'hasCompletedStartup')) {
+            $startupComplete = $user->hasCompletedStartup();
+        } else {
+            // fallback logic for startup completion
+            $startupComplete = $user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage);
+        }
+
+        $preRequests = [];
+
+        if (!$profileComplete) {
+            $preRequests[] = [
+                'id' => 'complete_profile',
+                'url' => route('user.profile_Edit'),
+                'label' => __('admin.Complete Profile')
+            ];
+        }
+
+        if (!$startupComplete) {
+            $preRequests[] = [
+                'id' => 'complete_startup',
+                'url' => route('company.profile_view_mine', ['company' => $user->company_id]),
+                'label' => __('admin.Complete Startup/Idea'),
+                'action' => 'complete-profile'
+            ];
+        }
+
+        return response()->json([
+            'profile_complete' => $profileComplete,
+            'startup_complete' => $startupComplete,
+            'has_pre_requests' => count($preRequests) > 0,
+            'pre_requests' => $preRequests
+        ]);
     }
 }

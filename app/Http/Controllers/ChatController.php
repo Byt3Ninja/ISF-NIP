@@ -264,6 +264,14 @@ class ChatController extends Controller
                 Log::error('Failed to broadcast message: ' . $e->getMessage());
             }
 
+            // Fire the event for real-time listeners
+            try {
+                event(new \Namu\WireChat\Events\MessageCreated($message));
+                Log::info('MessageCreated event fired for message: ' . $message->id);
+            } catch (\Exception $e) {
+                Log::error('Failed to fire MessageCreated event: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'message' => $message,
                 'conversation' => $conversation->load('participants.participantable'),
@@ -281,34 +289,31 @@ class ChatController extends Controller
     public function deleteMessage($messageId)
     {
         $message = Message::findOrFail($messageId);
+
+        try {
+            // Fire the event for real-time listeners before deleting
+            event(new \Namu\WireChat\Events\MessageDeleted($message));
+            Log::info('MessageDeleted event fired for message: ' . $message->id);
+        } catch (\Exception $e) {
+            Log::error('Failed to fire MessageDeleted event: ' . $e->getMessage());
+        }
+
         $message->delete();
 
         return response()->json(['message' => 'Message deleted']);
     }
 
-    // البحث عن مستخدم
-    public function searchUser(Request $request)
+    // Get list of users that can be chatted with
+    public function getUsers(Request $request)
     {
         try {
-            $query = $request->get('q', '');
             $currentUserId = auth()->id();
-            
-            if (strlen($query) < 2) {
-                return response()->json(['users' => []]);
-            }
-            
+            $limit = $request->get('limit', 50);
+
+            // Get users that can be chatted with (exclude current user and optionally blocked users)
             $users = User::where('id', '!=', $currentUserId)
-                ->where(function($q) use ($query) {
-                    $q->where('first_name_en', 'like', "%$query%")
-                      ->orWhere('last_name_en', 'like', "%$query%")
-                      ->orWhere('first_name_ar', 'like', "%$query%")
-                      ->orWhere('last_name_ar', 'like', "%$query%")
-                      ->orWhere('email', 'like', "%$query%")
-                      ->orWhereRaw("CONCAT(first_name_en, ' ', last_name_en) LIKE ?", ["%$query%"])
-                      ->orWhereRaw("CONCAT(first_name_ar, ' ', last_name_ar) LIKE ?", ["%$query%"]);
-                })
                 ->select('id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'email', 'img_url')
-                ->limit(10)
+                ->limit($limit)
                 ->get()
                 ->map(function($user) {
                     // Create a combined name field
@@ -316,7 +321,44 @@ class ChatController extends Controller
                     return $user;
                 });
 
-            return response()->json(['users' => $users]);
+            return response()->json([
+                'users' => $users,
+                'total' => $users->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error fetching users: ' . $e->getMessage(),
+                'users' => []
+            ], 500);
+        }
+    }
+
+    public function searchUser(Request $request)
+    {
+        try {
+            $q = $request->get('q', '');
+            $currentUserId = auth()->id();
+            $query = User::where('id', '!=', $currentUserId);
+            if ($q !== '') {
+                $query->where(function ($builder) use ($q) {
+                    $builder->where('first_name_en', 'like', '%' . $q . '%')
+                        ->orWhere('last_name_en', 'like', '%' . $q . '%')
+                        ->orWhere('first_name_ar', 'like', '%' . $q . '%')
+                        ->orWhere('last_name_ar', 'like', '%' . $q . '%')
+                        ->orWhere('email', 'like', '%' . $q . '%');
+                });
+            }
+            $users = $query->select('id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'email', 'img_url')
+                ->limit(50)
+                ->get()
+                ->map(function ($user) {
+                    $user->name = trim(($user->first_name_en ?: $user->first_name_ar) . ' ' . ($user->last_name_en ?: $user->last_name_ar)) ?: $user->email;
+                    return $user;
+                });
+            return response()->json([
+                'users' => $users,
+                'total' => $users->count()
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error searching users: ' . $e->getMessage(),
@@ -324,6 +366,7 @@ class ChatController extends Controller
             ], 500);
         }
     }
+
     public function myGroups()
     {
         try {
@@ -414,7 +457,7 @@ class ChatController extends Controller
 
             return response()->json([
                 'messages' => $messages,
-                'conversation' => $conversation,
+                'conversation' => $conversation->load('participants.participantable'),
                 'user_id' => auth()->id()
             ]);
         } catch (\Exception $e) {
@@ -536,4 +579,45 @@ class ChatController extends Controller
         }
     }
     
+    // Handle typing indicator
+    public function typing(Request $request)
+    {
+        try {
+            $request->validate([
+                'conversation_id' => 'required|exists:wire_conversations,id',
+                'is_typing' => 'required|boolean'
+            ]);
+
+            $user = auth()->user();
+            $conversation = Conversation::findOrFail($request->conversation_id);
+
+            // Check if user is participant in conversation
+            $isParticipant = $conversation->participants()
+                ->where('participantable_id', $user->id)
+                ->where('participantable_type', get_class($user))
+                ->exists();
+
+            if (!$isParticipant) {
+                return response()->json([
+                    'error' => 'You are not a participant in this conversation'
+                ], 403);
+            }
+
+            // Broadcast typing indicator event (no database saving needed)
+            if ($request->is_typing) {
+                event(new \App\Events\TypingIndicator($user, $conversation->id, true));
+                Log::info('TypingIndicator START event broadcast for user: ' . $user->id . ' in conversation: ' . $conversation->id);
+            } else {
+                event(new \App\Events\TypingIndicator($user, $conversation->id, false));
+                Log::info('TypingIndicator STOP event broadcast for user: ' . $user->id . ' in conversation: ' . $conversation->id);
+            }
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error handling typing indicator: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Error handling typing indicator: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

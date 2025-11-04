@@ -44,7 +44,7 @@ class TrainingSession extends Model
 
     public function course()
     {
-        return $this->belongsTo(Training::class, 'location');
+        return $this->belongsTo(Training::class, 'training_Address');
     }
     public function CalenderSync()
     {

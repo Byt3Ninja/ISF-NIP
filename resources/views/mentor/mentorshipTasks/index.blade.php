@@ -2,11 +2,7 @@
 
 @section('vendorstyle')
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
@@ -74,62 +70,61 @@
 		<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="card">
 				<!-- Startup Info Header -->
-				@if (!empty($tasks) && count($tasks) > 0)
-			<div
-				class="card-header mx-6 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom mb-4">
-				<div class="d-flex align-items-center">
-					@if (!empty($data['company_name']))
+				<div id="startup-info-header"
+					class="card-header mx-6 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom mb-4">
 					<div class="d-flex align-items-center">
-						<div
-							class="p-2 w-px-75 h-px-75 border shadow-sm rounded d-flex justify-content-center align-items-center me-4">
-							<img src="{{ $data['start_up_logo'] ?? '/images/logo-placeholder.png' }}"
-								alt="{{ $data['company_name'] }} Logo" class="rounded h-100 w-100 object-fit-contain overflow-hidden"
-								onerror="this.onerror=null; this.src='/images/logo-placeholder.png';">
-						</div>
-						<div>
-							<h4 class="mb-0">{{ $data['company_name'] }}</h4>
-							<small class="text-muted">{{ $data['program_name'] }}</small>
-						</div>
-					</div>
-					@endif
-				</div>
-				<div class="d-flex flex-column gap-3">
-					<div class="d-flex justify-content-between align-items-center gap-2">
-						<span class="fw-bold me-6">{{ __('admin.Current_Step') }}</span>
-						<div class="badge bg-label-primary">{{ $data['step_name'] }}</div>
-					</div>
-					<div class="d-flex justify-content-between align-items-center gap-2">
-						<span class="fw-bold me-6">{{ __('admin.Mentor_Session_Appointment') }}</span>
-						@if (!empty($data['mentor_zoom_date']))
-							<div class="badge bg-label-secondary">
-								<i class="ti ti-calendar ti-16px me-1"></i>
-								<span>{{ \Carbon\Carbon::parse($data['mentor_zoom_date'])->format('M d, Y H:i') }}</span>
+						@if (!empty($data['company_name']))
+						<div class="d-flex align-items-center">
+							<div
+								class="p-2 w-px-75 h-px-75 border shadow-sm rounded d-flex justify-content-center align-items-center me-4">
+								<img src="{{ $data['start_up_logo'] ?? '/images/logo-placeholder.png' }}"
+									alt="{{ $data['company_name'] }} Logo" class="rounded h-100 w-100 object-fit-contain overflow-hidden"
+									onerror="this.onerror=null; this.src='/images/logo-placeholder.png';">
 							</div>
+							<div>
+								<h4 class="mb-0">{{ $data['company_name'] }}</h4>
+								<small class="text-muted">{{ $data['program_name'] }}</small>
+							</div>
+						</div>
 						@endif
 					</div>
-				</div>
-			</div>
-				@endif
-
-
-				@if (!empty($tasks) && count($tasks) > 0)
-					<div class="card-body">
-						<div class="d-flex justify-content-end w-100 border-bottom pb-3">
-							<div id="card-header">
-								<div class="ms-md-8 d-flex flex-grow-1 position-relative">
-									<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
-									<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+					<div class="d-flex flex-column gap-3">
+						<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+							<span class="fw-bold me-6">{{ __('admin.Current_Step') }}</span>
+							<div class="badge bg-label-primary" style="width: fit-content;">{{ $data['step_name'] }}</div>
+						</div>
+						<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+							<span class="fw-bold me-6">{{ __('admin.Mentor_Session_Appointment') }}</span>
+							@if (!empty($data['mentor_zoom_date']))
+								<div class="badge bg-label-secondary" style="width: fit-content;">
+									<i class="ti ti-calendar ti-16px me-1"></i>
+									<span>{{ \Carbon\Carbon::parse($data['mentor_zoom_date'])->format('M d, Y H:i') }}</span>
 								</div>
-								@role('Mentor')
-								<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-									<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
-									<i class="ti ti-plus ti-16px"></i>
-								</button>
-								@endrole
-							</div>
+							@endif
 						</div>
 					</div>
-				@endif
+				</div>
+				<!-- / Startup Info Header -->
+
+				<div class="card-body">
+					<div class="d-flex justify-content-end w-100 border-bottom pb-3">
+						<div id="card-header">
+							<div class="ms-md-8 d-flex flex-grow-1 position-relative">
+								<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
+								<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+							</div>
+							@role('Mentor')
+							<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
+								<div class="d-none d-md-inline me-2">
+									{{ __('admin.Add_Task') }}
+								</div>
+								<i class="ti ti-plus"></i>
+							</button>
+							@endrole
+						</div>
+					</div>
+				</div>
+
 				<div class="app-kanban">
 					<!-- Kanban Wrapper -->
 					@if (!empty($tasks) && count($tasks) > 0)
@@ -141,8 +136,8 @@
 								 {{ __('admin.No_Tasks') }}
 							</h4>
 							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-								<i class="ti ti-plus ti-16px me-2"></i>
-								<span class="align-middle">{{ __('admin.Add_Task') }}</span>
+								<i class="ti ti-plus me-2"></i>
+								{{ __('admin.Add_Task') }}
 							</button>
 						</div>
 					@endif
@@ -154,7 +149,7 @@
 		<!-- View Task Modal -->
 		<div class="modal fade" id="viewTaskModal" tabindex="-1" aria-labelledby="viewTaskModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-lg">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+				<div class="modal-content rounded overflow-hidden bg-label-light p-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<div class="d-flex align-items-center gap-3">
@@ -165,30 +160,10 @@
 									@endrole
 								</div>
 								
-								<div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+								<div class="cursor-pointer" id="confirmDeleteTask" data-task="">
 									@role('Mentor')
 									<i class="ti ti-trash text-danger ti-20px"></i>
 									@endrole
-								</div>
-								<div class="dropdown-menu border" aria-labelledby="warningDropdown" style="background-color: #ebebed; width: 300px;">
-									<div class="d-flex justify-content-between align-items-center p-2">
-										<div class="d-flex align-items-center gap-2">
-											<i class="ti ti-alert-square-rounded ti-20px"></i>
-											<h6 class="fw-medium mb-0">{{ __('admin.Warning') }}</h6>
-										</div>
-										<div id="closeViewTask" class="cursor-pointer" data-bs-toggle="dropdown" aria-label="Close">
-											<i class="ti ti-x ti-20px text-primary"></i>
-										</div>
-									</div>
-									<div class="bg-white rounded border border-secondary mb-2">
-										<p class="text-muted p-2" style="font-size: 13px;">{{ __('admin.Delete_Confirmation') }}</p>
-									</div>
-									
-									<button id="confirmDeleteTask" class="btn btn-danger" style="width: 100%;" data-task="">
-										<i class="ti ti-trash ti-20px me-2"></i>
-										 <span>{{ __('admin.Delete') }}</span>
-									</button>
-									
 								</div>
 								
 							</div>
@@ -233,11 +208,6 @@
 									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
-								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
-								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-									onclick="document.getElementById('fileInput').click();">
-									<i class="ti ti-plus ti-16px"></i>
-								</button>
 							</div>
 							<div class="d-flex flex-wrap gap-2" id="fileList"></div>
 						</div>
@@ -316,11 +286,11 @@
 							</div>
 						</div>
 					</div>
-					<div class="bg-white rounded border border-light p-2 p-md-4">
+					<div class="bg-white rounded border border-light p-4">
 						<form action="#" method="POST">
 							<div class="mb-3">
 								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="task-name" name="task-name" />
+								<input type="text" class="form-control" id="task-name" name="task-name" placeholder="{{ __('admin.Task_Name') }}" />
 							</div>
 							<div class="mb-3">
 								<label for="task-content" class="form-label">{{ __('admin.Description') }}</label>
@@ -387,7 +357,7 @@
 										<option value="2">User 2</option>
 										<option value="3">User 3</option>
 									</select> --}}
-									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_User') }}" value="" />
+									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_Users') }}" value="" />
 								</div>
 							</div>
 							<div class="row mb-3">
@@ -398,7 +368,9 @@
 									</label>
 								</div>
 								<div class="col-4">
-									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
+									<input type="text" class="form-control flatpickr" id="task-due-date" name="task-due-date" placeholder="{{ $lang == 'en' ? 'Select due date' : 'اختر تاريخ الانتهاء' }}" 
+										style="font-size: 12px;"
+									/>
 								</div>
 								<div class="col-4">
 									{{--  <input type="date" class="form-control" id="task-due-date" name="task-due-date" />  --}}
@@ -417,11 +389,11 @@
 							</div>
 						</form>
 					</div>
-					<div class="mt-4 d-flex align-items-center gap-3">
-						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="createTask" type="button" class="btn btn-primary">
-							<span class="me-3">{{ __('admin.Create') }}</span>
-							<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+					<div class="mt-md-4 d-flex align-items-center gap-3 p-4 p-md-0">
+						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+						<button id="createTask" type="button" class="btn btn-primary w-px-100">
+							{{ __('admin.Create') }}
+							<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
 						</button>
 					</div>
 				</div>
@@ -431,7 +403,7 @@
 		<!-- Edit Task Modal -->
 		<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
 			<div class="modal-dialog modal-md">
-				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+				<div class="modal-content rounded overflow-hidden bg-label-light p-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<h6 class="modal-title" id="form-modal-title">{{ __('admin.Edit_Task') }}</h6>
@@ -444,7 +416,7 @@
 						<form action="#" method="POST" id="editTaskForm">
 							<div class="mb-3">
 								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
-								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" />
+								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" placeholder="{{ __('admin.Task_Name') }}" />
 							</div>
 							<div class="mb-3">
 								<label class="form-label">{{ __('admin.Description') }}</label>
@@ -528,7 +500,9 @@
 									</label>
 								</div>
 								<div class="col-4">
-									<input type="date" class="form-control" id="edit-task-due-date" name="edit-task-due-date" />
+									<input type="text" class="form-control flatpickr" id="edit-task-due-date" name="edit-task-due-date" placeholder="{{ $lang == 'en' ? 'Select due date' : 'اختر تاريخ الانتهاء' }}" 
+										style="font-size: 12px;"
+									/>
 								</div>
 								{{--  <div class="col-4">
 									<input type="date" class="form-control" id="edit-task-due-date" name="edit-task-due-date" />
@@ -553,12 +527,12 @@
 							</div>
 						</form>
 					</div>
-					<div class="mt-4 d-flex align-items-center gap-3">
+					<div class="mt-md-4 d-flex align-items-center gap-3 p-4 p-md-0">
 						<input type="hidden" id="edit-task-id" name="edit-task-id" value="0" />
-						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="editTaskBtn" type="button" class="btn btn-primary">
-							<span class="me-3">{{ __('admin.Edit') }}</span>
-							<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+						<button type="button" class="btn btn-label-secondary w-px-100" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+						<button id="editTaskBtn" type="button" class="btn btn-primary w-px-100">
+							{{ __('admin.Edit') }}
+							<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
 						</button>
 					</div>
 				</div>
@@ -573,67 +547,79 @@
 
 @section('scripts')
 	<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 	<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
 	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
 	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+
 	<script>
-		// Custom SweetAlert2 helper functions
-		const showError = (message) => {
-			return Swal.fire({
-				icon: 'error',
-				title: message,
-				confirmButtonText: '{{ __('admin.OK') }}',
-				customClass: {
-					confirmButton: 'btn btn-primary'
-				},
-				buttonsStyling: false
-			});
-		};
-
-		const showSuccess = (message) => {
-			return Swal.fire({
-				icon: 'success',
-				html: message,
-				showCancelButton: false,
-				showConfirmButton: true,
-				confirmButtonText: "{{ __('admin.OK') }}",
-				customClass: {
-					confirmButton: 'btn btn-primary',
-				},
-				buttonsStyling: false
-			});
-		};
-
 		// Handle attachments upload
 		function handleFileUpload(event) {
 			const files = event.target.files;
 			const task_id = $('#fileInput').attr('data-task');
-			uploadFiles(files, task_id, 'view');
+			validateAndUploadFiles(files, task_id, 'view');
 		}
 
 		// Handle attachments create
 		function handleAttachmentCreate(event) {
 			const files = event.target.files;
-			uploadFiles(files, null, 'create');
+			validateAndUploadFiles(files, null, 'create');
 		}
 
 		// Handle attachments edit
 		function handleAttachmentEdit(event) {
 			const files = event.target.files;
 			const task_id = $('#editFileInput').attr('data-task');
-			uploadFiles(files, task_id, 'edit');
+			validateAndUploadFiles(files, task_id, 'edit');
+		}
+
+		// Validate and upload files
+		function validateAndUploadFiles(files, task_id, mode) {
+			const allowedTypes = [
+				'application/pdf', 
+				'image/jpeg', 
+				'image/png', 
+				'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+			];
+			const maxFileSize = 10 * 1024 * 1024; // 10 MB
+
+			for (const file of files) {
+				if (!allowedTypes.includes(file.type)) {
+					const errorMessage = lang === 'ar' 
+						? 'يسمح فقط بملفات PDF و DOCX و XLSX و JPG و JPEG و PNG.' 
+						: 'Only PDF, DOCX, XLSX, JPG, JPEG, and PNG files are allowed.';
+					releaseFailureAlert({ message: errorMessage });
+					return;
+				}
+
+				if (file.size > maxFileSize) {
+					const errorMessage = lang === 'ar' 
+						? 'الملف كبير جدًا. الحد الأقصى المسموح به هو 10 ميجابايت.' 
+						: 'File too large. Maximum size allowed is 10 MB.';
+					releaseFailureAlert({ message: errorMessage });
+					return;
+				}
+			}
+			
+			// For create mode, store files for later upload
+			if (mode === 'create') {
+				pendingCreateAttachments = Array.from(files);
+				renderFiles(files, mode);
+			} else {
+				uploadFiles(files, task_id, mode);
+			}
 		}
 
 		// Upload files handler
 		function uploadFiles(files, task_id, mode) {
 			const formData = new FormData();
-			Array.from(files).forEach(file => {
+
+			for (const file of files) {
 				formData.append('attachments[]', file);
-			});
+			}
+			
 			formData.append('mentorship_request_id', {{ $session_id }});
 			if (task_id) {
 				formData.append('task_id', task_id);
@@ -648,13 +634,28 @@
 				contentType: false,
 				success: function(response) {
 					if (response.status) {
-						renderFiles(response.task.files, mode);
+						// Update the board_tasks array with updated task data
+						const taskIndex = board_tasks.findIndex(task => task.id == task_id);
+						if (taskIndex !== -1) {
+							board_tasks[taskIndex] = response.task;
+						}
+						
+						// Only render files for edit mode after upload, not for create mode since modal is closing
+						if (mode !== 'create') {
+							renderFiles(response.task.files, mode);
+						} else {
+							// For create mode, reload kanban to update attachment count in task item
+							reloadKanban();
+						}
 					} else {
-						showError(response.message);
+						releaseFailureAlert({ message: response.message });
 					}
 				},
 				error: function(error) {
-					console.error('Error uploading files:', error);
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		}
@@ -683,16 +684,29 @@
 			Array.from(files).forEach(file => {
 				const fileDiv = document.createElement('div');
 				fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-				fileDiv.innerHTML = `
-					<i class="ti ti-file text-info ti-20px me-2"></i>
-					<span class="text-dark fw-bold">${file.name}</span>
-					<div class="cursor-pointer me-2" onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);">
-						<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-					</div>
-					<a href="${file.url}" download="${file.name}" class="ms-auto">
-						<i class="ti ti-download text-primary ti-16px"></i>
-					</a>
-				`;
+				if (mode === 'create') {
+					fileDiv.innerHTML = `
+						<i class="ti ti-file text-info ti-20px me-2"></i>
+						<span class="text-dark fw-bold">${file.name}</span>
+						<div class="cursor-pointer me-2" onclick="deleteFileFromCreate(this.parentElement);">
+							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+						</div>
+						<a href="${URL.createObjectURL(file)}" download="${file.name}" class="ms-auto">
+							<i class="ti ti-download text-primary ti-16px"></i>
+						</a>
+					`;
+				} else {
+					fileDiv.innerHTML = `
+						<i class="ti ti-file text-info ti-20px me-2"></i>
+						<span class="text-dark fw-bold">${file.name}</span>
+						<div class="cursor-pointer me-2" onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);">
+							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+						</div>
+						<a href="${file.url}" download="${file.name}" class="ms-auto">
+							<i class="ti ti-download text-primary ti-16px"></i>
+						</a>
+					`;
+				}
 				fileList.appendChild(fileDiv);
 			});
 			attachmentCount.textContent = files.length;
@@ -727,11 +741,14 @@
 								const attachmentCount = document.getElementById('attachmentCount');
 								attachmentCount.textContent = document.getElementById('fileList').children.length;
 							} else {
-								showError(response.message);
+								releaseFailureAlert({ message: response.message });
 							}
 						},
 						error: function(error) {
-							console.error('Error deleting file:', error);
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 					return;
@@ -739,12 +756,17 @@
 				$('#viewTaskModal').modal('show');
 			});
 		}
+
+		// Delete file from create modal
+		function deleteFileFromCreate(ele) {
+			ele.remove();
+			const attachmentCount = document.getElementById('createAttachmentCount');
+			attachmentCount.textContent = document.getElementById('createFileList').children.length;
+		}
 	</script>
 @stop
 
 @section('pagescripts')
-	<script src="/vuexy/assets/js/forms-selects.js"></script>
-	{{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
 	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
 	<script>
 		let data = @json($data);
@@ -752,6 +774,19 @@
 		var kanban;
 		var boards = @json($kanban);
 		var lang = '{{ $l }}';
+
+		// Global variable to store files selected during task creation
+		let pendingCreateAttachments = [];
+
+		if (lang === 'en') {
+			boards.forEach(board => {
+				if (board.id === 'progress') {
+					board.title = 'In Progress';
+				} else if (board.id) {
+					board.title = board.id.charAt(0).toUpperCase() + board.id.slice(1);
+				}
+			});
+		}
 
 		var board_tasks = @json($tasks);
 		function getElement(el) { 
@@ -762,6 +797,8 @@
 
 		// Render Kanban board
 		const renderKanbanBoard = () => {
+			const element = document.querySelector('.kanban-wrapper');
+			if (!element) return;
 			kanban = new jKanban({
 				element: '.kanban-wrapper',
 				gutter: '15px',
@@ -791,7 +828,7 @@
 							if( element.priority == 'high' ) { bg = 'danger'; }
 							else if( element.priority == 'medium' ) { bg = 'warning'; }
 							else { bg = 'success'; }
-							let priority = element.priority_visible;
+							let priority = lang === 'en' ? (element.priority.charAt(0).toUpperCase() + element.priority.slice(1)) : element.priority_visible;
 							let reported_at = new Date(element.reported_at);
 							let updated_at = new Date(element.updated_at);
 		
@@ -841,7 +878,15 @@
 								done_date = done_date.toISOString().split('T')[0];
 							}
 		
-							$('#task-details-status .fw-semibold').html( element.visible_status );
+							let statusText = element.visible_status;
+							if (lang === 'en') {
+								if (element.status === 'progress') {
+									statusText = 'In Progress';
+								} else {
+									statusText = element.status.charAt(0).toUpperCase() + element.status.slice(1);
+								}
+							}
+							$('#task-details-status .fw-semibold').html( statusText );
 		
 							$('#task-details-assignee img.rounded-circle').prop({src: element.assignee.photo, title: element.assignee.name, alt: element.assignee.name });
 							$('#task-details-reporter img.rounded-circle').prop({src: element.reporter.photo, title: element.reporter.name, alt: element.reporter.name });
@@ -923,12 +968,16 @@
 		
 
 							// Handle view attachments
-							renderFiles(element.files, 'view');
+							renderFilesHandler(element.files, 'view');
 		
 							$('#viewTaskModal').modal('show');
 						},
 						error: function(error) {
-							showError('Unexpected error occurred.');
+							console.log('error', error);
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 				},
@@ -970,16 +1019,20 @@
 							}
 							else
 							{
-								showError(response.message);
+								releaseFailureAlert({ message: response.message });
 							}
 							reloadKanban();
 						},
 						error: function(error) {
 							reloadKanban();
-							if( error.status == 422 )
-							{
-								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
-							} else { showError('Unexpected error occurred.'); }
+							if( error.status == 422 ) {
+								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+								return;
+							} 
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 				}
@@ -1018,7 +1071,7 @@
 				if( element.priority == 'high' ) { bg = 'danger'; }
 				else if( element.priority == 'medium' ) { bg = 'warning'; }
 				else { bg = 'success'; }
-				let priority = element.priority_visible;
+				let priority = lang === 'en' ? (element.priority.charAt(0).toUpperCase() + element.priority.slice(1)) : element.priority_visible;
 
 				let content = `
 					<div class="card shadow-sm p-3 d-flex flex-column">
@@ -1053,15 +1106,41 @@
 		};
 
 		const reloadKanban = () => {
+			if (kanban) {
+				kanban = null;
+			}
 			var kanbanWrapper = document.querySelector('.kanban-wrapper');
-			kanbanWrapper.innerHTML = '';
+			if (kanbanWrapper) {
+				var parent = kanbanWrapper.parentNode;
+				parent.removeChild(kanbanWrapper);
+				kanbanWrapper = document.createElement('div');
+				kanbanWrapper.className = 'kanban-wrapper';
+				parent.appendChild(kanbanWrapper);
+			} else {
+				// If the kanban wrapper doesn't exist (e.g., when adding the first task)
+				const appKanban = document.querySelector('.app-kanban');
+				if (appKanban) {
+					// Remove the 'no tasks' message
+					const noTasksMessage = appKanban.querySelector('.d-flex.flex-column.justify-content-center');
+					if (noTasksMessage) {
+						noTasksMessage.remove();
+					}
+					// Create and append the kanban wrapper
+					kanbanWrapper = document.createElement('div');
+					kanbanWrapper.className = 'kanban-wrapper';
+					appKanban.appendChild(kanbanWrapper);
+				}
+			}
 			renderKanbanBoard();
-			renderKanbanItem();
+			setTimeout(() => {
+				renderKanbanItem();
+			}, 10);
 		}
 
 		// Filter tasks on search
 		const searchTask = () => {
 			const searchInput = document.getElementById('search-task');
+			if (!searchInput) return;
 			searchInput.addEventListener('input', (e) => {
 				const searchValue = e.target.value;
 				const tasks = document.querySelectorAll('.kanban-item');
@@ -1076,9 +1155,11 @@
 			});
 		}
 
-		renderKanbanBoard();
-		renderKanbanItem();
-		searchTask();
+		if (board_tasks && board_tasks.length > 0) {
+			renderKanbanBoard();
+			renderKanbanItem();
+			searchTask();
+		}
 	</script>
 	<script>
 		// Handle attachments upload
@@ -1086,73 +1167,19 @@
 			const files = event.target.files;
 			
 			// Render files handler
-			renderFiles(files, 'upload');
+			renderFilesHandler(files, 'upload');
 		}
 		
 		// Handle attachments create
 		function handleAttachmentCreate(event) {
 			const files = event.target.files;
-			console.log('files', files);
-			
-			// Render files handler
-			renderFiles(files, 'create');
+			validateAndUploadFiles(files, null, 'create');
 		}
 
 		// Render files handler
-		const renderFiles = (files, mode) => {
+		const renderFilesHandler = (files, mode) => {
 			
-			if (mode == 'upload')
-			{
-				console.log('upload mode');
-				const fileList = document.getElementById('fileList');
-				const attachmentCount = document.getElementById('attachmentCount');
-
-				const formData = new FormData();
-				Array.from(files).forEach(file => {
-					formData.append('attachments[]', file);
-				});
-				let task_id = $('#fileInput').attr('data-task');
-				formData.append('mentorship_request_id', {{ $session_id }});
-				formData.append('task_id', task_id);
-				formData.append('_token', '{{ csrf_token() }}')
-				$.ajax({
-					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
-					type: 'POST',
-					data: formData,
-					processData: false,
-					contentType: false,
-					success: function(response) {
-						if( response.status )
-						{
-							Array.from(response.task.files).forEach(file => {
-								const fileDiv = document.createElement('div');
-								fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-								fileDiv.innerHTML = `
-									<i class="ti ti-file text-info ti-20px me-2"></i>
-									<span class="text-dark fw-bold">${file.name}</span>
-									<div 
-										class="cursor-pointer me-2" 
-										onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
-									>
-										<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-									</div>
-									<a href="${file.url}" download="${file.name}" class="ms-auto">
-										<i class="ti ti-download text-primary ti-16px"></i>
-									</a>
-								`;
-								fileList.appendChild(fileDiv);
-							});
-							attachmentCount.textContent = response.task.files.length;
-						} else { showError( response.message ); }
-					},
-					error: function(error) {
-						console.error('Error uploading files:', error);
-					}
-				});
-
-				return;
-			}
-			else if (mode == 'view')
+			if (mode == 'view')
 			{
 				console.log('view mode');
 				const fileList = document.getElementById('fileList');
@@ -1166,7 +1193,7 @@
 						<span class="text-dark fw-bold">${file.name}</span>
 						<div 
 							class="cursor-pointer me-2" 
-							onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+							onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
 						>
 							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
 						</div>
@@ -1177,9 +1204,9 @@
 					fileList.appendChild(fileDiv);
 				});
 			} else {
-				console.log('create mode');
-				const fileList = document.getElementById('createFileList');
-				const attachmentCount = document.getElementById('createAttachmentCount');
+				console.log('create/edit mode');
+				const fileList = mode === 'create' ? document.getElementById('createFileList') : document.getElementById('editFileList');
+				const attachmentCount = mode === 'create' ? document.getElementById('createAttachmentCount') : document.getElementById('editAttachmentCount');
 				fileList.innerHTML = '';
 				Array.from(files).forEach(file => {
 					const fileDiv = document.createElement('div');
@@ -1189,7 +1216,7 @@
 						<span class="text-dark fw-bold">${file.name}</span>
 						<div 
 							class="cursor-pointer me-2" 
-							onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+							onclick="deleteFileHandlerFunc('${file.name}', '${file.id}', this.parentElement);"
 						>
 							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
 						</div>
@@ -1198,13 +1225,19 @@
 						</a>
 					`;
 					fileList.appendChild(fileDiv);
-					attachmentCount.textContent = files.length;
+					if (mode === 'create') {
+						attachmentCount.textContent = files.length;
+					}
 				});
+				// Set attachment count for edit mode as well
+				if (mode === 'edit') {
+					attachmentCount.textContent = files.length;
+				}
 			}
 		}
 
 		// Delete file handler
-		const deleteFileHandler = (fileName, fileId, ele) => {
+		const deleteFileHandlerFunc = (fileName, fileId, ele) => {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
 				title: "{{__('admin.SureDelete')}}",
@@ -1232,10 +1265,21 @@
 								ele.remove();
 								const attachmentCount = document.getElementById('attachmentCount');
 								attachmentCount.textContent = document.getElementById('fileList').children.length;
-							} else { showError( response.message ); }
+								
+								// Update the task attachment count in board_tasks and reload kanban
+								const taskId = $('#fileInput').attr('data-task');
+								const taskIndex = board_tasks.findIndex(task => task.id == taskId);
+								if (taskIndex !== -1) {
+									board_tasks[taskIndex].attachments = document.getElementById('fileList').children.length;
+									reloadKanban();
+								}
+							} else { releaseFailureAlert({ message: response.message }); }
 						},
 						error: function(error) {
-							console.error('Error deleting file:', error);
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
 						}
 					});
 					return;
@@ -1375,7 +1419,7 @@
 					$('#edit-task-status').trigger('change');
 					$('#edit-task-due-date').val( element.due_date );
 					$('#editFileInput').attr('data-task', element.id);
-					renderFiles(element.files, 'edit');
+					renderFilesHandler(element.files, 'edit');
 					if( typeof( EditAssigneeCustomInlineSuggestion ) !== 'undefined' )
 					{
 						EditAssigneeCustomInlineSuggestion.off('change');
@@ -1425,7 +1469,10 @@
 					$('#editTaskModal').modal('show');
 				},
 				error: function(error) {
-					showError('Unexpected error occurred.');
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		});
@@ -1433,39 +1480,54 @@
 		DeleteTaskButton.addEventListener('click', function(e) {
 			e.preventDefault();
 			let task_id = $(this).attr('data-task');
-			var send_data = {
-				_token: "{{ csrf_token() }}",
-				mentorship_request_id: '{{ $session_id }}',
-				task_id: task_id,
-			}
-			$.ajax({
-				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/remove-task') }}",
-				type: "POST",
-				data: send_data,
-				dataType: "json",
-				success: function(response) {
-					if( response.status )
-					{
-						$('#viewTaskModal').modal('hide');
-						var data = response.data;
-						boards = data.kanban;
-						board_tasks = data.tasks;
-						Swal.fire({
-							icon: 'success',
-							title: response.title,
-							text: response.message,
-							showConfirmButton: false,
-							showCancelButton: false,
-							timer: 4500
-						});
-						reloadKanban();
-					} else { showError( response.message ); }
+			Swal.fire({
+				title: "{{__('admin.SureDelete')}}",
+				text: "{{__('admin.Recover')}}",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "{{ __('admin.DYes') }}",
+				cancelButtonText: "{{ __('admin.No') }}",
+				reverseButtons: true,
+				customClass: {
+						confirmButton: 'btn btn-danger me-2',
+						cancelButton: 'btn btn-label-secondary',
 				},
-				error: function(error) {
-					if( error.status == 422 )
-					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+				buttonsStyling: false,
+			}).then((result) => {
+				if (result.isConfirmed) {
+					var send_data = {
+						_token: "{{ csrf_token() }}",
+						mentorship_request_id: '{{ $session_id }}',
+						task_id: task_id,
 					}
+					$.ajax({
+						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/remove-task') }}",
+						type: "POST",
+						data: send_data,
+						dataType: "json",
+						success: function(response) {
+							if( response.status )
+							{
+								$('#viewTaskModal').modal('hide');
+								var data = response.data;
+								boards = data.kanban;
+								board_tasks = data.tasks;
+								releaseSuccessAlert({ message: response.message, title: response.title });
+								reloadKanban();
+							} else { releaseFailureAlert({ message: response.message }); }
+						},
+						error: function(error) {
+							if( error.status == 422 ) {
+								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({message: message}); }); }
+								return;
+							}
+
+							releaseFailureAlert({
+								title: "{{ __('admin.Error') }}!",
+								message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+							});
+						}
+					});
 				}
 			});
 		})
@@ -1514,13 +1576,18 @@
 							`;
 							commentList.appendChild(commentDiv);
 							commentInput.value = '';
-						} else { showError( response.message ); }
+						} else { releaseFailureAlert({ message: response.message }); }
 					},
 					error: function(error) {
-						if( error.status == 422 )
-						{
-							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+						if( error.status == 422 ) {
+							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+							return;
 						}
+
+						releaseFailureAlert({
+							title: "{{ __('admin.Error') }}!",
+							message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+						});
 					}
 				});
 			}
@@ -1555,33 +1622,44 @@
 						boards = data.kanban;
 						board_tasks = data.tasks;
 						labels = data.labels;
+						
+						// Upload any pending attachments that were selected during task creation
+						if (pendingCreateAttachments.length > 0) {
+							const taskId = data.task.id;
+							uploadFiles(pendingCreateAttachments, taskId, 'create');
+							pendingCreateAttachments = []; // Clear the pending attachments
+						}
+						
 						$('#formTaskModal').modal('hide');
 						refreshLabelsForCreate();
 						$('#task-name').val('');
 						$('#task-content').val('');
-						editQuill.root.innerHTML = '';
+						quill.root.innerHTML = '';
 						$("#task-due-date").val('');
 						$('#task-status').val('pending');
 						$("#task-priority").val('low');
 						$("#task-labels").val('');
 						$("#task-assignee").val('');
-						Swal.fire({
-							icon: 'success',
-							title: response.title,
-							text: response.message,
-							showConfirmButton: false,
-							showCancelButton: false,
-							timer: 4500
-						});
+						// Reset attachments
+						$('#createFileList').empty();
+						$('#createAttachmentCount').text('0');
+						$('#createFileInput').val('');
+						releaseSuccessAlert({ message: response.message, title: response.title });
 						reloadKanban();
-					} else { showError( response.message ); }
+					} else { releaseFailureAlert({ message: response.message }); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
-					if( error.status == 422 )
-					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+					
+					if( error.status == 422 ) {
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+						return;
 					}
+
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		});
@@ -1626,23 +1704,21 @@
 						$("#edit-task-priority").val('low');
 						$("#edit-task-labels").val('');
 						$("#edit-task-assignee").val('');
-						Swal.fire({
-							icon: 'success',
-							title: response.title,
-							text: response.message,
-							showConfirmButton: false,
-							showCancelButton: false,
-							timer: 4500
-						});
+						releaseSuccessAlert({ message: response.message, title: response.title });
 						reloadKanban();
-					} else { showError( response.message ); }
+					} else { releaseFailureAlert({ message: response.message }); }
 				},
 				error: function(error) {
 					$spinner.addClass('d-none');
-					if( error.status == 422 )
-					{
-						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { showError(message); }); }
+					if( error.status == 422 ) {
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { releaseFailureAlert({ message }); }); }
+						return;
 					}
+
+					releaseFailureAlert({
+						title: "{{ __('admin.Error') }}!",
+						message: error.statusText == "Unauthorized" ? "{{ __('admin.dont_have_permission') }}" : "{{ __('admin.An unexpected error occurred, please try again later') }}",
+					});
 				}
 			});
 		});
@@ -1670,5 +1746,31 @@
 		// 	var content = $('#edit-task-content').val();
 		// 	editQuill.root.innerHTML = content;
 		// });
+
+		// Initialize Flatpickr for due date fields
+		document.addEventListener('DOMContentLoaded', function() {
+			// Initialize Flatpickr for create task modal
+			flatpickr("#task-due-date", {
+				dateFormat: "Y-m-d",
+				minDate: "today",
+			});
+
+			// Initialize Flatpickr for edit task modal
+			flatpickr("#edit-task-due-date", {
+				dateFormat: "Y-m-d",
+				minDate: "today",
+			});
+
+			// Clear task description field when opening add task modal
+			$('#formTaskModal').on('show.bs.modal', function() {
+				quill.root.innerHTML = '';
+				document.getElementById('task-content').value = '';
+				// Reset attachments when modal opens
+				$('#createFileList').empty();
+				$('#createAttachmentCount').text('0');
+				$('#createFileInput').val('');
+				pendingCreateAttachments = [];
+			});
+		});
 	</script>
 @stop

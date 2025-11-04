@@ -278,7 +278,7 @@
         cancelButtonText: '{{ __('admin.Cancel') }}',
         customClass: {
           confirmButton: 'btn btn-danger me-3',
-          cancelButton: 'btn btn-secondary'
+          cancelButton: 'btn btn-label-secondary'
         },
         buttonsStyling: false
       }).then((result) => {

@@ -2,6 +2,8 @@
 
 namespace App;
 
+use stdClass;
+use Illuminate\Support\Facades\{DB};
 use Illuminate\Database\Eloquent\Model;
 
 class Formdata extends Model
@@ -20,4 +22,110 @@ class Formdata extends Model
         return $this->belongsTo(Formfield::class, 'field_id', 'id');
     }
 
+    public static function formsData( $request )
+    {
+        $data = [];
+        $user = auth()->user();
+        $l = app()->getLocale();
+        $forms = DB::table('form_data as FD')
+        ->select([
+            'FD.company_id as FD_company_id',
+            'FD.user_id as FD_user_id',
+            'FD.step_id as FD_step_id',
+            'FD.question as FD_question',
+            'FD.answer as FD_answer',
+            'FD.created_at as FD_created_at',
+            'FD.updated_at as FD_updated_at',
+            'FD.deleted_at as FD_deleted_at',
+            'C.name_en as C_name_en',
+            'C.name_ar as C_name_ar',
+            'C.id as C_id',
+            DB::raw("CONCAT(U.first_name_en, ' ', U.last_name_en) as user_name_en"),
+            DB::raw("CONCAT(U.first_name_ar, ' ', U.last_name_ar) as user_name_ar"),
+            'U.id as U_id',
+            'S.title as S_title',
+            'S.id as S_id',
+            'S.cycle_id as S_cycle_id',
+            'CYC.title as CYC_title',
+            'CYC.id as CYC_id',
+            'CYC.organization_id as CYC_organization_id',
+            'O.name_en as O_name_en',
+            'O.name_ar as O_name_ar',
+            'O.id as O_id'
+        ])
+        ->leftJoin('companies as C', 'C.id', '=', 'FD.company_id')
+        ->leftJoin('users as U', 'U.id', '=', 'FD.user_id')
+        ->leftJoin('steps as S', 'S.id', '=', 'FD.step_id')
+        ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
+        ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
+        ->whereNull('FD.deleted_at')
+        ->when($user->organization_id != null, function ($query) use ($user) {
+            return $query->where('CYC.organization_id', $user->organization_id);
+        })
+        ->when($request->has('organization') && trim( $request->organization ), function ($query) use ($request) {
+            return $query->where('O.name_en', 'LIKE', $request->organization);
+        })
+        ->when($request->has('program') && trim( $request->program ), function ($query) use ($request) {
+            return $query->where('CYC.title', 'LIKE', $request->program);
+        })
+        ->when($request->has('step') && trim( $request->step ), function ($query) use ($request) {
+            return $query->where('S.title', 'LIKE', $request->step);
+        })
+        ->get();
+
+        $C = 1;
+        $grouped = $forms->groupBy('FD_step_id');
+        $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
+            $first = $group->first();
+
+            $item = new stdClass;
+            $item->submission_id = $C++;
+            $item->step_id = $stepId;
+            $item->startup_name = $first->{'C_name_' . $l};
+            $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
+            $item->step_name = $first->S_title;
+            $item->program_name = $first->CYC_title;
+            $item->organization_name = $first->O_name_en;
+            $item->created_at = $first->FD_created_at;
+            $item->answers = $group->map(function ($item) use ($l) {
+                $value = $item->FD_answer;
+
+                if( is_string( $value ) && (strpos($value, '/') !== false || strpos($value, '\\') !== false) )
+                {
+                    $filename = basename($value);
+                    $value = [
+                        'type' => 'file',
+                        'path' => $value,
+                        'file_name' => $filename,
+                        'file_url' => asset($value),
+                    ];
+                }
+
+                $submission = new stdClass;
+                $submission->user_id = $item->FD_user_id;
+                $submission->name = $item->{'user_name_' . $l};
+                $submission->label = trim( $item->FD_question );
+                $submission->value = $value;
+                $submission->created_at = $item->FD_created_at;
+                return $submission;
+            })->groupBy('user_id')->values();
+            return $item;
+        })->values();
+
+
+        $data = $data->when($request->has('search') && trim( $request->search ), function ($item) use ($request) {
+            return $item->filter(function ($item) use ($request) {
+                return 
+                    str_contains($item->submission_id, $request->search)
+                    || str_contains($item->startup_name, $request->search)
+                    || str_contains($item->submitted_by, $request->search)
+                    || str_contains($item->step_name, $request->search)
+                    || str_contains($item->program_name, $request->search)
+                    || str_contains($item->organization_name, $request->search)
+                    || str_contains($item->created_at, $request->search);
+            })->values();
+        });
+
+        return $data;
+    }
 }

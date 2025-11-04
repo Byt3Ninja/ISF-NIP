@@ -23,6 +23,7 @@ use App\TrainingContent;
 use App\TrainingSession;
 use App\SessionRecording;
 use App\MentorshipRequest;
+use App\SessionAttendance;
 use App\TrainingCompleted;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -46,6 +47,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Jobs\SendTrainingNotificationJob;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
+use App\TrainingDuration;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class TrainingController extends Controller
@@ -516,6 +518,41 @@ class TrainingController extends Controller
 		}
 	}
 
+	public function timeTracking(Request $request)
+	{
+		
+		Log::info($request->all());
+		$user= Auth::user();
+		if(!$user->hasAnyRole('registered')){
+			return back()->withInput()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
+		}
+		
+		 $request->validate([
+            'duration_minutes' => 'required|integer|min:1',
+			'trainingId' => 'required|integer',
+        ]);
+
+		$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
+
+        TrainingDuration::create([
+            'user_id' => $user->id,
+			'company_id' => $user->company_id,
+			'cycle_id' => $user->company->cycle,
+			'step_id' => $user->company->step,
+			'training_sessions_id' => $training->id,
+            'page_url' => $request->page_url,
+            'duration_minutes' => $request->duration_minutes,
+        ]);
+
+		$totalDuration = TrainingDuration::where('training_sessions_id', $training->id)->sum('duration_minutes');
+
+		TrainingSession::where('id', $training->id)->update([
+			'duration' => $totalDuration,
+		]);
+
+        return response()->json(['status' => 'success']);
+	}
+
 	public function results($id = 0)
 	{
 		try {
@@ -566,22 +603,25 @@ class TrainingController extends Controller
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
 			}
-			$sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
+			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
+			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC')->get();
+
+			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
+			
 			$online = Training::get();
-			if ($request->type != 0) {
-				$sessions = $sessions->where('type', $request->type);
-			}
-			if ($request->dateFrom != 0) {
-				$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
-			}
+			// if ($request->type != 0) {
+			// 	$sessions = $sessions->where('type', $request->type);
+			// }
+			// if ($request->dateFrom != 0) {
+			// 	$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
+			// }
 
-			if ($request->dateTo != 0) {
-				$sessions = $sessions->where('datetime', '<=', $request->dateTo);
-			}
+			// if ($request->dateTo != 0) {
+			// 	$sessions = $sessions->where('datetime', '<=', $request->dateTo);
+			// }
 
-			$sessions = $sessions->get();
 			// dd($sessions->toArray());
-			return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
+			return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'cycles', 'online'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
 		}
@@ -676,13 +716,13 @@ class TrainingController extends Controller
 				// ======> notify Trainer <=================
 				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
-				return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Online_Session_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'online') {
 				$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online);
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null, $addOrEdit);
 				}
-				return back()->with(['message' => 'Saved', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Online_Training_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'offline') {
 				$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email);
 				// ======> notify Trainer <=================
@@ -690,7 +730,7 @@ class TrainingController extends Controller
 				$address  = $request->training_Address ?? 'No Address';
 				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
 				// ==========> End Notify <================
-				return back()->with(['message' => 'Saved', 'class' => 'success']);
+				return back()->with(['message' => __('cycles.Offline_Session_Added_Successfully'), 'class' => 'success']);
 			} else {
 				return back()->with(['message' => 'Can\'t add session', 'class' => 'danger']);
 			}
@@ -801,7 +841,7 @@ class TrainingController extends Controller
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];
 			$join = $onlineMeeting['data']['join_url'];
-			$passcode = $onlineMeeting['data']['passcode'];
+			$passcode = $onlineMeeting['data']['passcode'] ?? null;
 
 			$data = [
 				'type' => $type,
@@ -1023,38 +1063,101 @@ class TrainingController extends Controller
 			}
 
 			$response = $this->meetingService->getSessionReport($zoomId);
-			if ($response['success']) {
-				$participants = $response['data']['participants'] ?? [];
 
-				foreach ($participants as $participant) {
-					$joinDate = isset($participant['join_time'])
-						? Carbon::parse($participant['join_time'])->toDateTimeString()
-						: null;
-					$endDate = isset($participant['leave_time'])
-						? Carbon::parse($participant['leave_time'])->toDateTimeString()
-						: null;
+			$serviceClass = get_class($this->meetingService);
+        	$isZoom = stripos($serviceClass, 'zoom') !== false;
+        	$isTeams = stripos($serviceClass, 'team') !== false || stripos($serviceClass, 'graph') !== false;
+			if ($isZoom) {
+             if (!empty($response['success'])) {
+                $participants = $response['data']['participants'] ?? [];
 
-					SessionReport::updateOrCreate(
-						[
-							'session_id' => $session ? $session->id : null,
-							'participant_user_id' => $participant['user_id'] ?? null,
-						],
-						[
-							'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
-							'participant_email' => $participant['user_email'] ?? null,
-							'participant_name' => $participant['name'] ?? null,
-							'participant_join_date' => $joinDate,
-							'participant_end_date' => $endDate,
-							'attendance_duration' => $participant['duration'] ?? 0,
-						]
-					);
-				}
-				return redirect()->back()->with(['message' => 'Session report updated', 'class' => 'success']);
-			} else {
-				return redirect()->back()->with(['message2' => 'session report is not available yet']);
-			}
+                foreach ($participants as $participant) {
+                    $joinDate = isset($participant['join_time']) ? Carbon::parse($participant['join_time'])->utc()->toDateTimeString() : null;
+                    $endDate = isset($participant['leave_time']) ? Carbon::parse($participant['leave_time'])->utc()->toDateTimeString() : null;
+
+                    SessionReport::updateOrCreate(
+                        [
+                            'session_id' => $session ? $session->id : null,
+                            'participant_user_id' => $participant['user_id'] ?? null,
+                        ],
+                        [
+                            'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
+                            'participant_email' => $participant['user_email'] ?? null,
+                            'participant_name' => $participant['name'] ?? null,
+                            'participant_join_date' => $joinDate,
+                            'participant_end_date' => $endDate,
+                            'attendance_duration' => $participant['duration'] ?? 0,
+                        ]
+                    );
+                }
+
+                return redirect()->back()->with(['message' => 'Session report updated', 'class' => 'success']);
+            } else {
+                Log::warning('Zoom sessionReport: no success', ['response' => $response]);
+                return redirect()->back()->with(['message2' => 'session report is not available yet']);
+            }
+        } elseif ($isTeams) {
+			 $participants = $response['participants'] ?? [];
+
+            if (empty($participants)) {
+                Log::warning('Teams sessionReport: participants empty', ['response' => $response]);
+                return redirect()->back()->with(['message2' => 'session report is not available yet', 'debug' => $response]);
+            }
+
+            foreach ($participants as $p) {
+                $identity = $p['identity'] ?? null;
+
+                $participantUserId = null;
+                $participantName = null;
+
+                if (is_array($identity)) {
+                    if (isset($identity['user']) && is_array($identity['user'])) {
+                        $participantUserId = $identity['user']['id'] ?? null;
+                        $participantName = $identity['user']['displayName'] ?? $identity['user']['displayname'] ?? null;
+                    } else {
+                        $participantUserId = $identity['id'] ?? null;
+                        $participantName = $identity['displayName'] ?? $identity['displayname'] ?? null;
+                    }
+                }
+
+                $email = $p['emailAddress'] ?? null;
+                $duration = $p['totalAttendanceInSeconds'] ?? 0;
+
+                $interval = $p['attendanceIntervals'][0] ?? null;
+                $joinDate = $interval['joinDateTime'] ?? $interval['joinDate'] ?? null;
+                $leaveDate = $interval['leaveDateTime'] ?? $interval['leaveDate'] ?? null;
+
+                try {
+                    $joinDateParsed = $joinDate ? Carbon::parse($joinDate)->utc()->toDateTimeString() : null;
+                } catch (\Throwable $ex) {
+                    $joinDateParsed = null;
+                }
+                try {
+                    $leaveDateParsed = $leaveDate ? Carbon::parse($leaveDate)->utc()->toDateTimeString() : null;
+                } catch (\Throwable $ex) {
+                    $leaveDateParsed = null;
+                }
+
+                SessionReport::updateOrCreate(
+                    [
+                        'session_id' => $session ? $session->id : null,
+                        'participant_user_id' => $participantUserId,
+                    ],
+                    [
+                        'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
+                        'participant_email' => $email,
+                        'participant_name' => $participantName,
+                        'participant_join_date' => $joinDateParsed,
+                        'participant_end_date' => $leaveDateParsed,
+                        'attendance_duration' => $duration ?? 0,
+                    ]
+                );
+            }
+            
+         return redirect()->back()->with(['message' => 'Session Report Updated', 'class' => 'success']);
+        } 
 		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage());
+			Log::error('Error in TrainingController@sessionReport: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 			return redirect()->back()->with(['message2' => 'session_report_not_available']);
 		}
 	}
@@ -1063,121 +1166,89 @@ class TrainingController extends Controller
 	{
 		$this->meetingService =  OnlineMeetingFactory::create();
 		try {
-			$sessionId = null;
-			$zoomId = null;
-			$mentorshipRequest = null;
+        $sessionId = null;
+        $zoomId = null;
+        $mentorshipRequest = null;
 
-			$type = request()->query('type');
+        $type = request()->query('type');
 
-			if ($type === 'training') {
-				$session = TrainingSession::findOrFail($id);
-				$zoomId = $session->zoom_id;
-				$sessionId = $session->id;
-			} elseif ($type === 'mentorship') {
-				$mentorshipRequest = MentorshipRequest::findOrFail($id);
-				$zoomId = $mentorshipRequest->zoom_id;
-			}
+        if ($type === 'training') {
+            $session = TrainingSession::findOrFail($id);
+            $zoomId = $session->zoom_id;
+            $sessionId = $session->id;
+        } elseif ($type === 'mentorship') {
+            $mentorshipRequest = MentorshipRequest::findOrFail($id);
+            $zoomId = $mentorshipRequest->zoom_id;
+        }
 
-			if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
-				return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
-			}
+        if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
+            return redirect()->back()->with([
+                'message2' => 'Session Recording is not available yet'
+            ]);
+        }
 
-			$response = $this->meetingService->getSessionRecord($zoomId);
+        $response = $this->meetingService->getSessionRecord($zoomId);
 
-			$recordingFiles = $response['data']['recording_files'] ?? [];
-			$password = $response['data']['password'] ?? null;
+        if (!empty($response['data'][0])) {
+            $file = $response['data'][0];
 
-			$firstFile = $recordingFiles[0] ?? null;
+            $recordingId = $file['id'] ?? null;
+            $recordingUrl = $file['recordingContentUrl'] ?? $file['meetingId'] ?? null;
+            $createdDateTime = isset($file['createdDateTime']) ? Carbon::parse($file['createdDateTime'])->utc()->toDateTimeString() : null;
 
-			if ($response['success']) {
-				$recordingTime = isset($firstFile['recording_start'])
-					? Carbon::parse($firstFile['recording_start'])->toDateTimeString()
-					: null;
+            if ($recordingId) {
+                SessionRecording::updateOrCreate(
+                    ['recording_id' => $recordingId],
+                    [
+                        'session_id' => $sessionId,
+                        'mentorship_request_id' => $mentorshipRequest?->id,
+                        'recording_type' => 'Teams Recording',
+                        'recording_view_url' => $recordingUrl,
+                        'recording_download_url' => $recordingUrl,
+                        'recording_time' => $createdDateTime,
+                        'passcode' => null,
+                    ]
+                );
 
-				SessionRecording::updateOrCreate(
-					[
-						'recording_id' => $firstFile['id'],
-					],
-					[
-						'session_id' => $sessionId ? $sessionId : null,
-						'mentorship_request_id' => $mentorshipRequest ? $mentorshipRequest->id : null,
-						'recording_type' => $firstFile['recording_type'] ?? null,
-						'recording_view_url' => $firstFile['play_url'] ?? null,
-						'recording_download_url' => $firstFile['download_url'] ?? null,
-						'recording_time' => $recordingTime,
-						'passcode' => $password,
-					]
-				);
-				return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
-			} else {
-				return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
-			}
+                return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
+            }
+        }
+
+        if (!empty($response['data']['recording_files'])) {
+            $file = $response['data']['recording_files'][0] ?? null;
+
+            if ($file) {
+                $recordingTime = isset($file['recording_start']) ? Carbon::parse($file['recording_start'])->utc()->toDateTimeString() : null;
+                $password = $response['data']['password'] ?? null;
+
+                SessionRecording::updateOrCreate(
+                    ['recording_id' => $file['id']],
+                    [
+                        'session_id' => $sessionId,
+                        'mentorship_request_id' => $mentorshipRequest?->id,
+                        'recording_type' => $file['recording_type'] ?? null,
+                        'recording_view_url' => $file['play_url'] ?? null,
+                        'recording_download_url' => $file['download_url'] ?? null,
+                        'recording_time' => $recordingTime,
+                        'passcode' => $password,
+                    ]
+                );
+
+                return redirect()->back()->with(['message' => 'Session Record updated', 'class' => 'success']);
+            }
+        }
+
+        return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
+
 		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage());
+			Log::error('Error in TrainingController@sessionRecord: ' . $e->getMessage(), [
+				'trace' => $e->getTraceAsString()
+			]);
+
 			return redirect()->back()->with(['message2' => 'Session Recording is not available yet']);
 		}
 	}
 
-	public function attendanceReport(Request $request, $id)
-	{
-		try {
-			$session = TrainingSession::find($id);
-
-			if (!$session || !$session->zoom_id) {
-				return response()->json(['success' => false, 'message' => 'Session not found'], 404);
-			}
-
-			if ($this->meetingService instanceof \App\Services\TeamsService) {
-				$sessionReportResponse = $this->meetingService->getSessionReport($session->zoom_id);
-
-				if (!$sessionReportResponse['success']) {
-					return response()->json([
-						'success' => false,
-						'message' => 'Failed to fetch session reports: ' . $sessionReportResponse['message'],
-					], 500);
-				}
-
-				$reports = $sessionReportResponse['data']['value'] ?? [];
-				if (empty($reports)) {
-					return response()->json([
-						'success' => false,
-						'message' => 'No attendance reports found for this session.',
-					], 404);
-				}
-
-				$reportId = $reports[0]['id'] ?? null;
-
-				if (!$reportId) {
-					return response()->json([
-						'success' => false,
-						'message' => 'Unable to Determine the Report ID.',
-					], 500);
-				}
-
-				$attendanceReportResponse = $this->meetingService->getMeetingAttendanceReport($session->zoom_id, $reportId);
-
-				// dd($attendanceReportResponse);
-				if ($attendanceReportResponse['success']) {
-					return response()->json([
-						'success' => true,
-						'data' => $attendanceReportResponse['data'],
-					], 200);
-				}
-
-				return response()->json([
-					'success' => false,
-					'message' => 'Failed to fetch attendance report: ' . $attendanceReportResponse['message'],
-				], 500);
-			}
-
-			return response()->json([
-				'success' => false,
-				'message' => 'Invalid meeting service instance.',
-			], 500);
-		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@attendanceReport: ' . $e->getMessage());
-		}
-	}
 
 	public function getdsc($id)
 	{
@@ -1342,4 +1413,363 @@ class TrainingController extends Controller
 			Log::error('Error in TrainingController@attendanceOffline: ' . $e->getMessage());
 		}
 	}
+
+	public function sessionsReport(Request $request)
+	{
+		
+		try {
+			$organization_id = auth()->user()->organization_id;
+
+			$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+				return $q->whereHas('cycle', function ($query) use ($organization_id) {
+					$query->where('organization_id', $organization_id);
+				});
+			})->where('stype', 4)->get();
+			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
+			$online = Training::get();
+			if ($request->type != 0) {
+				$sessions = $sessions->where('type', $request->type);
+			}
+			
+			if ($request->cycle != 0) {
+				$cycleId = $request->cycle;
+				// $sessions = $sessions->where('type', $request->type);
+				$sessions = $sessions->whereHas('step', function ($q) use ($cycleId) {
+					$q->where('cycle_id', $cycleId);
+				});
+			
+			}
+			
+			
+			if ($request->dateFrom != 0) {
+				$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
+			}
+
+			if ($request->dateTo != 0) {
+				$sessions = $sessions->where('datetime', '<=', $request->dateTo);
+			}
+
+			$sessions = $sessions->get();
+			
+			return view('admin/settings/training/sessionsReport', compact('sessions'));
+		} catch (\Throwable $e) {
+			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
+		}
+	}
+
+	/**
+	 * Fetch session reports and recordings data for modal
+	 */
+	public function getSessionReportsData(Request $request)
+	{
+		try {
+			$sessionId = $request->id;
+			
+			if (!$sessionId) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.session_id_required')
+				], 400);
+			}
+
+			$session = TrainingSession::with(['reports', 'recordings', 'step.cycle'])
+				->find($sessionId);
+
+			if (!$session) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.session_not_found')
+				], 404);
+			}
+
+			// Store original counts for debugging
+			$originalReportsCount = $session->reports->count();
+			$originalRecordingsCount = $session->recordings->count();
+
+			// Auto-fetch reports if none exist and session is a Zoom/Teams session
+			if ($session->reports->count() === 0 && $session->type === 'sessions' && $session->zoom_id) {
+				try {
+					// Log::info('Auto-fetch reports: Starting for session ' . $sessionId . ' with zoom_id ' . $session->zoom_id);
+					$this->meetingService = OnlineMeetingFactory::create();
+					if ($this->meetingService && method_exists($this->meetingService, 'getSessionReport')) {
+						// Log::info('Auto-fetch reports: Calling getSessionReport for zoom_id ' . $session->zoom_id);
+						$response = $this->meetingService->getSessionReport($session->zoom_id);
+						// Log::info('Auto-fetch reports: API Response', ['response' => $response]);
+						
+						$serviceClass = get_class($this->meetingService);
+						$isZoom = stripos($serviceClass, 'zoom') !== false;
+						$isTeams = stripos($serviceClass, 'team') !== false || stripos($serviceClass, 'graph') !== false;
+						
+						// Process Zoom reports
+						if ($isZoom && !empty($response['success']) && !empty($response['data']['participants'])) {
+							// Log::info('Auto-fetch reports: Processing Zoom participants', ['count' => count($response['data']['participants'])]);
+							foreach ($response['data']['participants'] as $participant) {
+								$joinDate = isset($participant['join_time']) ? Carbon::parse($participant['join_time'])->utc()->toDateTimeString() : null;
+								$endDate = isset($participant['leave_time']) ? Carbon::parse($participant['leave_time'])->utc()->toDateTimeString() : null;
+
+								SessionReport::updateOrCreate(
+									[
+										'session_id' => $session->id,
+										'participant_user_id' => $participant['user_id'] ?? null,
+									],
+									[
+										'participant_email' => $participant['user_email'] ?? null,
+										'participant_name' => $participant['name'] ?? null,
+										'participant_join_date' => $joinDate,
+										'participant_end_date' => $endDate,
+										'attendance_duration' => $participant['duration'] ?? 0,
+									]
+								);
+							}
+							// Refresh the session data to include new reports
+							$session->load('reports');
+						}
+						// Process Teams reports
+						elseif ($isTeams && !empty($response['participants'])) {
+							foreach ($response['participants'] as $p) {
+								$participantName = $p['displayName'] ?? $p['identity']['user']['displayName'] ?? null;
+								$participantEmail = $p['identity']['user']['email'] ?? null;
+								$participantUserId = $p['identity']['user']['id'] ?? null;
+								$duration = isset($p['totalAttendanceInSeconds']) ? $p['totalAttendanceInSeconds'] / 60 : 0;
+
+								$interval = $p['attendanceIntervals'][0] ?? null;
+								$joinDate = $interval['joinDateTime'] ?? $interval['joinDate'] ?? null;
+								$leaveDate = $interval['leaveDateTime'] ?? $interval['leaveDate'] ?? null;
+
+								try {
+									$joinDateParsed = $joinDate ? Carbon::parse($joinDate)->utc()->toDateTimeString() : null;
+								} catch (\Throwable $ex) {
+									$joinDateParsed = null;
+								}
+								try {
+									$leaveDateParsed = $leaveDate ? Carbon::parse($leaveDate)->utc()->toDateTimeString() : null;
+								} catch (\Throwable $ex) {
+									$leaveDateParsed = null;
+								}
+
+								SessionReport::updateOrCreate(
+									[
+										'session_id' => $session->id,
+										'participant_user_id' => $participantUserId,
+									],
+									[
+										'participant_email' => $participantEmail,
+										'participant_name' => $participantName,
+										'participant_join_date' => $joinDateParsed,
+										'participant_end_date' => $leaveDateParsed,
+										'attendance_duration' => $duration ?? 0,
+									]
+								);
+							}
+							// Refresh the session data to include new reports
+							$session->load('reports');
+							// Log::info('Completed processing reports for session ' . $sessionId . ', final count: ' . $session->reports->count());
+						}
+					}
+				} catch (\Throwable $e) {
+					// Log::info('Auto-fetch reports failed for session ' . $sessionId . ': ' . $e->getMessage());
+				}
+			}
+
+			// Auto-fetch recordings if none exist and session is a Zoom/Teams session
+			if ($session->recordings->count() === 0 && $session->type === 'sessions' && $session->zoom_id) {
+				try {
+					// Log::info('Auto-fetching recordings for session ' . $sessionId . ' with zoom_id: ' . $session->zoom_id);
+					$this->meetingService = OnlineMeetingFactory::create();
+					if ($this->meetingService && method_exists($this->meetingService, 'getSessionRecord')) {
+						$response = $this->meetingService->getSessionRecord($session->zoom_id);
+						// Log::info('Recordings API response for session ' . $sessionId . ': ' . json_encode($response));
+						
+						$serviceClass = get_class($this->meetingService);
+						$isZoom = stripos($serviceClass, 'zoom') !== false;
+						$isTeams = stripos($serviceClass, 'team') !== false || stripos($serviceClass, 'graph') !== false;
+						
+						// Process Zoom recordings
+						if ($isZoom && !empty($response['data']['recording_files'])) {
+							foreach ($response['data']['recording_files'] as $file) {
+								$recordingTime = isset($file['recording_start']) ? Carbon::parse($file['recording_start'])->utc()->toDateTimeString() : null;
+								$password = $response['data']['password'] ?? null;
+
+								SessionRecording::updateOrCreate(
+									['recording_id' => $file['id']],
+									[
+										'session_id' => $session->id,
+										'recording_type' => $file['recording_type'] ?? null,
+										'recording_view_url' => $file['play_url'] ?? null,
+										'recording_download_url' => $file['download_url'] ?? null,
+										'recording_time' => $recordingTime,
+										'passcode' => $password,
+									]
+								);
+							}
+							// Refresh the session data to include new recordings
+							$session->load('recordings');
+							// Log::info('Processed Zoom recordings for session ' . $sessionId . ', count: ' . $session->recordings->count());
+						}
+						// Process Teams recordings
+						elseif ($isTeams && !empty($response['data'][0])) {
+							$file = $response['data'][0];
+							$recordingId = $file['id'] ?? null;
+							$recordingUrl = $file['recordingContentUrl'] ?? $file['meetingId'] ?? null;
+							$createdDateTime = isset($file['createdDateTime']) ? Carbon::parse($file['createdDateTime'])->utc()->toDateTimeString() : null;
+
+							if ($recordingId) {
+								SessionRecording::updateOrCreate(
+									['recording_id' => $recordingId],
+									[
+										'session_id' => $session->id,
+										'recording_type' => 'Teams Recording',
+										'recording_view_url' => $recordingUrl,
+										'recording_download_url' => $recordingUrl,
+										'recording_time' => $createdDateTime,
+										'passcode' => null,
+									]
+								);
+								// Refresh the session data to include new recordings
+								$session->load('recordings');
+								// Log::info('Processed Teams recordings for session ' . $sessionId . ', count: ' . $session->recordings->count());
+							}
+						} else {
+							// Log::info('No recordings data found in response for session ' . $sessionId);
+						}
+					}
+				} catch (\Throwable $e) {
+					// Log::info('Auto-fetch recordings failed for session ' . $sessionId . ': ' . $e->getMessage());
+				}
+			}
+
+			// Prepare recordings data
+			$recordings = $session->recordings->map(function ($recording) {
+				// Format recording time properly for JavaScript
+				$recordingTime = $recording->recording_time;
+				if ($recordingTime) {
+					try {
+						// Treat stored time as UTC and convert to ISO string
+						$recordingTime = Carbon::parse($recordingTime, 'UTC')->toISOString();
+					} catch (\Exception $e) {
+						$recordingTime = null;
+					}
+				}
+
+				return [
+					'recording_type' => $recording->recording_type,
+					'recording_time' => $recordingTime,
+					'recording_view_url' => $recording->recording_view_url,
+					'recording_download_url' => $recording->recording_download_url,
+				];
+			});
+
+			// Recalculate reports data after potential auto-fetch
+			$reports = $session->reports->map(function ($report) {
+				// Format join and leave times properly for JavaScript
+				$joinDate = $report->participant_join_date;
+				if ($joinDate) {
+					try {
+						$joinDate = Carbon::parse($joinDate, 'UTC')->toISOString();
+					} catch (\Exception $e) {
+						$joinDate = null;
+					}
+				}
+				
+				$endDate = $report->participant_end_date;
+				if ($endDate) {
+					try {
+						$endDate = Carbon::parse($endDate, 'UTC')->toISOString();
+					} catch (\Exception $e) {
+						$endDate = null;
+					}
+				}
+				
+				return [
+					'participant_name' => $report->participant_name,
+					'participant_email' => $report->participant_email,
+					'participant_join_date' => $joinDate,
+					'participant_end_date' => $endDate,
+					'attendance_duration' => $report->attendance_duration,
+				];
+			});
+
+			// Calculate summary data after auto-fetch operations
+			$totalDuration = $session->reports->sum('attendance_duration');
+			$totalParticipants = $session->reports->count();
+			$totalRecordings = $session->recordings->count();
+
+			// Get recording passcode (from first recording if available)
+			$recordingPasscode = $session->recordings->first()->passcode ?? null;
+
+			return response()->json([
+				'success' => true,
+				'data' => [
+					'session' => [
+						'id' => $session->id,
+						'title' => $session->title,
+						'type' => $session->type,
+						'datetime' => $session->datetime,
+						'enddatetime' => $session->enddatetime,
+					],
+					'summary' => [
+						'total_duration' => $totalDuration,
+						'total_participants' => $totalParticipants,
+						'total_recordings' => $totalRecordings,
+					],
+					'reports' => $reports,
+					'recordings' => $recordings,
+					'recording_passcode' => $recordingPasscode,
+				],
+				'debug' => [
+					'session_id' => $sessionId,
+					'zoom_id' => $session->zoom_id,
+					'session_type' => $session->type,
+					'reports_count_before' => $originalReportsCount,
+					'recordings_count_before' => $originalRecordingsCount,
+					'reports_count_after' => $session->reports->count(),
+					'recordings_count_after' => $session->recordings->count(),
+					'auto_fetch_reports_attempted' => $originalReportsCount === 0 && $session->type === 'sessions' && $session->zoom_id,
+					'auto_fetch_recordings_attempted' => $originalRecordingsCount === 0 && $session->type === 'sessions' && $session->zoom_id,
+					'meeting_service_available' => class_exists('App\\Services\\OnlineMeetingFactory'),
+					'session_conditions' => [
+						'has_zoom_id' => !empty($session->zoom_id),
+						'is_sessions_type' => $session->type === 'sessions',
+						'reports_empty' => $originalReportsCount === 0,
+						'recordings_empty' => $originalRecordingsCount === 0
+					]
+				]
+			]);
+
+		} catch (\Throwable $e) {
+			// Log::error('Error in TrainingController@getSessionReportsData: ' . $e->getMessage());
+			
+			return response()->json([
+				'success' => false,
+				'message' => __('admin.error_fetching_session_data')
+			], 500);
+		}
+	}
+
+	public function join($id)
+	{
+		$session = TrainingSession::findOrFail($id);
+		
+		$user = Auth::user();
+		
+		AttendanceTrainingOffline::updateOrCreate(
+			[
+				'training_session_id' => $session->id,
+				'user_id' => $user->id,
+				'company_id' => $user->company_id,
+			],
+			[
+				
+				'step_id' => $session->step_id,
+				'cycle_id' => $session->step->cycle_id,
+				'attendance' => true,
+				'location' => 'online',
+				'created_at' => now(),
+			]
+		);
+
+		
+		return redirect()->away($session->join_url);
+	}
+
 }

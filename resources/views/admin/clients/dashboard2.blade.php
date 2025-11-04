@@ -218,9 +218,9 @@
 							<div class="card">
 								<div class="card-header border-bottom">
 
-										<h4 class="card-title d-flex align-items-center mb-1">
+										<h5 class="card-title d-flex align-items-center mb-1">
 											<i class='bx bx-briefcase font-medium-4 mr-1'></i>{{__('dashboard.My progress')}} : {{Auth::user()->company->cycledata->title }}
-										</h4>
+										</h5>
 
 									<span >{{ __('dashboard.start from').": " .Auth::user()->company->cycledata->start_format. " ".__('dashboard.to').": " .Auth::user()->company->cycledata->end_format  }}</span>
 
@@ -338,7 +338,7 @@
 						<div class="col-md-12">
 							<div class="card">
 								<div class="card-header border-bottom">
-									<h4 class="card-title d-flex align-items-center">
+									<h5 class="card-title d-flex align-items-center">
 										<i class='bx bx-card font-medium-4 mr-1'></i>{{__('dashboard.IncubationList')}}</h4>
 								</div>
 								<div class="card-body">
@@ -389,7 +389,7 @@
 					<div class="col-xl-12 col-md-12 col-sm-12">
 						<div class="card">
 							<div class="card-header border-bottom">
-								<h4 class="card-title d-flex align-items-center">
+								<h5 class="card-title d-flex align-items-center">
 									<i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{__('dashboard.My Latest training')}} :: 
 									<a href="/dashboard/training/my">{{__('dashboard.Show all')}}</a>
 								</h4>
@@ -446,7 +446,7 @@
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header border-bottom">
-								<h4 class="card-title align-items-center">
+								<h5 class="card-title align-items-center">
 									<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
 									@if($days!=14)
 									<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
@@ -562,7 +562,7 @@
 						<div class="col-md-12">
 							<div class="card">
 								<div class="card-header border-bottom">
-									<h4 class="card-title align-items-center">
+									<h5 class="card-title align-items-center">
 										<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.Mentors") }} :
 										
 									</h4>

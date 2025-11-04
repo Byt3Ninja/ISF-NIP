@@ -36,7 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'organization_id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'api_token', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret'];
+        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret', 'accept_email', 'accept_whatsapp', 'accept_pusher'];
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -67,6 +67,14 @@ class User extends Authenticatable implements MustVerifyEmail
                 // throw $th;
             }
         }
+        else
+        {
+            if( empty( $this->email_verified_at ) )
+            {
+                $this->email_verified_at = now();
+                $this->save();
+            }
+        }
 	}
 
     /**
@@ -76,6 +84,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'accept_email' => 'boolean',
+        'accept_whatsapp' => 'boolean',
+        'accept_pusher' => 'boolean',
     ];
     public static function image_handler( $img )
     {
@@ -204,10 +215,10 @@ class User extends Authenticatable implements MustVerifyEmail
         if( !empty( $_role ) )
         {
             $id = $_role->id;
+            RoleUsers::updateOrCreate(
+                ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
+            );
         }
-        RoleUsers::updateOrCreate(
-            ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
-        );
     }
     
     public function hasRole( $name ) 
@@ -330,7 +341,12 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function team_member()
     {
-        return $this->hasOne(Team_member::class, 'user_id');
+        return $this->hasOne(Team_member::class, 'user_id')->where('acceptInvition', 'accepted');
+    }
+
+    public function teamLeader()
+    {
+        return $this->hasOne(Team_member::class, 'user_id')->where('isTeamLeader', 1);
     }
     /**
      * Get all group conversations the user is a participant in.
@@ -417,5 +433,22 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return true;
     }
+
+     public function hasCompletedProfile(): bool
+{
+        return filled($this->phone)
+        && filled($this->country_id)
+        && filled($this->address)
+        && filled($this->timezone);
+}
+
+public function hasCompletedStartup(): bool
+{
+    return $this->company
+        && filled($this->company->name_en)
+        && filled($this->company->address_en)
+        && filled($this->company->est_date)
+        && filled($this->company->stage);
+}
 
 }

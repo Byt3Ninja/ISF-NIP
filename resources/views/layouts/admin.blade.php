@@ -25,10 +25,13 @@
           <!-- Navbar -->
           @include('admin.includes.header')
 
-          
 
           <!-- Content -->
           @yield('content')
+
+          <!-- Survey Reminder Modal -->
+          @include('partials.survey_reminder_modal')
+          <!-- /Survey Reminder Modal -->
 
           <!-- Footer -->
           <footer class="mx-6">
@@ -119,14 +122,14 @@
       @endif
     @endauth
 
-    @auth
+    {{-- @auth
       <script>
         console.log('User roles:', @json(auth()->user()->roles->pluck('name')));
         console.log('Has Registered role:', @json(auth()->user()->hasRole('Registered')));
         console.log('Has Mentor role:', @json(auth()->user()->hasRole('Mentor')));
         console.log('Has any role (Registered|Mentor):', @json(auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor')));
       </script>
-    @endauth
+    @endauth --}}
 
    @if (auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor'))
       <script>console.log('Echo script section executing - user has correct role');</script>
@@ -428,6 +431,79 @@
 
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')
+
+    <script>
+      // Global Toast function
+      function showToast(options) {
+        // Accept object with { message, type } properties
+        const message = options.message || '';
+        const type = options.type || 'info';
+        
+        // Simple toast notification - you can enhance this with your preferred toast library
+        const toast = `
+          <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <div class="d-flex">
+              <div class="toast-body">${message}</div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+          </div>
+        `;
+        
+        $('body').append(toast);
+        $('.toast').last().toast({ delay: 3000 }).toast('show').on('hidden.bs.toast', function() {
+          $(this).remove();
+        });
+      }
+
+      // Global SweetAlert2 configuration
+      const releaseSuccessAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'success',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      }
+
+      const releaseWarningAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'warning',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+
+      const releaseFailureAlert = ({title, message}) => {
+        Swal.fire({
+          icon: 'error',
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+              confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+    </script>
+
     @stack('scripts')
     <!-- END: Page JS-->
   </body>

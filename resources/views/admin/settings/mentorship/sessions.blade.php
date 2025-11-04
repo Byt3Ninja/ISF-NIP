@@ -3,6 +3,18 @@
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
+  
+  <style>
+    /* Spinning icon animation for loading states */
+    .spinner-icon {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 @stop
 
 @section('content')
@@ -48,59 +60,96 @@
                     {{ __('cycles.disapproved requests') }}
                   </button>
                 </div>
-                <button class="btn btn-light ExportExcelMentor">
-                  <i class="ti ti-file-arrow-right me-2 ti-16px"></i>{{ __('cycles.Export') }}
-                </button>
+                <div class="d-flex align-items-center gap-2">
+                  <!-- Filter Modal Trigger -->
+                  <button type="button" class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="ti ti-filter me-2"></i>
+                    {{ __('cycles.Filter') }}
+                  </button>
+                  @if(request()->hasAny(['start_date', 'end_date', 'done', 'cycle_id']))
+                  <button onclick="resetFilters()" class="btn btn-outline-secondary">
+                    <i class="ti ti-refresh me-2"></i>
+                    {{ __('cycles.Reset') }}
+                  </button>
+                  @endif
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="ti ti-file-export me-2"></i>{{ __('cycles.Export') }}
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportMentorship('csv')"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                      <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportMentorship('excel')"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                    </ul>
+                  </div>
+                </div>
               </div>
 
               <div class="card-body">
-                <div class="row g-3 mb-4">
-                  <div class="col-12 col-md-10">
-                    <div class="row">
-                      <div class="col-12 col-md-6 col-lg-2">
-                        <input type="text" class="form-control datewithouttime" id="start_date" value="{{ request('start_date') }}" placeholder="Start Date">
-                      </div>
-                      <div class="col-12 col-md-6 col-lg-2">
-                        <input type="text" class="form-control datewithouttime" id="end_date" value="{{ request('end_date') }}" placeholder="End Date">
-                      </div>
-                      <div class="col-12 col-md-6 col-lg-3">
-                        <select class="form-select select2" id="showValueSelect">
-                          <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>{{ __('cycles.All requests') }}</option>
-                          <option value="" {{ !request()->show ? 'selected' : '' }}>{{ __('cycles.New requests only') }}</option>
-                          <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>{{ __('cycles.approved requests') }}</option>
-                          <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
-                        </select>
-                      </div>
-                      <div class="col-12 col-md-6 col-lg-4">
-                        <select class="form-select select2" id="cycle_id">
-                          @php
-                          $user = auth()->user();
-                          if($user->hasAnyRole(['organizationManager'])) {
-                            $cycles = \App\Cycle::where('organization_id', $user->organization_id)->get();
-                          }else{
-                            $cycles = \App\Cycle::get();
-                          }
-                          @endphp
-                          <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
-                          @foreach ($cycles as $cycle)
-                            <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
-                              {{ $cycle->title }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
+               <!-- Filter Modal -->
+                <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered modal-md">
+                    <div class="modal-content">
+                      <form id="filterForm" method="GET" action="{{ url()->current() }}">
+                        <input type="hidden" name="show" value="all">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="filterModalLabel">{{ __('cycles.Filter_Sessions') }}</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Cancel') }}"></button>
+                        </div>
+
+                        <div class="modal-body">
+                          <div class="row g-6">
+                            <!-- Start Date -->
+                            <div class="col-12 col-md-6">
+                              <label for="start_date" class="form-label">{{ __('cycles.Start_Date') }}</label>
+                              <input type="text" id="filter_start_date" name="start_date" class="form-control datepicker-filter" 
+                                value="{{ request('start_date') }}" placeholder="{{ __('cycles.Start_Date') }}">
+                              <div class="invalid-feedback" id="start_date_error"></div>
+                            </div>
+
+                            <!-- End Date -->
+                            <div class="col-12 col-md-6">
+                              <label for="end_date" class="form-label">{{ __('cycles.End_Date') }}</label>
+                              <input type="text" id="filter_end_date" name="end_date" class="form-control datepicker-filter" 
+                                value="{{ request('end_date') }}" placeholder="{{ __('cycles.End_Date') }}">
+                              <div class="invalid-feedback" id="end_date_error"></div>
+                            </div>
+
+                            
+
+                            <!-- Done Filter -->
+                            <div class="col-12">
+                              <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
+                              <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
+                                <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
+                                <option value="yes" {{ request()->done == 'yes' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
+                                <option value="no" {{ request()->done == 'no' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
+                              </select>
+                            </div>
+
+                            <!-- Cycle -->
+                            <div class="col-12">
+                              <label for="cycle_id" class="form-label">{{ __('cycles.Cycle') }}</label>
+                              <select class="form-select select2" name="cycle_id">
+                                <option value="" disabled>{{ __('cycles.Select_Program') }}</option>
+                                <option value="all" {{ !request()->cycle_id ? 'selected' : '' }}>{{ __('admin.All_Programs') }}</option>
+                                @foreach ($cycles as $cycle)
+                                  <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
+                                    {{ $cycle->title }}
+                                  </option>
+                                @endforeach
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                          <button type="submit" class="btn btn-primary">{{ __('cycles.Apply_Filters') }}</button>
+                        </div>
+                      </form>
                     </div>
                   </div>
-                  <div class="col-8 col-lg-2 d-flex gap-2">
-                    <button class="btn btn-primary btn-icon rounded-circle" id="searchBot">
-                      <i class="ti ti-filter"></i>
-                    </button>
-                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions{{ request()->show ? '?show=' . request()->show : '' }}'">
-                      <i class="ti ti-reload"></i> 
-                    </button>
-                  </div>
                 </div>
-
                 <div class="table-responsive">
                   <table class="table" id="userstable">
                     <thead class="table-light">
@@ -108,6 +157,7 @@
                         <th>{{ __('cycles.Company') }}</th>
                         <th>{{ __('cycles.User/Title') }}</th>
                         <th>{{ __('cycles.Mentor') }}</th>
+                        <th>{{ __('cycles.Cycle') }}</th>
                         <th>{{ __('cycles.Rate/Comment') }}</th>
                         <th>{{ __('cycles.Date/Time') }}</th>
                         <th>{{ __('cycles.Approved') }}</th>
@@ -116,7 +166,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach ($sessions as $session)
+                      @foreach  ($sessions as $session)
                         <tr>
                           <td>
                             <div class="d-flex align-items-center w-px-150">
@@ -154,6 +204,9 @@
                                 @endif
                               {{ $session->mentor->name ?? '' }}
                             </div>
+                          </td>
+                          <td>
+                            {{ optional($cycles->firstWhere('id', $session->cycle_id))->title }}
                           </td>
                           <td>
                             <small>{!! $session->rate_comment ? str_repeat('<i class="ti tis-star text-warning"></i>', $session->rating) . '<br>' . $session->rate_comment : $session->comment !!}</small>
@@ -221,7 +274,7 @@
                                   <i class="ti ti-download"></i>
                                 </a>
                               @endif
-                              <button title="View Report" type="button" data-bs-toggle="modal" data-bs-target="#reportModal{{ $session->id }}" class="btn btn-icon btn-label-warning rounded-circle waves-effect">
+                              <button title="View Report" type="button" onclick="openReportsModal({{ $session->id }})" class="btn btn-icon btn-label-warning rounded-circle waves-effect">
                                  <i class="ti ti-file-text"></i>
                               </button>
                             </div>
@@ -230,127 +283,6 @@
                       @endforeach
                     </tbody>
                   </table>
-                  @foreach ($sessions as $session)
-<!-- Modal for Session Reports and Recordings -->
-<div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Total Meeting Duration -->
-        <div class="mb-3">
-          <strong>{{ __('admin.total_meeting_duration') }}:</strong>
-          {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
-        </div>
-        <!-- Total Number of Participants -->
-        <div class="mb-3">
-          <strong>{{ __('admin.total_number_of_participants') }}:</strong>
-          {{ $session->reports->count() }}
-        </div>
-
-        <!-- Session Reports Section -->
-        @if ($session->reports->count() > 0)
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
-            {{ __('admin.update_reports') }}
-          </a>
-        </div>
-        <table class="table table-bordered mt-2">
-          <thead>
-            <tr>
-              <th class="text-center">#</th>
-              <th class="text-center">{{ __('admin.participant_name') }}</th>
-              <th class="text-center">{{ __('admin.participant_email') }}</th>
-              <th class="text-center">{{ __('admin.join_time') }}</th>
-              <th class="text-center">{{ __('admin.leave_time') }}</th>
-              <th class="text-center">{{ __('admin.attendance_duration') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($session->reports as $key => $report)
-            <tr>
-              <td class="text-center">{{ $key + 1 }}</td>
-              <td class="text-center">{{ $report->participant_name }}</td>
-              <td class="text-center">{{ $report->participant_email }}</td>
-              <td class="text-center">{{ $report->participant_join_date }}</td>
-              <td class="text-center">{{ $report->participant_end_date }}</td>
-              <td class="text-center">{{ round($report->attendance_duration / 60, 2) }} {{ __('admin.minutes') }}</td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-        @else
-        <!-- No Reports: Display Update Button -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <h5>{{ __('admin.session_reports') }}</h5>
-          <a href="{{ route('trainings.reports_session', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-info">
-            {{ __('admin.update_reports') }}
-          </a>
-        </div>
-        @endif
-
-        <!-- Session Recordings Section -->
-        @if ($session->recordings->count() > 0)
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording', ['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
-            {{ __('admin.update_recordings') }}
-          </a>
-        </div>
-        <div class="mt-2">
-          <strong>{{ __('admin.recording_passcode') }}:</strong>
-          <span>{{ $session->recordings->first()->passcode ?? __('admin.not_available') }}</span>
-        </div>
-        <table class="table table-bordered mt-2">
-          <thead>
-            <tr>
-              <th class="text-center">#</th>
-              <th class="text-center">{{ __('admin.recording_type') }}</th>
-              <th class="text-center">{{ __('admin.recording_time') }}</th>
-              <th class="text-center">{{ __('admin.view_recording') }}</th>
-              <th class="text-center">{{ __('admin.download_recording') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($session->recordings as $key => $recording)
-            <tr>
-              <td class="text-center">{{ $key + 1 }}</td>
-              <td class="text-center">{{ $recording->recording_type }}</td>
-              <td class="text-center">{{ $recording->recording_time }}</td>
-              <td class="text-center">
-                <a href="{{ $recording->recording_view_url }}" target="_blank" class="btn btn-primary">
-                  {{ __('admin.View') }}
-                </a>
-              </td>
-              <td class="text-center">
-                <a href="{{ $recording->recording_download_url }}" target="_blank" class="btn btn-success">
-                  {{ __('admin.Download') }}
-                </a>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-        @else
-        <!-- No Recordings: Display Update Button -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <h5>{{ __('admin.session_recordings') }}</h5>
-          <a href="{{ route('trainings.reports_recording',['id' => $session->id, 'type' => 'mentorship']) }}" class="btn btn-warning">
-            {{ __('admin.update_recordings') }}
-          </a>
-        </div>
-        @endif
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
-      </div>
-    </div>
-  </div>
-</div>
-@endforeach
                 </div>
               </div>
             </div>
@@ -360,6 +292,193 @@
     </div>
   </div>
   <!-- END: Content-->
+
+<!-- Enhanced Modal for Session Reports and Recordings -->
+<div class="modal fade" id="reportsModal" tabindex="-1" aria-labelledby="reportsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-label-secondary pb-4">
+        <div class="d-flex align-items-center">
+          <div class="bg-white me-2 w-px-40 h-px-40 d-flex align-items-center justify-content-center rounded-circle">
+            <i class="ti ti-file-analytics"></i>
+          </div>
+          <div>
+            <h5 class="modal-title mb-0" id="reportsModalLabel">
+              {{ __('admin.session_reports_and_recordings') }}
+            </h5>
+            <small id="sessionTitleSubtext"></small>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body p-0">
+        <!-- Loading State -->
+        <div id="modalLoadingState" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">{{ __('admin.Loading') }}...</span>
+          </div>
+          <p class="mt-3 text-muted">{{ __('admin.fetching_session_data') }}...</p>
+        </div>
+
+        <!-- Main Content -->
+        <div id="modalMainContent" style="display: none;">
+          <!-- Session Summary Cards -->
+          @php
+            $summaryData = [
+              ['label' => __('admin.total_duration'), 'id' => 'totalDuration', 'icon' => 'clock', 'color' => 'info'],
+              ['label' => __('admin.total_participants'), 'id' => 'totalParticipants', 'icon' => 'users', 'color' => 'success'],
+              ['label' => __('admin.recordings_count'), 'id' => 'totalRecordings', 'icon' => 'video', 'color' => 'warning'],
+            ]
+          @endphp
+          <div class="row g-3 p-8">
+            @foreach ($summaryData as $key => $item)
+              <div class="col-md-4">
+                <div class="card card-border-shadow-{{ $item['color'] }} h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-center text-center mb-2">
+                      <div class="avatar me-4">
+                        <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
+                          <i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
+                        </span>
+                      </div>
+                      <h5 class="mb-0" id="{{ $item['id'] }}">-</h5>
+                      @if ($key != 1)
+                        <small class="text-muted ms-2">{{ __('admin.min') }}</small>
+                      @endif
+                    </div>
+                    <h6 class="text-center mb-0">{{ $item['label'] }}</h6>
+                  </div>
+                </div>
+              </div>
+            @endforeach
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="px-8 py-0">
+            <ul class="nav nav-pills nav-fill" id="reportsTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-content" type="button" role="tab">
+                  <i class="ti ti-file-text me-2"></i>{{ __('admin.session_reports') }}
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="recordings-tab" data-bs-toggle="tab" data-bs-target="#recordings-content" type="button" role="tab">
+                  <i class="ti ti-video me-2"></i>{{ __('admin.session_recordings') }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content p-8" id="reportsTabContent">
+            <!-- Reports Tab -->
+            <div class="tab-pane fade show active" id="reports-content" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">{{ __('admin.attendance_details') }}</h6>
+                <button id="refreshReportsBtn" class="btn btn-outline-info btn-sm">
+                  <i class="ti ti-refresh me-1"></i>{{ __('admin.refresh_reports') }}
+                </button>
+              </div>
+              
+              <div id="reportsTableContainer">
+                <div class="table-responsive">
+                  <table class="table table-hover" id="reportsTable">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center">#</th>
+                        <th>{{ __('admin.participant_name') }}</th>
+                        <th>{{ __('admin.participant_email') }}</th>
+                        <th class="text-center">{{ __('admin.join_time') }}</th>
+                        <th class="text-center">{{ __('admin.leave_time') }}</th>
+                        <th class="text-center">{{ __('admin.duration') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                      <!-- Dynamic content -->
+                    </tbody>
+                  </table>
+                </div>
+                <div id="reportsEmptyState" class="text-center py-5" style="display: none;">
+                  <div class="mb-3">
+                    <i class="ti ti-file-x display-1 text-secondary"></i>
+                  </div>
+                  <h6 class="mb-2">{{ __('admin.no_reports_available') }}</h6>
+                  <p class="text-muted mb-3">{{ __('admin.no_reports_description') }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recordings Tab -->
+            <div class="tab-pane fade" id="recordings-content" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">{{ __('admin.recording_details') }}</h6>
+                <button id="refreshRecordingsBtn" class="btn btn-outline-warning btn-sm">
+                  <i class="ti ti-refresh me-1"></i>{{ __('admin.refresh_recordings') }}
+                </button>
+              </div>
+
+              <div id="recordingPasscodeContainer" class="alert alert-info mb-3" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="ti ti-key me-2"></i>
+                  <strong>{{ __('admin.recording_passcode') }}:</strong>
+                  <span id="recordingPasscode" class="ms-2 font-monospace"></span>
+                  <button class="btn btn-sm btn-outline-info ms-auto" onclick="copyToClipboard('recordingPasscode')">
+                    <i class="ti ti-copy fs-6"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div id="recordingsTableContainer">
+                <div class="table-responsive">
+                  <table class="table table-hover" id="recordingsTable">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="text-center">#</th>
+                        <th>{{ __('admin.recording_type') }}</th>
+                        <th class="text-center">{{ __('admin.recording_time') }}</th>
+                        <th class="text-center">{{ __('admin.actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recordingsTableBody">
+                      <!-- Dynamic content -->
+                    </tbody>
+                  </table>
+                </div>
+                <div id="recordingsEmptyState" class="text-center py-5" style="display: none;">
+                  <div class="mb-3">
+                    <i class="ti ti-video-off display-1 text-secondary"></i>
+                  </div>
+                  <h6 class="mb-2">{{ __('admin.no_recordings_available') }}</h6>
+                  <p class="text-muted mb-3">{{ __('admin.no_recordings_description') }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="modalErrorState" class="text-center py-5" style="display: none;">
+          <div class="mb-3">
+            <i class="ti ti-alert-triangle display-1 text-danger"></i>
+          </div>
+          <h6 class="mb-2">{{ __('admin.error_loading_data') }}</h6>
+          <p class="text-muted mb-3" id="errorMessage"></p>
+          <button id="retryLoadBtn" class="btn btn-outline-primary">
+            <i class="ti ti-refresh me-2"></i>{{ __('admin.retry') }}
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-label-secondary pt-6">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-2"></i>{{ __('admin.Close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: Content-->
   <div class="modal fade text-left" id="ModifyRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -432,47 +551,337 @@
 
       alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
     });
-    $(document).ready(function() {
-    $('#userstable').DataTable().destroy();
-    $('#userstable').DataTable({
-    "responsive": true,
-    "searching": true,
-    "lengthChange": false,
-    "paging": true,
-    "bInfo": false,
-    "order": [],
-    "columnDefs": [
-      {
-        "orderable": false,
-        "targets": [0, 1, 2, 3, 4, 5, 6, 7]
-      }
-    ],
-    @if ($l == 'ar')
-      "language": {
-        "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-        "sLoadingRecords": "جارٍ التحميل...",
-        "sProcessing": "جارٍ التحميل...",
-        "sLengthMenu": "أظهر _MENU_ مدخلات",
-        "sZeroRecords": "لم يعثر على أية سجلات",
-        "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-        "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-        "sInfoPostFix": "",
-        "sSearch": "ابحث:",
-        "sUrl": "",
-        "oPaginate": {
-          "sFirst": "الأول",
-          "sPrevious": "السابق",
-          "sNext": "التالي",
-          "sLast": "الأخير"
-        },
-        "oAria": {
-          "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-          "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+
+    // Helper function to copy text to clipboard
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast({ message: '{{ __("admin.copied_to_clipboard") }}', type: 'success' });
+        }).catch(() => {
+          showToast({ message: '{{ __("admin.copy_failed") }}', type: 'danger' });
+        });
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast({ message: '{{ __("admin.copied_to_clipboard") }}', type: 'success' });
+        } catch (err) {
+          showToast({ message: '{{ __("admin.copy_failed") }}', type: 'danger' });
         }
+        document.body.removeChild(textArea);
       }
-    @endif
+    }
+
+    // Enhanced Reports Modal Functions
+    let currentSessionId = null;
+
+    function openReportsModal(sessionId) {
+      currentSessionId = sessionId;
+      
+      // Reset modal state
+      $('#modalLoadingState').show();
+      $('#modalMainContent').hide();
+      $('#modalErrorState').hide();
+      
+      // Show modal
+      $('#reportsModal').modal('show');
+      
+      // Fetch session data
+      fetchSessionData(sessionId);
+    }
+
+    function fetchSessionData(sessionId, showLoading = true) {
+      if (showLoading) {
+        $('#modalLoadingState').show();
+        $('#modalMainContent').hide();
+        $('#modalErrorState').hide();
+      }
+
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+
+      return $.ajax({
+        type: "POST",
+        url: "/dashboard/mentorship/session-reports-data",
+        data: { "id": sessionId },
+        timeout: 30000,
+        success: function(response) {
+          if (response.success) {
+            populateModalData(response.data);
+            $('#modalLoadingState').hide();
+            $('#modalMainContent').show();
+          } else {
+            showError(response.message || '{{ __("admin.error_fetching_data") }}');
+          }
+        },
+        error: function(xhr, status, error) {
+          let message = '{{ __("admin.network_error") }}';
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+          } else if (status === 'timeout') {
+            message = '{{ __("admin.request_timeout") }}';
+          }
+          showError(message);
+        }
+      });
+    }
+
+    function populateModalData(data) {
+      // Update modal title
+      $('#sessionTitleSubtext').text(data.session.title || '{{ __("admin.untitled_session") }}');
+      
+      // Update summary cards
+      $('#totalDuration').text(Math.round(data.summary.total_duration / 60 * 100) / 100);
+      $('#totalParticipants').text(data.summary.total_participants);
+      $('#totalRecordings').text(data.summary.total_recordings);
+      
+      // Populate reports table
+      populateReportsTable(data.reports);
+      
+      // Populate recordings table
+      populateRecordingsTable(data.recordings, data.recording_passcode);
+    }
+
+    function populateReportsTable(reports) {
+      const tbody = $('#reportsTableBody');
+      tbody.empty();
+      
+      if (reports && reports.length > 0) {
+        reports.forEach((report, index) => {
+          const duration = Math.round(report.attendance_duration / 60 * 100) / 100;
+          const row = `
+            <tr>
+              <td class="text-center fw-semibold">${index + 1}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="me-2">
+                    <i class="ti ti-user fs-6 text-primary"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">${report.participant_name || '{{ __("admin.unknown") }}'}</h6>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-label-info">${report.participant_email || '{{ __("admin.not_provided") }}'}</span>
+              </td>
+              <td class="text-center">
+                <small class="text-muted">${formatDateTime(report.participant_join_date)}</small>
+              </td>
+              <td class="text-center">
+                <small class="text-muted">${formatDateTime(report.participant_end_date)}</small>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-label-success">${duration} {{ __("admin.min") }}</span>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+        
+        $('#reportsTableContainer table').show();
+        $('#reportsEmptyState').hide();
+      } else {
+        $('#reportsTableContainer table').hide();
+        $('#reportsEmptyState').show();
+      }
+    }
+
+    function populateRecordingsTable(recordings, passcode) {
+      const tbody = $('#recordingsTableBody');
+      tbody.empty();
+      
+      // Handle passcode
+      if (passcode) {
+        $('#recordingPasscode').text(passcode);
+        $('#recordingPasscodeContainer').show();
+      } else {
+        $('#recordingPasscodeContainer').hide();
+      }
+      
+      if (recordings && recordings.length > 0) {
+        recordings.forEach((recording, index) => {
+          const recordingType = recording.recording_type ? recording.recording_type.replace(/_/g, ' ') : '{{ __("admin.video") }}';
+          const row = `
+            <tr>
+              <td class="text-center fw-semibold">${index + 1}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="me-2">
+                    <i class="ti ti-video fs-6 text-warning"></i>
+                  </div>
+                  <div class="text-capitalize">
+                    <h6 class="mb-0">${recordingType}</h6>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <small class="text-muted">${formatDateTime(recording.recording_time)}</small>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm">
+                  ${recording.recording_view_url ? 
+                    `<a href="${recording.recording_view_url}" target="_blank" class="btn btn-outline-primary btn-sm">
+                      <i class="ti ti-eye fs-6"></i>
+                    </a>` : ''
+                  }
+                  ${recording.recording_download_url ? 
+                    `<a href="${recording.recording_download_url}" target="_blank" class="btn btn-outline-success btn-sm">
+                      <i class="ti ti-download fs-6"></i>
+                    </a>` : ''
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+        
+        $('#recordingsTableContainer table').show();
+        $('#recordingsEmptyState').hide();
+      } else {
+        $('#recordingsTableContainer table').hide();
+        $('#recordingsEmptyState').show();
+      }
+    }
+
+    function showError(message) {
+      $('#modalLoadingState').hide();
+      $('#modalMainContent').hide();
+      $('#errorMessage').text(message);
+      $('#modalErrorState').show();
+    }
+
+    function refreshReports() {
+      if (!currentSessionId) return;
+      
+      const btn = $('#refreshReportsBtn');
+      const originalHtml = btn.html();
+      btn.html('<i class="ti ti-loader-2 spinner-icon me-1"></i>{{ __("admin.refreshing") }}...');
+      btn.prop('disabled', true);
+      
+      fetchSessionData(currentSessionId, false).always(function() {
+        btn.html(originalHtml);
+        btn.prop('disabled', false);
+      });
+    }
+
+    function refreshRecordings() {
+      if (!currentSessionId) return;
+      
+      const btn = $('#refreshRecordingsBtn');
+      const originalHtml = btn.html();
+      btn.html('<i class="ti ti-loader-2 spinner-icon me-1"></i>{{ __("admin.refreshing") }}...');
+      btn.prop('disabled', true);
+      
+      fetchSessionData(currentSessionId, false).always(function() {
+        btn.html(originalHtml);
+        btn.prop('disabled', false);
+      });
+    }
+
+    function formatDateTime(dateTime) {
+      if (!dateTime) return '{{ __("admin.not_available") }}';
+      
+      try {
+        const date = new Date(dateTime);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          return '{{ __("admin.invalid_date") }}';
+        }
+        
+        const options = {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        };
+        
+        return date.toLocaleString('{{ app()->getLocale() }}', options);
+      } catch (error) {
+        console.error('Date formatting error:', error);
+        return '{{ __("admin.invalid_date") }}';
+      }
+    }
+
+    // Event Listeners
+    $(document).ready(function() {
+      $('#refreshReportsBtn').on('click', refreshReports);
+      $('#refreshRecordingsBtn').on('click', refreshRecordings);
+      $('#retryLoadBtn').on('click', () => fetchSessionData(currentSessionId));
     });
+    $(document).ready(function() {
+    let mentorshipTable = $('#userstable').DataTable({
+      "responsive": true,
+      "searching": true,
+      "lengthChange": false,
+      "paging": true,
+      "bInfo": false,
+      "order": [],
+      "columnDefs": [
+        {
+          "orderable": false,
+          "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        }
+      ],
+        "language": {
+          emptyTable: "{{ $l === 'ar' ? 'لا توجد جلسات ارشاد متاحة' : 'No Mentorship Sessions Found' }}",
+         @if ($l === 'ar')
+          "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+          "sLoadingRecords": "جارٍ التحميل...",
+          "sProcessing": "جارٍ التحميل...",
+          "sLengthMenu": "أظهر _MENU_ مدخلات",
+          "sZeroRecords": "لم يعثر على أية سجلات",
+          "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+          "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+          "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+          "sInfoPostFix": "",
+          "sSearch": "ابحث:",
+          "sUrl": "",
+          "oPaginate": {
+            "sFirst": "الأول",
+            "sPrevious": "السابق",
+            "sNext": "التالي",
+            "sLast": "الأخير"
+          },
+          "oAria": {
+            "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+          }
+      @endif
+       },
+      buttons: [
+        { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] } },
+        { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] } }
+      ]
+      });
+
+    // Global export mentorship function
+    window.exportMentorship = function (format) {
+      if (!mentorshipTable) {
+        alert('{{ __("admin.no_data_to_export") }}');
+        return;
+      }
+      try {
+        mentorshipTable.button(`.buttons-${format}`).trigger();
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('{{ __("admin.export_failed") }}');
+      }
+    }
     });
   </script>
   <script>
@@ -491,7 +900,72 @@
     //   }
     // });
 
-    $('.datewithouttime').flatpickr({
+    // Initialize flatpickr for filter modal date pickers with validation
+    let startDatePicker = $('#filter_start_date').flatpickr({
+      enableTime: false,
+      dateFormat: "Y-m-d",
+      onChange: function(selectedDates, dateStr, instance) {
+        // Clear any previous error
+        $('#filter_start_date').removeClass('is-invalid');
+        $('#start_date_error').text('');
+        
+        // Update end date minDate
+        if (selectedDates.length > 0 && endDatePicker) {
+          endDatePicker.set('minDate', selectedDates[0]);
+        }
+      }
+    });
+
+    let endDatePicker = $('#filter_end_date').flatpickr({
+      enableTime: false,
+      dateFormat: "Y-m-d",
+      onChange: function(selectedDates, dateStr, instance) {
+        // Clear any previous error
+        $('#filter_end_date').removeClass('is-invalid');
+        $('#end_date_error').text('');
+        
+        // Validate against start date
+        const startDate = $('#filter_start_date').val();
+        if (startDate && dateStr && startDate > dateStr) {
+          $('#filter_end_date').addClass('is-invalid');
+          $('#end_date_error').text('{{ $l == "en" ? "End date must be on or after start date" : "تاريخ النهاية يجب أن يكون في أو بعد تاريخ البداية" }}');
+        }
+      }
+    });
+
+    // Form submission validation
+    $('#filterForm').on('submit', function(e) {
+      const startDate = $('#filter_start_date').val();
+      const endDate = $('#filter_end_date').val();
+      
+      // Check if there are already validation errors visible
+      if ($('#filter_end_date').hasClass('is-invalid') || $('#filter_start_date').hasClass('is-invalid')) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Validate if both dates are selected
+      if (startDate && endDate) {
+        if (endDate < startDate) {
+          e.preventDefault();
+          $('#filter_end_date').addClass('is-invalid');
+          $('#end_date_error').text('{{ $l == "en" ? "End date must be on or after start date" : "تاريخ النهاية يجب أن يكون في أو بعد تاريخ البداية" }}');
+          return false;
+        }
+      }
+      
+      return true;
+    });
+
+    // Reset validation when modal is closed
+    $('#filterModal').on('hidden.bs.modal', function() {
+      $('#filter_start_date').removeClass('is-invalid');
+      $('#filter_end_date').removeClass('is-invalid');
+      $('#start_date_error').text('');
+      $('#end_date_error').text('');
+    });
+
+    $('.datepicker').flatpickr({
       enableTime: false,
       dateFormat: "Y-m-d",
     });
@@ -542,7 +1016,9 @@
       exportSuccess: "{{ __('cycles.export_willsuccess') }}",
     };
 
-    document.getElementById('searchBot').addEventListener('click', redirectWithDates);
+    // Note: searchBot element doesn't exist in the DOM, so this event listener is commented out
+    // If you need this functionality, add a button with id="searchBot" to the HTML
+    // document.getElementById('searchBot')?.addEventListener('click', redirectWithDates);
 
     function redirectWithDates() {
       // الحصول على قيم التواريخ
@@ -682,37 +1158,13 @@
       });
     }
 
-    function deleteme(id) {
-      let url = '/dashboard/mentorship/delsession/' + id;
-      let token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-label-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
-            $.post(url, {
-                '_method': 'POST',
-                '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Session Deleted') }}.',
-                  'success');
-                window.location.href = '/dashboard/mentorship/sessions?show=all';
-              }).fail(function(error) {
-              console.log(error);
-            });
-          } else {
-            console.log('Canceled')
-          }
-        });
+    function resetFilters() {
+      const url = new URL(window.location);
+      url.searchParams.delete('start_date');
+      url.searchParams.delete('end_date');
+      url.searchParams.delete('done');
+      url.searchParams.delete('cycle_id');
+      window.location.href = url.toString();
     }
   </script>
 @stop

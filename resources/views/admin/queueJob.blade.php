@@ -48,27 +48,27 @@
 
 			<!-- Jobs Table Card -->
 			<div class="card">
-				<div class="card-header border-bottom d-flex justify-content-between align-items-center">
-					<h5 class="card-title mb-0">{{ __('admin.Job_List') }}</h5>
-					<div class="d-flex align-items-center">
-						<a href="{{ route('queue.run.once') }}" class="btn btn-primary me-3">
+				<div class="card-header border-bottom d-flex flex-wrap justify-content-between align-items-center">
+					<h5 class="card-title mb-3 mb-md-0">{{ __('admin.Job_List') }}</h5>
+					<div class="d-flex flex-wrap align-items-center gap-3">
+						<a href="{{ route('queue.run.once') }}" class="btn btn-primary">
 							<i class="ti ti-mobiledata me-2"></i>
 							{{ __('admin.RunQueueOnce') }}
 						</a>
-						<div class="btn-group">
-							<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+						<div class="dropdown">
+							<button class="btn btn-label-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
 								aria-expanded="false">
 								<i class="ti ti-download me-1"></i> {{ __('admin.Export') }}
 							</button>
 							<ul class="dropdown-menu">
 								<li>
-									<a class="dropdown-item" href="#" id="export-excel">
+									<a class="dropdown-item" href="javascript:void(0)" id="export-excel">
 										<i class="ti ti-file-type-xls me-1"></i> 
 										Excel
 									</a>
 								</li>
 								<li>
-									<a class="dropdown-item" href="#" id="export-csv">
+									<a class="dropdown-item" href="javascript:void(0)" id="export-csv">
 										<i class="ti ti-file-type-csv me-1"></i> 
 										CSV
 									</a>
@@ -80,9 +80,9 @@
 
 				<div class="card-datatable table-responsive">
 
-					<div id="jobsTable-filter-row" class="row px-4 py-3 align-items-end">
+					<div id="jobsTable-filter-row" class="row px-4 mb-6 align-items-end">
 						<div class="col-md-2">
-							<select id="status-filter" class="form-select form-select-sm w-100">
+							<select id="status-filter" class="form-select form-select-sm w-100 mb-3 mb-md-0">
 								<option value="" selected>{{ __('admin.All_statuses') }}</option>
 								<option value="Pending">{{ __('admin.Pending') }}</option>
 								<option value="Processing">{{ __('admin.Processing') }}</option>
@@ -91,7 +91,7 @@
 							</select>
 						</div>
 						<div class="col-md-2">
-							<select id="job-name-filter" class="form-select form-select-sm w-100">
+							<select id="job-name-filter" class="form-select form-select-sm w-100 mb-3 mb-md-0">
 								<option value="" selected>{{ __('admin.All_Jobs') }}</option>
 								@foreach($jobs->pluck('displayName')->unique()->filter() as $jobName)
 								<option value="{{ $jobName }}">{{ $jobName }}</option>
@@ -99,7 +99,7 @@
 							</select>
 						</div>
 						<div class="col-md-2">
-							<input type="text" id="date-range-filter" class="form-control form-control-sm w-100"
+							<input type="text" id="date-range-filter" class="form-control form-control-sm w-100 mb-3 mb-md-0"
 								placeholder="{{ __('admin.Date') }}" />
 						</div>
 						<div class="col-md-auto ms-auto">
@@ -113,7 +113,7 @@
 					@else
 					<table class="table table-hover">
 					@endif
-						<thead class="thead-dark">
+						<thead class="table-light">
 							<tr>
 								<th>{{ __('admin.ID') }}</th>
 								<th>{{ __('admin.Job_Name') }}</th>

@@ -387,7 +387,7 @@
 											
 											<div class="col-xl-4 col-lg-6 col-md-12 company-card" 
 													 data-company-name="{{ strtolower($company->name) }}"
-													 data-user-name="{{ strtolower($company->user->name) }}"
+													 data-user-name="{{ strtolower($company->resolveUser()->name) }}"
 													 data-category="{{ strtolower($categoryString) }}"
 													 data-score="{{ $filterScore }}"
 													 data-status="{{ $primaryStatus }}"
@@ -456,9 +456,9 @@
 														<!-- User Information -->
 														<div class="user-info bg-label-light border rounded-3 p-2 mb-4">
 															<div class="d-flex align-items-center">
-																<a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+																<a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="text-decoration-none">
 																	<img
-																		src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
+																		src="{{ $company->resolveUser()->image_url ?? '/icons/account.svg' }}"
 																		alt="img"
 																		class="rounded-circle me-3 shadow-sm"
 																		height="40"
@@ -466,9 +466,9 @@
 																	/>
 																</a>
 																<div class="flex-grow-1">
-																	<a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
-																		<h6 class="mb-0 fw-semibold text-dark">{{ $company->user->name }}</h6>
-																		<small class="text-muted">{{ $company->user->title ?: __('cycles.No title') }}</small>
+																	<a href="/dashboard/users/{{ $company->resolveUser()->id }}/edit" class="text-decoration-none">
+																		<h6 class="mb-0 fw-semibold text-dark">{{ $company->resolveUser()->name }}</h6>
+																		<small class="text-muted">{{ $company->resolveUser()->title ?: __('cycles.No title') }}</small>
 																	</a>
 																</div>
 															</div>
@@ -578,8 +578,8 @@
 							<div class="card border-0 shadow-sm rounded-4">
 								<div class="card-body text-center py-5">
 									<div class="error-state-icon mb-4"><i class="ti ti-alert-triangle text-warning" style="font-size: 4rem;"></i></div>
-									<h4 class="card-title text-dark mb-3">{{ __('admin.No_results_found') }}</h4>
-									<p class="text-muted mb-4">{{ __('cycles.No records screening from') }} </p>
+									<h5 class="card-title mb-3">{{ __('admin.No_Final_Screening_Startups') }}</h5>
+									<p class="text-muted mb-4">{{ __('admin.No_Final_Screening_Startups') }}</p>
 									<a href="/dashboard/cycles" class="btn btn-primary rounded-pill px-4">
 										<i class="ti ti-arrow-left me-2"></i> {{ __('cycles.Cycles') }}
 									</a>

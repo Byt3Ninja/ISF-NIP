@@ -33,7 +33,7 @@ class Step extends Model
 
 	public function fields()
 	{
-		return ( $this->belongsToMany('App\Field', 'form_fields')->withPivot('id', 'options'));
+		return ( $this->belongsToMany('App\Field', 'form_fields')->withPivot('id', 'options', 'builder_forms_id'));
 	}
 
 	public function formData(){

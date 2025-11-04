@@ -10,8 +10,10 @@ use stdClass;
 use App\Cycle;
 use App\Company;
 use App\Formfield;
+use App\Messenger;
 use Carbon\Carbon;
 use App\Team_member;
+use App\Conversation;
 use App\ProjectLikes;
 use App\CyclesMentors;
 use App\TeamFormation;
@@ -20,14 +22,17 @@ use Illuminate\Http\Request;
 use App\Exports\WinnersExport;
 use Illuminate\Support\Facades\DB;
 use App\ScreeningEvaluationResults;
+use App\Notifications\TemplateEmail;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\NextSessionsService;
-use Namu\WireChat\Models\Conversation;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Notifications\StatusHackathonInvitation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class HackathonController extends Controller
 {
@@ -473,6 +478,7 @@ class HackathonController extends Controller
         $todoList = collect(DB::select($todoList_q, [$TF_id]));
         return view('admin.hackathon.team-workspace', compact('teamData', 'sharedFile', 'todoList'));
     }
+
 
     public function show(Request $request, $id)
     {
@@ -1028,6 +1034,20 @@ class HackathonController extends Controller
             $winners = TeamFormation::winnersMapping( $teams );
         }
         
+        $finishedHackathon = [];
+        $hackthonCycle = Cycle::find($id);
+
+        if($hackthonCycle->end < now()){
+            $finishedHackathon['id'] = $hackthonCycle->id;
+            $finishedHackathon['title'] = $hackthonCycle->title;
+            $finishedHackathon['description'] = $hackthonCycle->description;
+            $finishedHackathon['start'] = $hackthonCycle->start->format('Y-m-d');
+            $finishedHackathon['end'] = $hackthonCycle->end->format('Y-m-d');
+            $finishedHackathon['img'] = $hackthonCycle->img_url;
+            $finishedHackathon['teams'] = TeamFormation::teams($hackthonCycle->id);
+            $finishedHackathon['winners']= TeamFormation::winnersMapping($finishedHackathon['teams']);
+        }
+
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
             'currentHackathon',
@@ -1049,7 +1069,8 @@ class HackathonController extends Controller
             'showStep',
             'steps_ids',
             'teamJoins',
-            'winners'
+            'winners',
+            'finishedHackathon'
         ));
     }
 
@@ -1091,7 +1112,8 @@ class HackathonController extends Controller
         return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
-    public function hackathonSubmissions($id) {
+    public function hackathonSubmissions($id) 
+    {
       $user = Auth::user();
       $data = [];
       $l = app()->getLocale();
@@ -1398,7 +1420,8 @@ class HackathonController extends Controller
         ]);
     }
 
-    public function invitation(Request $request){
+    public function invitation(Request $request)
+    {
         $request->validate([
             'memberEmail' => 'required|email',
             'user_id' => 'nullable|exists:users,id',
@@ -1457,6 +1480,19 @@ class HackathonController extends Controller
         return redirect()->back()->with('success', 'Invitation sent successfully.');
     }
 
+    public function deleteTeamInfo(Request $request)
+    {
+        
+        $teamFormation = TeamFormation::where('id', $request->team_formation_id)->where('user_id', Auth::user()->id)->first();
+        if (!$teamFormation) {
+            return response()->json(['success' => false, 'message' => __("admin.Team_not_found.")]);
+        }
+        $team_member = Team_member::where('team_formation_id', $teamFormation->id)->delete();
+       
+        $teamFormation->delete();
+        return redirect()->route('hackathon.view')->with('success', 'Team information deleted successfully.');
+    }
+
     public function cancelInvitation(Request $request)
     {
         $user = Auth::user();
@@ -1466,6 +1502,12 @@ class HackathonController extends Controller
         }
         $teamMember->acceptInvition = 'cancelled';
         $teamMember->save();
+
+        $userteam = User::where('id', $teamMember->user_id)->first();
+        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+
+        // Send cancel invitation email logic here
+         $user->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'cancelled'));
 
         return response()->json(['success' => true, 'message' => __("admin.Invitation_cancelled_successfully.")]);
     }
@@ -1488,8 +1530,8 @@ class HackathonController extends Controller
                 return redirect()->back()->with('error', 'Invitation_has_expired.');
             }
             $teamMember = Team_member::where('id', $id)
-            ->where('acceptInvition', 'pending')
-            ->first();
+                    ->whereIn('acceptInvition', ['pending', 'join'])
+                    ->first();
             
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation_not_found.');
@@ -1503,9 +1545,21 @@ class HackathonController extends Controller
                 $teamMember->isTeamLeader = 0;
                 $teamMember->user_id = $user->id;
                 $teamMember->save();
-
-                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
             
+                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+                if($teams->group_id_chat == null){
+                    $team_leader = Team_member::where('team_formation_id', $teams->id)->where('isTeamLeader', 1)->first();
+                    $conversation = Conversation::create([
+                        'name' => $team_leader->teamFormation->name,
+                        'description' => $team_leader->teamFormation->description,
+                        'type' => 'group',
+                    ]);
+                    $teams->group_id_chat = $conversation->id;
+                    $teams->save();
+                }
+                $conversation = Conversation::findOrFail($teams->group_id_chat);
+                $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+               
 
             $count_team_q = Team_member::where('team_formation_id', $teams->id)->get();
             $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
@@ -1556,6 +1610,10 @@ class HackathonController extends Controller
                     'role' => 'participant'
                 ]);
 
+                $userteam = User::where('id', $teamMember->user_id)->first();
+                $leader = User::findOrFail($teams ->user_id);
+                 $leader->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'Accept'));
+
         return redirect()->back()->with('success', 'Invitation_accepted_successfully');
     }
 
@@ -1578,8 +1636,10 @@ class HackathonController extends Controller
             }
                 
                 $teamMember = Team_member::where('id', $id)
-                ->where('acceptInvition', 'pending')
+                ->whereIn('acceptInvition', ['pending', 'join'])
                 ->first();
+
+              
 
             $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
             $count_team_q = Team_member::where('team_formation_id', $teams->id)
@@ -1605,7 +1665,10 @@ class HackathonController extends Controller
                 $teamMember->user_id = $user->id;
                 $teamMember->save();
 
-                
+                $userteam = User::where('id', $teamMember->user_id)->first();
+                $leader = User::findOrFail($teams ->user_id);
+               
+                 $leader->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'Reject'));
 
         return redirect()->back()->with('success', 'Invitation rejected successfully.');
     }
@@ -1652,13 +1715,12 @@ class HackathonController extends Controller
         if(!$teams){
             return redirect()->back()->with('error', 'Team not found.');
         }
-        $teamMember = Team_member::where('team_formation_id', $teams->id)->get();
+        $teamMember = Team_member::where('team_formation_id', $teams->id)->whereIn('acceptInvition', ['accepted', 'join', 'pending'])->get();
         $maxMembers = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first()->count_team_number;
 
         if (count($teamMember) >= $maxMembers) {
             return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
         }
-    
                 $teamMember = new Team_member;
                 $teamMember->acceptInvition = 'join';
                 $teamMember->Email = $user->email;
@@ -1679,6 +1741,18 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
+            $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
+                if($teams->group_id_chat == null){
+                    $team_leader = Team_member::where('team_formation_id', $teams->id)->where('isTeamLeader', 1)->first();
+                    $conversation = Conversation::create([
+                        'name' => $team_leader->teamFormation->name,
+                        'description' => $team_leader->teamFormation->description,
+                        'type' => 'group',
+                    ]);
+                    $teams->group_id_chat = $conversation->id;
+                    $teams->save();
+                }
+            $conversation = Conversation::findOrFail($teams->group_id_chat);
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
         $count_team_q = Team_member::where('team_formation_id', $teams->id)
             ->get();
@@ -1706,7 +1780,7 @@ class HackathonController extends Controller
                     $allteamMember->save();
                 }
 
-                $conversation = Conversation::findOrFail($teams->group_id_chat);
+                
                 $user = User::findOrFail($teamMember->user_id);
 
                 // Check if user is already a participant
@@ -1960,6 +2034,7 @@ class HackathonController extends Controller
                 tl.description as tl_description,
                 tl.status as tl_status,
                 tl.due_date as tl_due_date,
+                tl.team_formation_id as tl_team_formation_id,
                 tl.created_at as tl_created_at,
                 tl.updated_at as tl_updated_at,
                 u_creator.id as creator_id,
@@ -2075,6 +2150,7 @@ class HackathonController extends Controller
                 $task->title = $todo->tl_title;
                 $task->description = $todo->tl_description;
                 $task->status = $todo->tl_status;
+                $task->team_formation_id = $todo->tl_team_formation_id;
                 $task->due_date = $todo->tl_due_date;
                 $task->created_at = $todo->tl_created_at;
                 $task->updated_at = $todo->tl_updated_at;
@@ -2141,6 +2217,8 @@ class HackathonController extends Controller
                 users as u ON tm.user_id = u.id
             WHERE
                 tf.cycle_id = ?
+            AND
+                tm.acceptInvition = 'accepted'
         ";
 
         $teams = collect(DB::select($teams_q, [$id]));
@@ -2600,4 +2678,64 @@ class HackathonController extends Controller
             'total' => $total
         ]);
     }
+
+    public function sendTeamMessage(Request $request)
+    {
+        try {
+            $request->validate([
+                'receiver' => 'required',
+                'subject' => 'required',
+                'message' => 'required',
+            ]);
+
+            $cuser = auth()->user();
+            $rec = $request->receiver;
+            $rname = User::where('id', $rec)->first();
+
+            if (!$rname) {
+                return response()->json(['success' => false, 'message' => 'Receiver not found.'], 404);
+            }
+
+            $new = new Messenger();
+            $new->sender = $cuser->id;
+            $new->receiver = $rec;
+            $new->subject = $request->input('subject');
+            $new->message = $request->input('message');
+            $new->save();
+
+            // Prepare Email
+            $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+            $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+            $MSG = new TemplateEmail(
+                [
+                    "subject" => "New message received - VI portal",
+                    "greeting" => "Dear " . $rfullname . ",",
+                    "body" => "You have a new message from " . $sfullname . ", Needs your review.",
+                    "action_url" => "/dashboard/inbox"
+                ]
+            );
+
+            // Send Notification (only in production)
+            if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                try {
+                    // Assuming TemplateEmail is a Mailable class, you'd use Mail::to()
+                    // If it's a notification, your original approach is fine, but ensure it's
+                    // properly configured for the Notifiable trait.
+                    // For Mailable: Mail::to($rname->email)->send($MSG);
+                    $rname->notify($MSG); // If MSG is a Notification class
+                } catch (\Throwable $th) {
+                    Log::error('Notification Error: ' . $th->getMessage());
+                }
+            }
+
+            return response()->json(['success' => true, 'message' => 'Message sent successfully']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error sending message: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

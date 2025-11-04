@@ -16,7 +16,7 @@
         <div class="col-6 col-md-3 mb-2 mb-md-0">
           <div class="card px-4 py-3 shadow-sm border" style="height: 76px;">
             <div class="d-flex justify-content-between align-items-center">
-              <div class="badge bg-label-secondary me-1 me-md-0">
+              <div class="badge bg-label-secondary me-2 me-md-0">
                 @php($icon = $st->status == 'in-progress' ? 'ti ti-file-text' : ($st->status == 'completed' ? 'ti ti-circle-check' : 'ti ti-gavel'))
                 @if ($i == 0)
                 <img src="/icons/primary-rocket.svg" height="38" width="40" />
@@ -25,9 +25,12 @@
                 @endif
               </div>
               <div class="d-flex flex-column">
-                <h6 class="mb-0 text-capitalize text-secondary text-nowrap">
+                <h6 class="mb-0 text-capitalize text-secondary text-nowrap d-none d-md-inline">
                   {{ __('admin.' . $st->status) }}
                 </h6>
+                <small class="mb-0 text-capitalize text-secondary text-nowrap d-inline d-md-none">
+                  {{ __('admin.' . $st->status) }}
+                </small>
                 <span class="fs-5 text-dark fw-bold">{{ $st->count }}</span>
               </div>
             </div>

@@ -1,340 +1,478 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-@stop
-
 @section('content')
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-body">
-        <section id="multiple-column-form" class="mb-4">
-          <h4 class="card-title">{{ __('cycles.all courses') }}</h4>
-          @if (session()->has('message'))
-            <div 
-              class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
-              role="alert"
-            >
-              {{ __('admin.' . session()->get('message')) }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          @endif
-        </section>
-        <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
-              <div class="card-header">
+      
+      {{-- Alert Messages --}}
+      @if (session()->has('message'))
+        <div class="alert alert-{{ session()->get('class', 'info') }} alert-dismissible fade show mb-4" role="alert">
+          <strong>{{ __('admin.' . session()->get('message')) }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      @endif
 
-                @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
-                  <a class="btn btn-primary"
-                    href="{{ route('trainings.create') }}">
-                    <i class="ti ti-plus me-1"></i>
-                    {{ __('admin.Add_new_Courses') }}
-                  </a>
-                @endif
-              </div>
-              <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <br>
-
-										<form method="GET" action="/dashboard/training/all">
-										  <div class="d-flex align-items-center mx-2">
-											<div style="display: flex; align-items: center;">
-											<button
-											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
-											  style="border-radius: 17px; width: 40px; height: 40px;"
-											   type="submit"
-											>
-											  <i class="ti ti-filter text-white ti-24px"></i>
-											</button>
-										  </div>
-										  <!-- Search Bar -->
-										 
-							
-										  <div class="position-relative me-3 d-none d-md-flex">
-											<select name="catTr_id" class="form-control">
-											  <option value="0">{{ __('admin.All') }}</option>
-											  @php
-											  $expertises = App\Expertise::all();
-											  @endphp
-											  @foreach ($expertises as $expert) 
-											  <option value="{{$expert->id}}" {{ $expert->id == request('catTr_id') ? 'selected' : '' }}> {{ $expert->title }}</option>
-											@endforeach
-											</select>
-										  </div>
-										  <div class="position-relative me-3 d-none d-md-flex">
-											<select name="status" class="form-control">
-											  <option value="0">{{ __('admin.All') }}</option>
-											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>{{ __('admin.Draft') }}</option>
-											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>{{ __('admin.Published') }}</option>
-											</select>
-										  </div>
-
-										</div>
-										</form>
-										<hr>
-                    <table class="table mb-0" id="userstable">
-                      <thead class="bg-label-light">
-                        <tr>
-                          <th>#</th>
-                          <th>{{ __('cycles.Title') }}</th>
-                          <th>{{ __('cycles.Created at') }}</th>
-                          <th>{{ __('cycles.Added By') }}</th>
-                          <th>{{ __('admin.quizStatus') }}</th>
-                          <th>{{ __('cycles.Tags') }}</th>
-                          <th>{{ __('admin.Categories') }}</th>
-                          <th>{{ __('admin.CountProgram') }}</th>
-                          <th>{{ __('cycles.Edit/Delete') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($courses as $course)
-                          @php
-                            $trainingTags = App\Training::with('tags')->find($course->id);
-                            $tags = $trainingTags->tags;
-
-                            $trainingCategories = App\Training::with('categories')->find($course->id);
-                            $Categories = $trainingCategories->categories;
-                            $StatusDraft = $l == 'ar' ? 'محفوظة' : 'Draft';
-                            $Statuspublished = $l == 'ar' ? 'تم النشر' : 'Published';
-
-                            $contents = App\TrainingContent::where('training_id', $course->id)
-                                ->orderBy('arr', 'ASC')
-                                ->get();
-
-                            $count_content = $contents->count();
-
-                          @endphp
-                          <tr>
-                            <td>{{ $course->arr }}</td>
-                            <td><a title="view" href="/dashboard/training/viewCourse/{{ $course->id }}">
-                                {{ $course->title }} </a></td>
-                            <td>{{ $course->created_at }}</td>
-                            <td>{{ optional($course->user)->{'first_name_' . $l} }}
-                              {{ optional($course->user)->{'last_name_' . $l} }}</td>
-                            <td>
-
-                              {{ $course->Status == '0' ? $StatusDraft : $Statuspublished }}
-                            </td>
-                            <td>
-                              @foreach ($tags as $tag)
-                                {{ $tag->name }}
-                              @endforeach
-                            </td>
-                            <td>
-                              @foreach ($Categories as $Cat)
-                                {{ $Cat->title . ' - ' }}
-                              @endforeach
-                            </td>
-                            <th>{{ $count_content }}</th>
-                            @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
-                              <td>
-                                <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
-                                  class="btn btn-icon btn-label-info rounded-circle">
-                                  <i class="ti ti-edit text-info"></i></a>
-
-                                @if (isset($course))
-                                  <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
-                                    onclick="deleteme({{ $course->id ?? 0 }},1)">
-                                    <span class="align-middle ml-25">
-                                      <i class="ti ti-trash text-danger"></i>
-                                    </span>
-                                  </button>
-                                @endif
-
-
-                                <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
-                                  class="btn btn-icon btn-label-primary rounded-circle">
-                                  <i class="ti ti-eye"></i></a>
-                              </td>
-                            @else
-                              <td>
-
-                                <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
-                                  class="btn btn-label-primary">{{ __('admin.Enroll') }}</a>
-                              </td>
-                            @endif
-                          </tr>
-                        @endforeach
-
-                      </tbody>
-                    </table>
-                  </div>
+      {{-- Main Card --}}
+      <div class="card">
+        {{-- Card Header --}}
+        <div class="card-header border-bottom">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <h5 class="card-title mb-0">{{ __('cycles.all courses') }}</h5>
+            <div class="d-flex align-items-center gap-3">
+              @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
+                <div class="dropdown">
+                  <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+                  </ul>
                 </div>
-
-              </div>
+                <a class="btn btn-primary"
+                  href="{{ route('trainings.create') }}">
+                  <i class="ti ti-plus me-2"></i>
+                  {{ __('admin.Add_New') }}
+                </a>
+              @endif
             </div>
           </div>
-        </section>
+        </div>
+
+        {{-- Data Table --}}
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="coursesTable">
+              <thead class="table-light">
+                <tr>
+                  <th class="text-nowrap">#</th>
+                  <th class="text-nowrap">{{ __('cycles.Title') }}</th>
+                  <th class="text-nowrap">{{ __('cycles.Created at') }}</th>
+                  <th class="text-nowrap">{{ __('cycles.Added By') }}</th>
+                  <th class="text-nowrap">{{ __('admin.quizStatus') }}</th>
+                  <th class="text-nowrap">{{ __('cycles.Tags') }}</th>
+                  <th class="text-nowrap">{{ $l == 'ar' ? 'الفئات' : 'Categories' }}</th>
+                  <th class="text-nowrap">{{ __('admin.CountProgram') }}</th>
+                  <th class="text-nowrap" class="text-center">{{ __('cycles.Actions') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse ($courses as $key => $course)
+                  <tr id="course-row-{{ $course->id }}">
+                    <td class="fw-medium">{{ $key + 1 }}</td>
+                    <td>
+                      <a href="{{ route('trainings.course_view', $course->id) }}" class="text-primary fw-medium">
+                        {{ Str::limit($course->title, 50) }}
+                      </a>
+                    </td>
+                    <td>{{ $course->created_at->format('Y-m-d') }}</td>
+                    <td>
+                      @if($course->user)
+                        {{ $course->user->{"first_name_{$l}"} }} {{ $course->user->{"last_name_{$l}"} }}
+                      @else
+                        <span class="text-muted">{{ __('admin.Unknown') }}</span>
+                      @endif
+                    </td>
+                    <td data-status="{{ $course->Status == '0' ? 'draft' : 'published' }}">
+                      @if($course->Status == '0')
+                        <span class="badge bg-label-warning">{{ __('admin.Draft') }}</span>
+                      @else
+                        <span class="badge bg-label-success">{{ __('admin.Published') }}</span>
+                      @endif
+                    </td>
+                    <td>
+                      @php
+                        $tagsList = [];
+                        if($course->tags) {
+                          foreach($course->tags as $tag) {
+                            $tagName = $tag->name ?? '';
+                            if($tagName && (str_starts_with($tagName, '[') || str_starts_with($tagName, '{'))) {
+                              $decoded = json_decode($tagName, true);
+                              if(is_array($decoded)) {
+                                foreach($decoded as $item) {
+                                  if(is_array($item) && isset($item['value'])) {
+                                    $tagsList[] = $item['value'];
+                                  }
+                                }
+                              }
+                            } else {
+                              $tagsList[] = $tagName;
+                            }
+                          }
+                        }
+                        $tagsList = array_filter(array_map('trim', $tagsList));
+                        $tagsText = implode(', ', $tagsList);
+                      @endphp
+                      <span data-export="{{ $tagsText }}">
+                        @if(count($tagsList) > 0)
+                          @foreach($tagsList as $tagName)
+                            <span class="badge bg-label-info me-1 mb-1">{{ $tagName }}</span>
+                          @endforeach
+                        @else
+                          <span class="text-muted">-</span>
+                        @endif
+                      </span>
+                    </td>
+                    <td>
+                      @php
+                        $categories = $course->categories;
+                        $categoriesCount = $categories->count();
+                        $displayLimit = 2;
+                        $categoriesText = $categories->pluck('title')->implode(', ');
+                      @endphp
+                      <div data-categories="{{ $categoriesText }}">
+                        @if($categoriesCount > 0)
+                          @foreach($categories->take($displayLimit) as $category)
+                            <span class="badge bg-label-secondary me-1 mb-1">{{ $category->title }}</span>
+                          @endforeach
+                          @if($categoriesCount > $displayLimit)
+                            <button type="button" 
+                              class="badge bg-label-primary border-0 mb-1" 
+                              style="cursor: pointer;"
+                              onclick="showAllCategories({{ $course->id }}, {{ json_encode($categories->pluck('title')) }})">
+                              +{{ $categoriesCount - $displayLimit }}
+                            </button>
+                          @endif
+                        @else
+                          <span class="text-muted">-</span>
+                        @endif
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-label-primary">{{ $course->contents_count ?? $course->contents->count() }}</span>
+                    </td>
+                    @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
+                      <td>
+                        <div class="d-flex align-items-center gap-2 justify-content-center">
+                          <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
+                            class="btn btn-icon btn-label-info rounded-circle">
+                            <i class="ti ti-edit"></i>
+                          </a>
+  
+                          @if (isset($course))
+                            <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
+                              onclick="deleteCourse({{ $course->id ?? 0 }})">
+                              <i class="ti ti-trash"></i>
+                            </button>
+                          @endif
+  
+                          <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
+                            class="btn btn-icon btn-label-primary rounded-circle">
+                            <i class="ti ti-eye"></i>
+                          </a>
+                        </div>
+                      </td>
+                    @else
+                      <td>
+                        <a title="Show" href="/dashboard/training/viewCourse/{{ $course->id }}"
+                          class="btn btn-label-primary">{{ __('admin.Enroll') }}
+                        </a>
+                      </td>
+                    @endif
+                  </tr>
+                @empty
+                  <tr>
+                    <td colspan="9" class="text-center py-5">
+                      <i class="ti ti-file-off ti-lg text-muted d-block mb-2"></i>
+                      <p class="text-muted mb-0">{{ $l == 'en' ? 'No courses found.' : 'لا توجد دورات.' }}</p>
+                    </td>
+                  </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <!-- END: Content-->
-  <div class="modal fade text-left" id="edittraining" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+
+  {{-- Categories Modal --}}
+  <div class="modal fade" id="categoriesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
-        <form method="post" action="/dashboard/training/store" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ $l == 'en' ? 'All Categories' : 'جميع الفئات' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="categoriesList" class="d-flex flex-wrap gap-2"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+            {{ __('cycles.Close') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- Edit Modal (if still needed) --}}
+  <div class="modal fade" id="editTrainingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="{{ route('trainings.store') }}" enctype="multipart/form-data">
+          @csrf
+          <input type="hidden" name="id" id="courseId">
+          
+          <div class="modal-header">
+            <h5 class="modal-title">{{ $l == 'en' ? 'Edit Course' : 'تعديل الدورة' }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
           <div class="modal-body">
-            @csrf
-            <input type="hidden" name="id" value="" id="id">
-            <div style="text-align: center;" class="form-group mb-3" id="showimage">
+            <div id="imagePreview" class="text-center mb-3"></div>
+
+            <div class="mb-3">
+              <label for="courseTitle" class="form-label">{{ __('cycles.Course Title') }}</label>
+              <input type="text" class="form-control" id="courseTitle" name="title" required>
             </div>
-            <div class="form-group mb-3">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.Course Title') }}</label>
-              <input id="title" name="title" type="text" placeholder="Title" class="form-control" required>
+
+            <div class="mb-3">
+              <label for="courseDescription" class="form-label">{{ __('cycles.Add a description') }}</label>
+              <textarea class="form-control" id="courseDescription" name="dsc" rows="4"></textarea>
             </div>
-            <div class="form-group mb-3">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.Add a description') }}:</label>
-              <textarea class="form-control" id="dsc" name='dsc' rows="4"
-                placeholder="{{ __('cycles.Write your description here') }}."></textarea>
-            </div>
-            <div class="form-group mb-3">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.Image') }}</label>
-              <div class="custom-file">
-                <input type="file" class="form-control" name="image" id="image" accept='image/*'>
-                <label class="custom-file-label" for="image">{{ __('cycles.Browse') }}</label>
-              </div>
+
+            <div class="mb-3">
+              <label for="courseImage" class="form-label">{{ __('cycles.Image') }}</label>
+              <input type="file" class="form-control" id="courseImage" name="image" accept="image/*">
             </div>
           </div>
+
           <div class="modal-footer">
             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-              <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
+              {{ __('cycles.Close') }}
             </button>
-            <button type="submit" class="btn btn-primary ml-1">
-              <span class="d-none d-sm-block">{{ __('Submit') }}</span>
+            <button type="submit" class="btn btn-primary">
+              {{ __('admin.Submit') }}
             </button>
           </div>
         </form>
       </div>
     </div>
   </div>
-@stop
+@endsection
 
 @section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script>
+    let coursesTable;
+
     $(document).ready(function() {
-      $('#userstable').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "columnDefs": [{
-          "orderable": false,
-          "targets": [4]
-        }, ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
-    });
-  </script>
-  <script>
-    $('.date').datetimepicker({
-      timepicker: true,
-      format: 'Y-m-d H:i'
-    });
-
-    function edit(id) {
-      if (id === 0) {
-        $('#id').val('');
-        $('#title').val('');
-        $('#dsc').val('');
-        $('#showimage').html('')
-        $('#edittraining').modal('show');
-      } else {
-        $.ajax({
-          type: "GET",
-          url: "/dashboard/training/edit/" + id,
-          success: function(response) {
-            $('#id').val(id);
-            $('#title').val(response.title);
-            $('#dsc').val(response.dsc);
-            if (response.image) {
-              $('#showimage').html('<img style="height: 200px;" class="img-responsive" src="/191014/' + response
-                .image + '" >');
-            }
-            $('#edittraining').modal('show');
-          },
-          error: function(error) {
-            console.log(error);
-            alert("Error Occurred, Try again!");
-          }
-        });
-      }
-    }
-
-    function deleteme(id, type) {
-      let url = '/dashboard/training/delcontent/' + id;
-      if (type === 1) {
-        url = '/dashboard/training/delete/' + id
-      }
-      let token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
-            $.post(url, {
-                '_method': 'POST',
-                '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Course Deleted') }}.',
-                  'success'
-                );
-                if (type === 1) {
-                  window.location.href = '/dashboard/training/all';
-                } else {
-                  location.reload();
+      // Initialize DataTable with Buttons
+      coursesTable = $('#coursesTable').DataTable({
+        responsive: true,
+        searching: true,
+        lengthChange: true,
+        pageLength: 10,
+        order: [[0, 'asc']],
+        dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
+        buttons: [
+          {
+            extend: 'excel',
+            text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
+            className: 'btn btn-label-success d-none',
+            title: '{{ $l == "en" ? "Courses List" : "قائمة الدورات" }}',
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+              format: {
+                body: function(data, row, column, node) {
+                  // Handle status column
+                  if (column === 4) {
+                    return $(node).attr('data-status') === 'draft' ? '{{ __("admin.Draft") }}' : '{{ __("admin.Published") }}';
+                  }
+                  // Handle tags column
+                  if (column === 5) {
+                    const exportData = $(node).find('[data-export]').attr('data-export');
+                    return exportData || '-';
+                  }
+                  // Handle categories column
+                  if (column === 6) {
+                    const categories = $(node).find('[data-categories]').attr('data-categories');
+                    return categories || '-';
+                  }
+                  // Handle content count column
+                  if (column === 7) {
+                    return $(node).find('.badge').text();
+                  }
+                  // Strip HTML for other columns
+                  return $('<div>').html(data).text().trim();
                 }
               }
-            ).fail(
-              function(error) {
-                console.log(error);
+            }
+          },
+          {
+            extend: 'csv',
+            text: '<i class="ti ti-file-text me-1"></i>CSV',
+            className: 'btn btn-label-info d-none',
+            title: '{{ $l == "en" ? "Courses List" : "قائمة الدورات" }}',
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+              format: {
+                body: function(data, row, column, node) {
+                  if (column === 4) {
+                    return $(node).attr('data-status') === 'draft' ? '{{ __("admin.Draft") }}' : '{{ __("admin.Published") }}';
+                  }
+                  if (column === 5) {
+                    const exportData = $(node).find('[data-export]').attr('data-export');
+                    return exportData || '-';
+                  }
+                  if (column === 6) {
+                    const categories = $(node).attr('data-categories');
+                    return categories || '-';
+                  }
+                  if (column === 7) {
+                    return $(node).find('.badge').text();
+                  }
+                  return $('<div>').html(data).text().trim();
+                }
               }
-            );
-          } else {
-            console.log('Canceled')
+            }
+          },
+        ],
+        columnDefs: [
+          { orderable: false, targets: [5, 6, 8] }
+        ],
+        @if ($l === 'ar')
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
+        },
+        @endif
+        initComplete: function() {
+          // Create and insert Category Filter
+          $('<select id="categoryFilter" class="form-select form-select-sm ms-md-8 my-3 my-md-0" style="width: auto; min-width: 150px;">' +
+            '<option value="">{{ $l == "en" ? "All Categories" : "كل الفئات" }}</option>' +
+            '@foreach (App\Expertise::all() as $expertise)' +
+            '<option value="{{ $expertise->title }}">{{ $expertise->title }}</option>' +
+            '@endforeach' +
+            '</select>')
+            .insertAfter('.dataTables_length label')
+            .on('change', function() {
+              const value = $(this).val();
+              coursesTable.column(6).search(value).draw();
+            });
+
+          // Create and insert Status Filter
+          $('<select id="statusFilter" class="form-select form-select-sm ms-2" style="width: auto; min-width: 150px;">' +
+            '<option value="">{{ $l == "en" ? "All Statuses" : "كل الحالات" }}</option>' +
+            '<option value="draft">{{ __("admin.Draft") }}</option>' +
+            '<option value="published">{{ __("admin.Published") }}</option>' +
+            '</select>')
+            .insertAfter('#categoryFilter')
+            .on('change', function() {
+              const value = $(this).val();
+              if (value === '') {
+                coursesTable.column(4).search('').draw();
+              } else {
+                $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                  const status = $(coursesTable.row(dataIndex).node()).find('td[data-status]').attr('data-status');
+                  return value === '' || status === value;
+                });
+                coursesTable.draw();
+                $.fn.dataTable.ext.search.pop();
+              }
+            });
+        }
+      });
+
+      // Export button click handlers
+      $('#exportExcel').on('click', function() {
+        coursesTable.button('.buttons-excel').trigger();
+      });
+
+      $('#exportCsv').on('click', function() {
+        coursesTable.button('.buttons-csv').trigger();
+      });
+    });
+
+    // Show All Categories Modal
+    function showAllCategories(courseId, categories) {
+      const categoriesList = document.getElementById('categoriesList');
+      categoriesList.innerHTML = '';
+      
+      categories.forEach(category => {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-label-secondary';
+        badge.textContent = category;
+        categoriesList.appendChild(badge);
+      });
+      
+      const modal = new bootstrap.Modal(document.getElementById('categoriesModal'));
+      modal.show();
+    }
+
+    // Delete Course Function with DataTable Row Removal
+    function deleteCourse(id) {
+      Swal.fire({
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+          confirmButton: 'btn btn-danger me-2',
+          cancelButton: 'btn btn-label-secondary'
+        },
+        buttonsStyling: false
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: `/dashboard/training/delete/${id}`,
+            type: 'POST',
+            data: {
+              _token: '{{ csrf_token() }}',
+              _method: 'POST'
+            },
+            success: function(response) {
+              const row = coursesTable.row($('#course-row-' + id));
+              row.remove().draw();
+              
+              releaseSuccessAlert({
+                title: "{{ __('admin.Deleted') }}",
+                message: "{{ $l == 'en' ? 'The course has been deleted successfully.' : 'تم حذف الدورة بنجاح.' }}",
+              });
+            },
+            error: function(xhr) {
+              releaseFailureAlert({
+                title: "{{ __('admin.Error') }}",
+                message: "{{ __('admin.An unexpected error occurred, please try again later') }}",
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // Edit Course Modal (if needed)
+    function editCourse(id) {
+      if (id === 0) {
+        $('#courseId').val('');
+        $('#courseTitle').val('');
+        $('#courseDescription').val('');
+        $('#imagePreview').html('');
+      } else {
+        $.get(`/dashboard/training/edit/${id}`, function(response) {
+          $('#courseId').val(id);
+          $('#courseTitle').val(response.title);
+          $('#courseDescription').val(response.dsc);
+          
+          if (response.image) {
+            $('#imagePreview').html(`<img src="/191014/${response.image}" class="img-fluid rounded" style="max-height: 200px;">`);
           }
-        })
+        }).fail(function() {
+          Swal.fire({
+            title: "{{ __('admin.Error') }}",
+            text: "{{ __('admin.An unexpected error occurred, please try again later') }}",
+            icon: "error",
+            customClass: {
+              confirmButton: 'btn btn-danger'
+            },
+            buttonsStyling: false
+          });
+        });
+      }
+      
+      $('#editTrainingModal').modal('show');
     }
   </script>
-@stop
+@endsection

@@ -13,6 +13,25 @@
   },
   {
     "field_type": "file"
+  },
+
+  {
+    "field_type": "checkbox"
+  },
+  {
+    "field_type": "date"
+  },
+  {
+    "field_type": "time"
+  },
+  {
+    "field_type": "datetime"
+  },
+  {
+    "field_type": "number"
+  },
+  {
+    "field_type": "range"
   }
 ]
 

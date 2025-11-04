@@ -135,10 +135,10 @@
             <div class="card-body">
               <div id="mentors" style="display: none;" class="mb-3">
                 <hr class="my-3">
-                <h4 class="card-title mb-4">
+                <h5 class="card-title mb-4">
                   <b id="name"></b>
                   {{ __('cycles.Schedule') }}:
-                </h4>
+                </h5>
                 <div class="table-responsive">
                   <table class="table" id="mentorstable">
                   </table>
@@ -214,23 +214,23 @@
                   </td>
                   <td>
                     <div class="d-flex align-items-center" style="width: 150px;">
-                      <a class="me-2" href="/dashboard/users/{{ $company->user->id }}/edit">
-                        <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}" alt="avatar"
+                      <a class="me-2" href="/dashboard/users/{{ $company?->user?->id }}/edit">
+                        <img src="/191014/{{ $company?->user?->img_url ?? '../images/placeholder.jpg' }}" alt="avatar"
                           class="rounded-circle" height="40" width="40">
                       </a>
-                      <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                      <a href="/dashboard/users/{{ $company?->user?->id }}/edit">
                         <div>
-                          <h6 class="mb-0">{{ $company->user->{'first_name_' . $l} }}
-                            {{ $company->user->{'last_name_' . $l} }}</h6>
-                          <span class="small">{{ $company->user->{'title_' . $l} }}</span>
+                          <h6 class="mb-0">{{ $company?->user?->{'first_name_' . $l} }}
+                            {{ $company?->user?->{'last_name_' . $l} }}</h6>
+                          <span class="small">{{ $company?->user?->{'title_' . $l} }}</span>
                         </div>
                       </a>
                     </div>
                   </td>
                   <td>
-                    @if (count($company->user->mentorship) > 0)
+                    @if (count($company?->user?->mentorship) > 0)
                       <div class="d-flex align-items-center bg-light border rounded p-2" style="height: 100px; width: 300px; overflow-x: auto;">
-                        @foreach ($company->user->mentorship as $session)
+                        @foreach ($company?->user?->mentorship as $session)
                           @if ($session->approved == 'Yes')
                           <span class="text-wrap badge bg-white text-dark m-1" style="min-width: 100px;">
                             M#{{ $session->mentor_id }} ({{ $session->zoom_date }})

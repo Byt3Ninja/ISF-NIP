@@ -33,14 +33,16 @@
 	<div class="container-xxl flex-grow-1 container-p-y">
 		
 		@if( $_user->hasAnyRole('Registered', 'Admin') )
+		@php
 		
+		@endphp
+		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
 			@if( isset($newhackathon) && $newhackathon )
-			@if(now()->diffInDays($newhackathon->created_at) < 1)
+			{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
 			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
 			<br>
-			@endif
 					@endif
-
+		@endif
 		@endif
 		<div class="content-body">
 			@if( session()->has('success') )
@@ -383,10 +385,13 @@
 														$step->description ? $step->description : '...' }} </span>
 												</td>
 												<td>
-													@if( $step->stype == 1 or $step->stype == 5 )
-													@if( $step->status == 'Started' )
-													<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-label-primary"
-														title="{{ __('admin.View') }}"> {{ __('admin.View') }} </a>
+													@if( $step->stype == 1 || $step->stype == 5 )
+													@if( $step->status == 'On going' )
+														<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
+															title="{{ __('admin.Submit') }}"> 
+															{{ __('admin.Submit') }} 
+															<i class="ti ti-send ms-2 ti-16px"></i>
+														</a>
 													@endif
 													@endif
 													 @if($step->stype == 1 && isset($step->form) && $step->form)
@@ -412,54 +417,114 @@
 								</div>
 							</div>
 							@else
-							<div class="card mt-10">
-								<div class="card-header border-bottom">
-									<h4 class="card-title d-flex align-items-center">
-										<i class="ti ti-clipboard-list ti-28px"></i> <span
-											class="mx-2">{{__('dashboard.IncubationList')}}</span>
-									</h4>
-								</div>
-								<div class="card-body">
-									@if( count( $workingCycles ) > 0 )
-									@foreach( $workingCycles as $cycle )
-									<div class="border-bottom">
-										<div class="card-header">
-											<h4 class="primary"><i class="bx bxs-bell"></i> {{ $cycle->title }}</h4>
-											<div class="d-flex align-items-center mt-2">
-												<div class="media-left">
-													@if (!is_null( $cycle->organization->image_url ) )
-													<img src="{{ $cycle->organization->image_url }}" alt="avatar" class="rounded-circle"
-														height="40" width="40">
+							 <div class="card mt-10">
+    <div class="card-header border-bottom">
+        <h5 class="card-title d-flex align-items-center">
+            <i class="ti ti-clipboard-list ti-28px"></i>
+            <span class="mx-2">{{ __('dashboard.IncubationList') }}</span>
+        </h5>
+    </div>
+
+    <div class="card-body">
+        @if(count($workingCycles) > 0)
+            @foreach($workingCycles as $cycle)
+                <div class="border-bottom">
+                    <div class="card-header">
+                        <h4 class="primary">
+                            <i class="bx bxs-bell"></i>
+                            {{ $cycle->title }}
+                        </h4>
+
+                        <div class="d-flex align-items-center mt-2">
+                            <div class="media-left">
+                                @if(!empty($cycle->organization->image_url))
+                                    <img
+                                        src="{{ $cycle->organization->image_url }}"
+                                        alt="{{ $cycle->organization->name }} avatar"
+                                        class="rounded-circle"
+                                        height="40"
+                                        width="40"
+                                    >
+                                @endif
+                            </div>
+
+                            <div class="mx-2">{{ $cycle->organization->name }}</div>
+                        </div>
+                    </div>
+
+                    <div class="card-body bg-rgba-light">
+                        <p class="card-text mb-2">{{ $cycle->description }}</p>
+                        @php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
+						
+
+												<div class="alert alert-info alert-dismissible p-3 rounded mb-4 position-relative"
+													style="display: {{ $hasPreRequests ? 'block' : 'none' }};">
+													<h6 class="d-flex align-items-center">
+														<i class="ti ti-info-circle text-info ti-24px me-2"></i>
+														@if($_user->company && $_user->company->name)
+														{{ __('dashboard.To join this program as a startup, please complete these requirements first:') }}
+														@else
+														{{ __('dashboard.To get started with this program, please complete your profile requirements:') }}
+														@endif
+													</h6>
+													<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
+														@foreach($cycle->pre_requests as $pr)
+														<li id="{{ $pr['id'] }}" class="pre-request-item">
+															<a href="{{ $pr['url'] }}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+																aria-label="{{ __($pr['label']) }}">
+																<i class="ti ti-external-link"></i>
+																<span>{{ __($pr['label']) }}</span>
+															</a>
+														</li>
+														@endforeach
+													</ul>
+													@if($_user->company && $_user->company->name)
+													<p class="text-muted small mt-2 mb-0">
+														<i class="ti ti-lightbulb me-1"></i>
+														{{ __('dashboard.Completing these steps will help your startup get the most out of the program.') }}
+													</p>
+													@else
+													<p class="text-muted small mt-2 mb-0">
+														<i class="ti ti-lightbulb me-1"></i>
+														{{ __('dashboard.Setting up your profile properly will ensure you have access to all program features.') }}
+													</p>
 													@endif
+													<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="position: absolute; top: 0; {{ $l == 'en' ? 'right' : 'left' }}: 0.15rem;">
+													</button>
 												</div>
-												<div class="mx-2"> {{ $cycle->organization->name }} </div>
-											</div>
-										</div>
-										<div class="card-body bg-rgba-light">
-											<p class="card-text"> {{ $cycle->description }} </p>
-											<div class="d-flex align-items-center justify-content-between" style="width:100%">
-												<small class="text-muted" style="text-transform: capitalize"> {{__('dashboard.start from')}} {{
-													$cycle->start }} </small>
-												<a href="/dashboard/cycles/view/{{ $cycle->id}}" class="btn btn-primary">
-													<span class="mx-2">{{__('dashboard.Join')}}</span>
-													<i class="ti ti-arrows-join"></i>
-												</a>
-											</div>
-										</div>
-									</div>
-									@endforeach
-									@else
-									<div>
-										<h5 class="m-75 p-75">
-											<div class="avatar bg-rgba-warning m-0 mr-75">
-												<div class="avatar-content"> <i class="bx bx-stats text-warning"></i> </div>
-											</div>
-											{{__('dashboard.No Cycles started yet')}}...
-										</h5>
-									</div>
-									@endif
-								</div>
-							</div>
+
+                        <div class="d-flex align-items-center justify-content-between" style="width:100%">
+                            <small class="text-muted" style="text-transform: capitalize">
+                                {{ __('dashboard.start from') }} {{ $cycle->start }}
+                            </small>
+
+                            <button
+                                class="btn btn-primary"
+                                onclick="handleJoinClick(this)"
+                                data-cycle-id="{{ $cycle->id }}"
+                                data-has-pre="{{ $hasPreRequests ? 'true' : 'false' }}"
+                                data-join-url="{{ url('/dashboard/cycles/view/' . $cycle->id) }}"
+                                data-pre-requests="{{ json_encode(collect($cycle->pre_requests ?? [])->map(function($pr) { return ['url' => $pr['url'] ?? '#', 'label' => __($pr['label'] ?? ''), 'action' => $pr['action'] ?? '']; })->toArray()) }}"
+                            >
+                                <span class="me-2">{{ __('dashboard.Join now') }}</span>
+                                <i class="ti ti-arrows-join"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="text-center py-4">
+                <h5 class="m-75 p-75">
+                    <div class="avatar bg-rgba-warning m-0 mr-75 d-inline-flex align-items-center justify-content-center">
+                        <div class="avatar-content"> <i class="bx bx-stats text-warning"></i> </div>
+                    </div>
+                    {{ __('dashboard.No Cycles started yet') }}...
+                </h5>
+            </div>
+        @endif
+    </div>
+</div>
 							@endif
 						</div>
 					</div>
@@ -697,10 +762,31 @@
 													</td>
 													<td> {{ $session->done ?__('Yes') : __('No') }} </td>
 													<td> 
-														<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
-															<i class="ti ti-brand-zoom me-2"></i>
-															{{ __('dashboard.Join now') }}
-														</a>
+														@php
+															$now = date('Y-m-d H:i');
+															$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
+															$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
+															@endphp
+														@if ($session->approved == 'Yes')
+															@if($now >= $start_time )
+															@if($now <= $end_time)
+															<span class="warning">
+																<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																	<i class="ti ti-brand-zoom me-2"></i>
+																	{{ __('dashboard.Join now') }}
+																</a>
+															</span>
+															@else
+																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
+															@endif
+															@else 
+																<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
+															@endif
+														@elseif($session->approved == 'No')
+															{{ __('admin.No') }}
+														@else
+															{!! '<span class="text-primary">' . __('admin.Waiting_for_approval') . '</span>' !!}
+														@endif
 													</td>
 												</tr>
 												@endforeach
@@ -1299,6 +1385,8 @@
 		</div>
 	</div>
 </div>
+<!-- / Content Wrapper -->
+
 @if( $_user->ableTo('mentors.settings_modify', $permissions) &&
 array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null( $cycle_id ) )
 <!--  Edit SP Modal -->
@@ -1378,8 +1466,46 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 @endif
 
 @include('mentor.partials._availability_slots')
-<!-- / Content Wrapper -->
+
+<!-- Program Prerequisites Modal -->
+<div class="modal fade" id="prerequisitesModal" tabindex="-1" aria-labelledby="prerequisitesModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="d-flex align-items-center">
+					<i class="ti ti-alert-triangle me-2"></i>
+					<h5 class="modal-title" id="prerequisitesModalLabel">
+						{{ __('dashboard.Prerequisites_Required') }}
+					</h5>
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>{{ __('dashboard.To join this program, you must complete the following prerequisites first:') }}</p>
+				<ul id="prerequisitesList" class="list-group list-group-flush">
+					<!-- Prerequisites will be populated here -->
+				</ul>
+				<div class="alert alert-warning mt-3">
+					<i class="ti ti-alert-triangle me-2"></i>
+					{{ __('dashboard.Completion of all prerequisites is required before you can join the program.') }}
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+					<i class="ti ti-x me-2"></i>
+					{{ __('admin.Cancel') }}
+				</button>
+				<button type="button" class="btn btn-primary" id="completePrerequisitesBtn">
+					<i class="ti ti-external-link me-2"></i>
+					{{ __('dashboard.Complete Prerequisites & Join') }}
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- / Program Prerequisites Modal -->
 @stop
+
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1437,6 +1563,140 @@ document.addEventListener('DOMContentLoaded', function() {
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 	<script src="/vuexy/assets/js/mentor-schedule.js"></script>
 @endif
+<script>
+window.handleJoinClick = function(button) {
+    const cycleId = button.getAttribute('data-cycle-id');
+    const hasPreRequests = button.getAttribute('data-has-pre');
+    const joinUrl = button.getAttribute('data-join-url');
+    const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+
+    if (hasPreRequests === 'true') {
+        // Populate modal
+        const list = document.getElementById('prerequisitesList');
+        list.innerHTML = '';
+        preRequests.forEach(pr => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex align-items-center';
+            li.innerHTML = `
+                <i class="ti ti-circle-check me-2 text-warning"></i>
+                <a href="${pr.url}?action=complete-profile" target="_blank" class="text-decoration-none flex-grow-1">${pr.label}</a>
+            `;
+            list.appendChild(li);
+        });
+
+        // Set buttons
+        document.getElementById('completePrerequisitesBtn').onclick = function() {
+            if (preRequests.length > 0) {
+                const firstReq = preRequests[0];
+                if (firstReq.action === 'complete-profile') {
+                    window.location.href = firstReq.url + '?action=complete-profile';
+                } else {
+                    localStorage.setItem('prerequisitesOpened', 'true');
+                    window.open(`${firstReq.url}?action=complete-profile`, '_blank');
+                }
+            }
+            $('#prerequisitesModal').modal('hide');
+        };
+
+        // Show modal
+        $('#prerequisitesModal').modal('show');
+    } else {
+        window.location.href = joinUrl;
+    }
+}
+
+// Check if page should refresh when user returns from completing prerequisites
+window.addEventListener('focus', function() {
+    if (localStorage.getItem('prerequisitesOpened') === 'true') {
+        localStorage.removeItem('prerequisitesOpened');
+        // Refresh the page to update prerequisite status
+        window.location.reload();
+    }
+});
+
+// Real-time completion status checking
+let completionCheckInterval;
+
+function startCompletionStatusCheck() {
+    // Check every 5 seconds to reduce API calls
+    completionCheckInterval = setInterval(function() {
+        fetch('{{ route('cycles.completion_status_check') }}', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateUIWithCompletionStatus(data);
+        })
+        .catch(error => {
+            console.log('Error checking completion status:', error);
+        });
+    }, 5000); // Check every 5 seconds to reduce API calls
+}
+
+function updateUIWithCompletionStatus(data) {
+    const hasPreRequests = data.has_pre_requests;
+    const preRequests = data.pre_requests || [];
+		
+    // Find all join buttons
+    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
+    if (joinButtons.length === 0) {
+        console.log('No join buttons found');
+        return;
+    }
+
+    // Update each button appearance and text
+    joinButtons.forEach(joinButton => {
+			joinButton.className = 'btn btn-primary';
+			joinButton.innerHTML = '<span class="me-2">{{ __('dashboard.Join now') }}</span><i class="ti ti-arrows-join"></i>';
+  
+			// Update button data attributes
+			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+					url: `${pr.url}?action=complete-profile`,
+					label: pr.label,
+			}))));
+	});
+
+    // Find all prerequisites alerts
+    const alertDivs = document.querySelectorAll('.alert.alert-info');
+    alertDivs.forEach(alertDiv => {
+        if (hasPreRequests) {
+            // Update the alert content
+            const listElement = alertDiv.querySelector('.list-unstyled');
+            if (listElement) {
+                listElement.innerHTML = '';
+                preRequests.forEach(pr => {
+                    const li = document.createElement('li');
+                    li.className = 'pre-request-item';
+                    li.innerHTML = `
+                        <a href="${pr.url}?action=complete-profile" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button" aria-label="${pr.label}">
+                            <i class="ti ti-external-link"></i>
+                            <span>${pr.label}</span>
+                        </a>
+                    `;
+                    listElement.appendChild(li);
+                });
+            }
+            alertDiv.style.display = 'block';
+        } else {
+            // Hide the alert if no prerequisites
+            alertDiv.style.display = 'none';
+        }
+    });
+}
+
+// Start checking when page loads
+@if(isset($pollingNeeded) && $pollingNeeded)
+document.addEventListener('DOMContentLoaded', function() {
+    startCompletionStatusCheck();
+});
+@endif
+</script>
 <script>
 	// Initialize DataTable with pagination configuration
     $(document).on('click', '.show-passcode', function(e) {

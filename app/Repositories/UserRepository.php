@@ -207,6 +207,7 @@ class UserRepository
                 $user->title_en = $data['title_en'] ?? $user->title_en;
                 $user->title_ar = $data['title_ar'] ?? $user->title_ar;
                 $user->country_code = $data['country_code'] ?? $user->country_code;
+                $user->email_verified_at = $data['email_verified_at'] ?? null;
 
                     if (isset($data['img_url']) && $data['img_url']) {
                         $img_url = $data['img_url'];

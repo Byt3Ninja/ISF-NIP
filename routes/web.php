@@ -106,6 +106,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/', 'HomeController@index')->name('core.admin_access');
     Route::get('/dashboard', 'HomeController@index')->name('core.dashboard_view');
     Route::get('/dark', 'HomeController@dark');
+    Route::get('/check-completion-status', 'HomeController@checkCompletionStatus')->name('cycles.completion_status_check');
     Route::get('/import-users', 'UserController@showImportForm')->name('import.view_form');
     Route::post('/import-users', 'UserController@import')->name('import.execute_users');
 
@@ -123,6 +124,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     
     // Chat API routes (using web session authentication)
     Route::get('chat/messages', 'ChatController@messages')->name('chat.messages');
+    Route::get('chat/users', 'ChatController@getUsers')->name('chat.users');
     Route::get('chat/conversations/{conversationId}/messages', 'ChatController@getConversationMessages')->name('chat.conversation_messages');
     Route::post('chat/conversations', 'ChatController@createOrGetConversation')->name('chat.create_conversation');
     Route::get('chat/messages/{messageId}', 'ChatController@getMessage')->name('chat.get_message'); // For real-time broadcasting
@@ -135,6 +137,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('chat/messages', 'ChatController@sendMessage')->name('chat.send_message');
     Route::post('chat/groups/{groupId}/messages', 'ChatController@sendMessage')->name('chat.send_group_message');
     Route::delete('chat/messages/{messageId}', 'ChatController@deleteMessage')->name('chat.delete_message');
+    Route::post('chat/typing', 'ChatController@typing')->name('chat.typing');
     Route::get('chat/users/search', 'ChatController@searchUser')->name('chat.search_users');
 
     // Hackathon Routes
@@ -143,6 +146,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('apply/{id}/hackathon', 'HackathonController@applyHackathon')->name('hackathon.apply');
     Route::get('submission/{id}/hackathon', 'HackathonController@hackathonSubmissions')->name('hackathon.hackathonSubmissions');
     Route::post('hackathon/createTeam', 'HackathonController@createTeam')->name('hackathon.createTeam');
+    Route::post('hackathon/deleteTeamInfo', 'HackathonController@deleteTeamInfo')->name('hackathon.deleteTeamInfo');
     Route::post('hackathon/invitation', 'HackathonController@invitation')->name('hackathon.invitation');
     Route::post('hackathon/cancelinvitation', 'HackathonController@cancelInvitation')->name('hackathon.Cancelinvitation');
     Route::patch('hackathon/acceptInvitation/{id}', 'HackathonController@acceptInvitation')->name('hackathon.acceptInvitation');
@@ -160,8 +164,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
     Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners');
     Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
-    Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam');
-    Route::get('hackathon/landing/{id}', 'HackathonController@hackathonLanding');
+    Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam')->name('hackathon.viewTeam');
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
@@ -169,6 +172,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
     Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');
     Route::delete('hackathon/deleteTodoList/{id}', 'TodoListController@destroy')->name('hackathon.deleteTodoList');
+
+    Route::get('viewHackathonSummary/{id}', 'HackathonController@hackathon_Summary')->name('hackathon.hackathon_Summary');
 
     //waiting list
     Route::post('hackathon/leaveTeam', 'HackathonController@leaveTeam')->name('hackathon.leaveTeam');
@@ -220,6 +225,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
     Route::any('settings', 'SettingsController@get_settings')->name('settings.system_general_view');
+    Route::get('industry-settings', 'SettingsController@industrySettings')->name('settings.industry_view');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
     Route::any('setaboutus', 'SettingsController@get_aboutus');
     Route::post('updateaboutus', 'SettingsController@update_aboutus');
@@ -254,6 +260,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('organization.users_invite');
     Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('organization.users_invitations_resend');
     Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('organization.users_invitations_cancel');
+    Route::get('organizations/settings/reminder-logs', 'SettingsController@ReminderLogs')->name('organization.ReminderLogs');
+    Route::post('organizations/reminder-logs/destroy', 'ReminderLogController@destroy')->name('organization.destroyReminderLogs');
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -285,6 +293,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
+    // lowercase alias for backward-compatibility / ease of testing
+    Route::get('/show/mentors', 'ClientProfileController@showMintors')->name('mentors.list.lowercase');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
     Route::group(['prefix' => '2fa'], function () {
@@ -353,6 +363,21 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('company.profile_milestones_edit');
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('company.profile_milestones_delete');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
+    Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
+
+    //Industry
+    Route::post('/industries/technologies', 'TechnologyController@create_technologies')->name('settings.create_technologies');
+    Route::put('/industries/tech/{id}', 'TechnologyController@update_technologies')->name('settings.update_technologies');
+    Route::delete('/industries/technologies/{id}', 'TechnologyController@delete_technologies')->name('settings.delete_technologies');
+    
+    Route::post('/industries', 'IndustryController@store')->name('settings.create_industries');
+    Route::put('/industries/industry/{id}', 'IndustryController@update')->name('settings.update_industries');
+    Route::delete('/industries/{id}', 'IndustryController@destroy')->name('settings.delete_industries');
+
+    Route::post('/industries/sectors', 'SectorController@store')->name('settings.create_sectors');
+    Route::put('/industries/sector/{id}', 'SectorController@update')->name('settings.update_sectors');
+    Route::delete('/industries/sectors/{id}', 'SectorController@destroy')->name('settings.delete_sectors');
+
 
 
 
@@ -360,8 +385,11 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('services.like');
     //Users  Manager routes
     Route::resource('users', 'UserController');
+    Route::get('/judger', 'UserController@judger')->name('users.judger');
     Route::post('/users/password', 'UserController@updatePassword')->name('user.profile_update_password');
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
+    // Export startups (CSV / Excel) - preserves current filters passed as query params
+    Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
     //Cities
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');
@@ -380,7 +408,8 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     //SendMessage
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('messages.send');
-    Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');;
+    Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');
+    Route::post('/sendteammessage','HackathonController@sendTeamMessage')->name('messages.send_team_message');
     Route::post('/sendReplymessage', 'MessengerController@sendReplyMessage')->name('messages.reply');
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('messages.recipients_list_by_program');
 
@@ -405,6 +434,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.read_status_mark_read');
     Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.read_status_mark_unread');
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.view');
+
     //products categories Manager routes
     Route::resource('productsCategories', 'ProductCategoryController');
 
@@ -429,6 +459,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('forms-list', 'FormController@index')->name('forms.index');
 
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
+    Route::get('forms-submissions/export/{type}', 'FormController@export');
     Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
 
     //BuilderForm Builder
@@ -451,6 +482,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
     
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
+    Route::post('cycles/validate-url', 'CyclesController@validateURL');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
     Route::post('cycles/save', 'CyclesController@saveForm');
     Route::get('cycles/my/{id}', 'CyclesController@my')->name('cycles.list_mine');
@@ -474,6 +506,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
     Route::get('screening/results/{id?}', 'ScreeningController@results');
+    Route::get('screening/resultsReport', 'ScreeningController@resultsReport')->name('screening.results_report');
     Route::get('{id?}/screening', 'ScreeningController@index');
     Route::get('screening/{fid}/{cid}', 'ScreeningController@view')->name('screening.view');
     Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
@@ -513,6 +546,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('mentorship/mine', 'MentorsController@mine')->name('mentorships.list_mine');
     Route::post('mentorship/rate', 'MentorsController@rate')->name('mentorships.sessions_rate');
     Route::post('mentorship/delsession/{id}', 'MentorsController@delSession')->name('mentorships.sessions_delete');
+    Route::post('mentorship/session-reports-data', 'MentorsController@getSessionReportsData')->name('mentorships.sessions_reports_data');
     Route::get('/export-mentorship', 'MentorsController@exportMentorship')->name('mentorships.export');
     Route::post('/mentorship/getDates', 'MentorsController@MentorDates')->name('mentorships.dates_view');
 
@@ -538,10 +572,16 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
     Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
     Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
+    Route::post('/track-duration',  'TrainingController@timeTracking')->name('trainings.time_tracking');
+
 
 
     Route::get('training/results/{id?}', 'TrainingController@results')->name('trainings.results_view');
     Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('trainings.sessions_list');
+    Route::get('training/sessionsReport', 'TrainingController@sessionsReport')->name('trainings.sessions_report');
+    Route::get('/sessions/join/{session}', 'TrainingController@join')->name('trainings.sessions_join');
+
+
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
     Route::post('training/delsession/{id}', 'TrainingController@delsession')->name('trainings.sessions_delete');
     Route::post('training/session', 'TrainingController@session')->name('trainings.sessions_view');
@@ -562,6 +602,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('training/session-attendance-offline/{id}', 'TrainingController@attendanceOffline')->name('trainings.attendance_offline_manage');
     Route::post('training/QrCode-offline', 'TrainingController@QrCodeTraining')->name('trainings.attendance_qr_code_create');
     Route::get('training/Attendance-offline/{id}', 'TrainingController@getattendanceOffline')->name('trainings.attendance_offline_view');
+    Route::post('training/session-reports-data', 'TrainingController@getSessionReportsData')->name('trainings.session_reports_data');
 
 
     Route::get('/Totalsurveys', 'MentorsController@total_surveys')->name('surveys.dashboard_count_view');
@@ -581,6 +622,7 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
     Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.take');
     Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
     Route::post('surveys/{survey}/questions/delete', 'surveysController@delete_questions')->name('surveys.questions_delete');
+    
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
@@ -730,6 +772,9 @@ Route::post('/myProfile/notification-settings', 'ClientProfileController@updateN
         Route::get('/', 'ReportController@index')->name('reports.list');
         // ======> Ajax Route
         Route::get('view/{type?}', 'ReportController@View')->name('reports.view.ajax');
+        // ======> Export Routes
+        Route::post('export/final-screening', 'ReportController@exportFinalScreening')->name('reports.export.finalScreening');
+        Route::post('export/screening', 'ReportController@exportScreening')->name('reports.export.screening');
     });
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============

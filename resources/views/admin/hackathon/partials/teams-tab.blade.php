@@ -103,7 +103,7 @@
               </div>
               <div class="progress bg-light" style="height: 6px;">
                 <div class="progress-bar bg-gradient {{ count($team->members) == $team->max_members ? 'bg-danger' : 'bg-primary' }}" 
-                     style="width: {{ (count($team->members) / $team->max_members) * 100 }}%; transition: width 0.3s ease;"></div>
+                     style="width: {{ $team->max_members > 0 ? (count($team->members) / $team->max_members) * 100 : 0 }}%; transition: width 0.3s ease;"></div>
               </div>
             </div>
             
@@ -181,8 +181,9 @@
                 {{ $l == 'en' ? 'View My Team' : 'مشاهدة فريقي' }}
               </a>
               @elseif($team->request_sent == false)
+              
               @if($isExistingTeam == false)
-                @if($memberCount >= $maxAvatars)
+                @if($maxAvatars >= $memberCount)
                   <button onclick="joinTeam('{{ $team->id }}','{{ $team->name }}')" 
                           class="btn btn-primary btn-sm flex-fill d-flex align-items-center justify-content-center gap-2 fw-semibold"
                           style="transition: all 0.3s ease; border-radius: 8px;">

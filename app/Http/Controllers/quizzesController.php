@@ -777,7 +777,7 @@ class quizzesController extends Controller
 
 		$quizzesResults = collect(DB::select($quizzesResults_q));
 
-		return view('admin/clients/quiz/quiz_results', compact('quizzesResults'));
+		return view('admin.clients.quiz.quiz_results', compact('quizzesResults'));
 
 	}
 	public function quizResultsdetails($id)
@@ -824,7 +824,7 @@ class quizzesController extends Controller
 
 		$quizResult = collect(DB::select($quizzesResults_q, [$id]));
 		
-		return view('admin/clients/quiz/quiz_results_details', compact('quizResult'));
+		return view('admin.clients.quiz.quiz_results_details', compact('quizResult'));
 
 	}
 

@@ -258,7 +258,6 @@
       </div>
     </div>
     <!-- / Content -->
-
     <div class="content-backdrop fade"></div>
   </div>
   <!-- Content wrapper -->
@@ -318,6 +317,57 @@
         }
       });
     }
+
+
+    // خزن وقت بداية الجلسة
+    let startTime = Date.now();
+
+    // ID الدورة التدريبية الحالية
+    const trainingId = "{{ $content->training_id ?? 0 }}"; // غيّرها حسب متغيرك
+    const pageUrl = window.location.href;
+  
+    // دالة لحساب المدة بالدقائق
+    function getDurationMinutes() {
+        const now = Date.now();
+        const diffMs = now - startTime;
+        const minutes = Math.floor(diffMs / 60000); // 1 دقيقة = 60000ms
+        return minutes > 0 ? minutes : 1;
+    }
+
+    // دالة لإرسال الوقت للسيرفر
+    function sendTrainingTime() {
+        const duration = getDurationMinutes();
+        fetch("{{ route('trainings.time_tracking') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: {
+                trainingId: trainingId,
+                page_url: pageUrl,
+                duration_minutes: duration,
+            }
+        });
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+      const duration = getDurationMinutes();
+        
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        formData.append('trainingId', trainingId);
+        formData.append('page_url', pageUrl);
+        formData.append('duration_minutes', duration);
+
+        navigator.sendBeacon("{{ route('trainings.time_tracking') }}", formData);
+    });
+   
+
+    // كمان ممكن تبعت تحديث كل 5 دقايق لو المستخدم قاعد فترة طويلة
+    setInterval(sendTrainingTime, 5 * 60 * 1000);
+
+
   </script>
 @stop
 

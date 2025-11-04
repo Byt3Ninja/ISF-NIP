@@ -15,9 +15,12 @@ use App\Country;
 use App\Currency;
 use App\Settings;
 use App\Milestone;
+use App\Technology;
 use App\Team_member;
 use App\FundingRound;
 use App\Organization;
+use App\StaticCategory;
+use App\CompanyRelation;
 use App\SustainableIcon;
 use App\Events\WebMessage;
 use App\ScreeningEvaluation;
@@ -73,11 +76,39 @@ class ClientCompanyController extends Controller
                 ->where('Company_id', $id)->get();
 
 
-            $Achieved_Milestones = Milestone::where('plan', 'Achieved_Milestones')
-                ->where('Company_id', $id)->get();
-            $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')
-                ->where('Company_id', $id)->get();
+            // Load all milestones for this company (new unified structure)
+            $milestones = Milestone::where('Company_id', $id)->orderBy('created_at')->get();
+            
+            // For backward compatibility, create empty collections for old template variables
+            $Achieved_Milestones = collect();
+            $Planned_Milestones = collect();
             $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
+            
+            // Startup Technologies
+            $technologies = CompanyRelation::where('company_id', $id)
+                ->whereNotNull('technology_id')
+                ->with('technology')
+                ->get()
+                ->pluck('technology')
+                ->filter();
+            
+            // Startup Sectors
+            $sectors = CompanyRelation::where('company_id', $id)
+                ->whereNotNull('sector_id')
+                ->with('sector')
+                ->get()
+                ->pluck('sector')
+                ->filter();
+            
+            // Startup Industry
+            $industry = CompanyRelation::where('company_id', $id)
+                ->whereNotNull('industry_id')
+                ->with('industry')
+                ->get()
+                ->pluck('industry')
+                ->filter()
+                ->first(); // Usually one industry per company
+                
             // مسار الملف
             $pathToFile = storage_path($company->pitch_deck);
             // تحقق من وجود الملف
@@ -121,7 +152,7 @@ class ClientCompanyController extends Controller
                 });
                 $evaluationForm->isPublished = $isResponsesPublished;
             }
-            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+            return view('admin/clients/startup/company_profile', compact('company', 'formData', 'evaluationForm', 'Currencies', 'milestones', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile', 'technologies', 'sectors', 'industry'));
         // } catch (Exception $e) {
         //     //log what happend
         //     Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -137,16 +168,11 @@ class ClientCompanyController extends Controller
     public function editOrCreate($id = null)
     {
 
-
         try {
-
-            
             if ($id == null) {
-
                 $client = User::where('HaveCompany', 1)->with('company')
                     ->with('company.city')
                     ->find(Auth::id());
-                   
                     if (empty($client)) {
                     return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
@@ -156,9 +182,7 @@ class ClientCompanyController extends Controller
                 $Setting = Settings::where('id', 1)->first();
                 $sectors = Sector::whereNull('parent_id')->get();
                 $funding_rounds = auth()->user()->company ? auth()->user()->company->fundingRounds : [];
-
                 $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
-
                 if (auth()->user()->company) {
                     $fonders = Team_Member::where('TeamMember', 'Founder')
                         ->where('Company_id', auth()->user()->company->id)->get();
@@ -167,16 +191,19 @@ class ClientCompanyController extends Controller
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', auth()->user()->company->id)->get();
 
-                    $Achieveds = Milestone::where('plan', 'Achieved_Milestones')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Planneds = Milestone::where('plan', 'Planned_Milestones')
-                        ->where('Company_id', auth()->user()->company->id)->get();
-                    $Archiveds = Milestone::where('plan', 'Archived_Milestones')
-                        ->where('Company_id', auth()->user()->company->id)->get();
+                    // Load all milestones for this company (new unified structure)
+                    $milestones = Milestone::where('Company_id', auth()->user()->company->id)
+                        ->orderBy('created_at')->get();
+                    
+                    // For backward compatibility, create empty collections
+                    $Achieveds = collect();
+                    $Planneds = collect();
+                    $Archiveds = collect();
                 } else {
                     $fonders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
+                    $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
                     $Archiveds = 'NA';
@@ -252,16 +279,19 @@ class ClientCompanyController extends Controller
                     $Investors = Team_Member::where('TeamMember', 'Investor')
                         ->where('Company_id', $client->company->id)->get();
 
-                    $Achieveds = Milestone::where('plan', 'Achieved_Milestones')
-                        ->where('Company_id', $client->company->id)->get();
-                    $Planneds = Milestone::where('plan', 'Planned_Milestones')
-                        ->where('Company_id', $client->company->id)->get();
-                    $Archiveds = Milestone::where('plan', 'Archived_Milestones')
-                        ->where('Company_id', $client->company->id)->get();
+                    // Load all milestones for this company (new unified structure)
+                    $milestones = Milestone::where('Company_id', $client->company->id)
+                        ->orderBy('created_at')->get();
+                    
+                    // For backward compatibility, create empty collections
+                    $Achieveds = collect();
+                    $Planneds = collect();
+                    $Archiveds = collect();
                 } else {
                     $fonders = 'NA';
                     $Shareholders = 'NA';
                     $Investors = 'NA';
+                    $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
                     $Archiveds = 'NA';
@@ -289,7 +319,51 @@ class ClientCompanyController extends Controller
                 });
             }
 
-
+            $l = app()->getLocale();
+            if ($client->company) {
+                $companyRelations = CompanyRelation::where('company_id', $client->company->id)->get();
+                $selectedIndustryId   = $companyRelations->pluck('industry_id')->filter()->first();
+                $selectedSectorIds    = $companyRelations->pluck('sector_id')->filter()->toArray();
+                $selectedTechnologyIds = $companyRelations->pluck('technology_id')->filter()->toArray();
+                $technologies = DB::table('technologies')->get()->map(function ($tech) use ($l, $selectedTechnologyIds) {
+                    return [
+                        'id'       => $tech->id,
+                        'name'     => $tech->name,
+                        'selected' => in_array($tech->id, $selectedTechnologyIds),
+                    ];
+                })->values()->toArray();
+                $allSectors = DB::table('sectors')->get();
+                $industries = StaticCategory::with('sectors')->get();
+            $data = $industries->map(function ($industry) use ($l, $allSectors, $selectedIndustryId, $selectedSectorIds) {
+                if ($industry->sectors->isNotEmpty()) {
+                    $sectorsList = $industry->sectors->map(function ($sector) use ($l, $selectedSectorIds) {
+                        return [
+                            'id'       => $sector->id,
+                            'name'     => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+                            'selected' => in_array($sector->id, $selectedSectorIds),
+                        ];
+                    })->values()->toArray();
+                } else {
+                    $sectorsList = $allSectors->map(function ($sector) use ($l, $selectedSectorIds) {
+                        return [
+                            'id'       => $sector->id,
+                            'name'     => $sector->{"name_$l"} ?? $sector->name_en ?? 'N/A',
+                            'selected' => in_array($sector->id, $selectedSectorIds),
+                        ];
+                    })->values()->toArray();
+                }
+                return [
+                    'id'       => $industry->id,
+                    'name'     => $industry->name,
+                    'selected' => $industry->id == $selectedIndustryId,
+                    'sectors'  => $sectorsList,
+                ];
+            });
+        }else{
+           $industries = StaticCategory::with('sectors')->get();
+           $technologies = DB::table('technologies')->get();
+            $data = [];
+        }
             return view('admin/clients/company', compact(
                 'client',
                 '_countries',
@@ -297,6 +371,7 @@ class ClientCompanyController extends Controller
                 'Shareholders',
                 'Investors',
                 'Currencies',
+                'milestones',
                 'Achieveds',
                 'Planneds',
                 'Archiveds',
@@ -306,7 +381,10 @@ class ClientCompanyController extends Controller
                 'sectors',
                 'funding_rounds',
                 'Setting',
-                'Stages'
+                'Stages',
+                'technologies',
+                'industries',
+                'data'
             ));
         } catch (Exception $e) {
             //log what happend
@@ -314,6 +392,15 @@ class ClientCompanyController extends Controller
             abort(500);
         }
     }
+
+     public function deleteImage($id)
+     {
+        $user = Auth::user();
+        $company = Company::where('id', $user->company_id)->first(); 
+        $company->logo = null;
+        $company->save();
+        return response()->json(['status' => 'success']);
+     }
     /**
      * Update/Store the specified resource in storage.
      *
@@ -322,7 +409,7 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-        try {
+         try {
             $user = Auth::user();
             if( !is_null( $id ) )
             {
@@ -420,14 +507,15 @@ class ClientCompanyController extends Controller
                     'name_en' => 'required|string|max:255',
                     'country_id' => 'required|exists:countries,id',
                     'state_id' => 'required|exists:states,id',
-                    'sector' => 'required|string|max:255',
+                    'sector' => 'nullable|string|max:255',
                     'address_en' => 'required|string|max:500',
                     'est_date' => 'required|date',
                     'years_of_operations' => 'required|string',
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
-                    'business_categories.*' => ['string', Rule::in($allCategories)],
                     'other_category' => 'nullable|string|max:255',
+                    'Commercial_Register' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+                    'Tax_Card' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
                 ], [
                     'name_en.required' => __('admin.Name is required'),
                     'country_id.required' => __('admin.Country is required'),
@@ -440,6 +528,12 @@ class ClientCompanyController extends Controller
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
+                    'Commercial_Register.file'     => __('admin.File_is_not_valid'),
+                    'Commercial_Register.mimes'    => __('admin.Invalid_file_type'),
+                    'Commercial_Register.max'      => __('admin.File_size_must_be_less_than_10MB'),
+                    'Tax_Card.file'     => __('admin.File_is_not_valid'),
+                    'Tax_Card.mimes'    => __('admin.Invalid_file_type'),
+                    'Tax_Card.max'      => __('admin.File_size_must_be_less_than_10MB'),
                 ]);
 
                 // Handle "Other" category logic
@@ -464,17 +558,38 @@ class ClientCompanyController extends Controller
                 }
                 else
                 {
+                    if( $request->hasFile('Commercial_Register') )
+                    {
+                        $file = $request->file('Commercial_Register');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/documents/'; // بدون documents
+                        
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'document'
+                        ]);
+                        $Commercial_Register = '/documents/' . $path . $originalName;
+                    }else { $Commercial_Register = $company->Commercial_Register ?? 'null'; }
+                    if( $request->hasFile('Tax_Card') )
+                    {
+                        $file = $request->file('Tax_Card');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/documents/';
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'document'
+                        ]);
+                        $Tax_Card = '/documents/'. $path . $originalName;
+                    } else { $Tax_Card = $company->Tax_Card ?? 'null'; }
                     $CreatedTax = $data['CreatedTax'];
                     $cuntryReg = $data['Country_Register'];
-                    $Commercial_Register = $data['Commercial_Register'];
-                    $Tax_Card = $data['Tax_Card'];
+                    // $Commercial_Register = $data['Commercial_Register'];
+                    // $Tax_Card = $data['Tax_Card'];
                 }
-
                 $result->name_en = $data['name_en'];
                 $result->name_ar = $data['name_en'];
                 $result->country_id = $data['country_id'];
                 $result->state_id = $data['state_id'];
-                $result->sector = $data['sector'];
+                $result->sector = $data['sector'] ?? null;
                 $result->address_en = $data['address_en'];
                 $result->address_ar = $data['address_en'];
                 $result->est_date = $data['est_date'];
@@ -820,7 +935,301 @@ class ClientCompanyController extends Controller
                 $result->business_plan = $uploadedFile;
             }
             $result->save();
+            if( $data['CompanyN'] == 14 )
+            {               
+                // Set up debug logging using Laravel's Log facade
+                Log::debug('Starting company update process', [
+                    'company_id' => $id,
+                    'user_id' => $user->id,
+                    'request_data' => [
+                        'industry_id' => $request->industry_id,
+                        'sector_ids' => $request->sector_ids,
+                        'tech_tags' => $request->tech_tags,
+                        'CompanyN' => $request->CompanyN,
+                        'other_sector' => $request->other_sector,
+                        'other_tech' => $request->other_tech
+                    ]
+                ]);
 
+                    $rules = [
+                        'industry_id' => 'required|exists:static_categories,id',
+                        'sector_ids' => 'required',
+                        'tech_tags' => 'nullable|array',
+                        'tech_tags.*' => 'nullable|string|max:50',
+                        'other_sector' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:255',
+                        'other_tech' => 'nullable|regex:/^[A-Za-z0-9\s\-\.]+$/|max:50',
+                    ];
+
+                    $messages = [
+                        'industry_id.required' => __('admin.industry is required'),
+                        'industry_id.exists' => __('admin.invalid industry selected'),
+                        'sector_ids.required' => __('admin.sectors is required'),
+                        'tech_tags.array' => __('admin.technologies must be an array'),
+                        'tech_tags.*.string' => __('admin.technology name must be text'),
+                        'tech_tags.*.max' => __('admin.technology name too long'), 
+                        'other_sector.regex' => __('admin.other sector contains invalid characters'),
+                        'other_tech.regex' => __('admin.other technology contains invalid characters'),
+                        'other_sector.max' => __('admin.other sector name too long'),
+                        'other_tech.max' => __('admin.other technology name too long'),
+                    ];
+
+                    $validator = \Validator::make($request->all(), $rules, $messages);
+
+                // Normalize incoming sector and technology inputs
+                // Process sector IDs
+                $sectorIds = [];
+                if (!empty($data['sector_ids'])) {
+                    Log::debug('Processing sector IDs', ['raw' => $data['sector_ids']]);
+                    
+                    try {
+                        if (is_string($data['sector_ids'])) {
+                            $decoded = json_decode($data['sector_ids'], true);
+                            if (is_array($decoded)) {
+                                $sectorIds = array_filter($decoded);
+                            }
+                        } elseif (is_array($data['sector_ids'])) {
+                            $sectorIds = array_filter($data['sector_ids']);
+                        }
+
+                        // Validate sectors exist
+                        $validSectorIds = Sector::whereIn('id', $sectorIds)->pluck('id')->toArray();
+                        $invalidSectorIds = array_diff($sectorIds, $validSectorIds);
+                        
+                        if (!empty($invalidSectorIds)) {
+                            Log::warning('Invalid sector IDs provided', ['invalid_ids' => $invalidSectorIds]);
+                            throw new \Exception(__('admin.invalid_sectors_selected'));
+                        }
+                        
+                        $sectorIds = $validSectorIds;
+                        
+                    } catch (\Exception $e) {
+                        Log::error('Error processing sector IDs', [
+                            'error' => $e->getMessage(),
+                            'raw_data' => $data['sector_ids']
+                        ]);
+                        return redirect()->back()->with([
+                            'msg' => __('admin.error_processing_sectors'), 
+                            'class' => 'danger'
+                        ])->withInput();
+                    }
+                }
+
+                // Process existing tech IDs
+                $techIds = [];
+                if (!empty($data['tech_ids'])) {
+                    if (is_string($data['tech_ids'])) {
+                        try {
+                            $rawTechIds = json_decode($data['tech_ids'], true);
+                            if (is_array($rawTechIds)) {
+                                $validTechIds = Technology::whereIn('id', $rawTechIds)->pluck('id')->toArray();
+                                $techIds = array_values(array_unique($validTechIds));
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('Error processing tech IDs', ['error' => $e->getMessage()]);
+                        }
+                    } elseif (is_array($data['tech_ids'])) {
+                        $validTechIds = Technology::whereIn('id', $data['tech_ids'])->pluck('id')->toArray();
+                        $techIds = array_values(array_unique($validTechIds));
+                    }
+                }
+
+                // Process new tech tags
+                $techTags = [];
+                if (!empty($request->tech_tags)) {
+                    if (is_array($request->tech_tags)) {
+                        $techTags = array_filter(array_map('trim', $request->tech_tags));
+                    } elseif (is_string($request->tech_tags)) {
+                        try {
+                            $decoded = json_decode($request->tech_tags, true);
+                            if (is_array($decoded)) {
+                                $techTags = array_filter(array_map('trim', $decoded));
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('Error processing tech tags', ['error' => $e->getMessage()]);
+                        }
+                    }
+                }
+
+                // Require at least one technology selection
+                if (empty($techIds) && empty($techTags) && empty($request->other_tech)) {
+                    return redirect()->back()->with([
+                        'msg' => __('admin.please_select_technology'),
+                        'class' => 'danger'
+                    ])->withInput();
+                }
+                
+                // Validate that we have valid arrays after decoding
+                if (!is_array($sectorIds)) {
+                    $sectorIds = [];
+                }
+                if (!is_array($techIds)) {
+                    $techIds = [];
+                }
+                
+                // Process "Other" sector if provided
+                if (!empty(trim($data['other_sector'] ?? ''))) {
+                    try {
+                        $sectorName = trim($data['other_sector']);
+                        
+                        // Check if sector with similar name already exists (case-insensitive)
+                        $existingSector = Sector::whereRaw('LOWER(name_en) = ?', [strtolower($sectorName)])
+                            ->orWhereRaw('LOWER(name_ar) = ?', [strtolower($sectorName)])
+                            ->first();
+                            
+                        if ($existingSector) {
+                            $sectorIds[] = $existingSector->id;
+                            Log::info('Using existing sector', [
+                                'name' => $sectorName,
+                                'id' => $existingSector->id
+                            ]);
+                        } else {
+                            // Create new sector
+                            $addSector = new Sector();
+                            $addSector->name_en = $sectorName;
+                            $addSector->name_ar = $sectorName; // Consider translation if needed
+                            $addSector->save();
+                            
+                            // Associate with industry
+                            $industry = StaticCategory::findOrFail($data['industry_id']);
+                            $industry->sectors()->attach($addSector->id);
+                            
+                            $sectorIds[] = $addSector->id;
+                            
+                            Log::info('Created new sector', [
+                                'name' => $sectorName,
+                                'id' => $addSector->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error processing other sector', [
+                            'name' => $sectorName ?? null,
+                            'error' => $e->getMessage()
+                        ]);
+                        return redirect()->back()->with([
+                            'msg' => __('admin.error_creating_sector'),
+                            'class' => 'danger'
+                        ])->withInput();
+                    }
+                }
+                
+                // Process "Other" technology if provided
+                if (!empty(trim($data['other_tech'] ?? ''))) {
+                    try {
+                        $techName = trim($data['other_tech']);
+                        
+                        // Check if technology with similar name exists
+                        $existingTech = Technology::whereRaw('LOWER(name) = ?', [strtolower($techName)])
+                            ->first();
+                            
+                        if ($existingTech) {
+                            $techIds[] = $existingTech->id;
+                            Log::info('Using existing technology', [
+                                'name' => $techName,
+                                'id' => $existingTech->id
+                            ]);
+                        } else {
+                            // Create new technology
+                            $addTech = new Technology();
+                            $addTech->name = $techName;
+                            $addTech->save();
+                            
+                            $techIds[] = $addTech->id;
+                            
+                            Log::info('Created new technology', [
+                                'name' => $techName,
+                                'id' => $addTech->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error processing other technology', [
+                            'name' => $techName ?? null,
+                            'error' => $e->getMessage()
+                        ]);
+                        return redirect()->back()->with([
+                            'msg' => __('admin.error_creating_technology'),
+                            'class' => 'danger'
+                        ])->withInput();
+                    }
+                }
+
+                // Process freeform tech tags (create Technology rows if needed)
+                if (!empty($techTags)) {
+                    foreach ($techTags as $tag) {
+                        // enforce max length
+                        if (mb_strlen($tag) > 50) {
+                            return redirect()->back()->with(['msg' => __('admin.Technology_name_too_long'), 'class' => 'danger'])->withInput();
+                        }
+                        // try find existing technology by name (case-insensitive)
+                        $existing = Technology::whereRaw('LOWER(name) = ?', [mb_strtolower($tag)])->first();
+                        if ($existing) {
+                            $techIds[] = $existing->id;
+                        } else {
+                            $newTech = new Technology();
+                            $newTech->name = $tag;
+                            $newTech->save();
+                            $techIds[] = $newTech->id;
+                        }
+                    }
+                }
+
+                DB::beginTransaction();
+                try {
+                    // Remove existing relations
+                    CompanyRelation::where('company_id', $result->id)
+                        ->where('user_id', $user->id)
+                        ->delete();
+
+                    $timestamp = now();
+                    $relations = [];
+
+                    // Add sector relations
+                    foreach ($sectorIds as $sectorId) {
+                        $relations[] = [
+                            'company_id' => $result->id,
+                            'user_id' => $user->id,
+                            'industry_id' => $data['industry_id'],
+                            'sector_id' => $sectorId,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp
+                        ];
+                    }
+
+                    // Add technology relations
+                    foreach ($techIds as $techId) {
+                        $relations[] = [
+                            'company_id' => $result->id,
+                            'user_id' => $user->id,
+                            'industry_id' => $data['industry_id'],
+                            'technology_id' => $techId,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp
+                        ];
+                    }
+
+                    // Bulk insert all relations
+                    if (!empty($relations)) {
+                        CompanyRelation::insert($relations);
+                    }
+
+                    DB::commit();
+                    Log::info('Company relations updated', [
+                        'company_id' => $result->id,
+                        'sector_count' => count($sectorIds),
+                        'tech_count' => count($techIds)
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Failed to update company relations', [
+                        'error' => $e->getMessage(),
+                        'company_id' => $result->id
+                    ]);
+                    
+                    return redirect()->back()
+                        ->with('msg', __('admin.error_updating_company_relations'))
+                        ->with('class', 'danger')
+                        ->withInput();
+                }   
+            }
             if( is_null( $id ) )
             {
                 User::where('id', $user->id)->update(['company_id' => $result->id]);
@@ -829,8 +1238,11 @@ class ClientCompanyController extends Controller
 
             if( $result ) {
                 if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
-                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
-            } else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
+
+                // Use the result's ID if $id is null (new company creation)
+                $redirectId = $id ?: $result->id;
+                return redirect()->route('company.profile_view_mine', $redirectId)->with(['msg' => 'Startup_Info_Updated_Successfully', 'class' => 'success']);
+            } else { return back()->withInput()->with(['msg' => 'Startup_Info_Updated_Failed', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
@@ -838,7 +1250,7 @@ class ClientCompanyController extends Controller
             // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
+            return redirect()->back()->with(['msg' => 'please_complete_startup_info', 'class' => 'danger']);
         }
     }
 
@@ -1193,199 +1605,388 @@ class ClientCompanyController extends Controller
 
     public function AddMileStone(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        try {
+            // Get company from authenticated user or provided ID
+            if ($id) {
+                $user = User::where('company_id', $id)->first();
+                $companyId = $user ? $user->company_id : $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
+            }
 
+            if (!$companyId) {
+                return response()->json([
+                    'errors' => ['company' => [__('Startup not found')]],
+                ], 422);
+            }
 
-        if ($request->Plan == "Achieved_Milestones") {
-            // تحقق من صحة البيانات
+            // Validate the request
             $validator = Validator::make($request->all(), [
-                'Plan' => 'required|string|max:255',
-                'achieved_milestone_name' => 'required|max:255',
-                'achieved_milestone_description' => 'required|max:255',
+                'name' => 'required|string|max:300',
+                'description' => 'required|string|max:1000',
+                'completion_percentage' => 'required|integer|min:0|max:100',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
             ], [
-                'Plan.required' => __('admin.Choose achieved milestones'),
-                'achieved_milestone_name.required' => __('admin.Name is Required MileStone'),
-                'achieved_milestone_description.required' => __('admin.milestone achieved description'),
+                'name.required' => __('startup.milestone_title_required'),
+                'name.max' => __('startup.milestone_title_max_length'),
+                'description.required' => __('startup.milestone_description_required'),
+                'description.max' => __('startup.milestone_description_max_length'),
+                'completion_percentage.required' => __('startup.completion_percentage_required'),
+                'completion_percentage.integer' => __('startup.completion_percentage_numeric'),
+                'completion_percentage.min' => __('startup.completion_percentage_range'),
+                'completion_percentage.max' => __('startup.completion_percentage_range'),
+                'documents.*.file' => __('startup.document_invalid_file'),
+                'documents.*.mimes' => __('startup.document_invalid_type'),
+                'documents.*.max' => __('startup.document_too_large'),
             ]);
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
             if ($validator->fails()) {
                 return response()->json([
                     'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+                ], 422);
             }
 
-            $plan = $request->Plan;
-            $name = $request->achieved_milestone_name;
-            $desc = $request->achieved_milestone_description;
-        }
-        if ($request->Plan == "Planned_Milestones") {
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'Plan' => 'required|string|max:255',
-                'planned_milestone_name' => 'required|max:255',
-                'planned_milestone_description' => 'required|max:255',
-            ], [
-                'Plan.required' => __('admin.Choose achieved milestones'),
-                'planned_milestone_name.required' => __('admin.Name is Required MileStone'),
-                'planned_milestone_description.required' => __('admin.milestone achieved description'),
+            // Create new milestone
+            $milestone = new Milestone();
+            $milestone->name = $request->name;
+            $milestone->description = $request->description;
+            $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->Company_id = $companyId;
+            $milestone->save();
+
+            // Handle file uploads if any
+            $documents = [];
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $index => $file) {
+                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    
+                    $documents[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'url' => asset('storage/' . $filePath),
+                        'path' => $filePath,
+                    ];
+                }
+                
+                // Store documents info in milestone (you might want to create a separate table for this)
+                $milestone->documents = json_encode($documents);
+                $milestone->save();
+            }
+
+            return response()->json([
+                'state' => __('admin.MileStone_added'),
+                'success' => true,
+                'milestone' => [
+                    'id' => $milestone->id,
+                    'name' => $milestone->name,
+                    'description' => $milestone->description,
+                    'completion_percentage' => $milestone->completion_percentage,
+                    'documents' => $documents,
+                ],
             ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
-            }
-
-            $plan = $request->Plan;
-            $name = $request->planned_milestone_name;
-            $desc = $request->planned_milestone_description;
+            
+        } catch (\Exception $e) {
+            \Log::error('Error adding milestone: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => [__('An error occurred while saving the milestone.')]],
+            ], 500);
         }
-        if ($request->Plan == "Archived_Milestones") {
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'Plan' => 'required|string|max:255',
-                'Archived_milestone_name' => 'required|max:255',
-                'Archived_milestone_description' => 'required|max:255',
-            ], [
-                'Plan.required' => __('admin.Choose achieved milestones'),
-                'Archived_milestone_name.required' => __('admin.Name is Required MileStone'),
-                'Archived_milestone_description.required' => __('admin.milestone achieved description'),
-            ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
-            }
-
-            $plan = $request->Plan;
-            $name = $request->Archived_milestone_name;
-            $desc = $request->Archived_milestone_description;
-        }
-
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $mileStone = new Milestone(); // افترض أن لديك موديل اسمه TeamMember
-        $mileStone->plan = $plan;
-        $mileStone->name = $name;
-        $mileStone->description = $desc;
-        $mileStone->Company_id = $companyId;
-        $mileStone->save();
-
-        // استجابة بعد الحفظ
-        return response()->json([
-            'state' => __('admin.MileStone_added'),
-        ]);
     }
 
     public function EditMileStone(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        try {
+            // Get company from authenticated user or provided ID
+            if ($id) {
+                $user = User::where('company_id', $id)->first();
+                $companyId = $user ? $user->company_id : $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
+            }
 
-        $id = $request->id;
+            if (!$companyId) {
+                return response()->json([
+                    'errors' => ['company' => [__('Startup not found')]],
+                ], 422);
+            }
 
-
-        $mileStone = Milestone::where('id', $id)->first(); // افترض أن لديك موديل اسمه
-
-
-        if ($mileStone->plan == "Achieved_Milestones") {
-            // تحقق من صحة البيانات
+            // Validate the request
             $validator = Validator::make($request->all(), [
-                'Achieved_name' => 'required|max:255',
-                'Achieved_desc' => 'required|max:255',
+                'id' => 'required|integer|exists:milestones,id',
+                'name' => 'required|string|max:300',
+                'description' => 'required|string|max:1000',
+                'completion_percentage' => 'required|integer|min:0|max:100',
+                'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // 10MB
+                'remove_documents' => 'nullable|string', // JSON string of indices to remove
             ], [
-                'Achieved_name.required' => __('admin.Name is Required MileStone'),
-                'Achieved_desc.required' => __('admin.milestone achieved description'),
+                'id.required' => __('startup.milestone_id_required'),
+                'id.exists' => __('startup.milestone_not_found'),
+                'name.required' => __('startup.milestone_title_required'),
+                'name.max' => __('startup.milestone_title_max_length'),
+                'description.required' => __('startup.milestone_description_required'),
+                'description.max' => __('startup.milestone_description_max_length'),
+                'completion_percentage.required' => __('startup.completion_percentage_required'),
+                'completion_percentage.integer' => __('startup.completion_percentage_numeric'),
+                'completion_percentage.min' => __('startup.completion_percentage_range'),
+                'completion_percentage.max' => __('startup.completion_percentage_range'),
+                'documents.*.file' => __('startup.document_invalid_file'),
+                'documents.*.mimes' => __('startup.document_invalid_type'),
+                'documents.*.max' => __('startup.document_too_large'),
             ]);
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
             if ($validator->fails()) {
                 return response()->json([
                     'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+                ], 422);
             }
 
+            // Find the milestone and ensure it belongs to the company
+            $milestone = Milestone::where('id', $request->id)
+                                ->where('Company_id', $companyId)
+                                ->first();
 
-            $name = $request->Achieved_name;
-            $desc = $request->Achieved_desc;
-        }
-
-        if ($mileStone->plan == "Planned_Milestones") {
-
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-
-                'Planned_name' => 'required|max:255',
-                'Planned_desc' => 'required|max:255',
-            ], [
-
-                'Planned_name.required' => __('admin.Name is Required MileStone'),
-                'Planned_desc.required' => __('admin.milestone achieved description'),
-            ]);
-
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
+            if (!$milestone) {
                 return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+                    'errors' => ['milestone' => [__('Milestone not found or you do not have permission to edit it.')]],
+                ], 404);
             }
 
+            // Update milestone
+            $milestone->name = $request->name;
+            $milestone->description = $request->description;
+            $milestone->completion_percentage = $request->completion_percentage;
+            $milestone->save();
 
-            $name = $request->Planned_name;
-            $desc = $request->Planned_desc;
-        }
-        if ($mileStone->plan == "Archived_Milestones") {
-            // تحقق من صحة البيانات
-            $validator = Validator::make($request->all(), [
-                'Archived_name' => 'required|max:255',
-                'Archived_desc' => 'required|max:255',
-            ], [
-                'Archived_name.required' => __('admin.Name is Required MileStone'),
-                'Archived_desc.required' => __('admin.milestone achieved description'),
+            // Handle file uploads if any (append to existing documents)
+            // Force model to refresh and apply casts
+            $milestone->refresh();
+            $existingDocuments = $milestone->documents;
+            
+            \Log::info('EditMileStone: Initial request info', [
+                'milestone_id' => $milestone->id,
+                'has_files' => $request->hasFile('documents'),
+                'request_files' => $request->files->keys(),
+                'all_input' => array_keys($request->all()),
+                'files_in_documents' => $request->hasFile('documents') ? count($request->file('documents')) : 0
             ]);
+            
+            \Log::info('EditMileStone: Processing existing documents', [
+                'milestone_id' => $milestone->id,
+                'documents_type' => gettype($existingDocuments),
+                'documents_value' => $existingDocuments,
+                'has_files' => $request->hasFile('documents')
+            ]);
+            
+            // Ensure existing documents is an array (handle JSON string or null)
+            if (is_string($existingDocuments)) {
+                try {
+                    $decoded = json_decode($existingDocuments, true);
+                    $existingDocuments = is_array($decoded) ? $decoded : [];
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to decode milestone documents JSON', [
+                        'milestone_id' => $milestone->id,
+                        'documents_raw' => $existingDocuments,
+                        'error' => $e->getMessage()
+                    ]);
+                    $existingDocuments = [];
+                }
+            } elseif (!is_array($existingDocuments)) {
+                $existingDocuments = [];
+            }
+            
+            // Handle document removals
+            if ($request->has('remove_documents')) {
+                $removeDocuments = json_decode($request->input('remove_documents'), true);
+                if (is_array($removeDocuments)) {
+                    \Log::info('EditMileStone: Removing documents', [
+                        'remove_indices' => $removeDocuments,
+                        'milestone_id' => $milestone->id
+                    ]);
+                    
+                    // Remove documents from file system and filter from existing documents
+                    foreach ($removeDocuments as $index) {
+                        if (isset($existingDocuments[$index])) {
+                            $document = $existingDocuments[$index];
+                            
+                            // Delete physical file if it exists
+                            if (isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
+                                \Storage::disk('public')->delete($document['path']);
+                                \Log::info('EditMileStone: Physical file deleted', [
+                                    'path' => $document['path'],
+                                    'milestone_id' => $milestone->id
+                                ]);
+                            }
+                        }
+                    }
+                    
+                    // Remove documents from array by filtering out the specified indices
+                    $existingDocuments = array_values(array_filter($existingDocuments, function($doc, $index) use ($removeDocuments) {
+                        return !in_array($index, $removeDocuments);
+                    }, ARRAY_FILTER_USE_BOTH));
+                }
+            }
+            
+            $newDocuments = [];
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+            if ($request->hasFile('documents')) {
+                \Log::info('EditMileStone: Files detected', [
+                    'files_count' => count($request->file('documents')),
+                    'milestone_id' => $milestone->id
+                ]);
+                
+                foreach ($request->file('documents') as $index => $file) {
+                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('milestones/' . $companyId, $fileName, 'public');
+                    
+                    \Log::info('EditMileStone: File uploaded', [
+                        'original_name' => $file->getClientOriginalName(),
+                        'stored_path' => $filePath,
+                        'index' => $index
+                    ]);
+                    
+                    $newDocuments[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'url' => asset('storage/' . $filePath),
+                        'path' => $filePath,
+                    ];
+                }
+                
+                // Merge existing and new documents
+                $allDocuments = array_merge($existingDocuments, $newDocuments);
+                $milestone->documents = json_encode($allDocuments);
+                $milestone->save();
+                
+                \Log::info('EditMileStone: Documents saved', [
+                    'existing_count' => count($existingDocuments),
+                    'new_count' => count($newDocuments),
+                    'total_count' => count($allDocuments),
+                    'milestone_id' => $milestone->id
+                ]);
+                
+                // Return the merged documents directly
+                $finalDocuments = $allDocuments;
+            } else {
+                // No new files uploaded, use existing documents
+                $finalDocuments = $existingDocuments;
             }
 
-            $name = $request->Archived_name;
-            $desc = $request->Archived_desc;
+            \Log::info('EditMileStone: Final response', [
+                'milestone_id' => $milestone->id,
+                'final_documents_count' => count($finalDocuments),
+                'final_documents' => $finalDocuments
+            ]);
+            
+            return response()->json([
+                'state' => __('admin.MileStone_Edited'),
+                'success' => true,
+                'milestone' => [
+                    'id' => $milestone->id,
+                    'name' => $milestone->name,
+                    'description' => $milestone->description,
+                    'completion_percentage' => $milestone->completion_percentage,
+                    'documents' => $finalDocuments,
+                ],
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error editing milestone: ' . $e->getMessage());
+            return response()->json([
+                'errors' => ['general' => [__('An error occurred while updating the milestone.')]],
+            ], 500);
         }
-
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-
-
-        $mileStone->name = $name;
-        $mileStone->description = $desc;
-        $mileStone->save();
-
-        // استجابة بعد الحفظ
-        return response()->json([
-            'state' => __('admin.MileStone_Edited'),
-        ]);
     }
     public function DeleteMileStone(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        try {
+            // Get company from authenticated user or provided ID
+            if ($id) {
+                $user = User::where('company_id', $id)->first();
+                $companyId = $user ? $user->company_id : $id;
+                
+                // Verify that current user has access to this company (allow admins)
+                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager')) {
+                    return response()->json([
+                        'errors' => ['permission' => [__('You do not have permission to access this company.')]],
+                    ], 403);
+                }
+            } else {
+                $companyId = Auth::user()->company_id;
+            }
 
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $Milestone = Milestone::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+            if (!$companyId) {
+                return response()->json([
+                    'errors' => ['company' => [__('admin.Company not found')]],
+                ], 422);
+            }
 
-        $Milestone->delete();
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|integer|exists:milestones,id',
+            ], [
+                'id.required' => __('Milestone ID is required.'),
+                'id.exists' => __('Milestone not found.'),
+            ]);
 
-        // استجابة بعد الحفظ
-        return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Find the milestone and ensure it belongs to the company
+            $milestone = Milestone::where('id', $request->id)
+                                ->where('Company_id', $companyId)
+                                ->first();
+
+            if (!$milestone) {
+                return response()->json([
+                    'errors' => ['milestone' => [__('Milestone not found or you do not have permission to delete it.')]],
+                ], 404);
+            }
+
+            // Delete associated files if they exist
+            if ($milestone->documents && is_array($milestone->documents)) {
+                $documents = $milestone->documents;
+                foreach ($documents as $document) {
+                    if (is_array($document) && isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
+                        \Storage::disk('public')->delete($document['path']);
+                    }
+                }
+            }
+
+            // Delete the milestone
+            $milestone->delete();
+
+            return response()->json([
+                'state' => __('admin.MileStone_deleted'),
+                'success' => true,
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error deleting milestone: ' . $e->getMessage(), [
+                'milestone_id' => $request->id ?? 'unknown',
+                'company_id' => $companyId ?? 'unknown',
+                'user_id' => Auth::id(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'errors' => ['general' => [__('An error occurred while deleting the milestone.')]],
+            ], 500);
+        }
     }
 
 
@@ -1417,10 +2018,47 @@ class ClientCompanyController extends Controller
 }
 
     public function companies(Request $request)
-	{
-	    $filters = $request->only(['search', 'sector', 'stage', 'organization']);
+    {
+        // Map the form parameters to the expected filter parameters
+        $filters = [];
+        
+        // Handle search
+        if ($request->filled('search')) {
+            $filters['search'] = $request->get('search');
+        }
+        
+        // Handle organization filter (Admin only)
+        if ($request->filled('orgnization')) {
+            $filters['organization'] = $request->get('orgnization');
+        }
+        
+        // Handle program/cycle filter
+        if ($request->filled('programFilter')) {
+            $programFilter = $request->get('programFilter');
+            if ($programFilter !== 'all') {
+                $filters['programId'] = $programFilter;
+            }
+        }
+        
+        // Handle stage filter
+        if ($request->filled('stage')) {
+            $filters['stage'] = $request->get('stage');
+        }
+        
+        // Handle sectors filter (multiple sectors)
+        if ($request->filled('sectors')) {
+            $sectors = $request->get('sectors');
+            if (is_array($sectors) && !empty($sectors)) {
+                // For multiple sectors, we'll need to modify the repository to handle this
+                $filters['sectors'] = $sectors;
+            }
+        }
+        
         $companies = $this->companyService->getCompanies($filters, isApi: false);
+        
+        // Pass the language variable
+        $l = app()->getLocale();
 
-	    return view('admin/users/companies', compact('companies'));
-	}
+        return view('admin/users/companies', compact('companies', 'l'));
+    }
 }

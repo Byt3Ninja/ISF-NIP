@@ -2,12 +2,7 @@
 
 @section('style')
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
   <style>
     #contentWrapper {
@@ -39,14 +34,13 @@
   $name = 'name_' . $l;
   $tabs = collect([
       ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
+      ['classification', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
       ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
       ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
       ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
       ['team-info', 'ti-users', $l == 'en' ? 'Team Info' : ' الفريق'],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      // ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
-      // ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
   ])
       ->map(function ($tab) {
@@ -68,7 +62,7 @@
               <a 
                 id="mobile-company-tab"
                 href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link"
+                class="nav-link {{ $key == 0 ? 'active' : '' }}"
                 data-bs-toggle="tab" 
                 role="tab"
               >
@@ -90,9 +84,9 @@
             @foreach ($tabs as $key => $tab)
             <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
               <a 
-              id="company-tab"
+                  id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link py-3"
+                  class="nav-link py-3 {{ $key == 0 ? 'active' : '' }}"
                   data-bs-toggle="tab"
                   role="tab"
                 >
@@ -126,10 +120,13 @@
           <!-- / Alert -->
 
           @foreach ($tabs as $index => $tab)
-          <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
-            @switch($tab['target'])
+            <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="navs-left-{{ $tab['target'] }}">
+              @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
+                @break
+                @case('classification')
+                  @include('partials.forms.company.classification_form', ['heading' => $tab['label']])
                 @break
                 @case('company-contact-info')
                   @include('partials.forms.company.company-contact', ['heading' => $tab['label']])
@@ -149,12 +146,6 @@
                 @case('company-milestones')
                   @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
                 @break
-                {{-- @case('company-social')
-                  @include('partials.forms.company.company-social', ['heading' => $tab['label']])
-                @break --}}
-                {{-- @case('about_problem')
-                  @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
-                @break --}}
                 @case('business_model')
                   @include('partials.forms.company.business_model', ['heading' => $tab['label']])
                 @break
@@ -173,17 +164,12 @@
 
 @section('scripts')
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
   <!-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> -->
 @stop
 
@@ -193,7 +179,6 @@
   </script>
   <script src="/app-assets/js/1.js"></script>
 
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
   <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
   {{-- <script src="/vuexy/assets/js/founder-form.js"></script> --}}
@@ -215,79 +200,96 @@
   </script>  -->
 
   <script>
+    
+    document.getElementById('reset-company-logo').addEventListener('click', async () => {
+        if (!confirm('هل أنت متأكد من حذف الشعار؟')) return;
+
+        const response = await fetch("{{ route('company.profile_images_delete', $client->company->id ?? 0) }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                "Content-Type": "application/json"
+            }
+        });
+    });
+
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
       const pitchTabs = document.querySelectorAll('#pitch-tab');
       const tabs = document.querySelectorAll('#company-tab');
       const mobileTabs = document.querySelectorAll('#mobile-company-tab');
-      const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const tabsContent = document.querySelectorAll('#company-tab-content > .tab-pane');
       const pitchContent = document.querySelectorAll('#pitch-tab-content .tab-pane');
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
       const activePitchTab = localStorage.getItem('activePitchTab');
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasCompleteProfile = urlParams.get('action') === 'complete-profile';
+      const activeIndex = hasCompleteProfile || !activeCompanyTab ? 0 : JSON.parse(activeCompanyTab);
+      const activePitchIndex = hasCompleteProfile || !activePitchTab ? 0 : JSON.parse(activePitchTab);
 
+      // Clear localStorage if complete-profile action
+      if (hasCompleteProfile) {
+        localStorage.removeItem('activeCompanyTab');
+        localStorage.removeItem('activePitchTab');
+      }
+
+      // Initialize pitch tabs (internal tabs within pitch deck)
       pitchTabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
           localStorage.setItem('activePitchTab', JSON.stringify(index));
         });
-
-        if (!activePitchTab) {
-          pitchTabs[0].classList.add('active');
-          return;
-        }
-
-        if (index === JSON.parse(activePitchTab)) {
+        
+        if (index === activePitchIndex) {
           tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
         }
       });
 
-      pitchContent.forEach((tab, index) => {
-        if (!activePitchTab) {
-          pitchContent[0].classList.add('show', 'active');
-          return;
-        }
-
-        if (index === JSON.parse(activePitchTab)) {
-          tab.classList.add('fade', 'show', 'active');
+      // Initialize pitch content
+      pitchContent.forEach((content, index) => {
+        if (index === activePitchIndex) {
+          content.classList.add('show', 'active');
+        } else {
+          content.classList.remove('show', 'active');
         }
       });
 
-      mobileTabs.forEach((tab, index) => {
-        tab.addEventListener('click', function() {
-          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
-        });
-
-        if (!activeCompanyTab) {
-          mobileTabs[0].classList.add('active');
-          return;
-        }
-
-        if (index === JSON.parse(activeCompanyTab)) {
-          tab.classList.add('active');
-        }
-      });
-
+      // Initialize desktop tabs
       tabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
           localStorage.setItem('activeCompanyTab', JSON.stringify(index));
         });
-
-        if (!activeCompanyTab) {
-          tabs[0].classList.add('active');
-          return;
-        }
-
-        if (index === JSON.parse(activeCompanyTab)) {
+        
+        if (index === activeIndex) {
           tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
         }
       });
 
-      tabsContent.forEach((tab, index) => {
-        if (!activeCompanyTab) {
-          tabsContent[0].classList.add('show', 'active');
-          return;
+      // Initialize mobile tabs
+      mobileTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+        
+        if (index === activeIndex) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
         }
+      });
 
-        if (index === JSON.parse(activeCompanyTab)) {
-          tab.classList.add('fade', 'show', 'active');
+      // Initialize tab content
+      tabsContent.forEach((tab, index) => {
+        if (index === activeIndex) {
+          tab.classList.add('show', 'active');
+        } else {
+          tab.classList.remove('show', 'active');
         }
       });
     });

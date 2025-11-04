@@ -72,11 +72,21 @@
                         <label class="form-label fs-6 mb-1 fw-semibold" for="title">{{ __('admin.Title') }}</label>
                         <input name="title" type="text" class="form-control" id="title" placeholder="{{ __('admin.Title') }}" required />
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-6">
                         <label class="form-label fs-6 mb-1 fw-semibold" for="description">{{ __('admin.Description') }}</label>
                         <input name="description" type="text" class="form-control" id="description" placeholder="{{ __('admin.Description') }}" />
                     </div>
+                    <div class="form-group mb-4">
+                        <div class="form-check">
+                            <label class="form-check-label fs-6 mb-1 fw-semibold" for="required">
+                                {{ __('admin.Is_Required') }}
+                                <input name="is_required" type="checkbox" value="1" class="form-check-input" id="required" />
+                            </label>
+                        </div>
+                        <small class="text-muted">{{ __('admin.Is_Required_Survey_Description') }}</small>
+                    </div>
                 </div>
+                
 
                 <div class="card-body">
                     <legend class="mb-6 fs-5 border-bottom pb-3 text-dark fw-semibold">{{ __('admin.SurveyQuestions') }}</legend>

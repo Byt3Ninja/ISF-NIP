@@ -13,7 +13,7 @@ class Cycle extends Model
 {
     use Auditable;
     public static $module = 'Program';
-    protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d',];
+    protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d', 'is_public' => 'boolean',];
     protected $guarded = [];
 
     // =============> Attributes <======================
@@ -114,4 +114,6 @@ class Cycle extends Model
 
         return $hackathon;
     }
+
+   
 }

@@ -16,8 +16,12 @@ class FieldSeeder extends Seeder
     {
         $json = File::get(base_path('database/dbFiles/fields.json'));
         $data = json_decode($json,true);
+        
         foreach ($data as $value){
-            Field::create($value);
+            // Field::create($value);
+            Field::firstOrCreate(
+                ['field_type' => $value['field_type']],
+            );
         }
     }
 }

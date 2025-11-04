@@ -15,7 +15,16 @@ class MentorshipSchedule extends Model
         'value',
         'unit',
         'is_active',
+        'organization_id',
+        'cycle_id',
         'created_at',
         'updated_at',
     ];
+
+     public function cycle()
+    {
+        return $this->belongsTo(Cycle::class);
+    }
+
+
 }

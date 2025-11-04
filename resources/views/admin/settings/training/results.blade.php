@@ -25,42 +25,48 @@
         <h4 class="card-title">{{ __('cycles.Portal training results') }}</h4>
       </div>
       <div class="card-body">
-        <div class="d-flex flex-wrap align-items-end w-100 gap-6">
-          <div class="w-50 mt-4">
-            <label for="cstep" class="form-label fs-6 mb-2">{{ __('cycles.Select training from list') }}</label>
-            <select id="cstep" class="form-select select2 cyclesExcel"
-              onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
-              @foreach ($sessions as $step)
-              <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }} -
-                {{ $step->step->title }} ({{ __('cycles.Cycle') }} "{{ $step->step->cycle->title }}" -
-                {{ __('cycles.Start') }} {{ $step->step->from->format('d-m-Y') ?? '-' }}) -
-                {{ optional(optional(optional($step->step)->cycle)->organization)->name }}</option>
-              @endforeach
-            </select>
+        <div class="row my-6">
+          <div class="col-12 col-md-6">
+            <div class="form-group w-100">
+              <label class="form-label">{{ __('cycles.Select training from list') }}</label>
+              <select id="cstep" class="form-select select2 w-100 cyclesExcel"
+                onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
+                @foreach ($sessions as $step)
+                <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }} -
+                  {{ $step->step->title }} ({{ __('cycles.Cycle') }} "{{ $step->step->cycle->title }}" -
+                  {{ __('cycles.Start') }} {{ $step->step->from->format('d-m-Y') ?? '-' }}) -
+                  {{ optional(optional(optional($step->step)->cycle)->organization)->name }}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
-          <div class="d-flex align-items-end gap-4">
-            <a href="javascript:void(0)" class="btn btn-label-secondary"
-              onclick="window.location.href='/dashboard/cycles/{{ $csession->step->cycle->id }}/registered'">
-              <i class="ti ti-user me-2"></i> <span class="align-middle">{{ __('cycles.Users') }}</span>
-            </a>
-            <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $csession->step->cycle->id }}">
-              <i class="ti ti-pencil me-2"></i> <span class="align-middle ml-25">{{ __('cycles.Cycle') }}</span>
-            </a>
+          <div class="col-12 col-md-6">
+             <div class="d-flex align-items-end gap-4 h-100 mt-3 mt-md-0">
+              <a href="javascript:void(0)" class="btn btn-label-secondary"
+                onclick="window.location.href='/dashboard/cycles/{{ $csession->step->cycle->id }}/registered'">
+                <i class="ti ti-user me-2"></i> <span class="align-middle">{{ __('cycles.Users') }}</span>
+              </a>
+              <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $csession->step->cycle->id }}">
+                <i class="ti ti-pencil me-2"></i> <span class="align-middle ml-25">{{ __('cycles.Cycle') }}</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
     <section class="row mt-6">
       <div class="col-xl-12 col-md-12 col-sm-12">
         <div class="card">
           <div class="card-header">
             <h4 class="card-title">
               {{ $step->title }} - {{ $csession->step->title }}
-              <small class="text-muted">
-                {{ __('cycles.from') }} {{ $csession->step->from->format('d-m-Y') ?? '-' }}
-                {{ __('cycles.to') }} {{ $csession->step->to->format('d-m-Y') ?? '-' }}
-              </small>
             </h4>
+            <small class="text-muted">
+              <i class="ti ti-calendar-event me-2"></i>
+              {{ __('cycles.from') }} {{ $csession->step->from->format('d-m-Y') ?? '-' }}
+              {{ __('cycles.to') }} {{ $csession->step->to->format('d-m-Y') ?? '-' }}
+            </small>
             <p>{{ $csession->step->description }}</p>
           </div>
           <hr style="margin:-10px 0 5px 0;">
@@ -82,7 +88,7 @@
                         </select>
                       </div>
                       <div class="col-12 col-md-4">
-                        <a href="javascript:void(0)" class="btn btn-primary ExportExcelTresult">
+                        <a href="javascript:void(0)" class="btn btn-primary mt-3 mt-md-0 ExportExcelTresult">
                           <i class="ti ti-brand-abstract me-2"></i>
                           {{ __('cycles.Export') }}
                         </a>
@@ -156,7 +162,7 @@
                   @endphp
                   @foreach ($companies as $company)
                   @php
-                  $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
+                  $cc = \App\TrainingCompleted::where('user_id', $company?->user?->id)
                   ->where('course_id', $csession->training_Address)
                   ->count();
                   $per = $contents ? ($cc / $contents) * 100 : '0';
@@ -172,7 +178,7 @@
                     <td>
                       <div class="d-flex align-items-center gap-1">
                         <input type="checkbox" class="chboxTresult" do="{{ $company->id }}"
-                          userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
+                          userid="{{ $company?->user?->id }}" value="1" name="chboxcyclesReg[]">
                       </div>
                     </td>
                     <td>
@@ -197,21 +203,21 @@
                     <td>
                       <div class="d-flex align-items-center gap-2">
                         <a class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
-                          href="/dashboard/users/{{ $company->user->id }}/edit">
-                          @if ($company->user->img_url)
-                          <img src="/191014/{{ $company->user->img_url }}"
+                          href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
+                          @if ($company?->user?->img_url)
+                          <img src="/191014/{{ $company?->user?->img_url }}"
                             alt="avatar" class="img-fluid w-100 h-100">
                           @else
                           <img src="/icons/account.svg" class="img-fluid" />
                           @endif
                         </a>
-                        <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                        <a href="/dashboard/users/{{ $company?->user?->id ?? '0' }}/edit">
                           <div class="text-black d-flex flex-column">
                             <strong>
-                              {{ $company->user->{'first_name_' . $l} }}
-                              {{ $company->user->{'last_name_' . $l} }}
+                              {{ $company?->user?->{'first_name_' . $l} }}
+                              {{ $company?->user?->{'last_name_' . $l} }}
                             </strong>
-                            <small class="text-muted">{{ $company->user->{'title_' . $l} }}</small>
+                            <small class="text-muted">{{ $company?->user?->{'title_' . $l} }}</small>
                           </div>
                         </a>
                       </div>

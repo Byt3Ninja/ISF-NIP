@@ -15,8 +15,8 @@
                             @if (count($received)>0)
                             <div class="col-12">
                                 <div class="card">
-                                    <div class="card-header">
-                                      <h4 class="card-title">{{__('admin.Services')}}</h4>
+                                    <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
+                                      <h5 class="card-title mb-0">{{__('admin.Services')}}</h5>
                                       <br>
                                         <a href="/dashboard/directory" class="btn btn-primary glow">{{__('admin.Back to services')}}</a>
                                     </div>

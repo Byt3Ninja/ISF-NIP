@@ -23,6 +23,7 @@ use http\Env\Response;
 use App\Finalscreening;
 use App\TrainingSession;
 use App\CycleCustomPages;
+use App\MentorshipSchedule;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use Illuminate\Validation\Rule;
@@ -245,6 +246,10 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
+        $isEdit = false;
+        $isCreate = false;
+        if( $request->has('typeedit') && $request->has('id') && intval( $request->id ) > 0 ) { $isEdit = true; }
+        if( $request->has('typecreate') && !$request->has('id') ) { $isCreate = true; }
 
         if ($request->cycleid == null && isset($request->typeedit)) {
             $id = $request->id;
@@ -254,6 +259,7 @@ class CyclesController extends Controller
             $type = $request->type;
         }
 
+        if( $isEdit == true ) { $id = intval( $request->id ); }
         if ($request->has('date_range')) {
 
             $dates = explode(' - ', $request->date_range);
@@ -266,20 +272,32 @@ class CyclesController extends Controller
             ]);
         }
 
-        if ($type == 1) {
-            /// Edit Cycle
+        if ($type == 1 || $isEdit == true)
+        {
+            /// Edit Cycle (to be moved to standalone controller)
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250|unique:cycles,title,' . $id,
-                'description' => 'required|string|max:2000',
+                'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1',
+                // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
+                'public_slug' => [
+                    Rule::requiredIf($request->is_public == 1),
+                    'nullable',
+                    'regex:/^[a-zA-Z0-9]+$/',
+                    Rule::unique('cycles', 'public_slug')->ignore($request->id),
+                ],
                 'start' => 'required|date',
                 'end' => 'required|date',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'financial_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
+                'program_step_type' => ['required', 'in:cycle,time'],
+            ], [
+                'public_slug.required_if' => __('cycles.Public URL required'),
+                'public_slug.unique' => __('cycles.Public URL already exist'),
+                'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
             ]);
 
             $cycle = Cycle::find($id);
@@ -324,6 +342,7 @@ class CyclesController extends Controller
             $cycle->end = Carbon::parse($request->end);
             $cycle->private = $private;
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+            $cycle->step_type = $request->program_step_type;
 
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
@@ -356,11 +375,33 @@ class CyclesController extends Controller
                     $cycle->img_url = 'programs/' . $imageName;
                 }
                     $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
-                    $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
+                    // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
 
             $cycle->save();
+
+            if($request->reminder_enabled == 'on'){
+                $schedule = DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
+                    foreach ($request->reminder_times as $reminder) {
+                        [$value, $unit, $before] = explode('_', $reminder);
+                        DB::table('mentorship_schedules')->insert([
+                            'cycle_id' => $cycle->id,
+                            'value' => (int) $value,
+                            'unit' => $unit,
+                            'is_active' => 1,
+                            'organization_id' => $cycle->organization_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }else{
+                    DB::table('mentorship_schedules')->where('cycle_id', $cycle->id)->delete();
+                }
+
+
+           
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($type == 2) {
+        }
+        elseif ($type == 2) {
 
             /// Save Cycle
 
@@ -653,14 +694,16 @@ class CyclesController extends Controller
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'count_team_number' => $request->count_team_number, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($request->tab_id == 1) {
-            
+        }
+        elseif ($request->tab_id == 1)
+        {
+            // create new cycle (to be moved to standalone controller)
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
-                'description' => 'required|string|max:2000',
+                'description' => 'required|string|max:100',
                 'is_public' => 'required|boolean',
-                'public_slug' => 'required_if:is_public,1',
+                'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9]+$/',
                 'start' => 'required|date|before:end',
                 'end' => 'required|date|after:start',
                 'program-guideline-pdf' => 'nullable|file|mimes:pdf|max:2048',
@@ -668,6 +711,11 @@ class CyclesController extends Controller
                 'legal_policy_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'delegation_pdf' => 'nullable|file|mimes:pdf|max:2048',
                 'program_type' => ['required', 'in:General_Program,Hackathon'],
+                'program_step_type' => ['required', 'in:cycle,time'],
+            ], [
+                'public_slug.required_if' => __('cycles.Public URL required'),
+                'public_slug.unique' => __('cycles.Public URL already exist'),
+                'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
             ]);
 
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
@@ -708,6 +756,7 @@ class CyclesController extends Controller
                 } else { $public_slug = $cycle->public_slug; }
 
                 $cycle->public_slug = $public_slug;
+                $cycle->step_type = $request->program_step_type;
                 $cycle->organization_id = $request->organization_id2;
                 $cycle->type = $request->program_type;
                 $cycle->title = $request->title;
@@ -753,11 +802,23 @@ class CyclesController extends Controller
                     $cycle->img_url = 'programs/' . $imageName;
                     
                 }
-                
                 $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
-                $cycle->hours_Rminder = $request->hours_reminder;
-
+                // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
                 $cycle->save();
+                if($request->reminder_enabled == 'on'){
+                    foreach ($request->reminder_times as $reminder) {
+                        [$value, $unit, $before] = explode('_', $reminder);
+                        DB::table('mentorship_schedules')->insert([
+                            'cycle_id' => $cycle->id,
+                            'value' => (int) $value,
+                            'unit' => $unit,
+                            'is_active' => 1,
+                            'organization_id' => $cycle->organization_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
 
                 if (auth()->user()->hasRole('OrganizationManager')) {
                     $requiredFields = ['host', 'mail', 'mailpassword', 'port', 'encryption'];
@@ -796,7 +857,9 @@ class CyclesController extends Controller
                 }
             });
             return redirect()->route('programlist.index')->with('message', 'Saved');
-        } else {
+        }
+        else
+        {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
 
@@ -806,6 +869,69 @@ class CyclesController extends Controller
         }
     }
 
+    public function validateURL(Request $request)
+    {
+        $title = trim( $request->title );
+        $slug = Str::slug( $request->slug );
+
+        $slugsList = DB::table('cycles')
+            ->select([
+                'id',
+                'public_slug'
+            ])
+            ->whereNotNull('public_slug')
+            ->when($request->has('id') && $request->id != 0, function ($q) use ($request) {
+                return $q->where('id', '!=', $request->id);
+            })
+            ->get();
+
+        $slugs = $slugsList->pluck('public_slug')->toArray();
+
+        if( !in_array( $slug, $slugs ) ) { return response()->json(['status' => true, 'slug' => $slug, 'message' => __('cycles.Public URL available')]); }
+        else
+        {
+            $availableSlugs = [];
+            $baseSlug = Str::slug( $title );
+            if( preg_match('/^(.*?)-(\d+)$/', $slug, $matches ) )
+            {
+                $base = $matches[1];
+                $num  = (int) $matches[2];
+            }
+            else
+            {
+                $base = $slug;
+                $num  = 0;
+            }
+            $i = $num + 1;
+            while( count( $availableSlugs ) < 5 )
+            {
+                $newSlug = $base . '-' . $i;
+                if( !in_array( $newSlug, $slugs ) ) { $availableSlugs[] = $newSlug; }
+                $i++;
+            }
+
+            if( preg_match('/^(.*?)-(\d+)$/', $baseSlug, $matchings ) )
+            {
+                $base = $matchings[1];
+                $num  = (int) $matchings[2];
+            }
+            else
+            {
+                $base = $baseSlug;
+                $num  = 0;
+            }
+            $i = $num + 1;
+            $availableSlugs2 = [];
+            while( count( $availableSlugs2 ) < 5 )
+            {
+                $newSlug = $base . '-' . $i;
+                if( !in_array( $newSlug, $slugs ) ) { $availableSlugs2[] = $newSlug; }
+                $i++;
+            }
+            $availableSlugs = array_merge( $availableSlugs, $availableSlugs2 );
+            return response()->json(['status' => false, 'message' => __('cycles.Public URL not available', ['slug' => $request->slug]), 'slugs' => $availableSlugs]);
+        }
+    }
 
     function view($c, Request $request)
     {
@@ -887,24 +1013,85 @@ class CyclesController extends Controller
         $step = Step::where(function($query) {
         $query->where('stype', 1)
               ->orWhere('stype', 5);
-    })->where('id', $id)->first();
-        if (!$step) {
-            return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
-        }
-        //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
-        $id = $step->id;
-        $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
+        })->where('id', $id)->first();
+            if (!$step) {
+                return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
+            }
+            //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
+            $id = $step->id;
+
+            $field_map_ids = Formfield::where('step_id', $id)
+                ->where('builder_forms_id', $step->data)
+                ->pluck('id')
+                ->toArray();
+
+            // جلب كل الحقول الخاصة بالـ step
+            $fields = $step->fields()
+                ->where('builder_forms_id', $step->data)
+                ->orderBy('form_fields.id', 'asc')
+                ->get();
+
+            // تجهيز البيانات بشكل منسق
+            $structured = $fields->map(function ($field) {
+                $options = json_decode($field->pivot->options ?? '{}', true) ?? [];
+
+                return [
+                    'id'          => $field->id,
+                    'label'       => $options['label'] ?? '',
+                    'description' => $options['description'] ?? '',
+                    'section'     => $options['section'] ?? 'N/A',
+                    'type'        => $options['type'] ?? null,
+                    'is_required' => (bool)($options['validation']['required'] ?? 0),
+                    'options'     => isset($options['values'])
+                        ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
+                        : [],
+                    'logic'       => $options['logic'] ?? 'continue',
+                ];
+            })
+            ->groupBy('section')
+            ->map(function ($questions, $section_title) {
+                $first = $questions->first();
+
+                return [
+                    'title'       => $section_title,
+                    'description' => $first['description'] ?? '',
+                    'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                    'questions'   => $questions->values()->map(function ($q) {
+                        return [
+                            'id'          => $q['id'],
+                            'label'       => $q['label'],
+                            'is_required' => $q['is_required'],
+                            'type'        => $q['type'],
+                            'options'     => $q['options'],
+                            'logic'       => $q['logic'],
+                        ];
+                    })->toArray(),
+                ];
+            })
+            ->values()
+            ->toArray();
         $answers = [];
-        $data = [
-            'title' => $step->title,
-            'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
-            'form_id' => $step->id,
-            'field_ids' => implode(",", $field_map_ids)
-        ];
-        //        if (Auth::user()->company->step==$id) {
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
+            // البنية النهائية
+            $data = [
+                'id'          => $step->id,
+                'title'       => $step->title,
+                'description' => $step->description,
+                'build_data'  => $structured,
+                'field_ids' => implode(",", $field_map_ids)
+            ];
+
+            // $field_map_ids = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->select('id')->pluck('id')->toArray();
+            // $answers = [];
+            // $data = [
+            //     'title' => $step->title,
+            //     'fields' => $step->fields()->where('builder_forms_id', $step->data)->orderBy('form_fields.id', 'asc')->get(),
+            //     'form_id' => $step->id,
+            //     'field_ids' => implode(",", $field_map_ids)
+            // ];
+            //        if (Auth::user()->company->step==$id) {
+            $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('id', 'ASC')->get();
         //        }
-        return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
+        return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
     public function saveForm(Request $request)

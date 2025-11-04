@@ -132,8 +132,9 @@ class UserController extends Controller
 	 */
 	public function update(UpdateUserApiRequest $request, User $user)
 	{
+
 			$this->authorize('update', Auth::user());
-			
+		
 			$result=$this->userService->update($user,$request->all());
 
 
@@ -210,5 +211,11 @@ class UserController extends Controller
 		$result = $this->userService->importUsers($request->file('file'));
 
 		return redirect()->back()->with('success', 'تم رفع الشيت بنجاح!');
+	}
+	public function judger()
+	{
+		$judgers = User::role('Judger')->get();
+
+		return view('admin/users/judgers', compact('judgers'));
 	}
 }

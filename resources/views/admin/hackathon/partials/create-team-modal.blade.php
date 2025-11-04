@@ -17,7 +17,7 @@
             <label for="img_team" class="form-label">
               {{ $l == 'en' ? 'Team Logo' : 'شعار الفريق' }}
             </label>
-            <input type="file" class="form-control" name="img_team" id="img_team">
+            <input type="file" class="form-control" name="team_image" id="img_team">
           </div>
 
           <div class="mb-3">
@@ -30,7 +30,7 @@
             <label for="teamDescription" class="form-label">
               {{ $l == 'en' ? 'Brief Team/Idea Description (Optional)' : 'وصف مختصر للفريق/الفكرة (اختياري)' }}
             </label>
-            <textarea class="form-control" name="description" id="teamDescription" rows="2"></textarea>
+            <textarea class="form-control" name="team_description" id="teamDescription" rows="2"></textarea>
           </div>
 
           <hr>

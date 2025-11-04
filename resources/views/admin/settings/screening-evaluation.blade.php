@@ -50,46 +50,53 @@
   </div>
 </section>
 
+@push('scripts')
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
       // --- Tab Navigation ---
-      const navLinks = document.querySelectorAll('.nav-link');
-      const tabContents = document.querySelectorAll('.main-content .tab-content');
+      // const navLinks = document.querySelectorAll('.nav-link');
+      // const tabContents = document.querySelectorAll('.main-content .tab-content');
 
-      function setActiveTab(targetId) {
-        navLinks.forEach(l => {
-          l.classList.toggle('active', l.getAttribute('href') === `#${targetId}`);
-        });
-        tabContents.forEach(t => {
-          t.classList.toggle('active', t.id === targetId);
-        });
-      }
+      // function setActiveTab(targetId) {
+      //   navLinks.forEach(l => {
+      //     l.classList.toggle('active', l.getAttribute('href') === `#${targetId}`);
+      //   });
+      //   tabContents.forEach(t => {
+      //     t.classList.toggle('active', t.id === targetId);
+      //   });
+      // }
 
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const targetId = link.getAttribute('href').substring(1);
-          setActiveTab(targetId);
-          if (targetId === 'evaluation-model') {
-            renderModelEditor();
-          }
-        });
-      });
+      // navLinks.forEach(link => {
+      //   link.addEventListener('click', (e) => {
+      //     e.preventDefault();
 
-      const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
-      setActiveTab(initialTab);
+      //     const href = link.getAttribute('href');
+      //     if (!href) return; // Skip if no href
 
-      // --- Chart Initialization ---
-      const revenueChartCanvas = document.getElementById('revenueChart');
-      if (revenueChartCanvas) {
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-        const ctx = revenueChartCanvas.getContext('2d');
-        new Chart(ctx, {
-          type: 'line',
-          data: { /* ... chart data ... */ },
-          options: { /* ... chart options ... */ }
-        });
-      }
+      //     const targetId = href.substring(1);
+      //     setActiveTab(targetId);
+
+      //     if (targetId === 'evaluation-model') {
+      //       renderModelEditor();
+      //     }
+      //   });
+      // });
+
+
+      // const initialTab = window.location.hash ? window.location.hash.substring(1) : 'evaluation-model';
+      // setActiveTab(initialTab);
+
+      // // --- Chart Initialization ---
+      // const revenueChartCanvas = document.getElementById('revenueChart');
+      // if (revenueChartCanvas) {
+      //   const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      //   const ctx = revenueChartCanvas.getContext('2d');
+      //   new Chart(ctx, {
+      //     type: 'line',
+      //     data: { /* ... chart data ... */ },
+      //     options: { /* ... chart options ... */ }
+      //   });
+      // }
 
       // --- Evaluation Model CRUD Logic ---
       const modelEditorContainer = document.getElementById('model-editor');
@@ -562,10 +569,7 @@
 
     $(document).on('click', '#addPanelBtn', function(e) {
       e.preventDefault();
-      // let tBody = $('#panels-list-body');
-      // let lastTr = tBody.children('tr').last();
-      // let lastTrData = $(lastTr).data('panel');
-      lastTrData = $('#panels-list-body tr').length ?? 0;
+      let lastTrData = $('#panels-list-body tr').length ?? 0;
       let panel = lastTrData + 1;
       let html = `<tr data-panel="${panel}">
         <td>
@@ -616,13 +620,14 @@
       $('#panels-list-body tr').each(function() {
         const $tr = $(this);
         let line = `
-            <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
+            <i title="{{ __('cycles.Remove panel') }}" class="remove-panel-btn cursor-pointer fas fa-fw fa-sm fa-minus-circle text-danger"></i> 
             {{ __('cycles.Panel list') }} ${index}
         `;
-        index++
+        index++;
         $($tr).find('td').eq(0).html(line);
         $($tr).find('td').eq(1).find('select').attr('name', `judges[${index}][]`);
         $($tr).find('td').eq(2).find('select').attr('name', `users[${index}][]`);
       });
     });
   </script>
+@endpush

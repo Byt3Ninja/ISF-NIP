@@ -1,4 +1,4 @@
-  @extends('emails.layout')
+  @extends('emails.layout.master')
 @section('content')  
 
                                     <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">

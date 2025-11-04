@@ -55,7 +55,6 @@ return [
             'url' => env('APP_URL') . '/191014',
             'visibility' => 'public',
         ],
-
         'pitch_deck' => [
             'driver' => 'local',
             'root'   => public_path('pitch_decks'),
@@ -134,6 +133,12 @@ return [
             'driver' => 'local',
             'root' => public_path('qrcodes'),
             'url' => env('APP_URL') . '/qrcodes',
+            'visibility' => 'public',
+        ],
+        'document' => [
+            'driver' => 'local',
+            'root'   => public_path('documents'),
+            'url' => env('APP_URL') . '/documents',
             'visibility' => 'public',
         ],
     ],
