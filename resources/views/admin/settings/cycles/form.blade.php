@@ -1,44 +1,117 @@
 @extends('layouts.admin')
 
 <?php
-  // Static form structure for cycles
+  // Static form structure
   $form = [
     'id' => $step->id,
     'title' => $step->title,
     'description' => $step->description,
     'build_data' => [
       [
-        'title' => $step->title,
-        'description' => $step->description,
-        'logic' => 'submit',
-        'questions' => collect($fields)->map(function($field, $index) use ($answers) {
-          $options = $field->pivot->options ? json_decode($field->pivot->options) : null;
-          $get_answer = collect($answers)->where('field_id', $field->pivot->id)->first();
-          $answer = $get_answer ? $get_answer->answer : null;
-          
-          $question = [
-            'id' => $field->pivot->id,
-            'label' => $options->label ?? 'Field ' . ($index + 1),
+        'title' => 'Personal Information',
+        'description' => 'Please provide your personal details.',
+        'logic' => 'submit', // continue | section-{index} | submit
+        'questions' => [
+          [
+            'id' => 1,
+            'label' => 'Full Name',
             'is_required' => true,
-            'type' => $field->field_type,
+            'type' => 'short_answer',
             'options' => [],
             'logic' => [],
-            'answer' => $answer
-          ];
-          
-          if ($field->field_type === 'select' && isset($options->values)) {
-            $question['options'] = array_map('trim', explode(',', $options->values));
-            $question['logic'] = array_fill_keys($question['options'], 'continue');
-          }
-          
-          if ($field->field_type === 'textarea' && isset($options->rows)) {
-            $question['rows'] = $options->rows;
-          }
-          
-          return $question;
-        })->toArray()
-      ]
-    ]
+          ],
+          [
+            'id' => 2,
+            'label' => 'Email Address',
+            'is_required' => true,
+            'type' => 'short_answer',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 3,
+            'label' => 'Gender',
+            'is_required' => false,
+            'type' => 'dropdown',
+            'options' => ['Male', 'Female', 'Other'],
+            'logic' => [
+              'Male' => 'continue',
+              'Female' => 'continue',
+              'Other' => 'section-1',
+            ],
+          ],
+        ],
+      ],
+      [
+        'title' => 'Preferences',
+        'description' => 'Choose your preferences below.',
+        'logic' => 'continue',
+        'questions' => [
+          [
+            'id' => 4,
+            'label' => 'Favorite Color',
+            'is_required' => false,
+            'type' => 'multiple_choice',
+            'options' => ['Red', 'Blue', 'Green', 'Other'],
+            'logic' => [
+              'Red' => 'continue',
+              'Blue' => 'continue',
+              'Green' => 'continue',
+              'Other' => 'submit',
+            ],
+          ],
+          [
+            'id' => 5,
+            'label' => 'Hobbies',
+            'is_required' => false,
+            'type' => 'checkboxes',
+            'options' => ['Reading', 'Sports', 'Music', 'Traveling'],
+            'logic' => [
+              'Reading' => 'continue',
+              'Sports' => 'continue',
+              'Music' => 'continue',
+              'Traveling' => 'submit',
+            ],
+          ],
+        ],
+      ],
+      [
+        'title' => 'Feedback',
+        'description' => 'Help us improve by sharing your opinion.',
+        'logic' => 'submit',
+        'questions' => [
+          [
+            'id' => 6,
+            'label' => 'Rate your experience',
+            'is_required' => true,
+            'type' => 'linear_scale',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 7,
+            'label' => 'Additional Comments',
+            'is_required' => false,
+            'type' => 'paragraph',
+            'options' => [],
+            'logic' => [],
+          ],
+          [
+            'id' => 8,
+            'label' => 'Hobbies',
+            'is_required' => false,
+            'type' => 'checkboxes',
+            'options' => ['Reading', 'Sports', 'Music', 'Traveling'],
+            'logic' => [
+              'Reading' => 'section-0',
+              'Sports' => 'continue',
+              'Music' => 'continue',
+              'Traveling' => 'submit',
+            ],
+          ],
+        ],
+      ],
+    ],
   ];
 ?>
 
@@ -77,8 +150,18 @@
                   <input type="hidden" name="id" value="{{$step->id}}" />
                   <input type="hidden" name="field_ids" value="{{ $field_ids }}" />
 
-                  @foreach($form['build_data'] as $sectionIndex => $section)
+                   @foreach($form['build_data'] as $sectionIndex => $section)
                   <div class="section-wrapper mb-4" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
+                    @if($section['title'] || $section['description'])
+                    <div class="section-header mb-3">
+                      @if($section['title'])
+                      <h5 class="section-title text-primary mb-1">{{ $section['title'] }}</h5>
+                      @endif
+                      @if($section['description'])
+                      <p class="section-description text-muted mb-0">{{ $section['description'] }}</p>
+                      @endif
+                    </div>
+                    @endif
                     <div class="card border shadow-sm">
                       <div class="card-body p-4">
                         <div class="row g-4">
@@ -100,62 +183,133 @@
                               @endif
 
                               @switch($question['type'])
-                                @case('select')
+                                @case('dropdown')
                                   <select 
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}"
                                     class="form-select question-logic @error($field_name) is-invalid @enderror"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                   >
-                                    <option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>
+                                    <option value="">{{ $question['label'] }}</option>
                                     @foreach($question['options'] as $option)
                                       <option value="{{ $option }}" 
                                         data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
-                                        {{ (old($field_name) == $option || $question['answer'] == $option) ? 'selected' : '' }}>
-                                        {{ $option }}
+                                        {{ old($field_name) == $option ? 'selected' : '' }}>
+                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
                                       </option>
                                     @endforeach
                                   </select>
                                   @break
 
-                                @case('textarea')
+                                @case('paragraph')
                                   <textarea 
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}" 
-                                    rows="{{ $question['rows'] ?? 4 }}"
+                                    rows="3"
                                     class="form-control @error($field_name) is-invalid @enderror"
                                     placeholder="{{ $question['label'] }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
-                                  >{{ old($field_name) ?? $question['answer'] }}</textarea>
+                                  >{{ old($field_name) }}</textarea>
                                   @break
 
-                                @case('file')
-                                  <div class="d-flex flex-column">
-                                    <input 
-                                      type="file"
-                                      class="form-control @error($field_name) is-invalid @enderror"
-                                      id="{{ $id_for }}" 
-                                      name="{{ $field_name }}"
-                                      accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                                      {{ $question['is_required'] ? 'required' : '' }}
-                                    />
-                                    @if($question['answer'])
-                                      <div class="mt-4">
-                                        <a href="/{{ $question['answer'] }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                          <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
-                                        </a>
-                                      </div>
-                                    @endif
+                                @case('multiple_choice')
+                                  <div class="options-group">
+                                    @foreach($question['options'] as $optionIndex => $option)
+                                    <div class="form-check mb-2">
+                                      <input 
+                                        class="form-check-input question-logic" 
+                                        type="radio" 
+                                        name="{{ $field_name }}" 
+                                        id="{{ $id_for }}_{{ $optionIndex }}" 
+                                        value="{{ $option }}"
+                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                        {{ old($field_name) == $option ? 'checked' : '' }}
+                                        {{ $question['is_required'] ? 'required' : '' }}
+                                      />
+                                      <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
+                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                      </label>
+                                    </div>
+                                    @endforeach
                                   </div>
                                   @break
 
-                                @default
+                                @case('checkboxes')
+                                  <div class="options-group">
+                                    @foreach($question['options'] as $optionIndex => $option)
+                                    <div class="form-check mb-2">
+                                      <input 
+                                        class="form-check-input question-logic" 
+                                        type="checkbox" 
+                                        name="{{ $field_name }}[]" 
+                                        id="{{ $id_for }}_{{ $optionIndex }}" 
+                                        value="{{ $option }}"
+                                        data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
+                                      />
+                                      <label class="form-check-label" for="{{ $id_for }}_{{ $optionIndex }}">
+                                        {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
+                                      </label>
+                                    </div>
+                                    @endforeach
+                                  </div>
+                                  @break
+
+                                @case('linear_scale')
+                                  <select 
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}"
+                                    class="form-select @error($field_name) is-invalid @enderror"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  >
+                                    <option value="">Select a rating</option>
+                                    @for($i = 1; $i <= 5; $i++)
+                                      <option value="{{ $i }}" {{ old($field_name) == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                  </select>
+                                  @break
+
+                                @case('date')
                                   <input 
                                     type="text"
                                     class="form-control datepicker @error($field_name) is-invalid @enderror"
                                     id="{{ $id_for }}" 
                                     name="{{ $field_name }}" 
-                                    value="{{ old($field_name) ?? $question['answer'] }}"
+                                    value="{{ old($field_name) }}"
+                                    placeholder="{{ $question['label'] }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                                  @break
+
+                                @case('time')
+                                  <input 
+                                    type="text"
+                                    class="form-control timepicker @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}" 
+                                    value="{{ old($field_name) }}"
+                                    placeholder="{{ $question['label'] }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                                  @break
+
+                                @case('file')
+                                  <input 
+                                    type="file"
+                                    class="form-control @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}"
+                                    {{ $question['is_required'] ? 'required' : '' }}
+                                  />
+                                  @break
+
+                                @case('short_answer')
+                                @default
+                                  <input 
+                                    type="text"
+                                    class="form-control @error($field_name) is-invalid @enderror"
+                                    id="{{ $id_for }}" 
+                                    name="{{ $field_name }}" 
+                                    value="{{ old($field_name) }}"
                                     placeholder="{{ $question['label'] }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                   />
