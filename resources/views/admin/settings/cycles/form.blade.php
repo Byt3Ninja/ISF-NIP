@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 <?php
-// dd($answers);
   // Static form structure
   $form = $data;
 
