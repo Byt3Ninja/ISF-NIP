@@ -31,7 +31,9 @@
     $mode = !request()->segment(3) ? 'ADD' : 'EDIT';
 
     $orgIdParam = request()->get('org_id');
-  @endphp
+//   dd($data['builder_data']);
+    //   $builder_data = $data['builder_data'];
+@endphp
 
 @section('content')
 
@@ -1023,16 +1025,16 @@
                     return;
                 }
 
-                setTimeout(() => {    
-                    if (data.id) {
-                        if (currentMode === 'EDIT') {
-                            window.location.href = `/dashboard/show-form/${data.id}`;
-                            return;
-                        }
-                        window.location.href = redirectUrl;
-                    }
+                // setTimeout(() => {    
+                //     if (data.id) {
+                //         if (currentMode === 'EDIT') {
+                //             window.location.href = `/dashboard/show-form/${data.id}`;
+                //             return;
+                //         }
+                //         window.location.href = redirectUrl;
+                //     }
 
-                }, 2000);
+                // }, 2000);
 
             })
             .catch(error => {
